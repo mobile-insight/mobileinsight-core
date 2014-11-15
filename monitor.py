@@ -138,7 +138,7 @@ if __name__ == "__main__":
             s = vir_ser.read(32)
             now = time.time()
             if s:
-                log.write(">%.4f OUT %d \n%s\n" % (now - start, len(s), str_to_hex(s)))
+                log.write("<%.4f OUT %d \n%s\n" % (now - start, len(s), str_to_hex(s)))
                 output_bytes = output_bytes + len(s)
                 phy_ser.write(s)
 
