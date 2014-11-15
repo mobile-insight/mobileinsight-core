@@ -22,16 +22,23 @@ def init_opt():
     opt = optparse.OptionParser(prog="com-monitor",
                                 usage="usage: %prog [options] LOGFILE ...",
                                 description="COM serial port sniffer.")
-    opt.add_option("-p", "--phy-serial-name", metavar="STR",
-                   action="store", type="string", dest="phy_serial_name", 
-                   help="Manually set the name of physical serial name.")
-    opt.add_option("-v", "--vir-serial-name", metavar="STR",
-                   action="store", type="string", dest="vir_serial_name", 
-                   help="Manually set the name of virtual serial name.")
-    opt.add_option("--phy-baudrate", metavar="N",
-                   action="store", type="int", dest="phy_baudrate", 
-                   help="Set the physical baud rate [default: %default].")
-    opt.set_defaults(phy_serial_name=None, vir_serial_name=None, phy_baudrate=9600)
+    opt.add_option("-p", "--phy-serial-name",
+                    metavar="STR",
+                    action="store", type="string", dest="phy_serial_name", 
+                    help="Manually set the name of physical serial name.")
+    opt.add_option("-v", "--vir-serial-name",
+                    metavar="STR",
+                    action="store", type="string", dest="vir_serial_name", 
+                    help="Manually set the name of virtual serial name.")
+    opt.add_option("--phy-baudrate",
+                    metavar="N",
+                    action="store", type="int", dest="phy_baudrate", 
+                    help="Set the physical baud rate [default: %default].")
+    opt.add_option("--log-comment",
+                    metavar="STR",
+                    action="store", type="string", dest="log_comment", 
+                    help="Add a beginning comment on log.")
+    opt.set_defaults(phy_baudrate=9600)
     return opt
 
 
@@ -94,9 +101,9 @@ if __name__ == "__main__":
 
     if options.phy_serial_name is None or options.vir_serial_name is None:
         phy_ser_name, vir_ser_name = detect_ports()
-    if options.phy_serial_name is not None:
+    if options.phy_serial_name:
         phy_ser_name = options.phy_serial_name
-    if options.vir_serial_name is not None:
+    if options.vir_serial_name:
         vir_ser_name = options.vir_serial_name
     print "PHY COM: %s" % phy_ser_name
     print "VIR COM: %s" % vir_ser_name
@@ -108,8 +115,14 @@ if __name__ == "__main__":
     phy_baudrate = options.phy_baudrate
     print "PHY BAUD RATE: %d" % phy_baudrate
 
+    log_comment = options.log_comment
+    if log_comment:
+        print "LOG COMMENT: %s" % log_comment
+
     try:
         log = open(log_name, "w")
+        if log_comment:
+            log.write("#%s\n" % log_comment)
 
         start = time.time()
         call_period = 2         # call print_stats every 2 secs
