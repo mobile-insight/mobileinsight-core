@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+__all__ = ["DM_COMMAND_NAMES", "DM_SUBSYS_NAMES"]
+
 DM_COMMAND_NAMES = {0: "DIAG_CMD_VERSION_INFO",
                     1: "DIAG_CMD_ESN",
                     2: "DIAG_CMD_PEEKB",

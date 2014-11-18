@@ -1,5 +1,6 @@
 import string
 import sys
+from dm_const import *
 
 printable_dict = dict(map(lambda(c): (c, c), string.printable))
 printable_dict.update({"\x0c" : "."})
@@ -11,9 +12,7 @@ printable_dict.update({"\t" : "<TB>"})
 def hex_to_string(line):
     line = line.replace(" ", "") #get rid of spaces
     line = line.replace("\n", "")
-    #print line
     return line.decode("hex")
-    #return line
 
 def static_var(varname, value):
     def decorate(func):
@@ -21,9 +20,7 @@ def static_var(varname, value):
         return func
     return decorate
 
-@static_var("printset", set(string.printable))
 def str_to_printable(s):
-    #return "".join(c if c in str_to_printable.printset else "." for c in s)
     return "".join(printable_dict[c] if c in printable_dict else "." for c in s)
 
 if __name__ == "__main__":
@@ -40,6 +37,10 @@ if __name__ == "__main__":
         line = line.rstrip()
         out.write(line + '\n')
         if not line.startswith("<") and not line.startswith(">") and not line.startswith("#"):
+            #print DM_COMMAND_NAMES[ord('\x' + line[0:2])]
             line = hex_to_string(line)
+            command_num = ord(line[0])
+            if command_num in DM_COMMAND_NAMES:
+                out.write(DM_COMMAND_NAMES[command_num] + '\n')
             out.write(str_to_printable(line) + '\n\n')
     
