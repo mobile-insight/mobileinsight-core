@@ -34,7 +34,7 @@ def init_opt():
                     metavar="N",
                     action="store", type="int", dest="phy_baudrate", 
                     help="Set the physical baud rate [default: %default].")
-    opt.add_option("--log-comment",
+    opt.add_option("-c", "--log-comment",
                     metavar="STR",
                     action="store", type="string", dest="log_comment", 
                     help="Add a beginning comment on log.")
