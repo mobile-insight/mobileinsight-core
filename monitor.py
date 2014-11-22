@@ -124,7 +124,7 @@ if __name__ == "__main__":
         if log_comment:
             log.write("#%s\n" % log_comment)
 
-        start = time.time()
+        start = time.clock()
         call_period = 2         # call print_stats every 2 secs
         last_call = start
         income_bytes = 0        # data bytes read from physical port during the period
@@ -136,21 +136,21 @@ if __name__ == "__main__":
 
         while True:
             s = vir_ser.read(32)
-            now = time.time()
+            now = time.clock()
             if s:
                 log.write("<%.4f OUT %d \n%s\n" % (now - start, len(s), str_to_hex(s)))
                 output_bytes = output_bytes + len(s)
                 phy_ser.write(s)
 
             s = phy_ser.read(64)
-            now = time.time()
+            now = time.clock()
             if s:
                 log.write(">%.4f IN %d \n%s\n" % (now - start, len(s), str_to_hex(s)))
                 income_bytes = income_bytes + len(s)
                 vir_ser.write(s)
 
             # call print_stats every 2 secs
-            now = time.time()
+            now = time.clock()
             if now - last_call > call_period:
                 print_stats(income_bytes / (1000. * call_period), output_bytes / (1000. * call_period))
                 income_bytes = output_bytes = 0
