@@ -131,8 +131,13 @@ if __name__ == "__main__":
         output_bytes = 0        # data bytes written to physical port during the period
 
         # Open COM ports. A zero timeout means that IO functions never suspend.
-        vir_ser = serial.Serial(vir_ser_name, timeout=0)
+        vir_ser = serial.Serial(vir_ser_name, timeout=0, writeTimeout=0)
         phy_ser = serial.Serial(phy_ser_name, baudrate=phy_baudrate, timeout=0)
+
+        vir_ser.flushInput()
+        vir_ser.flushOutput()
+        phy_ser.flushInput()
+        phy_ser.flushOutput()
 
         while True:
             s = vir_ser.read(32)
