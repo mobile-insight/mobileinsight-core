@@ -2,9 +2,15 @@
 """
 hdlc_parser.py
 Define hdlc_parser class that deals with HDLC frames in the raw logs produced by monitor.
+If executed as a script, it translates a raw log into a new log, each log item of which
+is a single frame.
 
 Author: Jiayao Li
 """
+
+
+__all__ = {"hdlc_parser"}
+
 
 import struct
 import crcmod
@@ -12,14 +18,25 @@ import binascii
 
 class hdlc_parser:
     """
-    This class takes fragmented HDLC encapsulated data, decode its frame 
-    structure and return the clean HDLC frame.
+    This class takes fragmented HDLC encapsulated data and decodes its frame 
+    structure. The clean HDLC payload is returned using Python iterator interface.
     """
+
     def __init__(self):
         self._remain_frames = []
         self._incomplete = None
 
     def feed_binary(self, ts, binary):
+        """
+        Feed the parser with a chunk of HDLC encapsulated data with timestamp.
+
+        Returns:
+            None
+
+        Args:
+            ts: the timestamp of this chunk of binary data.
+            binary: a chunk of binary data.
+        """
         b_lst = binary.split("\x7e")
         # print repr(b_lst)
         for i in range(len(b_lst)):
@@ -63,7 +80,7 @@ class hdlc_parser:
                 else:
                     payld.append(c)
         payld = ''.join(payld)
-        fcs = struct.unpack("<H", payld[-2:])[0]   # unsigned short
+        fcs = struct.unpack("<H", payld[-2:])[0]   # unsigned short, little endian
         payld = payld[0:-2]
         return payld, fcs
 
@@ -71,11 +88,21 @@ class hdlc_parser:
         crc16 = crcmod.predefined.Crc('x-25')
         for c in payld:
             crc16.update(c)
-        calc_crc = struct.unpack(">H", crc16.digest())[0]
+        calc_crc = struct.unpack(">H", crc16.digest())[0]   # big endian
         # print 'Calc %s, FCS %s' % (hex(calc_crc), hex(fcs))
         return calc_crc == fcs
 
     def __iter__(self):
+        """
+        Returns an iterator over all parsed frames.
+
+        For each parsed frame, a 4-element tuple (ts, payld, fcs, crc_correct)
+        is returned. The meaning of each field is:
+            ts: the timestamp of this frame
+            payld: the payload part of this frame
+            fcs: the integer value of the original Frame Checksum Sequence.
+            crc_correct: whether this frame is correctly verified.
+        """
         return self
 
     def next(self):
