@@ -14,6 +14,8 @@ import serial
 import serial.tools.list_ports
 import optparse
 
+from utils import static_var
+
 
 def init_opt():
     """
@@ -40,13 +42,6 @@ def init_opt():
                     help="Add a beginning comment on log.")
     opt.set_defaults(phy_baudrate=9600)
     return opt
-
-
-def static_var(varname, value):
-    def decorate(func):
-        setattr(func, varname, value)
-        return func
-    return decorate
 
 
 def str_to_hex(s):
