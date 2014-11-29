@@ -14,6 +14,7 @@ import serial
 import serial.tools.list_ports
 import optparse
 import binascii
+from hdlc_parser import hdlc_parser
 
 
 def init_opt():
@@ -77,18 +78,31 @@ if __name__ == "__main__":
     try:
         # Open COM ports. A zero timeout means that IO functions never suspend.
         phy_ser = serial.Serial(phy_ser_name, baudrate=phy_baudrate, timeout=.5)
+        parser = hdlc_parser()
 
         while True:
             s = raw_input('enter a command: ')
             s = s.replace(" ", "")
             s = binascii.a2b_hex(s)
 
+            cmd = s[0:1]
+
             if s:
                 phy_ser.write(s)
 
             s = phy_ser.read(64)
-            if s:
-                print('reply: ' + str_to_hex(s))
+            isCorrectPacket = False
+            while s:
+                parser.feed_binary(0,s)
+                for t, payload, fcs, crc_correct in parser:
+                    if binascii.a2b_hex(str_to_hex(payload[0:1])) == cmd:
+                        print('reply: ' + str_to_hex(payload))
+                        print('crc_correct: ' + repr(crc_correct))
+                        isCorrectPacket = True
+                    break
+                if isCorrectPacket:
+                    break
+                s = phy_ser.read(64)
 
     except IOError, e:
         sys.exit(e)
