@@ -87,26 +87,22 @@ if __name__ == "__main__":
             s = binascii.a2b_hex(s)
             s = hdlc_frame(s).binary()
 
-            print "s: " + binascii.b2a_hex(s)
-
             cmd = s[0:1]
 
             if s:
                 phy_ser.write(s)
 
             s = phy_ser.read(64)
-            isCorrectPacket = False
+            isReply = False
             while s:
                 parser.feed_binary(0,s)
                 for t, payload, fcs, crc_correct in parser:
-                    print "payload: " + payload
-                    print "cmd: " + binascii.b2a_hex(cmd)
                     if payload[0:1] == cmd:
                         print('reply: ' + str_to_hex(payload))
                         print('crc_correct: ' + repr(crc_correct))
-                        isCorrectPacket = True
+                        isReply = True
                     break
-                if isCorrectPacket:
+                if isReply:
                     break
                 s = phy_ser.read(64)
 
