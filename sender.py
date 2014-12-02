@@ -15,6 +15,7 @@ import serial.tools.list_ports
 import optparse
 import binascii
 from hdlc_parser import hdlc_parser
+from hdlc_frame import hdlc_frame
 
 
 def init_opt():
@@ -84,6 +85,9 @@ if __name__ == "__main__":
             s = raw_input('enter a command: ')
             s = s.replace(" ", "")
             s = binascii.a2b_hex(s)
+            s = hdlc_frame(s).binary()
+
+            print "s: " + binascii.b2a_hex(s)
 
             cmd = s[0:1]
 
@@ -95,7 +99,9 @@ if __name__ == "__main__":
             while s:
                 parser.feed_binary(0,s)
                 for t, payload, fcs, crc_correct in parser:
-                    if binascii.a2b_hex(str_to_hex(payload[0:1])) == cmd:
+                    print "payload: " + payload
+                    print "cmd: " + binascii.b2a_hex(cmd)
+                    if payload[0:1] == cmd:
                         print('reply: ' + str_to_hex(payload))
                         print('crc_correct: ' + repr(crc_correct))
                         isCorrectPacket = True
