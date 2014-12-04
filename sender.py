@@ -60,6 +60,31 @@ def detect_ports():
                 phy_ser_name = name
     return phy_ser_name
 
+def sendMessage(phy_ser, s):
+    s = s.replace(" ", "")
+    s = binascii.a2b_hex(s)
+    s = hdlc_frame(s).binary()
+
+    if s:
+        phy_ser.write(s)
+
+def recvMessage(phy_ser, cmd):
+    parser = hdlc_parser()
+    s = phy_ser.read(64)
+    isReply = False
+    rtn = None
+    while s:
+        parser.feed_binary(0,s)
+        for t, payload, fcs, crc_correct in parser:
+            if payload[0:1] == binascii.a2b_hex(cmd):
+                rtn = 'reply: ' + str_to_hex(payload) + '\n'
+                rtn += 'crc_correct: ' + repr(crc_correct)
+                isReply = True
+            break
+        if isReply:
+            break
+        s = phy_ser.read(64)
+    return rtn
 
 if __name__ == "__main__":
     opt = init_opt()
@@ -79,32 +104,11 @@ if __name__ == "__main__":
     try:
         # Open COM ports. A zero timeout means that IO functions never suspend.
         phy_ser = serial.Serial(phy_ser_name, baudrate=phy_baudrate, timeout=.5)
-        parser = hdlc_parser()
 
         while True:
             s = raw_input('enter a command: ')
-            s = s.replace(" ", "")
-            s = binascii.a2b_hex(s)
-            s = hdlc_frame(s).binary()
-
-            cmd = s[0:1]
-
-            if s:
-                phy_ser.write(s)
-
-            s = phy_ser.read(64)
-            isReply = False
-            while s:
-                parser.feed_binary(0,s)
-                for t, payload, fcs, crc_correct in parser:
-                    if payload[0:1] == cmd:
-                        print('reply: ' + str_to_hex(payload))
-                        print('crc_correct: ' + repr(crc_correct))
-                        isReply = True
-                    break
-                if isReply:
-                    break
-                s = phy_ser.read(64)
+            sendMessage(phy_ser, s)
+            print recvMessage(phy_ser, s[0:2])
 
     except IOError, e:
         sys.exit(e)
