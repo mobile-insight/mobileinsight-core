@@ -72,7 +72,7 @@ def recvMessage(phy_ser, cmd):
     parser = hdlc_parser()
     s = phy_ser.read(64)
     isReply = False
-    rtn = None
+    rtn = ""
     while s:
         parser.feed_binary(0,s)
         for t, payload, fcs, crc_correct in parser:
