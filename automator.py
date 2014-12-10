@@ -1,5 +1,6 @@
 from sender import sendMessage
 from sender import recvMessage
+from hdlc_parser import hdlc_parser
 import optparse
 import sys
 import serial
@@ -48,25 +49,31 @@ if __name__ == "__main__":
     try:
         # Open COM ports. A zero timeout means that IO functions never suspend.
         phy_ser = serial.Serial(phy_ser_name, baudrate=phy_baudrate, timeout=.5)
+        parser = hdlc_parser()
 
         # disable logs
         s = "73 00 00 00 00 00 00 00"
         sendMessage(phy_ser, s)
-        print recvMessage(phy_ser, s[0:2]) + "\n"
+        print recvMessage(parser, phy_ser, s[0:2]) + "\n"
 
         # start rrc-ota messages
         s = "73 00 00 00 03 00 00 00 0B 00 00 00 09 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
         sendMessage(phy_ser, s)
-        print recvMessage(phy_ser, s[0:2]) + "\n"
+        print recvMessage(parser, phy_ser, s[0:2]) + "\n"
 
         while True:
             #cmd = 10 for log packets
-            rec = recvMessage(phy_ser, "10") 
+            rec = recvMessage(parser, phy_ser, "10") 
             if rec != "":
                 print rec + "\n"
                 if log is not None:
                     log.write(rec + "\n\n")
-
+    except KeyboardInterrupt, e:
+        # disable logs
+        s = "73 00 00 00 00 00 00 00"
+        sendMessage(phy_ser, s)
+        print recvMessage(parser, phy_ser, s[0:2]) + "\n"
+        sys.exit(e)
     except IOError, e:
         sys.exit(e)
     except Exception,e:
