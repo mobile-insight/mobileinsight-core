@@ -44,22 +44,6 @@ def str_to_hex(s):
     """
     return " ".join(c.encode("hex") for c in s)
 
-def detect_ports():
-    """
-    Automatically detect and return the physical COM port name.
-    """
-    ports = serial.tools.list_ports.comports()
-    phy_ser_name = None
-    for name, description, hardware_id in ports:
-        # Find the physical name for SAMSUNG phone
-        # WARNING(Jiayao): in usual cases there will be more than one port found.
-        # On my computer, the lowest one is what we want. This may vary from 
-        # computer to computer.
-        if description.startswith("SAMSUNG Mobile USB Serial Port"):
-            if phy_ser_name is None or phy_ser_name > name:
-                phy_ser_name = name
-    return phy_ser_name
-
 def sendMessage(phy_ser, s):
     s = s.replace(" ", "")
     s = binascii.a2b_hex(s)
@@ -68,14 +52,15 @@ def sendMessage(phy_ser, s):
     if s:
         phy_ser.write(s)
 
-def recvMessage(phy_ser, cmd):
-    parser = hdlc_parser()
+def recvMessage(parser, phy_ser, cmd, ):
     s = phy_ser.read(64)
     isReply = False
     rtn = ""
     while s:
         parser.feed_binary(0,s)
         for t, payload, fcs, crc_correct in parser:
+            # print 'payload: ' + repr(binascii.b2a_hex(payload[0:1]))
+            # print 'cmd: ' + repr(cmd)
             if payload[0:1] == binascii.a2b_hex(cmd):
                 rtn = 'reply: ' + str_to_hex(payload) + '\n'
                 rtn += 'crc_correct: ' + repr(crc_correct)
@@ -104,11 +89,12 @@ if __name__ == "__main__":
     try:
         # Open COM ports. A zero timeout means that IO functions never suspend.
         phy_ser = serial.Serial(phy_ser_name, baudrate=phy_baudrate, timeout=.5)
+        parser = hdlc_parser()
 
         while True:
             s = raw_input('enter a command: ')
             sendMessage(phy_ser, s)
-            print recvMessage(phy_ser, s[0:2])
+            print recvMessage(parser, phy_ser, s[0:2])
 
     except IOError, e:
         sys.exit(e)
