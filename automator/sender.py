@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 sender.py
-COM port monitor. Work with SAMSUNG phone and com0com, a Null-modem emulator.
-To learn about com0com, see http://com0com.sourceforge.net/ .
 
+Tool to send commands to a Qualcomm phone
 Author: Jiayao Li, Samson Richard Wong
 """
 
@@ -44,6 +43,12 @@ def str_to_hex(s):
     """
     return " ".join(c.encode("hex") for c in s)
 
+def sendRecv(parser, phy_ser, s, cmd = None):
+    if cmd == None:
+        cmd = s[0:2]
+    sendMessage(phy_ser, s)
+    return recvMessage(parser, phy_ser, cmd)
+
 def sendMessage(phy_ser, s):
     s = s.replace(" ", "")
     s = binascii.a2b_hex(s)
@@ -52,7 +57,7 @@ def sendMessage(phy_ser, s):
     if s:
         phy_ser.write(s)
 
-def recvMessage(parser, phy_ser, cmd, ):
+def recvMessage(parser, phy_ser, cmd):
     s = phy_ser.read(64)
     isReply = False
     rtn = ""

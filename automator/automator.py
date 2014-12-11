@@ -1,9 +1,20 @@
+"""
+automator.py
+
+A tool that disables logs from a phone and then tells the phone to start transmitting RRC-OTA messages.
+
+Author: Jiayao Li, Samson Richard Wong
+"""
+
 from sender import sendMessage
 from sender import recvMessage
+from sender import sendRecv
 from hdlc_parser import hdlc_parser
 import optparse
 import sys
 import serial
+
+disable_binary = "73 00 00 00 00 00 00 00"
 
 def init_opt():
     """
@@ -52,14 +63,11 @@ if __name__ == "__main__":
         parser = hdlc_parser()
 
         # disable logs
-        s = "73 00 00 00 00 00 00 00"
-        sendMessage(phy_ser, s)
-        print recvMessage(parser, phy_ser, s[0:2]) + "\n"
+        print sendRecv(parser, phy_ser, disable_binary) + "\n"
 
         # start rrc-ota messages
         s = "73 00 00 00 03 00 00 00 0B 00 00 00 09 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
-        sendMessage(phy_ser, s)
-        print recvMessage(parser, phy_ser, s[0:2]) + "\n"
+        print sendRecv(parser, phy_ser, s) + "\n"
 
         while True:
             #cmd = 10 for log packets
@@ -70,9 +78,7 @@ if __name__ == "__main__":
                     log.write(rec + "\n\n")
     except KeyboardInterrupt, e:
         # disable logs
-        s = "73 00 00 00 00 00 00 00"
-        sendMessage(phy_ser, s)
-        print recvMessage(parser, phy_ser, s[0:2]) + "\n"
+        print sendRecv(parser, phy_ser, disable_binary) + "\n"
         sys.exit(e)
     except IOError, e:
         sys.exit(e)
