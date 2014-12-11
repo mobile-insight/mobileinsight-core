@@ -11,6 +11,7 @@ from hdlc_parser import hdlc_parser
 import optparse
 import sys
 import serial
+import os
 
 disable_binary = "73 00 00 00 00 00 00 00"
 
@@ -60,7 +61,8 @@ if __name__ == "__main__":
     if options.cmd_file_name is not None:
         cmd_file = open(options.cmd_file_name, "r")
     else:
-        cmd_file = open('example_cmds.foobar', 'r')
+        cmd_file_path = os.path.join(os.path.dirname(__file__), '../command_files/example_cmds.foobar')
+        cmd_file = open(cmd_file_path, 'r')
 
     phy_baudrate = options.phy_baudrate
     print "PHY BAUD RATE: %d" % phy_baudrate
