@@ -58,6 +58,10 @@ def sendMessage(phy_ser, s):
         phy_ser.write(s)
 
 def recvMessage(parser, phy_ser, cmd):
+    """
+    Reads from a COM port and looks for a reply that starts with the same characters given by the cmd parameter.
+    Returns a string that contains the reply and whether the CRC (checksum) is correct.
+    """
     s = phy_ser.read(64)
     isReply = False
     rtn = ""
