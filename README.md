@@ -22,4 +22,5 @@ First, configure the phone. (Instructions shown for Samsung Galaxy S4 and S5)
 
    You can specify a custom commands file to automator.py by using the -c flag.
 
-   The messages sent from the phone will print onto the console. To save the messages to a file, use the -l flag to specify a 
+   The messages sent from the phone will print onto the console. To save the messages to a file, use the -l flag.
+   Example: python automator.py -p COM4 -c ../command_files/commands.txt -l ../test_logs.txt
