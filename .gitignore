@@ -1,3 +1,6 @@
 *.pyc
 *.txt
 log/
+build/
+dist/
+!win_dep/predefined.pyc
