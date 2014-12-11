@@ -1,6 +1,9 @@
 rotinom-trop-moc
 ================
 
+This tool is for phones based on the Qualcomm chip set.
+The phone requires a SIM card.
+
 First, configure the phone. (Instructions shown for Samsung Galaxy S4 and S5)
 
 1) Install the driver for the phone.
