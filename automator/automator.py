@@ -13,7 +13,7 @@ import sys
 import serial
 import os
 
-disable_binary = "73 00 00 00 00 00 00 00"
+cmd_dict = {}
 
 def init_opt():
     """
@@ -41,7 +41,19 @@ def init_opt():
     opt.set_defaults(phy_baudrate=9600)
     return opt
 
+def init_cmd_dict():
+    cmd_dict_path = os.path.join(os.path.dirname(__file__), '../command_files/cmd_dict.foobar')
+    cmd_dict_file = open(cmd_dict_path, 'r')
+    for line in cmd_dict_file:
+        line = line.strip()
+        if len(line) > 0 and not line.startswith('#'):
+            cmd, colon, binary = line.partition(':')
+            cmd = cmd.strip()
+            binary = binary.strip()
+            cmd_dict[cmd] = binary
+
 if __name__ == "__main__":
+    init_cmd_dict()
     opt = init_opt()
     options, args = opt.parse_args(sys.argv[1:])
 
@@ -73,12 +85,16 @@ if __name__ == "__main__":
         parser = hdlc_parser()
 
         # disable logs
-        print sendRecv(parser, phy_ser, disable_binary) + "\n"
+        print sendRecv(parser, phy_ser, cmd_dict.get('DISABLE')) + "\n"
         
         for line in cmd_file:
             line = line.replace('\n','')
+            line = line.upper()
             if len(line) > 0 and not line.startswith('#'):
-                print sendRecv(parser, phy_ser, line) + "\n"
+                binary = cmd_dict.get(line)
+                if binary is None:
+                    binary = line
+                print sendRecv(parser, phy_ser, binary) + "\n"
 
         while True:
             #cmd = 10 for log packets
@@ -89,8 +105,9 @@ if __name__ == "__main__":
                     log.write(rec + "\n\n")
         
     except KeyboardInterrupt, e:
+        print "\n\nKeyboard Interrupt Detected: Disabling all logs"
         # disable logs
-        print sendRecv(parser, phy_ser, disable_binary) + "\n"
+        print sendRecv(parser, phy_ser, cmd_dict.get('DISABLE')) + "\n"
         sys.exit(e)
     except IOError, e:
         sys.exit(e)

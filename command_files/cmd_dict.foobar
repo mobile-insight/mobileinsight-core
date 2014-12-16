@@ -1,0 +1,5 @@
+#This file contains mappings from a human readable string to the binary command. The form that should be used is STRING:BINARY. the STRING must be in all upper-case and should not contain spaces.
+
+RRC-OTA : 73 00 00 00 03 00 00 00 0B 00 00 00 09 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+DISABLE : 73 00 00 00 00 00 00 00
