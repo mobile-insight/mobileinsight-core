@@ -22,4 +22,6 @@ setup(
         },
     ],
     options = { 'py2exe' : PY2EXE_OPTIONS },
+    data_files = [("command_files", ["command_files/cmd_dict.txt",
+                                     "command_files/example_cmds.txt",])]
 )
