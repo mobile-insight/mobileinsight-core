@@ -1,4 +1,5 @@
 #This file contains mappings from a human readable string to the binary command. The form that should be used is STRING:BINARY. the STRING must be in all upper-case and should not contain spaces.
+#All lines starting with "#" will be ignored.
 
 DISABLE : 73 00 00 00 00 00 00 00
 

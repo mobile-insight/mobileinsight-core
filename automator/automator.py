@@ -93,6 +93,7 @@ if __name__ == "__main__":
         print sendRecv(parser, phy_ser, cmd_dict.get('DISABLE')) + "\n"
         
         for line in cmd_file:
+            line = line.strip()
             line = line.replace('\n','')
             line = line.upper()
             if len(line) > 0 and not line.startswith('#'):
