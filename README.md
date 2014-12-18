@@ -15,7 +15,7 @@ First, configure the phone. (Instructions shown for Samsung Galaxy S4 and S5)
     pyserial (v2.7)
     crcmod (v1.7)
 
-4) You can run the tool using automator.exe (given in the distribution) or with the actual python script.
+4) You can run the tool using automator.exe (given in the distribution) or with the actual python script. You will need to find out which COM port your phone is using to run the tool.
 
 To use the exe, run 
 
