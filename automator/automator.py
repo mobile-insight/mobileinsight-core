@@ -16,9 +16,12 @@ import os
 cmd_dict = {}
 inExe = hasattr(sys, "frozen") # true if the code is being run in an exe
 if (inExe):
-    command_files_path = "./command_files"
+    PROGRAM_PATH   = sys.executable
+    COMMAND_FILES_PATH = "./command_files"
 else:
-    command_files_path = "../command_files"
+    PROGRAM_PATH   = sys.argv[0]
+    COMMAND_FILES_PATH = "../command_files"
+PROGRAM_DIR_PATH = os.path.dirname(os.path.abspath(PROGRAM_PATH))
 
 def init_opt():
     """
@@ -47,7 +50,7 @@ def init_opt():
     return opt
 
 def init_cmd_dict():
-    cmd_dict_path = os.path.join(os.path.dirname("__file__"), command_files_path + '/cmd_dict.txt')
+    cmd_dict_path = os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH + '/cmd_dict.txt')
     cmd_dict_file = open(cmd_dict_path, 'r')
     for line in cmd_dict_file:
         line = line.strip()
@@ -78,7 +81,7 @@ if __name__ == "__main__":
     if options.cmd_file_name is not None:
         cmd_file = open(options.cmd_file_name, "r")
     else:
-        cmd_file_path = os.path.join(os.path.dirname("__file__"), command_files_path + '/example_cmds.txt')
+        cmd_file_path = os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH + '/example_cmds.txt')
         cmd_file = open(cmd_file_path, 'r')
 
     phy_baudrate = options.phy_baudrate
