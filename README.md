@@ -10,7 +10,8 @@ This tool is designed to collect runtime traces from mobile phones using Qualcom
   * Serial port communication: communicates with COM port using pySerial library.
   * HDLC-like frame decoder: en/decode the raw bytes read from the COM port. Written in native Python code.
   * QCDM protocol endec: (Not implemented yet) en/decode QCDM commands and messages.
-  * Automator: the main program
+  * Automator: the main program.
+  * Target trace configuration: a set of configuration files that describe what types of messages users care about.
 
 # Distribution #
 
