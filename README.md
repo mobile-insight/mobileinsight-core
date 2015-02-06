@@ -46,27 +46,19 @@ Make sure that your phone is based on the Qualcomm chip set. The phone also requ
 
 ## Get started ##
 
-You can run the tool using automator.exe (given in the distribution version) or with the actual python script.
+You can run the tool using automator.exe (given in the distribution version) or with the actual python script. We only present command lines for .exe version, but all flags and options described are appliable to .py version.
 
-To use the exe, run 
+To start automator, run
 
     automator -p *insert_COM_port_here*
     
-To use the script(automator.py), run:
-
-    python automator.py -p *insert_COM_port_here*
-
-The automator will first reset logging of the phone and then send commands to re-enable logging messages. Only messages of desired types will be received, and which type to be desired is user-configurable. By default, an example configuration is used.
+Automator will first reset logging of the phone and then send commands to re-enable logging messages. Only messages of desired types will be received, and which type to be desired is user-configurable. By default, an example configuration is used. Use -c flag to replace it with custom configuration.
 
 The messages received from the phone will print onto the console. To save the messages to a file as well, use the -l flag.
 
-Example (for the exe):
+Example (for .exe):
 
     automator -p COM4 -c ./command_files/commands.txt -l ../test_logs.txt
-
-Example (for the script):
-
-    python automator.py -p COM4 -c ../command_files/commands.txt -l ../test_logs.txt
 
 For description of all the options, use the -h or --help flags.
 
