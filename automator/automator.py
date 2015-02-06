@@ -27,9 +27,9 @@ def init_opt():
     """
     Initialize and return the option parser.
     """
-    opt = optparse.OptionParser(prog="com-sender",
-                                usage="usage: %prog [options] LOGFILE ...",
-                                description="COM serial port sender.")
+    opt = optparse.OptionParser(prog="automator",
+                                usage="usage: %prog [options] -p PHY_PORT_NAME ...",
+                                description="Automatic mobile trace collector.")
     opt.add_option("-p", "--phy-serial-name",
                     metavar="STR",
                     action="store", type="string", dest="phy_serial_name", 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     options, args = opt.parse_args(sys.argv[1:])
 
     if not options.phy_serial_name:
-        sys.stderr.write("Please use -p option to specify physical port name.\n")
+        opt.error("please use -p option to specify physical port name.")
         sys.exit(1)
     
     phy_ser_name = options.phy_serial_name
