@@ -1,11 +1,13 @@
 automator
 =========
 
-## Introduction ##
+# Introduction #
 
 This tool is designed to collect runtime traces from mobile phones using Qualcomm chipset.
 
-## Distribution ##
+![alt tag](docs/modules.png)
+
+# Distribution #
 
 This tool can be used in two forms: Python script(.py file) and Windows executable form(.exe file). The second form is generated based on the first one, so the functionality is identical.
 However, the executable form is more convenient for distribution purpose, because it is a stand-alone program and does not require any prerequisite application or library.
@@ -16,7 +18,7 @@ To generate Windows executable file, use the following command line:
 
 then you will find the automator.exe in the dist/ directory, along with some default configuration files under dist/command_files/ directory.
 
-## Usage ##
+# Usage #
 
 This tool is for phones based on the Qualcomm chip set. The phone requires a SIM card.
 
