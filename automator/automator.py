@@ -65,13 +65,12 @@ if __name__ == "__main__":
     opt = init_opt()
     options, args = opt.parse_args(sys.argv[1:])
 
-    if options.phy_serial_name:
-        phy_ser_name = options.phy_serial_name
-    print "PHY COM: %s" % phy_ser_name
-
-    if phy_ser_name is None:
-        sys.stderr.write("Serial port name error.\n")
+    if not options.phy_serial_name:
+        sys.stderr.write("Please use -p option to specify physical port name.\n")
         sys.exit(1)
+    
+    phy_ser_name = options.phy_serial_name
+    print "PHY COM: %s" % phy_ser_name
 
     log = None
     if options.log_name is not None:
