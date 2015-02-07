@@ -6,14 +6,13 @@ A tool that disables logs from a phone and then tells the phone to start transmi
 Author: Jiayao Li, Samson Richard Wong
 """
 
-from sender import *
+from sender import sendRecv, recvMessage
 from hdlc_parser import hdlc_parser
 import optparse
 import sys
 import serial
 import os
 
-cmd_dict = {}
 inExe = hasattr(sys, "frozen") # true if the code is being run in an exe
 if (inExe):
     PROGRAM_PATH   = sys.executable
@@ -49,19 +48,30 @@ def init_opt():
     opt.set_defaults(phy_baudrate=9600)
     return opt
 
-def init_cmd_dict():
-    cmd_dict_path = os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH + '/cmd_dict.txt')
-    cmd_dict_file = open(cmd_dict_path, 'r')
-    for line in cmd_dict_file:
-        line = line.strip()
-        if len(line) > 0 and not line.startswith('#'):
-            cmd, colon, binary = line.partition(':')
-            cmd = cmd.strip()
-            binary = binary.strip()
-            cmd_dict[cmd] = binary
+def init_cmd_dict(cmd_dict_path):
+    cmd_dict = {}
+    with open(cmd_dict_path, 'r') as cmd_dict_file:
+        for line in cmd_dict_file:
+            line = line.strip()
+            if len(line) > 0 and not line.startswith('#'):
+                cmd, colon, binary = line.partition(':')
+                cmd = cmd.strip()
+                binary = binary.strip()
+                cmd_dict[cmd] = binary
+    return cmd_dict
 
+def init_target_cmds(cmd_file_path):
+    target_cmds = []
+    with open(cmd_file_path, 'r') as cmd_file:
+        for line in cmd_file:
+            line = line.strip()
+            line = line.replace('\n','')
+            line = line.upper()
+            if len(line) > 0 and not line.startswith('#'):
+                target_cmds.append(line)
+    return target_cmds
+                
 if __name__ == "__main__":
-    init_cmd_dict()
     opt = init_opt()
     options, args = opt.parse_args(sys.argv[1:])
 
@@ -72,40 +82,40 @@ if __name__ == "__main__":
     phy_ser_name = options.phy_serial_name
     print "PHY COM: %s" % phy_ser_name
 
+    phy_baudrate = options.phy_baudrate
+    print "PHY BAUD RATE: %d" % phy_baudrate
+
+    # Read command dict
+    cmd_dict_path = os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH + '/cmd_dict.txt')
+    cmd_dict = init_cmd_dict(cmd_dict_path)
+
+    # Read target commands
+    if options.cmd_file_name is not None:
+        cmd_file_path = options.cmd_file_name
+    else:
+        cmd_file_path = os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH + '/example_cmds.txt')
+    target_cmds = init_target_cmds(cmd_file_path)
+
     log = None
     if options.log_name is not None:
         log = open(options.log_name, "w")
-
-    cmd_file = None
-    if options.cmd_file_name is not None:
-        cmd_file = open(options.cmd_file_name, "r")
-    else:
-        cmd_file_path = os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH + '/example_cmds.txt')
-        cmd_file = open(cmd_file_path, 'r')
-
-    phy_baudrate = options.phy_baudrate
-    print "PHY BAUD RATE: %d" % phy_baudrate
 
     try:
         # Open COM ports. A zero timeout means that IO functions never suspend.
         phy_ser = serial.Serial(phy_ser_name, baudrate=phy_baudrate, timeout=.5)
         parser = hdlc_parser()
 
-        # disable logs
-        print sendRecv(parser, phy_ser, cmd_dict.get('DISABLE')) + "\n"
+        # Disable logs
+        print sendRecv(parser, phy_ser, cmd_dict.get("DISABLE")) + "\n"
         
-        for line in cmd_file:
-            line = line.strip()
-            line = line.replace('\n','')
-            line = line.upper()
-            if len(line) > 0 and not line.startswith('#'):
-                binary = cmd_dict.get(line)
-                if binary is None:
-                    binary = line
-                print sendRecv(parser, phy_ser, binary) + "\n"
+        for cmd in target_cmds:
+            binary = cmd_dict.get(cmd)
+            if binary is None:      # To Samson: what does it exactly mean?
+                binary = cmd
+            print sendRecv(parser, phy_ser, binary) + "\n"
 
         while True:
-            #cmd = 10 for log packets
+            # cmd = 0x10 for log packets
             rec = recvMessage(parser, phy_ser, "10") 
             if rec != "":
                 print rec + "\n"
@@ -114,8 +124,8 @@ if __name__ == "__main__":
         
     except KeyboardInterrupt, e:
         print "\n\nKeyboard Interrupt Detected: Disabling all logs"
-        # disable logs
-        print sendRecv(parser, phy_ser, cmd_dict.get('DISABLE')) + "\n"
+        # Disable logs
+        print sendRecv(parser, phy_ser, cmd_dict.get("DISABLE")) + "\n"
         sys.exit(e)
     except IOError, e:
         sys.exit(e)
