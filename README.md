@@ -18,7 +18,7 @@ This tool is designed to collect runtime traces from mobile phones using Qualcom
 This tool can be run in two forms: Python script(.py file) and Windows executable form(.exe file). The second form is generated based on the first one, so the functionality is identical.
 However, the executable form is more convenient for distribution purpose, because it is a stand-alone program and does not require any prerequisite application or library.
 
-To generate Windows executable file, use the following command line:
+Before generating Windows executable file, please ensure that all prerequisites are installed, then use the following command line:
 
     python setup.py py2exe
 
@@ -37,13 +37,15 @@ Make sure that your phone is based on the Qualcomm chip set. The phone also requ
   * For Samsung Galaxy S4 and S5, type *#8080# in the keypad to show the USBSettings menu, then select AP and RNDIS + DM + MODEM mode (or any other option that includes both "DM" and "MODEM" words).
   * For other models, we have not tested yet.
 
-(3) Connect the phone with PC using USB cable. You will need to find out which COM port your phone is using to run the tool. To do so, open Windows device manager and check the hardware list. If you succeed in step (2), you will find a modem called "Qualcomm modem", "Samsung Android Modem" or any similar name under "Modems" catagory. There will also be several COM ports showing up in the "Ports (COM & LPT)" catagory. One of them will be the correct port, so you have to try.
+(3) Connect the phone with PC using USB cable. You will need to find out which COM port your phone is using to run the tool. Depending on your operating system, there are several ways to do so
+
+  * On Windows, you can open Windows device manager and check the hardware list. If you succeed in step (2), you will find a modem called "Qualcomm modem", "Samsung Android Modem" or any similar name under "Modems" catagory. There will also be several COM ports showing up in the "Ports (COM & LPT)" catagory. One of them will be the correct port, so you have to try.
+  * The pySerial library has also provide a small utility to list all available serial ports. See pySerial documentation for more information.
 
 (4) (Skip this step if you are using automator.exe) Install Python v2.7 (32 bit) and the following python libraries:
 
     pyserial (v2.7)
     crcmod (v1.7)
-
 
 ## Get started ##
 
@@ -53,7 +55,9 @@ To start automator, run
 
     automator -p *insert_COM_port_here*
     
-Automator will first reset logging of the phone and then send commands to re-enable logging messages. Only messages of desired types will be received, and which type to be desired is user-configurable. By default, an example configuration is used. Use -c flag to replace it with custom configuration.
+Automator will try to connect to the serial port first. If any other program (e.g. QPST) is using this port, the connection will fail.
+
+After successful conenction, automator will reset logging of the phone and then send commands to re-enable logging messages. Only messages of desired types will be received, and which type to be desired is user-configurable. By default, an example configuration is used. Use -c flag to replace it with custom configuration.
 
 The messages received from the phone will print onto the console. To save the messages to a file as well, use the -l flag.
 
