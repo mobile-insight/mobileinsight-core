@@ -16,6 +16,8 @@ import binascii
 from hdlc_parser import hdlc_parser
 from hdlc_frame import hdlc_frame
 
+__all__ = ["sendRecv", "sendMessage",  "recvMessage"]
+
 
 def init_opt():
     """
