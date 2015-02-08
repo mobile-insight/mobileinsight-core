@@ -14,12 +14,6 @@ def hex_to_string(line):
     line = line.replace("\n", "")
     return line.decode("hex")
 
-def static_var(varname, value):
-    def decorate(func):
-        setattr(func, varname, value)
-        return func
-    return decorate
-
 def str_to_printable(s):
     return "".join(printable_dict[c] if c in printable_dict else "." for c in s)
 

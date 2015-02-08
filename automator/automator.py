@@ -85,11 +85,9 @@ if __name__ == "__main__":
     phy_baudrate = options.phy_baudrate
     print "PHY BAUD RATE: %d" % phy_baudrate
 
-    # Read command dict
     cmd_dict_path = os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH + '/cmd_dict.txt')
     cmd_dict = init_cmd_dict(cmd_dict_path)
 
-    # Read target commands
     if options.cmd_file_name is not None:
         cmd_file_path = options.cmd_file_name
     else:
