@@ -5,9 +5,9 @@ Goal:
 
 todo list:
 1. Survey timestamp alignment between signaling message and Android logs?
-  Also summerize the result in documentation.
-2. Survey GPS: can we associate logs with the location we collect them?
-3. Can we control which message the UE sends (e.g., reject some requests from network; emulate some measurement reports to trigger handover; etc.)
+	Also summerize the result in documentation.
+2. Can we control which message the UE sends using QXDM (e.g., reject some requests from network; emulate some measurement reports to trigger handover; etc.)
+3. Survey GPS: can we associate logs with the location we collect them?
 4. Investigate how to decode ASN.1 and NAS messages (for WCDMA/LTE) using Wireshark. (@anoddnumber)
 5. Usage case study: how the cross-layer analytics can help identify problems?
 	- Start from the scenarios we are familiar with
