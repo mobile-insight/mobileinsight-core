@@ -1,4 +1,5 @@
 *.pyc
+*.pcap
 /*.txt
 log/
 build/
