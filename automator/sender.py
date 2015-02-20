@@ -62,19 +62,19 @@ def sendMessage(phy_ser, s):
 def recvMessage(parser, phy_ser, cmd):
     """
     Reads from a COM port and looks for a reply that starts with the same characters given by the cmd parameter.
-    Returns a string that contains the reply and whether the CRC (checksum) is correct.
+    Returns a tuple (payload, crc_correct).
+
+    If 
     """
     s = phy_ser.read(64)
     isReply = False
-    rtn = ""
+    rtn = (None, None)
     while s:
         parser.feed_binary(0,s)
         for t, payload, fcs, crc_correct in parser:
-            # print 'payload: ' + repr(binascii.b2a_hex(payload[0:1]))
-            # print 'cmd: ' + repr(cmd)
+            # Irrelevant messages are discarded.
             if payload[0:1] == binascii.a2b_hex(cmd):
-                rtn = 'reply: ' + str_to_hex(payload) + '\n'
-                rtn += 'crc_correct: ' + repr(crc_correct)
+                rtn = (payload, crc_correct)
                 isReply = True
             break
         if isReply:
@@ -105,7 +105,9 @@ if __name__ == "__main__":
         while True:
             s = raw_input('enter a command: ')
             sendMessage(phy_ser, s)
-            print recvMessage(parser, phy_ser, s[0:2])
+            payload, crc_correct = recvMessage(parser, phy_ser, s[0:2])
+            print "reply: " + binascii.b2a_hex(payload)
+            print "crc_correct: " + crc_correct
 
     except IOError, e:
         sys.exit(e)

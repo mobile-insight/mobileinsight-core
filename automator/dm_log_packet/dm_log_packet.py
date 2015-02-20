@@ -59,9 +59,8 @@ class DMLogPacket:
     @classmethod
     def decode(cls, b):
         l, type_id, ts = cls._decode_header(b)
-        print l, hex(type_id), ts
         log_item = cls._decode_log_item(type_id, b[cls.HEADER_LEN:])
-        print log_item
+        return (l, type_id, ts, log_item)
 
     @classmethod
     def _decode_header(cls, b):
@@ -105,8 +104,12 @@ class DMLogPacket:
                 elif name == "Msg Length":
                     pdu_length = decoded
             msg = b[ind:(ind + pdu_length)]
-            decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
-            res.append(("Msg", decoded))
+            if pdu_number in LTE_RRC_OTA_PDU_TYPE:
+                print pdu_number
+                decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
+                res.append(("Msg", decoded))
+            else:
+                print "Unknown PDU Type"
         return res
 
     @classmethod
@@ -119,7 +122,10 @@ if __name__ == '__main__':
             #"2c002c002741b4008aef9740ce0040100000211100000f5660030000070030070301000401002cd90000ba000000",
             "2c002c0027419203b0a48540ce00c224000052260000fda3fa02d0000700801f0301000401003ffd00003c000000",
             "26002600C0B00000A3894A13CE00070A7100D801B70799390400000000090040012F05EC4E700000",
+            "22002200c0b00000c3ad2176ce000209a000d801b707390404090040019d056f48800000"
             ]
 
     for b in tests:
-        DMLogPacket.decode(binascii.a2b_hex(b))
+        l, type_id, ts, log_item = DMLogPacket.decode(binascii.a2b_hex(b))
+        print l, hex(type_id), ts
+        print log_item

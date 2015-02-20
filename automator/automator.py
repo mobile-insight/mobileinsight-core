@@ -6,12 +6,15 @@ A tool that disables logs from a phone and then tells the phone to start transmi
 Author: Jiayao Li, Samson Richard Wong
 """
 
+import binascii
+import os
+import optparse
+import serial
+import sys
+
 from sender import sendRecv, recvMessage
 from hdlc_parser import hdlc_parser
-import optparse
-import sys
-import serial
-import os
+from dm_log_packet import DMLogPacket
 
 inExe = hasattr(sys, "frozen") # true if the code is being run in an exe
 if (inExe):
@@ -70,7 +73,14 @@ def init_target_cmds(cmd_file_path):
             if len(line) > 0 and not line.startswith('#'):
                 target_cmds.append(line)
     return target_cmds
-                
+
+
+def print_reply(payload, crc_correct):
+    if payload:
+        print "reply: " + binascii.b2a_hex(payload)
+        print "crc_correct: " + str(crc_correct)
+
+
 if __name__ == "__main__":
     opt = init_opt()
     options, args = opt.parse_args(sys.argv[1:])
@@ -104,26 +114,34 @@ if __name__ == "__main__":
         parser = hdlc_parser()
 
         # Disable logs
-        print sendRecv(parser, phy_ser, cmd_dict.get("DISABLE")) + "\n"
+        payload, crc_correct = sendRecv(parser, phy_ser, cmd_dict.get("DISABLE"))
+        print_reply(payload, crc_correct)
         
         for cmd in target_cmds:
             binary = cmd_dict.get(cmd)
             if binary is None:      # To Samson: what does it exactly mean?
                 binary = cmd
-            print sendRecv(parser, phy_ser, binary) + "\n"
+            payload, crc_correct = sendRecv(parser, phy_ser, binary)
+            print_reply(payload, crc_correct)
+
 
         while True:
             # cmd = 0x10 for log packets
-            rec = recvMessage(parser, phy_ser, "10") 
-            if rec != "":
-                print rec + "\n"
+            payload, crc_correct = recvMessage(parser, phy_ser, "10") 
+            if payload:
+                print_reply(payload, crc_correct)
+                l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
+                print l, hex(type_id), ts
+                print log_item
+                print ""
                 if log is not None:
-                    log.write(rec + "\n\n")
+                    log.write("reply: " + binascii.b2a_hex(payload) + "\n\n")
         
     except KeyboardInterrupt, e:
         print "\n\nKeyboard Interrupt Detected: Disabling all logs"
         # Disable logs
-        print sendRecv(parser, phy_ser, cmd_dict.get("DISABLE")) + "\n"
+        payload, crc_correct = sendRecv(parser, phy_ser, cmd_dict.get("DISABLE"))
+        print_reply(payload, crc_correct)
         sys.exit(e)
     except IOError, e:
         sys.exit(e)
