@@ -50,7 +50,7 @@ class DMLogPacket:
                         ("Freq", "H"),
                         ("SysFrameNum/SubFrameNum", "H"),
                         ("PDU Number", "B"),
-                        (DSL_SKIP, 4),      # Unknown yet
+                        # (DSL_SKIP, 4),      # Unknown yet, only for Pkt Version = 7
                         ("Msg Length", "B"),
                         ("SIB Mask in SI", "B"),
                     ],
@@ -104,10 +104,11 @@ class DMLogPacket:
                 elif name == "Msg Length":
                     pdu_length = decoded
             msg = b[ind:(ind + pdu_length)]
+            print binascii.b2a_hex(msg)
             if pdu_number in LTE_RRC_OTA_PDU_TYPE:
-                print pdu_number
                 decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
                 res.append(("Msg", decoded))
+                print decoded
             else:
                 print "Unknown PDU Type"
         return res
@@ -119,10 +120,17 @@ class DMLogPacket:
 
 if __name__ == '__main__':
     tests = [
-            #"2c002c002741b4008aef9740ce0040100000211100000f5660030000070030070301000401002cd90000ba000000",
+            # WCDMA_CELL_ID
+            "2c002c002741b4008aef9740ce0040100000211100000f5660030000070030070301000401002cd90000ba000000",
             "2c002c0027419203b0a48540ce00c224000052260000fda3fa02d0000700801f0301000401003ffd00003c000000",
+            # LTE_RRC_OTA_Packet v7 LTE-RRC_PCCH
             "26002600C0B00000A3894A13CE00070A7100D801B70799390400000000090040012F05EC4E700000",
-            "22002200c0b00000c3ad2176ce000209a000d801b707390404090040019d056f48800000"
+            # LTE_RRC_OTA_Packet v2 LTE-RRC_PCCH
+            "22002200c0b00000c3ad2176ce000209a000d801b707390404090040019d056f48800000",
+            # LTE_RRC_OTA_Packet v2 LTE-RRC_DL_DCCH
+            "2D002D00C0B00000C6A4212BCD000209A001D200E308000006140022020516EE933E90E02F67000299422868020880",
+            # LTE_RRC_OTA_Packet v2 LTE-RRC_UL_DCCH
+            "1B001B00C0B00000C8A4212BCD000209A001D200E30800000802001200"
             ]
 
     for b in tests:
