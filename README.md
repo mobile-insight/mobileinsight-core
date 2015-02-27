@@ -57,7 +57,7 @@ To start automator, run
     
 Automator will try to connect to the serial port first. If any other program (e.g. QPST) is using this port, the connection will fail.
 
-After successful conenction, automator will reset logging of the phone and then send commands to re-enable logging messages. Only messages of desired types will be received, and which type to be desired is user-configurable. By default, an example configuration is used. Use -c flag to replace it with custom configuration.
+After successful connection, automator will reset logging of the phone and then send commands to re-enable logging messages. Only messages of desired types will be received, and which type to be desired is user-configurable. By default, an example configuration is used. Use -c flag to replace it with custom configuration.
 
 The messages received from the phone will print onto the console. To save the messages to a file as well, use the -l flag.
 
