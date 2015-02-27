@@ -13,7 +13,7 @@ from tshark import *
 
 __all__ = ["DMLogPacket"]
 
-# TODO: remoce this code cloning later...
+# TODO: remove this code cloning later...
 def static_var(varname, value):
     def decorate(func):
         setattr(func, varname, value)
@@ -21,11 +21,11 @@ def static_var(varname, value):
     return decorate
 
 class DMLogPacket:
+    # See https://docs.python.org/2/library/struct.html#format-characters
     HEADER_FMT = "<HHHQ"
     HEADER_LEN = struct.calcsize(HEADER_FMT)
     DSL_SKIP = None
     LOGITEM_FMT = {
-                    # See https://docs.python.org/2/library/struct.html#format-characters
                     # default byte order: little endian
                     LOG_PACKET_ID["WCDMA_CELL_ID"]:
                     [
