@@ -99,18 +99,20 @@ class DMLogPacket:
 
         if type_id == LOG_PACKET_ID["LTE_RRC_OTA_Packet"]:
             for name, decoded in res:
-                if name == "PDU Number":
+                if name == "Pkt Version":
+                    pkt_ver = decoded
+                elif name == "PDU Number":
                     pdu_number = decoded
                 elif name == "Msg Length":
                     pdu_length = decoded
-            msg = b[ind:(ind + pdu_length)]
-            print binascii.b2a_hex(msg)
-            if pdu_number in LTE_RRC_OTA_PDU_TYPE:
-                decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
-                res.append(("Msg", decoded))
-                print decoded
-            else:
-                print "Unknown PDU Type"
+            if pkt_ver == 2:
+                msg = b[ind:(ind + pdu_length)]
+                if pdu_number in LTE_RRC_OTA_PDU_TYPE:
+                    decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
+                    res.append(("Msg", decoded))
+                    print decoded
+                else:
+                    print "Unknown PDU Type"
         return res
 
     @classmethod
@@ -133,7 +135,12 @@ if __name__ == '__main__':
             "1B001B00C0B00000C8A4212BCD000209A001D200E30800000802001200"
             ]
 
+    TShark.init_proc()
     for b in tests:
         l, type_id, ts, log_item = DMLogPacket.decode(binascii.a2b_hex(b))
         print l, hex(type_id), ts
         print log_item
+
+    s = binascii.a2b_hex(tests[-3])
+    import cProfile
+    cProfile.run("for i in range(20): l, type_id, ts, log_item = DMLogPacket.decode(s)")
