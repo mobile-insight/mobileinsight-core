@@ -7,3 +7,4 @@ log/
 build/
 dist/
 !win_dep/predefined.pyc
+!command_files/cmds.txt
