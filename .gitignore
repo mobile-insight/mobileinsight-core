@@ -6,4 +6,9 @@
 log/
 build/
 dist/
+
+# Necessary dependency for py2exe
 !win_dep/predefined.pyc
+
+# Config file
+command_files/cmds.txt
