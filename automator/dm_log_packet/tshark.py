@@ -9,8 +9,11 @@ import subprocess
 class TShark:
     # TEMP_FILE = "temp.pcap"
     FNULL = open(os.devnull, 'w')
-    SUPPORTED_TYPES = [ "DL_BCCH_BCH",
-                        "LTE-RRC_PCCH", "LTE-RRC_DL_DCCH", "LTE-RRC_UL_DCCH"]
+    SUPPORTED_TYPES = [ # WCDMA RRC
+                        "DL_BCCH_BCH",
+                        # LTE RRC
+                        "LTE-RRC_PCCH", "LTE-RRC_DL_DCCH",
+                        "LTE-RRC_UL_DCCH", "LTE-RRC_BCCH_DL_SCH"]
     WCDMA_CHANNEL_TYPE_TO_DISSECTOR = {"DL_BCCH_BCH": "rrc.bcch.bch"}
     initialized = False
     proc = None

@@ -23,7 +23,8 @@ WCDMA_SIGNALLING_MSG_CHANNEL_NUMBER = {"DL_BCCH_BCH":  0x04,
 
 WCDMA_SIGNALLING_MSG_CHANNEL_TYPE = dict([(v, k) for k, v in WCDMA_SIGNALLING_MSG_CHANNEL_NUMBER.items()])
 
-LTE_RRC_OTA_PDU_NUMBER = {  "LTE-RRC_PCCH": 0x04,
+LTE_RRC_OTA_PDU_NUMBER = {  "LTE-RRC_BCCH_DL_SCH": 0x02,
+                            "LTE-RRC_PCCH": 0x04,
                             "LTE-RRC_DL_DCCH":  0x06,
                             "LTE-RRC_UL_DCCH":  0x08,
                             }
