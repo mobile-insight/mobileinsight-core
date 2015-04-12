@@ -11,7 +11,10 @@ from datetime import *
 from consts import *
 from tshark import *
 
-__all__ = ["DMLogPacket"]
+__all__ = ["DMLogPacket", "FormatError"]
+
+class FormatError(RuntimeError):
+    pass
 
 # TODO: remove this code cloning later...
 def static_var(varname, value):
@@ -40,6 +43,12 @@ class DMLogPacket:
                         ("LAC id", "I"),
                         ("RAC id", "I"),
                     ],
+                    LOG_PACKET_ID["WCDMA_Signaling_Messages"]:
+                    [
+                        ("Channel Type", "B"),
+                        ("Radio Bearer ID", "B"),
+                        ("Message Length", "H"),
+                    ],
                     LOG_PACKET_ID["LTE_RRC_OTA_Packet"]:
                     [
                         ("Pkt Version", "B"),
@@ -50,10 +59,13 @@ class DMLogPacket:
                         ("Freq", "H"),
                         ("SysFrameNum/SubFrameNum", "H"),
                         ("PDU Number", "B"),
-                        # (DSL_SKIP, 4),      # Unknown yet, only for Pkt Version = 7
-                        ("Msg Length", "B"),
-                        ("SIB Mask in SI", "B"),
                     ],
+                    LOG_PACKET_ID["LTE_ML1_IRAT_Measurement_Request"]:
+                    [],
+                    LOG_PACKET_ID["LTE_ML1_Serving_Cell_Measurement_Result"]:
+                    [],
+                    LOG_PACKET_ID["LTE_ML1_Connected_Mode_Neighbor_Meas_Req/Resp"]:
+                    [],
                     }
 
     @classmethod
@@ -68,7 +80,7 @@ class DMLogPacket:
         assert l1 == l2
         assert l1 + 2 == len(b)
         if type_id not in cls.LOGITEM_FMT:
-            raise Exception("hahaha")
+            raise FormatError("Unknown Type ID: 0x%x" % type_id)
         ts = cls._decode_ts(ts)
         return l1, type_id, ts
 
@@ -81,9 +93,58 @@ class DMLogPacket:
 
     @classmethod
     def _decode_log_item(cls, type_id, b):
-        ind = 0
+        res, offset = cls._decode_by_format(cls.LOGITEM_FMT[type_id], b, 0)
+        ind = 0 + offset
+
+        if type_id == LOG_PACKET_ID["WCDMA_Signaling_Messages"]:
+            for name, decoded in res:
+                if name == "Channel Type":      # TODO: remove duplicate code
+                    ch_num = decoded
+                elif name == "Message Length":
+                    pdu_length = decoded
+            msg = b[ind:(ind + pdu_length)]
+            if ch_num in WCDMA_SIGNALLING_MSG_CHANNEL_TYPE:
+                decoded = cls._decode_msg(WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num], msg)
+                res.append(("Msg", decoded))
+                print decoded
+            else:
+                print "Unknown WCDMA Signalling Messages Channel Type: 0x%x" % ch_num
+
+        elif type_id == LOG_PACKET_ID["LTE_RRC_OTA_Packet"]:
+            for name, decoded in res:
+                if name == "Pkt Version":   # TODO: remove duplicate code
+                    pkt_ver = decoded
+            if pkt_ver == 7:
+                fmt = [ (cls.DSL_SKIP, 4),      # Unknown yet, only for Pkt Version = 7
+                        ("Msg Length", "B"),
+                        ("SIB Mask in SI", "B"),
+                        ]
+            elif pkt_ver == 2:
+                fmt = [ ("Msg Length", "B"),
+                        ("SIB Mask in SI", "B"),
+                        ]
+            res2, offset = cls._decode_by_format(fmt, b, ind)
+            res.extend(res2)
+            ind = ind + offset
+            for name, decoded in res:
+                if name == "PDU Number":       # TODO: remove duplicate code
+                    pdu_number = decoded
+                elif name == "Msg Length":
+                    pdu_length = decoded
+            msg = b[ind:(ind + pdu_length)]
+            if pdu_number in LTE_RRC_OTA_PDU_TYPE:
+                decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
+                res.append(("Msg", decoded))
+                print decoded
+            else:
+                print "Unknown LTE RRC PDU Type: 0x%x" % pdu_number
+        return res
+
+    @classmethod
+    def _decode_by_format(cls, fmt, b, start):
+        ind = start
         res = []
-        for spec in cls.LOGITEM_FMT[type_id]:
+        for spec in fmt:
             if spec[0] != cls.DSL_SKIP:
                 name = spec[0]
                 fmt = spec[1]
@@ -96,24 +157,7 @@ class DMLogPacket:
                 ind += struct.calcsize(fmt)
             else:   # padding/skip
                 ind += spec[1]
-
-        if type_id == LOG_PACKET_ID["LTE_RRC_OTA_Packet"]:
-            for name, decoded in res:
-                if name == "Pkt Version":
-                    pkt_ver = decoded
-                elif name == "PDU Number":
-                    pdu_number = decoded
-                elif name == "Msg Length":
-                    pdu_length = decoded
-            if pkt_ver == 2:
-                msg = b[ind:(ind + pdu_length)]
-                if pdu_number in LTE_RRC_OTA_PDU_TYPE:
-                    decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
-                    res.append(("Msg", decoded))
-                    print decoded
-                else:
-                    print "Unknown PDU Type"
-        return res
+        return res, (ind - start)
 
     @classmethod
     def _decode_msg(cls, msg_type, b):
@@ -125,6 +169,8 @@ if __name__ == '__main__':
             # WCDMA_CELL_ID
             "2c002c002741b4008aef9740ce0040100000211100000f5660030000070030070301000401002cd90000ba000000",
             "2c002c0027419203b0a48540ce00c224000052260000fda3fa02d0000700801f0301000401003ffd00003c000000",
+            # WCDMA_SIGNALLING_MESSAGES DL_BCCH_BCH
+            "2f002f002f414a01b442814bcf0004281f00948e00bf10c424c05aa2fe00a0c850448c466608a8e54a80100a0100000003",
             # LTE_RRC_OTA_Packet v7 LTE-RRC_PCCH
             "26002600C0B00000A3894A13CE00070A7100D801B70799390400000000090040012F05EC4E700000",
             # LTE_RRC_OTA_Packet v2 LTE-RRC_PCCH
@@ -141,6 +187,6 @@ if __name__ == '__main__':
         print l, hex(type_id), ts
         print log_item
 
-    s = binascii.a2b_hex(tests[-3])
-    import cProfile
-    cProfile.run("for i in range(20): l, type_id, ts, log_item = DMLogPacket.decode(s)")
+    # s = binascii.a2b_hex(tests[-3])
+    # import cProfile
+    # cProfile.run("for i in range(20): l, type_id, ts, log_item = DMLogPacket.decode(s)")

@@ -14,7 +14,8 @@ import sys
 
 from sender import sendRecv, recvMessage
 from hdlc_parser import hdlc_parser
-from dm_log_packet import DMLogPacket
+from dm_log_packet import DMLogPacket, FormatError
+from dm_log_packet import consts as dm_log_consts
 
 inExe = hasattr(sys, "frozen") # true if the code is being run in an exe
 if (inExe):
@@ -101,7 +102,7 @@ if __name__ == "__main__":
     if options.cmd_file_name is not None:
         cmd_file_path = options.cmd_file_name
     else:
-        cmd_file_path = os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH + '/example_cmds.txt')
+        cmd_file_path = os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH + '/cmds.txt')
     target_cmds = init_target_cmds(cmd_file_path)
 
     log = None
@@ -131,14 +132,15 @@ if __name__ == "__main__":
             if payload:
                 print_reply(payload, crc_correct)
                 l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
-                print l, hex(type_id), ts
+                print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
                 print log_item
                 print ""
                 if log is not None:
                     log.write("reply: " + binascii.b2a_hex(payload) + "\n\n")
+
         
-    except KeyboardInterrupt, e:
-        print "\n\nKeyboard Interrupt Detected: Disabling all logs"
+    except (KeyboardInterrupt, RuntimeError), e:
+        print "\n\n%s Detected: Disabling all logs" % type(e).__name__
         # Disable logs
         payload, crc_correct = sendRecv(parser, phy_ser, cmd_dict.get("DISABLE"))
         print_reply(payload, crc_correct)
