@@ -37,9 +37,9 @@ def init_opt():
                     metavar="STR",
                     action="store", type="string", dest="phy_serial_name", 
                     help="Manually set the name of physical serial name.")
-    opt.add_option("-l", "--log-name",
+    opt.add_option("-l", "--log-output",
                     metavar="STR",
-                    action="store", type="string", dest="log_name", 
+                    action="store", type="string", dest="log_output", 
                     help="Specify a log file to save packets in")
     opt.add_option("-c", "--commands-file",
                     metavar="STR",
@@ -106,8 +106,8 @@ if __name__ == "__main__":
     target_cmds = init_target_cmds(cmd_file_path)
 
     log = None
-    if options.log_name is not None:
-        log = open(options.log_name, "w")
+    if options.log_output is not None:
+        log = open(options.log_output, "w")
 
     try:
         # Open COM ports. A zero timeout means that IO functions never suspend.
@@ -119,6 +119,7 @@ if __name__ == "__main__":
         print_reply(payload, crc_correct)
         
         for cmd in target_cmds:
+            print "Enable: " + cmd
             binary = cmd_dict.get(cmd)
             if binary is None:      # To Samson: what does it exactly mean?
                 binary = cmd
@@ -136,7 +137,11 @@ if __name__ == "__main__":
                 print log_item
                 print ""
                 if log is not None:
-                    log.write("reply: " + binascii.b2a_hex(payload) + "\n\n")
+                    log.write("%s\n" % ts)
+                    log.write("Binary: " + binascii.b2a_hex(payload) + "\n")
+                    log.write("Length: %d, Type: 0x%x(%s)\n" % (l, type_id, dm_log_consts.LOG_PACKET_NAME[type_id]))
+                    log.write(str(log_item))
+                    log.write("\n\n")
 
         
     except (KeyboardInterrupt, RuntimeError), e:
