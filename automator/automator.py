@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 automator.py
 
@@ -66,15 +67,17 @@ def init_cmd_dict(cmd_dict_path):
 
 def init_target_cmds(cmd_file_path):
     target_cmds = []
-    with open(cmd_file_path, 'r') as cmd_file:
-        for line in cmd_file:
-            line = line.strip()
-            line = line.replace('\n','')
-            line = line.upper()
-            if len(line) > 0 and not line.startswith('#'):
-                target_cmds.append(line)
+    try:
+        with open(cmd_file_path, 'r') as cmd_file:
+            for line in cmd_file:
+                line = line.strip()
+                line = line.replace('\n','')
+                line = line.upper()
+                if len(line) > 0 and not line.startswith('#'):
+                    target_cmds.append(line)
+    except IOError, e:
+        raise RuntimeError("Cannot find command file %s. You can create it using example_cmds.txt as template." % cmd_file_path)
     return target_cmds
-
 
 def print_reply(payload, crc_correct):
     if payload:
