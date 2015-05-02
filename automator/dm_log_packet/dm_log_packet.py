@@ -9,7 +9,7 @@ import binascii
 from datetime import *
 
 from consts import *
-from tshark import *
+from ws_dissector import *
 
 __all__ = ["DMLogPacket", "FormatError"]
 
@@ -161,8 +161,8 @@ class DMLogPacket:
 
     @classmethod
     def _decode_msg(cls, msg_type, b):
-        return TShark.decode_msg(msg_type, b)
-
+        s = WSDissector.decode_msg(msg_type, b)
+        return s
 
 if __name__ == '__main__':
     tests = [
@@ -184,11 +184,14 @@ if __name__ == '__main__':
             "46004600C0B0000020FC1AEDCD00070A7100B900D502000002700000002900010881F5182916943B54003A41F5229A8A992800944419C25001288836A4A00251196FE9C004A22000",
             ]
 
-    TShark.init_proc()
+    WSDissector.init_proc()
+    i = 0
     for b in tests:
         l, type_id, ts, log_item = DMLogPacket.decode(binascii.a2b_hex(b))
+        print i
         print l, hex(type_id), ts
         print log_item
+        i += 1
 
     # s = binascii.a2b_hex(tests[-3])
     # import cProfile
