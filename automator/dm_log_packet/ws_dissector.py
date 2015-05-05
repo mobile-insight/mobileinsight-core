@@ -17,19 +17,17 @@ class WSDissector:
                         }
     TYPES_TO_ID = {}
     WCDMA_CHANNEL_TYPE_TO_DISSECTOR = {"DL_BCCH_BCH": "rrc.bcch.bch"}
-    EXECUTABLE_PATH = "/home/likayo/Code/test_libwireshark/"
     LD_LIBRARY_PATH = "/home/likayo/wireshark-local-1.12.3/lib"
     proc = None
     init_proc_called = False
 
-
     @classmethod
-    def init_proc(cls):
+    def init_proc(cls, executable_path):
         if cls.init_proc_called:
             return
         env = dict(os.environ)
         env["LD_LIBRARY_PATH"] = cls.LD_LIBRARY_PATH + ":" + env.get("LD_LIBRARY_PATH", "")
-        cls.proc = subprocess.Popen([os.path.join(cls.EXECUTABLE_PATH, "dissect")],
+        cls.proc = subprocess.Popen([os.path.join(executable_path, "dissect")],
                                     bufsize=-1,
                                     stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE,

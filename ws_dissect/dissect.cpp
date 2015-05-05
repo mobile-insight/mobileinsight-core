@@ -9,6 +9,7 @@
 #include <epan/packet_info.h>
 #include <epan/frame_data.h>
 #include <epan/packet.h>
+#include <epan/print.h>
 #include <wiretap/wtap.h>
 #include <wsutil/plugins.h>
 #include <wsutil/privileges.h>
@@ -100,8 +101,9 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
 
     epan_dissect_t *edt = epan_dissect_new(session, TRUE, TRUE);
     epan_dissect_run(edt, 0, &phdr, tvb_new_real_data(raw_data, data_len, data_len), &fdata, NULL);
-    const proto_tree *payload_tree = edt->tree->first_child->next;
-    print_tree(payload_tree, 0);
+    // const proto_tree *payload_tree = edt->tree->first_child->next;
+    // print_tree(payload_tree, 0);
+    proto_tree_write_pdml(edt, stdout);
 
     epan_dissect_free(edt);
     frame_data_destroy(&fdata);
@@ -163,7 +165,7 @@ int main(int argc, char** argv)
         fflush(stdout);
         int ign = fread(buffer, sizeof(uint32_t), 2, stdin);
         if (ign < 2)
-            continue;
+            break;
         size_t data_len = ntohl(*((uint32_t *)buffer));
         unsigned int type = ntohl(*(uint32_t *)(buffer + 4));
         fread(buffer + 2 * sizeof(uint32_t), sizeof(char), data_len, stdin);

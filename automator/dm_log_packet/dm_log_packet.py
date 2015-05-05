@@ -4,9 +4,10 @@ dm_log_packet.py
 Define DMLogPacket class.
 """
 
-import struct
 import binascii
 from datetime import *
+import os
+import struct
 
 from consts import *
 from ws_dissector import *
@@ -135,7 +136,7 @@ class DMLogPacket:
             if pdu_number in LTE_RRC_OTA_PDU_TYPE:
                 decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
                 res.append(("Msg", decoded))
-                print decoded
+                # print decoded
             else:
                 print "Unknown LTE RRC PDU Type: 0x%x" % pdu_number
         return res
@@ -184,7 +185,8 @@ if __name__ == '__main__':
             "46004600C0B0000020FC1AEDCD00070A7100B900D502000002700000002900010881F5182916943B54003A41F5229A8A992800944419C25001288836A4A00251196FE9C004A22000",
             ]
 
-    WSDissector.init_proc()
+    executable_path = os.path.join(os.path.abspath(os.getcwd()), "../../ws_dissect")
+    WSDissector.init_proc(executable_path)
     i = 0
     for b in tests:
         l, type_id, ts, log_item = DMLogPacket.decode(binascii.a2b_hex(b))

@@ -29,6 +29,7 @@ dissect_aww(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
 
         guint32 proto_id = tvb_get_ntohl(tvb, 4);
         tvbuff_t* next_tvb = tvb_new_subset_remaining(tvb, 8);
+        // fprintf(stderr, "len = %d\n", tvb_length(next_tvb));
         gboolean success = dissector_try_uint(proto_table, proto_id, next_tvb, pinfo, tree);
         if (!success) {
             fprintf(stderr, "!!!\n");

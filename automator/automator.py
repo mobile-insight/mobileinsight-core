@@ -129,6 +129,7 @@ if __name__ == "__main__":
             payload, crc_correct = sendRecv(parser, phy_ser, binary)
             print_reply(payload, crc_correct)
 
+        # TODO(likayo): add init code to DMLogPacket
 
         while True:
             # cmd = 0x10 for log packets
