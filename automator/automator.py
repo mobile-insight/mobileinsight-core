@@ -26,6 +26,8 @@ else:
     PROGRAM_PATH   = sys.argv[0]
     COMMAND_FILES_PATH = "../command_files"
 PROGRAM_DIR_PATH = os.path.dirname(os.path.abspath(PROGRAM_PATH))
+WS_DISSECT_EXECUTABLE_PATH = os.path.join(PROGRAM_DIR_PATH, "../ws_dissect/dissect")
+LIBWIRESHARK_PATH = "/home/likayo/wireshark-local-1.12.3/lib"
 
 def init_opt():
     """
@@ -92,7 +94,7 @@ if __name__ == "__main__":
     if not options.phy_serial_name:
         opt.error("please use -p option to specify physical port name.")
         sys.exit(1)
-    
+
     phy_ser_name = options.phy_serial_name
     print "PHY COM: %s" % phy_ser_name
 
@@ -113,6 +115,12 @@ if __name__ == "__main__":
         log = open(options.log_output, "w")
 
     try:
+        # Initialize Wireshark dissector
+        DMLogPacket.init({
+                    "ws_dissect_executable_path": WS_DISSECT_EXECUTABLE_PATH,
+                    "libwireshark_path": LIBWIRESHARK_PATH,
+                    })
+
         # Open COM ports. A zero timeout means that IO functions never suspend.
         phy_ser = serial.Serial(phy_ser_name, baudrate=phy_baudrate, timeout=.5)
         parser = hdlc_parser()
@@ -128,8 +136,6 @@ if __name__ == "__main__":
                 binary = cmd
             payload, crc_correct = sendRecv(parser, phy_ser, binary)
             print_reply(payload, crc_correct)
-
-        # TODO(likayo): add init code to DMLogPacket
 
         while True:
             # cmd = 0x10 for log packets

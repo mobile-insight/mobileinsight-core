@@ -68,9 +68,20 @@ class DMLogPacket:
                     LOG_PACKET_ID["LTE_ML1_Connected_Mode_Neighbor_Meas_Req/Resp"]:
                     [],
                     }
+    init_called = False
+
+    @classmethod
+    def init(cls, prefs):
+        if cls.init_called:
+            return
+        WSDissector.init_proc(prefs["ws_dissect_executable_path"],
+                                prefs["libwireshark_path"])
+        cls.init_called = True
 
     @classmethod
     def decode(cls, b):
+        assert cls.init_called
+
         l, type_id, ts = cls._decode_header(b)
         log_item = cls._decode_log_item(type_id, b[cls.HEADER_LEN:])
         return (l, type_id, ts, log_item)
@@ -107,7 +118,7 @@ class DMLogPacket:
             if ch_num in WCDMA_SIGNALLING_MSG_CHANNEL_TYPE:
                 decoded = cls._decode_msg(WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num], msg)
                 res.append(("Msg", decoded))
-                print decoded
+                # print decoded
             else:
                 print "Unknown WCDMA Signalling Messages Channel Type: 0x%x" % ch_num
 
@@ -185,8 +196,11 @@ if __name__ == '__main__':
             "46004600C0B0000020FC1AEDCD00070A7100B900D502000002700000002900010881F5182916943B54003A41F5229A8A992800944419C25001288836A4A00251196FE9C004A22000",
             ]
 
-    executable_path = os.path.join(os.path.abspath(os.getcwd()), "../../ws_dissect")
-    WSDissector.init_proc(executable_path)
+    executable_path = os.path.join(os.path.abspath(os.getcwd()), "../../ws_dissect/dissect")
+    DMLogPacket.init({
+                        "ws_dissect_executable_path": executable_path,
+                        "libwireshark_path": "/home/likayo/wireshark-local-1.12.3/lib",
+                        })
     i = 0
     for b in tests:
         l, type_id, ts, log_item = DMLogPacket.decode(binascii.a2b_hex(b))
