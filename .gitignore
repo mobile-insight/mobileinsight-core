@@ -10,5 +10,8 @@ dist/
 # Necessary dependency for py2exe
 !win_dep/predefined.pyc
 
-# Config file
+# User config file
 command_files/cmds.txt
+
+# ws_dissect executable
+ws_dissect/dissect

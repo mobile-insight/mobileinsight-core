@@ -21,31 +21,6 @@
 const int BUFFER_SIZE = 2000;
 guchar buffer[BUFFER_SIZE] = {};
 
-// // 帧数据, 不包括PCAP文件头和帧头
-// // 数据为ethernet - ipv4 - udp - DNS, 上网时随便捕获的.
-// #define DATA_LEN 73
-// const guchar data[DATA_LEN] = 
-// {
-// 0x7E, 0x6D, 0x20, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x08, 0x00, 0x45, 0x00,
-// 0x00, 0x3B, 0x5F, 0x15, 0x00, 0x00, 0x40, 0x11, 0xF1, 0x51, 0x73, 0xAB, 0x4F, 0x08, 0xDB, 0x8D,
-// 0x8C, 0x0A, 0x9B, 0x90, 0x00, 0x35, 0x00, 0x27, 0xEF, 0x4D, 0x43, 0x07, 0x01, 0x00, 0x00, 0x01,
-// 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x74, 0x04, 0x73, 0x69, 0x6E, 0x61, 0x03, 0x63, 0x6F,
-// 0x6D, 0x02, 0x63, 0x6E, 0x00, 0x00, 0x01, 0x00, 0x01
-// };
-
-// lte-rrc.pcch
-// #define DATA_LEN (9)
-// const guchar data[DATA_LEN] = {0x40, 0x01, 0xBF, 0x28, 0x1A, 0xEB, 0xA0, 0x00, 0x00};
-
-// qcdm
-// #define DATA_LEN (24)
-// const guchar data[DATA_LEN] = 
-// {
-//     0x10, 0x00, 0x14, 0x00, 0x14, 0x00, 0x2F, 0x41, 0x00, 0x00, 
-//     0xFE, 0x63, 0x76, 0xF2, 0xCD, 0x00, 0xFE, 0x28, 0x04, 0x00, 
-//     0x07, 0x02, 0x00, 0x00
-// };
-
 void print_tree(const proto_tree* tree, int level)
 {
     if(tree == NULL)
@@ -109,36 +84,10 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
     frame_data_destroy(&fdata);
 }
 
-void my_init_plugins1 ()
-{
-    init_process_policies();
-
-    /* Register all the plugin types we have. */
-    epan_register_plugin_types(); /* Types known to libwireshark */
-    // wtap_register_plugin_types(); /* Types known to libwiretap */
-
-    /* Scan for plugins.  This does *not* call their registration routines;
-       that's done later. */
-    scan_plugins();
-
-    /* Register all libwiretap plugin modules. */
-    // register_all_wiretap_modules();
-}
-
-void my_init_plugins2 ()
-{
-    // register_all_plugin_tap_listeners();
-    // plugins_dump_all();
-}
-
 int main(int argc, char** argv)
 {
-    // my_init_plugins1();
-
     epan_init(register_all_protocols, register_all_protocol_handoffs, 
                 NULL, NULL);
-    
-    // my_init_plugins2();
  
     proto_register_aww();
     proto_reg_handoff_aww();
