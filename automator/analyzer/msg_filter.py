@@ -13,6 +13,17 @@ Author: Yuanjie Li
 # Step 2: Register the msg_filter to the Msg_filter_manager
 # Step 3: link the Msg_filter_manager to the dissector
 
+# Message abstraction
+class Message:
+	timestamp = 0
+	type_id = 0
+	data = {}
+
+	def __init__(self,timestamp,type_id,data):
+		self.timestamp = timestamp
+		self.type_id = type_id
+		self.data = data
+
 
 #Base class for the per-message filter
 #TODO: LTE_Msg_filter, WCDMA_Msg_filter, RRC_Msg_filter

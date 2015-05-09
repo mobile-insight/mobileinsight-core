@@ -7,7 +7,8 @@ A centralized manager for message filter and callbacks
 Author: Yuanjie Li
 """
 
-from . import msg_filter
+from .msg_filter import * 
+import xml.etree.ElementTree as ET
 
 # Abstraction for msg_filter managment. 
 # Accept messgesa from the dissector
@@ -31,17 +32,23 @@ class MsgFilterManager:
 	# a decoded message from the dissector
 	# msg is a list of [timestamp,type_id,log_item]
 	def onMessage(self, msg):	
+		# FIXME: msg[0]=timestamp, msg[1]=type_id, msg[2]=log_item
 		
-		print "onMessage: %s" % msg
-		#test if the msg satisfies the filter
-		f = lambda x: x.filter_f(msg) 
-		# Find all filters looking for msg
-		filtered_list = filter(f,self.msg_filter_list)
+		# convert the message to xml format
+		msg_dict = dict(msg[2])
+		if msg_dict.has_key('Msg'):	#otherwise it's an empty message
+			root = ET.fromstring(msg_dict['Msg'])
+			new_msg = Message(msg[0],msg[1],root)
 
-		# For each msg_filter, trigger the call_back
-		g = lambda x: map(lambda ff:ff(msg),x.callback_list)
-		# Apply to all msg_filters
-		map(g,filtered_list)
+			# test if the msg satisfies the filter
+			f = lambda x: x.filter_f(new_msg) 
+			# Find all filters looking for msg
+			filtered_list = filter(f,self.msg_filter_list)
+
+			# For each msg_filter, trigger the call_back
+			g = lambda x: map(lambda ff:ff(new_msg),x.callback_list)
+			# Apply to all msg_filters
+			map(g,filtered_list)
 
 
 
