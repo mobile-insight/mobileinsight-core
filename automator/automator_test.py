@@ -20,7 +20,9 @@ from dm_log_packet import consts as dm_log_consts
 
 import xml.etree.ElementTree as ET
 
-from analyzer import *
+from analyzer import msg_filter_manager
+from analyzer.logger import mem_logger
+from analyzer.proto_analyzer import lte_rrc_analyzer
 
 inExe = hasattr(sys, "frozen") # true if the code is being run in an exe
 if (inExe):
@@ -119,10 +121,12 @@ if __name__ == "__main__":
         log = open(options.log_output, "w")
 
     #Create a message analyzer
+    logger=mem_logger.MemLogger()
+    rrc_analyzer=lte_rrc_analyzer.LTE_RRC_Analyzer()
+    #Create a centralized message analyzer manager
     msg_analyzer=msg_filter_manager.MsgFilterManager()
-    logger=msg_logger.MsgLogger()
-    logger.enable_mem_log()
-    msg_analyzer.register(logger)
+    #msg_analyzer.register(logger)
+    msg_analyzer.register(rrc_analyzer)
 
     try:
         # Initialize Wireshark dissector
@@ -153,16 +157,19 @@ if __name__ == "__main__":
                 #print_reply(payload, crc_correct)
                 l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
                 #print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
-                msg_analyzer.onMessage([ts,type_id,log_item])
-                log_item_dict=dict(log_item)
-                if log_item_dict.has_key('Msg'):
-                    # print log_item_dict['Msg']
-                    root = ET.fromstring(log_item_dict['Msg'])
-                    for field in root.iter('field'):
-                        if field.get('name')=="lte-rrc.CarrierFreqUTRA_FDD_element":
-                            for freq in field.iter('field'):     
-                                print freq.get('showname')
-                            print "\n\n"
+                #TODO: in the message manager, convert the log to the XML. Avoid redundant XML decoding
+                
+                #FIXME: change the onMessage API. Talk to Jiayao
+                msg_analyzer.onMessage([ts,dm_log_consts.LOG_PACKET_NAME[type_id],log_item])
+                # log_item_dict=dict(log_item)
+                # if log_item_dict.has_key('Msg'):
+                #     # print log_item_dict['Msg']
+                #     root = ET.fromstring(log_item_dict['Msg'])
+                #     for field in root.iter('field'):
+                #         if field.get('name')=="lte-rrc.CarrierFreqUTRA_FDD_element":
+                #             for freq in field.iter('field'):     
+                #                 print freq.get('showname')
+                #             print "\n\n"
         
     except (KeyboardInterrupt, RuntimeError), e:
         print "\n\n%s Detected: Disabling all logs" % type(e).__name__

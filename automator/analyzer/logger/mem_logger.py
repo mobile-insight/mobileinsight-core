@@ -27,6 +27,7 @@ class MemLogger(MsgFilter):
 	def callback_mem_log(self,msg):
 		self.msg_log_mem.append(msg)
 		print msg.timestamp,msg.type_id
+		ET.dump(msg.data)
 
 	
 

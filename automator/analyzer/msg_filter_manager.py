@@ -15,11 +15,9 @@ import xml.etree.ElementTree as ET
 # Trigger the filter and corresponding callbacks
 # TODO: bind the Msg_filter_manager to the message traces
 class MsgFilterManager:
-	# A list of all registered msg_filter
-	msg_filter_list=[]
-
+	
 	def __init__(self):
-		self.msg_filter_list = []
+		self.msg_filter_list = []	# A list of all registered msg_filter
 
 	def register(self, msg_filter):
 		if msg_filter not in self.msg_filter_list:

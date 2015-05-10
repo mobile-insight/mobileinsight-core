@@ -15,10 +15,6 @@ Author: Yuanjie Li
 
 # Message abstraction
 class Message:
-	timestamp = 0
-	type_id = 0
-	data = {}
-
 	def __init__(self,timestamp,type_id,data):
 		self.timestamp = timestamp
 		self.type_id = type_id
@@ -32,12 +28,9 @@ class Message:
 #TODO: Analyzer abstraction that has one callback and multiple filters (e.g., RRC+ML1)
 class MsgFilter:
 
-	filter_f = lambda msg: 1	# filter function. By default any packets are accepted
-	callback_list = []	# callback function list 
-
 	def __init__(self,filter_f,callback_list):
-		self.filter_f = filter_f
-		self.callback_list = callback_list
+		self.filter_f = filter_f	#filter messages
+		self.callback_list = callback_list	#callbacks when filter function is satisfied
 
 	def add_callback(self,callback):
 		if callback not in self.callback_list:

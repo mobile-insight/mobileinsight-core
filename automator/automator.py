@@ -27,7 +27,7 @@ else:
     COMMAND_FILES_PATH = "../command_files"
 PROGRAM_DIR_PATH = os.path.dirname(os.path.abspath(PROGRAM_PATH))
 WS_DISSECT_EXECUTABLE_PATH = os.path.join(PROGRAM_DIR_PATH, "../ws_dissect/dissect")
-LIBWIRESHARK_PATH = "/home/likayo/wireshark-local-1.12.3/lib"
+LIBWIRESHARK_PATH = "/usr/local/lib"
 
 def init_opt():
     """
@@ -117,10 +117,9 @@ if __name__ == "__main__":
     try:
         # Initialize Wireshark dissector
         DMLogPacket.init({
-                    "ws_dissect_executable_path": WS_DISSECT_EXECUTABLE_PATH,
-                    "libwireshark_path": LIBWIRESHARK_PATH,
-                    })
-
+                     "ws_dissect_executable_path": WS_DISSECT_EXECUTABLE_PATH,
+                     "libwireshark_path": LIBWIRESHARK_PATH,
+                     })
         # Open COM ports. A zero timeout means that IO functions never suspend.
         phy_ser = serial.Serial(phy_ser_name, baudrate=phy_baudrate, timeout=.5)
         parser = hdlc_parser()
@@ -145,6 +144,7 @@ if __name__ == "__main__":
                 l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
                 print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
                 print log_item
+
                 print ""
                 if log is not None:
                     log.write("%s\n" % ts)

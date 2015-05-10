@@ -19,8 +19,9 @@ class DiskLogger(MsgFilter):
 		self.filter_f = lambda msg : 1 
 		# by default no loggers are enabled
 		self.callback_list = []
+		callback_disk_file=None	#file handler
 	
-	callback_disk_file=None
+	
 	def callback_disk_log(self,msg):
 		if self.callback_disk_file is not None:
 			self.callback_disk_file.write(msg)
