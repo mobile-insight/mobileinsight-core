@@ -6,7 +6,16 @@ import struct
 import subprocess
 
 class WSDissector:
-    FNULL = open(os.devnull, 'w')
+    """
+    A wrapper class of the ws_dissect program, which calls functions in
+    libwireshark to dissect many types of messages.
+
+    This wrapper communicates with the ws_dissect program using a trivial
+    TLV-formatted protocol named AWW (Automator Wireshark Wrapper), through
+    the standard input/output interfaces.
+    """
+
+    # A mapping of all supported message types to their AWW protocol number.
     SUPPORTED_TYPES = { # WCDMA RRC
                         "DL_BCCH_BCH": 100,
                         # LTE RRC
@@ -15,13 +24,19 @@ class WSDissector:
                         "LTE-RRC_UL_DCCH": 202,
                         "LTE-RRC_BCCH_DL_SCH": 203
                         }
-    TYPES_TO_ID = {}
-    WCDMA_CHANNEL_TYPE_TO_DISSECTOR = {"DL_BCCH_BCH": "rrc.bcch.bch"}
     proc = None
     init_proc_called = False
 
     @classmethod
     def init_proc(cls, executable_path, ws_library_path):
+        """
+        Launch the ws_dissect program. Must be called before any actual decoding.
+
+        Args:
+            executable_path: the path of ws_dissect program.
+            ws_library_path: a directory that contains libwireshark.
+        """
+
         if cls.init_proc_called:
             return
         env = dict(os.environ)
@@ -36,31 +51,23 @@ class WSDissector:
 
 
     @classmethod
-    def _dissector_name(cls, msg_type):
-        """
-        Example:
-            cls._dissector_name("LTE-RRC_PCCH") => "lte-rrc.pcch"
-            cls._dissector_name("DL_BCCH_BCH") => "rrc.bcch.bch"
-        """
-        if msg_type.startswith("LTE-RRC_"):
-            return msg_type.lower().replace("_", ".")
-        elif msg_type in cls.WCDMA_CHANNEL_TYPE_TO_DISSECTOR:
-            return cls.WCDMA_CHANNEL_TYPE_TO_DISSECTOR[msg_type]
-        else:
-            raise NotImplementedError
-
-
-    @classmethod
     def decode_msg(cls, msg_type, b):
-        if not cls.init_proc_called:
-            return None
+        """
+        Decode a binary message of type msg_type.
+
+        Args:
+            msg_type:
+            b: 
+        """
+        assert cls.init_proc_called
         if msg_type not in cls.SUPPORTED_TYPES:
             return None
-        # dissector_name = cls._dissector_name(msg_type)
 
-        input_data = struct.pack("!II",
-                                len(b),
-                                cls.SUPPORTED_TYPES[msg_type]) # in network order
+        input_data = struct.pack(
+                                    "!II",  # in network order
+                                    len(b),
+                                    cls.SUPPORTED_TYPES[msg_type],
+                                )
         input_data += b
         
         cls.proc.stdin.write(input_data)

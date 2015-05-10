@@ -15,6 +15,9 @@ from ws_dissector import *
 __all__ = ["DMLogPacket", "FormatError"]
 
 class FormatError(RuntimeError):
+    """
+    Error in decoding messages.
+    """
     pass
 
 # TODO: remove this code cloning later...
@@ -25,10 +28,23 @@ def static_var(varname, value):
     return decorate
 
 class DMLogPacket:
-    # See https://docs.python.org/2/library/struct.html#format-characters
-    HEADER_FMT = "<HHHQ"
+    """
+    QCDM log packet decoder.
+
+    A log packet contains a header that specifies the packet type and timestamp,
+    and a payload field that store useful information of a phone. This class will
+    decode both the header and payload fields.
+
+    This class depends on Wireshark to decode some 3GPP standardized messages.
+
+    This class should not be instancialized.
+    """
+    # Format strings have the same meanings as in Python struct module. See 
+    # https://docs.python.org/2/library/struct.html for details.
+    HEADER_FMT = "<HHHQ"    # little endian
     HEADER_LEN = struct.calcsize(HEADER_FMT)
     DSL_SKIP = None
+    # A dict that maps the type ids to the format of the payload field.
     LOGITEM_FMT = {
                     # default byte order: little endian
                     LOG_PACKET_ID["WCDMA_CELL_ID"]:
@@ -72,6 +88,14 @@ class DMLogPacket:
 
     @classmethod
     def init(cls, prefs):
+        """
+        Configure the DMLogPacket class with user preferences.
+
+        This method should be called before any actual decoding.
+
+        Args:
+            prefs: a dict storing the preferences.
+        """
         if cls.init_called:
             return
         WSDissector.init_proc(prefs["ws_dissect_executable_path"],
@@ -80,14 +104,33 @@ class DMLogPacket:
 
     @classmethod
     def decode(cls, b):
+        """
+        Decode a QCDM log packet.
+
+        Args:
+            b: a string containing binary data of a packet
+
+        Returns:
+            a four-element tuple (len, type_id, ts, log_item). The meaning of each
+            element is as follows:
+
+            len: the number of bytes in the payload field.
+            type_id: an integer identifying the type.
+            ts: a datetime object storing the timestamp of this packet,
+                which is provided by the packet itself.
+            log_item: the decoding result of the payload.
+        """
         assert cls.init_called
 
         l, type_id, ts = cls._decode_header(b)
         log_item = cls._decode_log_item(type_id, b[cls.HEADER_LEN:])
-        return (l, type_id, ts, log_item)
+        return (l - cls.HEADER_LEN + 2, type_id, ts, log_item)
 
     @classmethod
     def _decode_header(cls, b):
+        """
+        Decode the 14-byte header of the packet.
+        """
         l1, l2, type_id, ts = struct.unpack_from(cls.HEADER_FMT, b)
         assert l1 == l2
         assert l1 + 2 == len(b)
@@ -100,11 +143,20 @@ class DMLogPacket:
     @static_var("epoch", datetime(1980, 1, 6, 0, 0, 0))  # 1980 Jan 6 00:00:00
     @static_var("per_sec", 52428800)
     def _decode_ts(cls, ts):
+        """
+        Decode the 8-byte packet timestamp in the header.
+
+        Returns:
+            a datetime object storing the interpreted timestamp.
+        """
         secs = float(ts) / cls._decode_ts.per_sec
         return cls._decode_ts.epoch + timedelta(seconds=secs)
 
     @classmethod
     def _decode_log_item(cls, type_id, b):
+        """
+        Decode the payload field according to its type.
+        """
         res, offset = cls._decode_by_format(cls.LOGITEM_FMT[type_id], b, 0)
         ind = 0 + offset
 
@@ -154,6 +206,20 @@ class DMLogPacket:
 
     @classmethod
     def _decode_by_format(cls, fmt, b, start):
+        """
+        Decode binary messsage according to a specific format.
+
+        Args:
+            fmt: the specific format
+            b: a string containing binary data to be decoded
+            start: the position where should we start the decoding.
+
+        Returns:
+            a 2-element tuple (res, n).
+
+            res: the decoding result
+            n: how many bytes are consumed in the decoding
+        """
         ind = start
         res = []
         for spec in fmt:
@@ -196,7 +262,7 @@ if __name__ == '__main__':
             "46004600C0B0000020FC1AEDCD00070A7100B900D502000002700000002900010881F5182916943B54003A41F5229A8A992800944419C25001288836A4A00251196FE9C004A22000",
             ]
 
-    executable_path = os.path.join(os.path.abspath(os.getcwd()), "../../ws_dissect/dissect")
+    executable_path = os.path.join(os.path.abspath(os.getcwd()), "../../ws_dissector/dissect")
     DMLogPacket.init({
                         "ws_dissect_executable_path": executable_path,
                         "libwireshark_path": "/home/likayo/wireshark-local-1.12.3/lib",
