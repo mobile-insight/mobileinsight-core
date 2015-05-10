@@ -12,9 +12,9 @@ Author: Yuanjie Li
 """
 
 import xml.etree.ElementTree as ET
-from ..msg_filter import *
+from protocol_analyzer import ProtocolAnalyzer
 
-class LTE_RRC_Analyzer(MsgFilter):
+class LTE_RRC_Analyzer(ProtocolAnalyzer):
 
 	def __init__(self):
 		self.filter_f = lambda msg : msg.type_id=="LTE_RRC_OTA_Packet"
@@ -78,6 +78,7 @@ class LTE_RRC_Analyzer(MsgFilter):
 					field_val['lte-rrc.q_RxLevMin'],
 					field_val['lte-rrc.p_Max'],
 					field_val['lte-rrc.s_IntraSearch'])
+				#self.config.sib[self.status.ID].intra_freq_config.dump()
 
 			#inter-freq cell info
 			elif field.get('name')=="lte-rrc.interFreqCarrierFreqList":
