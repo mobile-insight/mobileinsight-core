@@ -35,20 +35,17 @@ class LTE_RRC_Analyzer(MsgFilter):
 				if self.status.ID != field.get('show'):
 					self.status.ID = field.get('show')
 					self.history.add_history(msg.timestamp,self.status)
-					self.history.dump()
 
 			elif field.get('name')=="lte-rrc.trackingAreaCode": #tracking area code
 				if self.status.TAC != field.get('show'):
 					self.status.TAC = field.get('show')
 					self.history.add_history(msg.timestamp,self.status)
-					self.history.dump()
-					
+
 			#FIXME: is it serving cell freq?
 			# elif field.get('name')=="lte-rrc.carrierFreq": 
 			# 	if self.status.freq != field.get('show'):
 			# 		self.status.freq = field.get('show')
 			# 		self.history.add_history(msg.timestamp,self.status)
-			# 		self.history.dump()
 
 		#TODO: RRC connection status update
 
