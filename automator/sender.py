@@ -2,7 +2,8 @@
 """
 sender.py
 
-Tool to send commands to a Qualcomm phone
+Tool to send commands to a Qualcomm phone.
+
 Author: Jiayao Li, Samson Richard Wong
 """
 

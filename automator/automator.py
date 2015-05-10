@@ -2,7 +2,7 @@
 """
 automator.py
 
-A tool that disables logs from a phone and then tells the phone to start transmitting RRC-OTA messages.
+A tool that communciate the phone to start transmitting log messages.
 
 Author: Jiayao Li, Samson Richard Wong
 """
@@ -18,8 +18,10 @@ from hdlc_parser import hdlc_parser
 from dm_log_packet import DMLogPacket, FormatError
 from dm_log_packet import consts as dm_log_consts
 
-inExe = hasattr(sys, "frozen") # true if the code is being run in an exe
-if (inExe):
+
+# Define some constants
+IN_EXE = hasattr(sys, "frozen") # true if the code is being run in an exe
+if IN_EXE:
     PROGRAM_PATH   = sys.executable
     COMMAND_FILES_PATH = "./command_files"
 else:
@@ -28,6 +30,7 @@ else:
 PROGRAM_DIR_PATH = os.path.dirname(os.path.abspath(PROGRAM_PATH))
 WS_DISSECT_EXECUTABLE_PATH = os.path.join(PROGRAM_DIR_PATH, "../ws_dissect/dissect")
 LIBWIRESHARK_PATH = "/home/likayo/wireshark-local-1.12.3/lib"
+
 
 def init_opt():
     """
@@ -101,6 +104,7 @@ if __name__ == "__main__":
     phy_baudrate = options.phy_baudrate
     print "PHY BAUD RATE: %d" % phy_baudrate
 
+    # Load configurations
     cmd_dict_path = os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH + '/cmd_dict.txt')
     cmd_dict = init_cmd_dict(cmd_dict_path)
 
@@ -129,6 +133,7 @@ if __name__ == "__main__":
         payload, crc_correct = sendRecv(parser, phy_ser, cmd_dict.get("DISABLE"))
         print_reply(payload, crc_correct)
         
+        # Enable logs
         for cmd in target_cmds:
             print "Enable: " + cmd
             binary = cmd_dict.get(cmd)
@@ -137,11 +142,13 @@ if __name__ == "__main__":
             payload, crc_correct = sendRecv(parser, phy_ser, binary)
             print_reply(payload, crc_correct)
 
+        # Read log packets from serial port and decode their contents
         while True:
             # cmd = 0x10 for log packets
             payload, crc_correct = recvMessage(parser, phy_ser, "10") 
             if payload:
                 print_reply(payload, crc_correct)
+                # Note that the beginning 2 bytes are skipped.
                 l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
                 print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
                 print log_item

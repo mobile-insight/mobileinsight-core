@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+tshark.py
+Define TShark class.
+
+Note that this file has been replaced by ws_dissector.py.
+
+Author: Jiayao Li
+"""
+
 __all__ = ["TShark"]
 
 import os
@@ -48,7 +58,6 @@ class TShark:
         print "Complete"
         cls.initialized = True
 
-
     @classmethod
     def _dissector_name(cls, msg_type):
         """
@@ -62,7 +71,6 @@ class TShark:
             return cls.WCDMA_CHANNEL_TYPE_TO_DISSECTOR[msg_type]
         else:
             raise NotImplementedError
-
 
     @classmethod
     def decode_msg(cls, msg_type, b):

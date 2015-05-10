@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+ws_dissector.py
+Define WSDissector class.
+
+Author: Jiayao Li
+"""
+
 __all__ = ["WSDissector"]
 
 import os
@@ -5,17 +13,18 @@ import binascii
 import struct
 import subprocess
 
+
 class WSDissector:
     """
-    A wrapper class of the ws_dissect program, which calls functions in
-    libwireshark to dissect many types of messages.
+    A wrapper class of the ws_dissector program, which calls functions in
+    libwireshark to dissect many types of messages, e.g. 3GPP standardized.
 
-    This wrapper communicates with the ws_dissect program using a trivial
+    This wrapper communicates with the ws_dissector program using a trivial
     TLV-formatted protocol named AWW (Automator Wireshark Wrapper), through
     the standard input/output interfaces.
     """
 
-    # A mapping of all supported message types to their AWW protocol number.
+    # maps all supported message types to their AWW protocol number.
     SUPPORTED_TYPES = { # WCDMA RRC
                         "DL_BCCH_BCH": 100,
                         # LTE RRC
@@ -30,7 +39,7 @@ class WSDissector:
     @classmethod
     def init_proc(cls, executable_path, ws_library_path):
         """
-        Launch the ws_dissect program. Must be called before any actual decoding.
+        Launch the ws_dissector program. Must be called before any actual decoding.
 
         Args:
             executable_path: the path of ws_dissect program.
@@ -56,8 +65,8 @@ class WSDissector:
         Decode a binary message of type msg_type.
 
         Args:
-            msg_type:
-            b: 
+            msg_type: a string identifying the type of the message to be decoded
+            b: binary data
         """
         assert cls.init_proc_called
         if msg_type not in cls.SUPPORTED_TYPES:
@@ -83,6 +92,7 @@ class WSDissector:
         return "".join(result)
 
 
+# Test decoding
 if __name__ == '__main__':
     b = "4001BF281AEBA00000"
     WSDissector.init_proc()

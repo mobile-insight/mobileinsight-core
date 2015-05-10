@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 hdlc_frame.py
-Define hdlc_frame, an easy HDLC-like frame constructor class.
+Define hdlc_frame, an easy-to-use HDLC-like frame constructor.
 
 Author: Jiayao Li
 """
@@ -59,6 +59,7 @@ class hdlc_frame:
         return escaped
 
 
+# Test decoding
 if __name__ == '__main__':
     tests = [("7d028813a513", "7d5d028813a513c3407e")]
 

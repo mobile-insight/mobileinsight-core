@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+consts.py
+Define constants used in decoding QCDM log packets.
+
+Author: Jiayao Li
+"""
+
 
 __all__ = [ "LOG_PACKET_ID",
             "LOG_PACKET_NAME",

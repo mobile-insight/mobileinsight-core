@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 hdlc_parser.py
-Define hdlc_parser class that deals with HDLC frames in the raw logs produced by monitor.
-If executed as a script, it translates a raw log into a new log, each log item of which
-is a single frame.
+Define hdlc_parser class that deals with HDLC frames in the raw logs read from
+the diagnostic serial port.
+If executed as a script, it translates a raw log into a new log, each item of 
+which is a single frame.
 
 Author: Jiayao Li
 """
 
-
 __all__ = {"hdlc_parser"}
-
 
 import struct
 import crcmod

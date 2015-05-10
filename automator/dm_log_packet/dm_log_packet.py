@@ -2,6 +2,8 @@
 """
 dm_log_packet.py
 Define DMLogPacket class.
+
+Author: Jiayao Li
 """
 
 import binascii
@@ -14,11 +16,13 @@ from ws_dissector import *
 
 __all__ = ["DMLogPacket", "FormatError"]
 
+
 class FormatError(RuntimeError):
     """
     Error in decoding messages.
     """
     pass
+
 
 # TODO: remove this code cloning later...
 def static_var(varname, value):
@@ -26,6 +30,7 @@ def static_var(varname, value):
         setattr(func, varname, value)
         return func
     return decorate
+
 
 class DMLogPacket:
     """
@@ -119,6 +124,9 @@ class DMLogPacket:
             ts: a datetime object storing the timestamp of this packet,
                 which is provided by the packet itself.
             log_item: the decoding result of the payload.
+
+        Raises:
+            FormatError: the type of this message is unknown
         """
         assert cls.init_called
 
@@ -242,6 +250,8 @@ class DMLogPacket:
         s = WSDissector.decode_msg(msg_type, b)
         return s
 
+
+# Test decoding
 if __name__ == '__main__':
     tests = [
             # WCDMA_CELL_ID
