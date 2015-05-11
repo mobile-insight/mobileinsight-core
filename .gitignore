@@ -16,3 +16,5 @@ command_files/cmds.txt
 # ws_dissect executable
 ws_dissector/dissect
 
+# OSX file
+.DS_Store
