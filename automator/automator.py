@@ -47,10 +47,11 @@ def init_opt():
                     metavar="STR",
                     action="store", type="string", dest="log_output", 
                     help="Specify a log file to save packets in")
-    opt.add_option("-c", "--commands-file",
-                    metavar="STR",
-                    action="store", type="string", dest="cmd_file_name", 
-                    help="Specify the file which contains the commands to send to the phone.")
+    # TODO: temporarily removed?
+    # opt.add_option("-c", "--commands-file",
+    #                 metavar="STR",
+    #                 action="store", type="string", dest="cmd_file_name", 
+    #                 help="Specify the file which contains the commands to send to the phone.")
     opt.add_option("--phy-baudrate",
                     metavar="N",
                     action="store", type="int", dest="phy_baudrate", 
