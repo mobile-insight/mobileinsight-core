@@ -19,3 +19,5 @@ ws_dissector/ws_dissector
 # OSX file
 .DS_Store
 
+# documentation build
+docs/_build
