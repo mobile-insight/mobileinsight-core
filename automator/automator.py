@@ -24,8 +24,8 @@ else:
     PROGRAM_PATH   = sys.argv[0]
     COMMAND_FILES_PATH = "../command_files"
 PROGRAM_DIR_PATH = os.path.dirname(os.path.abspath(PROGRAM_PATH))
-WS_DISSECT_EXECUTABLE_PATH = os.path.join(PROGRAM_DIR_PATH, "../ws_dissector/dissect")
-LIBWIRESHARK_PATH = "/home/likayo/wireshark-local-1.12.3/lib"
+WS_DISSECT_EXECUTABLE_PATH = os.path.join(PROGRAM_DIR_PATH, "../ws_dissector/ws_dissector")
+LIBWIRESHARK_PATH = "/usr/local/lib"
 
 
 def init_opt():

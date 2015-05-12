@@ -52,3 +52,11 @@ class Analyzer(Module):
 		if self in analyzer.to_list:
 			analyzer.to_list.remove(self)
 		del self.from_list[analyzer]
+
+	def recv(self,module,event):
+		if module==self.source:
+			for f in self.source_callback:
+				f(event)
+		else:
+			for f in self.from_list[module]:
+				f(event)

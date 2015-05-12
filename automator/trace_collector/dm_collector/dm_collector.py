@@ -128,7 +128,7 @@ class DMCollector(TraceCollector):
                 # cmd = 0x10 for log packets
                 payload, crc_correct = recvMessage(parser, phy_ser, "10") 
                 if payload:
-                    print_reply(payload, crc_correct)
+                    # print_reply(payload, crc_correct)
                     # Note that the beginning 2 bytes are skipped.
                     l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
                     # print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
@@ -138,11 +138,11 @@ class DMCollector(TraceCollector):
                     
                     # conver the message to xml
                     log_item_dict = dict(log_item)
-                    log_xml = ET.fromstring(msg_dict['Msg'])
-
-                    #send event to analyzers
-                    event = Event(ts,dm_log_consts.LOG_PACKET_NAME[type_id],log_xml)
-                    self.send(event)
+                    if log_item_dict.has_key('Msg'):
+                        log_xml = ET.fromstring(log_item_dict['Msg'])
+                        #send event to analyzers
+                        event = Event(ts,dm_log_consts.LOG_PACKET_NAME[type_id],log_xml)
+                        self.send(event)
                     # if log is not None:
                     #     log.write("%s\n" % ts)
                     #     log.write("Binary: " + binascii.b2a_hex(payload) + "\n")
