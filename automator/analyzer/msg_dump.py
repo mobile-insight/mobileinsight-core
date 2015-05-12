@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-message_dump.py
+msg_dump.py
 
 A simple message dump analyzer
 

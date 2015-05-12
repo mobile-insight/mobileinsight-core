@@ -13,11 +13,16 @@ Author: Yuanjie Li
 
 import xml.etree.ElementTree as ET
 from analyzer import *
+from msg_dump import *
 
 class LteRrcAnalyzer(Analyzer):
 
 	def __init__(self):
 		Analyzer.__init__(self)
+
+		#Declare analyzers included
+		self.dumper=MsgDump()
+		self.include_analyzer(self.dumper,[])
 
 		#init packet filters
 		self.add_source_callback(self.rrc_filter)

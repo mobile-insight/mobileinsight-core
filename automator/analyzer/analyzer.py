@@ -41,7 +41,7 @@ class Analyzer(Module):
 			self.source_callback.remove(callback)
 
 	# receive events from analyzer, then trigger functions in callback_list
-	def include_analyzer(sef,analyzer,callback_list):
+	def include_analyzer(self,analyzer,callback_list):
 		#WARNING: if analyzer exits, its callback_list would be overwritten!!!
 		self.from_list[analyzer]=callback_list
 		#Add the analyzer to the to_list
