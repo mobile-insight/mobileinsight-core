@@ -13,8 +13,8 @@ from module import *
 class TraceCollector(Module):
 
     def __init__(self):
-        self.from_list={} # No source for TraceCollector
-        self.to_list=[]
+        # No source for TraceCollector
+        Module.__init__(self)
 
 
     # Add an analyzer that needs the message

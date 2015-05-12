@@ -24,6 +24,8 @@ from hdlc_parser import hdlc_parser
 from dm_log_packet import DMLogPacket, FormatError
 from dm_log_packet import consts as dm_log_consts
 
+import xml.etree.ElementTree as ET
+
 def init_cmd_dict(cmd_dict_path):
     cmd_dict = {}
     with open(cmd_dict_path, 'r') as cmd_dict_file:
@@ -69,7 +71,7 @@ class DMCollector(TraceCollector):
                 ws_dissect_executable_path
                 libwireshark_path
         """
-        super(DMCollector, self).__init__()
+        TraceCollector.__init__(self)
 
         self.phy_baudrate = 9600
         self.phy_ser_name = None
@@ -129,10 +131,18 @@ class DMCollector(TraceCollector):
                     print_reply(payload, crc_correct)
                     # Note that the beginning 2 bytes are skipped.
                     l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
-                    print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
-                    print log_item
+                    # print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
+                    # print log_item
 
-                    print ""
+                    # print ""
+                    
+                    # conver the message to xml
+                    log_item_dict = dict(log_item)
+                    log_xml = ET.fromstring(msg_dict['Msg'])
+
+                    #send event to analyzers
+                    event = Event(ts,dm_log_consts.LOG_PACKET_NAME[type_id],log_xml)
+                    self.send(event)
                     # if log is not None:
                     #     log.write("%s\n" % ts)
                     #     log.write("Binary: " + binascii.b2a_hex(payload) + "\n")
