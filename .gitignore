@@ -14,7 +14,8 @@ dist/
 command_files/cmds.txt
 
 # ws_dissect executable
-ws_dissector/dissect
+ws_dissector/ws_dissector
 
 # OSX file
 .DS_Store
+
