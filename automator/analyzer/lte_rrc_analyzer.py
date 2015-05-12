@@ -90,7 +90,7 @@ class LteRrcAnalyzer(Analyzer):
 					field_val['lte-rrc.q_RxLevMin'],
 					field_val['lte-rrc.p_Max'],
 					field_val['lte-rrc.s_IntraSearch'])
-				#self.config.sib[self.status.ID].intra_freq_config.dump()
+				self.config.sib[self.status.id].intra_freq_config.dump()
 
 			#inter-freq cell info
 			elif field.get('name')=="lte-rrc.interFreqCarrierFreqList":
