@@ -16,12 +16,13 @@ import subprocess
 
 class WSDissector:
     """
-    A wrapper class of the ws_dissector program, which calls functions in
-    libwireshark to dissect many types of messages, e.g. 3GPP standardized.
+    A wrapper class of the ws_dissector program, which calls functions 
+    in libwireshark to dissect many types of messages, e.g. 3GPP 
+    standardized messages.
 
-    This wrapper communicates with the ws_dissector program using a trivial
-    TLV-formatted protocol named AWW (Automator Wireshark Wrapper), through
-    the standard input/output interfaces.
+    This wrapper communicates with the ws_dissector program using a 
+    trivial TLV-formatted protocol named AWW (Automator Wireshark Wrapper), 
+    through the standard input/output interfaces.
     """
 
     # maps all supported message types to their AWW protocol number.
@@ -33,30 +34,31 @@ class WSDissector:
                         "LTE-RRC_UL_DCCH": 202,
                         "LTE-RRC_BCCH_DL_SCH": 203
                         }
-    proc = None
-    init_proc_called = False
+    _proc = None
+    _init_proc_called = False
 
     @classmethod
     def init_proc(cls, executable_path, ws_library_path):
         """
-        Launch the ws_dissector program. Must be called before any actual decoding.
+        Launch the ws_dissector program. Must be called before any actual 
+        decoding.
 
         Args:
             executable_path: the path of ws_dissect program.
             ws_library_path: a directory that contains libwireshark.
         """
 
-        if cls.init_proc_called:
+        if cls._init_proc_called:
             return
         env = dict(os.environ)
         env["LD_LIBRARY_PATH"] = ws_library_path + ":" + env.get("LD_LIBRARY_PATH", "")
-        cls.proc = subprocess.Popen([executable_path],
+        cls._proc = subprocess.Popen([executable_path],
                                     bufsize=-1,
                                     stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE,
                                     env=env
                                     )
-        cls.init_proc_called = True
+        cls._init_proc_called = True
 
 
     @classmethod
@@ -65,10 +67,11 @@ class WSDissector:
         Decode a binary message of type msg_type.
 
         Args:
-            msg_type: a string identifying the type of the message to be decoded
+            msg_type: a string identifying the type of the message to be 
+                decoded
             b: binary data
         """
-        assert cls.init_proc_called
+        assert cls._init_proc_called
         if msg_type not in cls.SUPPORTED_TYPES:
             return None
 
@@ -79,12 +82,12 @@ class WSDissector:
                                 )
         input_data += b
         
-        cls.proc.stdin.write(input_data)
-        cls.proc.stdin.flush()
-        cls.proc.stdout.flush()
+        cls._proc.stdin.write(input_data)
+        cls._proc.stdin.flush()
+        cls._proc.stdout.flush()
         result = []
         while True:
-            line = cls.proc.stdout.readline()
+            line = cls._proc.stdout.readline()
             if line.startswith("===___==="):
                 break
             result.append(line)

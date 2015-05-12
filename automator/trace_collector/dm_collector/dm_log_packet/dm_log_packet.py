@@ -17,13 +17,6 @@ from ws_dissector import *
 __all__ = ["DMLogPacket", "FormatError"]
 
 
-class FormatError(RuntimeError):
-    """
-    Error in decoding messages.
-    """
-    pass
-
-
 # TODO: remove this code cloning later...
 def static_var(varname, value):
     def decorate(func):
@@ -32,25 +25,33 @@ def static_var(varname, value):
     return decorate
 
 
+class FormatError(RuntimeError):
+    """
+    Error in decoding messages.
+    """
+    pass
+
+
 class DMLogPacket:
     """
     QCDM log packet decoder.
 
-    A log packet contains a header that specifies the packet type and timestamp,
-    and a payload field that store useful information of a phone. This class will
-    decode both the header and payload fields.
+    A log packet contains a header that specifies the packet type and 
+    timestamp, and a payload field that store useful information of a 
+    phone. This class will decode both the header and payload fields.
 
-    This class depends on Wireshark to decode some 3GPP standardized messages.
+    This class depends on Wireshark to decode some 3GPP standardized
+    messages.
 
     This class should not be instancialized.
     """
     # Format strings have the same meanings as in Python struct module. See 
     # https://docs.python.org/2/library/struct.html for details.
-    HEADER_FMT = "<HHHQ"    # little endian
-    HEADER_LEN = struct.calcsize(HEADER_FMT)
-    DSL_SKIP = None
+    _HEADER_FMT = "<HHHQ"    # little endian
+    _HEADER_LEN = struct.calcsize(_HEADER_FMT)
+    _DSL_SKIP = None
     # A dict that maps the type ids to the format of the payload field.
-    LOGITEM_FMT = {
+    _LOGITEM_FMT = {
                     # default byte order: little endian
                     LOG_PACKET_ID["WCDMA_CELL_ID"]:
                     [
@@ -58,7 +59,7 @@ class DMLogPacket:
                         ("UTRA DL Absolute RF channel number", "I"),
                         ("Cell identity (28-bits)", "I"),
                         ("URA to use in case of overlapping URAs", "B"),
-                        (DSL_SKIP, 2),      # Unknown yet
+                        (_DSL_SKIP, 2),      # Unknown yet
                         ("Allowed Call Access", "B"),
                         ("PSC", "H"),
                         ("PLMN", "6B"),
@@ -89,7 +90,7 @@ class DMLogPacket:
                     LOG_PACKET_ID["LTE_ML1_Connected_Mode_Neighbor_Meas_Req/Resp"]:
                     [],
                     }
-    init_called = False
+    _init_called = False
 
     @classmethod
     def init(cls, prefs):
@@ -101,11 +102,11 @@ class DMLogPacket:
         Args:
             prefs: a dict storing the preferences.
         """
-        if cls.init_called:
+        if cls._init_called:
             return
         WSDissector.init_proc(prefs["ws_dissect_executable_path"],
                                 prefs["libwireshark_path"])
-        cls.init_called = True
+        cls._init_called = True
 
     @classmethod
     def decode(cls, b):
@@ -116,8 +117,8 @@ class DMLogPacket:
             b: a string containing binary data of a packet
 
         Returns:
-            a four-element tuple (len, type_id, ts, log_item). The meaning of each
-            element is as follows:
+            a four-element tuple (len, type_id, ts, log_item). The meaning 
+            of each element is as follows:
 
             len: the number of bytes in the payload field.
             type_id: an integer identifying the type.
@@ -128,21 +129,21 @@ class DMLogPacket:
         Raises:
             FormatError: the type of this message is unknown
         """
-        assert cls.init_called
+        assert cls._init_called
 
         l, type_id, ts = cls._decode_header(b)
-        log_item = cls._decode_log_item(type_id, b[cls.HEADER_LEN:])
-        return (l - cls.HEADER_LEN + 2, type_id, ts, log_item)
+        log_item = cls._decode_log_item(type_id, b[cls._HEADER_LEN:])
+        return (l - cls._HEADER_LEN + 2, type_id, ts, log_item)
 
     @classmethod
     def _decode_header(cls, b):
         """
         Decode the 14-byte header of the packet.
         """
-        l1, l2, type_id, ts = struct.unpack_from(cls.HEADER_FMT, b)
+        l1, l2, type_id, ts = struct.unpack_from(cls._HEADER_FMT, b)
         assert l1 == l2
         assert l1 + 2 == len(b)
-        if type_id not in cls.LOGITEM_FMT:
+        if type_id not in cls._LOGITEM_FMT:
             raise FormatError("Unknown Type ID: 0x%x" % type_id)
         ts = cls._decode_ts(ts)
         return l1, type_id, ts
@@ -165,7 +166,7 @@ class DMLogPacket:
         """
         Decode the payload field according to its type.
         """
-        res, offset = cls._decode_by_format(cls.LOGITEM_FMT[type_id], b, 0)
+        res, offset = cls._decode_by_format(cls._LOGITEM_FMT[type_id], b, 0)
         ind = 0 + offset
 
         if type_id == LOG_PACKET_ID["WCDMA_Signaling_Messages"]:
@@ -187,7 +188,7 @@ class DMLogPacket:
                 if name == "Pkt Version":   # TODO: remove duplicate code
                     pkt_ver = decoded
             if pkt_ver == 7:
-                fmt = [ (cls.DSL_SKIP, 4),      # Unknown yet, only for Pkt Version = 7
+                fmt = [ (cls._DSL_SKIP, 4),      # Unknown yet, only for Pkt Version = 7
                         ("Msg Length", "B"),
                         ("SIB Mask in SI", "B"),
                         ]
@@ -231,7 +232,7 @@ class DMLogPacket:
         ind = start
         res = []
         for spec in fmt:
-            if spec[0] != cls.DSL_SKIP:
+            if spec[0] != cls._DSL_SKIP:
                 name = spec[0]
                 fmt = spec[1]
                 # print ind, binascii.b2a_hex(b[ind:ind+4])
@@ -272,7 +273,7 @@ if __name__ == '__main__':
             "46004600C0B0000020FC1AEDCD00070A7100B900D502000002700000002900010881F5182916943B54003A41F5229A8A992800944419C25001288836A4A00251196FE9C004A22000",
             ]
 
-    executable_path = os.path.join(os.path.abspath(os.getcwd()), "../../ws_dissector/dissect")
+    executable_path = os.path.join(os.path.abspath(os.getcwd()), "../../../../ws_dissector/dissect")
     DMLogPacket.init({
                         "ws_dissect_executable_path": executable_path,
                         "libwireshark_path": "/home/likayo/wireshark-local-1.12.3/lib",
