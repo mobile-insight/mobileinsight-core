@@ -13,22 +13,28 @@ __all__ = [ "LOG_PACKET_ID",
             "WCDMA_SIGNALLING_MSG_CHANNEL_TYPE",
             "LTE_RRC_OTA_PDU_NUMBER",
             "LTE_RRC_OTA_PDU_TYPE",
+            "LTE_ML1_SUBPACKET_ID",
+            "LTE_ML1_SUBPACKET_TYPE",
             ]
+
+def dict_reversed(d):
+    return dict([(v, k) for k, v in d.items()])
 
 LOG_PACKET_ID = {   "WCDMA_CELL_ID":    0x4127,
                     "WCDMA_Signaling_Messages": 0x412F,
                     "LTE_RRC_OTA_Packet":   0xB0C0,
+                    "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results": 0xB179,
                     "LTE_ML1_IRAT_Measurement_Request": 0xB187,
                     "LTE_ML1_Serving_Cell_Measurement_Result":  0xB193,
                     "LTE_ML1_Connected_Mode_Neighbor_Meas_Req/Resp":    0xB195
                     }
 
-LOG_PACKET_NAME = dict([(v, k) for k, v in LOG_PACKET_ID.items()])
+LOG_PACKET_NAME = dict_reversed(LOG_PACKET_ID)
 
-WCDMA_SIGNALLING_MSG_CHANNEL_NUMBER = {"DL_BCCH_BCH":  0x04,
-                                            }
+WCDMA_SIGNALLING_MSG_CHANNEL_NUMBER = { "DL_BCCH_BCH":  0x04,
+                                        }
 
-WCDMA_SIGNALLING_MSG_CHANNEL_TYPE = dict([(v, k) for k, v in WCDMA_SIGNALLING_MSG_CHANNEL_NUMBER.items()])
+WCDMA_SIGNALLING_MSG_CHANNEL_TYPE = dict_reversed(WCDMA_SIGNALLING_MSG_CHANNEL_NUMBER)
 
 LTE_RRC_OTA_PDU_NUMBER = {  "LTE-RRC_BCCH_DL_SCH": 0x02,
                             "LTE-RRC_PCCH": 0x04,
@@ -36,4 +42,9 @@ LTE_RRC_OTA_PDU_NUMBER = {  "LTE-RRC_BCCH_DL_SCH": 0x02,
                             "LTE-RRC_UL_DCCH":  0x08,
                             }
 
-LTE_RRC_OTA_PDU_TYPE = dict([(v, k) for k, v in LTE_RRC_OTA_PDU_NUMBER.items()])
+LTE_RRC_OTA_PDU_TYPE = dict_reversed(LTE_RRC_OTA_PDU_NUMBER)
+
+LTE_ML1_SUBPACKET_ID = {    "Serving_Cell_Measurement_Result": 25,
+                            }
+
+LTE_ML1_SUBPACKET_TYPE = dict_reversed(LTE_ML1_SUBPACKET_ID)
