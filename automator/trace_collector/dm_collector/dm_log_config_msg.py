@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     x = DMLogConfigMsg("SET_MASK", [0x1001, 0x1007, 0x1008])
     print " ".join(["%02x" % ord(c) for c in x.binary()])
-    x = DMLogConfigMsg("SET_MASK", [0xB0C0, 0xB187, 0xB193, 0xB195])
+    x = DMLogConfigMsg("SET_MASK", [0xB0C0, 0xB179, 0xB187, 0xB193, 0xB195])
     print " ".join(["%02x" % ord(c) for c in x.binary()])
     x = DMLogConfigMsg("SET_MASK", [0x4125, 0x4126, 0x4127, 0x4128,
                                     0x4129, 0x412B, 0x412F])

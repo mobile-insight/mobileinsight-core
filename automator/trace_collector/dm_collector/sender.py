@@ -17,7 +17,7 @@ import binascii
 from hdlc_parser import hdlc_parser
 from hdlc_frame import hdlc_frame
 
-__all__ = ["sendRecv", "sendMessage",  "recvMessage"]
+__all__ = ["sendRecv", "recvMessage"]
 
 
 def init_opt():
@@ -46,19 +46,17 @@ def str_to_hex(s):
     """
     return " ".join(c.encode("hex") for c in s)
 
-def sendRecv(parser, phy_ser, s, cmd = None):
+def sendRecv(parser, phy_ser, b, cmd = None):
     if cmd == None:
-        cmd = s[0:2]
-    sendMessage(phy_ser, s)
+        cmd = "%02x" % ord(b[0])
+    sendMessage(phy_ser, b)
     return recvMessage(parser, phy_ser, cmd)
 
-def sendMessage(phy_ser, s):
-    s = s.replace(" ", "")
-    s = binascii.a2b_hex(s)
-    s = hdlc_frame(s).binary()
+def sendMessage(phy_ser, b):
+    b = hdlc_frame(b).binary()
 
-    if s:
-        phy_ser.write(s)
+    if b:
+        phy_ser.write(b)
 
 def recvMessage(parser, phy_ser, cmd):
     """
