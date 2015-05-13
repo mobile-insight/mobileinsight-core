@@ -95,9 +95,10 @@ class DMCollector(TraceCollector):
 
     def _generate_type_dict(self):
         assert len(self._type_ids) > 0
-        s = set([DMLogConfigMsg.get_equip_id(i) for i in self._type_ids])
+        type_ids = set(self._type_ids)
+        s = set([DMLogConfigMsg.get_equip_id(i) for i in type_ids])
         self._type_id_dict = {i: [] for i in s}
-        for type_id in self._type_ids:
+        for type_id in type_ids:
             self._type_id_dict[DMLogConfigMsg.get_equip_id(type_id)].append(type_id)
 
     def run(self):
