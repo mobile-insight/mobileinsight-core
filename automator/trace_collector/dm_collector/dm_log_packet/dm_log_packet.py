@@ -239,7 +239,7 @@ class DMLogPacket:
     def _search_result(cls, result, target):
         if isinstance(target, str):
             target = [target]
-        assert isinstance(target, list)
+        assert isinstance(target, (list, tuple))
         assert len(target) > 0
 
         ret = [None for i in range(len(target))]
@@ -265,11 +265,8 @@ class DMLogPacket:
         ind = 0 + offset
 
         if type_id == LOG_PACKET_ID["WCDMA_Signaling_Messages"]:
-            for name, decoded in res:
-                if name == "Channel Type":      # TODO: remove duplicate code
-                    ch_num = decoded
-                elif name == "Message Length":
-                    pdu_length = decoded
+            ch_num, pdu_length = cls._search_result(res, ("Channel Type",
+                                                           "Message Length",))
             msg = b[ind:(ind + pdu_length)]
             if ch_num in WCDMA_SIGNALLING_MSG_CHANNEL_TYPE:
                 decoded = cls._decode_msg(WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num], msg)
@@ -279,9 +276,7 @@ class DMLogPacket:
                 print "Unknown WCDMA Signalling Messages Channel Type: 0x%x" % ch_num
 
         elif type_id == LOG_PACKET_ID["LTE_RRC_OTA_Packet"]:
-            for name, decoded in res:
-                if name == "Pkt Version":   # TODO: remove duplicate code
-                    pkt_ver = decoded
+            pkt_ver = cls._search_result(res, "Pkt Version")
             if pkt_ver not in (2, 7):
                 print "Unknown LTE RRC OTA packet version: %d" % pkt_ver
                 fmt = None
@@ -298,11 +293,9 @@ class DMLogPacket:
                 res2, offset = cls._decode_by_format(fmt, b, ind)
                 res.extend(res2)
                 ind = ind + offset
-                for name, decoded in res:
-                    if name == "PDU Number":       # TODO: remove duplicate code
-                        pdu_number = decoded
-                    elif name == "Msg Length":
-                        pdu_length = decoded
+                pdu_number, pdu_length = cls._search_result(
+                                                res,
+                                                ("PDU Number", "Msg Length",))
                 msg = b[ind:(ind + pdu_length)]
                 if pdu_number in LTE_RRC_OTA_PDU_TYPE:
                     decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
@@ -407,8 +400,10 @@ class DMLogPacket:
     @classmethod
     def _transform_element(cls, elem_type, val):
         if elem_type == "rsrp":
+            # (0.0625 * x - 180) dBm
             return val * 0.0625 - 180
         elif elem_type == "rsrq":
+            # (0.0625 * x - 30) dB
             return val * 0.0625 - 30
         else:
             raise NotImplementedError
