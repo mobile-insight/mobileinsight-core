@@ -27,6 +27,7 @@ else:
 PROGRAM_DIR_PATH = os.path.dirname(os.path.abspath(PROGRAM_PATH))
 WS_DISSECT_EXECUTABLE_PATH = os.path.join(PROGRAM_DIR_PATH, "../ws_dissector/ws_dissector")
 LIBWIRESHARK_PATH = "/usr/local/lib"
+LIBWIRESHARK_PATH = "/home/likayo//wireshark-local-1.12.3/lib"
 
 
 def init_opt():
@@ -73,6 +74,9 @@ if __name__ == "__main__":
                         })
     src.set_serial_port(options.phy_serial_name)
     src.set_baudrate(options.phy_baudrate)
+    src.enable_log("WCDMA_CELL_ID")
+    src.enable_log("WCDMA_Signaling_Messages")
+    src.enable_log(["LTE_RRC_OTA_Packet", "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results"])
 
     src.run()
     
