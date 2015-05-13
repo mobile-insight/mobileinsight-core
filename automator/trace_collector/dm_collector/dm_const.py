@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["DM_COMMAND_NAMES", "DM_SUBSYS_NAMES"]
+__all__ = [ "DM_COMMAND_NAMES",
+            "DM_COMMAND_CODES",
+            "DM_SUBSYS_NAMES",
+            "DM_LOG_CONFIG_OP_NAMES",
+            "DM_LOG_CONFIG_OP_NUMBER",
+            ]
+
+# TODO: remove code clode
+def dict_reversed(d):
+    return dict([(v, k) for k, v in d.items()])
 
 DM_COMMAND_NAMES = {0: "DIAG_CMD_VERSION_INFO",
                     1: "DIAG_CMD_ESN",
@@ -101,6 +110,8 @@ DM_COMMAND_NAMES = {0: "DIAG_CMD_VERSION_INFO",
                     130: "DIAG_CMD_EVENT_SET_MASK",
                     }
 
+DM_COMMAND_CODES = dict_reversed(DM_COMMAND_NAMES)
+
 DM_SUBSYS_NAMES = { 4 : "DIAG_SUBSYS_WCDMA",
                     5 : "DIAG_SUBSYS_HDR",
                     8 : "DIAG_SUBSYS_GSM",
@@ -114,3 +125,11 @@ DM_SUBSYS_NAMES = { 4 : "DIAG_SUBSYS_WCDMA",
                     101 : "DIAG_SUBSYS_ZTE",
                     250 : "DIAG_SUBSYS_NW_CONTROL_6800",
                     }
+
+DM_LOG_CONFIG_OP_NAMES = {  0: "DISABLE",
+                            1: "GET_RANGE",
+                            3: "SET_MASK",
+                            4: "GET_MASK",
+                            }
+
+DM_LOG_CONFIG_OP_NUMBER = dict_reversed(DM_LOG_CONFIG_OP_NAMES)
