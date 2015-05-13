@@ -74,12 +74,13 @@ if __name__ == "__main__":
     src.set_serial_port(options.phy_serial_name)
     src.set_baudrate(options.phy_baudrate)
 
-    dumper = LteRrcAnalyzer()
+    rrc_analyzer = LteRrcAnalyzer()
+    rrc_analyzer.set_source(src)
 
-    dumper.set_source(src)
+    # dumper = MsgFile("/Users/yuanjieli/Desktop/ml1.txt")
+    # dumper.set_source(src)
+
+    dumper2 = MsgDump()
+    dumper2.set_source(src)
 
     src.run()
-    
-    # log = None
-    # if options.log_output is not None:
-    #     log = open(options.log_output, "w")

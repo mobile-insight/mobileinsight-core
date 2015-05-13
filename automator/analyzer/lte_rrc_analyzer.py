@@ -38,7 +38,15 @@ class LteRrcAnalyzer(Analyzer):
 		"""
 		if msg.type_id != "LTE_RRC_OTA_Packet":
 			return
-		self.callback_sib_config(msg)
+
+		log_item = msg.data
+		log_item_dict = dict(log_item)
+		if not log_item_dict.has_key('Msg'):
+			return
+		
+		log_xml = ET.fromstring(log_item_dict['Msg'])
+		xml_msg=Event(msg.timestamp,msg.type_id,log_xml)
+		self.callback_sib_config(xml_msg)
 
 	#Callbacks for LTE RRC analysis
 	#FIXME: a single callback for all rrc messages, or per-msg callback? 
@@ -70,6 +78,13 @@ class LteRrcAnalyzer(Analyzer):
 			#serving cell info
 			elif field.get('name')=="lte-rrc.cellReselectionServingFreqInfo_element": 
 				field_val={}
+
+				#Default value setting
+				#FIXME: set default to those in TS36.331
+				field_val['lte-rrc.cellReselectionPriority']=None
+				field_val['lte-rrc.threshServingLow']=None
+				field_val['lte-rrc.s_NonIntraSearch']=None
+
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 	
@@ -84,12 +99,20 @@ class LteRrcAnalyzer(Analyzer):
 			#intra-freq cell info
 			elif field.get('name')=="lte-rrc.intraFreqCellReselectionInfo_element":
 				field_val={}
+
+				#Default value setting
+				#FIXME: set to the default value based on TS36.331
+				field_val['lte-rrc.t_ReselectionEUTRA']=None
+				field_val['lte-rrc.q_RxLevMin']=None
+				field_val['lte-rrc.p_Max']=None
+				field_val['lte-rrc.s_IntraSearch']=None
+
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
 				if not self.config.sib.has_key(self.status.id):
 					#FIXME: can cells in different freq/TAC have the same ID?
-					self.config.sib[self.status.id]=LteRrcSibCell()
+					self.config.sib[self.status.id]=LteRrcSibCell()	
 				self.config.sib[self.status.id].intra_freq_config=LteRrcSibIntraFreqConfig(
 					field_val['lte-rrc.t_ReselectionEUTRA'],
 					field_val['lte-rrc.q_RxLevMin'],
@@ -100,6 +123,17 @@ class LteRrcAnalyzer(Analyzer):
 			#inter-freq cell info
 			elif field.get('name')=="lte-rrc.interFreqCarrierFreqList":
 				field_val={}
+
+				#Default value setting
+				#FIXME: set to the default value based on TS36.331
+				field_val['lte-rrc.dl_CarrierFreq']=None
+				field_val['lte-rrc.t_ReselectionEUTRA']=None
+				field_val['lte-rrc.q_RxLevMin']=None
+				field_val['lte-rrc.p_Max']=None
+				field_val['lte-rrc.cellReselectionPriority']=None
+				field_val['lte-rrc.threshX_High']=None
+				field_val['lte-rrc.threshX_Low']=None
+
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
@@ -126,8 +160,19 @@ class LteRrcAnalyzer(Analyzer):
 						config.dump()
 			elif field.get('name')=="lte-rrc.CarrierFreqUTRA_FDD_element":
 				field_val={}
+
+				#Default value setting
+				#FIXME: set to default based on TS25.331
+				field_val['lte-rrc.carrierFreq']=None
+				field_val['lte-rrc.q_RxLevMin']=None
+				field_val['lte-rrc.p_MaxUTRA']=None
+				field_val['lte-rrc.cellReselectionPriority']=None
+				field_val['lte-rrc.threshX_High']=None
+				field_val['lte-rrc.threshX_High']=None
+
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
+
 
 				if not self.config.sib.has_key(self.status.id):
 					#FIXME: can cells in different freq/TAC have the same ID?

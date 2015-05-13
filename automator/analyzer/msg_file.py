@@ -15,6 +15,7 @@ import io
 class MsgFile(Analyzer):
 
 	def dump_message(self,msg):
+		self.file.write("\n\n")
 		self.file.write(ET.tostring(msg.data))
 
 

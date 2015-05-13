@@ -136,19 +136,9 @@ class DMCollector(TraceCollector):
 
                     # print ""
                     
-                    # conver the message to xml
-                    log_item_dict = dict(log_item)
-                    if log_item_dict.has_key('Msg'):
-                        log_xml = ET.fromstring(log_item_dict['Msg'])
-                        #send event to analyzers
-                        event = Event(ts,dm_log_consts.LOG_PACKET_NAME[type_id],log_xml)
-                        self.send(event)
-                    # if log is not None:
-                    #     log.write("%s\n" % ts)
-                    #     log.write("Binary: " + binascii.b2a_hex(payload) + "\n")
-                    #     log.write("Length: %d, Type: 0x%x(%s)\n" % (l, type_id, dm_log_consts.LOG_PACKET_NAME[type_id]))
-                    #     log.write(str(log_item))
-                    #     log.write("\n\n")
+                    #send event to analyzers
+                    event = Event(ts,dm_log_consts.LOG_PACKET_NAME[type_id],log_item)
+                    self.send(event)
 
         except (KeyboardInterrupt, RuntimeError), e:
             print "\n\n%s Detected: Disabling all logs" % type(e).__name__
