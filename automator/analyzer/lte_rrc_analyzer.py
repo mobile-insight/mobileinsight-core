@@ -20,9 +20,9 @@ class LteRrcAnalyzer(Analyzer):
 	def __init__(self):
 		Analyzer.__init__(self)
 
-		#Declare analyzers included
-		self.dumper=MsgDump()
-		self.include_analyzer(self.dumper,[])
+		# #Declare analyzers included
+		# self.dumper=MsgDump()
+		# self.include_analyzer(self.dumper,[])
 
 		#init packet filters
 		self.add_source_callback(self.rrc_filter)
@@ -31,6 +31,12 @@ class LteRrcAnalyzer(Analyzer):
 		self.status=LteRrcStatus()	# current cell status
 		self.history=LteRrcHistory()	# cell history: timestamp -> cell status
 		self.config=LteRrcConfig()	# cell configurations
+
+	def set_source(self,source):
+		Analyzer.set_source(self,source)
+		#enable LTE RRC log
+		source.enable_log("LTE_RRC_OTA_Packet")
+
 
 	def rrc_filter(self,msg):
 		"""

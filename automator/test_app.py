@@ -74,13 +74,21 @@ if __name__ == "__main__":
     src.set_serial_port(options.phy_serial_name)
     src.set_baudrate(options.phy_baudrate)
 
-    rrc_analyzer = LteRrcAnalyzer()
-    rrc_analyzer.set_source(src)
+    #Enable the messages to be collected
+    #For high-level analyzers, the corresponding message options can be enabled
+    src.enable_log("LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results")
+    
+
+    # rrc_analyzer = LteRrcAnalyzer()
+    # rrc_analyzer.set_source(src)
 
     # dumper = MsgFile("/Users/yuanjieli/Desktop/ml1.txt")
     # dumper.set_source(src)
 
-    dumper2 = MsgDump()
-    dumper2.set_source(src)
+    # dumper2 = MsgDump()
+    # dumper2.set_source(src)
+
+    ue = lte_ue_analyzer()
+    ue.set_source(src)
 
     src.run()

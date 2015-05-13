@@ -15,15 +15,15 @@ import io
 class MsgFile(Analyzer):
 
 	def dump_message(self,msg):
-		self.file.write("\n\n")
-		self.file.write(ET.tostring(msg.data))
+		#FIXME: incorrect output!!!
+		self.file.write(str(msg))
 
 
 
 	def __init__(self,filename):
 		Analyzer.__init__(self)
 
-		self.file=open(filename,'w')
+		self.file=open(filename,'wb')
 		self.add_source_callback(self.dump_message)
 
 	def __del__(self):
