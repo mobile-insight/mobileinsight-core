@@ -18,13 +18,14 @@ import os
 import optparse
 import serial
 import sys
+import xml.etree.ElementTree as ET
 
 from sender import sendRecv, recvMessage
 from hdlc_parser import hdlc_parser
 from dm_log_packet import DMLogPacket, FormatError
 from dm_log_packet import consts as dm_log_consts
+from dm_log_config_msg import DMLogConfigMsg
 
-import xml.etree.ElementTree as ET
 
 def init_cmd_dict(cmd_dict_path):
     cmd_dict = {}
@@ -67,7 +68,6 @@ class DMCollector(TraceCollector):
 
         Args:
             prefs: a dict that should contain the following items:
-                command_files_path
                 ws_dissect_executable_path
                 libwireshark_path
         """
@@ -76,6 +76,7 @@ class DMCollector(TraceCollector):
         self.phy_baudrate = 9600
         self.phy_ser_name = None
         self._prefs = prefs
+        self._type_ids = []
 
     def set_serial_port(self, phy_ser_name):
         self.phy_ser_name = phy_ser_name
@@ -83,22 +84,30 @@ class DMCollector(TraceCollector):
     def set_baudrate(self, rate):
         self.phy_baudrate = rate
 
+    def enable_log(self, type_name):
+        if isinstance(type_name, str):
+            type_name = [type_name]
+        for n in type_name:
+            if n not in dm_log_consts.LOG_PACKET_ID:
+                raise ValueError("Unsupported log packet type: %s" % n)
+            else:
+                self._type_ids.append(dm_log_consts.LOG_PACKET_ID[n])
+
+    def _generate_type_dict(self):
+        assert len(self._type_ids) > 0
+        s = set([DMLogConfigMsg.get_equip_id(i) for i in self._type_ids])
+        self._type_id_dict = {i: [] for i in s}
+        for type_id in self._type_ids:
+            self._type_id_dict[DMLogConfigMsg.get_equip_id(type_id)].append(type_id)
+
     def run(self):
         """
         Start collecting the QXDM traces.
         """
         assert self.phy_ser_name
 
-        # FIXME: move to the path configuration to separate member functions
         print "PHY COM: %s" % self.phy_ser_name
         print "PHY BAUD RATE: %d" % self.phy_baudrate
-
-        # Load configurations
-        cmd_dict_path = os.path.join(self._prefs["command_files_path"], 'cmd_dict.txt')
-        cmd_dict = init_cmd_dict(cmd_dict_path)
-
-        cmd_file_path = os.path.join(self._prefs["command_files_path"], 'cmds.txt')
-        target_cmds = init_target_cmds(cmd_file_path)
 
         try:
             # Initialize Wireshark dissector
@@ -111,16 +120,15 @@ class DMCollector(TraceCollector):
             parser = hdlc_parser()
 
             # Disable logs
-            payload, crc_correct = sendRecv(parser, phy_ser, cmd_dict.get("DISABLE"))
+            payload, crc_correct = sendRecv(parser, phy_ser, DMLogConfigMsg("DISABLE").binary())
             print_reply(payload, crc_correct)
             
             # Enable logs
-            for cmd in target_cmds:
-                print "Enable: " + cmd
-                binary = cmd_dict.get(cmd)
-                if binary is None:      # To Samson: what does it exactly mean?
-                    binary = cmd
-                payload, crc_correct = sendRecv(parser, phy_ser, binary)
+            self._generate_type_dict()
+            for equip_id, type_ids in self._type_id_dict.items():
+                print "Enabled: ", ["0x%04x" % i for i in type_ids]
+                x = DMLogConfigMsg("SET_MASK", type_ids)
+                payload, crc_correct = sendRecv(parser, phy_ser, x.binary())
                 print_reply(payload, crc_correct)
 
             # Read log packets from serial port and decode their contents
@@ -153,7 +161,7 @@ class DMCollector(TraceCollector):
         except (KeyboardInterrupt, RuntimeError), e:
             print "\n\n%s Detected: Disabling all logs" % type(e).__name__
             # Disable logs
-            payload, crc_correct = sendRecv(parser, phy_ser, cmd_dict.get("DISABLE"))
+            payload, crc_correct = sendRecv(parser, phy_ser, DMLogConfigMsg("DISABLE").binary())
             print_reply(payload, crc_correct)
             sys.exit(e)
         except IOError, e:
