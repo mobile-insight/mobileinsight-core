@@ -332,7 +332,7 @@ class DMLogPacket:
                     res_cell, offset = cls._decode_by_format(fmt, b, ind)
                     ind += offset
                     res_allcell.append(tuple(res_cell))
-                res2.append(("Neighbor Cells", tuple(res_allcell)))
+                res2.append(("Detected Cells", tuple(res_allcell)))
 
                 res.extend(tuple(res2))
 
