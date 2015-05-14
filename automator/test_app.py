@@ -88,7 +88,7 @@ if __name__ == "__main__":
     # dumper2 = MsgDump()
     # dumper2.set_source(src)
 
-    ue = lte_ue_analyzer()
+    ue = LteUeAnalyzer()
     ue.set_source(src)
 
     src.run()
