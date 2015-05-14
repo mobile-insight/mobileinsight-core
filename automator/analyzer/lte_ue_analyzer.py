@@ -53,7 +53,6 @@ class LteUeAnalyzer(Analyzer):
 			self.plot_conn.send(self.serv_cell_rsrp)
 
 def show_serv_rsrp(conn):
-	
 	xAchse=pylab.arange(0,100,1)
 	yAchse=pylab.array([0]*100)
 
