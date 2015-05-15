@@ -18,7 +18,6 @@ import os
 import optparse
 import serial
 import sys
-import xml.etree.ElementTree as ET
 
 from sender import sendRecv, recvMessage
 from hdlc_parser import hdlc_parser
@@ -26,32 +25,6 @@ from dm_log_packet import DMLogPacket, FormatError
 from dm_log_packet import consts as dm_log_consts
 from dm_log_config_msg import DMLogConfigMsg
 
-
-def init_cmd_dict(cmd_dict_path):
-    cmd_dict = {}
-    with open(cmd_dict_path, 'r') as cmd_dict_file:
-        for line in cmd_dict_file:
-            line = line.strip()
-            if len(line) > 0 and not line.startswith('#'):
-                cmd, colon, binary = line.partition(':')
-                cmd = cmd.strip()
-                binary = binary.strip()
-                cmd_dict[cmd] = binary
-    return cmd_dict
-
-def init_target_cmds(cmd_file_path):
-    target_cmds = []
-    try:
-        with open(cmd_file_path, 'r') as cmd_file:
-            for line in cmd_file:
-                line = line.strip()
-                line = line.replace('\n','')
-                line = line.upper()
-                if len(line) > 0 and not line.startswith('#'):
-                    target_cmds.append(line)
-    except IOError, e:
-        raise RuntimeError("Cannot find command file %s. You can create it using example_cmds.txt as template." % cmd_file_path)
-    return target_cmds
 
 def print_reply(payload, crc_correct):
     if payload:
@@ -142,7 +115,6 @@ class DMCollector(TraceCollector):
                     l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
                     # print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
                     # print log_item
-
                     # print ""
                     
                     #send event to analyzers
@@ -154,8 +126,4 @@ class DMCollector(TraceCollector):
             # Disable logs
             payload, crc_correct = sendRecv(parser, phy_ser, DMLogConfigMsg("DISABLE").binary())
             print_reply(payload, crc_correct)
-            sys.exit(e)
-        except IOError, e:
-            sys.exit(e)
-        except Exception,e:
-            sys.exit(e)
+            raise e
