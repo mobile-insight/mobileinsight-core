@@ -6,7 +6,7 @@ Include definitions of some utility functions and decorators.
 Author: Jiayao Li
 """
 
-__all__ = {"static_var"}
+__all__ = ["static_var"]
 
 def static_var(varname, value):
     def decorate(func):

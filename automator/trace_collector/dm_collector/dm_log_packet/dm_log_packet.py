@@ -14,16 +14,9 @@ import os
 import struct
 import xml.etree.ElementTree as ET
 
+from utils import *
 from consts import *
 from ws_dissector import *
-
-
-# TODO: remove this code cloning later...
-def static_var(varname, value):
-    def decorate(func):
-        setattr(func, varname, value)
-        return func
-    return decorate
 
 
 class FormatError(RuntimeError):
