@@ -6,15 +6,16 @@ Define DMLogPacket class.
 Author: Jiayao Li
 """
 
+__all__ = ["DMLogPacket", "FormatError"]
+
 import binascii
 from datetime import *
 import os
 import struct
+import xml.etree.ElementTree as ET
 
 from consts import *
 from ws_dissector import *
-
-__all__ = ["DMLogPacket", "FormatError"]
 
 
 # TODO: remove this code cloning later...
@@ -265,15 +266,8 @@ class DMLogPacket:
         ind = 0 + offset
 
         if type_id == LOG_PACKET_ID["WCDMA_Signaling_Messages"]:
-            ch_num, pdu_length = cls._search_result(res, ("Channel Type",
-                                                           "Message Length",))
-            msg = b[ind:(ind + pdu_length)]
-            if ch_num in WCDMA_SIGNALLING_MSG_CHANNEL_TYPE:
-                decoded = cls._decode_msg(WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num], msg)
-                res.append(("Msg", decoded))
-                # print decoded
-            else:
-                print "Unknown WCDMA Signalling Messages Channel Type: 0x%x" % ch_num
+            offset = cls._decode_wcdma_signaling_messages(b, ind, res)
+            ind += offset
 
         elif type_id == LOG_PACKET_ID["LTE_RRC_OTA_Packet"]:
             pkt_ver = cls._search_result(res, "Pkt Version")
@@ -413,6 +407,42 @@ class DMLogPacket:
         s = WSDissector.decode_msg(msg_type, b)
         return s
 
+    @classmethod
+    @static_var("sib_types", {  0: "RRC_MIB",
+                                1: "RRC_SIB1",
+                                7: "RRC_SIB7",
+                                12: "RRC_SIB12",
+                                })
+    def _decode_wcdma_signaling_messages(cls, b, start, result):
+        """
+        Return the number of consumed bytes.
+        """
+        sib_types = cls._decode_wcdma_signaling_messages.sib_types
+        ch_num, pdu_length = cls._search_result(
+                                            result, 
+                                            ("Channel Type", "Message Length"))
+        msg = b[start:(start + pdu_length)]
+        if ch_num in WCDMA_SIGNALLING_MSG_CHANNEL_TYPE:
+            decoded = cls._decode_msg(WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num], msg)
+            result.append(("Msg", decoded))
+            # print decoded
+            if WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num] == "RRC_DL_BCCH_BCH":
+                xml = ET.fromstring(decoded)
+                for field in xml.iter("field"):
+                    if field.get("name") == "rrc.sib_Type":
+                        i = int(field.get("show"))
+                        # TODO: there are some problem in decoding SIB5 messages
+                        if i in sib_types:
+                            decoded = cls._decode_msg(sib_types[i], msg)
+                            result.append((sib_types[i] + "_Msg", decoded))
+                        else:
+                            print "Unknown RRC SIB Type: %d" % i
+                            
+            return pdu_length
+        else:
+            print "Unknown WCDMA Signalling Messages Channel Type: 0x%x" % ch_num
+            return 0
+
 
 # Test decoding
 if __name__ == '__main__':
@@ -421,7 +451,12 @@ if __name__ == '__main__':
             "2c002c002741b4008aef9740ce0040100000211100000f5660030000070030070301000401002cd90000ba000000",
             "2c002c0027419203b0a48540ce00c224000052260000fda3fa02d0000700801f0301000401003ffd00003c000000",
             # WCDMA_SIGNALLING_MESSAGES DL_BCCH_BCH
+            #   MIB
             "2f002f002f414a01b442814bcf0004281f00948e00bf10c424c05aa2fe00a0c850448c466608a8e54a80100a0100000003",
+            #   SIB1
+            "2f002F002F414600D9581EDECD0004281F00844E017FC764B108500B1BA01483078A2BE62AD00000000000000000000000",
+            #   SIB7 & SIB12
+            "2f002F002F41340049581EDECD0004281F00832E2C43B38111D024541A42A38800C0000000000000000000000000000001",
             # LTE_RRC_OTA_Packet v7 LTE-RRC_PCCH
             "26002600C0B00000A3894A13CE00070A7100D801B70799390400000000090040012F05EC4E700000",
             # LTE_RRC_OTA_Packet v2 LTE-RRC_PCCH
@@ -451,7 +486,7 @@ if __name__ == '__main__':
         l, type_id, ts, log_item = DMLogPacket.decode(binascii.a2b_hex(b))
         print "> Packet #%d" % i
         print l, hex(type_id), ts
-        print log_item
+        print [k for k, v in log_item]
         i += 1
 
     # s = binascii.a2b_hex(tests[-3])

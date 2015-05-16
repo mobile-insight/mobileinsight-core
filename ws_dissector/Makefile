@@ -1,11 +1,11 @@
-#WS_SRC_PATH=$(HOME)/wireshark-1.12.3
-#WS_LIB_PATH=$(HOME)/wireshark-local-1.12.3/lib
-WS_SRC_PATH=$(HOME)/Documents/wireshark-1.12.4
-WS_LIB_PATH=/usr/local/lib
+WS_SRC_PATH=$(HOME)/wireshark-1.12.3
+WS_LIB_PATH=$(HOME)/wireshark-local-1.12.3/lib
+# WS_SRC_PATH=$(HOME)/Documents/wireshark-1.12.4
+# WS_LIB_PATH=/usr/local/lib
 
 all: ws_dissector
 
-ws_dissector: dissect.cpp packet-aww.cpp
+ws_dissector: ws_dissector.cpp packet-aww.cpp
 	g++ $^ -o $@ `pkg-config --libs --cflags glib-2.0` -I"$(WS_SRC_PATH)" \
 	-L"$(WS_LIB_PATH)" -lwireshark -lwsutil -lwiretap
 

@@ -94,7 +94,6 @@ int main(int argc, char** argv)
  
     epan_t *session = epan_new();
     char s[] = "uat:user_dlts:\"User 1 (DLT=148)\",\"aww\",\"0\",\"\",\"0\",\"\"";
-    // char s[] = "uat:user_dlts:\"User 1 (DLT=148)\",\"qcdm\",\"0\",\"\",\"0\",\"\"";
     switch (prefs_set_pref(s)) {
     case PREFS_SET_OK:
         break;
@@ -115,12 +114,12 @@ int main(int argc, char** argv)
         int ign = fread(buffer, sizeof(uint32_t), 2, stdin);
         if (ign < 2)
             break;
-        size_t data_len = ntohl(*((uint32_t *)buffer));
-        unsigned int type = ntohl(*(uint32_t *)(buffer + 4));
-        fread(buffer + 2 * sizeof(uint32_t), sizeof(char), data_len, stdin);
+        unsigned int type = ntohl(*(uint32_t *)buffer);
+        size_t data_len = ntohl(*((uint32_t *)(buffer + 4)));
+        fread(buffer + 2 * 4, 1, data_len, stdin);
         // fprintf(stderr, "type = %u, size = %u\n", type, (unsigned int) data_len);
         
-        try_dissect(session, 2 * sizeof(uint32_t) + data_len, buffer);
+        try_dissect(session, data_len + 2 * 4, buffer);
         printf("===___===\n");
     }
 
