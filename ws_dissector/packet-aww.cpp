@@ -17,10 +17,14 @@ static gint ett_payload = -1;
 // Keep consistent with ws_dissector.py
 static void init_proto_names (const char *protos []) {
     protos[100] = "rrc.bcch.bch";
+    
     protos[150] = "rrc.si.mib";
     protos[151] = "rrc.si.sib1";
+    protos[153] = "rrc.si.sib3";
     protos[157] = "rrc.si.sib7";
     protos[162] = "rrc.si.sib12";
+    protos[169] = "rrc.si.sib19";
+
     protos[200] = "lte-rrc.pcch";
     protos[201] = "lte-rrc.dl.dcch";
     protos[202] = "lte-rrc.ul.dcch";

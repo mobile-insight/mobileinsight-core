@@ -31,8 +31,10 @@ class WSDissector:
                         "RRC_DL_BCCH_BCH": 100,
                         "RRC_MIB": 150,
                         "RRC_SIB1": 151,
+                        "RRC_SIB3": 153,
                         "RRC_SIB7": 157,
                         "RRC_SIB12": 162,
+                        "RRC_SIB19": 169,
                         # LTE RRC
                         "LTE-RRC_PCCH": 200,
                         "LTE-RRC_DL_DCCH": 201,
@@ -106,9 +108,10 @@ if __name__ == "__main__":
                 ("RRC_MIB", "60c428205aa2fe0090c8506e422419822a3653940c40c0"),
                 ("RRC_MIB", "10c424c05aa2fe00a0c850448c466608a8e54a80100a0100"),
                 ("RRC_SIB1", "c764b108500b1ba01483078a2be62ad0"),
-                # ("RRC_SIB5", "c4300b6d830021844a0585760184af40"),
+                ("RRC_SIB3", "0d801f4544fc60005001000011094e"),
                 ("RRC_SIB7", "018000"),
                 ("RRC_SIB12", "b38111d024541a42a0"),
+                ("RRC_SIB19", "41a1001694e49470"),
                 ]
     executable_path = os.path.join(os.path.abspath(os.getcwd()),
                                     "../../../../ws_dissector/ws_dissector")

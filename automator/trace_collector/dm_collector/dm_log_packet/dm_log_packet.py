@@ -14,7 +14,16 @@ import os
 import struct
 import xml.etree.ElementTree as ET
 
-from utils import *
+try:
+    from utils import *
+except ImportError, e:
+    # TODO: wtf can I do to remove this dependence ..?
+    def static_var(varname, value):
+        def decorate(func):
+            setattr(func, varname, value)
+            return func
+        return decorate
+
 from consts import *
 from ws_dissector import *
 
@@ -401,10 +410,13 @@ class DMLogPacket:
         return s
 
     @classmethod
+    # Keep strings consistent with ws_dissector.py
     @static_var("sib_types", {  0: "RRC_MIB",
                                 1: "RRC_SIB1",
+                                3: "RRC_SIB3",
                                 7: "RRC_SIB7",
                                 12: "RRC_SIB12",
+                                31: "RRC_SIB19",
                                 })
     def _decode_wcdma_signaling_messages(cls, b, start, result):
         """
@@ -421,15 +433,16 @@ class DMLogPacket:
             # print decoded
             if WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num] == "RRC_DL_BCCH_BCH":
                 xml = ET.fromstring(decoded)
-                for field in xml.iter("field"):
-                    if field.get("name") == "rrc.sib_Type":
-                        i = int(field.get("show"))
-                        # TODO: there are some problem in decoding SIB5 messages
-                        if i in sib_types:
-                            decoded = cls._decode_msg(sib_types[i], msg)
-                            result.append((sib_types[i] + "_Msg", decoded))
-                        else:
-                            print "Unknown RRC SIB Type: %d" % i
+                for complete_sib in xml.findall(".//field[@name='rrc.CompleteSIBshort_element']"):
+                    field = complete_sib.find("field[@name='rrc.sib_Type']")
+                    sib_id = int(field.get("show"))
+                    field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
+                    sib_msg = binascii.a2b_hex(field.get("value"))
+                    if sib_id in sib_types:
+                        decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
+                        result.append((sib_types[sib_id] + "_Msg", decoded))
+                    else:
+                        print "Unknown RRC SIB Type: %d" % sib_id
                             
             return pdu_length
         else:
@@ -448,8 +461,12 @@ if __name__ == '__main__':
             "2f002f002f414a01b442814bcf0004281f00948e00bf10c424c05aa2fe00a0c850448c466608a8e54a80100a0100000003",
             #   SIB1
             "2f002F002F414600D9581EDECD0004281F00844E017FC764B108500B1BA01483078A2BE62AD00000000000000000000000",
+            #   SIB3
+            "2f002F002F41290029D010DECD0004281F0072EE03760D801F4544FC60005001000011094E000000000000000000000002",
             #   SIB7 & SIB12
             "2f002F002F41340049581EDECD0004281F00832E2C43B38111D024541A42A38800C0000000000000000000000000000001",
+            #   SIB19
+            "2f002F002F417E029DCA10DECD0004281F0067AE1F3B41A1001694E4947000000000000000000000000000000000000002",
             # LTE_RRC_OTA_Packet v7 LTE-RRC_PCCH
             "26002600C0B00000A3894A13CE00070A7100D801B70799390400000000090040012F05EC4E700000",
             # LTE_RRC_OTA_Packet v2 LTE-RRC_PCCH
