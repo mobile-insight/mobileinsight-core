@@ -126,4 +126,4 @@ class DMCollector(TraceCollector):
             # Disable logs
             payload, crc_correct = sendRecv(parser, phy_ser, DMLogConfigMsg("DISABLE").binary())
             print_reply(payload, crc_correct)
-            raise e
+            # raise e

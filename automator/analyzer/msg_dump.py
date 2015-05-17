@@ -17,7 +17,7 @@ class MsgDump(Analyzer):
 	def dump_message(self,msg):
 		self.msg_log.append(msg)
 		print msg.timestamp,msg.type_id
-
+		
 	def __init__(self):
 		Analyzer.__init__(self)
 		# a message dump has no analyzer in from/to_list
