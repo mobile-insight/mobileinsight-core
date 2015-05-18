@@ -19,8 +19,7 @@ class MsgFile(Analyzer):
 		# json.dump(self.file,msg)
 		log_item_dict = dict(msg.data)
 		for key in log_item_dict:
-			self.file.write('\n\n'+key+':\n')
-			self.file.write(str(log_item_dict[key]))
+			self.file.write('\n\n'+key+':'+str(log_item_dict[key]))
 
 
 
