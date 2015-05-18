@@ -35,7 +35,7 @@ class LteRrcAnalyzer(Analyzer):
 		Analyzer.set_source(self,source)
 		#enable LTE RRC log
 		source.enable_log("LTE_RRC_OTA_Packet")
-		# source.enable_log("LTE_RRC_MIB_Message_Log_Packet")
+		source.enable_log("LTE_RRC_Serv_Cell_Info_Log_Packet")
 
 	def rrc_filter(self,msg):
 		"""
@@ -64,8 +64,6 @@ class LteRrcAnalyzer(Analyzer):
 		if msg.type_id == "LTE_RRC_OTA_Packet":	
 			self.callback_sib_config(xml_msg)
 			#TODO: callback RRC
-		elif msg.type_id == "LTE_RRC_MIB_Message_Log_Packet":
-			self.callback_mib_config(xml_msg)
 
 		else: #nothing to update
 			return
@@ -84,7 +82,7 @@ class LteRrcAnalyzer(Analyzer):
 			self.status.freq = msg.data['Freq']
 		if msg.data.has_key('Physical Cell ID'):
 			self.status.id = msg.data['Physical Cell ID']
-		self.status.dump()
+		# self.status.dump()
 
 		
 
@@ -221,26 +219,6 @@ class LteRrcAnalyzer(Analyzer):
 
 			#TODO: RRC connection status update
 
-
-	def callback_mib_config(self,msg):
-		#LTE RRC status update
-		pass
-		#Whenever the status changes, push it into the history
-			# if field.get('name')=="lte-rrc.cellIdentity": #cell identity
-			# 	if self.status.id != field.get('show'):
-			# 		self.status.id = field.get('show')
-			# 		self.history.add_history(msg.timestamp,self.status)
-
-			# elif field.get('name')=="lte-rrc.trackingAreaCode": #tracking area code
-			# 	if self.status.tac != field.get('show'):
-			# 		self.status.tac = field.get('show')
-			# 		self.history.add_history(msg.timestamp,self.status)
-
-			# elif field.get('name')=="lte-rrc.carrierFreq": 
-			# 	if self.status.freq != field.get('show'):
-			# 		self.status.freq = field.get('show')
-			# 		self.history.add_history(msg.timestamp,self.status)
-
 	def get_cell_list(self):
 		"""
 			Get a complete list of cell IDs *at current location*
@@ -262,13 +240,13 @@ class LteRrcStatus:
 	"""
 	def __init__(self):
 		self.id = None #cell ID
-		self.tac = None #tracking area code
 		self.freq = None #cell frequency
+		self.tac = None #tracking area code
 		self.bandwidth = None #cell bandwidth
 		self.conn = False #connectivity status (for serving cell only)
 
 	def dump(self):
-		print self.id,self.tac,self.freq,self.bandwidth,self.conn
+		print "cellID=",self.id," Freq=",self.freq
 
 class LteRrcConfig:
 	""" 

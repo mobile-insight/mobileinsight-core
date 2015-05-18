@@ -111,19 +111,25 @@ class DMCollector(TraceCollector):
                 payload, crc_correct = recvMessage(parser, phy_ser, "10") 
                 if payload:
                     # print_reply(payload, crc_correct)
-                    # Note that the beginning 2 bytes are skipped.
-                    l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
-                    # print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
-                    # print log_item
-                    # print ""
-                    
-                    #send event to analyzers
-                    event = Event(ts,dm_log_consts.LOG_PACKET_NAME[type_id],log_item)
-                    self.send(event)
+                    try:
+                        # Note that the beginning 2 bytes are skipped.
+                        l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
+                        # print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
+                        # print log_item
+                        # print ""
+                        #send event to analyzers
+                        event = Event(ts,dm_log_consts.LOG_PACKET_NAME[type_id],log_item)
+                        self.send(event)
+                    except FormatError, e:
+                        # skip this packet
+                        print "FormatError: ", e
+
 
         except (KeyboardInterrupt, RuntimeError), e:
             print "\n\n%s Detected: Disabling all logs" % type(e).__name__
             # Disable logs
             payload, crc_correct = sendRecv(parser, phy_ser, DMLogConfigMsg("DISABLE").binary())
             print_reply(payload, crc_correct)
-            # raise e
+            sys.exit(e)
+        except Exception, e:
+            sys.exit(e)

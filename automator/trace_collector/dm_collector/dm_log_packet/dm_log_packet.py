@@ -114,6 +114,31 @@ class DMLogPacket:
                     ),
                     LOG_PACKET_ID["LTE_ML1_Connected_Mode_Neighbor_Meas_Req/Resp"]:
                     (),
+                    LOG_PACKET_ID["LTE_RRC_Serv_Cell_Info_Log_Packet"]:
+                    (
+                        ("Version", "B"),
+                        ("Physical Cell ID", "H"),
+                        ("DL FREQ","H"),
+                        ("UL FREQ","H"),
+                        ("DL BW", "B"),
+                        ("UL BW", "B"),
+                        ("Cell Identity", "I"),
+                        ("TAC", "H"),
+                        ("Band Indicator", "I"),
+                        ("MCC", "H"),
+                        ("MCC Digit", "B"),
+                        ("MNC", "H"),
+                        ("Allowed Access", "B"),
+                    ),
+                    LOG_PACKET_ID["LTE_RRC_MIB_Message_Log_Packet"]:
+                    (
+                        ("Version", "B"),
+                        ("Physical Cell ID", "H"),
+                        ("Freq", "H"),
+                        ("SFN", "H"),
+                        ("Number of Antenna", "B"),
+                        ("DL BW", "B"),
+                    ),
                     }
 
     _LTE_ML1_SUBPKT_FMT = {
@@ -221,6 +246,7 @@ class DMLogPacket:
         assert l1 == l2
         assert l1 + 2 == len(b)
         if type_id not in cls._LOGITEM_FMT:
+            print "hahaha"
             raise FormatError("Unknown Type ID: 0x%x" % type_id)
         ts = cls._decode_ts(ts)
         return l1, type_id, ts
