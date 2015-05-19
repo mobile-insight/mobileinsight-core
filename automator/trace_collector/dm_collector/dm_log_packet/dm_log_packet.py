@@ -468,6 +468,7 @@ class DMLogPacket:
                         decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
                         #result.append((sib_types[sib_id] + "_Msg", decoded))
                         result.append(("Msg", decoded))
+                        print sib_types[sib_id]
                     else:
                         print "Unknown RRC SIB Type: %d" % sib_id
                             

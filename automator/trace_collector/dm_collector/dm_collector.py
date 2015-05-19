@@ -108,7 +108,7 @@ class DMCollector(TraceCollector):
             # Read log packets from serial port and decode their contents
             while True:
                 # cmd = 0x10 for log packets
-                payload, crc_correct = recvMessage(parser, phy_ser, "10") 
+                payload, crc_correct = recvMessage(parser, phy_ser, "10")
                 if payload:
                     # print_reply(payload, crc_correct)
                     try:
