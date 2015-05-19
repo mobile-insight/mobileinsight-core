@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 __all__=["Analyzer","MsgDump","MsgFile","LteRrcAnalyzer",\
-		"LteUeAnalyzer","WcdmaRrcAnalyzer",\
-		"RrcAnalyzer"]
+		"LteUeAnalyzer","WcdmaRrcAnalyzer","RrcAnalyzer"]
 
 from analyzer import Analyzer
 from msg_dump import MsgDump

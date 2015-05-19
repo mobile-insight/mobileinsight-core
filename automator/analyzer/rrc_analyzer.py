@@ -12,6 +12,7 @@ from analyzer import *
 from wcdma_rrc_analyzer import WcdmaRrcAnalyzer
 from lte_rrc_analyzer import LteRrcAnalyzer
 
+__all__=["RrcAnalyzer"]
 
 class RrcAnalyzer(Analyzer):
 

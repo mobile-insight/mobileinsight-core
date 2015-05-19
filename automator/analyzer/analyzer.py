@@ -8,7 +8,7 @@ including low-level msg filter and high-level analyzer
 Author: Yuanjie Li
 """
 
-from module import *
+from module import Module, Event
 
 class Analyzer(Module):
 

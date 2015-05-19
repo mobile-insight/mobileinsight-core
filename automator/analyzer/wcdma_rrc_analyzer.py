@@ -16,6 +16,7 @@ from analyzer import *
 from msg_dump import *
 import time
 
+__all__=["WcdmaRrcAnalyzer"]
 
 class WcdmaRrcAnalyzer(Analyzer):
 
@@ -28,8 +29,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 		#init internal states
 		self.__status=WcdmaRrcStatus()	# current cell status
-		self.history={}	# cell history: timestamp -> WcdmaRrcStatus()
-		self.config={}	# cell_id -> WcdmaRrcConfig()
+		self.__history={}	# cell history: timestamp -> WcdmaRrcStatus()
+		self.__config={}	# cell_id -> WcdmaRrcConfig()
 
 	def set_source(self,source):
 		Analyzer.set_source(self,source)
@@ -112,16 +113,16 @@ class WcdmaRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if not self.config.has_key(self.__status.id):
-					self.config[self.__status.id]=WcdmaRrcConfig()
-					self.config[self.__status.id].status=self.__status
+				if not self.__config.has_key(self.__status.id):
+					self.__config[self.__status.id]=WcdmaRrcConfig()
+					self.__config[self.__status.id].status=self.__status
 
-				self.config[self.__status.id].serv_config=WcdmaRrcSibServ(
+				self.__config[self.__status.id].serv_config=WcdmaRrcSibServ(
 					field_val['rrc.priority'],
 					field_val['rrc.threshServingLow'],
 					field_val['rrc.s_PrioritySearch1'])
 
-				self.config[self.__status.id].serv_config.dump()
+				self.__config[self.__status.id].serv_config.dump()
 
 			#inter-RAT cell info (LTE)
 			if field.get('name')=="rrc.EUTRA_FrequencyAndPriorityInfo_element":
@@ -139,12 +140,12 @@ class WcdmaRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if not self.config.has_key(self.__status.id):
-					self.config[self.__status.id]=WcdmaRrcConfig()
-					self.config[self.__status.id].status=self.__status
+				if not self.__config.has_key(self.__status.id):
+					self.__config[self.__status.id]=WcdmaRrcConfig()
+					self.__config[self.__status.id].status=self.__status
 
 				neighbor_freq=field_val['rrc.earfcn']
-				self.config[self.__status.id].sib.inter_freq_config[neighbor_freq]\
+				self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq]\
 				=WcdmaRrcSibInterFreqConfig(
 						field_val['rrc.earfcn'],
 						field_val['lte-rrc.t_ReselectionEUTRA'],
@@ -153,7 +154,7 @@ class WcdmaRrcAnalyzer(Analyzer):
 						field_val['rrc.priority'],
 						field_val['rrc.threshXhigh'],
 						field_val['rrc.threshXlow'])
-				self.config[self.__status.id].sib.inter_freq_config[neighbor_freq].dump()
+				self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq].dump()
 
 			#TODO: RRC connection status update
 
@@ -163,14 +164,14 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 			FIXME: currently only return *all* cells in the LteRrcConfig
 		"""
-		return self.config.keys()
+		return self.__config.keys()
 
 	def get_cell_config(self,cell_id):
 		"""
 			Return a cell's configuration
 		"""
-		if self.config.has_key(cell_id):
-			return self.config[cell_id]
+		if self.__config.has_key(cell_id):
+			return self.__config[cell_id]
 		else:
 			return None
 
@@ -182,8 +183,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 		return self.__status
 
 	def get_cur_cell_config(self):
-		if self.config.has_key(self.__status.id):
-			return self.config[self.__status.id]
+		if self.__config.has_key(self.__status.id):
+			return self.__config[self.__status.id]
 		else:
 			return None
 
