@@ -24,10 +24,10 @@ class WcdmaRrcAnalyzer(Analyzer):
 		Analyzer.__init__(self)
 
 		#init packet filters
-		self.add_source_callback(self.rrc_filter)
+		self.add_source_callback(self.__rrc_filter)
 
 		#init internal states
-		self.status=WcdmaRrcStatus()	# current cell status
+		self.__status=WcdmaRrcStatus()	# current cell status
 		self.history={}	# cell history: timestamp -> WcdmaRrcStatus()
 		self.config={}	# cell_id -> WcdmaRrcConfig()
 
@@ -37,7 +37,7 @@ class WcdmaRrcAnalyzer(Analyzer):
 		source.enable_log("WCDMA_Signaling_Messages")
 		source.enable_log("WCDMA_CELL_ID")
 
-	def rrc_filter(self,msg):
+	def __rrc_filter(self,msg):
 		
 		"""
 			Filter all RRC packets, and call functions to process it
@@ -51,7 +51,7 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 		#Convert msg to dictionary format
 		raw_msg=Event(msg.timestamp,msg.type_id,log_item_dict)
-		self.callback_serv_cell(raw_msg)
+		self.__callback_serv_cell(raw_msg)
 
 		log_xml = None
 		if log_item_dict.has_key('Msg'):
@@ -65,7 +65,7 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 
 		if msg.type_id == "WCDMA_Signaling_Messages":	
-			self.callback_sib_config(xml_msg)
+			self.__callback_sib_config(xml_msg)
 			#TODO: callback RRC
 
 		else: #nothing to update
@@ -77,22 +77,22 @@ class WcdmaRrcAnalyzer(Analyzer):
 		self.send(e)
 
 
-	def callback_serv_cell(self,msg):
+	def __callback_serv_cell(self,msg):
 		"""
 			Update serving cell status
 		"""
 		if msg.data.has_key('UTRA DL Absolute RF channel number'):
-			self.status.freq = msg.data['UTRA DL Absolute RF channel number']
+			self.__status.freq = msg.data['UTRA DL Absolute RF channel number']
 		if msg.data.has_key('Cell identity (28-bits)'):
-			self.status.id = msg.data['Cell identity (28-bits)']
+			self.__status.id = msg.data['Cell identity (28-bits)']
 		if msg.data.has_key('LAC id'):
-			self.status.lac = msg.data['LAC id']
+			self.__status.lac = msg.data['LAC id']
 		if msg.data.has_key('RAC id'):
-			self.status.rac = msg.data['RAC id']
-		# self.status.dump()
+			self.__status.rac = msg.data['RAC id']
+		# self.__status.dump()
 
 		
-	def callback_sib_config(self,msg):
+	def __callback_sib_config(self,msg):
 		"""
 			Callbacks for LTE RRC analysis
 		"""
@@ -112,16 +112,16 @@ class WcdmaRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if not self.config.has_key(self.status.id):
-					self.config[self.status.id]=WcdmaRrcConfig()
-					self.config[self.status.id].status=self.status
+				if not self.config.has_key(self.__status.id):
+					self.config[self.__status.id]=WcdmaRrcConfig()
+					self.config[self.__status.id].status=self.__status
 
-				self.config[self.status.id].serv_config=WcdmaRrcSibServ(
+				self.config[self.__status.id].serv_config=WcdmaRrcSibServ(
 					field_val['rrc.priority'],
 					field_val['rrc.threshServingLow'],
 					field_val['rrc.s_PrioritySearch1'])
 
-				self.config[self.status.id].serv_config.dump()
+				self.config[self.__status.id].serv_config.dump()
 
 			#inter-RAT cell info (LTE)
 			if field.get('name')=="rrc.EUTRA_FrequencyAndPriorityInfo_element":
@@ -139,12 +139,12 @@ class WcdmaRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if not self.config.has_key(self.status.id):
-					self.config[self.status.id]=WcdmaRrcConfig()
-					self.config[self.status.id].status=self.status
+				if not self.config.has_key(self.__status.id):
+					self.config[self.__status.id]=WcdmaRrcConfig()
+					self.config[self.__status.id].status=self.__status
 
 				neighbor_freq=field_val['rrc.earfcn']
-				self.config[self.status.id].sib.inter_freq_config[neighbor_freq]\
+				self.config[self.__status.id].sib.inter_freq_config[neighbor_freq]\
 				=WcdmaRrcSibInterFreqConfig(
 						field_val['rrc.earfcn'],
 						field_val['lte-rrc.t_ReselectionEUTRA'],
@@ -153,7 +153,7 @@ class WcdmaRrcAnalyzer(Analyzer):
 						field_val['rrc.priority'],
 						field_val['rrc.threshXhigh'],
 						field_val['rrc.threshXlow'])
-				self.config[self.status.id].sib.inter_freq_config[neighbor_freq].dump()
+				self.config[self.__status.id].sib.inter_freq_config[neighbor_freq].dump()
 
 			#TODO: RRC connection status update
 
@@ -179,11 +179,11 @@ class WcdmaRrcAnalyzer(Analyzer):
 			Return a cell's configuration
 			TODO: if no current cell (inactive), return None
 		"""
-		return self.status
+		return self.__status
 
 	def get_cur_cell_config(self):
-		if self.config.has_key(self.status.id):
-			return self.config[self.status.id]
+		if self.config.has_key(self.__status.id):
+			return self.config[self.__status.id]
 		else:
 			return None
 

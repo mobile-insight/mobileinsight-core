@@ -24,12 +24,12 @@ class LteRrcAnalyzer(Analyzer):
 		Analyzer.__init__(self)
 
 		#init packet filters
-		self.add_source_callback(self.rrc_filter)
+		self.add_source_callback(self.__rrc_filter)
 
 		#init internal states
-		self.status=LteRrcStatus()	# current cell status
-		self.history={}	# cell history: timestamp -> LteRrcStatus()
-		self.config={}	# cell_id -> LteRrcConfig()
+		self.__status=LteRrcStatus()	# current cell status
+		self.__history={}	# cell history: timestamp -> LteRrcStatus()
+		self.__config={}	# cell_id -> LteRrcConfig()
 
 	def set_source(self,source):
 		Analyzer.set_source(self,source)
@@ -37,7 +37,7 @@ class LteRrcAnalyzer(Analyzer):
 		source.enable_log("LTE_RRC_OTA_Packet")
 		source.enable_log("LTE_RRC_Serv_Cell_Info_Log_Packet")
 
-	def rrc_filter(self,msg):
+	def __rrc_filter(self,msg):
 		
 		"""
 			Filter all RRC packets, and call functions to process it
@@ -52,7 +52,7 @@ class LteRrcAnalyzer(Analyzer):
 
 		#Convert msg to dictionary format
 		raw_msg=Event(msg.timestamp,msg.type_id,log_item_dict)
-		self.callback_serv_cell(raw_msg)
+		self.__callback_serv_cell(raw_msg)
 
 		if not log_item_dict.has_key('Msg'):
 			return
@@ -64,7 +64,7 @@ class LteRrcAnalyzer(Analyzer):
 		# Calllbacks triggering
 
 		if msg.type_id == "LTE_RRC_OTA_Packet":	
-			self.callback_sib_config(xml_msg)
+			self.__callback_sib_config(xml_msg)
 			#TODO: callback RRC
 
 		else: #nothing to update
@@ -76,19 +76,19 @@ class LteRrcAnalyzer(Analyzer):
 		self.send(e)
 
 
-	def callback_serv_cell(self,msg):
+	def __callback_serv_cell(self,msg):
 		"""
 			Update serving cell status
 		"""
 		if msg.data.has_key('Freq'):
-			self.status.freq = msg.data['Freq']
+			self.__status.freq = msg.data['Freq']
 		if msg.data.has_key('Physical Cell ID'):
-			self.status.id = msg.data['Physical Cell ID']
+			self.__status.id = msg.data['Physical Cell ID']
 		# self.status.dump()
 
 		
 
-	def callback_sib_config(self,msg):
+	def __callback_sib_config(self,msg):
 		"""
 			Callbacks for LTE RRC analysis
 		"""
@@ -97,8 +97,8 @@ class LteRrcAnalyzer(Analyzer):
 
 			#TODO: use MIB, not lte-rrc.trackingAreaCode
 			if field.get('name')=="lte-rrc.trackingAreaCode": #tracking area code
-				self.status.tac = field.get('show')
-				self.status.dump()
+				self.__status.tac = field.get('show')
+				self.__status.dump()
 
 			#serving cell info
 			if field.get('name')=="lte-rrc.cellReselectionServingFreqInfo_element": 
@@ -113,11 +113,11 @@ class LteRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if not self.config.has_key(self.status.id):
-					self.config[self.status.id]=LteRrcConfig()
-					self.config[self.status.id].status=self.status
+				if not self.__config.has_key(self.__status.id):
+					self.__config[self.__status.id]=LteRrcConfig()
+					self.__config[self.__status.id].status=self.__status
 
-				self.config[self.status.id].serv_config=LteRrcSibServ(
+				self.__config[self.__status.id].serv_config=LteRrcSibServ(
 					field_val['lte-rrc.cellReselectionPriority'],
 					field_val['lte-rrc.threshServingLow'],
 					field_val['lte-rrc.s_NonIntraSearch'])
@@ -136,17 +136,17 @@ class LteRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if not self.config.has_key(self.status.id):
-					self.config[self.status.id]=LteRrcConfig()
-					self.config[self.status.id].status=self.status
+				if not self.__config.has_key(self.__status.id):
+					self.__config[self.__status.id]=LteRrcConfig()
+					self.__config[self.__status.id].status=self.__status
 
-				self.config[self.status.id].sib.intra_freq_config\
+				self.__config[self.__status.id].sib.intra_freq_config\
 				=LteRrcSibIntraFreqConfig(
 					field_val['lte-rrc.t_ReselectionEUTRA'],
 					field_val['lte-rrc.q_RxLevMin'],
 					field_val['lte-rrc.p_Max'],
 					field_val['lte-rrc.s_IntraSearch'])
-				self.config[self.status.id].sib.intra_freq_config.dump()
+				self.__config[self.__status.id].sib.intra_freq_config.dump()
 
 			#inter-freq cell info
 			if field.get('name')=="lte-rrc.interFreqCarrierFreqList":
@@ -164,12 +164,12 @@ class LteRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if not self.config.has_key(self.status.id):
-					self.config[self.status.id]=LteRrcConfig()
-					self.config[self.status.id].status=self.status
+				if not self.__config.has_key(self.__status.id):
+					self.__config[self.__status.id]=LteRrcConfig()
+					self.__config[self.__status.id].status=self.__status
 
 				neighbor_freq=field_val['lte-rrc.dl_CarrierFreq']
-				self.config[self.status.id].sib.inter_freq_config[neighbor_freq]\
+				self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq]\
 				=LteRrcSibInterFreqConfig(
 						field_val['lte-rrc.dl_CarrierFreq'],
 						field_val['lte-rrc.t_ReselectionEUTRA'],
@@ -178,11 +178,11 @@ class LteRrcAnalyzer(Analyzer):
 						field_val['lte-rrc.cellReselectionPriority'],
 						field_val['lte-rrc.threshX_High'],
 						field_val['lte-rrc.threshX_Low'])
-				self.config[self.status.id].sib.inter_freq_config[neighbor_freq].dump()
+				self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq].dump()
 
 			#inter-RAT cell info (3G)
 			if field.get('name')=="lte-rrc.t_ReselectionUTRA":
-				for config in self.config[self.status.id].sib.inter_freq_config.itervalues():
+				for config in self.__config[self.__status.id].sib.inter_freq_config.itervalues():
 					#FIXME: how about 2G?
 					if config.tReselection==None:
 						config.tReselection = field.get('show')
@@ -204,12 +204,12 @@ class LteRrcAnalyzer(Analyzer):
 					field_val[val.get('name')]=val.get('show')
 
 
-				if not self.config.has_key(self.status.id):
-					self.config[self.status.id]=LteRrcConfig()
-					self.config[self.status.id].status=self.status
+				if not self.__config.has_key(self.__status.id):
+					self.__config[self.__status.id]=LteRrcConfig()
+					self.__config[self.__status.id].status=self.__status
 
 				neighbor_freq=field_val['lte-rrc.carrierFreq'] 
-				self.config[self.status.id].sib.inter_freq_config[neighbor_freq]\
+				self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq]\
 				=LteRrcSibInterFreqConfig(
 						field_val['lte-rrc.carrierFreq'],
 						None,	#For 3G, tReselection is not in this IE
@@ -227,14 +227,14 @@ class LteRrcAnalyzer(Analyzer):
 
 			FIXME: currently only return *all* cells in the LteRrcConfig
 		"""
-		return self.config.keys()
+		return self.__config.keys()
 
 	def get_cell_config(self,cell_id):
 		"""
 			Return a cell's configuration
 		"""
-		if self.config.has_key(cell_id):
-			return self.config[cell_id]
+		if self.__config.has_key(cell_id):
+			return self.__config[cell_id]
 		else:
 			return None
 
@@ -243,11 +243,11 @@ class LteRrcAnalyzer(Analyzer):
 			Return a cell's configuration
 			TODO: if no current cell (inactive), return None
 		"""
-		return self.status
+		return self.__status
 
 	def get_cur_cell_config(self):
-		if self.config.has_key(self.status.id):
-			return self.config[self.status.id]
+		if self.__config.has_key(self.__status.id):
+			return self.__config[self.__status.id]
 		else:
 			return None
 
