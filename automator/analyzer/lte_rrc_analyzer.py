@@ -28,7 +28,7 @@ class LteRrcAnalyzer(Analyzer):
 
 		#init internal states
 		self.status=LteRrcStatus()	# current cell status
-		self.history={}	# cell history: timestamp -> LteRrcHistory()
+		self.history={}	# cell history: timestamp -> LteRrcStatus()
 		self.config={}	# cell_id -> LteRrcConfig()
 
 	def set_source(self,source):
@@ -38,6 +38,7 @@ class LteRrcAnalyzer(Analyzer):
 		source.enable_log("LTE_RRC_Serv_Cell_Info_Log_Packet")
 
 	def rrc_filter(self,msg):
+		
 		"""
 			Filter all RRC packets, and call functions to process it
 			
@@ -46,16 +47,17 @@ class LteRrcAnalyzer(Analyzer):
 
 		"""
 
-		#Convert to xml 
 		log_item = msg.data
 		log_item_dict = dict(log_item)
 
-		if not log_item_dict.has_key('Msg'):
-			return
-
+		#Convert msg to dictionary format
 		raw_msg=Event(msg.timestamp,msg.type_id,log_item_dict)
 		self.callback_serv_cell(raw_msg)
+
+		if not log_item_dict.has_key('Msg'):
+			return
 		
+		#Convert msg to xml format
 		log_xml = ET.fromstring(log_item_dict['Msg'])
 		xml_msg=Event(msg.timestamp,msg.type_id,log_xml)
 
@@ -289,7 +291,7 @@ class LteRrcSibServ:
 		self.s_nonintrasearch = s_nonintrasearch #threshold for searching other frequencies
 
 	def dump(self):
-		print self.priority,self.threshx_low,self.s_nonintrasearch
+		print self.priority,self.threshserv_low,self.s_nonintrasearch
 
 class LteRrcSibIntraFreqConfig:
 	"""

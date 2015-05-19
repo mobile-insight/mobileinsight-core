@@ -466,7 +466,8 @@ class DMLogPacket:
                     sib_msg = binascii.a2b_hex(field.get("value"))
                     if sib_id in sib_types:
                         decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
-                        result.append((sib_types[sib_id] + "_Msg", decoded))
+                        #result.append((sib_types[sib_id] + "_Msg", decoded))
+                        result.append(("Msg", decoded))
                     else:
                         print "Unknown RRC SIB Type: %d" % sib_id
                             
