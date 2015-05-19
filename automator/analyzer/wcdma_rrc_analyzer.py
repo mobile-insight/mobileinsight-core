@@ -169,7 +169,18 @@ class WcdmaRrcAnalyzer(Analyzer):
 		"""
 			Return a cell's configuration
 		"""
-		return self.config[cell_id]
+		if self.config.has_key(cell_id):
+			return self.config[cell_id]
+		else:
+			return None
+
+	def get_cur_cell(self):
+		"""
+			Return a cell's configuration
+			TODO: if no current cell (inactive), return None
+		"""
+		return self.status
+
 
 
 class WcdmaRrcStatus:

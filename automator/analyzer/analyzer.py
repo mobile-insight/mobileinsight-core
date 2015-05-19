@@ -24,13 +24,19 @@ class Analyzer(Module):
 	# FIXME: current implementation is dangerous, any from/to analyzer can change source!
 	# FIXME: if looped analyzer dependency exists, dead lock happens here!!!
 	def set_source(self,source):
+		"""
+			Set the trace source
+			Bottom-up setting: the included analyzers should be evaluated first,
+			then top analyzer
+		"""
+		#Recursion for analyzers it depends on
+		for analyzer in self.from_list:
+			analyzer.set_source(source)
+			
 		if self.source != None:
 			self.source.deregister(self)
 		self.source = source
 		source.register(self)
-		#Recursion for analyzers it depends on
-		for analyzer in self.from_list:
-			analyzer.set_source(source)
 
 	def add_source_callback(self,callback):
 		if callback not in self.source_callback:

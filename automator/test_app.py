@@ -76,19 +76,25 @@ if __name__ == "__main__":
 
     #Enable the messages to be collected
     #For high-level analyzers, the corresponding message options can be enabled
-    src.enable_log("LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results")
-    
+    # src.enable_log("LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results")
+    src.enable_log("WCDMA_CELL_ID")
+    src.enable_log("WCDMA_Signaling_Messages")
 
-    # rrc_analyzer = LteRrcAnalyzer()
-    # rrc_analyzer.set_source(src)
+    # lte_rrc_analyzer = LteRrcAnalyzer()
+    # lte_rrc_analyzer.set_source(src)
 
-    # dumper = MsgFile("/Users/yuanjieli/Desktop/ml1.txt")
-    # dumper.set_source(src)
+    # wcdma_rrc_analyzer = WcdmaRrcAnalyzer()
+    # wcdma_rrc_analyzer.set_source(src)
+    rrc_analyzer  = RrcAnalyzer()
+    rrc_analyzer.set_source(src)
+
+    dumper = MsgFile("/Users/yuanjieli/Desktop/wcdma_rrc.txt")
+    dumper.set_source(src)
 
     # dumper2 = MsgDump()
     # dumper2.set_source(src)
 
-    ue = LteUeAnalyzer()
-    ue.set_source(src)
+    # ue = LteUeAnalyzer()
+    # ue.set_source(src)
 
     src.run()
