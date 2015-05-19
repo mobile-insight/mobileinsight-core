@@ -41,7 +41,9 @@ class RrcAnalyzer(Analyzer):
 		elif msg.type_id.find("WCDMA")!=-1:	#WCDMA RRC msg received, so it's WCDMA
 			self.cur_RAT = "WCDMA"
 
-		self.get_cur_cell()
+		cur_cell_config=self.get_cur_cell_config()
+		if cur_cell_config != None:
+			cur_cell_config.status.dump()
 
 	def get_cell_list(self):
 		lte_cell_list=self.lte_rrc_analyzer.get_cell_list()
@@ -71,6 +73,17 @@ class RrcAnalyzer(Analyzer):
 		elif self.cur_RAT=="WCDMA":
 			self.wcdma_rrc_analyzer.get_cur_cell().dump()
 			return self.wcdma_rrc_analyzer.get_cur_cell()
+		else:
+			return None
+
+	def get_cur_cell_config(self):
+		"""
+			Return current cell's configuration
+		"""
+		if self.cur_RAT=="LTE":
+			return self.lte_rrc_analyzer.get_cur_cell_config()
+		elif self.cur_RAT=="WCDMA":
+			return self.wcdma_rrc_analyzer.get_cur_cell_config()
 		else:
 			return None
 

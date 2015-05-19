@@ -245,6 +245,12 @@ class LteRrcAnalyzer(Analyzer):
 		"""
 		return self.status
 
+	def get_cur_cell_config(self):
+		if self.config.has_key(self.status.id):
+			return self.config[self.status.id]
+		else:
+			return None
+
 
 class LteRrcStatus:
 	"""
@@ -275,6 +281,11 @@ class LteRrcConfig:
 		self.status = LteRrcStatus() #the metadata of this cell
 		self.sib=LteRrcSib()	#Idle-state: cellID->LTE_RRC_SIB_CELL
 		self.active=LteRrcActive() #active-state configurations
+
+	def dump(self):
+		self.status.dump()
+		self.sib.dump()
+		self.active.dump()
 
 class LteRrcSib:
 
@@ -339,5 +350,8 @@ class LteRrcSibInterFreqConfig:
 class LteRrcActive:
 	def __init__(self):
 		#TODO: initialize some containers
+		pass
+
+	def dump(self):
 		pass
 

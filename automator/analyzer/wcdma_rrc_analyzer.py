@@ -181,6 +181,12 @@ class WcdmaRrcAnalyzer(Analyzer):
 		"""
 		return self.status
 
+	def get_cur_cell_config(self):
+		if self.config.has_key(self.status.id):
+			return self.config[self.status.id]
+		else:
+			return None
+
 
 
 class WcdmaRrcStatus:
@@ -214,6 +220,11 @@ class WcdmaRrcConfig:
 		self.status = WcdmaRrcStatus() #the metadata of this cell
 		self.sib=WcdmaRrcSib()	#Idle-state
 		self.active=WcdmaRrcActive() #active-state configurations
+
+	def dump(self):
+		self.status.dump()
+		self.sib.dump()
+		self.active.dump()
 
 class WcdmaRrcSib:
 
@@ -278,5 +289,8 @@ class WcdmaRrcSibInterFreqConfig:
 class WcdmaRrcActive:
 	def __init__(self):
 		#TODO: initialize some containers
+		pass
+
+	def dump(self):
 		pass
 
