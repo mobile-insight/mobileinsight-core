@@ -28,10 +28,15 @@ class WSDissector:
     # Maps all supported message types to their AWW protocol number.
     # Keep consistent with ws_dissector/packet-aww.cpp
     SUPPORTED_TYPES = { # WCDMA RRC
-                        "RRC_DL_BCCH_BCH": 100,
+                        "RRC_UL_CCCH":  100,
+                        "RRC_UL_DCCH":  101,
+                        "RRC_DL_CCCH":  102,
+                        "RRC_DL_DCCH":  103,
+                        "RRC_DL_BCCH_BCH":  104,
                         "RRC_MIB": 150,
                         "RRC_SIB1": 151,
                         "RRC_SIB3": 153,
+                        "RRC_SIB5": 155,
                         "RRC_SIB7": 157,
                         "RRC_SIB12": 162,
                         "RRC_SIB19": 169,
@@ -109,6 +114,7 @@ if __name__ == "__main__":
                 ("RRC_MIB", "10c424c05aa2fe00a0c850448c466608a8e54a80100a0100"),
                 ("RRC_SIB1", "c764b108500b1ba01483078a2be62ad0"),
                 ("RRC_SIB3", "0d801f4544fc60005001000011094e"),
+                ("RRC_SIB5", "63403AFFFF03FFFC5010F0290C0A8018000C8BF5B15EA0000003F5210E30000247894201400010440060222E56300C60202C000C14CC003C4300B6D830021844A0585760186AF400"),
                 ("RRC_SIB7", "018000"),
                 ("RRC_SIB12", "b38111d024541a42a0"),
                 ("RRC_SIB19", "41a1001694e49470"),

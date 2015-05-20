@@ -33,7 +33,11 @@ LOG_PACKET_ID = {   "WCDMA_CELL_ID":    0x4127,
 
 LOG_PACKET_NAME = dict_reversed(LOG_PACKET_ID)
 
-WCDMA_SIGNALLING_MSG_CHANNEL_NUMBER = { "RRC_DL_BCCH_BCH":  0x04,
+WCDMA_SIGNALLING_MSG_CHANNEL_NUMBER = { "RRC_UL_CCCH":  0x00,
+                                        "RRC_UL_DCCH":  0x01,
+                                        "RRC_DL_CCCH":  0x02,
+                                        "RRC_DL_DCCH":  0x03,
+                                        "RRC_DL_BCCH_BCH":  0x04,
                                         }
 
 WCDMA_SIGNALLING_MSG_CHANNEL_TYPE = dict_reversed(WCDMA_SIGNALLING_MSG_CHANNEL_NUMBER)

@@ -459,18 +459,37 @@ class DMLogPacket:
             # print decoded
             if WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num] == "RRC_DL_BCCH_BCH":
                 xml = ET.fromstring(decoded)
-                for complete_sib in xml.findall(".//field[@name='rrc.CompleteSIBshort_element']"):
-                    field = complete_sib.find("field[@name='rrc.sib_Type']")
-                    sib_id = int(field.get("show"))
-                    field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
-                    sib_msg = binascii.a2b_hex(field.get("value"))
-                    if sib_id in sib_types:
-                        decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
-                        #result.append((sib_types[sib_id] + "_Msg", decoded))
-                        result.append(("Msg", decoded))
-                        print sib_types[sib_id]
-                    else:
-                        print "Unknown RRC SIB Type: %d" % sib_id
+                sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
+                if sibs:
+                    # deal with a list of complete SIBs
+                    sibs[0]
+                    for complete_sib in sibs:
+                        field = complete_sib.find("field[@name='rrc.sib_Type']")
+                        sib_id = int(field.get("show"))
+                        field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
+                        sib_msg = binascii.a2b_hex(field.get("value"))
+                        if sib_id in sib_types:
+                            decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
+                            result.append((sib_types[sib_id] + "_Msg", decoded))
+                            print sib_types[sib_id]
+                        else:
+                            print "Unknown RRC SIB Type: %d" % sib_id
+                else:
+                    # deal with a segmented SIB
+                    sib_segment = xml.find(".//field[@name='rrc.firstSegment_element']")
+                    if sib_segment is None:
+                        sib_segment = xml.find(".//field[@name='rrc.subsequentSegment_element']")
+                    if sib_segment is None:
+                        sib_segment = xml.find(".//field[@name='rrc.lastSegmentShort_element']")
+                    if sib_segment is not None:
+                        field = sib_segment.find("field[@name='rrc.sib_Type']")
+                        sib_id = int(field.get("show"))
+                        print "RRC SIB Segment(type: %d) not handled" % sib_id
+                        # if sib_segment.get("name") != "rrc.lastSegmentShort_element":
+                        #     field = sib_segment.find("field[@name='rrc.sib_Data_fixed']")
+                        # else:
+                        #     field = sib_segment.find("field[@name='rrc.sib_Data_variable']")
+                        # sib_msg = binascii.a2b_hex(field.get("value"))
                             
             return pdu_length
         else:
@@ -484,6 +503,14 @@ if __name__ == '__main__':
             # WCDMA_CELL_ID
             "2c002c002741b4008aef9740ce0040100000211100000f5660030000070030070301000401002cd90000ba000000",
             "2c002c0027419203b0a48540ce00c224000052260000fda3fa02d0000700801f0301000401003ffd00003c000000",
+            # WCDMA_SIGNALLING_MESSAGES UL_CCCH
+            "200020002F41BA017FA40EDECD000000100039A99DCF8C310A086C96100B54B773C8",
+            # WCDMA_SIGNALLING_MESSAGES UL_DCCH
+            "4c004C002F41CC00459D0EDECD0001023C004A880000A0005C32AAD506A556A88A4830408001800151B84071CFBE7280E39F7CF501C73EF9E2038E7DF3CF0866B1A812694845F9228D64802981A0",
+            # WCDMA_SIGNALLING_MESSAGES DL_CCCH
+            "810081002F41CB00019D0EDECD000200710030E73533B9F18621410D92C0D80F5AF4782693A78109E0D420002819FD502C698270B9D3C284F0EA3000144CFE681634C1385CE9E24A78B528002A467F340B1A609C2E74F1A53C7A9C00153200018B4A3D03C0090088EE1982780090088F95E4930E0D1EB5ECFE402843FE207303D029E0",
+            # WCDMA_SIGNALLING_MESSAGES DL_DCCH
+            "180018002F41E100E89D0EDECD000302080020871B86097A6E3A",
             # WCDMA_SIGNALLING_MESSAGES DL_BCCH_BCH
             #   MIB
             "2f002f002f414a01b442814bcf0004281f00948e00bf10c424c05aa2fe00a0c850448c466608a8e54a80100a0100000003",
@@ -491,10 +518,17 @@ if __name__ == '__main__':
             "2f002F002F414600D9581EDECD0004281F00844E017FC764B108500B1BA01483078A2BE62AD00000000000000000000000",
             #   SIB3
             "2f002F002F41290029D010DECD0004281F0072EE03760D801F4544FC60005001000011094E000000000000000000000002",
+            #   SIB5 segment 1
+            "2f002F002F414800E9980EDECD0004281F0004625263403AFFFF03FFFC5010F0290C0A8018000C8BF5B15EA0000003F521",
+            #   SIB5 segment 2
+            "2f002F002F414C0009990EDECD0004281F0004A450438C000091E25080500004110018088B958C0318080B00030533000E",
+            #   SIB5 segment 3
+            "2f002F002F414E0019990EDECD0004281F0004C6517CC4300B6D830021844A0585760186AF400000000000000000000002",
             #   SIB7 & SIB12
             "2f002F002F41340049581EDECD0004281F00832E2C43B38111D024541A42A38800C0000000000000000000000000000001",
             #   SIB19
             "2f002F002F417E029DCA10DECD0004281F0067AE1F3B41A1001694E4947000000000000000000000000000000000000002",
+
             # LTE_RRC_OTA_Packet v7 LTE-RRC_PCCH
             "26002600C0B00000A3894A13CE00070A7100D801B70799390400000000090040012F05EC4E700000",
             # LTE_RRC_OTA_Packet v2 LTE-RRC_PCCH
