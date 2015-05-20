@@ -10,6 +10,7 @@ Author: Yuanjie Li
 
 __all__ = ["Event", "Module"]
 
+
 # Event abstraction
 class Event(object):
     def __init__(self,timestamp,type_id,data):
