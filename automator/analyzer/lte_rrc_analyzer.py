@@ -74,19 +74,11 @@ class LteRrcAnalyzer(Analyzer):
 		self.send(e)
 
 
-
-	# def __callback_serv_cell(self,msg):
-	# 	"""
-	# 		Update serving cell status
-	# 	"""
-
-	# 	if msg.data.has_key('Freq'):
-	# 		self.__status.freq = msg.data['Freq']
-	# 	if msg.data.has_key('Physical Cell ID'):
-	# 		self.__status.id = msg.data['Physical Cell ID']
-	# 	# self.status.dump()
-
 	def __callback_serv_cell(self,msg):
+
+		"""
+			Update current cell status
+		"""
 		if not self.__status.inited():
 			if msg.data.has_key('Freq'):
 				self.__status.freq = msg.data['Freq']

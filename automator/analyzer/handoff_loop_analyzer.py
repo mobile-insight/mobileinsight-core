@@ -42,3 +42,8 @@ class HandoffLoopAnalyzer(Analyzer):
 		# We implement the loop detection algorithm in Proposition 3,
 		# because preferences are observed to be inconsistent
 
+		# dfs_stack=[cell_list.pop()]	#starting cell
+		# virtual_rss=[]
+		#STOP HERE
+
+

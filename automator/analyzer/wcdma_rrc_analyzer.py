@@ -124,6 +124,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 		"""
 			Callbacks for LTE RRC analysis
 		"""
+		if self.__status.id==None: #serving cell is not initialized yet
+			return
 
 		for field in msg.data.iter('field'):
 
