@@ -1,7 +1,0 @@
-Analyzer TODO:
-	- WCDMA: finish the remainning config extraction
-	- WCDMA: update cell ID for the config
-	- Multiple cell config DB
-		- Move around BH hall, test whether multiple configs can be stored
-	- An AT-cmd module
-	- Integrate LTERRCAnalyzer and WCDMARRCAnalyzer

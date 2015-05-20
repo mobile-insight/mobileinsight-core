@@ -78,21 +78,48 @@ class WcdmaRrcAnalyzer(Analyzer):
 		self.send(e)
 
 
+
 	def __callback_serv_cell(self,msg):
 		"""
 			Update serving cell status
 		"""
-		if msg.data.has_key('UTRA DL Absolute RF channel number'):
-			self.__status.freq = msg.data['UTRA DL Absolute RF channel number']
-		if msg.data.has_key('Cell identity (28-bits)'):
-			self.__status.id = msg.data['Cell identity (28-bits)']
-		if msg.data.has_key('LAC id'):
-			self.__status.lac = msg.data['LAC id']
-		if msg.data.has_key('RAC id'):
-			self.__status.rac = msg.data['RAC id']
-		# self.__status.dump()
 
+		if not self.__status.inited():
+			#FIXME: the cellID appears AFTER the configuration. 
+			#Sometimes the config would be mapped to "None"
+			if msg.data.has_key('UTRA DL Absolute RF channel number'):
+				self.__status.freq = msg.data['UTRA DL Absolute RF channel number']
+			if msg.data.has_key('Cell identity (28-bits)'):
+				self.__status.id = msg.data['Cell identity (28-bits)']
+			if msg.data.has_key('LAC id'):
+				self.__status.lac = msg.data['LAC id']
+			if msg.data.has_key('RAC id'):
+				self.__status.rac = msg.data['RAC id']
+		else:
+			if msg.data.has_key('UTRA DL Absolute RF channel number') \
+			and self.__status.freq!=msg.data['UTRA DL Absolute RF channel number']:
+				self.__status=WcdmaRrcStatus()
+				self.__status.freq=msg.data['UTRA DL Absolute RF channel number']
+				self.__history[msg.timestamp]=self.__status
+
+			if msg.data.has_key('Cell identity (28-bits)') \
+			and self.__status.id!=msg.data['Cell identity (28-bits)']:
+				self.__status=WcdmaRrcStatus()
+				self.__status.id=msg.data['Cell identity (28-bits)']
+				self.__history[msg.timestamp]=self.__status
 		
+			if msg.data.has_key('LAC id') \
+			and self.__status.lac!=msg.data['LAC id']:
+				self.__status=WcdmaRrcStatus()
+				self.__status.lac=msg.data['LAC id']
+				self.__history[msg.timestamp]=self.__status
+
+			if msg.data.has_key('RAC id') \
+			and self.__status.rac!=msg.data['RAC id']:
+				self.__status=WcdmaRrcStatus()
+				self.__status.rac=msg.data['RAC id']
+				self.__history[msg.timestamp]=self.__status
+
 	def __callback_sib_config(self,msg):
 		"""
 			Callbacks for LTE RRC analysis
@@ -117,12 +144,39 @@ class WcdmaRrcAnalyzer(Analyzer):
 					self.__config[self.__status.id]=WcdmaRrcConfig()
 					self.__config[self.__status.id].status=self.__status
 
-				self.__config[self.__status.id].serv_config=WcdmaRrcSibServ(
-					field_val['rrc.priority'],
-					field_val['rrc.threshServingLow'],
-					field_val['rrc.s_PrioritySearch1'])
+				self.__config[self.__status.id].sib.serv_config=WcdmaRrcSibServ(
+					float(field_val['rrc.priority']),
+					float(field_val['rrc.threshServingLow'])*2,
+					float(field_val['rrc.s_PrioritySearch1'])*2)
 
-				self.__config[self.__status.id].serv_config.dump()
+				# self.__config[self.__status.id].serv_config.dump()
+
+			#intra-freq info
+			if field.get('name')=="rrc.SysInfoType3_element":
+				field_val={}
+
+				#default value based on TS25.331
+				field_val['rrc.s_Intrasearch']=0
+				field_val['rrc.s_Intersearch']=0
+				field_val['rrc.q_RxlevMin']=None #mandatory
+				field_val['rrc.q_QualMin']=None #mandatory
+				field_val['rrc.q_Hyst_l_S']=None #mandatory
+				field_val['rrc.t_Reselection_S']=None #mandatory
+
+				for val in field.iter('field'):
+					field_val[val.get('name')]=val.get('show')
+
+				if not self.__config.has_key(self.__status.id):
+					self.__config[self.__status.id]=WcdmaRrcConfig()
+					self.__config[self.__status.id].status=self.__status
+
+				self.__config[self.__status.id].sib.intra_freq_config\
+				=WcdmaRrcSibIntraFreqConfig(
+					float(field_val['rrc.t_Reselection_S']),
+					float(field_val['rrc.q_RxlevMin'])*2,
+					float(field_val['rrc.s_Intersearch'])*2,
+					float(field_val['rrc.s_Intrasearch'])*2,
+					float(field_val['rrc.q_Hyst_l_S'])*2)
 
 			#inter-RAT cell info (LTE)
 			if field.get('name')=="rrc.EUTRA_FrequencyAndPriorityInfo_element":
@@ -130,9 +184,9 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 				#FIXME: set to the default value based on TS36.331
 				field_val['rrc.earfcn']=None
-				field_val['lte-rrc.t_ReselectionEUTRA']=None
-				field_val['rrc.qRxLevMinEUTRA']=None
-				field_val['lte-rrc.p_Max']=None
+				#field_val['lte-rrc.t_ReselectionEUTRA']=None
+				field_val['rrc.qRxLevMinEUTRA']=-140
+				#field_val['lte-rrc.p_Max']=None
 				field_val['rrc.priority']=None
 				field_val['rrc.threshXhigh']=None
 				field_val['rrc.threshXlow']=None
@@ -147,14 +201,16 @@ class WcdmaRrcAnalyzer(Analyzer):
 				neighbor_freq=field_val['rrc.earfcn']
 				self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq]\
 				=WcdmaRrcSibInterFreqConfig(
-						field_val['rrc.earfcn'],
-						field_val['lte-rrc.t_ReselectionEUTRA'],
-						field_val['rrc.qRxLevMinEUTRA'],
-						field_val['lte-rrc.p_Max'],
-						field_val['rrc.priority'],
-						field_val['rrc.threshXhigh'],
-						field_val['rrc.threshXlow'])
-				self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq].dump()
+						float(field_val['rrc.earfcn']),
+						#float(field_val['lte-rrc.t_ReselectionEUTRA']),
+						None,
+						float(field_val['rrc.qRxLevMinEUTRA'])*2,
+						#float(field_val['lte-rrc.p_Max']),
+						None,
+						float(field_val['rrc.priority']),
+						float(field_val['rrc.threshXhigh'])*2,
+						float(field_val['rrc.threshXlow'])*2)
+				# self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq].dump()
 
 			#TODO: RRC connection status update
 
@@ -206,6 +262,10 @@ class WcdmaRrcStatus:
 		print "WCDMA Cell Info: cellID=",self.id," Freq=",self.freq,\
 			" RAC=",self.rac, " LAC=",self.lac
 
+	def inited(self):
+		return (self.id!=None and self.freq!=None \
+		and self.rac!=None and self.lac!=None)
+
 class WcdmaRrcConfig:
 	""" 
 		Per-cell RRC configurations
@@ -223,6 +283,7 @@ class WcdmaRrcConfig:
 		self.active=WcdmaRrcActive() #active-state configurations
 
 	def dump(self):
+		print "WcdmaRrcConfig:"
 		self.status.dump()
 		self.sib.dump()
 		self.active.dump()
@@ -237,10 +298,15 @@ class WcdmaRrcSib:
 		#configuration as a serving cell (LteRrcSibServ)
 		self.serv_config = WcdmaRrcSibServ(None,None,None) 
 		#Intra-freq reselection config
-		self.intra_freq_config = WcdmaRrcSibIntraFreqConfig(None,None,None,None) 
+		self.intra_freq_config = WcdmaRrcSibIntraFreqConfig(None,None,None,None,None) 
 		#Inter-freq/RAT reselection config. Freq/cell -> WcdmaRrcSibInterFreqConfig
 		self.inter_freq_config = {}  
 
+	def dump(self):
+		self.serv_config.dump()
+		self.intra_freq_config.dump()
+		for item in self.inter_freq_config:
+			self.inter_freq_config[item].dump()
 
 class WcdmaRrcSibServ:
 	"""
@@ -258,15 +324,17 @@ class WcdmaRrcSibIntraFreqConfig:
 	"""
 		Intra-frequency cell-reselection configurations
 	"""
-	def __init__(self,tReselection,q_RxLevMin,p_Max,s_IntraSearch):
+	def __init__(self,tReselection,q_RxLevMin,s_InterSearch,s_IntraSearch,q_Hyst):
 		#FIXME: individual cell offset
 		self.tReselection = tReselection
 		self.q_RxLevMin = q_RxLevMin
-		self.p_Max=p_Max
+		self.s_InterSearch = s_InterSearch
 		self.s_IntraSearch = s_IntraSearch
+		self.q_Hyst = q_Hyst
 
 	def dump(self):
-		print self.tReselection,self.q_RxLevMin,self.p_Max,self.s_IntraSearch
+		print "WcdmaRrcSibIntraFreqConfig: ",self.tReselection,self.q_RxLevMin,\
+		self.s_InterSearch,self.s_IntraSearch,self.q_Hyst
 
 class WcdmaRrcSibInterFreqConfig:
 	"""

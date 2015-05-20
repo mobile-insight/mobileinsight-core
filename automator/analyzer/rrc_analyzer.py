@@ -6,7 +6,6 @@ A RRC analyzer that integrates LTE and WCDMA RRC
 
 Author: Yuanjie Li
 """
-
 import xml.etree.ElementTree as ET
 from analyzer import *
 from wcdma_rrc_analyzer import WcdmaRrcAnalyzer
@@ -24,8 +23,8 @@ class RrcAnalyzer(Analyzer):
 		self.__lte_rrc_analyzer=LteRrcAnalyzer()
 		self.__wcdma_rrc_analyzer=WcdmaRrcAnalyzer()
 
-		self.include_analyzer(self.__lte_rrc_analyzer,[])
-		self.include_analyzer(self.__wcdma_rrc_analyzer,[])
+		self.include_analyzer(self.__lte_rrc_analyzer,[self.__on_event])
+		self.include_analyzer(self.__wcdma_rrc_analyzer,[self.__on_event])
 
 		self.__cur_RAT = None	#current RAT
 
@@ -42,9 +41,16 @@ class RrcAnalyzer(Analyzer):
 		elif msg.type_id.find("WCDMA")!=-1:	#WCDMA RRC msg received, so it's WCDMA
 			self.__cur_RAT = "WCDMA"
 
-		cur_cell_config=self.get_cur_cell_config()
-		if cur_cell_config != None:
-			cur_cell_config.status.dump()
+		# cur_cell_config=self.get_cur_cell_config()
+		# if cur_cell_config != None:
+		# 	cur_cell_config.status.dump()
+
+	def __on_event(self,event):
+		"""
+			Simply push the event to analyzers that depend on RrcAnalyzer
+		"""
+		e=Event(event.timestamp,"RrcAnalyzer",event.data)
+		self.send(e)
 
 	def get_cell_list(self):
 		lte_cell_list=self.__lte_rrc_analyzer.get_cell_list()
@@ -69,10 +75,10 @@ class RrcAnalyzer(Analyzer):
 			TODO: if no current cell (inactive), return None
 		"""
 		if self.__cur_RAT=="LTE":
-			self.__lte_rrc_analyzer.get_cur_cell().dump()
+			# self.__lte_rrc_analyzer.get_cur_cell().dump()
 			return self.lte_rrc_analyzer.get_cur_cell()
 		elif self.__cur_RAT=="WCDMA":
-			self.__wcdma_rrc_analyzer.get_cur_cell().dump()
+			# self.__wcdma_rrc_analyzer.get_cur_cell().dump()
 			return self.__wcdma_rrc_analyzer.get_cur_cell()
 		else:
 			return None
