@@ -85,6 +85,7 @@ class DMLogPacket:
                         ("Radio Bearer ID", "B"),
                         ("Message Length", "H"),
                     ),
+
                     LOG_PACKET_ID["LTE_RRC_OTA_Packet"]:
                     (
                         ("Pkt Version", "B"),
@@ -96,6 +97,26 @@ class DMLogPacket:
                         ("SysFrameNum/SubFrameNum", "H"),
                         ("PDU Number", "B"),
                         # continued
+                    ),
+                    LOG_PACKET_ID["LTE_NAS_ESM_Plain_OTA_Incoming_Message"]:
+                    (
+                        ("Pkt Version", "B"),
+                        # continued in _LTE_NAS_PLAIN_FMT
+                    ),
+                    LOG_PACKET_ID["LTE_NAS_ESM_Plain_OTA_Outgoing_Message"]:
+                    (
+                        ("Pkt Version", "B"),
+                        # continued in _LTE_NAS_PLAIN_FMT
+                    ),
+                    LOG_PACKET_ID["LTE_NAS_EMM_Plain_OTA_Incoming_Message"]:
+                    (
+                        ("Pkt Version", "B"),
+                        # continued in _LTE_NAS_PLAIN_FMT
+                    ),
+                    LOG_PACKET_ID["LTE_NAS_EMM_Plain_OTA_Outgoing_Message"]:
+                    (
+                        ("Pkt Version", "B"),
+                        # continued in _LTE_NAS_PLAIN_FMT
                     ),
                     LOG_PACKET_ID["LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results"]:
                     (
@@ -139,7 +160,18 @@ class DMLogPacket:
                         ("Number of Antenna", "B"),
                         ("DL BW", "B"),
                     ),
-                    }
+                }
+
+    # For LTE_NAS_EMM_Plain_OTA_Incoming_Message and LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+    _LTE_NAS_PLAIN_FMT = {
+                    1:  # Version 1
+                    (
+                        ("RRC Release Number", "B"),
+                        ("Major Version", "B"),
+                        ("Minor Version", "B"),
+                        # followed by NAS messages
+                    ),
+                }
 
     _LTE_ML1_SUBPKT_FMT = {
                     "Header":
@@ -246,7 +278,6 @@ class DMLogPacket:
         assert l1 == l2
         assert l1 + 2 == len(b)
         if type_id not in cls._LOGITEM_FMT:
-            print "hahaha"
             raise FormatError("Unknown Type ID: 0x%x" % type_id)
         ts = cls._decode_ts(ts)
         return l1, type_id, ts
@@ -325,6 +356,14 @@ class DMLogPacket:
                     # print decoded
                 else:
                     print "Unknown LTE RRC PDU Type: 0x%x" % pdu_number
+
+        elif type_id in (   LOG_PACKET_ID["LTE_NAS_ESM_Plain_OTA_Incoming_Message"],
+                            LOG_PACKET_ID["LTE_NAS_ESM_Plain_OTA_Outgoing_Message"],
+                            LOG_PACKET_ID["LTE_NAS_EMM_Plain_OTA_Incoming_Message"],
+                            LOG_PACKET_ID["LTE_NAS_EMM_Plain_OTA_Outgoing_Message"],
+                            ):
+            offset = cls._decode_lte_nas_plain(b, ind, res)
+            ind += offset
 
         elif type_id == LOG_PACKET_ID["LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results"]:
             pkt_ver = cls._search_result(res, "Version")
@@ -471,51 +510,64 @@ class DMLogPacket:
         ch_num, pdu_length = cls._search_result(
                                             result, 
                                             ("Channel Type", "Message Length"))
-        msg = b[start:(start + pdu_length)]
-        xmls = []
-        if ch_num in WCDMA_SIGNALLING_MSG_CHANNEL_TYPE:
-            decoded = cls._decode_msg(WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num], msg)
-            xmls.append(decoded)
-            # print decoded
-            if WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num] == "RRC_DL_BCCH_BCH":
-                xml = ET.fromstring(decoded)
-                sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
-                if sibs:
-                    # deal with a list of complete SIBs
-                    for complete_sib in sibs:
-                        field = complete_sib.find("field[@name='rrc.sib_Type']")
-                        sib_id = int(field.get("show"))
-                        field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
-                        sib_msg = binascii.a2b_hex(field.get("value"))
-                        if sib_id in sib_types:
-                            decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
-                            xmls.append(decoded)
-                            print sib_types[sib_id]
-                        else:
-                            print "Unknown RRC SIB Type: %d" % sib_id
-                else:
-                    # deal with a segmented SIB
-                    sib_segment = xml.find(".//field[@name='rrc.firstSegment_element']")
-                    if sib_segment is None:
-                        sib_segment = xml.find(".//field[@name='rrc.subsequentSegment_element']")
-                    if sib_segment is None:
-                        sib_segment = xml.find(".//field[@name='rrc.lastSegmentShort_element']")
-                    if sib_segment is not None:
-                        field = sib_segment.find("field[@name='rrc.sib_Type']")
-                        sib_id = int(field.get("show"))
-                        print "RRC SIB Segment(type: %d) not handled" % sib_id
-                        # if sib_segment.get("name") != "rrc.lastSegmentShort_element":
-                        #     field = sib_segment.find("field[@name='rrc.sib_Data_fixed']")
-                        # else:
-                        #     field = sib_segment.find("field[@name='rrc.sib_Data_variable']")
-                        # sib_msg = binascii.a2b_hex(field.get("value"))
-            result.append( ("Msg", cls._wrap_decoded_xml(xmls)) )
-            return pdu_length
-
-        else:
+        if ch_num not in WCDMA_SIGNALLING_MSG_CHANNEL_TYPE:
             print "Unknown WCDMA Signalling Messages Channel Type: 0x%x" % ch_num
             return 0
 
+        msg = b[start:(start + pdu_length)]
+        xmls = []
+        decoded = cls._decode_msg(WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num], msg)
+        xmls.append(decoded)
+        # print decoded
+        if WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num] == "RRC_DL_BCCH_BCH":
+            xml = ET.fromstring(decoded)
+            sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
+            if sibs:
+                # deal with a list of complete SIBs
+                for complete_sib in sibs:
+                    field = complete_sib.find("field[@name='rrc.sib_Type']")
+                    sib_id = int(field.get("show"))
+                    field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
+                    sib_msg = binascii.a2b_hex(field.get("value"))
+                    if sib_id in sib_types:
+                        decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
+                        xmls.append(decoded)
+                        print sib_types[sib_id]
+                    else:
+                        print "Unknown RRC SIB Type: %d" % sib_id
+            else:
+                # deal with a segmented SIB
+                sib_segment = xml.find(".//field[@name='rrc.firstSegment_element']")
+                if sib_segment is None:
+                    sib_segment = xml.find(".//field[@name='rrc.subsequentSegment_element']")
+                if sib_segment is None:
+                    sib_segment = xml.find(".//field[@name='rrc.lastSegmentShort_element']")
+                if sib_segment is not None:
+                    field = sib_segment.find("field[@name='rrc.sib_Type']")
+                    sib_id = int(field.get("show"))
+                    print "RRC SIB Segment(type: %d) not handled" % sib_id
+                    # if sib_segment.get("name") != "rrc.lastSegmentShort_element":
+                    #     field = sib_segment.find("field[@name='rrc.sib_Data_fixed']")
+                    # else:
+                    #     field = sib_segment.find("field[@name='rrc.sib_Data_variable']")
+                    # sib_msg = binascii.a2b_hex(field.get("value"))
+        result.append( ("Msg", cls._wrap_decoded_xml(xmls)) )
+        return pdu_length
+
+    @classmethod
+    def _decode_lte_nas_plain(cls, b, start, result):
+        pkt_ver = cls._search_result(result, "Pkt Version")
+        if pkt_ver not in cls._LTE_NAS_PLAIN_FMT:
+            print "Unknown LTE NAS version: 0x%x" % pkt_ver
+            return 0
+
+        fmt = cls._LTE_NAS_PLAIN_FMT[pkt_ver]
+        res2, offset = cls._decode_by_format(fmt, b, start)
+        result.extend(res2)
+        nas_msg_plain = b[(start + offset):]
+        decoded = cls._decode_msg("LTE-NAS_EPS_PLAIN", nas_msg_plain)
+        result.append( ("Msg", cls._wrap_decoded_xml(decoded)) )
+        return len(b) - start
 
 # Test decoding
 if __name__ == '__main__':
@@ -531,6 +583,7 @@ if __name__ == '__main__':
             "810081002F41CB00019D0EDECD000200710030E73533B9F18621410D92C0D80F5AF4782693A78109E0D420002819FD502C698270B9D3C284F0EA3000144CFE681634C1385CE9E24A78B528002A467F340B1A609C2E74F1A53C7A9C00153200018B4A3D03C0090088EE1982780090088F95E4930E0D1EB5ECFE402843FE207303D029E0",
             # WCDMA_SIGNALLING_MESSAGES DL_DCCH
             "180018002F41E100E89D0EDECD000302080020871B86097A6E3A",
+
             # WCDMA_SIGNALLING_MESSAGES DL_BCCH_BCH
             #   MIB
             "2f002f002f414a01b442814bcf0004281f00948e00bf10c424c05aa2fe00a0c850448c466608a8e54a80100a0100000003",
@@ -560,6 +613,16 @@ if __name__ == '__main__':
             # LTE_RRC_OTA_Packet v7 LTE-RRC_BCCH_DL_SCH / SystemInformation
             "42004200C0B0000020FC1AEDCD00070A7100B900D5020000020C000000250000804D499F848011580A920220040800D209456AAB00203007B763492540811231BC235FD4",
             "46004600C0B0000020FC1AEDCD00070A7100B900D502000002700000002900010881F5182916943B54003A41F5229A8A992800944419C25001288836A4A00251196FE9C004A22000",
+
+            # LTE_NAS_ESM_Plain_OTA_Incoming_Message v1
+            "1f001F00E2B000004F7C4D13CE00010905005200C93209833401085E04FEFEC553",
+            # LTE_NAS_ESM_Plain_OTA_Outgoing_Message v1
+            "19001900E3B00000507C4D13CE00010905005200CA000000000000",
+            # LTE_NAS_EMM_Plain_OTA_Incoming_Message v1
+            "3e003E00ECB000001C6E4D13CE00010905000749015A49500BF6130014FF5018D01FFD7C54060013001487405702200013130014D92C2305F4BA302390640100",
+            # LTE_NAS_EMM_Plain_OTA_Outgoing_Message v1
+            "14001400EDB00000C5D84913CE0001090500C7010400",
+
             # LTE_ML1_Serving_Cell_Measurement_Result v1
             "6000600093B10000E49484C7CF000101995119045000B707D80118E914023A85C00818751700DDE559009ED55D00DD555249134D5412255D4C5D17030000F2FFF5FF340037000C000000D0AE0C000A9A190037AB0200690900009A1600002AA10200",
             # LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results v3
@@ -577,7 +640,7 @@ if __name__ == '__main__':
     for b in tests:
         l, type_id, ts, log_item = DMLogPacket.decode(binascii.a2b_hex(b))
         print "> Packet #%d" % i
-        print l, hex(type_id), ts
+        print l, LOG_PACKET_NAME[type_id], ts
         print [k for k, v in log_item]
         print dict(log_item).get("Msg", "XML msg not found.")
         i += 1

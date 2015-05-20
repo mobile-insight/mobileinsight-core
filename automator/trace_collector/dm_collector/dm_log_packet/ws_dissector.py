@@ -27,24 +27,28 @@ class WSDissector:
 
     # Maps all supported message types to their AWW protocol number.
     # Keep consistent with ws_dissector/packet-aww.cpp
-    SUPPORTED_TYPES = { # WCDMA RRC
+    SUPPORTED_TYPES = {
+                        # WCDMA: 100~199
+                        #   WCDMA RRC: 100~149
                         "RRC_UL_CCCH":  100,
                         "RRC_UL_DCCH":  101,
                         "RRC_DL_CCCH":  102,
                         "RRC_DL_DCCH":  103,
                         "RRC_DL_BCCH_BCH":  104,
-                        "RRC_MIB": 150,
+                        #   WCDMA RRC SysInfo: 150~199
+                        "RRC_MIB":  150,
                         "RRC_SIB1": 151,
                         "RRC_SIB3": 153,
                         "RRC_SIB5": 155,
                         "RRC_SIB7": 157,
-                        "RRC_SIB12": 162,
-                        "RRC_SIB19": 169,
-                        # LTE RRC
+                        "RRC_SIB12":    162,
+                        "RRC_SIB19":    169,
+                        # LTE: 200~299
                         "LTE-RRC_PCCH": 200,
                         "LTE-RRC_DL_DCCH": 201,
                         "LTE-RRC_UL_DCCH": 202,
-                        "LTE-RRC_BCCH_DL_SCH": 203,
+                        "LTE-RRC_BCCH_DL_SCH":  203,
+                        "LTE-NAS_EPS_PLAIN":    250,
                         }
     _proc = None
     _init_proc_called = False
