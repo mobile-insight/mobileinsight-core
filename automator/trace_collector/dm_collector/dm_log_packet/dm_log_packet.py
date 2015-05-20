@@ -321,7 +321,7 @@ class DMLogPacket:
                 msg = b[ind:(ind + pdu_length)]
                 if pdu_number in LTE_RRC_OTA_PDU_TYPE:
                     decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
-                    res.append(("Msg", decoded))
+                    res.append( ("Msg", cls._wrap_decoded_xml(decoded)) )
                     # print decoded
                 else:
                     print "Unknown LTE RRC PDU Type: 0x%x" % pdu_number
@@ -401,7 +401,7 @@ class DMLogPacket:
             n: how many bytes are consumed in the decoding
         """
         ind = start
-        res = []
+        result = []
         for spec in fmt:
             if spec[0] != cls._DSL_SKIP:
                 name = spec[0]
@@ -413,11 +413,11 @@ class DMLogPacket:
                     if len(spec) > 2:   # the type of this element is specified
                         elem_type = spec[2]
                         decoded = cls._transform_element(elem_type, decoded)
-                res.append((name, decoded))
+                result.append( (name, decoded) )
                 ind += struct.calcsize(fmt)
             else:   # padding/skip
                 ind += spec[1]
-        return res, (ind - start)
+        return result, (ind - start)
 
     @classmethod
     def _transform_element(cls, elem_type, val):
@@ -432,8 +432,27 @@ class DMLogPacket:
 
     @classmethod
     def _decode_msg(cls, msg_type, b):
+        """
+        Decode standard message using WSDissector.
+        """
         s = WSDissector.decode_msg(msg_type, b)
         return s
+
+    @classmethod
+    def _wrap_decoded_xml(cls, xmls):
+        """
+        Return an XML string that looks like:
+
+        \"\"\"<msg>
+            <packet>...</packet>
+            <packet>...</packet>
+            <packet>...</packet>
+        </msg>\"\"\"
+        """
+        if isinstance(xmls, str):
+            xmls = [xmls]
+        assert isinstance(xmls, (list, tuple))
+        return "<msg>\n" + "".join(xmls) + "</msg>\n"
 
     @classmethod
     # Keep strings consistent with ws_dissector.py
@@ -453,16 +472,16 @@ class DMLogPacket:
                                             result, 
                                             ("Channel Type", "Message Length"))
         msg = b[start:(start + pdu_length)]
+        xmls = []
         if ch_num in WCDMA_SIGNALLING_MSG_CHANNEL_TYPE:
             decoded = cls._decode_msg(WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num], msg)
-            result.append(("Msg", decoded))
+            xmls.append(decoded)
             # print decoded
             if WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num] == "RRC_DL_BCCH_BCH":
                 xml = ET.fromstring(decoded)
                 sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
                 if sibs:
                     # deal with a list of complete SIBs
-                    sibs[0]
                     for complete_sib in sibs:
                         field = complete_sib.find("field[@name='rrc.sib_Type']")
                         sib_id = int(field.get("show"))
@@ -470,7 +489,7 @@ class DMLogPacket:
                         sib_msg = binascii.a2b_hex(field.get("value"))
                         if sib_id in sib_types:
                             decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
-                            result.append((sib_types[sib_id] + "_Msg", decoded))
+                            xmls.append(decoded)
                             print sib_types[sib_id]
                         else:
                             print "Unknown RRC SIB Type: %d" % sib_id
@@ -490,8 +509,9 @@ class DMLogPacket:
                         # else:
                         #     field = sib_segment.find("field[@name='rrc.sib_Data_variable']")
                         # sib_msg = binascii.a2b_hex(field.get("value"))
-                            
+            result.append( ("Msg", cls._wrap_decoded_xml(xmls)) )
             return pdu_length
+
         else:
             print "Unknown WCDMA Signalling Messages Channel Type: 0x%x" % ch_num
             return 0
@@ -559,6 +579,7 @@ if __name__ == '__main__':
         print "> Packet #%d" % i
         print l, hex(type_id), ts
         print [k for k, v in log_item]
+        print dict(log_item).get("Msg", "XML msg not found.")
         i += 1
 
     # s = binascii.a2b_hex(tests[-3])
