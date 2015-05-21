@@ -200,10 +200,10 @@ class WcdmaRrcAnalyzer(Analyzer):
 					self.__config[self.__status.id]=WcdmaRrcConfig()
 					self.__config[self.__status.id].status=self.__status
 
-				neighbor_freq=field_val['rrc.earfcn']
+				neighbor_freq=int(field_val['rrc.earfcn'])
 				self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq]\
 				=WcdmaRrcSibInterFreqConfig(
-						float(field_val['rrc.earfcn']),
+						neighbor_freq,
 						#float(field_val['lte-rrc.t_ReselectionEUTRA']),
 						None,
 						float(field_val['rrc.qRxLevMinEUTRA'])*2,
