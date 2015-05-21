@@ -23,12 +23,16 @@ def dict_reversed(d):
 LOG_PACKET_ID = {   "WCDMA_CELL_ID":    0x4127,
                     "WCDMA_Signaling_Messages": 0x412F,
                     "LTE_RRC_OTA_Packet":   0xB0C0,
-                    "LTE_RRC_MIB_Message_Log_Packet": 0xB0C1,
-                    "LTE_RRC_Serv_Cell_Info_Log_Packet": 0xB0C2,
+                    "LTE_RRC_MIB_Message_Log_Packet":   0xB0C1,
+                    "LTE_RRC_Serv_Cell_Info_Log_Packet":    0xB0C2,
+                    "LTE_NAS_ESM_Plain_OTA_Incoming_Message":   0xB0E2,
+                    "LTE_NAS_ESM_Plain_OTA_Outgoing_Message":   0xB0E3,
+                    "LTE_NAS_EMM_Plain_OTA_Incoming_Message":   0xB0EC,
+                    "LTE_NAS_EMM_Plain_OTA_Outgoing_Message":   0xB0ED,
                     "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results": 0xB179,
                     "LTE_ML1_IRAT_Measurement_Request": 0xB187,
                     "LTE_ML1_Serving_Cell_Measurement_Result":  0xB193,
-                    "LTE_ML1_Connected_Mode_Neighbor_Meas_Req/Resp":    0xB195
+                    "LTE_ML1_Connected_Mode_Neighbor_Meas_Req/Resp":    0xB195,
                     }
 
 LOG_PACKET_NAME = dict_reversed(LOG_PACKET_ID)
