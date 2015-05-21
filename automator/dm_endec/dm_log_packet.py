@@ -10,14 +10,13 @@ __all__ = ["DMLogPacket", "FormatError"]
 
 import binascii
 from datetime import *
-import os
 import struct
 import xml.etree.ElementTree as ET
 
 try:
     from utils import *
 except ImportError, e:
-    # TODO: wtf can I do to remove this dependence ..?
+    # TODO: WTF can I do to remove this dependence ..?
     def static_var(varname, value):
         def decorate(func):
             setattr(func, varname, value)
@@ -532,7 +531,7 @@ class DMLogPacket:
                     if sib_id in sib_types:
                         decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
                         xmls.append(decoded)
-                        print sib_types[sib_id]
+                        # print sib_types[sib_id]
                     else:
                         print "Unknown RRC SIB Type: %d" % sib_id
             else:
@@ -630,8 +629,9 @@ if __name__ == '__main__':
             "5C005C0079B10000E9F684C7CF000300000000000000B707D801200D160616062F012F0102029A00EA04EA040500050000009B00EA04EA042D002D0000009A000000D313000010634B1F000000009B0000003811000030E3701F00000000",
             ]
 
+    import os
     executable_path = os.path.join(os.path.abspath(os.getcwd()),
-                                    "../../../../ws_dissector/ws_dissector")
+                                    "../../ws_dissector/ws_dissector")
     DMLogPacket.init({
                         "ws_dissect_executable_path": executable_path,
                         "libwireshark_path": "/home/likayo/wireshark-local-1.12.3/lib",

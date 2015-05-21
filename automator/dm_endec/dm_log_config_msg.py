@@ -14,7 +14,7 @@ import binascii
 import math
 import struct
 
-from dm_const import *
+from consts import *
 
 
 # Thanks to ModemManager/libqcdm
@@ -23,8 +23,8 @@ class DMLogConfigMsg(object):
     _ITEM_ID_MASK = 0x0FFF
 
     def __init__(self, op_name, type_id_list=None):
-        self._op_number = DM_LOG_CONFIG_OP_NUMBER[op_name]
-        if self._op_number != DM_LOG_CONFIG_OP_NUMBER["DISABLE"]:
+        self._op_number = LOG_CONFIG_OP_NUMBER[op_name]
+        if self._op_number != LOG_CONFIG_OP_NUMBER["DISABLE"]:
             assert type_id_list
             self._item_lst = type_id_list
             # Set equip id
@@ -36,11 +36,11 @@ class DMLogConfigMsg(object):
         
     def binary(self):
         b = struct.pack("<BBBBI",   # little endian
-                        DM_COMMAND_CODES["DIAG_CMD_LOG_CONFIG"],
+                        COMMAND_CODE["DIAG_CMD_LOG_CONFIG"],
                         0, 0, 0,    # padding
                         self._op_number
                         )
-        if self._op_number != DM_LOG_CONFIG_OP_NUMBER["DISABLE"]:
+        if self._op_number != LOG_CONFIG_OP_NUMBER["DISABLE"]:
             item_mask, highest = self._get_item_mask()
             b += struct.pack("<II", self._equip_id, highest + 1)
             b += item_mask

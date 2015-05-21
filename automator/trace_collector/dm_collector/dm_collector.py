@@ -21,9 +21,8 @@ import sys
 
 from sender import sendRecv, recvMessage
 from hdlc_parser import hdlc_parser
-from dm_log_packet import DMLogPacket, FormatError
-from dm_log_packet import consts as dm_log_consts
-from dm_log_config_msg import DMLogConfigMsg
+from dm_endec import DMLogPacket, DMLogConfigMsg, FormatError
+import dm_endec.consts
 
 
 def print_reply(payload, crc_correct):
@@ -61,10 +60,10 @@ class DMCollector(TraceCollector):
         if isinstance(type_name, str):
             type_name = [type_name]
         for n in type_name:
-            if n not in dm_log_consts.LOG_PACKET_ID:
+            if n not in dm_endec.consts.LOG_PACKET_ID:
                 raise ValueError("Unsupported log packet type: %s" % n)
             else:
-                self._type_ids.append(dm_log_consts.LOG_PACKET_ID[n])
+                self._type_ids.append(dm_endec.consts.LOG_PACKET_ID[n])
 
     def _generate_type_dict(self):
         assert len(self._type_ids) > 0
@@ -108,17 +107,18 @@ class DMCollector(TraceCollector):
             # Read log packets from serial port and decode their contents
             while True:
                 # cmd = 0x10 for log packets
-                payload, crc_correct = recvMessage(parser, phy_ser, "10")
+                cmd = "%02x" % dm_endec.consts.COMMAND_CODE["DIAG_CMD_LOG"]
+                payload, crc_correct = recvMessage(parser, phy_ser, cmd)
                 if payload:
                     # print_reply(payload, crc_correct)
                     try:
                         # Note that the beginning 2 bytes are skipped.
                         l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
-                        # print l, hex(type_id), dm_log_consts.LOG_PACKET_NAME[type_id], ts
-                        # print log_item
+                        # print l, hex(type_id), dm_endec.consts.LOG_PACKET_NAME[type_id], ts
+                        # print dict(log_item).get("Msg", "XML msg not found.")
                         # print ""
                         #send event to analyzers
-                        event = Event(ts,dm_log_consts.LOG_PACKET_NAME[type_id],log_item)
+                        event = Event(ts,dm_endec.consts.LOG_PACKET_NAME[type_id],log_item)
                         self.send(event)
                     except FormatError, e:
                         # skip this packet

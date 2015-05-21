@@ -124,7 +124,7 @@ if __name__ == "__main__":
                 ("RRC_SIB19", "41a1001694e49470"),
                 ]
     executable_path = os.path.join(os.path.abspath(os.getcwd()),
-                                    "../../../../ws_dissector/ws_dissector")
+                                    "../../ws_dissector/ws_dissector")
     WSDissector.init_proc(executable_path, "/home/likayo/wireshark-local-1.12.3/lib")
 
     for typ, b in tests:
