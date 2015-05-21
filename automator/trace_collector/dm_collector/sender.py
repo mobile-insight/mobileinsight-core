@@ -14,8 +14,8 @@ import serial
 import serial.tools.list_ports
 import optparse
 import binascii
-from hdlc_parser import hdlc_parser
-from hdlc_frame import hdlc_frame
+from hdlc_parser import HdlcParser
+from hdlc_frame import HdlcFrame
 
 __all__ = ["sendRecv", "recvMessage"]
 
@@ -53,7 +53,7 @@ def sendRecv(parser, phy_ser, b, cmd = None):
     return recvMessage(parser, phy_ser, cmd)
 
 def sendMessage(phy_ser, b):
-    b = hdlc_frame(b).binary()
+    b = HdlcFrame(b).binary()
 
     if b:
         phy_ser.write(b)
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     try:
         # Open COM ports. A zero timeout means that IO functions never suspend.
         phy_ser = serial.Serial(phy_ser_name, baudrate=phy_baudrate, timeout=.5)
-        parser = hdlc_parser()
+        parser = HdlcParser()
 
         while True:
             s = raw_input('enter a command: ')

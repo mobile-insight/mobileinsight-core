@@ -20,7 +20,7 @@ import serial
 import sys
 
 from sender import sendRecv, recvMessage
-from hdlc_parser import hdlc_parser
+from hdlc_parser import HdlcParser
 from dm_endec import DMLogPacket, DMLogConfigMsg, FormatError
 import dm_endec.consts
 
@@ -90,7 +90,7 @@ class DMCollector(TraceCollector):
             phy_ser = serial.Serial(self.phy_ser_name,
                                     baudrate=self.phy_baudrate,
                                     timeout=.5)
-            parser = hdlc_parser()
+            parser = HdlcParser()
 
             # Disable logs
             payload, crc_correct = sendRecv(parser, phy_ser, DMLogConfigMsg("DISABLE").binary())

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 hdlc_parser.py
-Define hdlc_parser class that deals with HDLC frames in the raw logs read from
+Define HdlcParser class that deals with HDLC frames in the raw logs read from
 the diagnostic serial port.
 If executed as a script, it translates a raw log into a new log, each item of 
 which is a single frame.
@@ -9,13 +9,13 @@ which is a single frame.
 Author: Jiayao Li
 """
 
-__all__ = {"hdlc_parser"}
+__all__ = {"HdlcParser"}
 
 import struct
 import crcmod
 import binascii
 
-class hdlc_parser:
+class HdlcParser:
     """
     This class takes fragmented HDLC encapsulated data and decodes its frame 
     structure. The clean HDLC payload is returned using Python iterator interface.
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     # b = "7d 5d 02 88 13 a5 13 c3 40 7e".replace(" ", "")
     # b += "7d 5d 02 7c 15 8c 15 c0 02 7e".replace(" ", "")
     # b = binascii.a2b_hex(b)
-    # parser = hdlc_parser()
+    # parser = HdlcParser()
     # parser.feed_binary(0.0, b[0:5])
     # parser.feed_binary(0.5, b[5:7])
     # parser.feed_binary(1.0, b[7:])
@@ -131,8 +131,8 @@ if __name__ == '__main__':
     log_name = sys.argv[1]
     out_name = sys.argv[2]
 
-    in_parser = hdlc_parser()
-    out_parser = hdlc_parser()
+    in_parser = HdlcParser()
+    out_parser = HdlcParser()
     with open(out_name, "w") as out:
         metadata = None
         for line in open(log_name):

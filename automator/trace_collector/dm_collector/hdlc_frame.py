@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 hdlc_frame.py
-Define hdlc_frame, an easy-to-use HDLC-like frame constructor.
+Define HdlcFrame, an easy-to-use HDLC-like frame constructor.
 
 Author: Jiayao Li
 """
+
+__all__ = ["HdlcFrame"]
 
 import struct
 import crcmod
@@ -13,7 +15,7 @@ import binascii
 from utils import static_var
 
 
-class hdlc_frame:
+class HdlcFrame:
     """
     An easy HDLC-like frame constructor class.
     """
@@ -67,4 +69,4 @@ if __name__ == '__main__':
         payld = binascii.a2b_hex(payld)
         frame = binascii.a2b_hex(frame)
         print "Correct answer: " + binascii.b2a_hex(frame)
-        print "Construct: " + binascii.b2a_hex(hdlc_frame(payld).binary())
+        print "Construct: " + binascii.b2a_hex(HdlcFrame(payld).binary())
