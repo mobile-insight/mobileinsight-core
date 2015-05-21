@@ -67,7 +67,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     src = DMCollector(prefs={
-                        "command_files_path": os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH),
                         "ws_dissect_executable_path": WS_DISSECT_EXECUTABLE_PATH,
                         "libwireshark_path": LIBWIRESHARK_PATH,
                         })
