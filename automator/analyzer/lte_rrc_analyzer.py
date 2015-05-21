@@ -70,7 +70,7 @@ class LteRrcAnalyzer(Analyzer):
 
 		# Raise event to other analyzers
 		# FIXME: the timestamp is incoherent with that from the trace collector
-		e = Event(time.time(),'LteRrcAnalyzer',"")
+		e = Event(time.time(),self.__class__.__name__,"")
 		self.send(e)
 
 
@@ -186,7 +186,8 @@ class LteRrcAnalyzer(Analyzer):
 						float(field_val['lte-rrc.p_Max']),
 						float(field_val['lte-rrc.cellReselectionPriority']),
 						float(field_val['lte-rrc.threshX_High'])*2,
-						float(field_val['lte-rrc.threshX_Low'])*2)
+						float(field_val['lte-rrc.threshX_Low'])*2,
+						0)
 				# self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq].dump()
 
 			#inter-RAT cell info (3G)
@@ -226,7 +227,8 @@ class LteRrcAnalyzer(Analyzer):
 						float(field_val['lte-rrc.p_MaxUTRA']),
 						float(field_val['lte-rrc.cellReselectionPriority']),
 						float(field_val['lte-rrc.threshX_High'])*2,
-						float(field_val['lte-rrc.threshX_Low'])*2)
+						float(field_val['lte-rrc.threshX_Low'])*2,
+						0)
 
 			#TODO: RRC connection status update
 
@@ -273,7 +275,7 @@ class LteRrcStatus:
 		self.conn = False #connectivity status (for serving cell only)
 
 	def dump(self):
-		print "LteRrcStatus: ",self.id,self.freq
+		print self.__class__.__name__,self.id,self.freq
 
 	def inited(self):
 		return (self.id!=None and self.freq!=None)
@@ -295,7 +297,7 @@ class LteRrcConfig:
 		self.active=LteRrcActive() #active-state configurations
 
 	def dump(self):
-		print "LteRrcConfig:"
+		print self.__class__.__name__
 		self.status.dump()
 		self.sib.dump()
 		self.active.dump()
@@ -330,7 +332,8 @@ class LteRrcSibServ:
 		self.s_nonintrasearch = s_nonintrasearch #threshold for searching other frequencies
 
 	def dump(self):
-		print "LteRrcSibServ: ", self.priority,self.threshserv_low,self.s_nonintrasearch
+		print self.__class__.__name__, self.priority, \
+		self.threshserv_low,self.s_nonintrasearch
 
 class LteRrcSibIntraFreqConfig:
 	"""
@@ -344,7 +347,7 @@ class LteRrcSibIntraFreqConfig:
 		self.s_IntraSearch = s_IntraSearch
 
 	def dump(self):
-		print "LteRrcSibIntraFreqConfig: ",self.tReselection,self.q_RxLevMin,\
+		print self.__class__.__name__,self.tReselection,self.q_RxLevMin,\
 		self.p_Max,self.s_IntraSearch
 
 class LteRrcSibInterFreqConfig:
@@ -353,7 +356,7 @@ class LteRrcSibInterFreqConfig:
 	"""	
 	#FIXME: the current list is incomplete
 	#FIXME: individual cell offset
-	def __init__(self,freq,tReselection,q_RxLevMin,p_Max,priority,threshx_high,threshx_low):
+	def __init__(self,freq,tReselection,q_RxLevMin,p_Max,priority,threshx_high,threshx_low,q_offset):
 		self.freq = freq
 		self.tReselection = tReselection
 		self.q_RxLevMin = q_RxLevMin
@@ -361,11 +364,12 @@ class LteRrcSibInterFreqConfig:
 		self.priority = priority
 		self.threshx_high = threshx_high
 		self.threshx_low = threshx_low
+		self.q_offset = q_offset
 
 	def dump(self):
-		print "LteRrcSibInterFreqConfig: ",self.freq, self.tReselection,\
-		self.q_RxLevMin, self.p_Max, \
-		self.priority, self.threshx_high, self.threshx_low
+		print self.__class__.__name__,self.freq, self.tReselection,\
+		self.q_RxLevMin, self.p_Max, self.priority, \
+		self.threshx_high, self.threshx_low, self.q_offset
 
 class LteRrcActive:
 	def __init__(self):

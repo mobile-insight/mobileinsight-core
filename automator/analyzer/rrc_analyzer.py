@@ -94,6 +94,17 @@ class RrcAnalyzer(Analyzer):
 		else:
 			return None
 
+	def get_cell_on_freq(self,freq):
+		"""
+			Given a frequency band, get all cells under this freq in the cell_list
+		"""
+		cell_list=self.get_cell_list()
+		res=[]
+		for cell in cell_list:
+			if self.get_cell_config(cell).status.freq==freq:
+				res.append(cell)
+		return res
+
 
 
 

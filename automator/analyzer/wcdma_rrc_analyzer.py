@@ -74,7 +74,7 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 		# Raise event to other analyzers
 		# FIXME: the timestamp is incoherent with that from the trace collector
-		e = Event(time.time(),'WcdmaRrcAnalyzer',"")
+		e = Event(time.time(),self.__class__.__name__,"")
 		self.send(e)
 
 
@@ -261,8 +261,7 @@ class WcdmaRrcStatus:
 		self.conn = False #connectivity status (for serving cell only)
 
 	def dump(self):
-		print "WCDMA Cell Info: cellID=",self.id," Freq=",self.freq,\
-			" RAC=",self.rac, " LAC=",self.lac
+		print self.__class__.__name__,self.id,self.freq,self.rac,self.lac
 
 	def inited(self):
 		return (self.id!=None and self.freq!=None \
@@ -285,7 +284,7 @@ class WcdmaRrcConfig:
 		self.active=WcdmaRrcActive() #active-state configurations
 
 	def dump(self):
-		print "WcdmaRrcConfig:"
+		print self.__class__.__name__
 		self.status.dump()
 		self.sib.dump()
 		self.active.dump()
@@ -320,7 +319,7 @@ class WcdmaRrcSibServ:
 		self.s_priority_search1 = s_priority_search1 #threshold for searching other frequencies
 
 	def dump(self):
-		print "WcdmaRrcSibServ: ",self.priority,self.threshserv_low,self.s_priority_search1
+		print self.__class__.__name__,self.priority,self.threshserv_low,self.s_priority_search1
 
 class WcdmaRrcSibIntraFreqConfig:
 	"""
@@ -335,7 +334,7 @@ class WcdmaRrcSibIntraFreqConfig:
 		self.q_Hyst = q_Hyst
 
 	def dump(self):
-		print "WcdmaRrcSibIntraFreqConfig: ",self.tReselection,self.q_RxLevMin,\
+		print self.__class__.__name__,self.tReselection,self.q_RxLevMin,\
 		self.s_InterSearch,self.s_IntraSearch,self.q_Hyst
 
 class WcdmaRrcSibInterFreqConfig:
@@ -354,8 +353,8 @@ class WcdmaRrcSibInterFreqConfig:
 		self.threshx_low = threshx_low
 
 	def dump(self):
-		print self.freq, self.tReselection, self.q_RxLevMin, self.p_Max, \
-		self.priority, self.threshx_high, self.threshx_low
+		print self.__class__.__name__,self.freq, self.tReselection, self.q_RxLevMin, \
+		self.p_Max, self.priority, self.threshx_high, self.threshx_low
 
 class WcdmaRrcActive:
 	def __init__(self):
