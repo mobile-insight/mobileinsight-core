@@ -142,11 +142,12 @@ class WcdmaRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if not self.__config.has_key(self.__status.id):
-					self.__config[self.__status.id]=WcdmaRrcConfig()
-					self.__config[self.__status.id].status=self.__status
+				cur_pair=(self.__status.id,self.__status.freq)
+				if not self.__config.has_key(cur_pair):
+					self.__config[cur_pair]=WcdmaRrcConfig()
+					self.__config[cur_pair].status=self.__status
 
-				self.__config[self.__status.id].sib.serv_config=WcdmaRrcSibServ(
+				self.__config[cur_pair].sib.serv_config=WcdmaRrcSibServ(
 					float(field_val['rrc.priority']),
 					float(field_val['rrc.threshServingLow'])*2,
 					float(field_val['rrc.s_PrioritySearch1'])*2)
@@ -168,11 +169,12 @@ class WcdmaRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if not self.__config.has_key(self.__status.id):
-					self.__config[self.__status.id]=WcdmaRrcConfig()
-					self.__config[self.__status.id].status=self.__status
+				cur_pair=(self.__status.id,self.__status.freq)
+				if not self.__config.has_key(cur_pair):
+					self.__config[cur_pair]=WcdmaRrcConfig()
+					self.__config[cur_pair].status=self.__status
 
-				self.__config[self.__status.id].sib.intra_freq_config\
+				self.__config[cur_pair].sib.intra_freq_config\
 				=WcdmaRrcSibIntraFreqConfig(
 					float(field_val['rrc.t_Reselection_S']),
 					float(field_val['rrc.q_RxlevMin'])*2,
@@ -196,12 +198,13 @@ class WcdmaRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if not self.__config.has_key(self.__status.id):
-					self.__config[self.__status.id]=WcdmaRrcConfig()
-					self.__config[self.__status.id].status=self.__status
+				cur_pair=(self.__status.id,self.__status.freq)
+				if not self.__config.has_key(cur_pair):
+					self.__config[cur_pair]=WcdmaRrcConfig()
+					self.__config[cur_pair].status=self.__status
 
 				neighbor_freq=int(field_val['rrc.earfcn'])
-				self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq]\
+				self.__config[cur_pair].sib.inter_freq_config[neighbor_freq]\
 				=WcdmaRrcSibInterFreqConfig(
 						neighbor_freq,
 						#float(field_val['lte-rrc.t_ReselectionEUTRA']),
@@ -212,24 +215,26 @@ class WcdmaRrcAnalyzer(Analyzer):
 						float(field_val['rrc.priority']),
 						float(field_val['rrc.threshXhigh'])*2,
 						float(field_val['rrc.threshXlow'])*2)
-				# self.__config[self.__status.id].sib.inter_freq_config[neighbor_freq].dump()
 
 			#TODO: RRC connection status update
 
 	def get_cell_list(self):
 		"""
-			Get a complete list of cell IDs *at current location*
+			Get a complete list of cell IDs *at current location*.
+			For these cells, the RrcAnalyzer has the corresponding configurations
+			Cells observed yet not camped on would NOT be listed (no config)
 
 			FIXME: currently only return *all* cells in the LteRrcConfig
 		"""
 		return self.__config.keys()
 
-	def get_cell_config(self,cell_id):
+	def get_cell_config(self,cell):
 		"""
 			Return a cell's configuration
+			cell is a (cell_id,freq) pair
 		"""
-		if self.__config.has_key(cell_id):
-			return self.__config[cell_id]
+		if self.__config.has_key(cell):
+			return self.__config[cell]
 		else:
 			return None
 
@@ -241,8 +246,9 @@ class WcdmaRrcAnalyzer(Analyzer):
 		return self.__status
 
 	def get_cur_cell_config(self):
-		if self.__config.has_key(self.__status.id):
-			return self.__config[self.__status.id]
+		cur_pair=(self.__status.id,self.__status.freq)
+		if self.__config.has_key(cur_pair):
+			return self.__config[cur_pair]
 		else:
 			return None
 
