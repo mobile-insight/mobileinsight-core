@@ -190,6 +190,22 @@ class LteRrcAnalyzer(Analyzer):
 						float(field_val['lte-rrc.threshX_Low'])*2,
 						float(field_val['lte-rrc.q_OffsetFreq']))
 
+				#2nd round: inter-freq cell individual offset
+				for val in field.iter('field'):
+					if val.get('name')=="lte-rrc.InterFreqNeighCellInfo_element":
+						field_val2={}
+
+						field_val2['lte-rrc.physCellId']=None #mandatory
+						field_val2['lte-rrc.q_OffsetCell']=None #mandatory
+
+						for val2 in field.iter('field'):
+							field_val2[val2.get('name')]=val2.get('show')
+
+						cell_id=int(field_val2['lte-rrc.physCellId'])
+						offset=int(field_val2['lte-rrc.q_OffsetCell'])
+						self.__config[cur_pair].sib.inter_freq_cell_config[(cell_id,neighbor_freq)]=q_offset_range[int(offset)]
+
+
 			#inter-RAT (UTRA)
 			if field.get('name')=="lte-rrc.CarrierFreqUTRA_FDD_element":
 				field_val={}
@@ -290,28 +306,6 @@ class LteRrcAnalyzer(Analyzer):
 				cell_id=int(field_val['lte-rrc.physCellId'])
 				offset=int(field_val['lte-rrc.q_OffsetCell'])
 				self.__config[cur_pair].sib.intra_freq_cell_config[cell_id]=q_offset_range[int(offset)]
-
-			if field.get('name')=="lte-rrc.InterFreqNeighCellInfo_element":
-				field_val={}
-
-				field_val['lte-rrc.physCellId']=None #mandatory
-				field_val['lte-rrc.q_OffsetCell']=None #mandatory
-
-				for val in field.iter('field'):
-					field_val[val.get('name')]=val.get('show')
-
-				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
-					self.__config[cur_pair]=LteRrcConfig()
-					self.__config[cur_pair].status=self.__status
-
-				cell_id=int(field_val['lte-rrc.physCellId'])
-				offset=int(field_val['lte-rrc.q_OffsetCell'])
-				cur_pair=(self.__status.id,self.__status.freq)
-				self.__config[cur_pair].sib.inter_freq_cell_config[cell_id]=q_offset_range[int(offset)]
-
-
-
 
 			#TODO: RRC connection status update
 
