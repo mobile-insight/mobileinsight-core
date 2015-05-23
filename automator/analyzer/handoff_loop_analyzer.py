@@ -46,6 +46,11 @@ class HandoffLoopAnalyzer(Analyzer):
 		cell_visited = {x:False for x in cell_list} # mark if a cell has been visited
 		cell_neighbor_visited = {} #boolean matrix: [i][j] indicates if ci->cj has been visited
 
+		#test
+		print cell_list
+		for cell in cell_list:
+			self.__rrc_analyzer.get_cell_config(cell).dump()
+
 		#Setup neighboring cell matrix
 		for cell in cell_list:
 
@@ -54,8 +59,8 @@ class HandoffLoopAnalyzer(Analyzer):
 			inter_freq_dict=cell_config[cell].sib.inter_freq_config
 			neighbor_cells=[] 
 
-			#test
-			cell_config[cell].dump()
+			# #test
+			# cell_config[cell].dump()
 			
 			#add intra-freq neighbors
 			neighbor_cells+=self.__rrc_analyzer.get_cell_on_freq(cell_freq)

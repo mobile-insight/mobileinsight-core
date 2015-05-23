@@ -343,7 +343,6 @@ class LteRrcAnalyzer(Analyzer):
 		else:
 			return None
 
-
 class LteRrcStatus:
 	"""
 		The metadata of a cell
@@ -408,7 +407,6 @@ class LteRrcConfig:
 			return LteRrcReselectionConfig(cell,freq,freq_config.priority,\
 				freq_config.q_offset_freq+offset_cell+hyst, \
 				freq_config.threshx_high,freq_config.threshx_low)
-
 
 class LteRrcSib:
 

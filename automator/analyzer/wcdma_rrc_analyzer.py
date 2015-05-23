@@ -135,9 +135,10 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 				#Default value setting
 				#FIXME: set default to those in TS25.331
-				field_val['rrc.priority']=None
-				field_val['rrc.threshServingLow']=None
-				field_val['rrc.s_PrioritySearch1']=None
+				field_val['rrc.priority']=None	#mandatory
+				field_val['rrc.threshServingLow']=None	#mandatory
+				field_val['rrc.s_PrioritySearch1']=None	#mandatory
+				field_val['rrc.s_PrioritySearch2']=0	#optional
 
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
@@ -148,14 +149,15 @@ class WcdmaRrcAnalyzer(Analyzer):
 					self.__config[cur_pair].status=self.__status
 
 				self.__config[cur_pair].sib.serv_config=WcdmaRrcSibServ(
-					float(field_val['rrc.priority']),
-					float(field_val['rrc.threshServingLow'])*2,
-					float(field_val['rrc.s_PrioritySearch1'])*2)
+					int(field_val['rrc.priority']),
+					int(field_val['rrc.threshServingLow'])*2,
+					int(field_val['rrc.s_PrioritySearch1'])*2,
+					int(field_val['rrc.s_PrioritySearch2']))	#do not double
 
 				# self.__config[self.__status.id].serv_config.dump()
 
 			#intra-freq info
-			if field.get('name')=="rrc.SysInfoType3_element":
+			if field.get('name')=="rrc.cellSelectReselectInfo_element":
 				field_val={}
 
 				#default value based on TS25.331
@@ -165,9 +167,19 @@ class WcdmaRrcAnalyzer(Analyzer):
 				field_val['rrc.q_QualMin']=None #mandatory
 				field_val['rrc.q_Hyst_l_S']=None #mandatory
 				field_val['rrc.t_Reselection_S']=None #mandatory
+				field_val['rrc.q_HYST_2_S']=None #optional, default=q_Hyst_l_S
+
+				#TODO: handle rrc.RAT_FDD_Info_element (p1530, TS25.331)
+				#s-SearchRAT is the RAT-specific threshserv
+
+				#TODO: handle FDD and TDD
 
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
+
+				#TS25.331: if qHyst-2s is missing, the default is qHyst-1s
+				if field_val['rrc.q_HYST_2_S']==None:
+					field_val['rrc.q_HYST_2_S']=field_val['rrc.q_Hyst_l_S']
 
 				cur_pair=(self.__status.id,self.__status.freq)
 				if not self.__config.has_key(cur_pair):
@@ -176,11 +188,12 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 				self.__config[cur_pair].sib.intra_freq_config\
 				=WcdmaRrcSibIntraFreqConfig(
-					float(field_val['rrc.t_Reselection_S']),
-					float(field_val['rrc.q_RxlevMin'])*2,
-					float(field_val['rrc.s_Intersearch'])*2,
-					float(field_val['rrc.s_Intrasearch'])*2,
-					float(field_val['rrc.q_Hyst_l_S'])*2)
+					int(field_val['rrc.t_Reselection_S']),
+					int(field_val['rrc.q_RxlevMin'])*2,
+					int(field_val['rrc.s_Intersearch'])*2,
+					int(field_val['rrc.s_Intrasearch'])*2,
+					int(field_val['rrc.q_Hyst_l_S'])*2,
+					int(field_val['rrc.q_HYST_2_S'])*2)
 
 			#inter-RAT cell info (LTE)
 			if field.get('name')=="rrc.EUTRA_FrequencyAndPriorityInfo_element":
@@ -189,9 +202,9 @@ class WcdmaRrcAnalyzer(Analyzer):
 				#FIXME: set to the default value based on TS36.331
 				field_val['rrc.earfcn']=None
 				#field_val['lte-rrc.t_ReselectionEUTRA']=None
+				field_val['rrc.priority']=None
 				field_val['rrc.qRxLevMinEUTRA']=-140
 				#field_val['lte-rrc.p_Max']=None
-				field_val['rrc.priority']=None
 				field_val['rrc.threshXhigh']=None
 				field_val['rrc.threshXlow']=None
 
@@ -209,12 +222,12 @@ class WcdmaRrcAnalyzer(Analyzer):
 						neighbor_freq,
 						#float(field_val['lte-rrc.t_ReselectionEUTRA']),
 						None,
-						float(field_val['rrc.qRxLevMinEUTRA'])*2,
+						int(field_val['rrc.qRxLevMinEUTRA'])*2,
 						#float(field_val['lte-rrc.p_Max']),
 						None,
-						float(field_val['rrc.priority']),
-						float(field_val['rrc.threshXhigh'])*2,
-						float(field_val['rrc.threshXlow'])*2)
+						int(field_val['rrc.priority']),
+						int(field_val['rrc.threshXhigh'])*2,
+						int(field_val['rrc.threshXlow'])*2)
 
 			#TODO: RRC connection status update
 
@@ -295,6 +308,21 @@ class WcdmaRrcConfig:
 		self.sib.dump()
 		self.active.dump()
 
+	def get_cell_reselection_config(self,cell,freq):
+
+		if freq==self.status.freq: #intra-freq
+			hyst = self.sib.intra_freq_config.q_Hyst1
+			return LteRrcReselectionConfig(cell,freq,None,hyst,None,None)
+		else:
+			#inter-frequency/RAT
+			#TODO: cell individual offset (not available in AT&T and T-mobile)
+			if not self.sib.inter_freq_config.has_key(freq):
+				return None
+			freq_config = self.sib.inter_freq_config[freq]
+			hyst = self.sib.serv_config.s_priority_search2
+			return LteRrcReselectionConfig(cell,freq,freq_config.priority, hyst, \
+				freq_config.threshx_high,freq_config.threshx_low)
+
 class WcdmaRrcSib:
 
 	"""
@@ -303,9 +331,9 @@ class WcdmaRrcSib:
 	def __init__(self):
 		#FIXME: init based on the default value in TS25.331
 		#configuration as a serving cell (LteRrcSibServ)
-		self.serv_config = WcdmaRrcSibServ(None,None,None) 
+		self.serv_config = WcdmaRrcSibServ(None,None,None,None) 
 		#Intra-freq reselection config
-		self.intra_freq_config = WcdmaRrcSibIntraFreqConfig(None,None,None,None,None) 
+		self.intra_freq_config = WcdmaRrcSibIntraFreqConfig(0,0,None,None,None,None) 
 		#Inter-freq/RAT reselection config. Freq/cell -> WcdmaRrcSibInterFreqConfig
 		self.inter_freq_config = {}  
 
@@ -319,10 +347,11 @@ class WcdmaRrcSibServ:
 	"""
 		Serving cell's cell-reselection configurations
 	"""
-	def __init__(self,priority,thresh_serv, s_priority_search1):
+	def __init__(self,priority,thresh_serv, s_priority_search1,s_priority_search2):
 		self.priority = priority #cell reselection priority
 		self.threshserv_low = thresh_serv #cell reselection threshold
 		self.s_priority_search1 = s_priority_search1 #threshold for searching other frequencies
+		self.s_priority_search2 = s_priority_search2
 
 	def dump(self):
 		print self.__class__.__name__,self.priority,self.threshserv_low,self.s_priority_search1
@@ -331,17 +360,18 @@ class WcdmaRrcSibIntraFreqConfig:
 	"""
 		Intra-frequency cell-reselection configurations
 	"""
-	def __init__(self,tReselection,q_RxLevMin,s_InterSearch,s_IntraSearch,q_Hyst):
+	def __init__(self,tReselection,q_RxLevMin,s_InterSearch,s_IntraSearch,q_Hyst1,q_Hyst2):
 		#FIXME: individual cell offset
 		self.tReselection = tReselection
 		self.q_RxLevMin = q_RxLevMin
 		self.s_InterSearch = s_InterSearch
 		self.s_IntraSearch = s_IntraSearch
-		self.q_Hyst = q_Hyst
+		self.q_Hyst1 = q_Hyst1
+		self.q_Hyst2 = q_Hyst2
 
 	def dump(self):
 		print self.__class__.__name__,self.tReselection,self.q_RxLevMin,\
-		self.s_InterSearch,self.s_IntraSearch,self.q_Hyst
+		self.s_InterSearch,self.s_IntraSearch,self.q_Hyst1,self.q_Hyst2
 
 class WcdmaRrcSibInterFreqConfig:
 	"""
@@ -359,8 +389,8 @@ class WcdmaRrcSibInterFreqConfig:
 		self.threshx_low = threshx_low
 
 	def dump(self):
-		print self.__class__.__name__,self.freq, self.tReselection, self.q_RxLevMin, \
-		self.p_Max, self.priority, self.threshx_high, self.threshx_low
+		print self.__class__.__name__,self.freq, self.priority, self.tReselection,\
+		self.p_Max, self.q_RxLevMin, self.threshx_high, self.threshx_low
 
 class WcdmaRrcActive:
 	def __init__(self):
