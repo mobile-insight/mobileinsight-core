@@ -126,11 +126,11 @@ class LteRrcAnalyzer(Analyzer):
 				#FIXME: set default to those in TS36.331
 				field_val['lte-rrc.cellReselectionPriority']=None #mandatory
 				field_val['lte-rrc.threshServingLow']=None #mandatory
-				field_val['lte-rrc.s_NonIntraSearch']=float("inf")
+				field_val['lte-rrc.s_NonIntraSearch']="inf"
 				field_val['lte-rrc.q_Hyst']=0
 				field_val['lte-rrc.q_RxLevMin']=None #mandatory
 				field_val['lte-rrc.p_Max']=23 #default value for UE category 3
-				field_val['lte-rrc.s_IntraSearch']=float('inf')
+				field_val['lte-rrc.s_IntraSearch']="inf"
 				field_val['lte-rrc.t_ReselectionEUTRA']=None
 
 				for val in field.iter('field'):
@@ -142,16 +142,16 @@ class LteRrcAnalyzer(Analyzer):
 					self.__config[cur_pair].status=self.__status
 
 				self.__config[cur_pair].sib.serv_config=LteRrcSibServ(
-					float(field_val['lte-rrc.cellReselectionPriority']),
-					float(field_val['lte-rrc.threshServingLow'])*2,
+					int(field_val['lte-rrc.cellReselectionPriority']),
+					int(field_val['lte-rrc.threshServingLow'])*2,
 					float(field_val['lte-rrc.s_NonIntraSearch'])*2,
-					float(field_val['lte-rrc.q_Hyst']))
+					int(field_val['lte-rrc.q_Hyst']))
 
 				self.__config[cur_pair].sib.intra_freq_config\
 				=LteRrcSibIntraFreqConfig(
-					float(field_val['lte-rrc.t_ReselectionEUTRA']),
-					float(field_val['lte-rrc.q_RxLevMin'])*2,
-					float(field_val['lte-rrc.p_Max']),
+					int(field_val['lte-rrc.t_ReselectionEUTRA']),
+					int(field_val['lte-rrc.q_RxLevMin'])*2,
+					int(field_val['lte-rrc.p_Max']),
 					float(field_val['lte-rrc.s_IntraSearch'])*2) 
 
 
@@ -182,13 +182,13 @@ class LteRrcAnalyzer(Analyzer):
 				=LteRrcSibInterFreqConfig(
 						"LTE",
 						neighbor_freq,
-						float(field_val['lte-rrc.t_ReselectionEUTRA']),
-						float(field_val['lte-rrc.q_RxLevMin'])*2,
-						float(field_val['lte-rrc.p_Max']),
-						float(field_val['lte-rrc.cellReselectionPriority']),
-						float(field_val['lte-rrc.threshX_High'])*2,
-						float(field_val['lte-rrc.threshX_Low'])*2,
-						float(field_val['lte-rrc.q_OffsetFreq']))
+						int(field_val['lte-rrc.t_ReselectionEUTRA']),
+						int(field_val['lte-rrc.q_RxLevMin'])*2,
+						int(field_val['lte-rrc.p_Max']),
+						int(field_val['lte-rrc.cellReselectionPriority']),
+						int(field_val['lte-rrc.threshX_High'])*2,
+						int(field_val['lte-rrc.threshX_Low'])*2,
+						int(field_val['lte-rrc.q_OffsetFreq']))
 
 				#2nd round: inter-freq cell individual offset
 				for val in field.iter('field'):
@@ -233,11 +233,11 @@ class LteRrcAnalyzer(Analyzer):
 						"UTRA",
 						neighbor_freq,
 						None,	#For 3G, tReselection is not in this IE
-						float(field_val['lte-rrc.q_RxLevMin'])*2,
-						float(field_val['lte-rrc.p_MaxUTRA']),
-						float(field_val['lte-rrc.cellReselectionPriority']),
-						float(field_val['lte-rrc.threshX_High'])*2,
-						float(field_val['lte-rrc.threshX_Low'])*2,
+						int(field_val['lte-rrc.q_RxLevMin'])*2,
+						int(field_val['lte-rrc.p_MaxUTRA']),
+						int(field_val['lte-rrc.cellReselectionPriority']),
+						int(field_val['lte-rrc.threshX_High'])*2,
+						int(field_val['lte-rrc.threshX_Low'])*2,
 						0)	#inter-RAT has no freq-offset
 
 			if field.get('name')=="lte-rrc.t_ReselectionUTRA":
@@ -273,11 +273,11 @@ class LteRrcAnalyzer(Analyzer):
 						"GERAN",
 						neighbor_freq,
 						None,	#For 3G, tReselection is not in this IE
-						float(field_val['lte-rrc.q_RxLevMin'])*2,
-						float(field_val['lte-rrc.p_MaxGERAN']),
-						float(field_val['lte-rrc.cellReselectionPriority']),
-						float(field_val['lte-rrc.threshX_High'])*2,
-						float(field_val['lte-rrc.threshX_Low'])*2,
+						int(field_val['lte-rrc.q_RxLevMin'])*2,
+						int(field_val['lte-rrc.p_MaxGERAN']),
+						int(field_val['lte-rrc.cellReselectionPriority']),
+						int(field_val['lte-rrc.threshX_High'])*2,
+						int(field_val['lte-rrc.threshX_Low'])*2,
 						0)	#inter-RAT has no freq-offset
 
 			#FIXME: t_ReselectionGERAN appears BEFORE config, so this code does not work!

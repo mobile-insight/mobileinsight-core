@@ -8,12 +8,12 @@ including low-level msg filter and high-level analyzer
 Author: Yuanjie Li
 """
 
-from module import Module, Event
+from element import Element, Event
 
-class Analyzer(Module):
+class Analyzer(Element):
 
 	def __init__(self):
-		Module.__init__(self)
+		Element.__init__(self)
 		self.source=None	#trace source collector
 		#callback when source pushes messages
 		#FIXME: looks redundant with the from_list

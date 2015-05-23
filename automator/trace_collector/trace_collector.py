@@ -8,13 +8,13 @@ All specific trace collectors (QXDM, RIL, 802.11, pcap) derive from it
 Author: Yuanjie Li
 """
 
-from module import *
+from element import *
 
-class TraceCollector(Module):
+class TraceCollector(Element):
 
     def __init__(self):
         # No source for TraceCollector
-        Module.__init__(self)
+        Element.__init__(self)
 
 
     # Add an analyzer that needs the message
