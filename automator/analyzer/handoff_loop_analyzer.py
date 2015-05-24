@@ -100,7 +100,7 @@ class HandoffLoopAnalyzer(Analyzer):
 				dont_care=False
 
 				while dfs_stack:
-					print "dfs_stack",dfs_stack
+					# print "dfs_stack",dfs_stack
 					src_cell = dfs_stack.pop()
 					src_rss = virtual_rss.pop()
 					dst_cell = None
@@ -116,7 +116,7 @@ class HandoffLoopAnalyzer(Analyzer):
 							cell_neighbor_visited[src_cell][dst_cell]=True
 							break
 
-					print "dst_cell",dst_cell
+					# print "dst_cell",dst_cell
 					if dst_cell==None:
 						#src_cell's all neighbors have been visited
 						continue
@@ -132,7 +132,7 @@ class HandoffLoopAnalyzer(Analyzer):
 					else:
 						dst_pref=None
 
-					print src_freq,src_pref,dst_freq,dst_pref
+					# print src_freq,src_pref,dst_freq,dst_pref
 
 					if src_pref==None or dst_pref==None:	#happens in 3G
 						#25.331: without pref, treat as equal pref
@@ -145,7 +145,7 @@ class HandoffLoopAnalyzer(Analyzer):
 
 						loop_happen = False
 						if dont_care:
-							print "test1"
+							# print "test1"
 							#loop if src_cell->dst_cell happens under src_rss only
 							#intra-freq: loop must happens
 							intra_freq_loop = (src_freq==dst_freq)
@@ -158,7 +158,7 @@ class HandoffLoopAnalyzer(Analyzer):
 							loop_happen = intra_freq_loop or inter_freq_loop1 \
 								or inter_freq_loop2
 						else:
-							print "test2"
+							# print "test2"
 							#loop if src_cell->dst_cell happens under src_rss and dst_rss
 							dst_rss = virtual_rss[0]
 
@@ -179,9 +179,9 @@ class HandoffLoopAnalyzer(Analyzer):
 								or inter_freq_loop2 or inter_freq_loop3
 
 						if loop_happen:
-							print "test3"
+							# print "test3"
 							#report loop
-							loop_report="Persistent loop: "
+							loop_report="\033[91m\033[1mPersistent loop: \033[0m\033[0m"
 							for cell in dfs_stack:
 								loop_report=loop_report+str(cell)+"->"
 							loop_report=loop_report+str(src_cell)+"->"+str(dst_cell)
@@ -193,7 +193,7 @@ class HandoffLoopAnalyzer(Analyzer):
 
 					else:
 						if src_freq==dst_freq:	#intra-freq reselection
-							print "test4"
+							# print "test4"
 
 							if dst_config.offset!=None:
 								if not dfs_stack:
@@ -208,7 +208,7 @@ class HandoffLoopAnalyzer(Analyzer):
 								virtual_rss.append(src_rss)
 						else:
 							if src_pref<dst_pref:
-								print "test5"
+								# print "test5"
 								if not dfs_stack:
 									dont_care = True
 								dfs_stack.append(src_cell)
@@ -219,11 +219,11 @@ class HandoffLoopAnalyzer(Analyzer):
 
 								threshserv=cell_config[src_cell].sib.serv_config.threshserv_low
 								if src_rss >= threshserv:	#no loop, pass the dst_cell
-									print "test6"
+									# print "test6"
 									dfs_stack.append(src_cell)
 									virtual_rss.append(src_rss)
 								else:
-									print "test7"
+									# print "test7"
 									if not dfs_stack:
 										dont_care = False
 									dfs_stack.append(src_cell)
@@ -231,7 +231,7 @@ class HandoffLoopAnalyzer(Analyzer):
 									virtual_rss.append(src_rss)
 									virtual_rss.append(dst_config.threshx_low)
 							else:	#src_pref==dst_pref
-								print "test8"
+								# print "test8"
 								if not dfs_stack:
 									dont_care = False
 
