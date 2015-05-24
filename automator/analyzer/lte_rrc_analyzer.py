@@ -13,7 +13,6 @@ Author: Yuanjie Li
 
 import xml.etree.ElementTree as ET
 from analyzer import *
-from msg_dump import *
 import time
 
 __all__=["LteRrcAnalyzer"]
