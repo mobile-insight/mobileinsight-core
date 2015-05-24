@@ -323,39 +323,13 @@ class DMLogPacket:
         res, offset = cls._decode_by_format(cls._LOGITEM_FMT[type_id], b, 0)
         ind = 0 + offset
 
+        # Decode complex items that need extra cares
         if type_id == LOG_PACKET_ID["WCDMA_Signaling_Messages"]:
             offset = cls._decode_wcdma_signaling_messages(b, ind, res)
             ind += offset
-
         elif type_id == LOG_PACKET_ID["LTE_RRC_OTA_Packet"]:
-            pkt_ver = cls._search_result(res, "Pkt Version")
-            if pkt_ver not in (2, 7):
-                print "Unknown LTE RRC OTA packet version: %d" % pkt_ver
-                fmt = None
-            elif pkt_ver == 7:
-                fmt = [ (cls._DSL_SKIP, 4),      # Unknown yet, only for Pkt Version = 7
-                        ("Msg Length", "B"),
-                        ("SIB Mask in SI", "B"),
-                        ]
-            elif pkt_ver == 2:
-                fmt = [ ("Msg Length", "B"),
-                        ("SIB Mask in SI", "B"),
-                        ]
-            if fmt:
-                res2, offset = cls._decode_by_format(fmt, b, ind)
-                res.extend(res2)
-                ind = ind + offset
-                pdu_number, pdu_length = cls._search_result(
-                                                res,
-                                                ("PDU Number", "Msg Length",))
-                msg = b[ind:(ind + pdu_length)]
-                if pdu_number in LTE_RRC_OTA_PDU_TYPE:
-                    decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
-                    res.append( ("Msg", cls._wrap_decoded_xml(decoded)) )
-                    # print decoded
-                else:
-                    print "Unknown LTE RRC PDU Type: 0x%x" % pdu_number
-
+            offset = cls._decode_lte_rrc_ota(b, ind, res)
+            ind += offset
         elif type_id in (   LOG_PACKET_ID["LTE_NAS_ESM_Plain_OTA_Incoming_Message"],
                             LOG_PACKET_ID["LTE_NAS_ESM_Plain_OTA_Outgoing_Message"],
                             LOG_PACKET_ID["LTE_NAS_EMM_Plain_OTA_Incoming_Message"],
@@ -363,62 +337,12 @@ class DMLogPacket:
                             ):
             offset = cls._decode_lte_nas_plain(b, ind, res)
             ind += offset
-
         elif type_id == LOG_PACKET_ID["LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results"]:
-            pkt_ver = cls._search_result(res, "Version")
-            if pkt_ver not in cls._LTE_ML1_CMIFMR_FMT:
-                print "Unknown LTE ML1 CMIFMR version: 0x%x" % pkt_ver
-            else:
-                # Decode header
-                fmt = cls._LTE_ML1_CMIFMR_FMT[pkt_ver]["Header"]
-                res2, offset = cls._decode_by_format(fmt, b, ind)
-                ind += offset
-                n_neighbor_cells, n_detected_cells = cls._search_result( 
-                                                res2,
-                                                ("Number of Neighbor Cells",
-                                                 "Number of Detected Cells",))
-                # Decode each line of neighbor cells
-                res_allcell = []
-                fmt = cls._LTE_ML1_CMIFMR_FMT[pkt_ver]["Neighbor Cell"]
-                for i in range(n_neighbor_cells):
-                    res_cell, offset = cls._decode_by_format(fmt, b, ind)
-                    ind += offset
-                    res_allcell.append(tuple(res_cell))
-                res2.append(("Neighbor Cells", tuple(res_allcell)))
-                # Decode each line of detected cells
-                res_allcell = []
-                fmt = cls._LTE_ML1_CMIFMR_FMT[pkt_ver]["Detected Cell"]
-                for i in range(n_detected_cells):
-                    res_cell, offset = cls._decode_by_format(fmt, b, ind)
-                    ind += offset
-                    res_allcell.append(tuple(res_cell))
-                res2.append(("Detected Cells", tuple(res_allcell)))
-
-                res.extend(tuple(res2))
-
+            offset = cls._decode_lte_ml1_cmifmr(b, ind, res)
+            ind += offset
         elif type_id == LOG_PACKET_ID["LTE_ML1_Serving_Cell_Measurement_Result"]:
-            n_subpkt = cls._search_result(res, "Number of SubPackets")
-            res_allpkt = []
-            for i in range(n_subpkt):
-                # Decode subpacket header
-                fmt = cls._LTE_ML1_SUBPKT_FMT["Header"]
-                res_pkt, offset = cls._decode_by_format(fmt, b, ind)
-                ind += offset
-                # Decode payload
-                subpkt_id, subpkt_ver = cls._search_result( 
-                                                res_pkt,
-                                                ("SubPacket ID", "Version"))
-                if subpkt_id not in cls._LTE_ML1_SUBPKT_FMT:
-                    print "Unknown LTE ML1 Subpacket ID: 0x%x" % subpkt_id
-                elif subpkt_ver not in cls._LTE_ML1_SUBPKT_FMT[subpkt_id]:
-                    print "Unknown LTE ML1 Subpacket version: 0x%x - %d" % (subpkt_id, subpkt_ver)
-                else:
-                    fmt = cls._LTE_ML1_SUBPKT_FMT[subpkt_id][subpkt_ver]
-                    res2, offset = cls._decode_by_format(fmt, b, ind)
-                    res_pkt.extend(res2)
-                    
-                res_allpkt.append(tuple(res_pkt))
-            res.append(("Subpackets", tuple(res_allpkt)))
+            offset = cls._decode_lte_ml1_subpkt(b, ind, res)
+            ind += offset
 
         return res
 
@@ -492,6 +416,12 @@ class DMLogPacket:
         assert isinstance(xmls, (list, tuple))
         return "<msg>\n" + "".join(xmls) + "</msg>\n"
 
+    ##################################################
+    #                                                #
+    #         DECODE IRREGULAR LOG ITEMS             #
+    #                                                #
+    ##################################################
+
     @classmethod
     # Keep strings consistent with ws_dissector.py
     @static_var("sib_types", {  0: "RRC_MIB",
@@ -554,6 +484,38 @@ class DMLogPacket:
         return pdu_length
 
     @classmethod
+    def _decode_lte_rrc_ota(cls, b, start, result):
+        pkt_ver = cls._search_result(result, "Pkt Version")
+        if pkt_ver not in (2, 7):
+            print "Unknown LTE RRC OTA packet version: %d" % pkt_ver
+            return 0
+
+        if pkt_ver == 7:
+            fmt = [ (cls._DSL_SKIP, 4),      # Unknown yet, only for Pkt Version = 7
+                    ("Msg Length", "B"),
+                    ("SIB Mask in SI", "B"),
+                    ]
+        elif pkt_ver == 2:
+            fmt = [ ("Msg Length", "B"),
+                    ("SIB Mask in SI", "B"),
+                    ]
+        ind = start
+        res2, offset = cls._decode_by_format(fmt, b, ind)
+        result.extend(res2)
+        ind += offset
+        pdu_number, pdu_length = cls._search_result(
+                                        result,
+                                        ("PDU Number", "Msg Length",))
+        msg = b[ind:(ind + pdu_length)]
+        if pdu_number in LTE_RRC_OTA_PDU_TYPE:
+            decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
+            result.append( ("Msg", cls._wrap_decoded_xml(decoded)) )
+            # print decoded
+        else:
+            print "Unknown LTE RRC PDU Type: 0x%x" % pdu_number
+        return (ind - start) + pdu_length
+
+    @classmethod
     def _decode_lte_nas_plain(cls, b, start, result):
         pkt_ver = cls._search_result(result, "Pkt Version")
         if pkt_ver not in cls._LTE_NAS_PLAIN_FMT:
@@ -567,6 +529,78 @@ class DMLogPacket:
         decoded = cls._decode_msg("LTE-NAS_EPS_PLAIN", nas_msg_plain)
         result.append( ("Msg", cls._wrap_decoded_xml(decoded)) )
         return len(b) - start
+
+
+    @classmethod
+    def _decode_lte_ml1_cmifmr(cls, b, start, result):
+        pkt_ver = cls._search_result(result, "Version")
+        if pkt_ver not in cls._LTE_ML1_CMIFMR_FMT:
+            print "Unknown LTE ML1 CMIFMR version: 0x%x" % pkt_ver
+            return 0
+        
+        # Decode header
+        ind = start
+        fmt = cls._LTE_ML1_CMIFMR_FMT[pkt_ver]["Header"]
+        res2, offset = cls._decode_by_format(fmt, b, ind)
+        ind += offset
+        n_neighbor_cells, n_detected_cells = cls._search_result( 
+                                        res2,
+                                        ("Number of Neighbor Cells",
+                                         "Number of Detected Cells",))
+        # Decode each line of neighbor cells
+        res_allcell = []
+        fmt = cls._LTE_ML1_CMIFMR_FMT[pkt_ver]["Neighbor Cell"]
+        for i in range(n_neighbor_cells):
+            res_cell, offset = cls._decode_by_format(fmt, b, ind)
+            ind += offset
+            res_allcell.append(tuple(res_cell))
+        res2.append(("Neighbor Cells", tuple(res_allcell)))
+        # Decode each line of detected cells
+        res_allcell = []
+        fmt = cls._LTE_ML1_CMIFMR_FMT[pkt_ver]["Detected Cell"]
+        for i in range(n_detected_cells):
+            res_cell, offset = cls._decode_by_format(fmt, b, ind)
+            ind += offset
+            res_allcell.append(tuple(res_cell))
+        res2.append(("Detected Cells", tuple(res_allcell)))
+
+        result.extend(tuple(res2))
+        return ind - start
+
+    @classmethod
+    def _decode_lte_ml1_subpkt(cls, b, start, result):
+        pkt_ver, n_subpkt = cls._search_result(
+                                        result,
+                                        ("Version", "Number of SubPackets"))
+        if pkt_ver != 1:
+            print "Unknown LTE ML1 packet version: %d" % pkt_ver
+            return 0
+        res_allpkt = []
+        ind = start
+        for i in range(n_subpkt):
+            # Decode subpacket header
+            fmt = cls._LTE_ML1_SUBPKT_FMT["Header"]
+            res_subpkt, offset = cls._decode_by_format(fmt, b, ind)
+            ind += offset
+            # Decode payload
+            subpkt_id, subpkt_ver = cls._search_result( 
+                                                res_subpkt,
+                                                ("SubPacket ID", "Version"))
+            if subpkt_id not in cls._LTE_ML1_SUBPKT_FMT:
+                print "Unknown LTE ML1 Subpacket ID: 0x%x" % subpkt_id
+            elif subpkt_ver not in cls._LTE_ML1_SUBPKT_FMT[subpkt_id]:
+                print "Unknown LTE ML1 Subpacket version: 0x%x - %d" % (subpkt_id, subpkt_ver)
+            else:
+                fmt = cls._LTE_ML1_SUBPKT_FMT[subpkt_id][subpkt_ver]
+                res2, offset = cls._decode_by_format(fmt, b, ind)
+                ind += offset
+                res_subpkt.extend(res2)
+                
+            res_allpkt.append(tuple(res_subpkt))
+
+        result.append(("Subpackets", tuple(res_allpkt)))
+        return ind - start
+
 
 # Test decoding
 if __name__ == '__main__':
@@ -641,7 +675,6 @@ if __name__ == '__main__':
         l, type_id, ts, log_item = DMLogPacket.decode(binascii.a2b_hex(b))
         print "> Packet #%d" % i
         print l, LOG_PACKET_NAME[type_id], ts
-        print [k for k, v in log_item]
         print dict(log_item).get("Msg", "XML msg not found.")
         i += 1
 
