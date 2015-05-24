@@ -350,6 +350,7 @@ class LteRrcStatus:
 	def __init__(self):
 		self.id = None #cell ID
 		self.freq = None #cell frequency
+		self.rat = "LTE" #radio technology
 		self.tac = None #tracking area code
 		self.bandwidth = None #cell bandwidth
 		self.conn = False #connectivity status (for serving cell only)
@@ -373,6 +374,7 @@ class LteRrcConfig:
 	"""
 	def __init__(self):
 		self.status = LteRrcStatus() #the metadata of this cell
+		self.status.rat = "LTE"
 		self.sib=LteRrcSib()	#Idle-state: cellID->LTE_RRC_SIB_CELL
 		self.active=LteRrcActive() #active-state configurations
 
@@ -383,10 +385,14 @@ class LteRrcConfig:
 		self.active.dump()
 
 
-	def get_cell_reselection_config(self,cell,freq):
+	def get_cell_reselection_config(self,cell_meta):
 		"""
-			Given a cell ID, return its resel configurations in serving cell (self.status)
+			Given a cell's metadata, return its reselection config from the serving cell
 		"""
+		if cell_meta==None:
+			return None
+		cell = cell_meta.id
+		freq = cell_meta.freq
 		if freq==self.status.freq:
 			#intra-frequency 
 			hyst = self.sib.serv_config.q_hyst

@@ -47,7 +47,7 @@ class HandoffLoopAnalyzer(Analyzer):
 		cell_neighbor_visited = {} #boolean matrix: [i][j] indicates if ci->cj has been visited
 
 		#test
-		print cell_list
+		# print cell_list
 		for cell in cell_list:
 			self.__rrc_analyzer.get_cell_config(cell).dump()
 
@@ -55,20 +55,24 @@ class HandoffLoopAnalyzer(Analyzer):
 		for cell in cell_list:
 
 			cell_config[cell]=self.__rrc_analyzer.get_cell_config(cell)
-			cell_freq=cell_config[cell].status.freq
-			inter_freq_dict=cell_config[cell].sib.inter_freq_config
-			neighbor_cells=[] 
+			# cell_freq=cell_config[cell].status.freq
+			# inter_freq_dict=cell_config[cell].sib.inter_freq_config
+			# neighbor_cells=[] 
 
 			# #test
 			# cell_config[cell].dump()
 			
-			#add intra-freq neighbors
-			neighbor_cells+=self.__rrc_analyzer.get_cell_on_freq(cell_freq)
-			neighbor_cells.remove(cell)	#remove the current cell itself
+			# #add intra-freq neighbors
+			# neighbor_cells+=self.__rrc_analyzer.get_cell_on_freq(cell_freq)
+			# if cell in neighbor_cells:
+			# 	neighbor_cells.remove(cell)	#remove the current cell itself
 
-			#add inter-freq/RAT neighbors	
-			for freq in inter_freq_dict:
-				neighbor_cells+=self.__rrc_analyzer.get_cell_on_freq(freq)
+			# #add inter-freq/RAT neighbors	
+			# for freq in inter_freq_dict:
+			# 	neighbor_cells+=self.__rrc_analyzer.get_cell_on_freq(freq)
+			neighbor_cells = self.__rrc_analyzer.get_cell_neighbor(cell)
+
+			print cell,"neighbor_cells=",neighbor_cells
 			
 			#initially all links are marked unvisited
 			cell_neighbor_visited[cell]={x:False for x in neighbor_cells}
@@ -86,7 +90,6 @@ class HandoffLoopAnalyzer(Analyzer):
 				for cell in cell_list:
 					if not cell_visited[cell]:
 						unvisited_cell=cell
-						cell_visited[cell]=True
 						break
 
 				dfs_stack=[unvisited_cell]		
@@ -97,6 +100,7 @@ class HandoffLoopAnalyzer(Analyzer):
 				dont_care=False
 
 				while dfs_stack:
+					print "dfs_stack",dfs_stack
 					src_cell = dfs_stack.pop()
 					src_rss = virtual_rss.pop()
 					dst_cell = None
@@ -112,16 +116,27 @@ class HandoffLoopAnalyzer(Analyzer):
 							cell_neighbor_visited[src_cell][dst_cell]=True
 							break
 
+					print "dst_cell",dst_cell
 					if dst_cell==None:
 						#src_cell's all neighbors have been visited
 						continue
 
 					src_freq=cell_config[src_cell].status.freq
 					dst_freq=cell_config[dst_cell].status.freq
-					dst_config=cell_config[src_cell].get_cell_reselection_config(dst_cell,dst_freq)
+					dst_config=cell_config[src_cell].get_cell_reselection_config(cell_config[dst_cell].status)
 
 					src_pref=cell_config[src_cell].sib.serv_config.priority
-					dst_pref=dst_config.freq
+					if dst_config!=None:
+						#WCDMA only
+						dst_pref=dst_config.priority
+					else:
+						dst_pref=None
+
+					print src_freq,src_pref,dst_freq,dst_pref
+
+					if src_pref==None or dst_pref==None:	#happens in 3G
+						#25.331: without pref, treat as equal pref
+						src_pref = dst_pref = None 
 
 					# a potential loop with dst_cell
 					if dst_cell in dfs_stack: 
@@ -130,6 +145,7 @@ class HandoffLoopAnalyzer(Analyzer):
 
 						loop_happen = False
 						if dont_care:
+							print "test1"
 							#loop if src_cell->dst_cell happens under src_rss only
 							#intra-freq: loop must happens
 							intra_freq_loop = (src_freq==dst_freq)
@@ -142,6 +158,7 @@ class HandoffLoopAnalyzer(Analyzer):
 							loop_happen = intra_freq_loop or inter_freq_loop1 \
 								or inter_freq_loop2
 						else:
+							print "test2"
 							#loop if src_cell->dst_cell happens under src_rss and dst_rss
 							dst_rss = virtual_rss[0]
 
@@ -162,6 +179,7 @@ class HandoffLoopAnalyzer(Analyzer):
 								or inter_freq_loop2 or inter_freq_loop3
 
 						if loop_happen:
+							print "test3"
 							#report loop
 							loop_report="Persistent loop: "
 							for cell in dfs_stack:
@@ -175,34 +193,9 @@ class HandoffLoopAnalyzer(Analyzer):
 
 					else:
 						if src_freq==dst_freq:	#intra-freq reselection
-							if not dfs_stack:
-								dont_care = False
-							dst_rss=src_rss+dst_config.offset
-							dfs_stack.append(src_cell)
-							dfs_stack.append(dst_cell)
-							virtual_rss.append(src_rss)
-							virtual_rss.append(dst_rss)
-						else:
-							if src_pref<dst_pref:
-								if not dfs_stack:
-									dont_care = True
-								dfs_stack.append(src_cell)
-								dfs_stack.append(dst_cell)
-								virtual_rss.append(src_rss)
-								virtual_rss.append(dst_config.threshx_high)
-							elif src_pref>dst_pref:
-								threshserv=cell_config[src_cell].sib.serv_config.threshserv_low
-								if src_rss >= threshserv:	#no loop, pass the dst_cell
-									dfs_stack.append(src_cell)
-									virtual_rss.append(src_rss)
-								else:
-									if not dfs_stack:
-										dont_care = False
-									dfs_stack.append(src_cell)
-									dfs_stack.append(dst_cell)
-									virtual_rss.append(src_rss)
-									virtual_rss.append(dst_config.threshx_low)
-							else:	
+							print "test4"
+
+							if dst_config.offset!=None:
 								if not dfs_stack:
 									dont_care = False
 								dst_rss=src_rss+dst_config.offset
@@ -210,4 +203,48 @@ class HandoffLoopAnalyzer(Analyzer):
 								dfs_stack.append(dst_cell)
 								virtual_rss.append(src_rss)
 								virtual_rss.append(dst_rss)
+							else: #trace not ready
+								dfs_stack.append(src_cell)
+								virtual_rss.append(src_rss)
+						else:
+							if src_pref<dst_pref:
+								print "test5"
+								if not dfs_stack:
+									dont_care = True
+								dfs_stack.append(src_cell)
+								dfs_stack.append(dst_cell)
+								virtual_rss.append(src_rss)
+								virtual_rss.append(dst_config.threshx_high)
+							elif src_pref>dst_pref:
+
+								threshserv=cell_config[src_cell].sib.serv_config.threshserv_low
+								if src_rss >= threshserv:	#no loop, pass the dst_cell
+									print "test6"
+									dfs_stack.append(src_cell)
+									virtual_rss.append(src_rss)
+								else:
+									print "test7"
+									if not dfs_stack:
+										dont_care = False
+									dfs_stack.append(src_cell)
+									dfs_stack.append(dst_cell)
+									virtual_rss.append(src_rss)
+									virtual_rss.append(dst_config.threshx_low)
+							else:	#src_pref==dst_pref
+								print "test8"
+								if not dfs_stack:
+									dont_care = False
+
+								#test
+								if dst_config.offset!=None:
+									dst_rss=src_rss+dst_config.offset
+									dfs_stack.append(src_cell)
+									dfs_stack.append(dst_cell)
+									virtual_rss.append(src_rss)
+									virtual_rss.append(dst_rss)
+								else:
+									dfs_stack.append(src_cell)
+									virtual_rss.append(src_rss)
+
+				cell_visited[unvisited_cell]=True
 

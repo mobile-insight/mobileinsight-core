@@ -41,9 +41,11 @@ class RrcAnalyzer(Analyzer):
 		elif msg.type_id.find("WCDMA")!=-1:	#WCDMA RRC msg received, so it's WCDMA
 			self.__cur_RAT = "WCDMA"
 
+		#test
 		# cur_cell_config=self.get_cur_cell_config()
 		# if cur_cell_config != None:
-		# 	cur_cell_config.status.dump()
+		# 	print self.__class__.__name__,": cur_cell_ID=",cur_cell_config.status.id,\
+		# 	", cur_cell_freq=",cur_cell_config.status.freq
 
 	def __on_event(self,event):
 		"""
@@ -112,6 +114,35 @@ class RrcAnalyzer(Analyzer):
 			if cell[1]==freq:
 				res.append(cell)
 		return res
+
+	def get_cell_neighbor(self,cell):
+		"""
+			Given a cell, return its neighbor cells
+		"""
+		cell_config=self.get_cell_config(cell)
+		cell_freq=cell_config.status.freq
+		inter_freq_dict=cell_config.sib.inter_freq_config
+		neighbor_cells=[] 
+
+		#add intra-freq neighbors
+		neighbor_cells+=self.get_cell_on_freq(cell[1])
+		
+		#add inter-freq/RAT neighbors	
+		for freq in inter_freq_dict:
+			neighbor_cells+=self.get_cell_on_freq(freq)
+
+		#WCDMA: any cells under WCDMA can be its neighbors
+		if cell_config.status.rat=="UTRA":
+			cell_list = self.get_cell_list()
+			for item in cell_list:
+				if self.get_cell_config(item).status.rat=="UTRA" \
+				and item not in neighbor_cells:
+					neighbor_cells.append(item)
+
+		if cell in neighbor_cells:
+			neighbor_cells.remove(cell)	#remove the current cell itself
+
+		return neighbor_cells
 
 
 
