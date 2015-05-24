@@ -66,6 +66,7 @@ if __name__ == "__main__":
         opt.error("please use -p option to specify physical port name.")
         sys.exit(1)
 
+    #Initialize trace collector
     src = DMCollector(prefs={
                         "command_files_path": os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH),
                         "ws_dissect_executable_path": WS_DISSECT_EXECUTABLE_PATH,
@@ -77,18 +78,18 @@ if __name__ == "__main__":
     #Enable the messages to be collected
     #For high-level analyzers, the corresponding message options can be enabled
     # src.enable_log("LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results")
-    src.enable_log("WCDMA_CELL_ID")
-    src.enable_log("WCDMA_Signaling_Messages")
+    # src.enable_log("WCDMA_CELL_ID")
+    # src.enable_log("WCDMA_Signaling_Messages")
 
     # lte_rrc_analyzer = LteRrcAnalyzer()
     # lte_rrc_analyzer.set_source(src)
 
     # wcdma_rrc_analyzer = WcdmaRrcAnalyzer()
     # wcdma_rrc_analyzer.set_source(src)
-    rrc_analyzer  = RrcAnalyzer()
-    rrc_analyzer.set_source(src)
+    # rrc_analyzer = RrcAnalyzer()
+    # rrc_analyzer.set_source(src)
 
-    dumper = MsgFile("/Users/yuanjieli/Desktop/wcdma_rrc.txt")
+    dumper = MsgFile("/Users/yuanjieli/Desktop/lte_rrc_verizon.txt")
     dumper.set_source(src)
 
     # dumper2 = MsgDump()
@@ -96,5 +97,8 @@ if __name__ == "__main__":
 
     # ue = LteUeAnalyzer()
     # ue.set_source(src)
+
+    loop_detect = HandoffLoopAnalyzer()
+    loop_detect.set_source(src)
 
     src.run()

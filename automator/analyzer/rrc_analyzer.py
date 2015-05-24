@@ -53,21 +53,28 @@ class RrcAnalyzer(Analyzer):
 		self.send(e)
 
 	def get_cell_list(self):
+		"""
+			Get a complete list of cell IDs *at current location*.
+			For these cells, the RrcAnalyzer has the corresponding configurations
+			Cells observed yet not camped on would NOT be listed (no config)
+
+			FIXME: currently only return *all* cells in the LteRrcConfig
+		"""
 		lte_cell_list=self.__lte_rrc_analyzer.get_cell_list()
 		wcdma_cell_list=self.__wcdma_rrc_analyzer.get_cell_list()
 		return lte_cell_list+wcdma_cell_list
 
-	def get_cell_config(self,cell_id):
+	def get_cell_config(self,cell):
 
 		"""
 			get RRC configuration of a cell
-			Assumption: the cell ID is globally unique in LTE AND WCDMA
+			cell is a (cell_id,freq)pair
 		"""
-		res=self.__lte_rrc_analyzer.get_cell_config(cell_id)
+		res=self.__lte_rrc_analyzer.get_cell_config(cell)
 		if res != None:
 			return res
 		else:
-			return self.__wcdma_rrc_analyzer.get_cell_config(cell_id)
+			return self.__wcdma_rrc_analyzer.get_cell_config(cell)
 
 	def get_cur_cell(self):
 		"""
@@ -97,11 +104,12 @@ class RrcAnalyzer(Analyzer):
 	def get_cell_on_freq(self,freq):
 		"""
 			Given a frequency band, get all cells under this freq in the cell_list
+			These cells are already with config
 		"""
 		cell_list=self.get_cell_list()
 		res=[]
 		for cell in cell_list:
-			if self.get_cell_config(cell).status.freq==freq:
+			if cell[1]==freq:
 				res.append(cell)
 		return res
 
