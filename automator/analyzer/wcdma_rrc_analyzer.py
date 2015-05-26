@@ -119,7 +119,6 @@ class WcdmaRrcAnalyzer(Analyzer):
 			#if new config arrives, push new one to the history
 			if msg.data.has_key('UTRA DL Absolute RF channel number') \
 			and self.__status.freq!=msg.data['UTRA DL Absolute RF channel number']:
-				print "\033[91m\033[1mNew freq\033[0m\033[0m"
 				self.__status=WcdmaRrcStatus()
 				self.__status.freq=msg.data['UTRA DL Absolute RF channel number']
 				self.__history[msg.timestamp]=self.__status
@@ -128,7 +127,6 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 			if msg.data.has_key('Cell identity (28-bits)') \
 			and self.__status.id!=msg.data['Cell identity (28-bits)']:
-				print "\033[91m\033[1mNew Cell\033[0m\033[0m"
 				self.__status=WcdmaRrcStatus()
 				self.__status.id=msg.data['Cell identity (28-bits)']
 				self.__history[msg.timestamp]=self.__status
@@ -166,7 +164,6 @@ class WcdmaRrcAnalyzer(Analyzer):
 			#But Qualcomm's chipset may report cellID AFTER some configurations
 			if field.get('name')=="rrc.cellIdentity":
 				cellId = int(field.get('value')[0:-1],16)
-				# print "\033[91m\033[1mHahaha\033[0m\033[0m"
 				self.__status.dump()
 				if not self.__status.inited():
 					self.__status.id = cellId
@@ -176,8 +173,6 @@ class WcdmaRrcAnalyzer(Analyzer):
 						self.__config[cur_pair] = self.__config_tmp
 						self.__config[cur_pair].__status = self.__status
 				elif self.__status.id != cellId:
-					# print "\033[91m\033[1mBug\033[0m\033[0m"
-					# print self.__status.id,cellId,self.__status.id.__class__.__name__,cellId.__class__.__name__
 					self.__status=WcdmaRrcStatus()
 					self.__status.id=cellId
 					self.__history[msg.timestamp]=self.__status
@@ -256,7 +251,6 @@ class WcdmaRrcAnalyzer(Analyzer):
 			if field.get('name')=="rrc.EUTRA_FrequencyAndPriorityInfo_element":
 				field_val={}
 
-				print "rrc.EUTRA_FrequencyAndPriorityInfo_element"
 				#FIXME: set to the default value based on TS36.331
 				field_val['rrc.earfcn']=None
 				#field_val['lte-rrc.t_ReselectionEUTRA']=None

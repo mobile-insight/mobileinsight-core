@@ -86,7 +86,8 @@ class HandoffLoopAnalyzer(Analyzer):
 				dont_care=False
 
 				while dfs_stack:
-					print "dfs_stack",dfs_stack
+					# print "dfs_stack",dfs_stack
+					self.logger.debug("dfs_stack:"+str(dfs_stack))
 					src_cell = dfs_stack.pop()
 					src_rss = virtual_rss.pop()
 					src_neighbor = neighbor_stack.pop()
@@ -104,7 +105,8 @@ class HandoffLoopAnalyzer(Analyzer):
 						#src_cell's all neighbors have been visited
 						continue
 
-					print "dst_cell",dst_cell
+					# print "dst_cell",dst_cell
+					self.logger.debug("dst_cell:"+str(dst_cell))
 					src_neighbor[dst_cell]=True	
 
 					src_freq=cell_config[src_cell].status.freq
@@ -126,7 +128,6 @@ class HandoffLoopAnalyzer(Analyzer):
 					if dst_cell in dfs_stack: 
 						loop_happen = False
 						if dont_care:
-							# print "test1"
 							#loop if src_cell->dst_cell happens under src_rss only
 
 							#intra-freq: loop must happens
@@ -140,7 +141,6 @@ class HandoffLoopAnalyzer(Analyzer):
 							loop_happen = intra_freq_loop or inter_freq_loop1 \
 								or inter_freq_loop2
 						else:
-							# print "test2"
 							#loop if src_cell->dst_cell happens under src_rss and dst_rss
 							dst_rss = virtual_rss[0]
 
@@ -161,13 +161,13 @@ class HandoffLoopAnalyzer(Analyzer):
 								or inter_freq_loop2 or inter_freq_loop3
 
 						if loop_happen:
-							# print "test3"
 							#report loop
 							loop_report="\033[91m\033[1mPersistent loop: \033[0m\033[0m"
 							for cell in dfs_stack:
 								loop_report=loop_report+str(cell)+"->"
 							loop_report=loop_report+str(src_cell)+"->"+str(dst_cell)
-							print loop_report
+							# print loop_report
+							self.logger.warning(loop_report)
 
 						
 						dfs_stack.append(src_cell)
@@ -199,7 +199,6 @@ class HandoffLoopAnalyzer(Analyzer):
 								neighbor_stack.append(src_neighbor)
 						else:
 							if src_pref<dst_pref:
-								# print "test5"
 								if not dfs_stack:
 									dont_care = True
 								dfs_stack.append(src_cell)
@@ -212,24 +211,21 @@ class HandoffLoopAnalyzer(Analyzer):
 
 								threshserv=cell_config[src_cell].sib.serv_config.threshserv_low
 								if src_rss >= threshserv:	#no loop, pass the dst_cell
-									# print "test6"
 									dfs_stack.append(src_cell)
 									virtual_rss.append(src_rss)
 									neighbor_stack.append(src_neighbor)
 								else:
-									# print "test7"
 									if not dfs_stack:
 										dont_care = False
 									dfs_stack.append(src_cell)
 									dfs_stack.append(dst_cell)
 									# #IMPORTANT to set proper inital value
-									# src_rss = threshserv
+									src_rss = threshserv
 									virtual_rss.append(src_rss)
 									virtual_rss.append(dst_config.threshx_low)
 									neighbor_stack.append(src_neighbor)
 									neighbor_stack.append(dst_neighbor)
 							else:	#src_pref==dst_pref
-								# print "test8"
 								if not dfs_stack:
 									dont_care = False
 								#test

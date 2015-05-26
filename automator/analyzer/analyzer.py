@@ -9,6 +9,19 @@ Author: Yuanjie Li
 """
 
 from element import Element, Event
+import logging
+
+def setup_logger(logger_name, log_file, level=logging.INFO):
+    l = logging.getLogger(logger_name)
+    formatter = logging.Formatter('%(asctime)s : %(name)s : %(message)s')
+    fileHandler = logging.FileHandler(log_file, mode='w')
+    fileHandler.setFormatter(formatter)
+    streamHandler = logging.StreamHandler()
+    streamHandler.setFormatter(formatter)
+
+    l.setLevel(level)
+    l.addHandler(fileHandler)
+    l.addHandler(streamHandler)    
 
 class Analyzer(Element):
 
@@ -18,6 +31,22 @@ class Analyzer(Element):
 		#callback when source pushes messages
 		#FIXME: looks redundant with the from_list
 		self.source_callback=[]	
+
+		#setup the logs
+		self.__logpath="automator.log"
+		self.__loglevel=logging.INFO
+		setup_logger('automator_logger',self.__logpath,self.__loglevel)
+		self.logger=logging.getLogger('automator_logger')
+
+	def set_log(self,logpath,loglevel):
+		"""
+			Set the logging in analyzers
+			All the analyzers share the same logger
+		"""
+		self.__logpath=logpath
+		self.__loglevel=loglevel
+		setup_logger('automator_logger',self.__logpath,self.__loglevel)
+		self.logger=logging.getLogger('automator_logger')
 
 	# Set the trace source collector
 	# Both this analyzer and other analyzers it depends would set to this source
