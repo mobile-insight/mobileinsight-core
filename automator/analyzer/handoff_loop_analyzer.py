@@ -222,8 +222,8 @@ class HandoffLoopAnalyzer(Analyzer):
 										dont_care = False
 									dfs_stack.append(src_cell)
 									dfs_stack.append(dst_cell)
-									#IMPORTANT to set proper inital value
-									src_rss = threshserv
+									# #IMPORTANT to set proper inital value
+									# src_rss = threshserv
 									virtual_rss.append(src_rss)
 									virtual_rss.append(dst_config.threshx_low)
 									neighbor_stack.append(src_neighbor)
