@@ -41,41 +41,13 @@ class HandoffLoopAnalyzer(Analyzer):
 
 		#Get cell list and configurations
 		cell_list = self.__rrc_analyzer.get_cell_list()
-		cell_config = {}	# each cell's configuration
-
 		cell_visited = {x:False for x in cell_list} # mark if a cell has been visited
-		cell_neighbor_visited = {} #boolean matrix: [i][j] indicates if ci->cj has been visited
+		
 
 		#test
 		# print cell_list
 		for cell in cell_list:
 			self.__rrc_analyzer.get_cell_config(cell).dump()
-
-		#Setup neighboring cell matrix
-		for cell in cell_list:
-
-			cell_config[cell]=self.__rrc_analyzer.get_cell_config(cell)
-			# cell_freq=cell_config[cell].status.freq
-			# inter_freq_dict=cell_config[cell].sib.inter_freq_config
-			# neighbor_cells=[] 
-
-			# #test
-			# cell_config[cell].dump()
-			
-			# #add intra-freq neighbors
-			# neighbor_cells+=self.__rrc_analyzer.get_cell_on_freq(cell_freq)
-			# if cell in neighbor_cells:
-			# 	neighbor_cells.remove(cell)	#remove the current cell itself
-
-			# #add inter-freq/RAT neighbors	
-			# for freq in inter_freq_dict:
-			# 	neighbor_cells+=self.__rrc_analyzer.get_cell_on_freq(freq)
-			neighbor_cells = self.__rrc_analyzer.get_cell_neighbor(cell)
-
-			print cell,"neighbor_cells=",neighbor_cells
-			
-			#initially all links are marked unvisited
-			cell_neighbor_visited[cell]={x:False for x in neighbor_cells}
 
 		if cell_list:
 
@@ -92,6 +64,20 @@ class HandoffLoopAnalyzer(Analyzer):
 						unvisited_cell=cell
 						break
 
+				# each cell's configuration
+				cell_config = {}	
+				#boolean matrix: [i][j] indicates if ci->cj has been visited
+				cell_neighbor_visited = {} 
+				for cell in cell_list:
+					if not cell_visited[cell]:	#visited cells would not be considered
+						cell_config[cell]=self.__rrc_analyzer.get_cell_config(cell)
+						neighbor_cells = self.__rrc_analyzer.get_cell_neighbor(cell)
+						cell_neighbor_visited[cell]={}
+						for item in neighbor_cells:
+							if not cell_visited[item]:
+								cell_neighbor_visited[cell][item]=False
+
+
 				dfs_stack=[unvisited_cell]		
 				# For ci->ci+1, a ci's rss lower bound that satisifes this handoff
 				# virtual (normalized) measurements are used
@@ -100,7 +86,7 @@ class HandoffLoopAnalyzer(Analyzer):
 				dont_care=False
 
 				while dfs_stack:
-					# print "dfs_stack",dfs_stack
+					print "dfs_stack",dfs_stack
 					src_cell = dfs_stack.pop()
 					src_rss = virtual_rss.pop()
 					dst_cell = None
@@ -143,16 +129,19 @@ class HandoffLoopAnalyzer(Analyzer):
 						# dst_cell==dfs_stack[0]
 						# dfs_stack and dont_care must not be empty!!!
 
+						print src_freq,dst_freq,src_pref,dst_pref,dont_care
+						
 						loop_happen = False
 						if dont_care:
 							# print "test1"
 							#loop if src_cell->dst_cell happens under src_rss only
+
 							#intra-freq: loop must happens
 							intra_freq_loop = (src_freq==dst_freq)
 							#inter-freq/RAT: loop happens in equal/high-pref reselection
-							inter_freq_loop1 = (src_freq!=dst_freq and src_pref<=dst_freq)
+							inter_freq_loop1 = (src_freq!=dst_freq and src_pref<=dst_pref)
 							#inter-freq/RAT: low-pref reselection happens
-							inter_freq_loop2 = (src_freq!=dst_freq and src_pref>dst_freq \
+							inter_freq_loop2 = (src_freq!=dst_freq and src_pref>dst_pref \
 							and src_rss<cell_config[src_cell].sib.serv_config.threshserv_low)
 
 							loop_happen = intra_freq_loop or inter_freq_loop1 \
@@ -165,13 +154,13 @@ class HandoffLoopAnalyzer(Analyzer):
 							intra_freq_loop = (src_freq==dst_freq \
 								and dst_rss>=src_rss+dst_config.offset)
 
-							inter_freq_loop1 = (src_freq!=dst_freq and src_pref==dst_freq \
+							inter_freq_loop1 = (src_freq!=dst_freq and src_pref==dst_pref \
 								and dst_rss>=src_rss+dst_config.offset) 
 
-							inter_freq_loop2 = (src_freq!=dst_freq and src_pref<dst_freq \
+							inter_freq_loop2 = (src_freq!=dst_freq and src_pref<dst_pref \
 								and dst_rss>=dst_config.threshx_high)
 
-							inter_freq_loop3 = (src_freq!=dst_freq and src_pref>dst_freq \
+							inter_freq_loop3 = (src_freq!=dst_freq and src_pref>dst_pref \
 								and src_rss<cell_config[src_cell].sib.serv_config.threshserv_low \
 								and dst_rss>=dst_config.threshx_low)
 
