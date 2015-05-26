@@ -49,6 +49,11 @@ class HandoffLoopAnalyzer(Analyzer):
 		for cell in cell_list:
 			self.__rrc_analyzer.get_cell_config(cell).dump()
 
+		# each cell's configuration
+		cell_config = {}
+		for cell in cell_list:
+			cell_config[cell]=self.__rrc_analyzer.get_cell_config(cell)
+		
 		if cell_list:
 
 			# We implement the loop detection algorithm in Proposition 3,
@@ -64,21 +69,16 @@ class HandoffLoopAnalyzer(Analyzer):
 						unvisited_cell=cell
 						break
 
-				# each cell's configuration
-				cell_config = {}	
-				#boolean matrix: [i][j] indicates if ci->cj has been visited
-				cell_neighbor_visited = {} 
-				for cell in cell_list:
-					if not cell_visited[cell]:	#visited cells would not be considered
-						cell_config[cell]=self.__rrc_analyzer.get_cell_config(cell)
-						neighbor_cells = self.__rrc_analyzer.get_cell_neighbor(cell)
-						cell_neighbor_visited[cell]={}
-						for item in neighbor_cells:
-							if not cell_visited[item]:
-								cell_neighbor_visited[cell][item]=False
+				neighbor_cells = self.__rrc_analyzer.get_cell_neighbor(unvisited_cell)
+				neighbor_visited = {x: False for x in neighbor_cells}
+				#visited cells are ruled out
+				for item in neighbor_visited:
+					if cell_visited.has_key(item) and cell_visited[item]:
+						neighbor_visited[item]=True
 
-
-				dfs_stack=[unvisited_cell]		
+				#stacks
+				dfs_stack=[unvisited_cell]	
+				neighbor_stack=[neighbor_visited]	
 				# For ci->ci+1, a ci's rss lower bound that satisifes this handoff
 				# virtual (normalized) measurements are used
 				virtual_rss=[0]
@@ -89,23 +89,23 @@ class HandoffLoopAnalyzer(Analyzer):
 					print "dfs_stack",dfs_stack
 					src_cell = dfs_stack.pop()
 					src_rss = virtual_rss.pop()
+					src_neighbor = neighbor_stack.pop()
 					dst_cell = None
 					dst_rss = None
 
 					#Find a next cell to handoff
-					for cell in cell_neighbor_visited[src_cell]:
-						#eliminate duplicate: visited cells are not visited
-						if not cell_neighbor_visited[src_cell][cell]\
-						and not cell_visited[cell]\
-						and (not dfs_stack or cell not in dfs_stack[1:]):	
+					for cell in src_neighbor:
+						if not src_neighbor[cell] \
+						and (not dfs_stack or cell not in dfs_stack[1:]):
 							dst_cell = cell
-							cell_neighbor_visited[src_cell][dst_cell]=True
 							break
 
-					# print "dst_cell",dst_cell
 					if dst_cell==None:
 						#src_cell's all neighbors have been visited
 						continue
+
+					print "dst_cell",dst_cell
+					src_neighbor[dst_cell]=True	
 
 					src_freq=cell_config[src_cell].status.freq
 					dst_freq=cell_config[dst_cell].status.freq
@@ -118,19 +118,12 @@ class HandoffLoopAnalyzer(Analyzer):
 					else:
 						dst_pref=None
 
-					# print src_freq,src_pref,dst_freq,dst_pref
-
 					if src_pref==None or dst_pref==None:	#happens in 3G
 						#25.331: without pref, treat as equal pref
-						src_pref = dst_pref = None 
+						src_pref = dst_pref = None
 
 					# a potential loop with dst_cell
 					if dst_cell in dfs_stack: 
-						# dst_cell==dfs_stack[0]
-						# dfs_stack and dont_care must not be empty!!!
-
-						print src_freq,dst_freq,src_pref,dst_pref,dont_care
-						
 						loop_happen = False
 						if dont_care:
 							# print "test1"
@@ -175,15 +168,21 @@ class HandoffLoopAnalyzer(Analyzer):
 								loop_report=loop_report+str(cell)+"->"
 							loop_report=loop_report+str(src_cell)+"->"+str(dst_cell)
 							print loop_report
-							
+
+						
 						dfs_stack.append(src_cell)
 						virtual_rss.append(src_rss)
+						neighbor_stack.append(src_neighbor)
 						continue
 
 					else:
-						if src_freq==dst_freq:	#intra-freq reselection
-							# print "test4"
+						dst_neighbor_cells=self.__rrc_analyzer.get_cell_neighbor(dst_cell)
+						dst_neighbor={x: False for x in dst_neighbor_cells}
+						for item in dst_neighbor:
+							if cell_visited.has_key(item) and cell_visited[item]:
+								dst_neighbor[item]=True
 
+						if src_freq==dst_freq:	#intra-freq reselection
 							if dst_config.offset!=None:
 								if not dfs_stack:
 									dont_care = False
@@ -192,9 +191,12 @@ class HandoffLoopAnalyzer(Analyzer):
 								dfs_stack.append(dst_cell)
 								virtual_rss.append(src_rss)
 								virtual_rss.append(dst_rss)
+								neighbor_stack.append(src_neighbor)
+								neighbor_stack.append(dst_neighbor)
 							else: #trace not ready
 								dfs_stack.append(src_cell)
 								virtual_rss.append(src_rss)
+								neighbor_stack.append(src_neighbor)
 						else:
 							if src_pref<dst_pref:
 								# print "test5"
@@ -204,6 +206,8 @@ class HandoffLoopAnalyzer(Analyzer):
 								dfs_stack.append(dst_cell)
 								virtual_rss.append(src_rss)
 								virtual_rss.append(dst_config.threshx_high)
+								neighbor_stack.append(src_neighbor)
+								neighbor_stack.append(dst_neighbor)
 							elif src_pref>dst_pref:
 
 								threshserv=cell_config[src_cell].sib.serv_config.threshserv_low
@@ -211,19 +215,23 @@ class HandoffLoopAnalyzer(Analyzer):
 									# print "test6"
 									dfs_stack.append(src_cell)
 									virtual_rss.append(src_rss)
+									neighbor_stack.append(src_neighbor)
 								else:
 									# print "test7"
 									if not dfs_stack:
 										dont_care = False
 									dfs_stack.append(src_cell)
 									dfs_stack.append(dst_cell)
+									#IMPORTANT to set proper inital value
+									src_rss = threshserv
 									virtual_rss.append(src_rss)
 									virtual_rss.append(dst_config.threshx_low)
+									neighbor_stack.append(src_neighbor)
+									neighbor_stack.append(dst_neighbor)
 							else:	#src_pref==dst_pref
 								# print "test8"
 								if not dfs_stack:
 									dont_care = False
-
 								#test
 								if dst_config.offset!=None:
 									dst_rss=src_rss+dst_config.offset
@@ -231,9 +239,12 @@ class HandoffLoopAnalyzer(Analyzer):
 									dfs_stack.append(dst_cell)
 									virtual_rss.append(src_rss)
 									virtual_rss.append(dst_rss)
+									neighbor_stack.append(src_neighbor)
+									neighbor_stack.append(dst_neighbor)
 								else:
 									dfs_stack.append(src_cell)
 									virtual_rss.append(src_rss)
+									neighbor_stack.append(src_neighbor)
 
 				cell_visited[unvisited_cell]=True
 
