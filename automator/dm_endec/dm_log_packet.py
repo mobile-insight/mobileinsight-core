@@ -285,7 +285,7 @@ class DMLogPacket:
         # root tag is like a "dict" type in XML
         xml = cls._decode_xml_recursive(self._decoded_list, "dict", "")
         xml.tag = "qcdm_log_packet"
-        return ET.dump(xml)
+        return ET.tostring(xml)
 
     @classmethod
     def _decode_xml_recursive(cls, element, xml_type=None, list_item_tag=""):
@@ -443,7 +443,6 @@ class DMLogPacket:
             if spec[0] != cls._DSL_SKIP:
                 name = spec[0]
                 fmt = spec[1]
-                # print ind, binascii.b2a_hex(b[ind:ind+4])
                 decoded = struct.unpack_from(fmt, b, ind)
                 if len(decoded) == 1:
                     decoded = decoded[0]
