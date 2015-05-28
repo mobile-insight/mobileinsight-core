@@ -10,6 +10,7 @@ __all__ = ["DMLogPacket", "FormatError"]
 
 import binascii
 from datetime import *
+import json
 import struct
 import xml.etree.ElementTree as ET
 
@@ -28,13 +29,20 @@ from ws_dissector import *
 
 
 class SuperTuple(tuple):
-
     def __new__(cls, data, xml_type, xml_list_item_tag=None):
         return super(SuperTuple, cls).__new__(cls, data)
 
     def __init__(self, data, xml_type, xml_list_item_tag=None):
         self.xml_type = xml_type
         self.xml_list_item_tag = xml_list_item_tag
+
+
+class SuperEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return str(obj)
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(self, obj)
 
 
 class FormatError(RuntimeError):
@@ -278,6 +286,12 @@ class DMLogPacket:
         return dict(self._decoded_list)
 
     def decode_xml(self):
+        """
+        Decode the message and convert to a standard XML document.
+
+        Returns:
+            a string that contains the converted XML document.
+        """
         cls = self.__class__
         if self._decoded_list is None:
             ignored = self.decode()
@@ -286,6 +300,20 @@ class DMLogPacket:
         xml = cls._decode_xml_recursive(self._decoded_list, "dict", "")
         xml.tag = "qcdm_log_packet"
         return ET.tostring(xml)
+
+    def decode_json(self):
+        """
+        Decode the message and convert to a standard JSON dictionary.
+
+        Returns:
+            a string that contains the converted XML document.
+        """
+        cls = self.__class__
+        if self._decoded_list is None:
+            ignored = self.decode()
+
+        return json.dumps(  cls._decode_json_recursive(self._decoded_list, "dict"),
+                            cls=SuperEncoder)
 
     @classmethod
     def _decode_xml_recursive(cls, element, xml_type=None, list_item_tag=""):
@@ -326,6 +354,30 @@ class DMLogPacket:
 
         else:
             return str(element)
+
+    @classmethod
+    def _decode_json_recursive(cls, element, special_type=None):
+        if special_type == "dict":
+            d = dict()
+            for pair in element:
+                if isinstance(pair, SuperTuple):
+                    d[pair[0]] = cls._decode_json_recursive(pair[1], pair.xml_type)
+                else:
+                    d[pair[0]] = pair[1]
+            return d
+
+        elif special_type == "list":
+            print element
+            lst = []
+            for item in element:
+                if isinstance(item, SuperTuple):
+                    lst.append(cls._decode_json_recursive(item, item.xml_type))
+                else:
+                    lst.append(item)
+            return lst
+
+        else:
+            return element
 
     @classmethod
     def init(cls, prefs):
@@ -754,6 +806,7 @@ if __name__ == '__main__':
         print LOG_PACKET_NAME[d["type_id"]], d["timestamp"]
         print d
         print packet.decode_xml()
+        print packet.decode_json()
         # print d.get("Msg", "XML msg not found.")
         i += 1
 
