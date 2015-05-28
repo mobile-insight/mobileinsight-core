@@ -12,6 +12,7 @@ import os
 import optparse
 import serial
 import sys
+import logging
 
 from trace_collector import *
 from analyzer import *
@@ -75,12 +76,6 @@ if __name__ == "__main__":
     src.set_serial_port(options.phy_serial_name)
     src.set_baudrate(options.phy_baudrate)
 
-    #Enable the messages to be collected
-    #For high-level analyzers, the corresponding message options can be enabled
-    # src.enable_log("LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results")
-    # src.enable_log("WCDMA_CELL_ID")
-    # src.enable_log("WCDMA_Signaling_Messages")
-
     # lte_rrc_analyzer = LteRrcAnalyzer()
     # lte_rrc_analyzer.set_source(src)
 
@@ -89,7 +84,10 @@ if __name__ == "__main__":
     # rrc_analyzer = RrcAnalyzer()
     # rrc_analyzer.set_source(src)
 
-    dumper = MsgFile("/Users/yuanjieli/Desktop/lte_rrc_verizon.txt")
+    # lte_nas_analyzer = LteNasAnalyzer()
+    # lte_nas_analyzer.set_source(src)
+
+    dumper = MsgFile("/Users/yuanjieli/Desktop/loop-test.txt")
     dumper.set_source(src)
 
     # dumper2 = MsgDump()
@@ -100,5 +98,6 @@ if __name__ == "__main__":
 
     loop_detect = HandoffLoopAnalyzer()
     loop_detect.set_source(src)
+    loop_detect.set_log("/Users/yuanjieli/Desktop/verizon_veautomator_log.txt",logging.WARNING)
 
     src.run()

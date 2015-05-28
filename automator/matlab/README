@@ -1,0 +1,11 @@
+Please refer to the following link:
+
+http://stackoverflow.com/questions/1707780/call-python-function-from-matlab
+
+(1) Copy python.m to $MATLAB_PATH/toolbox/matlab/general/
+
+(2) In Matlab, call the python script as
+
+python script_name arg1 arg2 ...
+
+NOTE: the python script should have main function, which parses the args and call the functions

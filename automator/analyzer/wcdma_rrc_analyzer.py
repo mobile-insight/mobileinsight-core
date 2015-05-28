@@ -15,6 +15,8 @@ import xml.etree.ElementTree as ET
 from analyzer import *
 from msg_dump import *
 import time
+from copy import deepcopy
+
 
 __all__=["WcdmaRrcAnalyzer"]
 
@@ -31,6 +33,9 @@ class WcdmaRrcAnalyzer(Analyzer):
 		self.__status=WcdmaRrcStatus()	# current cell status
 		self.__history={}	# cell history: timestamp -> WcdmaRrcStatus()
 		self.__config={}	# cell_id -> WcdmaRrcConfig()
+
+		#FIXME: change the timestamp
+		self.__history[0]=self.__config
 
 		#Temporary structure for holding the config
 		#Qualcomm chipset does not report cellID BEFORE SIB, so the update should be delayed
@@ -54,9 +59,9 @@ class WcdmaRrcAnalyzer(Analyzer):
 		log_item = msg.data
 		log_item_dict = dict(log_item)
 
-		#Convert msg to dictionary format
-		raw_msg=Event(msg.timestamp,msg.type_id,log_item_dict)
-		self.__callback_serv_cell(raw_msg)
+		if msg.type_id=="WCDMA_CELL_ID":
+			raw_msg=Event(msg.timestamp,msg.type_id,log_item_dict)
+			self.__callback_serv_cell(raw_msg)
 
 		log_xml = None
 		if log_item_dict.has_key('Msg'):
@@ -85,10 +90,10 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 	def __callback_serv_cell(self,msg):
 		"""
-			Update serving cell status
+		Update serving cell status
 		"""
-
 		if not self.__status.inited():
+			#old yet incomplete config would be discarded
 			if msg.data.has_key('UTRA DL Absolute RF channel number'):
 				self.__status.freq = msg.data['UTRA DL Absolute RF channel number']
 			if msg.data.has_key('Cell identity (28-bits)'):
@@ -99,37 +104,52 @@ class WcdmaRrcAnalyzer(Analyzer):
 				self.__status.rac = msg.data['RAC id']
 
 			if self.__status.inited():
-				#update succeed, copy temporary results to the config
+				#push the config to the library
 				cur_pair=(self.__status.id,self.__status.freq)
-				self.__config[cur_pair]=self.__config_tmp
-				self.__config[cur_pair].status=self.__status
-				#Initialize a new config
-				self.__config_tmp=WcdmaRrcConfig()
-
+				if not self.__config.has_key(cur_pair):
+					self.__config[cur_pair] = self.__config_tmp
+					self.__config[cur_pair].status = self.__status
+				else:
+					#FIXME: merge two config? Critical for itner-freq
+					for item in self.__config_tmp.sib.inter_freq_config:
+						if not self.__config[cur_pair].sib.inter_freq_config.has_key(item):
+							self.__config[cur_pair].sib.inter_freq_config[item]\
+							=self.__config_tmp.sib.inter_freq_config[item]
 		else:
+			#if new config arrives, push new one to the history
 			if msg.data.has_key('UTRA DL Absolute RF channel number') \
 			and self.__status.freq!=msg.data['UTRA DL Absolute RF channel number']:
 				self.__status=WcdmaRrcStatus()
 				self.__status.freq=msg.data['UTRA DL Absolute RF channel number']
 				self.__history[msg.timestamp]=self.__status
+				#Initialize a new config
+				self.__config_tmp=WcdmaRrcConfig()
 
 			if msg.data.has_key('Cell identity (28-bits)') \
 			and self.__status.id!=msg.data['Cell identity (28-bits)']:
 				self.__status=WcdmaRrcStatus()
 				self.__status.id=msg.data['Cell identity (28-bits)']
 				self.__history[msg.timestamp]=self.__status
+				#Initialize a new config
+				self.__config_tmp=WcdmaRrcConfig()
 		
 			if msg.data.has_key('LAC id') \
 			and self.__status.lac!=msg.data['LAC id']:
 				self.__status=WcdmaRrcStatus()
 				self.__status.lac=msg.data['LAC id']
 				self.__history[msg.timestamp]=self.__status
-
+				#Initialize a new config
+				self.__config_tmp=WcdmaRrcConfig()
+		
 			if msg.data.has_key('RAC id') \
 			and self.__status.rac!=msg.data['RAC id']:
 				self.__status=WcdmaRrcStatus()
 				self.__status.rac=msg.data['RAC id']
 				self.__history[msg.timestamp]=self.__status
+				#Initialize a new config
+				self.__config_tmp=WcdmaRrcConfig()
+
+
 
 	def __callback_sib_config(self,msg):
 		"""
@@ -143,13 +163,21 @@ class WcdmaRrcAnalyzer(Analyzer):
 			#Cell Identity: should be done in __callback_serv_cell
 			#But Qualcomm's chipset may report cellID AFTER some configurations
 			if field.get('name')=="rrc.cellIdentity":
-				cellId=str(int(field.get('value')[0:-1],16))
+				cellId = int(field.get('value')[0:-1],16)
+				self.__status.dump()
 				if not self.__status.inited():
 					self.__status.id = cellId
+					if self.__status.inited():
+						#push the config to the library
+						cur_pair = (self.__status.id,self.__status.freq)
+						self.__config[cur_pair] = self.__config_tmp
+						self.__config[cur_pair].__status = self.__status
 				elif self.__status.id != cellId:
 					self.__status=WcdmaRrcStatus()
 					self.__status.id=cellId
 					self.__history[msg.timestamp]=self.__status
+					#Initialize a new config
+					self.__config_tmp=WcdmaRrcConfig()
 
 			#serving cell info
 			if field.get('name')=="rrc.utra_ServingCell_element": 
@@ -165,22 +193,19 @@ class WcdmaRrcAnalyzer(Analyzer):
 				for val in field.iter('field'):
 					field_val[val.get('name')]=val.get('show')
 
-				if self.__status.inited():
-					cur_pair=(self.__status.id,self.__status.freq)
-					self.__config[cur_pair].sib.serv_config=WcdmaRrcSibServ(
-						int(field_val['rrc.priority']),
-						int(field_val['rrc.threshServingLow'])*2,
-						int(field_val['rrc.s_PrioritySearch1'])*2,
-						int(field_val['rrc.s_PrioritySearch2']))
+				
+				serv_config = WcdmaRrcSibServ(
+					int(field_val['rrc.priority']),
+					int(field_val['rrc.threshServingLow'])*2,
+					int(field_val['rrc.s_PrioritySearch1'])*2,
+					int(field_val['rrc.s_PrioritySearch2']))
+				
+				if not self.__status.inited():
+					self.__config_tmp.sib.serv_config = serv_config
 				else:
-					self.__config_tmp.sib.serv_config=WcdmaRrcSibServ(
-						int(field_val['rrc.priority']),
-						int(field_val['rrc.threshServingLow'])*2,
-						int(field_val['rrc.s_PrioritySearch1'])*2,
-						int(field_val['rrc.s_PrioritySearch2']))
+					cur_pair = (self.__status.id,self.__status.freq)
+					self.__config[cur_pair].sib.serv_config = serv_config
 
-
-				# self.__config[self.__status.id].serv_config.dump()
 
 			#intra-freq info
 			if field.get('name')=="rrc.cellSelectReselectInfo_element":
@@ -207,25 +232,20 @@ class WcdmaRrcAnalyzer(Analyzer):
 				if field_val['rrc.q_HYST_2_S']==None:
 					field_val['rrc.q_HYST_2_S']=field_val['rrc.q_Hyst_l_S']
 
-				if self.__status.inited():
-					cur_pair=(self.__status.id,self.__status.freq)
-					self.__config[cur_pair].sib.intra_freq_config\
-					=WcdmaRrcSibIntraFreqConfig(
+				intra_freq_config=WcdmaRrcSibIntraFreqConfig(
 						int(field_val['rrc.t_Reselection_S']),
 						int(field_val['rrc.q_RxlevMin'])*2,
 						int(field_val['rrc.s_Intersearch'])*2,
 						int(field_val['rrc.s_Intrasearch'])*2,
 						int(field_val['rrc.q_Hyst_l_S'])*2,
 						int(field_val['rrc.q_HYST_2_S'])*2)
-				else:			
-					self.__config_tmp.sib.intra_freq_config\
-					=WcdmaRrcSibIntraFreqConfig(
-						int(field_val['rrc.t_Reselection_S']),
-						int(field_val['rrc.q_RxlevMin'])*2,
-						int(field_val['rrc.s_Intersearch'])*2,
-						int(field_val['rrc.s_Intrasearch'])*2,
-						int(field_val['rrc.q_Hyst_l_S'])*2,
-						int(field_val['rrc.q_HYST_2_S'])*2)
+
+				if not self.__status.inited():		
+					self.__config_tmp.sib.intra_freq_config=intra_freq_config
+				else:
+					cur_pair = (self.__status.id,self.__status.freq)
+					self.__config[cur_pair].sib.intra_freq_config=intra_freq_config
+
 
 			#inter-RAT cell info (LTE)
 			if field.get('name')=="rrc.EUTRA_FrequencyAndPriorityInfo_element":
@@ -245,31 +265,22 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 				neighbor_freq=int(field_val['rrc.earfcn'])
 
-				if self.__status.inited():
-					cur_pair=(self.__status.id,self.__status.freq)
-					self.__config[cur_pair].sib.inter_freq_config[neighbor_freq]\
-					=WcdmaRrcSibInterFreqConfig(
-							neighbor_freq,
-							#float(field_val['lte-rrc.t_ReselectionEUTRA']),
-							None,
-							int(field_val['rrc.qRxLevMinEUTRA'])*2,
-							#float(field_val['lte-rrc.p_Max']),
-							None,
-							int(field_val['rrc.priority']),
-							int(field_val['rrc.threshXhigh'])*2,
-							int(field_val['rrc.threshXlow'])*2)
+				inter_freq_config=WcdmaRrcSibInterFreqConfig(
+									neighbor_freq,
+									#float(field_val['lte-rrc.t_ReselectionEUTRA']),
+									None,
+									int(field_val['rrc.qRxLevMinEUTRA'])*2,
+									#float(field_val['lte-rrc.p_Max']),
+									None,
+									int(field_val['rrc.priority']),
+									int(field_val['rrc.threshXhigh'])*2,
+									int(field_val['rrc.threshXlow'])*2
+									)
+				if not self.__status.inited():
+					self.__config_tmp.sib.inter_freq_config[neighbor_freq]=inter_freq_config
 				else:
-					self.__config_tmp.sib.inter_freq_config[neighbor_freq]\
-					=WcdmaRrcSibInterFreqConfig(
-							neighbor_freq,
-							#float(field_val['lte-rrc.t_ReselectionEUTRA']),
-							None,
-							int(field_val['rrc.qRxLevMinEUTRA'])*2,
-							#float(field_val['lte-rrc.p_Max']),
-							None,
-							int(field_val['rrc.priority']),
-							int(field_val['rrc.threshXhigh'])*2,
-							int(field_val['rrc.threshXlow'])*2)
+					cur_pair = (self.__status.id,self.__status.freq)
+					self.__config[cur_pair].sib.inter_freq_config[neighbor_freq]=inter_freq_config
 
 			#TODO: RRC connection status update
 
@@ -326,8 +337,7 @@ class WcdmaRrcStatus:
 		print self.__class__.__name__,self.id,self.freq,self.rat,self.rac,self.lac
 
 	def inited(self):
-		return (self.id!=None and self.freq!=None \
-		and self.rac!=None and self.lac!=None)
+		return (self.id!=None and self.freq!=None)
 
 class WcdmaRrcConfig:
 	""" 
@@ -362,11 +372,6 @@ class WcdmaRrcConfig:
 		cell = cell_meta.id
 		freq = cell_meta.freq
 
-		if cell_meta.rat=="UTRA":
-			#WCDMA reselection without priority
-			hyst = self.sib.intra_freq_config.q_Hyst1
-			return WcdmaRrcReselectionConfig(cell,freq,None,hyst,None,None)
-
 		if freq==self.status.freq: #intra-freq
 			hyst = self.sib.intra_freq_config.q_Hyst1
 			return WcdmaRrcReselectionConfig(cell,freq,None,hyst,None,None)
@@ -374,12 +379,11 @@ class WcdmaRrcConfig:
 			#inter-frequency/RAT
 			#TODO: cell individual offset (not available in AT&T and T-mobile)
 			if not self.sib.inter_freq_config.has_key(freq):
-				if self.sib.serv_config.priority==None:
+				if self.sib.serv_config.priority==None \
+				or cell_meta.rat=="UTRA":
 					#WCDMA reselection without priority
 					hyst = self.sib.intra_freq_config.q_Hyst1
 					return WcdmaRrcReselectionConfig(cell,freq,None,hyst,None,None)
-				else:
-					return None
 			else:
 				freq_config = self.sib.inter_freq_config[freq]
 				hyst = self.sib.serv_config.s_priority_search2

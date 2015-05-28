@@ -153,7 +153,6 @@ class LteRrcAnalyzer(Analyzer):
 					int(field_val['lte-rrc.p_Max']),
 					float(field_val['lte-rrc.s_IntraSearch'])*2) 
 
-
 			#inter-frequency (LTE)
 			if field.get('name')=="lte-rrc.interFreqCarrierFreqList":
 				field_val={}
