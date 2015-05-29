@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-__all__=["Analyzer","MsgDump","MsgFile","LteRrcAnalyzer",\
-		"LteUeAnalyzer","WcdmaRrcAnalyzer","RrcAnalyzer",\
-		"HandoffLoopAnalyzer","LteNasAnalyzer"]
+__all__=["Analyzer","MsgDump","MsgFile","PickleDump",
+        "LteRrcAnalyzer",
+        "LteUeAnalyzer","WcdmaRrcAnalyzer","RrcAnalyzer",
+        "HandoffLoopAnalyzer","LteNasAnalyzer"]
 
 from analyzer import Analyzer
 
 from msg_dump import MsgDump
 from msg_file import MsgFile
+from pickle_dump import PickleDump
 
 # LTE
 from lte_rrc_analyzer import LteRrcAnalyzer

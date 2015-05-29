@@ -18,6 +18,7 @@ import os
 import optparse
 import serial
 import sys
+import timeit
 
 from sender import sendRecv, recvMessage
 from hdlc_parser import HdlcParser
@@ -115,13 +116,14 @@ class DMCollector(TraceCollector):
                         # Note that the beginning 2 bytes are skipped.
                         packet = DMLogPacket(payload[2:])
                         d = packet.decode()
-                        xml = packet.decode_xml()
+                        # xml = packet.decode_xml()
                         # print hex(d["type_id"]), dm_endec.consts.LOG_PACKET_NAME[d["type_id"]], d["timestamp"]
                         # print xml
                         # print ""
                         # Send event to analyzers
-                        # TODO(likayo): unify the timestamp here.
-                        event = Event(d["timestamp"], dm_endec.consts.LOG_PACKET_NAME[d["type_id"]], packet)
+                        event = Event(  timeit.default_timer(),
+                                        dm_endec.consts.LOG_PACKET_NAME[d["type_id"]],
+                                        packet)
                         self.send(event)
                     except FormatError, e:
                         # skip this packet
