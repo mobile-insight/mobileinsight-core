@@ -137,7 +137,7 @@ class HandoffLoopAnalyzer(Analyzer):
 							inter_freq_loop1 = (src_freq!=dst_freq and src_pref<=dst_pref)
 							#inter-freq/RAT: low-pref reselection happens
 							inter_freq_loop2 = (src_freq!=dst_freq and src_pref>dst_pref \
-							and src_rss<cell_config[src_cell].sib.serv_config.threshserv_low)
+							and src_rss<dst_config.threshserv_low)
 
 							loop_happen = intra_freq_loop or inter_freq_loop1 \
 								or inter_freq_loop2
@@ -155,7 +155,7 @@ class HandoffLoopAnalyzer(Analyzer):
 								and dst_rss>=dst_config.threshx_high)
 
 							inter_freq_loop3 = (src_freq!=dst_freq and src_pref>dst_pref \
-								and src_rss<cell_config[src_cell].sib.serv_config.threshserv_low \
+								and src_rss<dst_config.threshserv_low \
 								and dst_rss>=dst_config.threshx_low)
 
 							loop_happen = intra_freq_loop or inter_freq_loop1 \
@@ -209,9 +209,7 @@ class HandoffLoopAnalyzer(Analyzer):
 								neighbor_stack.append(src_neighbor)
 								neighbor_stack.append(dst_neighbor)
 							elif src_pref>dst_pref:
-
-								threshserv=cell_config[src_cell].sib.serv_config.threshserv_low
-								if src_rss >= threshserv:	#no loop, pass the dst_cell
+								if src_rss >= dst_config.threshserv_low:	#no loop, pass the dst_cell
 									dfs_stack.append(src_cell)
 									virtual_rss.append(src_rss)
 									neighbor_stack.append(src_neighbor)
@@ -221,7 +219,7 @@ class HandoffLoopAnalyzer(Analyzer):
 									dfs_stack.append(src_cell)
 									dfs_stack.append(dst_cell)
 									# #IMPORTANT to set proper inital value
-									src_rss = threshserv
+									src_rss = dst_config.threshserv_low
 									virtual_rss.append(src_rss)
 									virtual_rss.append(dst_config.threshx_low)
 									neighbor_stack.append(src_neighbor)

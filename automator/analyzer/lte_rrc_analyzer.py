@@ -570,7 +570,7 @@ class LteRrcConfig:
 			if self.sib.intra_freq_cell_config.has_key(cell):
 				offset_cell = self.sib.intra_freq_cell_config[cell]
 			return LteRrcReselectionConfig(cell,freq,self.sib.serv_config.priority, \
-				hyst+offset_cell,None,None)
+				hyst+offset_cell,None,None,self.sib.serv_config.threshserv_low)
 		else:
 			#inter-frequency/RAT
 			if not self.sib.inter_freq_config.has_key(freq):
@@ -582,7 +582,80 @@ class LteRrcConfig:
 				offset_cell = self.sib.inter_freq_cell_config[cell]
 			return LteRrcReselectionConfig(cell,freq,freq_config.priority,\
 				freq_config.q_offset_freq+offset_cell+hyst, \
-				freq_config.threshx_high,freq_config.threshx_low)
+				freq_config.threshx_high,freq_config.threshx_low, \
+				self.sib.serv_config.threshserv_low)
+
+
+
+	def get_meas_config(self,cell_meta):
+
+		"""
+			Given a cell's metadata, return its measurement config from the serving cell
+			Note: there may be more than 1 measurement configuration for the same cell/freq
+		"""
+		if cell_meta==None:
+			return None
+		cell = cell_meta.id
+		freq = cell_meta.freq
+
+		if not self.active.measobj.has_key(freq):
+			return None
+
+		obj_id = self.active.measobj[freq].obj_id
+		config_id_list = []
+
+		#Find the corresponding report conditions
+		for item in self.active.measid_list.itervalues():
+			if item[0]==obj_id:
+				config_id_list.append(item[1])
+
+		if not config_id_list:
+			return None
+
+		#For each configuration, we convert it to an equivalent reselection form
+		res=[]
+		for config_id in config_id_list:
+			if self.active.report_list.has_key(config_id):
+				hyst=self.active.report_list[config_id].hyst
+				for item in self.active.report_list[config_id].event_list:
+					if item.type=="a1":
+						#equivalent to high-priority reselection
+						priority=self.sib.serv_config.priority+1
+						threshX_High=item.threshold1+hyst
+						res.append(LteRrcReselectionConfig(cell,freq,priority, \
+							None,threshX_High,None,self.sib.serv_config.threshserv_low))
+					if item.type=="a2":
+						pass
+					if item.type=="a3":
+						#equivalent to equal-priority reselection
+						priority=self.sib.serv_config.priority
+						offset=item.threshold1+hyst-self.active.measobj[freq].offset_freq
+						if self.active.measobj[freq].cell_list[freq].has_key(cell):
+							offset-=self.active.measobj[freq].cell_list[cell]
+						res.append(LteRrcReselectionConfig(cell,freq,priority, \
+							offset,None,None,self.sib.serv_config.threshserv_low))
+					if item.type=="a4":
+						#equivalent to high-priority reselection
+						priority=self.sib.serv_config.priority+1
+						threshX_High=item.threshold1+hyst-self.active.measobj[freq].offset_freq
+						if self.active.measobj[freq].cell_list[freq].has_key(cell):
+							threshX_High-=self.active.measobj[freq].cell_list[cell]
+						res.append(LteRrcReselectionConfig(cell,freq,priority,None, \
+							threshX_High,None,self.sib.serv_config.threshserv_low))
+					if item.type=="a5":
+						#equivalent o low-priority reselection
+						priority=self.sib.serv_config.priority-1
+						#TODO: add thresh_serv. Currently use offset
+						threshserv_low=item.threshold1-hyst
+						threshX_Low=item.threshold2+hyst-self.active.measobj[freq].offset_freq
+						if self.active.measobj[freq].cell_list[freq].has_key(cell):
+							threshX_Low-=self.active.measobj[freq].cell_list[cell]
+						res.append(LteRrcReselectionConfig(cell,freq,priority,None, 
+							None,threshserv_low))
+		return res
+
+
+
 
 class LteRrcSib:
 
@@ -615,13 +688,14 @@ class LteRrcSib:
 			print "Inter-freq offset: ",item,self.inter_freq_cell_config[item]
 
 class LteRrcReselectionConfig:
-	def __init__(self,cell_id,freq,priority,offset,threshX_High,threshX_Low):
+	def __init__(self,cell_id,freq,priority,offset,threshX_High,threshX_Low,threshserv_low):
 		self.id = cell_id
 		self.freq = freq
 		self.priority = priority
 		self.offset = offset #adjusted offset by considering freq/cell-specific offsets
 		self.threshx_high = threshX_High
 		self.threshx_low = threshX_Low
+		self.threshserv_low = threshserv_low
 
 class LteRrcSibServ:
 	"""
@@ -696,19 +770,19 @@ class LteMeasObjectEutra:
 	"""
 
 	def __init__(self,measobj_id,freq,offset_freq):
-		self.__obj_id = measobj_id
-		self.__freq = freq # carrier frequency
-		self.__offset_freq = offset_freq # frequency-specific measurement offset
-		self.__cell_list={} # cellID->cellIndividualOffset
+		self.obj_id = measobj_id
+		self.freq = freq # carrier frequency
+		self.offset_freq = offset_freq # frequency-specific measurement offset
+		self.cell_list={} # cellID->cellIndividualOffset
 		#TODO: add cell blacklist
 
 	def add_cell(self,cell_id,cell_offset):
-		self.__cell_list[cell_id]=cell_offset
+		self.cell_list[cell_id]=cell_offset
 
 	def dump(self):
-		print self.__class__.__name__,self.__obj_id,self.__freq,self.__offset_freq
-		for item in self.__cell_list:
-			print item,self.__cell_list[item]
+		print self.__class__.__name__,self.obj_id,self.freq,self.offset_freq
+		for item in self.cell_list:
+			print item,self.cell_list[item]
 
 class LteMeasObjectUtra:
 	"""
@@ -716,13 +790,13 @@ class LteMeasObjectUtra:
 	"""
 
 	def __init__(self,measobj_id,freq,offset_freq):
-		self.__obj_id = measobj_id
-		self.__freq = freq # carrier frequency
-		self.__offset_freq = offset_freq # frequency-specific measurement offset
+		self.obj_id = measobj_id
+		self.freq = freq # carrier frequency
+		self.offset_freq = offset_freq # frequency-specific measurement offset
 		#TODO: add cell list
 		
 	def dump(self):
-		print self.__class__.__name__,self.__obj_id,self.__freq,self.__offset_freq
+		print self.__class__.__name__,self.obj_id,self.freq,self.offset_freq
 
 class LteReportConfig:
 	def __init__(self,report_id,hyst):
