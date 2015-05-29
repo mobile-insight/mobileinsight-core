@@ -87,7 +87,7 @@ if __name__ == "__main__":
     # lte_nas_analyzer = LteNasAnalyzer()
     # lte_nas_analyzer.set_source(src)
 
-    dumper = MsgFile("/Users/yuanjieli/Desktop/loop-test.txt")
+    dumper = MsgFile("/Users/yuanjieli/Desktop/verizon-lte-active.txt")
     dumper.set_source(src)
 
     # dumper2 = MsgDump()
@@ -98,6 +98,6 @@ if __name__ == "__main__":
 
     loop_detect = HandoffLoopAnalyzer()
     loop_detect.set_source(src)
-    loop_detect.set_log("/Users/yuanjieli/Desktop/verizon_veautomator_log.txt",logging.WARNING)
+    loop_detect.set_log("/Users/yuanjieli/Desktop/verizon_automator_log.txt",logging.WARNING)
 
     src.run()

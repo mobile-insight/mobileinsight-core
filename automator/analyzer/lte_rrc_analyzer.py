@@ -469,7 +469,7 @@ class LteRrcAnalyzer(Analyzer):
 				config_id=int(field_val['lte-rrc.reportConfigId'])
 				self.__config[cur_pair].active.measid_list[meas_id]=(obj_id,config_id)
 
-	def __callback_rrc_conn(self.msg):
+	def __callback_rrc_conn(self,msg):
 		for field in msg.data.iter('field'):
 			if field.get('name')=="lte-rrc.rrcConnectionSetupComplete_element":
 				self.__status.conn = True

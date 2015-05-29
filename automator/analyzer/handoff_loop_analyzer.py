@@ -28,6 +28,7 @@ class HandoffLoopAnalyzer(Analyzer):
 		"""
 			Detection persistent loops, configure device to avoid it
 		"""
+
 		if msg.type_id!="RrcAnalyzer":
 			return
 

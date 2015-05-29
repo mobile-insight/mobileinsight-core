@@ -36,6 +36,7 @@ class RrcAnalyzer(Analyzer):
 		"""
 			Decide the current RAT
 		"""
+
 		if msg.type_id.find("LTE")!=-1:	#LTE RRC msg received, so it's LTE
 			self.__cur_RAT = "LTE"
 		elif msg.type_id.find("WCDMA")!=-1:	#WCDMA RRC msg received, so it's WCDMA
