@@ -73,7 +73,9 @@ class LteRrcAnalyzer(Analyzer):
 		# Calllbacks triggering
 
 		if msg.type_id == "LTE_RRC_OTA_Packet":	
+			self.__callback_rrc_conn(xml_msg)
 			self.__callback_sib_config(xml_msg)
+			self.__callback_rrc_reconfig(xml_msg)
 			#TODO: callback RRC
 
 		# Raise event to other analyzers
@@ -102,8 +104,6 @@ class LteRrcAnalyzer(Analyzer):
 				self.__status=LteRrcStatus()
 				self.__status.id=msg.data['Physical Cell ID']
 				self.__history[msg.timestamp]=self.__status
-
-		
 
 	def __callback_sib_config(self,msg):
 		"""
@@ -307,6 +307,177 @@ class LteRrcAnalyzer(Analyzer):
 
 			#TODO: RRC connection status update
 
+	def __callback_rrc_reconfig(self,msg):
+		
+		"""
+			Handle the RRCReconfiguration Message
+		"""
+
+		#TODO: optimize code to handle objects/config under the same ID
+		measobj_id = -1
+		report_id = -1
+
+		for field in msg.data.iter('field'):
+
+			if field.get('name')=="lte-rrc.measObjectId":
+				measobj_id = field.get('show')
+
+			if field.get('name')=="lte-rrc.reportConfigId":
+				report_id = field.get('show')
+
+
+
+			#Add a LTE measurement object
+			if field.get('name')=="lte-rrc.measObjectEUTRA_element": 
+				field_val={}
+
+				field_val['lte-rrc.carrierFreq']=None
+				field_val['lte-rrc.offsetFreq']=0
+
+				for val in field.iter('field'):
+					field_val[val.get('name')]=val.get('show')
+
+				cur_pair=(self.__status.id,self.__status.freq)
+				if not self.__config.has_key(cur_pair):
+					self.__config[cur_pair]=LteRrcConfig()
+					self.__config[cur_pair].status=self.__status
+
+				freq = int(field_val['lte-rrc.carrierFreq'])
+				offsetFreq = int(field_val['lte-rrc.offsetFreq'])
+				self.__config[cur_pair].active.measobj[freq] = LteMeasObjectEutra(measobj_id,freq,offsetFreq)
+
+				#2nd round: handle cell individual offset
+				for val in field.iter('field'):
+					if val.get('name')=='lte-rrc.CellsToAddMod_element':
+						cell_val={}
+						for item in val.iter('field'):
+							cell_val[item.get('name')]=item.get('show')
+
+						if cell_val.has_key('lte-rrc.physCellId'):
+							cell_id = int(cell_val['lte-rrc.physCellId'])
+							cell_offset = q_offset_range[int(cell_val['lte-rrc.cellIndividualOffset'])]
+							self.__config[cur_pair].active.measobj[freq].add_cell(cell_id,cell_offset)
+
+			#Add a UTRA (3G) measurement object:
+			if field.get('name')=="lte-rrc.measObjectUTRA_element":
+				field_val={}
+
+				field_val['lte-rrc.carrierFreq']=None
+				field_val['lte-rrc.offsetFreq']=0
+
+				for val in field.iter('field'):
+					field_val[val.get('name')]=val.get('show')
+
+				cur_pair=(self.__status.id,self.__status.freq)
+				if not self.__config.has_key(cur_pair):
+					self.__config[cur_pair]=LteRrcConfig()
+					self.__config[cur_pair].status=self.__status
+
+				freq = int(field_val['lte-rrc.carrierFreq'])
+				offsetFreq = int(field_val['lte-rrc.offsetFreq'])
+				self.__config[cur_pair].active.measobj[freq] = LteMeasObjectUtra(measobj_id,freq,offsetFreq)
+
+
+			#Add a LTE report configuration
+			if field.get('name')=="lte-rrc.reportConfigEUTRA_element":
+
+				cur_pair=(self.__status.id,self.__status.freq)
+				if not self.__config.has_key(cur_pair):
+					self.__config[cur_pair]=LteRrcConfig()
+					self.__config[cur_pair].status=self.__status
+
+				hyst=0
+				for val in field.iter('field'):
+					if val.get('name')=='lte-rrc.hysteresis':
+						hyst = int(val.get('show'))
+
+				report_config = LteReportConfig(report_id,hyst/2)
+
+				for val in field.iter('field'):
+
+					if val.get('name')=='lte-rrc.eventA1_element':
+						for item in val.iter('field'):
+							if item.get('name')=='lte-rrc.threshold_RSRP':
+								report_config.add_event('a1',int(item.get('show'))-140)
+								break
+							if item.get('name')=='lte-rrc.threshold_RSRQ':
+								report_config.add_event('a1',(int(item.get('show'))-40)/2)
+								break
+
+					if val.get('name')=='lte-rrc.eventA2_element':
+						for item in val.iter('field'):
+							if item.get('name')=='lte-rrc.threshold_RSRP':
+								report_config.add_event('a2',int(item.get('show'))-140)
+								break
+							if item.get('name')=='lte-rrc.threshold_RSRQ':
+								report_config.add_event('a2',(int(item.get('show'))-40)/2)
+								break
+
+					if val.get('name')=='lte-rrc.eventA3_element':
+						for item in val.iter('field'):
+							if item.get('name')=='lte-rrc.a3_Offset':
+								report_config.add_event('a3',int(item.get('show'))/2)
+								break
+
+					if val.get('name')=='lte-rrc.eventA4_element':
+						for item in val.iter('field'):
+							if item.get('name')=='lte-rrc.threshold_RSRP':
+								report_config.add_event('a4',int(item.get('show'))-140)
+								break
+							if item.get('name')=='lte-rrc.threshold_RSRQ':
+								report_config.add_event('a4',(int(item.get('show'))-40)/2)
+								break
+
+					if val.get('name')=='lte-rrc.eventA5_element':
+						threshold1=None
+						threshold2=None
+						for item in val.iter('field'):
+							if item.get('name')=='lte-rrc.a5_Threshold1':
+								for item2 in item.iter('field'):
+									if item2.get('name')=='lte-rrc.threshold_RSRP':
+										threshold1=int(item.get('show'))-140
+										break
+									if item2.get('name')=='lte-rrc.threshold_RSRQ':
+										threshold1=(int(item.get('show'))-40)/2
+										break
+							if item.get('name')=='lte-rrc.a5_Threshold2':
+								for item2 in item.iter('field'):
+									if item2.get('name')=='lte-rrc.threshold_RSRP':
+										threshold2=int(item.get('show'))-140
+										break
+									if item2.get('name')=='lte-rrc.threshold_RSRQ':
+										threshold2=(int(item.get('show'))-40)/2
+										break
+						report_config.add_event('a5',threshold1,threshold2)
+
+				self.__config[cur_pair].active.report_list[report_id]=report_config
+
+			#Add a LTE measurement report config
+			if field.get('name')=="lte-rrc.MeasIdToAddMod_element":
+				field_val={}
+				for val in field.iter('field'):
+					field_val[val.get('name')]=val.get('show')
+
+				cur_pair=(self.__status.id,self.__status.freq)
+				if not self.__config.has_key(cur_pair):
+					self.__config[cur_pair]=LteRrcConfig()
+					self.__config[cur_pair].status=self.__status
+
+				meas_id=int(field_val['lte-rrc.measId'])
+				obj_id=int(field_val['lte-rrc.measObjectId'])
+				config_id=int(field_val['lte-rrc.reportConfigId'])
+				self.__config[cur_pair].active.measid_list[meas_id]=(obj_id,config_id)
+
+	def __callback_rrc_conn(self.msg):
+		for field in msg.data.iter('field'):
+			if field.get('name')=="lte-rrc.rrcConnectionSetupComplete_element":
+				self.__status.conn = True
+
+			if field.get('name')=="lte-rrc.rrcConnectionRelease_element":
+				self.__status.conn = False
+
+
+
 	def get_cell_list(self):
 		"""
 			Get a complete list of cell IDs *at current location*.
@@ -463,7 +634,7 @@ class LteRrcSibServ:
 
 	def dump(self):
 		print self.__class__.__name__, self.priority, \
-		self.threshserv_low,self.s_nonintrasearch
+		self.threshserv_low,self.s_nonintrasearch,self.q_hyst
 
 class LteRrcSibIntraFreqConfig:
 	"""
@@ -505,8 +676,69 @@ class LteRrcSibInterFreqConfig:
 class LteRrcActive:
 	def __init__(self):
 		#TODO: initialize some containers
-		pass
+		self.measobj={} #freq->measobject
+		self.report_list={} #report_id->reportConfig
+		self.measid_list={} #meas_id->(obj_id,report_id)
 
 	def dump(self):
-		pass
+		for item in self.measobj:
+			self.measobj[item].dump()
+		for item in self.report_list:
+			self.report_list[item].dump()
+		for item in self.measid_list:
+			print "MeasObj",item,self.measid_list[item]
 
+
+class LteMeasObjectEutra:
+	"""
+		LTE Measurement object configuration
+	"""
+
+	def __init__(self,measobj_id,freq,offset_freq):
+		self.__obj_id = measobj_id
+		self.__freq = freq # carrier frequency
+		self.__offset_freq = offset_freq # frequency-specific measurement offset
+		self.__cell_list={} # cellID->cellIndividualOffset
+		#TODO: add cell blacklist
+
+	def add_cell(self,cell_id,cell_offset):
+		self.__cell_list[cell_id]=cell_offset
+
+	def dump(self):
+		print self.__class__.__name__,self.__obj_id,self.__freq,self.__offset_freq
+		for item in self.__cell_list:
+			print item,self.__cell_list[item]
+
+class LteMeasObjectUtra:
+	"""
+		Utra (3G) Measurement object configuration
+	"""
+
+	def __init__(self,measobj_id,freq,offset_freq):
+		self.__obj_id = measobj_id
+		self.__freq = freq # carrier frequency
+		self.__offset_freq = offset_freq # frequency-specific measurement offset
+		#TODO: add cell list
+		
+	def dump(self):
+		print self.__class__.__name__,self.__obj_id,self.__freq,self.__offset_freq
+
+class LteReportConfig:
+	def __init__(self,report_id,hyst):
+		self.report_id = report_id
+		self.hyst = hyst
+		self.event_list=[]
+
+	def add_event(self,event_type,threshold1,threshold2=None):
+		self.event_list.append(LteRportEvent(event_type,threshold1,threshold2))
+
+	def dump(self):
+		print self.__class__.__name__,self.report_id,self.hyst
+		for item in self.event_list:
+			print item.type,item.threshold1,item.threshold2
+
+class LteRportEvent:
+	def __init__(self,event_type,threshold1,threshold2=None):
+		self.type=event_type
+		self.threshold1=threshold1
+		self.threshold2=threshold2	
