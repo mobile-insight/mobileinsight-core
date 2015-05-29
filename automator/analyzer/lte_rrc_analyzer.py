@@ -56,7 +56,8 @@ class LteRrcAnalyzer(Analyzer):
 
 		"""
 
-		log_item = msg.data
+		# log_item = msg.data
+		log_item = msg.data.decode()
 		log_item_dict = dict(log_item)
 
 		#Convert msg to dictionary format

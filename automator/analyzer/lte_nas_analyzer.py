@@ -117,7 +117,8 @@ class LteNasAnalyzer(Analyzer):
 
 		"""
 
-		log_item = msg.data
+		# log_item = msg.data
+		log_item = msg.data.decode()
 		log_item_dict = dict(log_item)
 
 		if not log_item_dict.has_key('Msg'):

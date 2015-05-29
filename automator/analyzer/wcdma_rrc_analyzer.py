@@ -56,7 +56,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 				msg: the event (message) from the trace collector
 		"""
 
-		log_item = msg.data
+		# log_item = msg.data
+		log_item = msg.data.decode()
 		log_item_dict = dict(log_item)
 
 		if msg.type_id=="WCDMA_CELL_ID":
