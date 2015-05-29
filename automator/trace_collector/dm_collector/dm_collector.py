@@ -113,12 +113,15 @@ class DMCollector(TraceCollector):
                     # print_reply(payload, crc_correct)
                     try:
                         # Note that the beginning 2 bytes are skipped.
-                        l, type_id, ts, log_item = DMLogPacket.decode(payload[2:])
-                        # print l, hex(type_id), dm_endec.consts.LOG_PACKET_NAME[type_id], ts
-                        # print dict(log_item).get("Msg", "XML msg not found.")
+                        packet = DMLogPacket(payload[2:])
+                        d = packet.decode()
+                        xml = packet.decode_xml()
+                        # print hex(d["type_id"]), dm_endec.consts.LOG_PACKET_NAME[d["type_id"]], d["timestamp"]
+                        # print xml
                         # print ""
-                        #send event to analyzers
-                        event = Event(ts,dm_endec.consts.LOG_PACKET_NAME[type_id],log_item)
+                        # Send event to analyzers
+                        # TODO(likayo): unify the timestamp here.
+                        event = Event(d["timestamp"], dm_endec.consts.LOG_PACKET_NAME[d["type_id"]], packet)
                         self.send(event)
                     except FormatError, e:
                         # skip this packet

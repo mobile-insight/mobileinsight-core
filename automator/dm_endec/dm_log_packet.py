@@ -27,6 +27,16 @@ from consts import *
 from ws_dissector import *
 
 
+class SuperTuple(tuple):
+
+    def __new__(cls, data, xml_type, xml_list_item_tag=None):
+        return super(SuperTuple, cls).__new__(cls, data)
+
+    def __init__(self, data, xml_type, xml_list_item_tag=None):
+        self.xml_type = xml_type
+        self.xml_list_item_tag = xml_list_item_tag
+
+
 class FormatError(RuntimeError):
     """
     Error in decoding messages.
@@ -44,8 +54,6 @@ class DMLogPacket:
 
     This class depends on Wireshark to decode some 3GPP standardized
     messages.
-
-    This class should not be instancialized.
     """
     # Format strings have the same meanings as in Python struct module. See 
     # https://docs.python.org/2/library/struct.html for details.
@@ -172,6 +180,7 @@ class DMLogPacket:
                     ),
                 }
 
+    # For LTE_ML1_Serving_Cell_Measurement_Result
     _LTE_ML1_SUBPKT_FMT = {
                     "Header":
                     (
@@ -225,6 +234,99 @@ class DMLogPacket:
 
     _init_called = False
 
+    def __init__(self, b):
+        self._binary = b
+        self._decoded_list = None
+
+    def decode(self):
+        """
+        Decode a QCDM log packet.
+
+        Returns:
+            a Python dict object that looks like:
+
+            {
+                "type_id": 0xB0C0, # for LTE RRC OTA
+                "timestamp": datetime.datetime(......),
+                "Pkt Version": 2,
+                "RRC Release Number": 9,
+                # other fields ...
+                "Msg": \"\"\"
+                    <msg>
+                        <packet>...</packet>
+                        <packet>...</packet>
+                        <packet>...</packet>
+                    </msg>
+                    \"\"\",
+            }
+
+        Raises:
+            FormatError: this message has an unknown type
+        """
+        cls = self.__class__
+        assert cls._init_called
+        if self._decoded_list is not None:
+            return dict(self._decoded_list)
+
+        self._decoded_list = []
+        l, type_id, ts = cls._decode_header(self._binary)
+        self._decoded_list.append( ("type_id", type_id) )
+        self._decoded_list.append( ("timestamp", ts) )
+        log_item = cls._decode_log_item(type_id,
+                                        self._binary[cls._HEADER_LEN:])
+        self._decoded_list.extend(log_item)
+        return dict(self._decoded_list)
+
+    def decode_xml(self):
+        cls = self.__class__
+        if self._decoded_list is None:
+            ignored = self.decode()
+
+        # root tag is like a "dict" type in XML
+        xml = cls._decode_xml_recursive(self._decoded_list, "dict", "")
+        xml.tag = "qcdm_log_packet"
+        return ET.tostring(xml)
+
+    @classmethod
+    def _decode_xml_recursive(cls, element, xml_type=None, list_item_tag=""):
+        """
+        Return an XML element or a str, depending on the value of xml_type.
+        """
+        if xml_type == "list":
+            assert list_item_tag != ""
+            lst_tag = ET.Element("list")
+            for item in element:
+                item_tag = ET.SubElement(lst_tag, list_item_tag)
+                if isinstance(item, SuperTuple):
+                    item_tag.append(cls._decode_xml_recursive(
+                                                item,
+                                                item.xml_type,
+                                                item.xml_list_item_tag)
+                                    )
+                else:
+                    item_tag.text = cls._decode_xml_recursive(item)
+            return lst_tag
+
+        elif xml_type == "dict":
+            dict_tag = ET.Element("dict")
+            for pair in element:
+                pair_tag = ET.SubElement(dict_tag, "pair", {"key": pair[0]})
+                if pair[0] == "Msg":
+                    pair_tag.set("type", "list")
+                    pair_tag.append(ET.fromstring(pair[1]))
+                elif isinstance(pair, SuperTuple):
+                    pair_tag.append(cls._decode_xml_recursive(
+                                                pair[1],
+                                                pair.xml_type,
+                                                pair.xml_list_item_tag),
+                                    )
+                else:
+                    pair_tag.text = cls._decode_xml_recursive(pair[1])
+            return dict_tag
+
+        else:
+            return str(element)
+
     @classmethod
     def init(cls, prefs):
         """
@@ -240,33 +342,6 @@ class DMLogPacket:
         WSDissector.init_proc(prefs["ws_dissect_executable_path"],
                                 prefs["libwireshark_path"])
         cls._init_called = True
-
-    @classmethod
-    def decode(cls, b):
-        """
-        Decode a QCDM log packet.
-
-        Args:
-            b: a string containing binary data of a packet
-
-        Returns:
-            a four-element tuple (len, type_id, ts, log_item). The meaning 
-            of each element is as follows:
-
-            len: the number of bytes in the payload field.
-            type_id: an integer identifying the type.
-            ts: a datetime object storing the timestamp of this packet,
-                which is provided by the packet itself.
-            log_item: the decoding result of the payload.
-
-        Raises:
-            FormatError: the type of this message is unknown
-        """
-        assert cls._init_called
-
-        l, type_id, ts = cls._decode_header(b)
-        log_item = cls._decode_log_item(type_id, b[cls._HEADER_LEN:])
-        return (l - cls._HEADER_LEN + 2, type_id, ts, log_item)
 
     @classmethod
     def _decode_header(cls, b):
@@ -368,7 +443,6 @@ class DMLogPacket:
             if spec[0] != cls._DSL_SKIP:
                 name = spec[0]
                 fmt = spec[1]
-                # print ind, binascii.b2a_hex(b[ind:ind+4])
                 decoded = struct.unpack_from(fmt, b, ind)
                 if len(decoded) == 1:
                     decoded = decoded[0]
@@ -553,17 +627,18 @@ class DMLogPacket:
         for i in range(n_neighbor_cells):
             res_cell, offset = cls._decode_by_format(fmt, b, ind)
             ind += offset
-            res_allcell.append(tuple(res_cell))
-        res2.append(("Neighbor Cells", tuple(res_allcell)))
+            res_allcell.append(SuperTuple(res_cell, "dict"))
+        tmp = ("Neighbor Cells", tuple(res_allcell))
+        res2.append(SuperTuple(tmp, "list", "neighbor_cell"))
         # Decode each line of detected cells
         res_allcell = []
         fmt = cls._LTE_ML1_CMIFMR_FMT[pkt_ver]["Detected Cell"]
         for i in range(n_detected_cells):
             res_cell, offset = cls._decode_by_format(fmt, b, ind)
             ind += offset
-            res_allcell.append(tuple(res_cell))
-        res2.append(("Detected Cells", tuple(res_allcell)))
-
+            res_allcell.append(SuperTuple(res_cell, "dict"))
+        tmp = ("Detected Cells", tuple(res_allcell))
+        res2.append(SuperTuple(tmp, "list", "detected_cell"))
         result.extend(tuple(res2))
         return ind - start
 
@@ -596,9 +671,10 @@ class DMLogPacket:
                 ind += offset
                 res_subpkt.extend(res2)
                 
-            res_allpkt.append(tuple(res_subpkt))
+            res_allpkt.append(SuperTuple(res_subpkt, "dict"))
 
-        result.append(("Subpackets", tuple(res_allpkt)))
+        tmp = ("Subpackets", tuple(res_allpkt))
+        result.append(SuperTuple(tmp, "list", "subpacket"))
         return ind - start
 
 
@@ -672,10 +748,13 @@ if __name__ == '__main__':
                         })
     i = 0
     for b in tests:
-        l, type_id, ts, log_item = DMLogPacket.decode(binascii.a2b_hex(b))
+        packet = DMLogPacket(binascii.a2b_hex(b))
+        d = packet.decode()
         print "> Packet #%d" % i
-        print l, LOG_PACKET_NAME[type_id], ts
-        print dict(log_item).get("Msg", "XML msg not found.")
+        print LOG_PACKET_NAME[d["type_id"]], d["timestamp"]
+        print d
+        print packet.decode_xml()
+        # print d.get("Msg", "XML msg not found.")
         i += 1
 
     # s = binascii.a2b_hex(tests[-3])
