@@ -14,6 +14,7 @@ import optparse
 import serial
 import sys
 
+from analyzer import PickleDump
 from trace_collector import *
 
 # Define some constants
@@ -75,6 +76,13 @@ if __name__ == "__main__":
     src.enable_log("WCDMA_CELL_ID")
     src.enable_log("WCDMA_Signaling_Messages")
     src.enable_log(["LTE_RRC_OTA_Packet", "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results"])
+
+    # src = PickleCollector()
+    # src.set_input_path("output.p")
+
+    pickle_dumper = PickleDump()
+    pickle_dumper.set_source(src)
+    pickle_dumper.set_output_path("output.p")
 
     src.run()
     
