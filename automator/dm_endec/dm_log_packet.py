@@ -272,10 +272,10 @@ class DMLogPacket:
             FormatError: this message has an unknown type
         """
         cls = self.__class__
-        assert cls._init_called
         if self._decoded_list is not None:
             return dict(self._decoded_list)
 
+        assert cls._init_called
         self._decoded_list = []
         l, type_id, ts = cls._decode_header(self._binary)
         self._decoded_list.append( ("type_id", type_id) )
