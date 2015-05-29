@@ -391,6 +391,11 @@ class WcdmaRrcConfig:
 				return WcdmaRrcReselectionConfig(cell,freq,freq_config.priority, hyst, \
 					freq_config.threshx_high,freq_config.threshx_low)
 
+
+	def get_meas_config(self,cell_meta):
+		#NOT DONE
+		return None
+
 class WcdmaRrcSib:
 
 	"""

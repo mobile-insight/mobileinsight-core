@@ -451,6 +451,92 @@ class LteRrcAnalyzer(Analyzer):
 										break
 						report_config.add_event('a5',threshold1,threshold2)
 
+					if val.get('name')=='lte-rrc.eventB2_element':
+
+						threshold1=None
+						threshold2=None
+						for item in val.iter('field'):
+							if item.get('name')=='lte-rrc.b2_Threshold1':
+								for item2 in item.iter('field'):
+									if item2.get('name')=='lte-rrc.threshold_RSRP':
+										threshold1=int(item.get('show'))-140
+										break
+									if item2.get('name')=='lte-rrc.threshold_RSRQ':
+										threshold1=(int(item.get('show'))-40)/2
+										break
+							if item.get('name')=='lte-rrc.b2_Threshold2':
+								for item2 in item.iter('field'):
+									if item2.get('name')=='lte-rrc.threshold_RSRP':
+										threshold2=int(item.get('show'))-140
+										break
+									if item2.get('name')=='lte-rrc.threshold_RSRQ':
+										threshold2=(int(item.get('show'))-40)/2
+										break
+									if item2.get('name')=='lte-rrc.utra_RSCP':
+										threshold2=int(item.get('show'))-115
+										break
+						report_config.add_event('b2',threshold1,threshold2)
+
+
+				self.__config[cur_pair].active.report_list[report_id]=report_config
+
+
+			#Add a 2G/3G report configuration
+			if field.get('name')=="lte-rrc.reportConfigInterRAT_element":
+
+				cur_pair=(self.__status.id,self.__status.freq)
+				if not self.__config.has_key(cur_pair):
+					self.__config[cur_pair]=LteRrcConfig()
+					self.__config[cur_pair].status=self.__status
+
+				hyst=0
+				for val in field.iter('field'):
+					if val.get('name')=='lte-rrc.hysteresis':
+						hyst = int(val.get('show'))
+
+				report_config = LteReportConfig(report_id,hyst/2)
+
+				for val in field.iter('field'):
+
+					if val.get('name')=='lte-rrc.eventB1_element':
+						for item in val.iter('field'):
+							if item.get('name')=='lte-rrc.threshold_RSRP':
+								report_config.add_event('b1',int(item.get('show'))-140)
+								break
+							if item.get('name')=='lte-rrc.threshold_RSRQ':
+								report_config.add_event('b1',(int(item.get('show'))-40)/2)
+								break
+							if item.get('name')=='lte-rrc.threshold_RSCP':
+								report_config.add_event('b1',int(item.get('show'))-115)
+								break
+
+					if val.get('name')=='lte-rrc.eventB2_element':
+
+						threshold1=None
+						threshold2=None
+						for item in val.iter('field'):
+							if item.get('name')=='lte-rrc.b2_Threshold1':
+								for item2 in item.iter('field'):
+									if item2.get('name')=='lte-rrc.threshold_RSRP':
+										threshold1=int(item.get('show'))-140
+										break
+									if item2.get('name')=='lte-rrc.threshold_RSRQ':
+										threshold1=(int(item.get('show'))-40)/2
+										break
+							if item.get('name')=='lte-rrc.b2_Threshold2':
+								for item2 in item.iter('field'):
+									if item2.get('name')=='lte-rrc.threshold_RSRP':
+										threshold2=int(item.get('show'))-140
+										break
+									if item2.get('name')=='lte-rrc.threshold_RSRQ':
+										threshold2=(int(item.get('show'))-40)/2
+										break
+									if item2.get('name')=='lte-rrc.utra_RSCP':
+										threshold2=int(item.get('show'))-115
+										break
+						report_config.add_event('b2',threshold1,threshold2)
+
+
 				self.__config[cur_pair].active.report_list[report_id]=report_config
 
 			#Add a LTE measurement report config
@@ -593,6 +679,8 @@ class LteRrcConfig:
 			Given a cell's metadata, return its measurement config from the serving cell
 			Note: there may be more than 1 measurement configuration for the same cell/freq
 		"""
+
+		#FIXME: this is NOT a generic function
 		if cell_meta==None:
 			return None
 		cell = cell_meta.id
@@ -651,7 +739,16 @@ class LteRrcConfig:
 						if self.active.measobj[freq].cell_list[freq].has_key(cell):
 							threshX_Low-=self.active.measobj[freq].cell_list[cell]
 						res.append(LteRrcReselectionConfig(cell,freq,priority,None, 
-							None,threshserv_low))
+							threshX_Low,threshserv_low))
+
+					if item.type=="b2":
+						#equivalent o low-priority reselection
+						priority=self.sib.serv_config.priority-1
+						#TODO: add thresh_serv. Currently use offset
+						threshserv_low=item.threshold1-hyst
+						threshX_Low=item.threshold2+hyst-self.active.measobj[freq].offset_freq
+						res.append(LteRrcReselectionConfig(cell,freq,priority,None, 
+							threshX_Low,threshserv_low))
 		return res
 
 
@@ -762,7 +859,6 @@ class LteRrcActive:
 			self.report_list[item].dump()
 		for item in self.measid_list:
 			print "MeasObj",item,self.measid_list[item]
-
 
 class LteMeasObjectEutra:
 	"""
