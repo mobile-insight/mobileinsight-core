@@ -9,7 +9,7 @@ Author: Yuanjie Li
 
 import xml.etree.ElementTree as ET
 from analyzer import *
-import time
+import timeit
 
 __all__=["LteNasAnalyzer"]
 
@@ -137,7 +137,7 @@ class LteNasAnalyzer(Analyzer):
 			self.__callback_esm(xml_msg)
 
 
-		e = Event(time.time(),self.__class__.__name__,"")
+		e = Event(timeit.default_timer(),self.__class__.__name__,"")
 		self.send(e)
 
 	def __callback_emm_state(self,msg):

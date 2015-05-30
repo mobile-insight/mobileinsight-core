@@ -14,7 +14,7 @@ Author: Yuanjie Li
 import xml.etree.ElementTree as ET
 from analyzer import *
 from msg_dump import *
-import time
+import timeit
 from copy import deepcopy
 
 
@@ -84,7 +84,7 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 		# Raise event to other analyzers
 		# FIXME: the timestamp is incoherent with that from the trace collector
-		e = Event(time.time(),self.__class__.__name__,"")
+		e = Event(timeit.default_timer(),self.__class__.__name__,"")
 		self.send(e)
 
 

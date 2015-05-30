@@ -266,8 +266,3 @@ class HandoffLoopAnalyzer(Analyzer):
 									neighbor_stack.append(src_neighbor)
 
 				cell_visited[unvisited_cell]=True
-
-
-
-
-

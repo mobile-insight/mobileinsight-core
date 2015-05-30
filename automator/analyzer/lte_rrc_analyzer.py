@@ -13,7 +13,7 @@ Author: Yuanjie Li
 
 import xml.etree.ElementTree as ET
 from analyzer import *
-import time
+import timeit
 
 __all__=["LteRrcAnalyzer"]
 
@@ -81,7 +81,7 @@ class LteRrcAnalyzer(Analyzer):
 
 		# Raise event to other analyzers
 		# FIXME: the timestamp is incoherent with that from the trace collector
-		e = Event(time.time(),self.__class__.__name__,"")
+		e = Event(timeit.default_timer(),self.__class__.__name__,"")
 		self.send(e)
 
 
