@@ -84,25 +84,23 @@ class HandoffLoopAnalyzer(Analyzer):
 				#stacks
 				dfs_stack=[unvisited_cell]	
 				neighbor_stack=[neighbor_visited]
-				# For ci->ci+1, a ci's rss lower bound that satisifes this handoff
-				# virtual (normalized) measurements are used
-				virtual_rss=[0]
-				# For dfs_stack[0]->dfs_stack[1], indicates whether ci's rss matters	
-				dont_care=False
+				#dcell_clear_stack[i]=false if ci-1->ci is "high-pref" handoff, true otherwise
+				cell_clear_stack=[True]
+				val_stack=[0]
 
 				while dfs_stack:
-					# print "dfs_stack",dfs_stack
 					self.logger.debug("dfs_stack:"+str(dfs_stack))
 					src_cell = dfs_stack.pop()
-					src_rss = virtual_rss.pop()
 					src_neighbor = neighbor_stack.pop()
+					src_clear = cell_clear_stack.pop()
+					src_val = val_stack.pop()
 					dst_cell = None
-					dst_rss = None
+					dst_clear = None
+					dst_val = None
 
 					#Find a next cell to handoff
 					for cell in src_neighbor:
-						# if src_neighbor[cell]<2 \
-						if src_neighbor[cell]<1 \
+						if src_neighbor[cell]<2 \
 						and (not dfs_stack or cell not in dfs_stack[1:]):
 							dst_cell = cell
 							break
@@ -126,60 +124,69 @@ class HandoffLoopAnalyzer(Analyzer):
 						dst_config=cell_config[src_cell].get_meas_config(cell_config[dst_cell].status)
 
 					if dst_config==None:
+						dfs_stack.append(src_cell)
+						neighbor_stack.append(src_neighbor)
+						cell_clear_stack.append(src_clear)
+						val_stack.append(src_val)
 						continue
 
 					src_pref=cell_config[src_cell].sib.serv_config.priority
-					dst_pref=dst_pref=dst_config.priority
+					dst_pref=dst_config.priority
 
 					if src_pref==None or dst_pref==None:	#happens in 3G
 						#25.331: without pref, treat as equal pref
 						src_pref = dst_pref = None
 
-					# a potential loop with dst_cell
-					if dst_cell in dfs_stack: 
-						loop_happen = False
-						if dont_care:
-							#loop if src_cell->dst_cell happens under src_rss only
+					
+					dst_neighbor_cells=self.__rrc_analyzer.get_cell_neighbor(dst_cell)
+					dst_neighbor={x: 0 for x in dst_neighbor_cells}
+					for item in dst_neighbor:
+						if cell_visited.has_key(item) and cell_visited[item]:
+							dst_neighbor[item]=2
 
-							#intra-freq: loop must happens
-							intra_freq_loop = (src_freq==dst_freq)
-							#inter-freq/RAT: loop happens in equal/high-pref reselection
-							inter_freq_loop1 = (src_freq!=dst_freq and src_pref<=dst_pref)
-							#inter-freq/RAT: low-pref reselection happens
-							inter_freq_loop2 = (src_freq!=dst_freq and src_pref>dst_pref \
-							and src_rss<dst_config.threshserv_low)
+					dfs_stack.append(src_cell)
+					neighbor_stack.append(src_neighbor)
+					cell_clear_stack.append(src_clear)
+					val_stack.append(src_val)
 
-							loop_happen = intra_freq_loop \
-										or inter_freq_loop1 \
-										or inter_freq_loop2
+					if src_freq==dst_freq or src_pref==dst_pref:
+						if dst_config.offset!=None:
+							dst_clear = True
+							dst_val = src_val+dst_config.offset
+						else: #trace not ready
+							continue
+					elif src_pref<dst_pref:
+						dst_clear = False
+						dst_val = dst_config.threshx_high
+					elif src_pref>dst_pref:
+						if src_val>dst_config.threshserv_low:
+							continue
+						dst_clear = True
+						dst_val = src_val+dst_config.threshx_low-dst_config.threshserv_low
+						
+					if dst_cell == dfs_stack[0]:
+						#Loop may occur
+						#Special check: if dfs_stack[0] performs low-pref handoff
+						dst_dst_cell = dfs_stack[1]
+						if neighbor_stack[0][dst_dst_cell]==1:
+							#idle-state handoff
+							dst_dst_config=cell_config[dst_cell].get_cell_reselection_config(cell_config[dst_dst_cell].status)
 						else:
-							#loop if src_cell->dst_cell happens under src_rss and dst_rss
-							dst_rss = virtual_rss[0]
+							#active-state handoff
+							dst_dst_config=cell_config[dst_cell].get_meas_config(cell_config[dst_dst_cell].status)
 
-							intra_freq_loop = (src_freq==dst_freq \
-								and dst_rss>=src_rss+dst_config.offset)
+						dst_serv_pref = cell_config[dst_cell].sib.serv_config.priority
+						dst_dst_pref = dst_dst_config.priority
 
-							inter_freq_loop1 = (src_freq!=dst_freq and src_pref==dst_pref \
-								and dst_rss>=src_rss+dst_config.offset) 
+						if dst_serv_pref==None or dst_dst_pref==None:	#happens in 3G
+							#25.331: without pref, treat as equal pref
+							dst_serv_pref = dst_dst_pref = None
 
-							inter_freq_loop2 = (src_freq!=dst_freq and src_pref<dst_pref \
-								and dst_rss>=dst_config.threshx_high)
+						if dst_serv_pref>dst_dst_pref \
+						and dst_val>dst_dst_config.threshserv_low:
+							continue
 
-							inter_freq_loop3 = (src_freq!=dst_freq and src_pref>dst_pref \
-								and src_rss<dst_config.threshserv_low \
-								and dst_rss>=dst_config.threshx_low)
-
-							loop_happen = intra_freq_loop \
-										or inter_freq_loop1 \
-										or inter_freq_loop2 \
-										or inter_freq_loop3
-
-						dfs_stack.append(src_cell)
-						virtual_rss.append(src_rss)
-						neighbor_stack.append(src_neighbor)
-
-						if loop_happen:
-							#report loop
+						if False in cell_clear_stack or dst_val<0:
 							loop_report="\033[91m\033[1mPersistent loop: \033[0m\033[0m"
 							loop_report+=str(dfs_stack[0])
 							prev_item=dfs_stack[0]
@@ -196,73 +203,16 @@ class HandoffLoopAnalyzer(Analyzer):
 								loop_report+="(active)->"+str(dst_cell)
 
 							self.logger.warning(loop_report)
+							continue
 
-						continue
+					dfs_stack.append(dst_cell)
+					neighbor_stack.append(dst_neighbor)
+					cell_clear_stack.append(dst_clear)
+					val_stack.append(dst_val)
 
-					else:
 
-						dst_neighbor_cells=self.__rrc_analyzer.get_cell_neighbor(dst_cell)
-						dst_neighbor={x: 0 for x in dst_neighbor_cells}
-						for item in dst_neighbor:
-							if cell_visited.has_key(item) and cell_visited[item]:
-								dst_neighbor[item]=2
-
-						if src_freq==dst_freq:	#intra-freq handoff
-							if dst_config.offset!=None:
-								if not dfs_stack:
-									dont_care = False
-								dst_rss=src_rss+dst_config.offset
-								dfs_stack.append(src_cell)
-								dfs_stack.append(dst_cell)
-								virtual_rss.append(src_rss)
-								virtual_rss.append(dst_rss)
-								neighbor_stack.append(src_neighbor)
-								neighbor_stack.append(dst_neighbor)
-							else: #trace not ready
-								dfs_stack.append(src_cell)
-								virtual_rss.append(src_rss)
-								neighbor_stack.append(src_neighbor)
-						else:
-							if src_pref<dst_pref:
-								if not dfs_stack:
-									dont_care = True
-								dfs_stack.append(src_cell)
-								dfs_stack.append(dst_cell)
-								virtual_rss.append(src_rss)
-								virtual_rss.append(dst_config.threshx_high)
-								neighbor_stack.append(src_neighbor)
-								neighbor_stack.append(dst_neighbor)
-							elif src_pref>dst_pref:
-								if src_rss >= dst_config.threshserv_low:	#no loop, pass the dst_cell
-									dfs_stack.append(src_cell)
-									virtual_rss.append(src_rss)
-									neighbor_stack.append(src_neighbor)
-								else:
-									if not dfs_stack:
-										dont_care = False
-									dfs_stack.append(src_cell)
-									dfs_stack.append(dst_cell)
-									# #IMPORTANT to set proper inital value
-									src_rss = dst_config.threshserv_low
-									virtual_rss.append(src_rss)
-									virtual_rss.append(dst_config.threshx_low)
-									neighbor_stack.append(src_neighbor)
-									neighbor_stack.append(dst_neighbor)
-							else:	#src_pref==dst_pref
-								if not dfs_stack:
-									dont_care = False
-								#test
-								if dst_config.offset!=None:
-									dst_rss=src_rss+dst_config.offset
-									dfs_stack.append(src_cell)
-									dfs_stack.append(dst_cell)
-									virtual_rss.append(src_rss)
-									virtual_rss.append(dst_rss)
-									neighbor_stack.append(src_neighbor)
-									neighbor_stack.append(dst_neighbor)
-								else:
-									dfs_stack.append(src_cell)
-									virtual_rss.append(src_rss)
-									neighbor_stack.append(src_neighbor)
 
 				cell_visited[unvisited_cell]=True
+
+
+
