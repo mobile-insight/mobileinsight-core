@@ -49,7 +49,8 @@ class HandoffLoopAnalyzer(Analyzer):
 		#test
 		# print cell_list
 		for cell in cell_list:
-			self.__rrc_analyzer.get_cell_config(cell).dump()
+			# self.__rrc_analyzer.get_cell_config(cell).dump()
+			self.logger.info(self.__rrc_analyzer.get_cell_config(cell).dump())
 
 		# each cell's configuration
 		cell_config = {}

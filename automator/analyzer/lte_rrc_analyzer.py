@@ -116,7 +116,6 @@ class LteRrcAnalyzer(Analyzer):
 			#TODO: use MIB, not lte-rrc.trackingAreaCode
 			if field.get('name')=="lte-rrc.trackingAreaCode": #tracking area code
 				self.__status.tac = field.get('show')
-				# self.__status.dump()
 
 			#serving cell and intra-frequency reselection info
 			if field.get('name')=="lte-rrc.sib3_element":
@@ -612,7 +611,8 @@ class LteRrcStatus:
 		self.conn = False #connectivity status (for serving cell only)
 
 	def dump(self):
-		print self.__class__.__name__,self.id,self.freq
+		# print self.__class__.__name__,self.id,self.freq
+		return self.__class__.__name__+" "+str(self.id)+" "+str(self.freq)+'\n'
 
 	def inited(self):
 		return (self.id!=None and self.freq!=None)
@@ -635,10 +635,15 @@ class LteRrcConfig:
 		self.active=LteRrcActive() #active-state configurations
 
 	def dump(self):
-		print self.__class__.__name__
-		self.status.dump()
-		self.sib.dump()
-		self.active.dump()
+		# print self.__class__.__name__
+		# self.status.dump()
+		# self.sib.dump()
+		# self.active.dump()
+
+		return self.__class__.__name__ + '\n'\
+		+ self.status.dump() \
+		+ self.sib.dump() \
+		+ self.active.dump()
 
 
 	def get_cell_reselection_config(self,cell_meta):
@@ -775,14 +780,24 @@ class LteRrcSib:
 		self.inter_freq_cell_config = {} # cell -> offset
 
 	def dump(self):
-		self.serv_config.dump()
-		self.intra_freq_config.dump()
+		res=self.serv_config.dump()+self.intra_freq_config.dump()
 		for item in self.inter_freq_config:
-			self.inter_freq_config[item].dump()
+			res+=self.inter_freq_config[item].dump()
 		for item in self.intra_freq_cell_config:
-			print "Intra-freq offset: ",item,self.intra_freq_cell_config[item]
+			res+="Intra-freq offset: "+str(item)+' '+str(self.intra_freq_cell_config[item])+'\n'
 		for item in self.inter_freq_cell_config:
-			print "Inter-freq offset: ",item,self.inter_freq_cell_config[item]
+			res+="Inter-freq offset: "+str(item)+' '+str(self.inter_freq_cell_config[item])+'\n'
+		return res
+
+	# def dump(self):
+	# 	self.serv_config.dump()
+	# 	self.intra_freq_config.dump()
+	# 	for item in self.inter_freq_config:
+	# 		self.inter_freq_config[item].dump()
+	# 	for item in self.intra_freq_cell_config:
+	# 		print "Intra-freq offset: ",item,self.intra_freq_cell_config[item]
+	# 	for item in self.inter_freq_cell_config:
+	# 		print "Inter-freq offset: ",item,self.inter_freq_cell_config[item]
 
 class LteRrcReselectionConfig:
 	def __init__(self,cell_id,freq,priority,offset,threshX_High,threshX_Low,threshserv_low):
@@ -805,8 +820,11 @@ class LteRrcSibServ:
 		self.q_hyst = q_hyst
 
 	def dump(self):
-		print self.__class__.__name__, self.priority, \
-		self.threshserv_low,self.s_nonintrasearch,self.q_hyst
+		# print self.__class__.__name__, self.priority, \
+		# self.threshserv_low,self.s_nonintrasearch,self.q_hyst
+		return self.__class__.__name__ + ' ' + str(self.priority) + ' ' \
+		+ str(self.threshserv_low) + ' ' + str(self.s_nonintrasearch) + ' '\
+		+ str(self.q_hyst) + '\n'
 
 class LteRrcSibIntraFreqConfig:
 	"""
@@ -820,8 +838,10 @@ class LteRrcSibIntraFreqConfig:
 		self.s_IntraSearch = s_IntraSearch
 
 	def dump(self):
-		print self.__class__.__name__,self.tReselection,self.q_RxLevMin,\
-		self.p_Max,self.s_IntraSearch
+		# print self.__class__.__name__,self.tReselection,self.q_RxLevMin,\
+		# self.p_Max,self.s_IntraSearch
+		return self.__class__.__name__ + ' ' + str(self.tReselection) + ' ' \
+		+ str(self.q_RxLevMin) + ' ' + str(self.p_Max) + ' ' + str(self.s_IntraSearch) + '\n'
 
 class LteRrcSibInterFreqConfig:
 	"""
@@ -841,9 +861,13 @@ class LteRrcSibInterFreqConfig:
 		self.q_offset_freq = q_offset_freq
 
 	def dump(self):
-		print self.__class__.__name__,self.rat,self.freq, self.tReselection,\
-		self.q_RxLevMin, self.p_Max, self.priority, \
-		self.threshx_high, self.threshx_low
+		# print self.__class__.__name__,self.rat,self.freq, self.tReselection,\
+		# self.q_RxLevMin, self.p_Max, self.priority, \
+		# self.threshx_high, self.threshx_low
+		return self.__class__.__name__ +' '+str(self.rat)+' '\
+		+str(self.freq)+' '+str(self.tReselection)+' '\
+		+str(self.q_RxLevMin)+' '+str(self.p_Max)+' '+str(self.priority)+' '\
+		+str(self.threshx_high)+' '+str(self.threshx_low)+'\n'
 
 class LteRrcActive:
 	def __init__(self):
@@ -853,12 +877,17 @@ class LteRrcActive:
 		self.measid_list={} #meas_id->(obj_id,report_id)
 
 	def dump(self):
+		res=""
 		for item in self.measobj:
-			self.measobj[item].dump()
+			# self.measobj[item].dump()
+			res+=self.measobj[item].dump()
 		for item in self.report_list:
-			self.report_list[item].dump()
+			# self.report_list[item].dump()
+			res+=self.report_list[item].dump()
 		for item in self.measid_list:
-			print "MeasObj",item,self.measid_list[item]
+			# print "MeasObj",item,self.measid_list[item]
+			res+="MeasObj "+str(item)+' '+str(self.measid_list[item])+'\n'
+		return res
 
 class LteMeasObjectEutra:
 	"""
@@ -876,9 +905,14 @@ class LteMeasObjectEutra:
 		self.cell_list[cell_id]=cell_offset
 
 	def dump(self):
-		print self.__class__.__name__,self.obj_id,self.freq,self.offset_freq
+		# print self.__class__.__name__,self.obj_id,self.freq,self.offset_freq
+		# for item in self.cell_list:
+		# 	print item,self.cell_list[item]
+		res = self.__class__.__name__+' '+str(self.obj_id)+' '\
+		+str(self.freq)+' '+ str(self.offset_freq)+'\n'
 		for item in self.cell_list:
-			print item,self.cell_list[item]
+			res+=str(item)+' '+str(self.cell_list[item])+'\n'
+		return res
 
 class LteMeasObjectUtra:
 	"""
@@ -892,7 +926,9 @@ class LteMeasObjectUtra:
 		#TODO: add cell list
 		
 	def dump(self):
-		print self.__class__.__name__,self.obj_id,self.freq,self.offset_freq
+		# print self.__class__.__name__,self.obj_id,self.freq,self.offset_freq
+		return self.__class__.__name__+' '+str(self.obj_id)+' '\
+		+str(self.freq,self.offset_freq)+'\n'
 
 class LteReportConfig:
 	def __init__(self,report_id,hyst):
@@ -904,9 +940,13 @@ class LteReportConfig:
 		self.event_list.append(LteRportEvent(event_type,threshold1,threshold2))
 
 	def dump(self):
-		print self.__class__.__name__,self.report_id,self.hyst
+		# print self.__class__.__name__,self.report_id,self.hyst
+		# for item in self.event_list:
+		# 	print item.type,item.threshold1,item.threshold2
+		res = self.__class__.__name__+' '+str(self.report_id)+' '+str(self.hyst)+'\n'
 		for item in self.event_list:
-			print item.type,item.threshold1,item.threshold2
+			res+=str(item.type)+' '+str(item.threshold1)+' '+str(item.threshold2)+'\n'
+		return res
 
 class LteRportEvent:
 	def __init__(self,event_type,threshold1,threshold2=None):

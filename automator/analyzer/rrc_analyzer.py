@@ -42,12 +42,6 @@ class RrcAnalyzer(Analyzer):
 		elif msg.type_id.find("WCDMA")!=-1:	#WCDMA RRC msg received, so it's WCDMA
 			self.__cur_RAT = "WCDMA"
 
-		#test
-		# cur_cell_config=self.get_cur_cell_config()
-		# if cur_cell_config != None:
-		# 	print self.__class__.__name__,": cur_cell_ID=",cur_cell_config.status.id,\
-		# 	", cur_cell_freq=",cur_cell_config.status.freq
-
 	def __on_event(self,event):
 		"""
 			Simply push the event to analyzers that depend on RrcAnalyzer
@@ -85,10 +79,8 @@ class RrcAnalyzer(Analyzer):
 			TODO: if no current cell (inactive), return None
 		"""
 		if self.__cur_RAT=="LTE":
-			# self.__lte_rrc_analyzer.get_cur_cell().dump()
 			return self.lte_rrc_analyzer.get_cur_cell()
 		elif self.__cur_RAT=="WCDMA":
-			# self.__wcdma_rrc_analyzer.get_cur_cell().dump()
 			return self.__wcdma_rrc_analyzer.get_cur_cell()
 		else:
 			return None

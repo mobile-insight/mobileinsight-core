@@ -165,7 +165,7 @@ class WcdmaRrcAnalyzer(Analyzer):
 			#But Qualcomm's chipset may report cellID AFTER some configurations
 			if field.get('name')=="rrc.cellIdentity":
 				cellId = int(field.get('value')[0:-1],16)
-				self.__status.dump()
+				# self.__status.dump()
 				if not self.__status.inited():
 					self.__status.id = cellId
 					if self.__status.inited():
@@ -335,7 +335,9 @@ class WcdmaRrcStatus:
 		self.conn = False #connectivity status (for serving cell only)
 
 	def dump(self):
-		print self.__class__.__name__,self.id,self.freq,self.rat,self.rac,self.lac
+		# print self.__class__.__name__,self.id,self.freq,self.rat,self.rac,self.lac
+		return self.__class__.__name__+' '+str(self.id)+' '+str(self.freq)\
+		+' '+str(self.rat)+' '+str(self.rac)+' '+str(self.lac)+'\n'
 
 	def inited(self):
 		return (self.id!=None and self.freq!=None)
@@ -357,10 +359,12 @@ class WcdmaRrcConfig:
 		self.active=WcdmaRrcActive() #active-state configurations
 
 	def dump(self):
-		print self.__class__.__name__
-		self.status.dump()
-		self.sib.dump()
-		self.active.dump()
+		# print self.__class__.__name__
+		# self.status.dump()
+		# self.sib.dump()
+		# self.active.dump()
+		return self.__class__.__name__+'\n' \
+		+self.status.dump()+self.sib.dump()+self.active.dump()
 
 	def get_cell_reselection_config(self,cell_meta):
 
@@ -411,10 +415,14 @@ class WcdmaRrcSib:
 		self.inter_freq_config = {}  
 
 	def dump(self):
-		self.serv_config.dump()
-		self.intra_freq_config.dump()
+		# self.serv_config.dump()
+		# self.intra_freq_config.dump()
+		# for item in self.inter_freq_config:
+		# 	self.inter_freq_config[item].dump()
+		res = self.serv_config.dump()+self.intra_freq_config.dump()
 		for item in self.inter_freq_config:
-			self.inter_freq_config[item].dump()
+			res += self.inter_freq_config[item].dump()
+		return res
 
 class WcdmaRrcReselectionConfig:
 	def __init__(self,cell_id,freq,priority,offset,threshX_High,threshX_Low):
@@ -436,7 +444,9 @@ class WcdmaRrcSibServ:
 		self.s_priority_search2 = s_priority_search2
 
 	def dump(self):
-		print self.__class__.__name__,self.priority,self.threshserv_low,self.s_priority_search1
+		# print self.__class__.__name__,self.priority,self.threshserv_low,self.s_priority_search1
+		return self.__class__.__name__+' '+str(self.priority)+' '+str(self.threshserv_low)\
+		+' '+str(self.s_priority_search1)+'\n'
 
 class WcdmaRrcSibIntraFreqConfig:
 	"""
@@ -452,8 +462,12 @@ class WcdmaRrcSibIntraFreqConfig:
 		self.q_Hyst2 = q_Hyst2
 
 	def dump(self):
-		print self.__class__.__name__,self.tReselection,self.q_RxLevMin,\
-		self.s_InterSearch,self.s_IntraSearch,self.q_Hyst1,self.q_Hyst2
+		# print self.__class__.__name__,self.tReselection,self.q_RxLevMin,\
+		# self.s_InterSearch,self.s_IntraSearch,self.q_Hyst1,self.q_Hyst2
+		return self.__class__.__name__+' '+str(self.tReselection)\
+		+' '+str(self.q_RxLevMin)+' '+str(self.s_InterSearch)\
+		+' '+str(self.s_IntraSearch)+' '+str(self.q_Hyst1)\
+		+' '+str(self.q_Hyst2)+'\n'
 
 class WcdmaRrcSibInterFreqConfig:
 	"""
@@ -471,8 +485,11 @@ class WcdmaRrcSibInterFreqConfig:
 		self.threshx_low = threshx_low
 
 	def dump(self):
-		print self.__class__.__name__,self.freq, self.priority, self.tReselection,\
-		self.p_Max, self.q_RxLevMin, self.threshx_high, self.threshx_low
+		# print self.__class__.__name__,self.freq, self.priority, self.tReselection,\
+		# self.p_Max, self.q_RxLevMin, self.threshx_high, self.threshx_low
+		return self.__class__.__name__+' '+str(self.freq)+' '+str(self.priority)\
+		+' '+str(self.tReselection)+' '+str(self.p_Max)+' '+str(self.q_RxLevMin)\
+		+' '+str(self.threshx_high)+' '+str(self.threshx_low)+'\n'
 
 class WcdmaRrcActive:
 	def __init__(self):
@@ -480,5 +497,5 @@ class WcdmaRrcActive:
 		pass
 
 	def dump(self):
-		pass
+		return "\n"
 
