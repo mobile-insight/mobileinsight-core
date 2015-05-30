@@ -35,8 +35,8 @@ class Analyzer(Element):
 		#setup the logs
 		self.__logpath="automator.log"
 		self.__loglevel=logging.INFO
-		setup_logger('automator_logger',self.__logpath,self.__loglevel)
-		self.logger=logging.getLogger('automator_logger')
+		self.logger=logging.getLogger()
+		self.logger.disabled = True
 
 	def set_log(self,logpath,loglevel):
 		"""
@@ -47,6 +47,7 @@ class Analyzer(Element):
 		self.__loglevel=loglevel
 		setup_logger('automator_logger',self.__logpath,self.__loglevel)
 		self.logger=logging.getLogger('automator_logger')
+		self.logger.disabled = False
 
 	# Set the trace source collector
 	# Both this analyzer and other analyzers it depends would set to this source
