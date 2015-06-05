@@ -21,3 +21,8 @@ ws_dissector/ws_dissector
 
 # documentation build
 docs/_build
+
+# Pickle output
+*.p
+*.pkl
+
