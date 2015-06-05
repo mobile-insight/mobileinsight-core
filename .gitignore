@@ -26,3 +26,7 @@ docs/_build
 *.p
 *.pkl
 
+# Object files
+*.so
+*.pyd
+
