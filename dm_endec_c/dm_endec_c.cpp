@@ -2,11 +2,12 @@
 #include <utility>
 #include <algorithm>
 #include <vector>
+
 #include "consts.h"
 
 typedef std::pair<char*, int> BinaryBuffer;
 
-static PyObject * dm_endec_c_decode_log_packet (PyObject *self, PyObject *args);
+PyObject *dm_endec_c_decode_log_packet (PyObject *self, PyObject *args);
 static PyObject * dm_endec_c_encode_log_config (PyObject *self, PyObject *args);
 
 static PyMethodDef DmEndecCMethods[] = {
@@ -17,19 +18,8 @@ static PyMethodDef DmEndecCMethods[] = {
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
-static PyObject *
-dm_endec_c_decode_log_packet (PyObject *self, PyObject *args)
-{
-    const char *command;
-    int length;
-
-    if (!PyArg_ParseTuple(args, "s#", &command, &length))
-        return NULL;
-    return Py_BuildValue("(i)", length);
-}
-
 static BinaryBuffer
-_encode_log_config (LOG_CONFIG_OP_ID op, const std::vector<int>& type_ids) {
+_encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
     const int EQUIP_ID_MASK = 0x0000F000;
     const int ITEM_ID_MASK = 0x00000FFF;
 
@@ -99,19 +89,20 @@ static PyObject *
 dm_endec_c_encode_log_config (PyObject *self, PyObject *args) {
     std::vector<int> type_ids;
     BinaryBuffer buf;
+    LogConfigOp op = DISABLE;
     const char * op_name = NULL;
+    int n;
     PyObject *sequence = NULL;
     PyObject *retstr = NULL;
-    LOG_CONFIG_OP_ID op = DISABLE;
 
     if (!PyArg_ParseTuple(args, "sO", &op_name, &sequence))
         return NULL;
     Py_INCREF(sequence);
 
     // Check arguments
-    int n = PySequence_Length(sequence);
-    if (n < 0)
+    if (!PySequence_Check(sequence))
         goto fail;
+    n = PySequence_Length(sequence);
     if (strcmp(op_name, "DISABLE") == 0)
         op = DISABLE;
     else if (strcmp(op_name, "GET_RANGE") == 0)
@@ -129,7 +120,7 @@ dm_endec_c_encode_log_config (PyObject *self, PyObject *args) {
             goto fail;
         if (PyInt_Check(item))
             type_ids.push_back(int(PyInt_AsLong(item)));
-        Py_DECREF(item); /* Discard reference ownership */
+        Py_DECREF(item);    // Discard reference ownership
     }
     Py_DECREF(sequence);
     buf = _encode_log_config(op, type_ids);

@@ -798,6 +798,7 @@ if __name__ == '__main__':
                         "ws_dissect_executable_path": executable_path,
                         "libwireshark_path": "/home/likayo/wireshark-local-1.12.3/lib",
                         })
+    import dm_endec_c
     i = 0
     for b in tests:
         packet = DMLogPacket(binascii.a2b_hex(b))
@@ -805,6 +806,8 @@ if __name__ == '__main__':
         print "> Packet #%d" % i
         print LOG_PACKET_NAME[d["type_id"]], d["timestamp"]
         print d
+        print dm_endec_c.decode_log_packet(binascii.a2b_hex(b))
+        continue
         print packet.decode_xml()
         print packet.decode_json()
         # print d.get("Msg", "XML msg not found.")

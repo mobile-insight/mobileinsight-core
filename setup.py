@@ -19,7 +19,8 @@ PY2EXE_OPTIONS = {
 }
 
 c_dm_endec_module = Extension('automator.dm_endec.dm_endec_c',
-                                sources = ['dm_endec_c/dm_endec_c.cpp'],
+                                sources = [ "dm_endec_c/dm_endec_c.cpp",
+                                            "dm_endec_c/log_packet.cpp"],
                                 extra_compile_args=["-std=c++11"])
 
 setup(
