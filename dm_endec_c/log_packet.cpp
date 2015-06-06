@@ -1,4 +1,5 @@
 #include <Python.h>
+#include <datetime.h>
 
 #include "consts.h"
 #include "log_packet.h"
@@ -55,11 +56,19 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
 
         case TIMESTAMP1:
             {
+                const double PER_SECOND = 52428800.0;
+                const double PER_USECOND = 52428800.0 / 1.0e6;
                 assert(fmt[i].len == 8);
-                unsigned long long iiii = *((unsigned long long *)(b + offset + n_consumed));
                 // Convert to a Python long integer object
-                decoded = Py_BuildValue("K", iiii);
+                unsigned long long iiii = *((unsigned long long *)(b + offset + n_consumed));
+                int seconds = int(double(iiii) / PER_SECOND);
+                int useconds = (double(iiii) / PER_USECOND) - double(seconds) * 1.0e6;
+                PyObject *epoch = PyDateTime_FromDateAndTime(1980, 1, 6, 0, 0, 0, 0);
+                PyObject *delta = PyDelta_FromDSU(0, seconds, useconds);
+                decoded = PyNumber_Add(epoch, delta);
                 n_consumed += fmt[i].len;
+                Py_DECREF(epoch);
+                Py_DECREF(delta);
                 break;
             }
 
@@ -113,6 +122,8 @@ _search_result(PyObject *result, const char *target) {
 PyObject *
 dm_endec_c_decode_log_packet (PyObject *self, PyObject *args)
 {
+    if (PyDateTimeAPI == NULL)
+        PyDateTime_IMPORT;
     const char *b;
     int offset = 0;
     int length;
