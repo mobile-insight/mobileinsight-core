@@ -16,10 +16,6 @@ class HandoffLoopAnalyzer(Analyzer):
 
 		Analyzer.__init__(self)
 
-		#include analyzers
-		#V1: RrcAnalyzer only
-		#V2: RrcAnalyzer + UeAnanlyzer
-
 		self.__rrc_analyzer = RrcAnalyzer()
 
 		self.include_analyzer(self.__rrc_analyzer,[self.__loop_detection])
@@ -31,14 +27,6 @@ class HandoffLoopAnalyzer(Analyzer):
 
 		if msg.type_id!="RrcAnalyzer":
 			return
-
-		"""
-			Implementation plan:
-			step 1: inter-freq/RAT only in idle-state
-			step 2: introduce intra-freq in idle-state
-			step 3: introduce cell-individual offsets
-			step 4: introduce active-state handoff
-		"""
 
 		#Get cell list and configurations
 		cell_list = self.__rrc_analyzer.get_cell_list()

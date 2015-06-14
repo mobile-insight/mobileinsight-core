@@ -656,12 +656,11 @@ class LteRrcConfig:
 		freq = cell_meta.freq
 		if freq==self.status.freq:
 			#intra-frequency 
-			hyst = self.sib.serv_config.q_hyst
-			offset_cell = 0
+			offset = self.sib.serv_config.q_hyst
 			if self.sib.intra_freq_cell_config.has_key(cell):
-				offset_cell = self.sib.intra_freq_cell_config[cell]
+				offset += self.sib.intra_freq_cell_config[cell]
 			return LteRrcReselectionConfig(cell,freq,self.sib.serv_config.priority, \
-				hyst+offset_cell,None,None,self.sib.serv_config.threshserv_low)
+				offset,None,None,self.sib.serv_config.threshserv_low)
 		else:
 			#inter-frequency/RAT
 			if not self.sib.inter_freq_config.has_key(freq):
