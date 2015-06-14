@@ -17,6 +17,7 @@ import logging
 from trace_collector import *
 from analyzer import *
 
+
 # Define some constants
 # TODO: eliminate these with automatic path configuration
 IN_EXE = hasattr(sys, "frozen") # true if the code is being run in an exe

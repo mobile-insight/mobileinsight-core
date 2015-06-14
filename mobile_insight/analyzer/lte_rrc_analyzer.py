@@ -93,18 +93,22 @@ class LteRrcAnalyzer(Analyzer):
 		if not self.__status.inited():
 			if msg.data.has_key('Freq'):
 				self.__status.freq = msg.data['Freq']
+				self.logger.info(self.__status.dump())
 			if msg.data.has_key('Physical Cell ID'):
 				self.__status.id = msg.data['Physical Cell ID']
+				self.logger.info(self.__status.dump())
 		else:
 			if msg.data.has_key('Freq') and self.__status.freq != msg.data['Freq']:
 				self.__status=LteRrcStatus()
 				self.__status.freq=msg.data['Freq']
 				self.__history[msg.timestamp]=self.__status
+				self.logger.info(self.__status.dump())
 			if msg.data.has_key('Physical Cell ID') \
 			and self.__status.id != msg.data['Physical Cell ID']:
 				self.__status=LteRrcStatus()
 				self.__status.id=msg.data['Physical Cell ID']
 				self.__history[msg.timestamp]=self.__status
+				self.logger.info(self.__status.dump())
 
 	def __callback_sib_config(self,msg):
 		"""
@@ -558,11 +562,11 @@ class LteRrcAnalyzer(Analyzer):
 		for field in msg.data.iter('field'):
 			if field.get('name')=="lte-rrc.rrcConnectionSetupComplete_element":
 				self.__status.conn = True
+				self.logger.info(self.__status.dump())
 
 			if field.get('name')=="lte-rrc.rrcConnectionRelease_element":
 				self.__status.conn = False
-
-
+				self.logger.info(self.__status.dump())
 
 	def get_cell_list(self):
 		"""
@@ -598,6 +602,12 @@ class LteRrcAnalyzer(Analyzer):
 		else:
 			return None
 
+	def get_mobility_history(self):
+		"""
+			Get the history of cells the device associates with
+		"""
+		return self.__history
+
 class LteRrcStatus:
 	"""
 		The metadata of a cell
@@ -611,8 +621,8 @@ class LteRrcStatus:
 		self.conn = False #connectivity status (for serving cell only)
 
 	def dump(self):
-		# print self.__class__.__name__,self.id,self.freq
-		return self.__class__.__name__+" "+str(self.id)+" "+str(self.freq)+'\n'
+		return self.__class__.__name__+" cellID="+str(self.id)+" frequency="+str(self.freq)\
+		+" TAC="+str(self.tac)+" connected="+str(self.conn)+'\n'
 
 	def inited(self):
 		return (self.id!=None and self.freq!=None)
@@ -754,9 +764,6 @@ class LteRrcConfig:
 						res.append(LteRrcReselectionConfig(cell,freq,priority,None, 
 							threshX_Low,threshserv_low))
 		return res
-
-
-
 
 class LteRrcSib:
 

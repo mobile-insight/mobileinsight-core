@@ -97,12 +97,16 @@ class WcdmaRrcAnalyzer(Analyzer):
 			#old yet incomplete config would be discarded
 			if msg.data.has_key('UTRA DL Absolute RF channel number'):
 				self.__status.freq = msg.data['UTRA DL Absolute RF channel number']
+				self.logger.info(self.__status.dump())
 			if msg.data.has_key('Cell identity (28-bits)'):
 				self.__status.id = msg.data['Cell identity (28-bits)']
+				self.logger.info(self.__status.dump())
 			if msg.data.has_key('LAC id'):
 				self.__status.lac = msg.data['LAC id']
+				self.logger.info(self.__status.dump())
 			if msg.data.has_key('RAC id'):
 				self.__status.rac = msg.data['RAC id']
+				self.logger.info(self.__status.dump())
 
 			if self.__status.inited():
 				#push the config to the library
@@ -110,12 +114,14 @@ class WcdmaRrcAnalyzer(Analyzer):
 				if not self.__config.has_key(cur_pair):
 					self.__config[cur_pair] = self.__config_tmp
 					self.__config[cur_pair].status = self.__status
+					self.logger.info(self.__status.dump())
 				else:
 					#FIXME: merge two config? Critical for itner-freq
 					for item in self.__config_tmp.sib.inter_freq_config:
 						if not self.__config[cur_pair].sib.inter_freq_config.has_key(item):
 							self.__config[cur_pair].sib.inter_freq_config[item]\
 							=self.__config_tmp.sib.inter_freq_config[item]
+							self.logger.info(self.__status.dump())
 		else:
 			#if new config arrives, push new one to the history
 			if msg.data.has_key('UTRA DL Absolute RF channel number') \
@@ -336,8 +342,8 @@ class WcdmaRrcStatus:
 
 	def dump(self):
 		# print self.__class__.__name__,self.id,self.freq,self.rat,self.rac,self.lac
-		return self.__class__.__name__+' '+str(self.id)+' '+str(self.freq)\
-		+' '+str(self.rat)+' '+str(self.rac)+' '+str(self.lac)+'\n'
+		return self.__class__.__name__+' cellID='+str(self.id)+' frequency='+str(self.freq)\
+		+' RAC='+str(self.rac)+' LAC='+str(self.lac)+'\n'
 
 	def inited(self):
 		return (self.id!=None and self.freq!=None)
