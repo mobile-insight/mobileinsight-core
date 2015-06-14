@@ -65,7 +65,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 			self.__callback_serv_cell(raw_msg)
 
 		log_xml = None
-		if log_item_dict.has_key('Msg'):
+		# if log_item_dict.has_key('Msg'):
+		if 'Msg' in log_item_dict:
 			log_xml = ET.fromstring(log_item_dict['Msg'])
 		else:
 			return
@@ -95,36 +96,43 @@ class WcdmaRrcAnalyzer(Analyzer):
 		"""
 		if not self.__status.inited():
 			#old yet incomplete config would be discarded
-			if msg.data.has_key('UTRA DL Absolute RF channel number'):
+			# if msg.data.has_key('UTRA DL Absolute RF channel number'):
+			if 'UTRA DL Absolute RF channel number' in msg.data:
 				self.__status.freq = msg.data['UTRA DL Absolute RF channel number']
 				self.logger.info(self.__status.dump())
-			if msg.data.has_key('Cell identity (28-bits)'):
+			# if msg.data.has_key('Cell identity (28-bits)'):
+			if 'Cell identity (28-bits)' in msg.data:
 				self.__status.id = msg.data['Cell identity (28-bits)']
 				self.logger.info(self.__status.dump())
-			if msg.data.has_key('LAC id'):
+			# if msg.data.has_key('LAC id'):
+			if 'LAC id' in msg.data:
 				self.__status.lac = msg.data['LAC id']
 				self.logger.info(self.__status.dump())
-			if msg.data.has_key('RAC id'):
+			# if msg.data.has_key('RAC id'):
+			if 'RAC id' in msg.data:
 				self.__status.rac = msg.data['RAC id']
 				self.logger.info(self.__status.dump())
 
 			if self.__status.inited():
 				#push the config to the library
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				# if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair] = self.__config_tmp
 					self.__config[cur_pair].status = self.__status
 					self.logger.info(self.__status.dump())
 				else:
 					#FIXME: merge two config? Critical for itner-freq
 					for item in self.__config_tmp.sib.inter_freq_config:
-						if not self.__config[cur_pair].sib.inter_freq_config.has_key(item):
+						# if not self.__config[cur_pair].sib.inter_freq_config.has_key(item):
+						if item not in self.__config[cur_pair].sib.inter_freq_config:
 							self.__config[cur_pair].sib.inter_freq_config[item]\
 							=self.__config_tmp.sib.inter_freq_config[item]
 							self.logger.info(self.__status.dump())
 		else:
 			#if new config arrives, push new one to the history
-			if msg.data.has_key('UTRA DL Absolute RF channel number') \
+			# if msg.data.has_key('UTRA DL Absolute RF channel number') \
+			if 'UTRA DL Absolute RF channel number' in msg.data \
 			and self.__status.freq!=msg.data['UTRA DL Absolute RF channel number']:
 				self.__status=WcdmaRrcStatus()
 				self.__status.freq=msg.data['UTRA DL Absolute RF channel number']
@@ -132,7 +140,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 				#Initialize a new config
 				self.__config_tmp=WcdmaRrcConfig()
 
-			if msg.data.has_key('Cell identity (28-bits)') \
+			# if msg.data.has_key('Cell identity (28-bits)') \
+			if 'Cell identity (28-bits)' in msg.data \
 			and self.__status.id!=msg.data['Cell identity (28-bits)']:
 				self.__status=WcdmaRrcStatus()
 				self.__status.id=msg.data['Cell identity (28-bits)']
@@ -140,7 +149,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 				#Initialize a new config
 				self.__config_tmp=WcdmaRrcConfig()
 		
-			if msg.data.has_key('LAC id') \
+			# if msg.data.has_key('LAC id') \
+			if 'LAC id' in msg.data \
 			and self.__status.lac!=msg.data['LAC id']:
 				self.__status=WcdmaRrcStatus()
 				self.__status.lac=msg.data['LAC id']
@@ -148,7 +158,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 				#Initialize a new config
 				self.__config_tmp=WcdmaRrcConfig()
 		
-			if msg.data.has_key('RAC id') \
+			# if msg.data.has_key('RAC id') \
+			if 'RAC id' in msg.data \
 			and self.__status.rac!=msg.data['RAC id']:
 				self.__status=WcdmaRrcStatus()
 				self.__status.rac=msg.data['RAC id']
@@ -306,7 +317,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 			Return a cell's configuration
 			cell is a (cell_id,freq) pair
 		"""
-		if self.__config.has_key(cell):
+		# if self.__config.has_key(cell):
+		if cell in self.__config:
 			return self.__config[cell]
 		else:
 			return None
@@ -320,7 +332,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 	def get_cur_cell_config(self):
 		cur_pair=(self.__status.id,self.__status.freq)
-		if self.__config.has_key(cur_pair):
+		# if self.__config.has_key(cur_pair):
+		if cur_pair in self.__config:
 			return self.__config[cur_pair]
 		else:
 			return None
@@ -365,10 +378,6 @@ class WcdmaRrcConfig:
 		self.active=WcdmaRrcActive() #active-state configurations
 
 	def dump(self):
-		# print self.__class__.__name__
-		# self.status.dump()
-		# self.sib.dump()
-		# self.active.dump()
 		return self.__class__.__name__+'\n' \
 		+self.status.dump()+self.sib.dump()+self.active.dump()
 
@@ -389,7 +398,8 @@ class WcdmaRrcConfig:
 		else:
 			#inter-frequency/RAT
 			#TODO: cell individual offset (not available in AT&T and T-mobile)
-			if not self.sib.inter_freq_config.has_key(freq):
+			# if not self.sib.inter_freq_config.has_key(freq):
+			if freq not in self.sib.inter_freq_config:
 				if self.sib.serv_config.priority==None \
 				or cell_meta.rat=="UTRA":
 					#WCDMA reselection without priority
@@ -421,10 +431,6 @@ class WcdmaRrcSib:
 		self.inter_freq_config = {}  
 
 	def dump(self):
-		# self.serv_config.dump()
-		# self.intra_freq_config.dump()
-		# for item in self.inter_freq_config:
-		# 	self.inter_freq_config[item].dump()
 		res = self.serv_config.dump()+self.intra_freq_config.dump()
 		for item in self.inter_freq_config:
 			res += self.inter_freq_config[item].dump()
@@ -450,7 +456,6 @@ class WcdmaRrcSibServ:
 		self.s_priority_search2 = s_priority_search2
 
 	def dump(self):
-		# print self.__class__.__name__,self.priority,self.threshserv_low,self.s_priority_search1
 		return self.__class__.__name__+' '+str(self.priority)+' '+str(self.threshserv_low)\
 		+' '+str(self.s_priority_search1)+'\n'
 
@@ -468,8 +473,6 @@ class WcdmaRrcSibIntraFreqConfig:
 		self.q_Hyst2 = q_Hyst2
 
 	def dump(self):
-		# print self.__class__.__name__,self.tReselection,self.q_RxLevMin,\
-		# self.s_InterSearch,self.s_IntraSearch,self.q_Hyst1,self.q_Hyst2
 		return self.__class__.__name__+' '+str(self.tReselection)\
 		+' '+str(self.q_RxLevMin)+' '+str(self.s_InterSearch)\
 		+' '+str(self.s_IntraSearch)+' '+str(self.q_Hyst1)\
@@ -491,8 +494,6 @@ class WcdmaRrcSibInterFreqConfig:
 		self.threshx_low = threshx_low
 
 	def dump(self):
-		# print self.__class__.__name__,self.freq, self.priority, self.tReselection,\
-		# self.p_Max, self.q_RxLevMin, self.threshx_high, self.threshx_low
 		return self.__class__.__name__+' '+str(self.freq)+' '+str(self.priority)\
 		+' '+str(self.tReselection)+' '+str(self.p_Max)+' '+str(self.q_RxLevMin)\
 		+' '+str(self.threshx_high)+' '+str(self.threshx_low)+'\n'

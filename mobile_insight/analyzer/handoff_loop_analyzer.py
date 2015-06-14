@@ -67,7 +67,8 @@ class HandoffLoopAnalyzer(Analyzer):
 
 				#visited cells are ruled out
 				for item in neighbor_cells:
-					if cell_visited.has_key(item) and cell_visited[item]:
+					# if cell_visited.has_key(item) and cell_visited[item]:
+					if item in cell_visited and cell_visited[item]:
 						neighbor_visited[item]=2
 				
 				#stacks
@@ -130,7 +131,8 @@ class HandoffLoopAnalyzer(Analyzer):
 					dst_neighbor_cells=self.__rrc_analyzer.get_cell_neighbor(dst_cell)
 					dst_neighbor={x: 0 for x in dst_neighbor_cells}
 					for item in dst_neighbor:
-						if cell_visited.has_key(item) and cell_visited[item]:
+						# if cell_visited.has_key(item) and cell_visited[item]:
+						if item in cell_visited and cell_visited[item]:
 							dst_neighbor[item]=2
 
 					dfs_stack.append(src_cell)

@@ -64,7 +64,7 @@ class LteRrcAnalyzer(Analyzer):
 		raw_msg=Event(msg.timestamp,msg.type_id,log_item_dict)
 		self.__callback_serv_cell(raw_msg)
 
-		if not log_item_dict.has_key('Msg'):
+		if 'Msg' not in log_item_dict:
 			return
 		
 		#Convert msg to xml format
@@ -91,20 +91,19 @@ class LteRrcAnalyzer(Analyzer):
 			Update current cell status
 		"""
 		if not self.__status.inited():
-			if msg.data.has_key('Freq'):
+			if 'Freq' in msg.data:
 				self.__status.freq = msg.data['Freq']
 				self.logger.info(self.__status.dump())
-			if msg.data.has_key('Physical Cell ID'):
+			if 'Physical Cell ID' in msg.data:
 				self.__status.id = msg.data['Physical Cell ID']
 				self.logger.info(self.__status.dump())
 		else:
-			if msg.data.has_key('Freq') and self.__status.freq != msg.data['Freq']:
+			if 'Freq' in msg.data and self.__status.freq != msg.data['Freq']:
 				self.__status=LteRrcStatus()
 				self.__status.freq=msg.data['Freq']
 				self.__history[msg.timestamp]=self.__status
 				self.logger.info(self.__status.dump())
-			if msg.data.has_key('Physical Cell ID') \
-			and self.__status.id != msg.data['Physical Cell ID']:
+			if 'Physical Cell ID' in msg.data and self.__status.id != msg.data['Physical Cell ID']:
 				self.__status=LteRrcStatus()
 				self.__status.id=msg.data['Physical Cell ID']
 				self.__history[msg.timestamp]=self.__status
@@ -140,7 +139,7 @@ class LteRrcAnalyzer(Analyzer):
 					field_val[val.get('name')]=val.get('show')
 
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair]=LteRrcConfig()
 					self.__config[cur_pair].status=self.__status
 
@@ -175,7 +174,7 @@ class LteRrcAnalyzer(Analyzer):
 					field_val[val.get('name')]=val.get('show')
 
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair]=LteRrcConfig()
 					self.__config[cur_pair].status=self.__status
 
@@ -225,7 +224,7 @@ class LteRrcAnalyzer(Analyzer):
 					field_val[val.get('name')]=val.get('show')
 
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair]=LteRrcConfig()
 					self.__config[cur_pair].status=self.__status
 
@@ -265,7 +264,7 @@ class LteRrcAnalyzer(Analyzer):
 					field_val[val.get('name')]=val.get('show')
 
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair]=LteRrcConfig()
 					self.__config[cur_pair].status=self.__status
 
@@ -301,7 +300,7 @@ class LteRrcAnalyzer(Analyzer):
 					field_val[val.get('name')]=val.get('show')
 
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair]=LteRrcConfig()
 					self.__config[cur_pair].status=self.__status
 
@@ -342,7 +341,7 @@ class LteRrcAnalyzer(Analyzer):
 					field_val[val.get('name')]=val.get('show')
 
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair]=LteRrcConfig()
 					self.__config[cur_pair].status=self.__status
 
@@ -357,7 +356,7 @@ class LteRrcAnalyzer(Analyzer):
 						for item in val.iter('field'):
 							cell_val[item.get('name')]=item.get('show')
 
-						if cell_val.has_key('lte-rrc.physCellId'):
+						if 'lte-rrc.physCellId' in cell_val:
 							cell_id = int(cell_val['lte-rrc.physCellId'])
 							cell_offset = q_offset_range[int(cell_val['lte-rrc.cellIndividualOffset'])]
 							self.__config[cur_pair].active.measobj[freq].add_cell(cell_id,cell_offset)
@@ -373,7 +372,7 @@ class LteRrcAnalyzer(Analyzer):
 					field_val[val.get('name')]=val.get('show')
 
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair]=LteRrcConfig()
 					self.__config[cur_pair].status=self.__status
 
@@ -386,7 +385,7 @@ class LteRrcAnalyzer(Analyzer):
 			if field.get('name')=="lte-rrc.reportConfigEUTRA_element":
 
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair]=LteRrcConfig()
 					self.__config[cur_pair].status=self.__status
 
@@ -488,7 +487,7 @@ class LteRrcAnalyzer(Analyzer):
 			if field.get('name')=="lte-rrc.reportConfigInterRAT_element":
 
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair]=LteRrcConfig()
 					self.__config[cur_pair].status=self.__status
 
@@ -549,7 +548,7 @@ class LteRrcAnalyzer(Analyzer):
 					field_val[val.get('name')]=val.get('show')
 
 				cur_pair=(self.__status.id,self.__status.freq)
-				if not self.__config.has_key(cur_pair):
+				if cur_pair not in self.__config:
 					self.__config[cur_pair]=LteRrcConfig()
 					self.__config[cur_pair].status=self.__status
 
@@ -583,7 +582,7 @@ class LteRrcAnalyzer(Analyzer):
 			Return a cell's configuration
 			cell is a (cell_id,freq) pair
 		"""
-		if self.__config.has_key(cell):
+		if cell in self.__config:
 			return self.__config[cell]
 		else:
 			return None
@@ -597,7 +596,7 @@ class LteRrcAnalyzer(Analyzer):
 
 	def get_cur_cell_config(self):
 		cur_pair=(self.__status.id,self.__status.freq)
-		if self.__config.has_key(cur_pair):
+		if cur_pair in self.__config:
 			return self.__config[cur_pair]
 		else:
 			return None
@@ -645,10 +644,6 @@ class LteRrcConfig:
 		self.active=LteRrcActive() #active-state configurations
 
 	def dump(self):
-		# print self.__class__.__name__
-		# self.status.dump()
-		# self.sib.dump()
-		# self.active.dump()
 
 		return self.__class__.__name__ + '\n'\
 		+ self.status.dump() \
@@ -667,18 +662,18 @@ class LteRrcConfig:
 		if freq==self.status.freq:
 			#intra-frequency 
 			offset = self.sib.serv_config.q_hyst
-			if self.sib.intra_freq_cell_config.has_key(cell):
+			if cell in self.sib.intra_freq_cell_config:
 				offset += self.sib.intra_freq_cell_config[cell]
 			return LteRrcReselectionConfig(cell,freq,self.sib.serv_config.priority, \
 				offset,None,None,self.sib.serv_config.threshserv_low)
 		else:
 			#inter-frequency/RAT
-			if not self.sib.inter_freq_config.has_key(freq):
+			if freq not in self.sib.inter_freq_config:
 				return None
 			freq_config = self.sib.inter_freq_config[freq]
 			hyst = self.sib.serv_config.q_hyst
 			offset_cell = 0
-			if self.sib.inter_freq_cell_config.has_key(cell):
+			if cell in self.sib.inter_freq_cell_config:
 				offset_cell = self.sib.inter_freq_cell_config[cell]
 			return LteRrcReselectionConfig(cell,freq,freq_config.priority,\
 				freq_config.q_offset_freq+offset_cell+hyst, \
@@ -700,7 +695,7 @@ class LteRrcConfig:
 		cell = cell_meta.id
 		freq = cell_meta.freq
 
-		if not self.active.measobj.has_key(freq):
+		if freq not in self.active.measobj:
 			return None
 
 		obj_id = self.active.measobj[freq].obj_id
@@ -717,7 +712,7 @@ class LteRrcConfig:
 		#For each configuration, we convert it to an equivalent reselection form
 		res=[]
 		for config_id in config_id_list:
-			if self.active.report_list.has_key(config_id):
+			if config_id in self.active.report_list:
 				hyst=self.active.report_list[config_id].hyst
 				for item in self.active.report_list[config_id].event_list:
 					if item.type=="a1":
@@ -732,7 +727,7 @@ class LteRrcConfig:
 						#equivalent to equal-priority reselection
 						priority=self.sib.serv_config.priority
 						offset=item.threshold1+hyst-self.active.measobj[freq].offset_freq
-						if self.active.measobj[freq].cell_list[freq].has_key(cell):
+						if cell in self.active.measobj[freq].cell_list[freq]:
 							offset-=self.active.measobj[freq].cell_list[cell]
 						res.append(LteRrcReselectionConfig(cell,freq,priority, \
 							offset,None,None,self.sib.serv_config.threshserv_low))
@@ -740,7 +735,7 @@ class LteRrcConfig:
 						#equivalent to high-priority reselection
 						priority=self.sib.serv_config.priority+1
 						threshX_High=item.threshold1+hyst-self.active.measobj[freq].offset_freq
-						if self.active.measobj[freq].cell_list[freq].has_key(cell):
+						if cell in self.active.measobj[freq].cell_list[freq]:
 							threshX_High-=self.active.measobj[freq].cell_list[cell]
 						res.append(LteRrcReselectionConfig(cell,freq,priority,None, \
 							threshX_High,None,self.sib.serv_config.threshserv_low))
@@ -750,7 +745,7 @@ class LteRrcConfig:
 						#TODO: add thresh_serv. Currently use offset
 						threshserv_low=item.threshold1-hyst
 						threshX_Low=item.threshold2+hyst-self.active.measobj[freq].offset_freq
-						if self.active.measobj[freq].cell_list[freq].has_key(cell):
+						if cell in self.active.measobj[freq].cell_list[freq]:
 							threshX_Low-=self.active.measobj[freq].cell_list[cell]
 						res.append(LteRrcReselectionConfig(cell,freq,priority,None, 
 							threshX_Low,threshserv_low))
@@ -795,16 +790,6 @@ class LteRrcSib:
 			res+="Inter-freq offset: "+str(item)+' '+str(self.inter_freq_cell_config[item])+'\n'
 		return res
 
-	# def dump(self):
-	# 	self.serv_config.dump()
-	# 	self.intra_freq_config.dump()
-	# 	for item in self.inter_freq_config:
-	# 		self.inter_freq_config[item].dump()
-	# 	for item in self.intra_freq_cell_config:
-	# 		print "Intra-freq offset: ",item,self.intra_freq_cell_config[item]
-	# 	for item in self.inter_freq_cell_config:
-	# 		print "Inter-freq offset: ",item,self.inter_freq_cell_config[item]
-
 class LteRrcReselectionConfig:
 	def __init__(self,cell_id,freq,priority,offset,threshX_High,threshX_Low,threshserv_low):
 		self.id = cell_id
@@ -826,8 +811,6 @@ class LteRrcSibServ:
 		self.q_hyst = q_hyst
 
 	def dump(self):
-		# print self.__class__.__name__, self.priority, \
-		# self.threshserv_low,self.s_nonintrasearch,self.q_hyst
 		return self.__class__.__name__ + ' ' + str(self.priority) + ' ' \
 		+ str(self.threshserv_low) + ' ' + str(self.s_nonintrasearch) + ' '\
 		+ str(self.q_hyst) + '\n'
@@ -844,8 +827,6 @@ class LteRrcSibIntraFreqConfig:
 		self.s_IntraSearch = s_IntraSearch
 
 	def dump(self):
-		# print self.__class__.__name__,self.tReselection,self.q_RxLevMin,\
-		# self.p_Max,self.s_IntraSearch
 		return self.__class__.__name__ + ' ' + str(self.tReselection) + ' ' \
 		+ str(self.q_RxLevMin) + ' ' + str(self.p_Max) + ' ' + str(self.s_IntraSearch) + '\n'
 
@@ -867,9 +848,6 @@ class LteRrcSibInterFreqConfig:
 		self.q_offset_freq = q_offset_freq
 
 	def dump(self):
-		# print self.__class__.__name__,self.rat,self.freq, self.tReselection,\
-		# self.q_RxLevMin, self.p_Max, self.priority, \
-		# self.threshx_high, self.threshx_low
 		return self.__class__.__name__ +' '+str(self.rat)+' '\
 		+str(self.freq)+' '+str(self.tReselection)+' '\
 		+str(self.q_RxLevMin)+' '+str(self.p_Max)+' '+str(self.priority)+' '\
@@ -885,13 +863,10 @@ class LteRrcActive:
 	def dump(self):
 		res=""
 		for item in self.measobj:
-			# self.measobj[item].dump()
 			res+=self.measobj[item].dump()
 		for item in self.report_list:
-			# self.report_list[item].dump()
 			res+=self.report_list[item].dump()
 		for item in self.measid_list:
-			# print "MeasObj",item,self.measid_list[item]
 			res+="MeasObj "+str(item)+' '+str(self.measid_list[item])+'\n'
 		return res
 
@@ -911,9 +886,6 @@ class LteMeasObjectEutra:
 		self.cell_list[cell_id]=cell_offset
 
 	def dump(self):
-		# print self.__class__.__name__,self.obj_id,self.freq,self.offset_freq
-		# for item in self.cell_list:
-		# 	print item,self.cell_list[item]
 		res = self.__class__.__name__+' '+str(self.obj_id)+' '\
 		+str(self.freq)+' '+ str(self.offset_freq)+'\n'
 		for item in self.cell_list:
@@ -932,7 +904,6 @@ class LteMeasObjectUtra:
 		#TODO: add cell list
 		
 	def dump(self):
-		# print self.__class__.__name__,self.obj_id,self.freq,self.offset_freq
 		return self.__class__.__name__+' '+str(self.obj_id)+' '\
 		+str(self.freq,self.offset_freq)+'\n'
 
@@ -946,9 +917,6 @@ class LteReportConfig:
 		self.event_list.append(LteRportEvent(event_type,threshold1,threshold2))
 
 	def dump(self):
-		# print self.__class__.__name__,self.report_id,self.hyst
-		# for item in self.event_list:
-		# 	print item.type,item.threshold1,item.threshold2
 		res = self.__class__.__name__+' '+str(self.report_id)+' '+str(self.hyst)+'\n'
 		for item in self.event_list:
 			res+=str(item.type)+' '+str(item.threshold1)+' '+str(item.threshold2)+'\n'
