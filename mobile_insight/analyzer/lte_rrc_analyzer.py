@@ -123,7 +123,7 @@ class LteRrcAnalyzer(Analyzer):
 
 				#Default value setting
 				#FIXME: set default to those in TS36.331
-				field_val['lte-rrc.cellReselectionPriority']=None #mandatory
+				field_val['lte-rrc.cellReselectionPriority']=0 #mandatory
 				field_val['lte-rrc.threshServingLow']=None #mandatory
 				field_val['lte-rrc.s_NonIntraSearch']="inf"
 				field_val['lte-rrc.q_Hyst']=0
@@ -162,7 +162,7 @@ class LteRrcAnalyzer(Analyzer):
 				field_val['lte-rrc.t_ReselectionEUTRA']=None #mandatory
 				field_val['lte-rrc.q_RxLevMin']=None #mandatory
 				field_val['lte-rrc.p_Max']=23 #optional, r.f. 36.101
-				field_val['lte-rrc.cellReselectionPriority']=None #mandatory
+				field_val['lte-rrc.cellReselectionPriority']=0 #mandatory
 				field_val['lte-rrc.threshX_High']=None #mandatory
 				field_val['lte-rrc.threshX_Low']=None #mandatory
 				field_val['lte-rrc.q_OffsetFreq']=0
@@ -213,7 +213,7 @@ class LteRrcAnalyzer(Analyzer):
 				field_val['lte-rrc.carrierFreq']=None #mandatory
 				field_val['lte-rrc.q_RxLevMin']=None #mandatory
 				field_val['lte-rrc.p_MaxUTRA']=None #mandatory
-				field_val['lte-rrc.cellReselectionPriority']=None #mandatory
+				field_val['lte-rrc.cellReselectionPriority']=0 #mandatory
 				field_val['lte-rrc.threshX_High']=None #mandatory
 				field_val['lte-rrc.threshX_High']=None #mandatory
 
@@ -253,7 +253,7 @@ class LteRrcAnalyzer(Analyzer):
 				field_val['lte-rrc.startingARFCN']=None #mandatory
 				field_val['lte-rrc.q_RxLevMin']=None #mandatory
 				field_val['lte-rrc.lte-rrc.p_MaxGERAN']=None #mandatory
-				field_val['lte-rrc.cellReselectionPriority']=None #mandatory
+				field_val['lte-rrc.cellReselectionPriority']=0 #mandatory
 				field_val['lte-rrc.threshX_High']=None #mandatory
 				field_val['lte-rrc.threshX_High']=None #mandatory
 

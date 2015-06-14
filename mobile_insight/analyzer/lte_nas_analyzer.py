@@ -85,8 +85,6 @@ def trans_delay(val):
 	else:
 		return None
 
-
-
 class LteNasAnalyzer(Analyzer):
 
 	def __init__(self):
@@ -101,7 +99,6 @@ class LteNasAnalyzer(Analyzer):
 
 	def set_source(self,source):
 		Analyzer.set_source(self,source)
-
 		#Enable EMM/ESM logs
 		source.enable_log("LTE_NAS_ESM_Plain_OTA_Incoming_Message")
 		source.enable_log("LTE_NAS_ESM_Plain_OTA_Outgoing_Message")
@@ -127,8 +124,6 @@ class LteNasAnalyzer(Analyzer):
 		#Convert msg to xml format
 		log_xml = ET.fromstring(log_item_dict['Msg'])
 		xml_msg=Event(msg.timestamp,msg.type_id,log_xml)
-
-		print log_xml
 
 		if msg.type_id == "LTE_NAS_ESM_Plain_OTA_Incoming_Message" \
 		or msg.type_id == "LTE_NAS_ESM_Plain_OTA_Outgoing_Message" \
@@ -165,7 +160,8 @@ class LteNasAnalyzer(Analyzer):
 				self.__emm_status.state="deregistered"
 				self.__emm_status.substate="deregistered.attach_needed"
 
-		self.__emm_status.dump()
+		self.logger.info(self.__emm_status.dump())
+		# self.__emm_status.dump()
 
 
 
@@ -256,9 +252,14 @@ class EmmStatus:
 		self.integrity = None
 
 	def dump(self):
-		print self.__class__.__name__,self.state,self.substate, \
-		self.guti.mcc,self.guti.mnc,self.guti.mme_group_id, \
-		self.guti.mme_code,self.guti.m_tmsi,self.ciphering,self.integrity
+		# print self.__class__.__name__,self.state,self.substate, \
+		# self.guti.mcc,self.guti.mnc,self.guti.mme_group_id, \
+		# self.guti.mme_code,self.guti.m_tmsi,self.ciphering,self.integrity
+
+		return self.__class__.__name__+' '+str(self.state)+' '+str(self.substate)\
+		+' '+str(self.guti.mcc)+' '+str(self.guti.mnc)+' '+str(self.guti.mme_group_id)\
+		+' '+str(self.guti.mme_code)+' '+str(self.guti.m_tmsi)\
+		+' '+str(self.ciphering)+' '+str(self.integrity)
 
 class Guti:
 	def __init__(self):
