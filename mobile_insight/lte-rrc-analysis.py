@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-test_app.py
+lte-nas-analysis.py
 
-for debug purpose
+An example appplication for LTE RRC analyzer
 
 Author: Yuanjie Li
 """
@@ -17,7 +17,9 @@ import logging
 from trace_collector import *
 from analyzer import *
 
+
 # Define some constants
+# TODO: eliminate these with automatic path configuration
 IN_EXE = hasattr(sys, "frozen") # true if the code is being run in an exe
 if IN_EXE:
     PROGRAM_PATH   = sys.executable
@@ -34,23 +36,13 @@ def init_opt():
     """
     Initialize and return the option parser.
     """
-    opt = optparse.OptionParser(prog="automator",
+    opt = optparse.OptionParser(prog="lte-nas-analysis",
                                 usage="usage: %prog [options] -p PHY_PORT_NAME ...",
-                                description="Automatic mobile trace collector.")
+                                description="Example for LTE NAS analysis")
     opt.add_option("-p", "--phy-serial-name",
                     metavar="STR",
                     action="store", type="string", dest="phy_serial_name", 
                     help="Manually set the name of physical serial name.")
-    # TODO: temporarily removed
-    # opt.add_option("-l", "--log-output",
-    #                 metavar="STR",
-    #                 action="store", type="string", dest="log_output", 
-    #                 help="Specify a log file to save packets in")
-    # TODO: temporarily removed or permanantly???
-    # opt.add_option("-c", "--commands-file",
-    #                 metavar="STR",
-    #                 action="store", type="string", dest="cmd_file_name", 
-    #                 help="Specify the file which contains the commands to send to the phone.")
     opt.add_option("--phy-baudrate",
                     metavar="N",
                     action="store", type="int", dest="phy_baudrate", 
@@ -76,36 +68,16 @@ if __name__ == "__main__":
     # src.set_serial_port(options.phy_serial_name)
     # src.set_baudrate(options.phy_baudrate)
 
-    src = PickleCollector()
-    src.set_input_path("/Users/yuanjieli/Desktop/verizon-mentone-lollicup.replay")
-    ###############################################
+    
 
-    # lte_rrc_analyzer = LteRrcAnalyzer()
-    # lte_rrc_analyzer.set_source(src)
 
-    # wcdma_rrc_analyzer = WcdmaRrcAnalyzer()
-    # wcdma_rrc_analyzer.set_source(src)
-    # rrc_analyzer = RrcAnalyzer()
-    # rrc_analyzer.set_source(src)
+    # Initialize the analyzer
+    lte_rrc_analyzer = LteRrcAnalyzer()
+    lte_rrc_analyzer.set_log("lte-rrc-analysis.log",logging.INFO)
 
-    # lte_nas_analyzer = LteNasAnalyzer()
-    # lte_nas_analyzer.set_source(src)
+    # Link the analyzer with the trace collector
+    lte_rrc_analyzer.set_source(src)
+    
 
-    # dumper = MsgFile("/Users/yuanjieli/Desktop/att-lte-active.txt")
-    # dumper.set_source(src)
-
-    # dumper2 = MsgDump()
-    # dumper2.set_source(src)
-
-    # ue = LteUeAnalyzer()
-    # ue.set_source(src)
-
-    # pickle_dumper = PickleDump()
-    # pickle_dumper.set_source(src)
-    # pickle_dumper.set_output_path("/Users/yuanjieli/Desktop/hong-kong-roaming.replay")
-
-    loop_detect = HandoffLoopAnalyzer()
-    loop_detect.set_source(src)
-    loop_detect.set_log("/Users/yuanjieli/Desktop/verizon-mentone-lollicup.txt",logging.INFO)
-
+    # Start the analysis
     src.run()
