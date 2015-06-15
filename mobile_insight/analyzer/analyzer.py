@@ -1,4 +1,5 @@
-#! /usr/bin/env python
+#!/usr/bin/python
+# Filename: analyzer.py
 """
 analyzer.py
 
@@ -12,6 +13,10 @@ from element import Element, Event
 import logging
 
 def setup_logger(logger_name, log_file, level=logging.INFO):
+    '''Setup the analyzer logger.
+
+    All analyzers share the same logger.
+    '''
     l = logging.getLogger(logger_name)
     formatter = logging.Formatter('%(asctime)s : %(message)s')
     fileHandler = logging.FileHandler(log_file, mode='w')
