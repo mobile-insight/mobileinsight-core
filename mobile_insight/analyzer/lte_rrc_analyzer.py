@@ -1,12 +1,7 @@
-#! /usr/bin/env python
+#!/usr/bin/python
+# Filename: lte_rrc_analyzer.py
 """
-lte_rrc_analyzer.py
-
-A LTE_RRC analyzer
-    - Maintain configurations from the SIB
-    - Connection setup/release statistics
-    - RRCReconfiguration statistics
-    - ...
+A LTE RRC analyzer.
 
 Author: Yuanjie Li
 """
@@ -29,6 +24,9 @@ q_offset_range = {
 
 class LteRrcAnalyzer(Analyzer):
 
+    """
+    A protocol ananlyzer for LTE Radio Resource Control (RRC) protocol.
+    """
     def __init__(self):
 
         Analyzer.__init__(self)
@@ -42,19 +40,23 @@ class LteRrcAnalyzer(Analyzer):
         self.__config = {}    # (cell_id,freq) -> LteRrcConfig()
 
     def set_source(self,source):
+        """
+        Set the trace source. Enable the LTE RRC messages.
+
+        :param source: the trace source.
+        :type source: trace collector
+        """
         Analyzer.set_source(self,source)
         #enable LTE RRC log
         source.enable_log("LTE_RRC_OTA_Packet")
         source.enable_log("LTE_RRC_Serv_Cell_Info_Log_Packet")
 
     def __rrc_filter(self,msg):
-        
-        """
-            Filter all RRC packets, and call functions to process it
-            
-            Args:
-                msg: the event (message) from the trace collector
 
+        """
+        Filter all LTE RRC packets, and call functions to process it
+
+        :param msg: the event (message) from the trace collector.
         """
 
         # log_item = msg.data
@@ -88,7 +90,9 @@ class LteRrcAnalyzer(Analyzer):
     def __callback_serv_cell(self,msg):
 
         """
-            Update current cell status
+        A callback to update current cell status
+
+        :param msg: the RRC messages with cell status
         """
         if not self.__status.inited():
             if 'Freq' in msg.data:
@@ -111,7 +115,10 @@ class LteRrcAnalyzer(Analyzer):
 
     def __callback_sib_config(self,msg):
         """
-            Callbacks for LTE RRC analysis
+        A callback to extract configurations from System Information Blocks (SIBs), 
+        including the radio asssement thresholds, the preference settings, etc.
+
+        :param msg: RRC SIB messages
         """
 
         for field in msg.data.iter('field'):
@@ -310,7 +317,10 @@ class LteRrcAnalyzer(Analyzer):
     def __callback_rrc_reconfig(self,msg):
         
         """
-            Handle the RRCReconfiguration Message
+        Extract configurations from RRCReconfiguration Message, 
+        including the measurement profiles, the MAC/RLC/PDCP configurations, etc.
+
+        :param msg: LTE RRC reconfiguration messages
         """
 
         #TODO: optimize code to handle objects/config under the same ID
@@ -555,6 +565,11 @@ class LteRrcAnalyzer(Analyzer):
                 self.__config[cur_pair].active.measid_list[meas_id] = (obj_id,config_id)
 
     def __callback_rrc_conn(self,msg):
+        """
+        Update RRC connectivity status
+
+        :param msg: the RRC message
+        """
         for field in msg.data.iter('field'):
             if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
                 self.__status.conn = True
@@ -566,18 +581,21 @@ class LteRrcAnalyzer(Analyzer):
 
     def get_cell_list(self):
         """
-            Get a complete list of cell IDs *at current location*.
-            For these cells, the RrcAnalyzer has the corresponding configurations
-            Cells observed yet not camped on would NOT be listed (no config)
+        Get a complete list of cell IDs.
 
-            FIXME: currently only return *all* cells in the LteRrcConfig
+        :returns: a list of cells the device has associated with
         """
+        #FIXME: currently only return *all* cells in the LteRrcConfig
         return self.__config.keys()
 
     def get_cell_config(self,cell):
         """
-            Return a cell's configuration
-            cell is a (cell_id,freq) pair
+        Return a cell's active/idle-state configuration.
+        
+        :param cell:  a cell identifier
+        :type cell: a (cell_id,freq) pair
+        :returns: this cell's active/idle-state configurations
+        :rtype: LteRrcConfig
         """
         if cell in self.__config:
             return self.__config[cell]
@@ -586,12 +604,20 @@ class LteRrcAnalyzer(Analyzer):
 
     def get_cur_cell(self):
         """
-            Return a cell's configuration
-            TODO: if no current cell (inactive), return None
+        Get current cell's status
+
+        :returns: current cell's status
+        :rtype: LteRrcStatus      
         """
         return self.__status
 
     def get_cur_cell_config(self):
+        """
+        Get current cell's configuration
+
+        :returns: current cell's status
+        :rtype: LteRrcConfig
+        """
         cur_pair = (self.__status.id,self.__status.freq)
         if cur_pair in self.__config:
             return self.__config[cur_pair]
@@ -600,14 +626,18 @@ class LteRrcAnalyzer(Analyzer):
 
     def get_mobility_history(self):
         """
-            Get the history of cells the device associates with
+        Get the history of cells the device associates with
+
+        :returns: the cells the device has traversed
+        :rtype: a dictionary of timestamp -> LteRrcStatus
         """
         return self.__history
 
 
 class LteRrcStatus:
     """
-        The metadata of a cell
+    The metadata of a cell, including its ID, frequency band, tracking area code, 
+    bandwidth, connectivity status, etc.
     """
     def __init__(self):
         self.id = None #cell ID
@@ -618,6 +648,12 @@ class LteRrcStatus:
         self.conn = False #connectivity status (for serving cell only)
 
     def dump(self):
+        """
+        Report the cell status
+
+        :returns: a string that encodes the cell status
+        :rtype: string
+        """
         return (self.__class__.__name__
             + " cellID=" + str(self.id)
             + " frequency=" + str(self.freq)
@@ -631,14 +667,14 @@ class LteRrcStatus:
 
 class LteRrcConfig:
     """ 
-        Per-cell RRC configurations
+    Per-cell RRC configurations
 
-        The following configurations should be supported
-            - Idle-state
-                - Cell reselection parameters
-            - Active-state
-                - PHY/MAC/PDCP/RLC configuration
-                - Measurement configurations
+    The following configurations are supported
+        - Idle-state
+            - Cell reselection parameters
+        - Active-state
+            - PHY/MAC/PDCP/RLC configuration
+            - Measurement configurations
     """
     def __init__(self):
         self.status = LteRrcStatus() #the metadata of this cell
@@ -647,6 +683,12 @@ class LteRrcConfig:
         self.active = LteRrcActive() #active-state configurations
 
     def dump(self):
+        """
+        Report the cell configurations
+
+        :returns: a string that encodes the cell's configurations
+        :rtype: string
+        """
 
         return (self.__class__.__name__ + '\n'
             + self.status.dump()
@@ -655,7 +697,13 @@ class LteRrcConfig:
 
     def get_cell_reselection_config(self,cell_meta):
         """
-            Given a cell's metadata, return its reselection config from the serving cell
+        Given a cell, return its reselection config as a serving cell
+
+        :param cell_meta: a cell identifier
+        :type cell_meta: a (cell_id,freq) pair
+
+        :returns: cell reselection configurations
+        :rtype: LteRrcReselectionConfig
         """
         # if cell_meta == None:
         if not cell_meta:
@@ -689,13 +737,16 @@ class LteRrcConfig:
                 freq_config.threshx_high,freq_config.threshx_low,
                 self.sib.serv_config.threshserv_low)
 
-
-
     def get_meas_config(self,cell_meta):
 
         """
-            Given a cell's metadata, return its measurement config from the serving cell
-            Note: there may be more than 1 measurement configuration for the same cell/freq
+        Given a cell, return its measurement config from the serving cell.
+        Note: there may be more than 1 measurement configuration for the same cell.
+
+        :param cell_meta: a cell identifier
+        :type cell_meta: a (cell_id,freq) pair
+        :returns: RRC measurement configurations
+        :rtype: a list of LteRrcReselectionConfig
         """
 
         #FIXME: this is NOT a generic function
@@ -780,7 +831,7 @@ class LteRrcConfig:
 class LteRrcSib:
 
     """
-        Per-cell Idle-state configurations
+    Per-cell Idle-state SIB configurations
     """
     def __init__(self):
         #FIXME: init based on the default value in TS36.331
@@ -798,6 +849,12 @@ class LteRrcSib:
         self.inter_freq_cell_config = {} # cell -> offset
 
     def dump(self):
+        """
+        Report the cell SIB configurations
+
+        :returns: a string that encodes the cell's SIB configurations
+        :rtype: string
+        """
         res = self.serv_config.dump() + self.intra_freq_config.dump()
         for item in self.inter_freq_config:
             res += self.inter_freq_config[item].dump()
@@ -811,6 +868,9 @@ class LteRrcSib:
 
 
 class LteRrcReselectionConfig:
+    """
+    Per-cell cell reselection configurations
+    """
     def __init__(self,cell_id,freq,priority,offset,threshX_High,threshX_Low,threshserv_low):
         self.id = cell_id
         self.freq = freq
@@ -823,7 +883,7 @@ class LteRrcReselectionConfig:
 
 class LteRrcSibServ:
     """
-        Serving cell's cell-reselection configurations
+    Serving cell's SIB configurations
     """
     def __init__(self,priority,thresh_serv, s_nonintrasearch,q_hyst):
         self.priority = priority #cell reselection priority
@@ -832,6 +892,12 @@ class LteRrcSibServ:
         self.q_hyst = q_hyst
 
     def dump(self):
+        """
+        Report the serving cell SIB configurations
+
+        :returns: a string that encodes the cell's SIB configurations
+        :rtype: string
+        """
         # return self.__class__.__name__ + ' ' + str(self.priority) + ' ' \
         # + str(self.threshserv_low) + ' ' + str(self.s_nonintrasearch) + ' '\
         # + str(self.q_hyst) + '\n'
@@ -844,7 +910,7 @@ class LteRrcSibServ:
 
 class LteRrcSibIntraFreqConfig:
     """
-        Intra-frequency cell-reselection configurations
+    Intra-frequency SIB configurations
     """
     def __init__(self,tReselection,q_RxLevMin,p_Max,s_IntraSearch):
         #FIXME: individual cell offset
@@ -854,6 +920,12 @@ class LteRrcSibIntraFreqConfig:
         self.s_IntraSearch = s_IntraSearch
 
     def dump(self):
+        """
+        Report the cell SIB configurations
+
+        :returns: a string that encodes the cell's SIB configurations
+        :rtype: string
+        """
         # return self.__class__.__name__ + ' ' + str(self.tReselection) + ' ' \
         # + str(self.q_RxLevMin) + ' ' + str(self.p_Max) + ' ' + str(self.s_IntraSearch) + '\n'
         return (self.__class__.__name__
@@ -865,7 +937,7 @@ class LteRrcSibIntraFreqConfig:
 
 class LteRrcSibInterFreqConfig:
     """
-        Inter-frequency cell-reselection configurations
+    Inter-frequency SIB configurations
     """    
     #FIXME: the current list is incomplete
     #FIXME: individual cell offset
@@ -881,6 +953,12 @@ class LteRrcSibInterFreqConfig:
         self.q_offset_freq = q_offset_freq
 
     def dump(self):
+        """
+        Report the cell SIB configurations
+
+        :returns: a string that encodes the cell's SIB configurations
+        :rtype: string
+        """
         # return self.__class__.__name__ +' '+str(self.rat)+' '\
         # +str(self.freq)+' '+str(self.tReselection)+' '\
         # +str(self.q_RxLevMin)+' '+str(self.p_Max)+' '+str(self.priority)+' '\
@@ -897,6 +975,9 @@ class LteRrcSibInterFreqConfig:
 
 
 class LteRrcActive:
+    """
+    RRC active-state configurations (from RRCReconfiguration messsage)
+    """
     def __init__(self):
         #TODO: initialize some containers
         self.measobj = {} #freq->measobject
@@ -904,6 +985,12 @@ class LteRrcActive:
         self.measid_list = {} #meas_id->(obj_id,report_id)
 
     def dump(self):
+        """
+        Report the cell's active-state configurations
+
+        :returns: a string that encodes the cell's active-state configurations
+        :rtype: string
+        """
         res = ""
         for item in self.measobj:
             res += self.measobj[item].dump()
@@ -916,7 +1003,7 @@ class LteRrcActive:
 
 class LteMeasObjectEutra:
     """
-        LTE Measurement object configuration
+    LTE Measurement object configuration
     """
 
     def __init__(self,measobj_id,freq,offset_freq):
@@ -927,9 +1014,23 @@ class LteMeasObjectEutra:
         #TODO: add cell blacklist
 
     def add_cell(self,cell_id,cell_offset):
+        """
+        Add a cell individual offset
+
+        :param cell_id: the cell identifier
+        :type cell_id: int
+        :param cell_offset: the cell individual offset
+        :type cell_offset: int
+        """
         self.cell_list[cell_id]=cell_offset
 
     def dump(self):
+        """
+        Report the cell's LTE measurement configurations
+
+        :returns: a string that encodes the cell's LTE measurement configurations
+        :rtype: string
+        """
         # res = self.__class__.__name__+' '+str(self.obj_id)+' '\
         # +str(self.freq)+' '+ str(self.offset_freq)+'\n'
         res = (self.__class__.__name__
@@ -944,7 +1045,7 @@ class LteMeasObjectEutra:
 
 class LteMeasObjectUtra:
     """
-        Utra (3G) Measurement object configuration
+    3G Measurement object configuration
     """
 
     def __init__(self,measobj_id,freq,offset_freq):
@@ -954,6 +1055,12 @@ class LteMeasObjectUtra:
         #TODO: add cell list
         
     def dump(self):
+        """
+        Report the cell's 3G measurement configurations
+
+        :returns: a string that encodes the cell's 3G measurement configurations
+        :rtype: string
+        """
         # return self.__class__.__name__+' '+str(self.obj_id)+' '\
         # +str(self.freq,self.offset_freq)+'\n'
         return (self.__class__.__name__
@@ -962,15 +1069,34 @@ class LteMeasObjectUtra:
 
 
 class LteReportConfig:
+    """
+    LTE measurement report configuration
+    """
     def __init__(self,report_id,hyst):
         self.report_id = report_id
         self.hyst = hyst
         self.event_list = []
 
     def add_event(self,event_type,threshold1,threshold2=None):
+        """
+        Add a measurement event
+
+        :param event_type: a measurement type (r.f. 5.5.4, TS36.331)
+        :type event_type: string
+        :param threshold1: threshold 1
+        :type threshold1: int
+        :param threshold2: threshold 2
+        :type threshold2: int
+        """
         self.event_list.append(LteRportEvent(event_type,threshold1,threshold2))
 
     def dump(self):
+        """
+        Report the cell's measurement report configurations
+
+        :returns: a string that encodes the cell's measurement report configurations
+        :rtype: string
+        """
         res = (self.__class__.__name__
             + ' ' + str(self.report_id)
             + ' ' + str(self.hyst) + '\n')
@@ -982,6 +1108,9 @@ class LteReportConfig:
 
 
 class LteRportEvent:
+    """
+    Abstraction for LTE report event
+    """
     def __init__(self,event_type,threshold1,threshold2=None):
         self.type = event_type
         self.threshold1 = threshold1

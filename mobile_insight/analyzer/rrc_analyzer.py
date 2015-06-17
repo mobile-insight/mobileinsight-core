@@ -1,7 +1,6 @@
-#! /usr/bin/env python
+#!/usr/bin/python
+# Filename: rrc_analyzer.py
 """
-rrc_analyzer.py
-
 A RRC analyzer that integrates LTE and WCDMA RRC
 
 Author: Yuanjie Li
@@ -14,6 +13,11 @@ from lte_rrc_analyzer import LteRrcAnalyzer
 __all__=["RrcAnalyzer"]
 
 class RrcAnalyzer(Analyzer):
+    """
+    A protocol ananlyzer for 3G/4G Radio Resource Control (RRC).
+    It depends on WcdmaRrcAnalyzer and LteRrcAnalyzer, and integrates configurations
+    from both ananlyzers.
+    """
 
     def __init__(self):
         Analyzer.__init__(self)
@@ -32,7 +36,10 @@ class RrcAnalyzer(Analyzer):
 
     def __rrc_filter(self,msg):
         """
-            Decide the current RAT
+        Callback to process RRC messages.
+
+        :param msg: the WCDMA/LTE RRC message from trace source.
+        :type msg: Event
         """
 
         if msg.type_id.find("LTE")!=-1:    #LTE RRC msg received, so it's LTE
@@ -42,18 +49,20 @@ class RrcAnalyzer(Analyzer):
 
     def __on_event(self,event):
         """
-            Simply push the event to analyzers that depend on RrcAnalyzer
+        Triggered by WcdmaRrcAnalyzer and/or LteRrcAnalyzer.
+        Push the event to analyzers that depend on RrcAnalyzer
+
+        :param event: the event raised by WcdmaRrcAnalyzer and/or LteRrcAnalyzer.
+        :type event: Event
         """
         e=Event(event.timestamp,"RrcAnalyzer",event.data)
         self.send(e)
 
     def get_cell_list(self):
         """
-            Get a complete list of cell IDs *at current location*.
-            For these cells, the RrcAnalyzer has the corresponding configurations
-            Cells observed yet not camped on would NOT be listed (no config)
-
-            FIXME: currently only return *all* cells in the LteRrcConfig
+        Get a complete list of cell IDs.
+    
+        :returns: a list of cells the device has associated with
         """
         lte_cell_list=self.__lte_rrc_analyzer.get_cell_list()
         wcdma_cell_list=self.__wcdma_rrc_analyzer.get_cell_list()
@@ -61,8 +70,12 @@ class RrcAnalyzer(Analyzer):
 
     def get_cell_config(self,cell):
         """
-            get RRC configuration of a cell
-            cell is a (cell_id,freq)pair
+        Return a cell's active/idle-state configuration.
+        
+        :param cell:  a cell identifier
+        :type cell: a (cell_id,freq) pair
+        :returns: this cell's active/idle-state configurations
+        :rtype: LteRrcConfig or WcdmaRrcConfig
         """
         res=self.__lte_rrc_analyzer.get_cell_config(cell)
         if res != None:
@@ -72,8 +85,10 @@ class RrcAnalyzer(Analyzer):
 
     def get_cur_cell(self):
         """
-            Return a cell's configuration
-            TODO: if no current cell (inactive), return None
+        Get current cell's status
+
+        :returns: current cell's status
+        :rtype: LteRrcStatus   or WcdmaRrcStatus    
         """
         if self.__cur_RAT=="LTE":
             return self.lte_rrc_analyzer.get_cur_cell()
@@ -84,7 +99,10 @@ class RrcAnalyzer(Analyzer):
 
     def get_cur_cell_config(self):
         """
-            Return current cell's configuration
+        Get current cell's configuration
+
+        :returns: current cell's status
+        :rtype: LteRrcConfig or WcdmaRrcConfig
         """
         if self.__cur_RAT=="LTE":
             return self.__lte_rrc_analyzer.get_cur_cell_config()
@@ -95,8 +113,10 @@ class RrcAnalyzer(Analyzer):
 
     def get_cell_on_freq(self,freq):
         """
-            Given a frequency band, get all cells under this freq in the cell_list
-            These cells are already with config
+        Given a frequency band, get all cells under this freq in the cell_list.
+        
+        :param freq: a frequency band
+        :type freq: int
         """
         cell_list=self.get_cell_list()
         res=[]
@@ -107,7 +127,10 @@ class RrcAnalyzer(Analyzer):
 
     def get_cell_neighbor(self,cell):
         """
-            Given a cell, return its neighbor cells
+        Given a cell, return its neighbor cells
+
+        :param cell: a cell identifier
+        :type cell: a (cell_id,freq) pair
         """
         cell_config=self.get_cell_config(cell)
         cell_freq=cell_config.status.freq

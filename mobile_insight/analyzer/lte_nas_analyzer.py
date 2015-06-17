@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#!/usr/bin/python
+# Filename: lte_nas_analyzer.py
 """
-lte_nas_analyzer.py
 
 A LTE NAS layer (EMM/ESM) analyzer
 
@@ -13,9 +13,10 @@ import timeit
 
 __all__=["LteNasAnalyzer"]
 
+#EMM registeration state 
 emm_state={0:"deregistered",1:"registered"}
 
-
+#EMM registeration substate 
 emm_substate={
     0: "deregistered.normal_service",
     1: "deregistered.limited_service",
@@ -33,7 +34,7 @@ emm_substate={
     13: "registered.attempting_to_update_mm",
     14: "registered.imsi_detach_inited"}
 
-
+#ESM session connection state
 esm_state={0:"disconnected",1:"connected"}
 
 #QoS mapping: 10.5.6.5, TS24.008
@@ -54,10 +55,12 @@ residual_ber={1:5e-2, 2:1e-2, 3:5e-3, 4:4e-3, 5:1e-3, 6:1e-4, 7:1e-5,
 
 
 def max_bitrate(val):
-    """
-        Given ESM value, return MBR (Kbps)
-        R.f. 10.5.6.5, TS24.008
-    """
+    '''
+    Given ESM value, return maximum bit rate (Kbps).
+    Please refer to 10.5.6.5, TS24.008 for more details.
+
+    :param val: the value encoded in the ESM NAS message
+    '''
     if val<=63:
         return val
     elif val<=127:
@@ -70,8 +73,10 @@ def max_bitrate(val):
 
 def max_bitrate_ext(val):
     """
-        Given ESM value, return MBR (Kbps)
-        R.f. 10.5.6.5, TS24.008
+    Given ESM value, return extended maximum bit rate (Kbps).
+    Please refer to 10.5.6.5, TS24.008 for more details.
+
+    :param val: the value encoded in the ESM NAS message
     """
     if val<=74:
         return 8600+val*100
@@ -85,8 +90,10 @@ def max_bitrate_ext(val):
 
 def trans_delay(val):
     """
-        Given ESM value, return transfer delay (ms)
-        R.f. 10.5.6.5, TS24.008
+    Given ESM value, return transfer delay (ms).
+    Please refer to 10.5.6.5, TS24.008 for more details.
+
+    :param val: the value encoded in the ESM NAS message
     """
     if val<=15:
         return val*10
@@ -100,6 +107,10 @@ def trans_delay(val):
 
 class LteNasAnalyzer(Analyzer):
 
+    """
+    A protocol analyzer for LTE NAS messages (EMM and ESM)
+    """
+
     def __init__(self):
         Analyzer.__init__(self)
         #init packet filters
@@ -109,6 +120,11 @@ class LteNasAnalyzer(Analyzer):
         self.__esm_status = EsmStatus()
 
     def set_source(self,source):
+        """
+        Set the trace source. Enable the LTE NAS messages.
+
+        :param source: the trace source (collector).
+        """
         Analyzer.set_source(self,source)
         #Enable EMM/ESM logs
         source.enable_log("LTE_NAS_ESM_Plain_OTA_Incoming_Message")
@@ -118,11 +134,9 @@ class LteNasAnalyzer(Analyzer):
 
     def __nas_filter(self,msg):
         """
-            Filter all NAS(EMM/ESM) packets, and call functions to process it
-            
-            Args:
-                msg: the event (message) from the trace collector
+        Filter all NAS(EMM/ESM) packets, and call functions to process it
 
+        :param msg: the event (message) from the trace collector.
         """
         # log_item = msg.data
         log_item = msg.data.decode()
@@ -150,7 +164,9 @@ class LteNasAnalyzer(Analyzer):
 
     def __callback_emm_state(self,msg):
         """
-            Update EMM state and substate
+        Given the EMM message, update EMM state and substate.
+
+        :param msg: the NAS signaling message that carries EMM state
         """
 
         for field in msg.data.iter('field'):
@@ -176,7 +192,9 @@ class LteNasAnalyzer(Analyzer):
 
     def __callback_emm(self,msg):
         """
-            Update EMM status
+        Extrace EMM status and configurations from the NAS messages
+
+        :param msg: the EMM NAS message
         """
 
         for field in msg.data.iter('field'):
@@ -201,9 +219,10 @@ class LteNasAnalyzer(Analyzer):
                 self.__emm_status.guti.m_tmsi=field_val['nas_eps.emm.m_tmsi']
 
     def __callback_esm(self,msg):
-
         """
-            Update ESM status
+        Extrace EMM status and configurations from the NAS messages
+
+        :param msg: the ESM NAS message
         """
         for field in msg.data.iter('field'):
 
@@ -241,12 +260,17 @@ class LteNasAnalyzer(Analyzer):
                 self.__esm_status.qos.guaranteed_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl_ext']))
                 self.__esm_status.qos.guaranteed_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
-                self.__esm_status.qos.dump_rate()
-                self.__esm_status.qos.dump_delay()
+                self.logger.info(self.__esm_status.qos.dump_rate())
+                self.logger.info(self.__esm_status.qos.dump_delivery())
+                # self.__esm_status.qos.dump_rate()
+                # self.__esm_status.qos.dump_delay()
 
     
 class EmmStatus:
-
+    """
+    An abstraction to maintain the EMM status, including the registeration states, 
+    temporary IDs (GUTI), security options, etc.
+    """
     def __init__(self):
         self.state = "null"
         self.substate = "null"
@@ -255,6 +279,11 @@ class EmmStatus:
         self.integrity = None
 
     def dump(self):
+        """
+        Report the EMM status
+
+        :returns: a string that encodes EMM status
+        """
         # print self.__class__.__name__,self.state,self.substate, \
         # self.guti.mcc,self.guti.mnc,self.guti.mme_group_id, \
         # self.guti.mme_code,self.guti.m_tmsi,self.ciphering,self.integrity
@@ -266,6 +295,9 @@ class EmmStatus:
 
 
 class Guti:
+    """
+    An abstraction to maintain Globally Unique Temporary ID (GUTI)
+    """
     def __init__(self):
         self.mcc=None
         self.mnc=None
@@ -274,17 +306,25 @@ class Guti:
         self.m_tmsi=None
 
     def inited(self):
+        """
+        Return true if all GUTI fileds are initialized
+        """
         return (self.mcc and self.mnc and self.mme_group_id \
             and self.mme_code and self.m_tmsi)
 
 
 class EsmStatus:
-
+    """
+    An abstraction to maintain the ESM status
+    """
     def __init__(self):
         self.qos=EsmQos()
 
 
 class EsmQos:
+    """
+    An abstraction for ESM QoS profiles
+    """
     def __init__(self):
         self.qci=None
         self.delay_class=None
@@ -307,13 +347,38 @@ class EsmQos:
         self.residual_ber=None
 
     def dump_rate(self):
-        print self.__class__.__name__,"Throughput(Kbps):",self.peak_tput,self.mean_tput, \
-        self.max_bitrate_ulink, self.max_bitrate_dlink, \
-        self.guaranteed_bitrate_ulink, self.guaranteed_bitrate_dlink, \
-        self.max_bitrate_ulink_ext, self.max_bitrate_dlink_ext, \
-        self.guaranteed_bitrate_ulink_ext, self.guaranteed_bitrate_dlink_ext
+        """
+        Report the data rate profile in ESM QoS, including the peak/mean throughput,
+        maximum downlink/uplink data rate, guaranteed downlink/uplink data rate, etc.
 
-    def dump_delay(self):
-        print self.__class__.__name__,"delay:",delivery_order[self.delivery_order], \
-        traffic_class[self.traffic_class],self.qci,self.delay_class,self.transfer_delay, \
-        self.residual_ber
+        :returns: a string that encodes all the data rate 
+        :rtype: string
+        """
+        # print self.__class__.__name__,"Throughput(Kbps):",self.peak_tput,self.mean_tput, \
+        # self.max_bitrate_ulink, self.max_bitrate_dlink, \
+        # self.guaranteed_bitrate_ulink, self.guaranteed_bitrate_dlink, \
+        # self.max_bitrate_ulink_ext, self.max_bitrate_dlink_ext, \
+        # self.guaranteed_bitrate_ulink_ext, self.guaranteed_bitrate_dlink_ext
+        return (self.__class__.__name__ + " Throughput(Kbps):"
+            + ' ' + self.peak_tput + ' ' + self.mean_tput
+            + ' ' + self.max_bitrate_ulink + ' ' + self.max_bitrate_dlink
+            + ' ' + self.guaranteed_bitrate_ulink + ' ' + self.guaranteed_bitrate_dlink
+            + ' ' + self.max_bitrate_ulink_ext + ' ' + self.max_bitrate_dlink_ext
+            + ' ' + self.guaranteed_bitrate_ulink_ext + ' ' + self.guaranteed_bitrate_dlink_ext)
+
+    def dump_delivery(self):
+        """
+        Report the delivery profile in ESM QoS, including delivery order guarantee,
+        traffic class, QCI, delay class, transfer delay, etc.
+
+        :returns: a string that encodes all the data rate 
+        :rtype: string
+        """
+        # print self.__class__.__name__,"delay:",delivery_order[self.delivery_order], \
+        # traffic_class[self.traffic_class],self.qci,self.delay_class,self.transfer_delay, \
+        # self.residual_ber
+        return (self.__class__.__name__ + " delivery profile:"
+            + ' ' + delivery_order[self.delivery_order]
+            + ' ' + traffic_class[self.traffic_class]
+            + ' ' + self.qci + ' ' + self.delay_class
+            + ' ' + self.transfer_delay + ' ' + self.residual_ber)

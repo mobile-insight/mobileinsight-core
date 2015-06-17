@@ -1,8 +1,7 @@
-#! /usr/bin/env python
+#!/usr/bin/python
+# Filename: handoff_loop_analyzer.py
 """
-handoff_loop_analyzer.py
-
-An analyzer for handoff loop detection and resolution
+An analyzer for handoff persistent loop detection
 
 Author: Yuanjie Li
 """
@@ -11,15 +10,25 @@ from analyzer import *
 from rrc_analyzer import RrcAnalyzer
 
 class HandoffLoopAnalyzer(Analyzer):
+    """
+    An analyzer for handoff persistent loop detection. 
+    It relies on RrcAnalyzer to extract idle/active-state handoff policies.
+    """
 
     def __init__(self):
+        """
+        Initialization of the analyzer.
+        """
         Analyzer.__init__(self)
         self.__rrc_analyzer = RrcAnalyzer()
         self.include_analyzer(self.__rrc_analyzer,[self.__loop_detection])
 
     def __loop_detection(self,msg):
         """
-            Detection persistent loops, configure device to avoid it
+        Detection persistent loops caused by handoff policy conflicts.
+        The results would be written into the log. 
+
+        :param msg: the event from RrcAnalyzer
         """
 
         if msg.type_id!="RrcAnalyzer":

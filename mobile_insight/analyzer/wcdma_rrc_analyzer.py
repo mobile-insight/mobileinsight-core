@@ -1,12 +1,7 @@
-#! /usr/bin/env python
+#!/usr/bin/python
+# Filename: wcdma_rrc_analyzer.py
 """
-wcdma_rrc_analyzer.py
-
-A WCDMA_RRC analyzer
-    - Maintain configurations from the SIB
-    - Connection setup/release statistics
-    - RRCReconfiguration statistics
-    - ...
+A WCDMA (3G) RRC analyzer.
 
 Author: Yuanjie Li
 """
@@ -21,6 +16,10 @@ from copy import deepcopy
 __all__=["WcdmaRrcAnalyzer"]
 
 class WcdmaRrcAnalyzer(Analyzer):
+
+    """
+    A protocol ananlyzer for WCDMA (3G) Radio Resource Control (RRC) protocol.
+    """
 
     def __init__(self):
 
@@ -42,6 +41,12 @@ class WcdmaRrcAnalyzer(Analyzer):
         self.__config_tmp=WcdmaRrcConfig()
 
     def set_source(self,source):
+        """
+        Set the trace source. Enable the WCDMA RRC messages.
+
+        :param source: the trace source.
+        :type source: trace collector
+        """
         Analyzer.set_source(self,source)
         #enable WCDMA RRC log
         source.enable_log("WCDMA_Signaling_Messages")
@@ -50,10 +55,9 @@ class WcdmaRrcAnalyzer(Analyzer):
     def __rrc_filter(self,msg):
         
         """
-            Filter all RRC packets, and call functions to process it
-            
-            Args:
-                msg: the event (message) from the trace collector
+        Filter all WCDMA RRC packets, and call functions to process it
+
+        :param msg: the event (message) from the trace collector.
         """
 
         # log_item = msg.data
@@ -90,7 +94,9 @@ class WcdmaRrcAnalyzer(Analyzer):
 
     def __callback_serv_cell(self,msg):
         """
-        Update serving cell status
+        A callback to update current cell status
+
+        :param msg: the RRC messages with cell status
         """
         if not self.__status.inited():
             #old yet incomplete config would be discarded
@@ -167,7 +173,10 @@ class WcdmaRrcAnalyzer(Analyzer):
 
     def __callback_sib_config(self,msg):
         """
-            Callbacks for LTE RRC analysis
+        A callback to extract configurations from System Information Blocks (SIBs), 
+        including the radio asssement thresholds, the preference settings, etc.
+
+        :param msg: RRC SIB messages
         """
         if not self.__status.id: #serving cell is not initialized yet
             return
@@ -300,18 +309,20 @@ class WcdmaRrcAnalyzer(Analyzer):
 
     def get_cell_list(self):
         """
-            Get a complete list of cell IDs *at current location*.
-            For these cells, the RrcAnalyzer has the corresponding configurations
-            Cells observed yet not camped on would NOT be listed (no config)
+        Get a complete list of cell IDs.
 
-            FIXME: currently only return *all* cells in the LteRrcConfig
+        :returns: a list of cells the device has associated with
         """
         return self.__config.keys()
 
     def get_cell_config(self,cell):
         """
-            Return a cell's configuration
-            cell is a (cell_id,freq) pair
+        Return a cell's active/idle-state configuration.
+        
+        :param cell:  a cell identifier
+        :type cell: a (cell_id,freq) pair
+        :returns: this cell's active/idle-state configurations
+        :rtype: WcdmaRrcConfig
         """
         # if self.__config.has_key(cell):
         if cell in self.__config:
@@ -321,12 +332,20 @@ class WcdmaRrcAnalyzer(Analyzer):
 
     def get_cur_cell(self):
         """
-            Return a cell's configuration
-            TODO: if no current cell (inactive), return None
+        Get current cell's status
+
+        :returns: current cell's status
+        :rtype: WcdmaRrcStatus      
         """
         return self.__status
 
     def get_cur_cell_config(self):
+        """
+        Get current cell's configuration
+
+        :returns: current cell's status
+        :rtype: WcdmaRrcConfig
+        """
         cur_pair = (self.__status.id,self.__status.freq)
         # if self.__config.has_key(cur_pair):
         if cur_pair in self.__config:
@@ -337,7 +356,8 @@ class WcdmaRrcAnalyzer(Analyzer):
 
 class WcdmaRrcStatus:
     """
-        The metadata of a cell
+    The metadata of a cell, including its ID, frequency band, location/routing area code, 
+    bandwidth, connectivity status, etc.
     """
     def __init__(self):
         self.id = None #cell ID
@@ -349,6 +369,12 @@ class WcdmaRrcStatus:
         self.conn = False #connectivity status (for serving cell only)
 
     def dump(self):
+        """
+        Report the cell status
+
+        :returns: a string that encodes the cell status
+        :rtype: string
+        """
         # print self.__class__.__name__,self.id,self.freq,self.rat,self.rac,self.lac
         return (self.__class__.__name__ 
             + ' cellID=' + str(self.id)
@@ -377,6 +403,12 @@ class WcdmaRrcConfig:
         self.active = WcdmaRrcActive() #active-state configurations
 
     def dump(self):
+        """
+        Report the cell configurations
+
+        :returns: a string that encodes the cell's configurations
+        :rtype: string
+        """
         return (self.__class__.__name__+'\n'
             + self.status.dump()
             + self.sib.dump()
@@ -385,7 +417,13 @@ class WcdmaRrcConfig:
     def get_cell_reselection_config(self,cell_meta):
 
         """
-            Given a cell's metadata, return its reselection config from the serving cell
+        Given a cell, return its reselection config as a serving cell
+
+        :param cell_meta: a cell identifier
+        :type cell_meta: a (cell_id,freq) pair
+
+        :returns: cell reselection configurations
+        :rtype: WcdmaRrcReselectionConfig
         """
         if not cell_meta:
             return None
@@ -414,6 +452,15 @@ class WcdmaRrcConfig:
 
 
     def get_meas_config(self,cell_meta):
+        """
+        Given a cell, return its measurement config from the serving cell.
+        Note: there may be more than 1 measurement configuration for the same cell.
+
+        :param cell_meta: a cell identifier
+        :type cell_meta: a (cell_id,freq) pair
+        :returns: RRC measurement configurations
+        :rtype: a list of WcdmaRrcReselectionConfig
+        """
         #NOT DONE
         return None
 
@@ -421,7 +468,7 @@ class WcdmaRrcConfig:
 class WcdmaRrcSib:
 
     """
-        Per-cell Idle-state configurations
+    Per-cell Idle-state SIB configurations
     """
     def __init__(self):
         #FIXME: init based on the default value in TS25.331
@@ -433,6 +480,12 @@ class WcdmaRrcSib:
         self.inter_freq_config = {}  
 
     def dump(self):
+        """
+        Report the cell SIB configurations
+
+        :returns: a string that encodes the cell's SIB configurations
+        :rtype: string
+        """
         res = self.serv_config.dump() + self.intra_freq_config.dump()
         for item in self.inter_freq_config:
             res += self.inter_freq_config[item].dump()
@@ -440,6 +493,9 @@ class WcdmaRrcSib:
 
 
 class WcdmaRrcReselectionConfig:
+    """
+    Per-cell cell reselection configurations
+    """
     def __init__(self,cell_id,freq,priority,offset,threshX_High,threshX_Low):
         self.id = cell_id
         self.freq = freq
@@ -451,7 +507,7 @@ class WcdmaRrcReselectionConfig:
 
 class WcdmaRrcSibServ:
     """
-        Serving cell's cell-reselection configurations
+    Serving cell's SIB configurations
     """
     def __init__(self,priority,thresh_serv, s_priority_search1,s_priority_search2):
         self.priority = priority #cell reselection priority
@@ -460,6 +516,12 @@ class WcdmaRrcSibServ:
         self.s_priority_search2 = s_priority_search2
 
     def dump(self):
+        """
+        Report the serving cell SIB configurations
+
+        :returns: a string that encodes the cell's SIB configurations
+        :rtype: string
+        """
         return (self.__class__.__name__
             + ' ' + str(self.priority)
             + ' ' + str(self.threshserv_low)
@@ -468,7 +530,7 @@ class WcdmaRrcSibServ:
 
 class WcdmaRrcSibIntraFreqConfig:
     """
-        Intra-frequency cell-reselection configurations
+    Intra-frequency SIB configurations
     """
     def __init__(self,tReselection,q_RxLevMin,s_InterSearch,s_IntraSearch,q_Hyst1,q_Hyst2):
         #FIXME: individual cell offset
@@ -480,6 +542,12 @@ class WcdmaRrcSibIntraFreqConfig:
         self.q_Hyst2 = q_Hyst2
 
     def dump(self):
+        """
+        Report the cell SIB configurations
+
+        :returns: a string that encodes the cell's SIB configurations
+        :rtype: string
+        """
         return (self.__class__.__name__
             + ' ' + str(self.tReselection)
             + ' ' + str(self.q_RxLevMin)
@@ -491,8 +559,8 @@ class WcdmaRrcSibIntraFreqConfig:
 
 class WcdmaRrcSibInterFreqConfig:
     """
-        Inter-frequency cell-reselection configurations
-    """    
+    Inter-frequency SIB configurations
+    """     
     #FIXME: the current list is incomplete
     #FIXME: individual cell offset
     def __init__(self,freq,tReselection,q_RxLevMin,p_Max,priority,threshx_high,threshx_low):
@@ -505,6 +573,12 @@ class WcdmaRrcSibInterFreqConfig:
         self.threshx_low = threshx_low
 
     def dump(self):
+        """
+        Report the cell SIB configurations
+
+        :returns: a string that encodes the cell's SIB configurations
+        :rtype: string
+        """
         return (self.__class__.__name__
             + ' ' + str(self.freq)
             + ' ' + str(self.priority)
@@ -516,6 +590,10 @@ class WcdmaRrcSibInterFreqConfig:
 
 
 class WcdmaRrcActive:
+    """
+    RRC active-state configurations (from RRCReconfiguration 
+    and MeasurementControl messsage)
+    """
     def __init__(self):
         #TODO: initialize some containers
         pass

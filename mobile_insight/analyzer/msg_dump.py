@@ -1,8 +1,7 @@
-#! /usr/bin/env python
+#!/usr/bin/python
+# Filename: msg_dump.py
 """
-msg_dump.py
-
-A simple message dump analyzer
+A simple message dumper
 
 Author: Yuanjie Li
 """
@@ -15,8 +14,16 @@ import io
 __all__=["MsgDump"]
 
 class MsgDump(Analyzer):
+    """
+    A simple dumper to show messsage in stdin
+    """
 
     def __dump_message(self,msg):
+        """
+        Print the received message
+
+        :param msg: the received message
+        """
         self.__msg_log.append(msg)
         print msg.timestamp,msg.type_id
         
