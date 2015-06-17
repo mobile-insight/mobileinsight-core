@@ -1,7 +1,6 @@
-#! /usr/bin/env python
+#!/usr/bin/python
+# Filename: lte_ue_analyzer.py
 """
-lte_ue_analyzer.py
-
 An analyzer for LTE user's internal events
 
 Author: Yuanjie Li
@@ -14,7 +13,9 @@ from pylab import *
 from multiprocessing import Process,Pipe
 
 class LteUeAnalyzer(Analyzer):
-
+    """
+    An analyzer for LTE user's internal events
+    """
     def __init__(self):
 
         Analyzer.__init__(self)
@@ -35,11 +36,24 @@ class LteUeAnalyzer(Analyzer):
             self.plot_p.kill()
 
     def set_source(self,source):
+        """
+        Set the source of the trace. 
+        Enable device's LTE internal logs.
+
+        :param source: the source trace collector
+        :param type: trace collector
+        """
         Analyzer.set_source(self,source)
         #enable user's internal events
         source.enable_log("LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results")
 
     def ue_event_filter(self,msg):
+        """
+        callback to handle user events
+
+        :param source: the source trace collector
+        :param type: trace collector
+        """
         #TODO: support more user events
         self.serving_cell_rsrp(msg)
 
@@ -47,6 +61,12 @@ class LteUeAnalyzer(Analyzer):
         if msg.type_id == "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results":
             msg_dict=dict(msg.data)
             print msg.timestamp,msg_dict['Serving Filtered RSRP(dBm)']
+            # rsrp_log = (self.__class__.__name__
+            #     + ' ' + str(msg.timestamp)
+            #     + ' ' + str(msg.timestamp,msg_dict['Serving Filtered RSRP(dBm)'])
+
+            # self.logger.info(rsrp_log)
+            
             self.serv_cell_rsrp.append(msg_dict['Serving Filtered RSRP(dBm)'])
             self.plot_conn.send(self.serv_cell_rsrp)
 

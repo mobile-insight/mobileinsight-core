@@ -68,6 +68,7 @@ class Analyzer(Element):
         The messages from the source will drive the analysis.
 
         :param source: the source trace collector
+        :param type: trace collector
         """
 
         #Bottom-up setting: the included analyzers should be evaluated first, then top analyzer
@@ -109,8 +110,7 @@ class Analyzer(Element):
         from other analyzers, then trigger functions in callback_list
 
         :param analyzer: the analyzer to depend on
-        :param callback_list: a list of callback functions. They will be triggered 
-        when an event from analyzer arrives
+        :param callback_list: a list of callback functions. They will be triggered when an event from analyzer arrives
         """
         #WARNING: if analyzer exits, its callback_list would be overwritten!!!
         self.from_list[analyzer]=callback_list
