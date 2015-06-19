@@ -2,7 +2,7 @@
 #define __DM_ENDEC_C_CONSTS_H__
 
 enum LogPacketType {
-	WCDMA_CELL_ID = 0x4127,
+    WCDMA_CELL_ID = 0x4127,
     WCDMA_Signaling_Messages = 0x412F,
     LTE_RRC_OTA_Packet = 0xB0C0,
     LTE_RRC_MIB_Message_Log_Packet = 0xB0C1,
@@ -15,6 +15,22 @@ enum LogPacketType {
     LTE_ML1_IRAT_Measurement_Request = 0xB187,
     LTE_ML1_Serving_Cell_Measurement_Result = 0xB193,
     LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp = 0xB195
+};
+
+static const char *LogPacketTypes [] = {
+    "WCDMA_CELL_ID", 
+    "WCDMA_Signaling_Messages", 
+    "LTE_RRC_OTA_Packet", 
+    "LTE_RRC_MIB_Message_Log_Packet", 
+    "LTE_RRC_Serv_Cell_Info_Log_Packet", 
+    "LTE_NAS_ESM_Plain_OTA_Incoming_Message", 
+    "LTE_NAS_ESM_Plain_OTA_Outgoing_Message", 
+    "LTE_NAS_EMM_Plain_OTA_Incoming_Message", 
+    "LTE_NAS_EMM_Plain_OTA_Outgoing_Message", 
+    "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results", 
+    "LTE_ML1_IRAT_Measurement_Request", 
+    "LTE_ML1_Serving_Cell_Measurement_Result", 
+    "LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp"
 };
 
 enum LogConfigOp {
