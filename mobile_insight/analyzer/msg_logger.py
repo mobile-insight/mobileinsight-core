@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Filename: msg_dump.py
+# Filename: msg_logger.py
 """
-A simple message dumper
+A simple message dumper in std IO
 
 Author: Yuanjie Li
 """
@@ -11,11 +11,11 @@ from analyzer import *
 import xml.etree.ElementTree as ET
 import io
 
-__all__=["MsgDump"]
+__all__=["MsgLogger"]
 
-class MsgDump(Analyzer):
+class MsgLogger(Analyzer):
     """
-    A simple dumper to show messsage in stdin
+    A simple dumper to print messages
     """
 
     def __dump_message(self,msg):

@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 """
-pickle_collector.py
+replayer.py
 
 A pickle message replayer
 
 Author: Jiayao Li
 """
 
-__all__ = ["PickleCollector"]
+__all__ = ["Replayer"]
 
 import pickle
 import sys
 
-from trace_collector import TraceCollector
+from monitor import Monitor
 
 
-class PickleCollector(TraceCollector):
+class Replayer(Monitor):
 
     def __init__(self):
-        TraceCollector.__init__(self)
+        Monitor.__init__(self)
 
     def set_input_path(self, path):
         self._input_path = path

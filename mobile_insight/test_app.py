@@ -14,7 +14,7 @@ import serial
 import sys
 import logging
 
-from trace_collector import *
+from monitor import *
 from analyzer import *
 
 # Define some constants
@@ -76,8 +76,8 @@ if __name__ == "__main__":
     # src.set_serial_port(options.phy_serial_name)
     # src.set_baudrate(options.phy_baudrate)
 
-    src = PickleCollector()
-    src.set_input_path("/Users/yuanjieli/Desktop/verizon-mentone-lollicup.replay")
+    src = Replayer()
+    src.set_input_path("/Users/yuanjieli/Desktop/test.replay")
     ###############################################
 
     # lte_rrc_analyzer = LteRrcAnalyzer()
@@ -94,15 +94,15 @@ if __name__ == "__main__":
     # dumper = MsgFile("/Users/yuanjieli/Desktop/att-lte-active.txt")
     # dumper.set_source(src)
 
-    # dumper2 = MsgDump()
-    # dumper2.set_source(src)
+    dumper2 = MsgLogger()
+    dumper2.set_source(src)
 
     # ue = LteUeAnalyzer()
     # ue.set_source(src)
 
-    # pickle_dumper = PickleDump()
-    # pickle_dumper.set_source(src)
-    # pickle_dumper.set_output_path("/Users/yuanjieli/Desktop/hong-kong-roaming.replay")
+    # serializer = MsgSerializer()
+    # serializer.set_source(src)
+    # serializer.set_output_path("/Users/yuanjieli/Desktop/test.replay")
 
     loop_detect = HandoffLoopAnalyzer()
     loop_detect.set_source(src)

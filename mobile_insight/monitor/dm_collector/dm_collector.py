@@ -11,7 +11,7 @@ Author: Jiayao Li
 
 __all__ = ["DMCollector"]
 
-from ..trace_collector import *
+from ..monitor import *
 
 import binascii
 import os
@@ -31,7 +31,7 @@ def print_reply(payload, crc_correct):
         print "reply: " + binascii.b2a_hex(payload)
         print "crc_correct: " + str(crc_correct)
 
-class DMCollector(TraceCollector):
+class DMCollector(Monitor):
 
     def __init__(self, prefs):
         """
@@ -44,7 +44,7 @@ class DMCollector(TraceCollector):
                 ws_dissect_executable_path
                 libwireshark_path
         """
-        TraceCollector.__init__(self)
+        Monitor.__init__(self)
 
         self.phy_baudrate = 9600
         self.phy_ser_name = None

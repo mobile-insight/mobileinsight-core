@@ -8,8 +8,8 @@ Author: Yuanjie Li
 
 from analyzer import *
 
-import pylab
-from pylab import *
+#import pylab
+#from pylab import *
 from multiprocessing import Process,Pipe
 
 class LteUeAnalyzer(Analyzer):

@@ -1,19 +1,19 @@
 #!/usr/bin/python
-# Filename: pickle_dump.py
+# Filename: msg_serializer.py
 """
-A pickle message dump analyzer
+A serializer of mobile network messages. It can be used for offline analysis and replay-based debugging.
 
 Author: Jiayao Li
 """
 
-__all__ = ["PickleDump"]
+__all__ = ["MsgSerializer"]
 
 import pickle
 
 from analyzer import *
 
 
-class PickleDump(Analyzer):
+class MsgSerializer(Analyzer):
     """
     An ananlyzer to save the message to disk. 
     It can be used for replay-based debugging and offline analysis.

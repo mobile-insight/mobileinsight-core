@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 __all__=["Analyzer",
-    "MsgDump","PickleDump",
+    "MsgLogger","MsgSerializer",
     "LteRrcAnalyzer","LteNasAnalyzer","LteUeAnalyzer",
     # "LteRrcAnalyzer","LteNasAnalyzer",
 	"WcdmaRrcAnalyzer","RrcAnalyzer",
@@ -8,8 +8,8 @@ __all__=["Analyzer",
 
 from analyzer import Analyzer
 
-from msg_dump import MsgDump
-from pickle_dump import PickleDump
+from msg_logger import MsgLogger
+from msg_serializer import MsgSerializer
 
 # LTE
 from lte_rrc_analyzer import LteRrcAnalyzer

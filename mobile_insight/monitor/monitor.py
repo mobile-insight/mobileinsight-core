@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 """
-trace_collector.py
+monitor.py
 
-An abstraction for trace collector.
+An abstraction for log monitor.
 All specific trace collectors (QXDM, RIL, 802.11, pcap) derive from it
 
 Author: Yuanjie Li
@@ -10,10 +10,10 @@ Author: Yuanjie Li
 
 from element import *
 
-class TraceCollector(Element):
+class Monitor(Element):
 
     def __init__(self):
-        # No source for TraceCollector
+        # No source for Monitor
         Element.__init__(self)
 
 
