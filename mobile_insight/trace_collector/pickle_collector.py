@@ -10,6 +10,7 @@ Author: Jiayao Li
 __all__ = ["PickleCollector"]
 
 import pickle
+import sys
 
 from trace_collector import TraceCollector
 

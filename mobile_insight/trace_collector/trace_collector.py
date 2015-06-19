@@ -26,6 +26,13 @@ class TraceCollector(Element):
         if analyzer in self.to_list:
             self.to_list.remove(analyzer)
 
+    def enable_log(self, type_name):
+
+        """
+            Enable different types of log
+        """
+        pass
+
     def run(self):
         """
         Start collecting the traces.

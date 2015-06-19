@@ -1,4 +1,4 @@
-automator
+MobileInsight
 =========
 
 # Introduction #
@@ -51,7 +51,7 @@ Make sure that your phone is based on the Qualcomm chip set. The phone also requ
 
 You can run the tool using automator.exe (given in the distribution version) or with the actual python script. We only present command lines for .exe version, but all flags and options described are appliable to .py version.
 
-To start automator, run
+To start MobileInsight, run
 
     automator -p *insert_COM_port_here*
     
