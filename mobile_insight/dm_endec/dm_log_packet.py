@@ -24,9 +24,9 @@ except ImportError, e:
             return func
         return decorate
 
+import dm_endec_c
 from consts import *
 from ws_dissector import *
-
 
 class SuperTuple(tuple):
     def __new__(cls, data, xml_type, xml_list_item_tag=None):
@@ -63,188 +63,13 @@ class DMLogPacket:
     This class depends on Wireshark to decode some 3GPP standardized
     messages.
     """
-    # Format strings have the same meanings as in Python struct module. See 
-    # https://docs.python.org/2/library/struct.html for details.
-    _HEADER_FMT = "<HHHQ"    # little endian
-    _HEADER_LEN = struct.calcsize(_HEADER_FMT)
-    _DSL_SKIP = None
-
-    # A dict that maps the type ids to the format of the payload field.
-    # The format of a format spec:
-    #   (name, field_type[, elem_type])
-    #       name: a string or _DSL_SKIP
-    #       field_type: 
-    #           If "name" is a string, this is a format string defined
-    #           by the struct module; otherwise, it is a number that
-    #           specify how many bytes should be skipped
-    #       elem_type:
-    #           can be "rsrp" or "rsrq"
-    _LOGITEM_FMT = {
-                    # default byte order: little endian
-                    LOG_PACKET_ID["WCDMA_CELL_ID"]:
-                    (
-                        ("UTRA UL Absolute RF channel number", "I"),
-                        ("UTRA DL Absolute RF channel number", "I"),
-                        ("Cell identity (28-bits)", "I"),
-                        ("URA to use in case of overlapping URAs", "B"),
-                        (_DSL_SKIP, 2),      # Unknown yet
-                        ("Allowed Call Access", "B"),
-                        ("PSC", "H"),
-                        ("PLMN", "6B"),
-                        ("LAC id", "I"),
-                        ("RAC id", "I"),
-                    ),
-                    LOG_PACKET_ID["WCDMA_Signaling_Messages"]:
-                    (
-                        ("Channel Type", "B"),
-                        ("Radio Bearer ID", "B"),
-                        ("Message Length", "H"),
-                    ),
-
-                    LOG_PACKET_ID["LTE_RRC_OTA_Packet"]:
-                    (
-                        ("Pkt Version", "B"),
-                        ("RRC Release Number", "B"),
-                        ("Major/minor", "B"),
-                        ("Radio Bearer ID", "B"),
-                        ("Physical Cell ID", "H"),
-                        ("Freq", "H"),
-                        ("SysFrameNum/SubFrameNum", "H"),
-                        ("PDU Number", "B"),
-                        # continued
-                    ),
-                    LOG_PACKET_ID["LTE_NAS_ESM_Plain_OTA_Incoming_Message"]:
-                    (
-                        ("Pkt Version", "B"),
-                        # continued in _LTE_NAS_PLAIN_FMT
-                    ),
-                    LOG_PACKET_ID["LTE_NAS_ESM_Plain_OTA_Outgoing_Message"]:
-                    (
-                        ("Pkt Version", "B"),
-                        # continued in _LTE_NAS_PLAIN_FMT
-                    ),
-                    LOG_PACKET_ID["LTE_NAS_EMM_Plain_OTA_Incoming_Message"]:
-                    (
-                        ("Pkt Version", "B"),
-                        # continued in _LTE_NAS_PLAIN_FMT
-                    ),
-                    LOG_PACKET_ID["LTE_NAS_EMM_Plain_OTA_Outgoing_Message"]:
-                    (
-                        ("Pkt Version", "B"),
-                        # continued in _LTE_NAS_PLAIN_FMT
-                    ),
-                    LOG_PACKET_ID["LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results"]:
-                    (
-                        ("Version", "B"),
-                        (_DSL_SKIP, 7),     # Unknown
-                        # continued in _LTE_ML1_CMIFMR_FMT
-                    ),
-                    LOG_PACKET_ID["LTE_ML1_IRAT_Measurement_Request"]:
-                    (),
-                    LOG_PACKET_ID["LTE_ML1_Serving_Cell_Measurement_Result"]:
-                    (  
-                        ("Version", "B"),
-                        ("Number of SubPackets", "B"),
-                        (_DSL_SKIP, 2),      # Unknown
-                        # continued in _LTE_ML1_SUBPKT_FMT
-                    ),
-                    LOG_PACKET_ID["LTE_ML1_Connected_Mode_Neighbor_Meas_Req/Resp"]:
-                    (),
-                    LOG_PACKET_ID["LTE_RRC_Serv_Cell_Info_Log_Packet"]:
-                    (
-                        ("Version", "B"),
-                        ("Physical Cell ID", "H"),
-                        ("DL FREQ","H"),
-                        ("UL FREQ","H"),
-                        ("DL BW", "B"),
-                        ("UL BW", "B"),
-                        ("Cell Identity", "I"),
-                        ("TAC", "H"),
-                        ("Band Indicator", "I"),
-                        ("MCC", "H"),
-                        ("MCC Digit", "B"),
-                        ("MNC", "H"),
-                        ("Allowed Access", "B"),
-                    ),
-                    LOG_PACKET_ID["LTE_RRC_MIB_Message_Log_Packet"]:
-                    (
-                        ("Version", "B"),
-                        ("Physical Cell ID", "H"),
-                        ("Freq", "H"),
-                        ("SFN", "H"),
-                        ("Number of Antenna", "B"),
-                        ("DL BW", "B"),
-                    ),
-                }
-
-    # For LTE_NAS_EMM_Plain_OTA_Incoming_Message and LTE_NAS_EMM_Plain_OTA_Outgoing_Message
-    _LTE_NAS_PLAIN_FMT = {
-                    1:  # Version 1
-                    (
-                        ("RRC Release Number", "B"),
-                        ("Major Version", "B"),
-                        ("Minor Version", "B"),
-                        # followed by NAS messages
-                    ),
-                }
-
-    # For LTE_ML1_Serving_Cell_Measurement_Result
-    _LTE_ML1_SUBPKT_FMT = {
-                    "Header":
-                    (
-                        ("SubPacket ID", "B"),
-                        ("Version", "B"),
-                        ("SubPacket Size", "H"),
-                    ),
-                    LTE_ML1_SUBPACKET_ID["Serving_Cell_Measurement_Result"]:
-                    {
-                        4: # Version 4
-                        (
-                            ("E-ARFCN", "H"),
-                            ("Physical Cell ID", "H"),
-                            # TODO: extra effort to deal with unaligned fields
-                        ),
-                    },
-                }
-
-    # LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results
-    _LTE_ML1_CMIFMR_FMT = {
-                    3:  # Version 3
-                    {
-                        "Header":
-                        (
-                            ("E-ARFCN", "H"),
-                            ("Serving Physical Cell ID", "H"),
-                            ("Sub-frame Number", "H"),
-                            ("Serving Filtered RSRP(dBm)", "H", "rsrp"),
-                            (_DSL_SKIP, 2),     # Duplicated
-                            ("Serving Filtered RSRQ(dB)", "H", "rsrq"),
-                            (_DSL_SKIP, 2),     # Duplicated
-                            ("Number of Neighbor Cells", "B"),
-                            ("Number of Detected Cells", "B"),
-                        ),
-                        "Neighbor Cell":
-                        (
-                            ("Physical Cell ID", "H"),
-                            ("Filtered RSRP(dBm)", "H", "rsrp"),
-                            (_DSL_SKIP, 2),     # Duplicated
-                            ("Filtered RSRQ(dB)", "H", "rsrq"),
-                            (_DSL_SKIP, 4),     # Duplicated & reserved
-                        ),
-                        "Detected Cell":
-                        (
-                            ("Physical Cell ID", "I"),
-                            ("SSS Corr Value", "I"),
-                            ("Reference Time", "Q"),
-                        ),
-                    }
-                }
 
     _init_called = False
 
     def __init__(self, b):
         self._binary = b
         self._decoded_list = None
+        self._decoded_dict = None
 
     def decode(self):
         """
@@ -273,17 +98,79 @@ class DMLogPacket:
         """
         cls = self.__class__
         if self._decoded_list is not None:
-            return dict(self._decoded_list)
+            return self._decoded_dict
 
         assert cls._init_called
-        self._decoded_list = []
-        l, type_id, ts = cls._decode_header(self._binary)
-        self._decoded_list.append( ("type_id", type_id) )
-        self._decoded_list.append( ("timestamp", ts) )
-        log_item = cls._decode_log_item(type_id,
-                                        self._binary[cls._HEADER_LEN:])
-        self._decoded_list.extend(log_item)
-        return dict(self._decoded_list)
+        self._decoded_list = dm_endec_c.decode_log_packet(self._binary)
+        self._decoded_dict = cls._parse_internal_list("dict", self._decoded_list)
+        return self._decoded_dict
+
+    @classmethod
+    @static_var("wcdma_sib_types", {    0: "RRC_MIB",
+                                        1: "RRC_SIB1",
+                                        3: "RRC_SIB3",
+                                        7: "RRC_SIB7",
+                                        12: "RRC_SIB12",
+                                        31: "RRC_SIB19",
+                                        })
+    def _parse_internal_list(cls, out_type, decoded_list):
+        if out_type == "dict":
+            d = dict()
+        elif out_type == "list":
+            lst = []
+
+        for field_name, val, type_str in decoded_list:
+            if not type_str:
+                xx = val
+
+            elif type_str.startswith("raw_msg/"):
+                msg_type = type_str[8:]
+                decoded = cls._decode_msg(msg_type, val)
+                xmls = [decoded,]
+
+                if msg_type == "RRC_DL_BCCH_BCH":
+                    sib_types = cls._parse_internal_list.wcdma_sib_types
+                    xml = ET.fromstring(decoded)
+                    sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
+                    if sibs:
+                        # deal with a list of complete SIBs
+                        for complete_sib in sibs:
+                            field = complete_sib.find("field[@name='rrc.sib_Type']")
+                            sib_id = int(field.get("show"))
+                            field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
+                            sib_msg = binascii.a2b_hex(field.get("value"))
+                            if sib_id in sib_types:
+                                decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
+                                xmls.append(decoded)
+                                # print sib_types[sib_id]
+                            else:
+                                print "Unknown RRC SIB Type: %d" % sib_id
+                    else:
+                        # deal with a segmented SIB
+                        sib_segment = xml.find(".//field[@name='rrc.firstSegment_element']")
+                        if sib_segment is None:
+                            sib_segment = xml.find(".//field[@name='rrc.subsequentSegment_element']")
+                        if sib_segment is None:
+                            sib_segment = xml.find(".//field[@name='rrc.lastSegmentShort_element']")
+                        if sib_segment is not None:
+                            field = sib_segment.find("field[@name='rrc.sib_Type']")
+                            sib_id = int(field.get("show"))
+                            print "RRC SIB Segment(type: %d) not handled" % sib_id
+                xx = cls._wrap_decoded_xml(xmls)
+            elif type_str == "dict":
+                xx = cls._parse_internal_list("dict", val)
+            elif type_str == "list":
+                xx = cls._parse_internal_list("list", val)
+
+            if out_type == "dict":
+                d[field_name] = xx
+            elif out_type == "list":
+                lst.append(xx)
+
+        if out_type == "dict":
+            return d
+        elif out_type == "list":
+            return tuple(lst)
 
     def decode_xml(self):
         """
@@ -312,14 +199,14 @@ class DMLogPacket:
         if self._decoded_list is None:
             ignored = self.decode()
 
-        return json.dumps(  cls._decode_json_recursive(self._decoded_list, "dict"),
-                            cls=SuperEncoder)
+        return json.dumps(self._decoded_dict, cls=SuperEncoder)
 
     @classmethod
     def _decode_xml_recursive(cls, element, xml_type=None, list_item_tag=""):
         """
         Return an XML element or a str, depending on the value of xml_type.
         """
+        # TODO: rewrite this part
         if xml_type == "list":
             assert list_item_tag != ""
             lst_tag = ET.Element("list")
@@ -356,30 +243,6 @@ class DMLogPacket:
             return str(element)
 
     @classmethod
-    def _decode_json_recursive(cls, element, special_type=None):
-        if special_type == "dict":
-            d = dict()
-            for pair in element:
-                if isinstance(pair, SuperTuple):
-                    d[pair[0]] = cls._decode_json_recursive(pair[1], pair.xml_type)
-                else:
-                    d[pair[0]] = pair[1]
-            return d
-
-        elif special_type == "list":
-            print element
-            lst = []
-            for item in element:
-                if isinstance(item, SuperTuple):
-                    lst.append(cls._decode_json_recursive(item, item.xml_type))
-                else:
-                    lst.append(item)
-            return lst
-
-        else:
-            return element
-
-    @classmethod
     def init(cls, prefs):
         """
         Configure the DMLogPacket class with user preferences.
@@ -394,32 +257,6 @@ class DMLogPacket:
         WSDissector.init_proc(prefs["ws_dissect_executable_path"],
                                 prefs["libwireshark_path"])
         cls._init_called = True
-
-    @classmethod
-    def _decode_header(cls, b):
-        """
-        Decode the 14-byte header of the packet.
-        """
-        l1, l2, type_id, ts = struct.unpack_from(cls._HEADER_FMT, b)
-        assert l1 == l2
-        assert l1 + 2 == len(b)
-        if type_id not in cls._LOGITEM_FMT:
-            raise FormatError("Unknown Type ID: 0x%x" % type_id)
-        ts = cls._decode_ts(ts)
-        return l1, type_id, ts
-
-    @classmethod
-    @static_var("epoch", datetime(1980, 1, 6, 0, 0, 0))  # 1980 Jan 6 00:00:00
-    @static_var("per_sec", 52428800)
-    def _decode_ts(cls, ts):
-        """
-        Decode the 8-byte packet timestamp in the header.
-
-        Returns:
-            a datetime object storing the interpreted timestamp.
-        """
-        secs = float(ts) / cls._decode_ts.per_sec
-        return cls._decode_ts.epoch + timedelta(seconds=secs)
 
     @classmethod
     def _search_result(cls, result, target):
@@ -441,82 +278,6 @@ class DMLogPacket:
             return ret[0]
         else:
             return tuple(ret)
-
-    @classmethod
-    def _decode_log_item(cls, type_id, b):
-        """
-        Decode the payload field according to its type.
-        """
-        res, offset = cls._decode_by_format(cls._LOGITEM_FMT[type_id], b, 0)
-        ind = 0 + offset
-
-        # Decode complex items that need extra cares
-        if type_id == LOG_PACKET_ID["WCDMA_Signaling_Messages"]:
-            offset = cls._decode_wcdma_signaling_messages(b, ind, res)
-            ind += offset
-        elif type_id == LOG_PACKET_ID["LTE_RRC_OTA_Packet"]:
-            offset = cls._decode_lte_rrc_ota(b, ind, res)
-            ind += offset
-        elif type_id in (   LOG_PACKET_ID["LTE_NAS_ESM_Plain_OTA_Incoming_Message"],
-                            LOG_PACKET_ID["LTE_NAS_ESM_Plain_OTA_Outgoing_Message"],
-                            LOG_PACKET_ID["LTE_NAS_EMM_Plain_OTA_Incoming_Message"],
-                            LOG_PACKET_ID["LTE_NAS_EMM_Plain_OTA_Outgoing_Message"],
-                            ):
-            offset = cls._decode_lte_nas_plain(b, ind, res)
-            ind += offset
-        elif type_id == LOG_PACKET_ID["LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results"]:
-            offset = cls._decode_lte_ml1_cmifmr(b, ind, res)
-            ind += offset
-        elif type_id == LOG_PACKET_ID["LTE_ML1_Serving_Cell_Measurement_Result"]:
-            offset = cls._decode_lte_ml1_subpkt(b, ind, res)
-            ind += offset
-
-        return res
-
-    @classmethod
-    def _decode_by_format(cls, fmt, b, start):
-        """
-        Decode binary messsage according to a specific format.
-
-        Args:
-            fmt: the specific format
-            b: a string containing binary data to be decoded
-            start: the position where should we start the decoding.
-
-        Returns:
-            a 2-element tuple (res, n).
-
-            res: the decoding result (a list)
-            n: how many bytes are consumed in the decoding
-        """
-        ind = start
-        result = []
-        for spec in fmt:
-            if spec[0] != cls._DSL_SKIP:
-                name = spec[0]
-                fmt = spec[1]
-                decoded = struct.unpack_from(fmt, b, ind)
-                if len(decoded) == 1:
-                    decoded = decoded[0]
-                    if len(spec) > 2:   # the type of this element is specified
-                        elem_type = spec[2]
-                        decoded = cls._transform_element(elem_type, decoded)
-                result.append( (name, decoded) )
-                ind += struct.calcsize(fmt)
-            else:   # padding/skip
-                ind += spec[1]
-        return result, (ind - start)
-
-    @classmethod
-    def _transform_element(cls, elem_type, val):
-        if elem_type == "rsrp":
-            # (0.0625 * x - 180) dBm
-            return val * 0.0625 - 180
-        elif elem_type == "rsrq":
-            # (0.0625 * x - 30) dB
-            return val * 0.0625 - 30
-        else:
-            raise NotImplementedError
 
     @classmethod
     def _decode_msg(cls, msg_type, b):
@@ -541,193 +302,6 @@ class DMLogPacket:
             xmls = [xmls]
         assert isinstance(xmls, (list, tuple))
         return "<msg>\n" + "".join(xmls) + "</msg>\n"
-
-    ##################################################
-    #                                                #
-    #         DECODE IRREGULAR LOG ITEMS             #
-    #                                                #
-    ##################################################
-
-    @classmethod
-    # Keep strings consistent with ws_dissector.py
-    @static_var("sib_types", {  0: "RRC_MIB",
-                                1: "RRC_SIB1",
-                                3: "RRC_SIB3",
-                                7: "RRC_SIB7",
-                                12: "RRC_SIB12",
-                                31: "RRC_SIB19",
-                                })
-    def _decode_wcdma_signaling_messages(cls, b, start, result):
-        """
-        Return the number of consumed bytes.
-        """
-        sib_types = cls._decode_wcdma_signaling_messages.sib_types
-        ch_num, pdu_length = cls._search_result(
-                                            result, 
-                                            ("Channel Type", "Message Length"))
-        if ch_num not in WCDMA_SIGNALLING_MSG_CHANNEL_TYPE:
-            print "Unknown WCDMA Signalling Messages Channel Type: 0x%x" % ch_num
-            return 0
-
-        msg = b[start:(start + pdu_length)]
-        xmls = []
-        decoded = cls._decode_msg(WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num], msg)
-        xmls.append(decoded)
-        # print decoded
-        if WCDMA_SIGNALLING_MSG_CHANNEL_TYPE[ch_num] == "RRC_DL_BCCH_BCH":
-            xml = ET.fromstring(decoded)
-            sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
-            if sibs:
-                # deal with a list of complete SIBs
-                for complete_sib in sibs:
-                    field = complete_sib.find("field[@name='rrc.sib_Type']")
-                    sib_id = int(field.get("show"))
-                    field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
-                    sib_msg = binascii.a2b_hex(field.get("value"))
-                    if sib_id in sib_types:
-                        decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
-                        xmls.append(decoded)
-                        # print sib_types[sib_id]
-                    else:
-                        print "Unknown RRC SIB Type: %d" % sib_id
-            else:
-                # deal with a segmented SIB
-                sib_segment = xml.find(".//field[@name='rrc.firstSegment_element']")
-                if sib_segment is None:
-                    sib_segment = xml.find(".//field[@name='rrc.subsequentSegment_element']")
-                if sib_segment is None:
-                    sib_segment = xml.find(".//field[@name='rrc.lastSegmentShort_element']")
-                if sib_segment is not None:
-                    field = sib_segment.find("field[@name='rrc.sib_Type']")
-                    sib_id = int(field.get("show"))
-                    print "RRC SIB Segment(type: %d) not handled" % sib_id
-                    # if sib_segment.get("name") != "rrc.lastSegmentShort_element":
-                    #     field = sib_segment.find("field[@name='rrc.sib_Data_fixed']")
-                    # else:
-                    #     field = sib_segment.find("field[@name='rrc.sib_Data_variable']")
-                    # sib_msg = binascii.a2b_hex(field.get("value"))
-        result.append( ("Msg", cls._wrap_decoded_xml(xmls)) )
-        return pdu_length
-
-    @classmethod
-    def _decode_lte_rrc_ota(cls, b, start, result):
-        pkt_ver = cls._search_result(result, "Pkt Version")
-        if pkt_ver not in (2, 7):
-            print "Unknown LTE RRC OTA packet version: %d" % pkt_ver
-            return 0
-
-        if pkt_ver == 7:
-            fmt = [ (cls._DSL_SKIP, 4),      # Unknown yet, only for Pkt Version = 7
-                    ("Msg Length", "B"),
-                    ("SIB Mask in SI", "B"),
-                    ]
-        elif pkt_ver == 2:
-            fmt = [ ("Msg Length", "B"),
-                    ("SIB Mask in SI", "B"),
-                    ]
-        ind = start
-        res2, offset = cls._decode_by_format(fmt, b, ind)
-        result.extend(res2)
-        ind += offset
-        pdu_number, pdu_length = cls._search_result(
-                                        result,
-                                        ("PDU Number", "Msg Length",))
-        msg = b[ind:(ind + pdu_length)]
-        if pdu_number in LTE_RRC_OTA_PDU_TYPE:
-            decoded = cls._decode_msg(LTE_RRC_OTA_PDU_TYPE[pdu_number], msg)
-            result.append( ("Msg", cls._wrap_decoded_xml(decoded)) )
-            # print decoded
-        else:
-            print "Unknown LTE RRC PDU Type: 0x%x" % pdu_number
-        return (ind - start) + pdu_length
-
-    @classmethod
-    def _decode_lte_nas_plain(cls, b, start, result):
-        pkt_ver = cls._search_result(result, "Pkt Version")
-        if pkt_ver not in cls._LTE_NAS_PLAIN_FMT:
-            print "Unknown LTE NAS version: 0x%x" % pkt_ver
-            return 0
-
-        fmt = cls._LTE_NAS_PLAIN_FMT[pkt_ver]
-        res2, offset = cls._decode_by_format(fmt, b, start)
-        result.extend(res2)
-        nas_msg_plain = b[(start + offset):]
-        decoded = cls._decode_msg("LTE-NAS_EPS_PLAIN", nas_msg_plain)
-        result.append( ("Msg", cls._wrap_decoded_xml(decoded)) )
-        return len(b) - start
-
-
-    @classmethod
-    def _decode_lte_ml1_cmifmr(cls, b, start, result):
-        pkt_ver = cls._search_result(result, "Version")
-        if pkt_ver not in cls._LTE_ML1_CMIFMR_FMT:
-            print "Unknown LTE ML1 CMIFMR version: 0x%x" % pkt_ver
-            return 0
-        
-        # Decode header
-        ind = start
-        fmt = cls._LTE_ML1_CMIFMR_FMT[pkt_ver]["Header"]
-        res2, offset = cls._decode_by_format(fmt, b, ind)
-        ind += offset
-        n_neighbor_cells, n_detected_cells = cls._search_result( 
-                                        res2,
-                                        ("Number of Neighbor Cells",
-                                         "Number of Detected Cells",))
-        # Decode each line of neighbor cells
-        res_allcell = []
-        fmt = cls._LTE_ML1_CMIFMR_FMT[pkt_ver]["Neighbor Cell"]
-        for i in range(n_neighbor_cells):
-            res_cell, offset = cls._decode_by_format(fmt, b, ind)
-            ind += offset
-            res_allcell.append(SuperTuple(res_cell, "dict"))
-        tmp = ("Neighbor Cells", tuple(res_allcell))
-        res2.append(SuperTuple(tmp, "list", "neighbor_cell"))
-        # Decode each line of detected cells
-        res_allcell = []
-        fmt = cls._LTE_ML1_CMIFMR_FMT[pkt_ver]["Detected Cell"]
-        for i in range(n_detected_cells):
-            res_cell, offset = cls._decode_by_format(fmt, b, ind)
-            ind += offset
-            res_allcell.append(SuperTuple(res_cell, "dict"))
-        tmp = ("Detected Cells", tuple(res_allcell))
-        res2.append(SuperTuple(tmp, "list", "detected_cell"))
-        result.extend(tuple(res2))
-        return ind - start
-
-    @classmethod
-    def _decode_lte_ml1_subpkt(cls, b, start, result):
-        pkt_ver, n_subpkt = cls._search_result(
-                                        result,
-                                        ("Version", "Number of SubPackets"))
-        if pkt_ver != 1:
-            print "Unknown LTE ML1 packet version: %d" % pkt_ver
-            return 0
-        res_allpkt = []
-        ind = start
-        for i in range(n_subpkt):
-            # Decode subpacket header
-            fmt = cls._LTE_ML1_SUBPKT_FMT["Header"]
-            res_subpkt, offset = cls._decode_by_format(fmt, b, ind)
-            ind += offset
-            # Decode payload
-            subpkt_id, subpkt_ver = cls._search_result( 
-                                                res_subpkt,
-                                                ("SubPacket ID", "Version"))
-            if subpkt_id not in cls._LTE_ML1_SUBPKT_FMT:
-                print "Unknown LTE ML1 Subpacket ID: 0x%x" % subpkt_id
-            elif subpkt_ver not in cls._LTE_ML1_SUBPKT_FMT[subpkt_id]:
-                print "Unknown LTE ML1 Subpacket version: 0x%x - %d" % (subpkt_id, subpkt_ver)
-            else:
-                fmt = cls._LTE_ML1_SUBPKT_FMT[subpkt_id][subpkt_ver]
-                res2, offset = cls._decode_by_format(fmt, b, ind)
-                ind += offset
-                res_subpkt.extend(res2)
-                
-            res_allpkt.append(SuperTuple(res_subpkt, "dict"))
-
-        tmp = ("Subpackets", tuple(res_allpkt))
-        result.append(SuperTuple(tmp, "list", "subpacket"))
-        return ind - start
 
 
 # Test decoding
@@ -798,18 +372,15 @@ if __name__ == '__main__':
                         "ws_dissect_executable_path": executable_path,
                         "libwireshark_path": "/home/likayo/wireshark-local-1.12.3/lib",
                         })
-    import dm_endec_c
     i = 0
     for b in tests:
         packet = DMLogPacket(binascii.a2b_hex(b))
         d = packet.decode()
         print "> Packet #%d" % i
         print LOG_PACKET_NAME[d["type_id"]], d["timestamp"]
-        print d
-        print dm_endec_c.decode_log_packet(binascii.a2b_hex(b))
-        continue
-        print packet.decode_xml()
-        print packet.decode_json()
+        print sorted(d.items())
+        # print packet.decode_xml()
+        # print packet.decode_json()
         # print d.get("Msg", "XML msg not found.")
         i += 1
 
