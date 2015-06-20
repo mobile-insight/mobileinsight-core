@@ -2,6 +2,8 @@
 
 #include <string>
 
+static const int ESCAPE_XOR = 0x20;
+
 // Define the required data types
 typedef unsigned char      UINT8;
 typedef unsigned short     UINT16;
@@ -62,19 +64,19 @@ _calc_crc(UINT8 *data, int len, UINT16 crc)
 static std::string
 _encode_hdlc_frame(const char *payld, int length) {
     std::string retstr;
-    unsigned int crc16 = (unsigned int) _calc_crc((UINT8 *)payld, length, 0);
+    UINT16 crc16 = _calc_crc((UINT8 *)payld, length, 0);
     for (int i = 0; i < length + 2; i++) {
         char c;
         if (i < length)
             c = payld[i];
-        else if (i == length)
-            c = crc16 & 0x000000FF;
+        else if (i == length)   // little endian
+            c = crc16 & 0x00FF;
         else
-            c = (crc16 & 0x0000FF00) >> 8;
+            c = (crc16 & 0xFF00) >> 8;
 
         if (c == '\x7d' || c == '\x7e') {
             retstr.append(1, '\x7d');
-            retstr.append(1, c ^ 0x20);
+            retstr.append(1, c ^ ESCAPE_XOR);
         } else
             retstr.append(1, c);
     }
@@ -82,10 +84,73 @@ _encode_hdlc_frame(const char *payld, int length) {
     return retstr;
 }
 
+static std::string buffer;
+
+static void
+_feed_binary(const char *b, int length) {
+    buffer.append(b, length);
+}
+
+static void
+_unescape(std::string& frame) {
+    bool esc = false;
+    std::string output;
+    for (size_t i = 0; i < frame.size(); i++) {
+        if (esc) {
+            output.append(1, char(frame[i] ^ ESCAPE_XOR));
+            esc = false;
+        } else if (frame[i] == '\x7d') {
+            esc = true;
+        } else {
+            output.append(1, frame[i]);
+        }
+    }
+    frame = output;
+    return;
+}
+
+static bool
+_get_next_frame(std::string& output_frame, bool& crc_correct) {
+    size_t delim = buffer.find('\x7e');
+    if (delim == std::string::npos)
+        return false;
+    output_frame = buffer.substr(0, delim);
+    buffer.erase(0, delim + 1);
+
+    _unescape(output_frame);
+    if (output_frame.size() <= 2) {
+        crc_correct = false;
+        return true;
+    }
+    // little endian
+    UINT16 b1 = output_frame[output_frame.size() - 1] & 0xFF;
+    UINT16 b2 = output_frame[output_frame.size() - 2] & 0xFF;
+    UINT16 frame_crc16 = (b1 << 8) + b2;
+    output_frame.erase(output_frame.size() - 2);
+    
+    UINT16 crc16 = _calc_crc((UINT8 *) output_frame.c_str(), output_frame.size(), 0);
+
+    crc_correct = (frame_crc16 == crc16);
+    return true;
+}
+
+
 PyObject *
 dm_collector_c_encode_hdlc_frame (PyObject *self, PyObject *args) {
     const char *payld = NULL;
     int length = 0;
+
+    const char input [] = "\x7d\x5d\x02\x88\x13\xa5\x13\xc3\x40\x7e\x7d\x5d\x02\x7c\x15\x8c\x15\xc0\x02\x7e";
+    _feed_binary(input, sizeof(input) / sizeof(char) - 1);
+    std::string frame;
+    bool crc_correct;
+    while (_get_next_frame(frame, crc_correct)) {
+        printf("crc_correct: %d\n", int(crc_correct));
+        for (size_t i = 0; i < frame.size(); i++) {
+            printf("%02x ", frame[i] & 0xFF);
+        }
+        printf("\n");
+    }
 
     if (!PyArg_ParseTuple(args, "s#", &payld, &length))
         return NULL;
