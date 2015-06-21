@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Filename: lte_ue_analyzer.py
+# Filename: device_internal_analyzer.py
 """
 An analyzer for LTE user's internal events
 
@@ -8,11 +8,11 @@ Author: Yuanjie Li
 
 from analyzer import *
 
-#import pylab
-#from pylab import *
+# import pylab
+# from pylab import *
 from multiprocessing import Process,Pipe
 
-class LteUeAnalyzer(Analyzer):
+class DeviceInternalAnalyzer(Analyzer):
     """
     An analyzer for LTE user's internal events
     """

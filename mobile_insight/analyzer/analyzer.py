@@ -48,7 +48,7 @@ class Analyzer(Element):
         self.logger=logging.getLogger()
         self.logger.disabled = True
 
-    def set_log(self,logpath,loglevel):
+    def set_log(self,logpath,loglevel=logging.INFO):
         """
         Set the logging in analyzers.
         All the analyzers share the same logger.
