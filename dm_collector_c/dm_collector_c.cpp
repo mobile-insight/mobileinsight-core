@@ -147,10 +147,17 @@ initdm_collector_c(void)
 {
     PyObject *dm_collector_c = Py_InitModule("dm_collector_c", DmCollectorCMethods);
 
-    int n_types = sizeof(LogPacketTypes) / sizeof(const char *);
+    int n_types = LogPacketType_To_ID.size();
     PyObject *log_packet_types = PyTuple_New(n_types);
-    for (int i = 0; i < n_types; i++) {
-        PyTuple_SetItem(log_packet_types, i, Py_BuildValue("s", LogPacketTypes[i]));
+    int i = 0;
+    for (auto& pair: LogPacketType_To_ID) {
+        // There is no leak here, because PyTuple_SetItem steals reference
+        PyTuple_SetItem(log_packet_types, i, Py_BuildValue("s", pair.first.c_str()));
+        i++;
     }
+    // int n_types = sizeof(LogPacketTypes) / sizeof(const char *);
+    // for (int i = 0; i < n_types; i++) {
+    //     PyTuple_SetItem(log_packet_types, i, Py_BuildValue("s", LogPacketTypes[i]));
+    // }
     PyObject_SetAttrString(dm_collector_c, "log_packet_types", log_packet_types);
 }
