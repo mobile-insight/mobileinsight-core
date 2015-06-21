@@ -18,15 +18,11 @@ PY2EXE_OPTIONS = {
     "bundle_files": 1,      # 1: bundle everything
 }
 
-dm_endec_c_module = Extension('mobile_insight.dm_endec.dm_endec_c',
-                                sources = [ "dm_endec_c/dm_endec_c.cpp",
-                                            "dm_endec_c/log_packet.cpp",
-                                            "dm_endec_c/log_config.cpp",],
-                                extra_compile_args=["-std=c++11"])
-
 dm_collector_c_module = Extension('mobile_insight.trace_collector.dm_collector.dm_collector_c',
                                 sources = [ "dm_endec_c/dm_collector_c.cpp",
-                                            "dm_endec_c/hdlc.cpp",],
+                                            "dm_endec_c/hdlc.cpp",
+                                            "dm_endec_c/log_config.cpp",
+                                            "dm_endec_c/log_packet.cpp",],
                                 extra_compile_args=["-std=c++11"])
 
 "dm_endec_c/crc.cpp",
@@ -43,5 +39,5 @@ setup(
                 'mobile_insight.trace_collector',
                 'mobile_insight.dm_endec'],
     options = { 'py2exe' : PY2EXE_OPTIONS },
-    ext_modules = [dm_endec_c_module, dm_collector_c_module],
+    ext_modules = [dm_collector_c_module],
 )

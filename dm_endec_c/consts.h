@@ -1,6 +1,11 @@
 #ifndef __DM_ENDEC_C_CONSTS_H__
 #define __DM_ENDEC_C_CONSTS_H__
 
+#include <map>
+#include <string>
+
+typedef std::map<std::string, int> StringValue;
+
 enum LogPacketType {
     WCDMA_CELL_ID = 0x4127,
     WCDMA_Signaling_Messages = 0x412F,
@@ -33,11 +38,33 @@ static const char *LogPacketTypes [] = {
     "LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp"
 };
 
-enum LogConfigOp {
-    DISABLE = 0,
-    GET_RANGE = 1,
-    SET_MASK = 3,
-    GET_MASK = 4
+const StringValue LogPacketType_To_ID = {
+    {"WCDMA_CELL_ID",
+        WCDMA_CELL_ID},
+    {"WCDMA_Signaling_Messages",
+        WCDMA_Signaling_Messages},
+    {"LTE_RRC_OTA_Packet",
+        LTE_RRC_OTA_Packet},
+    {"LTE_RRC_MIB_Message_Log_Packet",
+        LTE_RRC_MIB_Message_Log_Packet},
+    {"LTE_RRC_Serv_Cell_Info_Log_Packet",
+        LTE_RRC_Serv_Cell_Info_Log_Packet},
+    {"LTE_NAS_ESM_Plain_OTA_Incoming_Message",
+        LTE_NAS_ESM_Plain_OTA_Incoming_Message},
+    {"LTE_NAS_ESM_Plain_OTA_Outgoing_Message",
+        LTE_NAS_ESM_Plain_OTA_Outgoing_Message},
+    {"LTE_NAS_EMM_Plain_OTA_Incoming_Message",
+        LTE_NAS_EMM_Plain_OTA_Incoming_Message},
+    {"LTE_NAS_EMM_Plain_OTA_Outgoing_Message",
+        LTE_NAS_EMM_Plain_OTA_Outgoing_Message},
+    {"LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results",
+        LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results},
+    {"LTE_ML1_IRAT_Measurement_Request",
+        LTE_ML1_IRAT_Measurement_Request},
+    {"LTE_ML1_Serving_Cell_Measurement_Result",
+        LTE_ML1_Serving_Cell_Measurement_Result},
+    {"LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp",
+        LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp}
 };
 
 #endif	// __DM_ENDEC_C_CONSTS_H__

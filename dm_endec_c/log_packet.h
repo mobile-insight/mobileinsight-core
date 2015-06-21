@@ -175,4 +175,7 @@ const Fmt LteRrcMibMessageLogPacketFmt [] = {
     {UINT, "DL BW", 1}
 };
 
+bool is_log_packet (const char *b, int length);
+PyObject * decode_log_packet (const char *b, int length);
+
 #endif  // __DM_ENDEC_C_LOG_PACKET_H__

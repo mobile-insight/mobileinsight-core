@@ -54,6 +54,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
     Py_INCREF(result);
     for (int i = 0; i < n_fmt; i++) {
         PyObject *decoded = NULL;
+        const char *p = b + offset + n_consumed;
         switch (fmt[i].type) {
         case UINT:
             {
@@ -61,16 +62,16 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 unsigned long long iiii = 0;
                 switch (fmt[i].len) {
                 case 1:
-                    ii = *((unsigned char *)(b + offset + n_consumed));
+                    ii = *((unsigned char *) p);
                     break;
                 case 2:
-                    ii = *((unsigned short *)(b + offset + n_consumed));
+                    ii = *((unsigned short *) p);
                     break;
                 case 4:
-                    ii = *((unsigned int *)(b + offset + n_consumed));
+                    ii = *((unsigned int *) p);
                     break;
                 case 8:
-                    iiii = *((unsigned long long *)(b + offset + n_consumed));
+                    iiii = *((unsigned long long *) p);
                     break;
                 default:
                     assert(false);
@@ -88,7 +89,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
         case PLMN:
             {
                 assert(fmt[i].len == 6);
-                const char *plmn = b + offset + n_consumed;
+                const char *plmn = p;
                 decoded = PyString_FromFormat("%d%d%d-%d%d%d",
                                                 plmn[0],
                                                 plmn[1],
@@ -106,7 +107,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 const double PER_USECOND = 52428800.0 / 1.0e6;
                 assert(fmt[i].len == 8);
                 // Convert to a Python long integer object
-                unsigned long long iiii = *((unsigned long long *)(b + offset + n_consumed));
+                unsigned long long iiii = *((unsigned long long *) p);
                 int seconds = int(double(iiii) / PER_SECOND);
                 int useconds = (double(iiii) / PER_USECOND) - double(seconds) * 1.0e6;
                 PyObject *epoch = PyDateTime_FromDateAndTime(1980, 1, 6, 0, 0, 0, 0);
@@ -122,7 +123,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
             {
                 // (0.0625 * x - 180) dBm
                 assert(fmt[i].len == 2);
-                short val = *((short *)(b + offset + n_consumed));
+                short val = *((short *) p);
                 decoded = Py_BuildValue("f", val * 0.0625 - 180);
                 n_consumed += fmt[i].len;
                 break;
@@ -132,7 +133,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
             {
                 // (0.0625 * x - 30) dB
                 assert(fmt[i].len == 2);
-                short val = *((short *)(b + offset + n_consumed));
+                short val = *((short *) p);
                 decoded = Py_BuildValue("f", val * 0.0625 - 30);
                 n_consumed += fmt[i].len;
                 break;
@@ -262,6 +263,7 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
 
             PyObject *t = NULL;
             PyObject *result_allcells = NULL;
+            // decode "Neighbor Cells"
             result_allcells = PyList_New(0);
             for (int i = 0; i < n_neighbor_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
@@ -277,6 +279,7 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
             Py_DECREF(t);
             Py_DECREF(result_allcells);
             
+            // decode "Detected Cells"
             result_allcells = PyList_New(0);
             for (int i = 0; i < n_detected_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
@@ -361,19 +364,19 @@ _decode_lte_ml1_subpkt(const char *b, int offset, int length,
     }
 }
 
+bool
+is_log_packet (const char *b, int length) {
+    return length >= 2 && b[0] == '\x10';
+}
+
 PyObject *
-dm_endec_c_decode_log_packet (PyObject *self, PyObject *args)
-{
+decode_log_packet (const char *b, int length) {
     if (PyDateTimeAPI == NULL)
         PyDateTime_IMPORT;
-    const char *b;
-    int offset = 0;
-    int length;
+
     PyObject *result = NULL;
     PyObject *item = NULL;
-
-    if (!PyArg_ParseTuple(args, "s#", &b, &length))
-        return NULL;
+    int offset = 0;
 
     // Parse Header
     result = PyList_New(0);
@@ -384,6 +387,7 @@ dm_endec_c_decode_log_packet (PyObject *self, PyObject *args)
     result = PyList_GetSlice(result, 2, 4);
     Py_DECREF(old_result);
     old_result = NULL;
+
 
     // Differentiate using type ID
     item = _search_result(result, "type_id");

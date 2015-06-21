@@ -1,18 +1,24 @@
 #include <Python.h>
 
 #include "consts.h"
+#include "log_config.h"
 
-#include <utility>
 #include <algorithm>
-#include <vector>
 
-typedef std::pair<char*, int> BinaryBuffer;
-
-static BinaryBuffer
-_encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
+int
+get_equip_id (int type_id) {
     const int EQUIP_ID_MASK = 0x0000F000;
-    const int ITEM_ID_MASK  = 0x00000FFF;
+    return (type_id & EQUIP_ID_MASK) >> 12;
+}
 
+int
+get_item_id (int type_id) {
+    const int ITEM_ID_MASK  = 0x00000FFF;
+    return type_id & ITEM_ID_MASK;
+}
+
+BinaryBuffer
+encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
     BinaryBuffer buf;
     buf.first = NULL;
     buf.second = 0;
@@ -32,12 +38,12 @@ _encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
             int equip_id = -1;
             int highest = -1;
             for (int id : type_ids) {
-                int e = (id & EQUIP_ID_MASK) >> 12;
+                int e = get_equip_id(id);
                 if (equip_id == -1) {
                     equip_id = e;
-                    highest = std::max(highest, id & ITEM_ID_MASK);
+                    highest = std::max(highest, get_item_id(id));
                 } else if (equip_id == e) {
-                    highest = std::max(highest, id & ITEM_ID_MASK);
+                    highest = std::max(highest, get_item_id(id));
                 } else {
                     equip_id = -1;
                     break;
@@ -60,7 +66,7 @@ _encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
                 for (int i = 0; i < mask_len; i++)
                     mask[i] = 0;
                 for (int id : type_ids) {
-                    int i = id & ITEM_ID_MASK;
+                    int i = get_item_id(id);
                     mask[i / 8] |= 1 << (i % 8);
                 }
             }
@@ -73,54 +79,4 @@ _encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
         break;
     }
     return buf;
-}
-
-PyObject *
-dm_endec_c_encode_log_config (PyObject *self, PyObject *args) {
-    std::vector<int> type_ids;
-    BinaryBuffer buf;
-    LogConfigOp op = DISABLE;
-    const char * op_name = NULL;
-    int n;
-    PyObject *sequence = NULL;
-    PyObject *retstr = NULL;
-
-    if (!PyArg_ParseTuple(args, "sO", &op_name, &sequence))
-        return NULL;
-    Py_INCREF(sequence);
-
-    // Check arguments
-    if (!PySequence_Check(sequence))
-        goto fail;
-    n = PySequence_Length(sequence);
-    if (strcmp(op_name, "DISABLE") == 0)
-        op = DISABLE;
-    else if (strcmp(op_name, "GET_RANGE") == 0)
-        op = GET_RANGE;
-    else if (strcmp(op_name, "SET_MASK") == 0)
-        op = SET_MASK;
-    else if (strcmp(op_name, "GET_MASK") == 0)
-        op = GET_MASK;
-    else
-        goto fail;
-
-    for (int i = 0; i < n; i++) {
-        PyObject *item = PySequence_GetItem(sequence, i);
-        if (item == NULL) 
-            goto fail;
-        if (PyInt_Check(item))
-            type_ids.push_back(int(PyInt_AsLong(item)));
-        Py_DECREF(item);    // Discard reference ownership
-    }
-    Py_DECREF(sequence);
-    buf = _encode_log_config(op, type_ids);
-    if (buf.first == NULL || buf.second == 0)
-        goto fail;
-    retstr = Py_BuildValue("s#", buf.first, buf.second);
-    delete buf.first;
-    return retstr;
-
-    fail:
-        Py_DECREF(sequence);
-        Py_RETURN_NONE;
 }

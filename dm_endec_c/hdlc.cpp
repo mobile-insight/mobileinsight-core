@@ -1,5 +1,7 @@
 #include <Python.h>
 
+#include "hdlc.h"
+
 #include <string>
 
 static const int ESCAPE_XOR = 0x20;
@@ -13,7 +15,7 @@ typedef unsigned long long UINT64;
 // Automatically generated CRC function
 // polynomial: 0x11021, bit reverse algorithm
 static UINT16
-_calc_crc(UINT8 *data, int len, UINT16 crc)
+calc_crc (UINT8 *data, int len, UINT16 crc)
 {
     static const UINT16 table[256] = {
     0x0000U,0x1189U,0x2312U,0x329BU,0x4624U,0x57ADU,0x6536U,0x74BFU,
@@ -61,10 +63,10 @@ _calc_crc(UINT8 *data, int len, UINT16 crc)
     return crc;
 }
 
-static std::string
-_encode_hdlc_frame(const char *payld, int length) {
+std::string
+encode_hdlc_frame (const char *payld, int length) {
     std::string retstr;
-    UINT16 crc16 = _calc_crc((UINT8 *)payld, length, 0);
+    UINT16 crc16 = calc_crc((UINT8 *)payld, length, 0);
     for (int i = 0; i < length + 2; i++) {
         char c;
         if (i < length)
@@ -86,13 +88,13 @@ _encode_hdlc_frame(const char *payld, int length) {
 
 static std::string buffer;
 
-static void
-_feed_binary(const char *b, int length) {
+void
+feed_binary (const char *b, int length) {
     buffer.append(b, length);
 }
 
 static void
-_unescape(std::string& frame) {
+unescape (std::string& frame) {
     bool esc = false;
     std::string output;
     for (size_t i = 0; i < frame.size(); i++) {
@@ -109,15 +111,16 @@ _unescape(std::string& frame) {
     return;
 }
 
-static bool
-_get_next_frame(std::string& output_frame, bool& crc_correct) {
+// Return: if there is new frame or not
+bool
+get_next_frame (std::string& output_frame, bool& crc_correct) {
     size_t delim = buffer.find('\x7e');
     if (delim == std::string::npos)
         return false;
     output_frame = buffer.substr(0, delim);
     buffer.erase(0, delim + 1);
 
-    _unescape(output_frame);
+    unescape(output_frame);
     if (output_frame.size() <= 2) {
         crc_correct = false;
         return true;
@@ -128,32 +131,8 @@ _get_next_frame(std::string& output_frame, bool& crc_correct) {
     UINT16 frame_crc16 = (b1 << 8) + b2;
     output_frame.erase(output_frame.size() - 2);
     
-    UINT16 crc16 = _calc_crc((UINT8 *) output_frame.c_str(), output_frame.size(), 0);
+    UINT16 crc16 = calc_crc((UINT8 *) output_frame.c_str(), output_frame.size(), 0);
 
     crc_correct = (frame_crc16 == crc16);
     return true;
-}
-
-
-PyObject *
-dm_collector_c_encode_hdlc_frame (PyObject *self, PyObject *args) {
-    const char *payld = NULL;
-    int length = 0;
-
-    const char input [] = "\x7d\x5d\x02\x88\x13\xa5\x13\xc3\x40\x7e\x7d\x5d\x02\x7c\x15\x8c\x15\xc0\x02\x7e";
-    _feed_binary(input, sizeof(input) / sizeof(char) - 1);
-    std::string frame;
-    bool crc_correct;
-    while (_get_next_frame(frame, crc_correct)) {
-        printf("crc_correct: %d\n", int(crc_correct));
-        for (size_t i = 0; i < frame.size(); i++) {
-            printf("%02x ", frame[i] & 0xFF);
-        }
-        printf("\n");
-    }
-
-    if (!PyArg_ParseTuple(args, "s#", &payld, &length))
-        return NULL;
-    std::string b = _encode_hdlc_frame(payld, length);
-    return Py_BuildValue("s#", b.c_str(), b.size());
 }
