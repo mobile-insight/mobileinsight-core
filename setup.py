@@ -19,13 +19,12 @@ PY2EXE_OPTIONS = {
 }
 
 dm_collector_c_module = Extension('mobile_insight.trace_collector.dm_collector.dm_collector_c',
-                                sources = [ "dm_endec_c/dm_collector_c.cpp",
-                                            "dm_endec_c/hdlc.cpp",
-                                            "dm_endec_c/log_config.cpp",
-                                            "dm_endec_c/log_packet.cpp",],
+                                sources = [ "dm_collector_c/dm_collector_c.cpp",
+                                            "dm_collector_c/hdlc.cpp",
+                                            "dm_collector_c/log_config.cpp",
+                                            "dm_collector_c/log_packet.cpp",],
                                 extra_compile_args=["-std=c++11"])
 
-"dm_endec_c/crc.cpp",
 setup(
     # setting for console program
     console = [
