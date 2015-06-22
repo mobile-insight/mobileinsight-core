@@ -24,7 +24,6 @@ except ImportError, e:
             return func
         return decorate
 
-import dm_endec_c
 from consts import *
 from ws_dissector import *
 
@@ -66,9 +65,8 @@ class DMLogPacket:
 
     _init_called = False
 
-    def __init__(self, b):
-        self._binary = b
-        self._decoded_list = None
+    def __init__(self, decoded_list):
+        self._decoded_list = decoded_list
         self._decoded_dict = None
 
     def decode(self):
@@ -97,11 +95,10 @@ class DMLogPacket:
             FormatError: this message has an unknown type
         """
         cls = self.__class__
-        if self._decoded_list is not None:
+        if self._decoded_dict is not None:
             return self._decoded_dict
 
         assert cls._init_called
-        self._decoded_list = dm_endec_c.decode_log_packet(self._binary)
         self._decoded_dict = cls._parse_internal_list("dict", self._decoded_list)
         return self._decoded_dict
 
@@ -196,7 +193,7 @@ class DMLogPacket:
             a string that contains the converted XML document.
         """
         cls = self.__class__
-        if self._decoded_list is None:
+        if self._decoded_dict is None:
             ignored = self.decode()
 
         return json.dumps(self._decoded_dict, cls=SuperEncoder)

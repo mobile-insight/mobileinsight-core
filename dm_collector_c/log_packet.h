@@ -1,10 +1,9 @@
 #ifndef __DM_COLLECTOR_C_LOG_PACKET_H__
 #define __DM_COLLECTOR_C_LOG_PACKET_H__
 
-#include <map>
+#include "consts.h"
 
 enum FmtType { UINT, QCDM_TIMESTAMP, PLMN, RSRP, RSRQ, SKIP };
-typedef std::map<int, const char*> ValueString;
 
 struct Fmt {
     FmtType type;

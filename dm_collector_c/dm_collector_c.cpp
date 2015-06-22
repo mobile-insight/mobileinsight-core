@@ -66,6 +66,7 @@ send_msg (PyObject *serial_port, const char *b, int length) {
     return true;
 }
 
+// Return: successful or not
 static PyObject *
 dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
     IdVector empty;
@@ -87,7 +88,7 @@ dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
         Py_DECREF(serial_port);
         Py_RETURN_FALSE;
     }
-    send_msg(serial_port, buf.first, buf.second);
+    (void) send_msg(serial_port, buf.first, buf.second);
     Py_DECREF(serial_port);
     Py_RETURN_TRUE;
 
@@ -150,7 +151,7 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
             Py_DECREF(serial_port);
             Py_RETURN_FALSE;
         }
-        send_msg(serial_port, buf.first, buf.second);
+        (void) send_msg(serial_port, buf.first, buf.second);
     }
     Py_DECREF(serial_port);
     Py_RETURN_TRUE;
@@ -161,6 +162,7 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
         return NULL;
 }
 
+// Return: None
 static PyObject *
 dm_collector_c_feed_binary (PyObject *self, PyObject *args) {
     const char *b;
@@ -171,6 +173,7 @@ dm_collector_c_feed_binary (PyObject *self, PyObject *args) {
     Py_RETURN_NONE;
 }
 
+// Return: decoded_list or None
 static PyObject *
 dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     std::string frame;

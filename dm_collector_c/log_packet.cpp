@@ -375,7 +375,6 @@ decode_log_packet (const char *b, int length) {
         PyDateTime_IMPORT;
 
     PyObject *result = NULL;
-    PyObject *item = NULL;
     int offset = 0;
 
     // Parse Header
@@ -388,13 +387,15 @@ decode_log_packet (const char *b, int length) {
     Py_DECREF(old_result);
     old_result = NULL;
 
-
     // Differentiate using type ID
-    item = _search_result(result, "type_id");
-    assert(PyInt_Check(item));
-    LogPacketType type_id = (LogPacketType) PyInt_AsLong(item);
-    Py_DECREF(item);
-    item = NULL;
+    LogPacketType type_id = (LogPacketType) _search_result_int(result, "type_id");
+    const char* type_name = NULL;
+    if (LogPacketTypeID_To_Name.count(type_id) > 0)
+        type_name = LogPacketTypeID_To_Name.at(type_id);
+    else
+        type_name = "Unsupported";
+    // There is no leak here
+    PyList_SetItem(result, 0, Py_BuildValue("(ss)", "type_id", type_name));
 
     switch (type_id) {
     case WCDMA_CELL_ID:
