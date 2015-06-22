@@ -1,5 +1,5 @@
-#ifndef __DM_ENDEC_C_LOG_PACKET_H__
-#define __DM_ENDEC_C_LOG_PACKET_H__
+#ifndef __DM_COLLECTOR_C_LOG_PACKET_H__
+#define __DM_COLLECTOR_C_LOG_PACKET_H__
 
 #include <map>
 
@@ -178,4 +178,4 @@ const Fmt LteRrcMibMessageLogPacketFmt [] = {
 bool is_log_packet (const char *b, int length);
 PyObject * decode_log_packet (const char *b, int length);
 
-#endif  // __DM_ENDEC_C_LOG_PACKET_H__
+#endif  // __DM_COLLECTOR_C_LOG_PACKET_H__

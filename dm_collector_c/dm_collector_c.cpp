@@ -10,11 +10,14 @@
 #include <algorithm>
 
 
+static PyObject *dm_collector_c_disable_logs (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_enable_logs (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_feed_binary (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_receive_log_packet (PyObject *self, PyObject *args);
 
 static PyMethodDef DmCollectorCMethods[] = {
+    {"disable_logs", dm_collector_c_disable_logs, METH_VARARGS,
+        "hahaha"},
     {"enable_logs", dm_collector_c_enable_logs, METH_VARARGS,
         "hahaha"},
     {"feed_binary", dm_collector_c_feed_binary, METH_VARARGS,
@@ -53,6 +56,47 @@ check_serial_port (PyObject *o) {
     return PyObject_HasAttrString(o, "read");
 }
 
+static bool
+send_msg (PyObject *serial_port, const char *b, int length) {
+    std::string frame = encode_hdlc_frame(b, length);
+    PyObject *o = PyObject_CallMethod(serial_port,
+                                        (char *) "write",
+                                        (char *) "s#", frame.c_str(), frame.size());
+    Py_DECREF(o);
+    return true;
+}
+
+static PyObject *
+dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
+    IdVector empty;
+    BinaryBuffer buf;
+    PyObject *serial_port = NULL;
+    if (!PyArg_ParseTuple(args, "O", &serial_port)) {
+        return NULL;
+    }
+    Py_INCREF(serial_port);
+
+    // Check arguments
+    if (!check_serial_port(serial_port)) {
+        PyErr_SetString(PyExc_TypeError, "\'port\' is not a serial port.");
+        goto raise_exception;
+    }
+
+    buf = encode_log_config(DISABLE, empty);
+    if (buf.first == NULL || buf.second == 0) {
+        Py_DECREF(serial_port);
+        Py_RETURN_FALSE;
+    }
+    send_msg(serial_port, buf.first, buf.second);
+    Py_DECREF(serial_port);
+    Py_RETURN_TRUE;
+
+    raise_exception:
+        Py_DECREF(serial_port);
+        return NULL;
+}
+
+// Return: successful or not
 static PyObject *
 dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
     IdVector type_ids;
@@ -64,6 +108,7 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "OO", &serial_port, &sequence)) {
         return NULL;
     }
+    Py_INCREF(serial_port);
     Py_INCREF(sequence);
 
     // Check arguments
@@ -105,12 +150,9 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
             Py_DECREF(serial_port);
             Py_RETURN_FALSE;
         }
-        std::string b = encode_hdlc_frame(buf.first, buf.second);
-        PyObject *o = PyObject_CallMethod(serial_port,
-                                            (char *) "write",
-                                            (char *) "s#", b.c_str(), b.size());
-        Py_DECREF(o);
+        send_msg(serial_port, buf.first, buf.second);
     }
+    Py_DECREF(serial_port);
     Py_RETURN_TRUE;
 
     raise_exception:
@@ -155,9 +197,5 @@ initdm_collector_c(void)
         PyTuple_SetItem(log_packet_types, i, Py_BuildValue("s", pair.first.c_str()));
         i++;
     }
-    // int n_types = sizeof(LogPacketTypes) / sizeof(const char *);
-    // for (int i = 0; i < n_types; i++) {
-    //     PyTuple_SetItem(log_packet_types, i, Py_BuildValue("s", LogPacketTypes[i]));
-    // }
     PyObject_SetAttrString(dm_collector_c, "log_packet_types", log_packet_types);
 }

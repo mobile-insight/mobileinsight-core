@@ -1,5 +1,5 @@
-#ifndef __DM_ENDEC_C_CONSTS_H__
-#define __DM_ENDEC_C_CONSTS_H__
+#ifndef __DM_COLLECTOR_C_CONSTS_H__
+#define __DM_COLLECTOR_C_CONSTS_H__
 
 #include <map>
 #include <string>
@@ -51,4 +51,4 @@ const StringValue LogPacketType_To_ID = {
         LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp}
 };
 
-#endif	// __DM_ENDEC_C_CONSTS_H__
+#endif	// __DM_COLLECTOR_C_CONSTS_H__

@@ -1,5 +1,5 @@
-#ifndef __DM_ENDEC_C_LOG_CONFIG_H__
-#define __DM_ENDEC_C_LOG_CONFIG_H__
+#ifndef __DM_COLLECTOR_C_LOG_CONFIG_H__
+#define __DM_COLLECTOR_C_LOG_CONFIG_H__
 
 #include "consts.h"
 
@@ -20,4 +20,4 @@ int get_equip_id (int type_id);
 int get_item_id (int type_id);
 BinaryBuffer encode_log_config (LogConfigOp op, const IdVector& type_ids);
 
-#endif  // __DM_ENDEC_C_LOG_CONFIG_H__
+#endif  // __DM_COLLECTOR_C_LOG_CONFIG_H__
