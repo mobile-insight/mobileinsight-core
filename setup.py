@@ -35,8 +35,7 @@ setup(
     ],
     packages = ['mobile_insight',
                 'mobile_insight.analyzer',
-                'mobile_insight.trace_collector',
-                'mobile_insight.dm_endec'],
+                'mobile_insight.trace_collector'],
     options = { 'py2exe' : PY2EXE_OPTIONS },
     ext_modules = [dm_collector_c_module],
 )
