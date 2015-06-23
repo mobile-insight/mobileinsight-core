@@ -118,7 +118,7 @@ class DMCollector(TraceCollector):
                         # print ""
                         # Send event to analyzers
                         event = Event(  timeit.default_timer(),
-                                        dm_endec.consts.LOG_PACKET_NAME[d["type_id"]],
+                                        d["type_id"],
                                         packet)
                         self.send(event)
                     except FormatError, e:
