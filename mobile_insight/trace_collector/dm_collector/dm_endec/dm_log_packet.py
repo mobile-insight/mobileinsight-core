@@ -58,7 +58,114 @@ class DMLogPacket:
     _init_called = False
 
     def __init__(self, decoded_list):
-        self._decoded_list = decoded_list
+        cls = self.__class__
+        self._decoded_list = cls._preparse_internal_list(decoded_list)
+
+    @classmethod
+    @static_var("wcdma_sib_types", {    0: "RRC_MIB",
+                                        1: "RRC_SIB1",
+                                        3: "RRC_SIB3",
+                                        7: "RRC_SIB7",
+                                        12: "RRC_SIB12",
+                                        31: "RRC_SIB19",
+                                        })
+    def _preparse_internal_list(cls, decoded_list):
+        lst = []
+        for i in range(len(decoded_list)):
+            field_name, val, type_str = decoded_list[i]
+            if type_str.startswith("raw_msg/"):
+                msg_type = type_str[len("raw_msg/"):]
+                decoded = cls._decode_msg(msg_type, val)
+                xmls = [decoded,]
+
+                if msg_type == "RRC_DL_BCCH_BCH":
+                    sib_types = cls._preparse_internal_list.wcdma_sib_types
+                    xml = ET.fromstring(decoded)
+                    sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
+                    if sibs:
+                        # deal with a list of complete SIBs
+                        for complete_sib in sibs:
+                            field = complete_sib.find("field[@name='rrc.sib_Type']")
+                            sib_id = int(field.get("show"))
+                            field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
+                            sib_msg = binascii.a2b_hex(field.get("value"))
+                            if sib_id in sib_types:
+                                decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
+                                xmls.append(decoded)
+                                # print sib_types[sib_id]
+                            else:
+                                print "Unknown RRC SIB Type: %d" % sib_id
+                    else:
+                        # deal with a segmented SIB
+                        sib_segment = xml.find(".//field[@name='rrc.firstSegment_element']")
+                        if sib_segment is None:
+                            sib_segment = xml.find(".//field[@name='rrc.subsequentSegment_element']")
+                        if sib_segment is None:
+                            sib_segment = xml.find(".//field[@name='rrc.lastSegmentShort_element']")
+                        if sib_segment is not None:
+                            field = sib_segment.find("field[@name='rrc.sib_Type']")
+                            sib_id = int(field.get("show"))
+                            print "RRC SIB Segment(type: %d) not handled" % sib_id
+                xx = cls._wrap_decoded_xml(xmls)
+                lst.append( (field_name, xx, "msg") )
+            else:
+                lst.append(decoded_list[i])
+        return lst
+
+    @classmethod
+    def _parse_internal_list(cls, out_type, decoded_list):
+        if out_type == "dict":
+            output_d = dict()
+        elif out_type == "list":
+            output_lst = []
+        elif out_type.startswith("xml/"):
+            tag_name = out_type[len("xml/"):]
+            output_xml = ET.Element(tag_name)
+
+        for field_name, val, type_str in decoded_list:
+            if not type_str:    # default type
+                xx = val
+            elif type_str == "msg":
+                xx = val
+            elif type_str == "dict":
+                if out_type.startswith("xml/"):
+                    xx = cls._parse_internal_list("xml/dict", val)
+                else:
+                    xx = cls._parse_internal_list("dict", val)
+            elif type_str == "list":
+                if out_type.startswith("xml/"):
+                    xx = cls._parse_internal_list("xml/list", val)
+                else:
+                    xx = cls._parse_internal_list("list", val)
+
+            if out_type == "dict":
+                output_d[field_name] = xx
+            elif out_type == "list":
+                output_lst.append(xx)
+            elif out_type.startswith("xml/"):
+                # Create tag
+                if out_type == "xml/list":
+                    sub_tag = ET.SubElement(output_xml, "item")
+                elif out_type == "xml/dict":
+                    sub_tag = ET.SubElement(output_xml, "pair", {"key": field_name})
+
+                if not type_str:
+                    xx = str(xx)
+                    sub_tag.text = xx
+                else:
+                    if type_str == "msg":
+                        xx = ET.fromstring(xx)
+                        sub_tag.set("type", "list")
+                    else:
+                        sub_tag.set("type", type_str)
+                    sub_tag.append(xx)
+
+        if out_type == "dict":
+            return output_d
+        elif out_type == "list":
+            return tuple(output_lst)
+        elif out_type.startswith("xml/"):
+            return output_xml
 
     def decode(self):
         """
@@ -87,103 +194,8 @@ class DMLogPacket:
         """
         cls = self.__class__
 
-        assert cls._init_called
         d = cls._parse_internal_list("dict", self._decoded_list)
         return d
-
-    @classmethod
-    @static_var("wcdma_sib_types", {    0: "RRC_MIB",
-                                        1: "RRC_SIB1",
-                                        3: "RRC_SIB3",
-                                        7: "RRC_SIB7",
-                                        12: "RRC_SIB12",
-                                        31: "RRC_SIB19",
-                                        })
-    def _parse_internal_list(cls, out_type, decoded_list):
-        if out_type == "dict":
-            d = dict()
-        elif out_type == "list":
-            lst = []
-        elif out_type.startswith("xml/"):
-            tag_name = out_type[len("xml/"):]
-            xml = ET.Element(tag_name)
-
-        for field_name, val, type_str in decoded_list:
-            if not type_str:    # default type
-                xx = val
-            elif type_str.startswith("raw_msg/"):
-                msg_type = type_str[len("raw_msg/"):]
-                decoded = cls._decode_msg(msg_type, val)
-                xmls = [decoded,]
-
-                if msg_type == "RRC_DL_BCCH_BCH":
-                    sib_types = cls._parse_internal_list.wcdma_sib_types
-                    xml = ET.fromstring(decoded)
-                    sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
-                    if sibs:
-                        # deal with a list of complete SIBs
-                        for complete_sib in sibs:
-                            field = complete_sib.find("field[@name='rrc.sib_Type']")
-                            sib_id = int(field.get("show"))
-                            field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
-                            sib_msg = binascii.a2b_hex(field.get("value"))
-                            if sib_id in sib_types:
-                                decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
-                                xmls.append(decoded)
-                                # print sib_types[sib_id]
-                            else:
-                                print "Unknown RRC SIB Type: %d" % sib_id
-                    else:
-                        # deal with a segmented SIB
-                        sib_segment = xml.find(".//field[@name='rrc.firstSegment_element']")
-                        if sib_segment is None:
-                            sib_segment = xml.find(".//field[@name='rrc.subsequentSegment_element']")
-                        if sib_segment is None:
-                            sib_segment = xml.find(".//field[@name='rrc.lastSegmentShort_element']")
-                        if sib_segment is not None:
-                            field = sib_segment.find("field[@name='rrc.sib_Type']")
-                            sib_id = int(field.get("show"))
-                            print "RRC SIB Segment(type: %d) not handled" % sib_id
-                xx = cls._wrap_decoded_xml(xmls)
-            elif type_str == "dict":
-                if out_type.startswith("xml/"):
-                    xx = cls._parse_internal_list("xml/dict", val)
-                else:
-                    xx = cls._parse_internal_list("dict", val)
-            elif type_str == "list":
-                if out_type.startswith("xml/"):
-                    xx = cls._parse_internal_list("xml/list", val)
-                else:
-                    xx = cls._parse_internal_list("list", val)
-
-            if out_type == "dict":
-                d[field_name] = xx
-            elif out_type == "list":
-                lst.append(xx)
-            elif out_type.startswith("xml/"):
-                # Preprocessing
-                if out_type == "xml/list":
-                    sub_tag = ET.SubElement(xml, "item")
-                elif out_type == "xml/dict":
-                    sub_tag = ET.SubElement(xml, "pair", {"key": field_name})
-
-                if not type_str:
-                    xx = str(xx)
-                    sub_tag.text = xx
-                else:
-                    if type_str.startswith("raw_msg/"):
-                        xx = ET.fromstring(xx)
-                        sub_tag.set("type", "list")
-                    else:
-                        sub_tag.set("type", type_str)
-                    sub_tag.append(xx)
-
-        if out_type == "dict":
-            return d
-        elif out_type == "list":
-            return tuple(lst)
-        elif out_type.startswith("xml/"):
-            return xml
 
     def decode_xml(self):
         """
@@ -206,8 +218,8 @@ class DMLogPacket:
             a string that contains the converted XML document.
         """
         cls = self.__class__
-        d = self.decode()
 
+        d = self.decode()
         return json.dumps(d, cls=SuperEncoder)
 
     @classmethod
@@ -252,6 +264,8 @@ class DMLogPacket:
         """
         Decode standard message using WSDissector.
         """
+        assert cls._init_called
+
         s = WSDissector.decode_msg(msg_type, b)
         return s
 
