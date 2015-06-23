@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
+# Filename: hdlc_frame.py
 """
-hdlc_parser.py
 Define HdlcParser class that deals with HDLC frames in the raw logs read from
 the diagnostic serial port.
 If executed as a script, it translates a raw log into a new log, each item of 
@@ -29,12 +29,8 @@ class HdlcParser:
         """
         Feed the parser with a chunk of HDLC encapsulated data with timestamp.
 
-        Returns:
-            None
-
-        Args:
-            ts: the timestamp of this chunk of binary data.
-            binary: a chunk of binary data.
+        :param ts: the timestamp of this chunk of binary data.
+        :param binary: a chunk of binary data.
         """
         b_lst = binary.split("\x7e")
         # print repr(b_lst)

@@ -4,8 +4,8 @@ import os
 import sys
 
 #Import MobileInsight modules
-from monitor import *
 from analyzer import *
+from monitor import *
 
 #Wireshark library path
 LIBWIRESHARK_PATH = "/usr/local/lib"

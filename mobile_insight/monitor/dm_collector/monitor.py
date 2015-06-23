@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
+# Filename: monitor.py
 """
-monitor.py
 COM port monitor. Work with SAMSUNG phone and com0com, a Null-modem emulator.
 To learn about com0com, see http://com0com.sourceforge.net/ .
 

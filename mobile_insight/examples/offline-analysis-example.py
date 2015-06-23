@@ -4,11 +4,8 @@ import os
 import sys
 
 #Import MobileInsight modules
-from monitor import *
-from analyzer import *
-
-#Wireshark library path
-LIBWIRESHARK_PATH = "/usr/local/lib"
+from monitor import Replayer
+from analyzer import LteRrcAnalyzer
 
 if __name__ == "__main__":
     

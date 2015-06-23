@@ -54,7 +54,7 @@ class Analyzer(Element):
         All the analyzers share the same logger.
 
         :param logpath: the file path to save the log
-        :param loglevel: the level of the log
+        :param loglevel: the level of the log. The default value is logging.INFO.
         """
         self.__logpath=logpath
         self.__loglevel=loglevel

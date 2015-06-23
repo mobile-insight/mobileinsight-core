@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
+# Filename: sender.py
 """
-sender.py
-
 Tool to send commands to a Qualcomm phone.
 
 Author: Jiayao Li, Samson Richard Wong

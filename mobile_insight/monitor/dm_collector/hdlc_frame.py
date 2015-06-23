@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
+# Filename: hdlc_frame.py
 """
-hdlc_frame.py
 Define HdlcFrame, an easy-to-use HDLC-like frame constructor.
 
 Author: Jiayao Li
@@ -24,8 +24,7 @@ class HdlcFrame:
         """
         Initialize a frame given payload.
 
-        Args:
-            payld: a binary string
+        :param payld: a binary string
         """
         s = self._calc_checksum(payld)
         fcs = struct.pack("<H", s)  # little endian
@@ -36,11 +35,19 @@ class HdlcFrame:
     def binary(self):
         """
         Return the binary form of the frame.
+
+        :returns: the binary form of the frame.
         """
         return self._binary
 
     @classmethod
     def _calc_checksum(cls, payld):
+        """
+        Calculate the checksum of a binary message.
+
+        :param payld: the binary message
+        :returns: the checksum of the message
+        """
         crc16 = crcmod.predefined.Crc('x-25')
         for c in payld:
             crc16.update(c)

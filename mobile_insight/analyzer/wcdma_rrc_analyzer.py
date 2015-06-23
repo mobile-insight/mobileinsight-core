@@ -10,8 +10,6 @@ import xml.etree.ElementTree as ET
 from analyzer import *
 from msg_dump import *
 import timeit
-from copy import deepcopy
-
 
 __all__=["WcdmaRrcAnalyzer"]
 

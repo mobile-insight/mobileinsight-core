@@ -1,12 +1,10 @@
-#! /usr/bin/env python
+#!/usr/bin/python
+# Filename: dm_collector.py
 """
-dm_collector.py
-
-A QCDM trace collector.
-Currently it's a re-package of automator
+A monitor for 2G/3G/4G mobile network protocols (RRC/EMM/ESM). 
+It currently supports mobile devices with Qualcomm chipsets.
 
 Author: Jiayao Li
-
 """
 
 __all__ = ["DMCollector"]
@@ -33,16 +31,18 @@ def print_reply(payload, crc_correct):
 
 class DMCollector(Monitor):
 
+    """
+    A monitor for 2G/3G/4G mobile network protocols (RRC/EMM/ESM). 
+    It currently supports mobile devices with Qualcomm chipsets.
+    """
+
     def __init__(self, prefs):
         """
         Configure this class with user preferences.
-
         This method should be called before any actual decoding.
 
-        Args:
-            prefs: a dict that should contain the following items:
-                ws_dissect_executable_path
-                libwireshark_path
+        param prefs: configurations that contain *ws_dissect_executable_path* and *libwireshark_path*
+        type prefs: dictionary
         """
         Monitor.__init__(self)
 
@@ -52,12 +52,57 @@ class DMCollector(Monitor):
         self._type_ids = []
 
     def set_serial_port(self, phy_ser_name):
+        """
+        Configure the serial port that dumps messages
+
+        :param phy_ser_name: the serial port name (path)
+        :type phy_ser_name: string
+        """
         self.phy_ser_name = phy_ser_name
 
     def set_baudrate(self, rate):
+        """
+        Configure the baudrate of the serial port
+
+        :param rate: the baudrate of the port
+        :type rate: int
+        """
         self.phy_baudrate = rate
 
     def enable_log(self, type_name):
+        """
+        Enable the messages to be monitored.
+        Currently DMCollector supports the following logs:
+
+        WCDMA_CELL_ID
+
+        WCDMA_Signaling_Messages
+
+        LTE_RRC_OTA_Packet
+
+        LTE_RRC_MIB_Message_Log_Packet
+
+        LTE_RRC_Serv_Cell_Info_Log_Packet
+
+        LTE_NAS_ESM_Plain_OTA_Incoming_Message
+
+        LTE_NAS_ESM_Plain_OTA_Outgoing_Message
+
+        LTE_NAS_EMM_Plain_OTA_Incoming_Message
+
+        LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+
+        LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results
+
+        LTE_ML1_IRAT_Measurement_Request
+
+        LTE_ML1_Serving_Cell_Measurement_Result
+
+        LTE_ML1_Connected_Mode_Neighbor_Meas_Req/Resp
+
+        :param type_name: the message type to be monitored
+        :type type_name: string
+        """
         if isinstance(type_name, str):
             type_name = [type_name]
         for n in type_name:
@@ -67,6 +112,9 @@ class DMCollector(Monitor):
                 self._type_ids.append(dm_endec.consts.LOG_PACKET_ID[n])
 
     def _generate_type_dict(self):
+        """
+        Create a dictionary that maps message type to the binary code
+        """
         assert len(self._type_ids) > 0
         type_ids = set(self._type_ids)
         s = set([DMLogConfigMsg.get_equip_id(i) for i in type_ids])
@@ -76,7 +124,10 @@ class DMCollector(Monitor):
 
     def run(self):
         """
-        Start collecting the QXDM traces.
+        Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
+
+        :except KeyboardInterrupt: if the user interrupts the monitoring (e.g. ctrl-C)
+        :except RuntimeError: if unexpected runtime errors occur 
         """
         assert self.phy_ser_name
 
