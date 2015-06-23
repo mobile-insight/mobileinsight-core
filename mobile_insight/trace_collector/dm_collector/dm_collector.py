@@ -87,7 +87,7 @@ class DMCollector(TraceCollector):
         print "Supported type:", self.supported_types
 
         try:
-            Open COM ports
+            # Open COM ports
             phy_ser = serial.Serial(self.phy_ser_name,
                                     baudrate=self.phy_baudrate,
                                     timeout=.5)
