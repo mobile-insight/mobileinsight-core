@@ -395,7 +395,7 @@ decode_log_packet (const char *b, int length) {
     else
         type_name = "Unsupported";
     // There is no leak here
-    PyList_SetItem(result, 0, Py_BuildValue("(ss)", "type_id", type_name));
+    PyList_SetItem(result, 0, Py_BuildValue("(sss)", "type_id", type_name, ""));
 
     switch (type_id) {
     case WCDMA_CELL_ID:
@@ -418,13 +418,13 @@ decode_log_packet (const char *b, int length) {
         offset += _decode_lte_rrc_ota(b, offset, length, result);
         break;
 
-    case LTE_RRC_MIB_Message_Log_Packet:
+    case LTE_RRC_Serv_Cell_Info_Log_Packet:
         offset += _decode_by_fmt(LteRrcServCellInfoLogPacketFmt,
                                     sizeof(LteRrcServCellInfoLogPacketFmt) / sizeof(Fmt),
                                     b, offset, length, result);
         break;
 
-    case LTE_RRC_Serv_Cell_Info_Log_Packet:
+    case LTE_RRC_MIB_Message_Log_Packet:
         offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt,
                                     sizeof(LteRrcMibMessageLogPacketFmt) / sizeof(Fmt),
                                     b, offset, length, result);
