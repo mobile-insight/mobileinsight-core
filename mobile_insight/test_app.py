@@ -68,20 +68,29 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Initialize trace collector
-    # src = DMCollector(prefs={
-    #                     "command_files_path": os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH),
-    #                     "ws_dissect_executable_path": WS_DISSECT_EXECUTABLE_PATH,
-    #                     "libwireshark_path": LIBWIRESHARK_PATH,
-    #                     })
-    # src.set_serial_port(options.phy_serial_name)
-    # src.set_baudrate(options.phy_baudrate)
+    src = DMCollector(prefs={
+                        "command_files_path": os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH),
+                        "ws_dissect_executable_path": WS_DISSECT_EXECUTABLE_PATH,
+                        "libwireshark_path": LIBWIRESHARK_PATH,
+                        })
+    src.set_serial_port(options.phy_serial_name)
+    src.set_baudrate(options.phy_baudrate)
 
-    src = PickleCollector()
-    src.set_input_path("/Users/yuanjieli/Desktop/verizon-mentone-lollicup.replay")
+    src.enable_log("LTE_RRC_OTA_Packet")
+    src.enable_log("LTE_RRC_Serv_Cell_Info_Log_Packet")
+    src.enable_log("WCDMA_Signaling_Messages")
+    src.enable_log("WCDMA_CELL_ID")
+
+
+    # src = PickleCollector()
+    # src.set_input_path("/Users/yuanjieli/Desktop/verizon-mentone-lollicup.replay")
     ###############################################
 
-    # lte_rrc_analyzer = LteRrcAnalyzer()
-    # lte_rrc_analyzer.set_source(src)
+    lte_rrc_analyzer = LteRrcAnalyzer()
+    lte_rrc_analyzer.set_source(src)
+
+    wcdma_rrc_analyzer = WcdmaRrcAnalyzer()
+    wcdma_rrc_analyzer.set_source(src)
 
     # wcdma_rrc_analyzer = WcdmaRrcAnalyzer()
     # wcdma_rrc_analyzer.set_source(src)
@@ -104,8 +113,8 @@ if __name__ == "__main__":
     # pickle_dumper.set_source(src)
     # pickle_dumper.set_output_path("/Users/yuanjieli/Desktop/hong-kong-roaming.replay")
 
-    loop_detect = HandoffLoopAnalyzer()
-    loop_detect.set_source(src)
-    loop_detect.set_log("/Users/yuanjieli/Desktop/verizon-mentone-lollicup.txt",logging.INFO)
+    # loop_detect = HandoffLoopAnalyzer()
+    # loop_detect.set_source(src)
+    # loop_detect.set_log("/Users/yuanjieli/Desktop/verizon-mentone-lollicup.txt",logging.INFO)
 
     src.run()
