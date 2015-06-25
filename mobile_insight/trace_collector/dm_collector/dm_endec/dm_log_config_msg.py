@@ -63,15 +63,21 @@ class DMLogConfigMsg(object):
 
 # Test encoding
 if __name__ == "__main__":
-    x = DMLogConfigMsg("DISABLE")
-    print " ".join(["%02x" % ord(c) for c in x.binary()])
-
-    x = DMLogConfigMsg("SET_MASK", [0x1001, 0x1007, 0x1008])
-    print " ".join(["%02x" % ord(c) for c in x.binary()])
-    x = DMLogConfigMsg("SET_MASK", [0xB0C0, 0xB179, 0xB187, 0xB193, 0xB195])
-    print " ".join(["%02x" % ord(c) for c in x.binary()])
-    x = DMLogConfigMsg("SET_MASK", [0x4125, 0x4126, 0x4127, 0x4128,
-                                    0x4129, 0x412B, 0x412F])
-    print " ".join(["%02x" % ord(c) for c in x.binary()])
-    x = DMLogConfigMsg("SET_MASK", [0x7130, 0x7131, 0x7132, 0x7133, 0x7134, 0x7135, 0x7136, 0x7137, 0x7138, 0x7139, 0x713A, 0x713B, 0x713C, 0x713D, 0x713E, 0x7150, 0x7151, 0x7152, 0x7153, 0x7154, 0x7155, 0x7156, 0x7157, 0x7158, 0x7159, 0x7B3A])
-    print " ".join(["%02x" % ord(c) for c in x.binary()])
+    tests = [   ("DISABLE", []),
+                ("SET_MASK", [0x1001, 0x1007, 0x1008]),
+                ("SET_MASK", [0xB0C0, 0xB179, 0xB187, 0xB193, 0xB195]),
+                ("SET_MASK", [  0x4125, 0x4126, 0x4127, 0x4128,
+                                0x4129, 0x412B, 0x412F]),
+                ("SET_MASK", [0x7130, 0x7131, 0x7132, 0x7133, 0x7134, 0x7135, 0x7136, 0x7137, 0x7138, 0x7139, 0x713A, 0x713B, 0x713C, 0x713D, 0x713E, 0x7150, 0x7151, 0x7152, 0x7153, 0x7154, 0x7155, 0x7156, 0x7157, 0x7158, 0x7159, 0x7B3A]),
+                ]
+    import dm_endec_c
+    for op_name, type_id_list in tests:
+        if type_id_list:
+            x = DMLogConfigMsg(op_name, type_id_list)
+        else:
+            x = DMLogConfigMsg(op_name)
+        b1 = x.binary();
+        b2 = dm_endec_c.encode_log_config(op_name, type_id_list)
+        print " ".join(["%02x" % ord(c) for c in b1])
+        print " ".join(["%02x" % ord(c) for c in b2])
+        print ("Pass" if b1 == b2 else "Failed")

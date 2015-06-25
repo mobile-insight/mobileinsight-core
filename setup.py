@@ -1,27 +1,41 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-from distutils.core import setup
-import py2exe
+from distutils.core import setup, Extension
+try:
+    import py2exe
+    use_py2exe = True
+except ImportError:
+    use_py2exe = False
 
-# This is an temporary workaround to deal with importing errors using py2exe.
-if "py2exe" in sys.argv:
-    sys.path.append("./automator")
-    sys.path.append("./win_dep")
+if use_py2exe:
+    # This is an temporary workaround to deal with importing errors using py2exe.
+    if "py2exe" in sys.argv:
+        sys.path.append("./mobile_insight")
+        sys.path.append("./win_dep")
 
 PY2EXE_OPTIONS = {
     "bundle_files": 1,      # 1: bundle everything
 }
 
+dm_collector_c_module = Extension('mobile_insight.trace_collector.dm_collector.dm_collector_c',
+                                sources = [ "dm_collector_c/dm_collector_c.cpp",
+                                            "dm_collector_c/hdlc.cpp",
+                                            "dm_collector_c/log_config.cpp",
+                                            "dm_collector_c/log_packet.cpp",],
+                                extra_compile_args=["-std=c++11"])
+
 setup(
     # setting for console program
     console = [
         {
-            "script": "automator/automator.py",
+            "script": "mobile_insight/automator.py",
             # "icon_resources": [(1, "resources/icon.ico")],
         },
     ],
+    packages = ['mobile_insight',
+                'mobile_insight.analyzer',
+                'mobile_insight.trace_collector'],
     options = { 'py2exe' : PY2EXE_OPTIONS },
-    data_files = [("command_files", ["command_files/cmd_dict.txt",
-                                     "command_files/example_cmds.txt",])]
+    ext_modules = [dm_collector_c_module],
 )

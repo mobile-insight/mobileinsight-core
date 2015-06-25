@@ -18,10 +18,8 @@ import serial
 import sys
 import timeit
 
-from sender import sendRecv, recvMessage
-from hdlc_parser import HdlcParser
-from dm_endec import DMLogPacket, DMLogConfigMsg, FormatError
-import dm_endec.consts
+from dm_endec import *
+import dm_collector_c
 
 
 def print_reply(payload, crc_correct):
@@ -48,8 +46,11 @@ class DMCollector(Monitor):
 
         self.phy_baudrate = 9600
         self.phy_ser_name = None
+        self.supported_types = set(dm_collector_c.log_packet_types)
         self._prefs = prefs
-        self._type_ids = []
+        self._type_names = []
+        # Initialize Wireshark dissector
+        DMLogPacket.init(self._prefs)
 
     def set_serial_port(self, phy_ser_name):
         """
@@ -106,10 +107,10 @@ class DMCollector(Monitor):
         if isinstance(type_name, str):
             type_name = [type_name]
         for n in type_name:
-            if n not in dm_endec.consts.LOG_PACKET_ID:
+            if n not in self.supported_types:
                 raise ValueError("Unsupported log packet type: %s" % n)
             else:
-                self._type_ids.append(dm_endec.consts.LOG_PACKET_ID[n])
+                self._type_names.append(n)
 
     def _generate_type_dict(self):
         """
@@ -134,38 +135,33 @@ class DMCollector(Monitor):
         print "PHY COM: %s" % self.phy_ser_name
         print "PHY BAUD RATE: %d" % self.phy_baudrate
 
-        try:
-            # Initialize Wireshark dissector
-            DMLogPacket.init(self._prefs)
+        print "Supported type:", self.supported_types
 
+        try:
             # Open COM ports
             phy_ser = serial.Serial(self.phy_ser_name,
                                     baudrate=self.phy_baudrate,
                                     timeout=.5)
-            parser = HdlcParser()
+            # phy_ser = open("hahaha.txt", "r+b")
 
             # Disable logs
-            payload, crc_correct = sendRecv(parser, phy_ser, DMLogConfigMsg("DISABLE").binary())
-            print_reply(payload, crc_correct)
+            print "Disable logs"
+            dm_collector_c.disable_logs(phy_ser)
             
             # Enable logs
-            self._generate_type_dict()
-            for equip_id, type_ids in self._type_id_dict.items():
-                print "Enabled: ", ["0x%04x" % i for i in type_ids]
-                x = DMLogConfigMsg("SET_MASK", type_ids)
-                payload, crc_correct = sendRecv(parser, phy_ser, x.binary())
-                print_reply(payload, crc_correct)
+            print "Enable logs"
+            dm_collector_c.enable_logs(phy_ser, self._type_names)
 
             # Read log packets from serial port and decode their contents
             while True:
-                # cmd = 0x10 for log packets
-                cmd = "%02x" % dm_endec.consts.COMMAND_CODE["DIAG_CMD_LOG"]
-                payload, crc_correct = recvMessage(parser, phy_ser, cmd)
-                if payload:
+                s = phy_ser.read(64)
+                dm_collector_c.feed_binary(s)
+                decoded = dm_collector_c.receive_log_packet()
+                if decoded:
                     # print_reply(payload, crc_correct)
                     try:
                         # Note that the beginning 2 bytes are skipped.
-                        packet = DMLogPacket(payload[2:])
+                        packet = DMLogPacket(decoded)
                         d = packet.decode()
                         # xml = packet.decode_xml()
                         # print hex(d["type_id"]), dm_endec.consts.LOG_PACKET_NAME[d["type_id"]], d["timestamp"]
@@ -173,7 +169,7 @@ class DMCollector(Monitor):
                         # print ""
                         # Send event to analyzers
                         event = Event(  timeit.default_timer(),
-                                        dm_endec.consts.LOG_PACKET_NAME[d["type_id"]],
+                                        d["type_id"],
                                         packet)
                         self.send(event)
                     except FormatError, e:
@@ -184,8 +180,8 @@ class DMCollector(Monitor):
         except (KeyboardInterrupt, RuntimeError), e:
             print "\n\n%s Detected: Disabling all logs" % type(e).__name__
             # Disable logs
-            payload, crc_correct = sendRecv(parser, phy_ser, DMLogConfigMsg("DISABLE").binary())
-            print_reply(payload, crc_correct)
+            dm_collector_c.disable_logs(phy_ser)
+            phy_ser.close()
             sys.exit(e)
         except Exception, e:
             sys.exit(e)
