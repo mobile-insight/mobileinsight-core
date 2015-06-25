@@ -21,18 +21,18 @@ First install [Python 2.7](https://www.python.org/) if you do not have them.
 
 Second, MobileInsight builds on top of pyserial and crcmod, so please install both libraries:
 
-  pip install pyserial
-  pip install crcmod 
+    pip install pyserial
+    pip install crcmod
 
 If you need visualization for some results (e.g., plotting the signal strength), 
 please install matplotlib:
-  
-  pip install matplotlib 
+
+    pip install matplotlib
+
 
 Third, MobileInsight relies on Wireshark to decode the 3G/4G messages. Please install [Wireshark](https://www.wireshark.org/download.html) with either binary executables or source code. 
 
 Last, download MobileInsight [here](download.html), and unpack the code::
 
-  tar -x mobile_insight.tar.bz2
-
+    tar -x mobile_insight.tar.bz2
 
