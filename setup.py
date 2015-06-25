@@ -18,7 +18,7 @@ PY2EXE_OPTIONS = {
     "bundle_files": 1,      # 1: bundle everything
 }
 
-dm_collector_c_module = Extension('mobile_insight.trace_collector.dm_collector.dm_collector_c',
+dm_collector_c_module = Extension('mobile_insight.monitor.dm_collector.dm_collector_c',
                                 sources = [ "dm_collector_c/dm_collector_c.cpp",
                                             "dm_collector_c/hdlc.cpp",
                                             "dm_collector_c/log_config.cpp",
@@ -35,7 +35,7 @@ setup(
     ],
     packages = ['mobile_insight',
                 'mobile_insight.analyzer',
-                'mobile_insight.trace_collector'],
+                'mobile_insight.monitor'],
     options = { 'py2exe' : PY2EXE_OPTIONS },
     ext_modules = [dm_collector_c_module],
 )
