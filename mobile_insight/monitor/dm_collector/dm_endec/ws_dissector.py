@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 ws_dissector.py
-Define WSDissector class.
+A wrapper class of the ws_dissector program.
 
 Author: Jiayao Li
 """
@@ -16,9 +16,8 @@ import subprocess
 
 class WSDissector:
     """
-    A wrapper class of the ws_dissector program, which calls functions 
-    in libwireshark to dissect many types of messages, e.g. 3GPP 
-    standardized messages.
+    A wrapper class of the ws_dissector program, which calls libwireshark
+    to dissect many types of messages, e.g. 3GPP standardized messages.
 
     This wrapper communicates with the ws_dissector program using a 
     trivial TLV-formatted protocol named AWW (Automator Wireshark Wrapper), 
@@ -27,15 +26,16 @@ class WSDissector:
 
     # Maps all supported message types to their AWW protocol number.
     # Keep consistent with ws_dissector/packet-aww.cpp
+    """Test comment for SUPPORTED_TYPES"""
     SUPPORTED_TYPES = {
                         # WCDMA: 100~199
-                        #   WCDMA RRC: 100~149
+                        # - WCDMA RRC: 100~149
                         "RRC_UL_CCCH":  100,
                         "RRC_UL_DCCH":  101,
                         "RRC_DL_CCCH":  102,
                         "RRC_DL_DCCH":  103,
                         "RRC_DL_BCCH_BCH":  104,
-                        #   WCDMA RRC SysInfo: 150~199
+                        # - WCDMA RRC SysInfo: 150~199
                         "RRC_MIB":  150,
                         "RRC_SIB1": 151,
                         "RRC_SIB3": 153,
@@ -57,11 +57,13 @@ class WSDissector:
     def init_proc(cls, executable_path, ws_library_path):
         """
         Launch the ws_dissector program. Must be called before any actual 
-        decoding.
+        decoding, and should be called only once.
 
-        Args:
-            executable_path: the path of ws_dissect program.
-            ws_library_path: a directory that contains libwireshark.
+        :param executable_path: the path to ws_dissector program
+        :type executable_path: string
+
+        :param ws_library_path: a directory that contains libwireshark
+        :type ws_library_path: string
         """
 
         if cls._init_proc_called:
@@ -82,10 +84,13 @@ class WSDissector:
         """
         Decode a binary message of type msg_type.
 
-        Args:
-            msg_type: a string identifying the type of the message to be 
-                decoded
-            b: binary data
+        :param msg_type: the type of the message to be decoded
+        :type msg_type: string
+
+        :param b: binary data to be decoded
+        :type b: string
+
+        :returns: an XML string
         """
         assert cls._init_proc_called
         if msg_type not in cls.SUPPORTED_TYPES:

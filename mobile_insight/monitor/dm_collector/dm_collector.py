@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # Filename: dm_collector.py
 """
-A monitor for 2G/3G/4G mobile network protocols (RRC/EMM/ESM). 
-It currently supports mobile devices with Qualcomm chipsets.
+dm_collector.py
+A monitor for 3G/4G mobile network protocols (RRC/EMM/ESM).
 
 Author: Jiayao Li
 """
@@ -22,31 +22,26 @@ from dm_endec import *
 import dm_collector_c
 
 
-def print_reply(payload, crc_correct):
-    if payload:
-        print "reply: " + binascii.b2a_hex(payload)
-        print "crc_correct: " + str(crc_correct)
-
 class DMCollector(Monitor):
-
     """
-    A monitor for 2G/3G/4G mobile network protocols (RRC/EMM/ESM). 
+    A monitor for 3G/4G mobile network protocols (RRC/EMM/ESM).
     It currently supports mobile devices with Qualcomm chipsets.
     """
+
+    SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
 
     def __init__(self, prefs):
         """
         Configure this class with user preferences.
         This method should be called before any actual decoding.
 
-        param prefs: configurations that contain *ws_dissect_executable_path* and *libwireshark_path*
-        type prefs: dictionary
+        :param prefs: configurations that contain *ws_dissect_executable_path* and *libwireshark_path*
+        :type prefs: dictionary
         """
         Monitor.__init__(self)
 
         self.phy_baudrate = 9600
         self.phy_ser_name = None
-        self.supported_types = set(dm_collector_c.log_packet_types)
         self._prefs = prefs
         self._type_names = []
         # Initialize Wireshark dissector
@@ -101,41 +96,30 @@ class DMCollector(Monitor):
 
         LTE_ML1_Connected_Mode_Neighbor_Meas_Req/Resp
 
-        :param type_name: the message type to be monitored
-        :type type_name: string
+        :param type_name: the message type(s) to be monitored
+        :type type_name: string or list
+
+        :except ValueError: unsupported message type encountered
         """
+        cls = self.__class__
         if isinstance(type_name, str):
             type_name = [type_name]
         for n in type_name:
-            if n not in self.supported_types:
-                raise ValueError("Unsupported log packet type: %s" % n)
+            if n not in cls.SUPPORTED_TYPES:
+                raise ValueError("Unsupported log message type: %s" % n)
             else:
                 self._type_names.append(n)
-
-    def _generate_type_dict(self):
-        """
-        Create a dictionary that maps message type to the binary code
-        """
-        assert len(self._type_ids) > 0
-        type_ids = set(self._type_ids)
-        s = set([DMLogConfigMsg.get_equip_id(i) for i in type_ids])
-        self._type_id_dict = {i: [] for i in s}
-        for type_id in type_ids:
-            self._type_id_dict[DMLogConfigMsg.get_equip_id(type_id)].append(type_id)
 
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
 
-        :except KeyboardInterrupt: if the user interrupts the monitoring (e.g. ctrl-C)
-        :except RuntimeError: if unexpected runtime errors occur 
+        This function does NOT return or raise any exception.
         """
         assert self.phy_ser_name
 
         print "PHY COM: %s" % self.phy_ser_name
         print "PHY BAUD RATE: %d" % self.phy_baudrate
-
-        print "Supported type:", self.supported_types
 
         try:
             # Open COM ports
@@ -158,13 +142,11 @@ class DMCollector(Monitor):
                 dm_collector_c.feed_binary(s)
                 decoded = dm_collector_c.receive_log_packet()
                 if decoded:
-                    # print_reply(payload, crc_correct)
                     try:
-                        # Note that the beginning 2 bytes are skipped.
                         packet = DMLogPacket(decoded)
                         d = packet.decode()
+                        # print d["type_id"], d["timestamp"]
                         # xml = packet.decode_xml()
-                        # print hex(d["type_id"]), dm_endec.consts.LOG_PACKET_NAME[d["type_id"]], d["timestamp"]
                         # print xml
                         # print ""
                         # Send event to analyzers

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 dm_log_packet.py
-Define DMLogPacket class.
+Defines DMLogPacket class.
 
 Author: Jiayao Li
 """
@@ -58,6 +58,12 @@ class DMLogPacket:
     _init_called = False
 
     def __init__(self, decoded_list):
+        """
+        Initialize a log packet.
+
+        :param decoded_list: output of *dm_collector_c* library
+        :type decoded_list: list
+        """
         cls = self.__class__
         self._decoded_list = cls._preparse_internal_list(decoded_list)
 
@@ -114,6 +120,16 @@ class DMLogPacket:
 
     @classmethod
     def _parse_internal_list(cls, out_type, decoded_list):
+        """
+        Parse the internal list to create different types of output.
+
+        :param out_type: can be "dict", "list", "xml/dict" or "xml/list"
+        :type out_type: string
+
+        :param decoded_list: output of dm_collector_c library
+        :type decoded_list: list
+        """
+
         if out_type == "dict":
             output_d = dict()
         elif out_type == "list":

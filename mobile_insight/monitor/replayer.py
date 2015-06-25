@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Filename: replayer.py
 """
-A replayer of messages saved by MsgSerializer. It is implemented with Python pickle. 
+A replayer of messages saved by MsgSerializer.
 
 Author: Jiayao Li
 """
@@ -16,7 +16,7 @@ from monitor import Monitor
 
 class Replayer(Monitor):
     """
-    A replayer of messages saved by MsgSerializer.
+    A replayer of messages saved by MsgSerializer. It is implemented using Python pickle format.
     """
 
     def __init__(self):
@@ -42,7 +42,7 @@ class Replayer(Monitor):
                 self.send(event)
 
         except EOFError, e:
-            # print "Pickle file EOF."
+            # Pickle file EOF
             pass
         except Exception, e:
             sys.exit(e)

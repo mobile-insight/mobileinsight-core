@@ -10,9 +10,9 @@ Author: Yuanjie Li
 from element import Element, Event
 
 class Monitor(Element):
-    '''
+    """
     An abstraction for mobile network monitors
-    '''
+    """
 
     def __init__(self):
         # No source for Monitor
@@ -44,14 +44,16 @@ class Monitor(Element):
         """
         Enable the messages to be monitored.
 
-        :param type_name: the message type to be monitored
-        :type type_name: string
+        :param type_name: the message type(s) to be monitored
+        :type type_name: string or list
         """
         pass
 
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
+
+        This method should be overloaded in every subclass.
         """
         #send() is used to pass message to analyzers
         #EVERY derived collector SHOULD overload this function to generate msg (event) 
