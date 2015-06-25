@@ -45,7 +45,7 @@ class FormatError(RuntimeError):
 
 class DMLogPacket:
     """
-    QCDM log packet decoder.
+    DM log packet decoder.
 
     A log packet contains a header that specifies the packet type and 
     timestamp, and a payload field that store useful information of a 
@@ -185,7 +185,7 @@ class DMLogPacket:
 
     def decode(self):
         """
-        Decode a QCDM log packet.
+        Decode a DM log packet.
 
         :returns: a Python dict object that looks like::
         
@@ -220,7 +220,7 @@ class DMLogPacket:
         cls = self.__class__
 
         xml = cls._parse_internal_list("xml/dict", self._decoded_list)
-        xml.tag = "qcdm_log_packet"
+        xml.tag = "dm_log_packet"
         return ET.tostring(xml)
 
     def decode_json(self):
