@@ -187,9 +187,8 @@ class DMLogPacket:
         """
         Decode a QCDM log packet.
 
-        Returns:
-            a Python dict object that looks like:
-
+        :returns: a Python dict object that looks like::
+        
             {
                 "type_id": "LTE_RRC_OTA_Packet",
                 "timestamp": datetime.datetime(......),
@@ -205,8 +204,7 @@ class DMLogPacket:
                     \"\"\",
             }
 
-        Raises:
-            FormatError: this message has an unknown type
+        :raises FormatError: this message has an unknown type
         """
         cls = self.__class__
 
@@ -217,8 +215,7 @@ class DMLogPacket:
         """
         Decode the message and convert to a standard XML document.
 
-        Returns:
-            a string that contains the converted XML document.
+        :returns: a string that contains the converted XML document.
         """
         cls = self.__class__
 
@@ -230,8 +227,7 @@ class DMLogPacket:
         """
         Decode the message and convert to a standard JSON dictionary.
 
-        Returns:
-            a string that contains the converted XML document.
+        :returns: a string that contains the converted JSON document.
         """
         cls = self.__class__
 
@@ -245,8 +241,8 @@ class DMLogPacket:
 
         This method should be called before any actual decoding.
 
-        Args:
-            prefs: a dict storing the preferences.
+        :param prefs: a dict storing the preferences
+        :type prefs: dict
         """
         if cls._init_called:
             return
@@ -288,13 +284,13 @@ class DMLogPacket:
     @classmethod
     def _wrap_decoded_xml(cls, xmls):
         """
-        Return an XML string that looks like:
+        :returns: an XML string that looks like::
 
-        \"\"\"<msg>
-            <packet>...</packet>
-            <packet>...</packet>
-            <packet>...</packet>
-        </msg>\"\"\"
+            <msg>
+                <packet>...</packet>
+                <packet>...</packet>
+                <packet>...</packet>
+            </msg>
         """
         if isinstance(xmls, str):
             xmls = [xmls]
