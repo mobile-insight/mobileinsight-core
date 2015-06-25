@@ -4,8 +4,8 @@ import os
 import sys
 
 #Import MobileInsight modules
-from monitor import Replayer
-from analyzer import LteRrcAnalyzer
+from monitor import DMCollector
+from analyzer import MsgLogger,MsgSerializer
 
 
 #Wireshark library path
@@ -28,10 +28,12 @@ if __name__ == "__main__":
     #Enable 3G/4G messages to be monitored. Here we enable RRC (radio resource control) monitoring
     src.enable_log("LTE_RRC_OTA_Packet")
     src.enable_log("WCDMA_Signaling_Messages")
+    src.enable_log("WCDMA_CELL_ID")
 
     #Dump the messages to std I/O. Comment it if it is not needed.
     dumper = MsgLogger()
     dumper.set_source(src)
+    dumper.set_decoding(MsgLogger.XML)  #decode the message as xml
 
     #Save the messages to disk. Comment it if it is not needed.
     serializer = MsgSerializer()
