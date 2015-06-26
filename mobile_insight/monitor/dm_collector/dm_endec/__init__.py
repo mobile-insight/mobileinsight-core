@@ -1,6 +1,6 @@
 """
 dm_endec
-A module that encodes or decodes QCDM packets.
+A module that encodes or decodes DM packets.
 
 Author: Jiayao Li
 """
