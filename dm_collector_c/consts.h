@@ -23,7 +23,6 @@ enum LogPacketType {
     LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp = 0xB195
 };
 
-
 //Yuanjie: the following comments are my suggestions for message type name replacement
 //No change if the comments are missing
 
@@ -56,7 +55,6 @@ const StringValue LogPacketType_To_ID = {
         LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp}
 };
 
-// TODO: remove duplicate
 const ValueString LogPacketTypeID_To_Name = {
     {WCDMA_CELL_ID,
         "WCDMA_CELL_ID"},

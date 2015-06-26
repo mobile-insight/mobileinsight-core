@@ -20,11 +20,9 @@ from analyzer import *
 # Define some constants
 IN_EXE = hasattr(sys, "frozen") # true if the code is being run in an exe
 if IN_EXE:
-    PROGRAM_PATH   = sys.executable
-    COMMAND_FILES_PATH = "./command_files"
+    PROGRAM_PATH = sys.executable
 else:
-    PROGRAM_PATH   = sys.argv[0]
-    COMMAND_FILES_PATH = "../command_files"
+    PROGRAM_PATH = sys.argv[0]
 PROGRAM_DIR_PATH = os.path.dirname(os.path.abspath(PROGRAM_PATH))
 WS_DISSECT_EXECUTABLE_PATH = os.path.join(PROGRAM_DIR_PATH, "../ws_dissector/ws_dissector")
 LIBWIRESHARK_PATH = "/usr/local/lib"
@@ -69,7 +67,6 @@ if __name__ == "__main__":
 
     # Initialize trace collector
     src = DMCollector(prefs={
-                        "command_files_path": os.path.join(PROGRAM_DIR_PATH, COMMAND_FILES_PATH),
                         "ws_dissect_executable_path": WS_DISSECT_EXECUTABLE_PATH,
                         "libwireshark_path": LIBWIRESHARK_PATH,
                         })
