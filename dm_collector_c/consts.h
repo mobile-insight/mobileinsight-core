@@ -23,36 +23,6 @@ enum LogPacketType {
     LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp = 0xB195
 };
 
-const StringValue LogPacketType_To_ID = {
-    {"WCDMA_CELL_ID",
-        WCDMA_CELL_ID},
-    {"WCDMA_Signaling_Messages",
-        WCDMA_Signaling_Messages},
-    {"LTE_RRC_OTA_Packet",
-        LTE_RRC_OTA_Packet},
-    {"LTE_RRC_MIB_Message_Log_Packet",
-        LTE_RRC_MIB_Message_Log_Packet},
-    {"LTE_RRC_Serv_Cell_Info_Log_Packet",
-        LTE_RRC_Serv_Cell_Info_Log_Packet},
-    {"LTE_NAS_ESM_Plain_OTA_Incoming_Message",
-        LTE_NAS_ESM_Plain_OTA_Incoming_Message},
-    {"LTE_NAS_ESM_Plain_OTA_Outgoing_Message",
-        LTE_NAS_ESM_Plain_OTA_Outgoing_Message},
-    {"LTE_NAS_EMM_Plain_OTA_Incoming_Message",
-        LTE_NAS_EMM_Plain_OTA_Incoming_Message},
-    {"LTE_NAS_EMM_Plain_OTA_Outgoing_Message",
-        LTE_NAS_EMM_Plain_OTA_Outgoing_Message},
-    {"LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results",
-        LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results},
-    {"LTE_ML1_IRAT_Measurement_Request",
-        LTE_ML1_IRAT_Measurement_Request},
-    {"LTE_ML1_Serving_Cell_Measurement_Result",
-        LTE_ML1_Serving_Cell_Measurement_Result},
-    {"LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp",
-        LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp}
-};
-
-// TODO: remove duplicate
 const ValueString LogPacketTypeID_To_Name = {
     {WCDMA_CELL_ID,
         "WCDMA_CELL_ID"},

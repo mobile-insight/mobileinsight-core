@@ -24,7 +24,6 @@ except ImportError, e:
             return func
         return decorate
 
-from consts import *
 from ws_dissector import *
 
 
