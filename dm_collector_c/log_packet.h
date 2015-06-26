@@ -18,18 +18,20 @@ const Fmt LogPacketHeaderFmt [] = {
     {QCDM_TIMESTAMP, "timestamp", 8}
 };
 
+//Yuanjie: the following comments are my suggestions for field name replacement
+//No change if the comments are missing
 
 const Fmt WcdmaCellIdFmt [] = {
-    {UINT, "UTRA UL Absolute RF channel number", 4},
-    {UINT, "UTRA DL Absolute RF channel number", 4},
-    {UINT, "Cell identity (28-bits)", 4},
-    {UINT, "URA to use in case of overlapping URAs", 1},
+    {UINT, "UTRA UL Absolute RF channel number", 4},    //Uplink RF channel number
+    {UINT, "UTRA DL Absolute RF channel number", 4},    //Download RF channel number
+    {UINT, "Cell identity (28-bits)", 4},               //Cell ID
+    {UINT, "URA to use in case of overlapping URAs", 1}, // UTRA registration area (overlapping URAs)
     {SKIP, NULL, 2},    // Unknown yet
-    {UINT, "Allowed Call Access", 1},
-    {UINT, "PSC", 2},
-    {PLMN, "PLMN", 6},
-    {UINT, "LAC id", 4},
-    {UINT, "RAC id", 4}
+    {UINT, "Allowed Call Access", 1},   //Allowed call access
+    {UINT, "PSC", 2},   //PSC
+    {PLMN, "PLMN", 6},  //PLMN
+    {UINT, "LAC id", 4},    //Location area code
+    {UINT, "RAC id", 4}     //routing area code
 };
 
 // ------------------------------------------------------------
@@ -50,14 +52,14 @@ const ValueString WcdmaSignalingMsgChannelType = {
 // ------------------------------------------------------------
 // LTE_RRC_OTA_Packet
 const Fmt LteRrcOtaPacketFmt [] = {
-    {UINT, "Pkt Version", 1},
-    {UINT, "RRC Release Number", 1},
-    {UINT, "Major/minor", 1},
-    {UINT, "Radio Bearer ID", 1},
-    {UINT, "Physical Cell ID", 2},
-    {UINT, "Freq", 2},
-    {UINT, "SysFrameNum/SubFrameNum", 2},
-    {UINT, "PDU Number", 1}
+    {UINT, "Pkt Version", 1},           //version
+    {UINT, "RRC Release Number", 1},    //RRC release version
+    {UINT, "Major/minor", 1},   
+    {UINT, "Radio Bearer ID", 1},       //no change
+    {UINT, "Physical Cell ID", 2},      //Cell ID
+    {UINT, "Freq", 2},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1}             //PDU number
     // continued in LteRrcOtaPacketFmt_v2 or LteRrcOtaPacketFmt_v7
 };
 
@@ -101,18 +103,18 @@ const Fmt LteMl1CmlifmrFmt [] = {
 
 const Fmt LteMl1CmlifmrFmt_v3_Header [] = {
     {UINT, "E-ARFCN", 2},
-    {UINT, "Serving Physical Cell ID", 2},
-    {UINT, "Sub-frame Number", 2},
-    {RSRP, "Serving Filtered RSRP(dBm)", 2},
+    {UINT, "Serving Physical Cell ID", 2},  //serving cell ID
+    {UINT, "Sub-frame Number", 2},          
+    {RSRP, "Serving Filtered RSRP(dBm)", 2}, //Filtered RSRP (dBm)
     {SKIP, NULL, 2},    // Duplicated
-    {RSRQ, "Serving Filtered RSRQ(dB)", 2},
+    {RSRQ, "Serving Filtered RSRQ(dB)", 2}, //Filtered RSRQ (dBm)
     {SKIP, NULL, 2},    // Duplicated
     {UINT, "Number of Neighbor Cells", 1},
     {UINT, "Number of Detected Cells", 1}
 };
 
 const Fmt LteMl1CmlifmrFmt_v3_Neighbor_Cell [] = {
-    {UINT, "Physical Cell ID", 2},
+    {UINT, "Physical Cell ID", 2},  //cell ID
     {RSRP, "Filtered RSRP(dBm)", 2},
     {SKIP, NULL, 2},    // Duplicated
     {RSRQ, "Filtered RSRQ(dB)", 2},
@@ -120,7 +122,7 @@ const Fmt LteMl1CmlifmrFmt_v3_Neighbor_Cell [] = {
 };
 
 const Fmt LteMl1CmlifmrFmt_v3_Detected_Cell [] = {
-    {UINT, "Physical Cell ID", 4},
+    {UINT, "Physical Cell ID", 4},  //cell ID
     {UINT, "SSS Corr Value", 4},
     {UINT, "Reference Time", 8}
 };
@@ -145,33 +147,33 @@ const ValueString LteMl1Subpkt_SubpktType = {
 // Serving_Cell_Measurement_Result
 const Fmt LteMl1SubpktFmt_v1_Scmr_v4 [] = {
     {UINT, "E-ARFCN", 2},
-    {UINT, "Physical Cell ID", 2}
+    {UINT, "Physical Cell ID", 2}   //cell ID
 };
 
 
 const Fmt LteRrcServCellInfoLogPacketFmt [] = {
     {UINT, "Version", 1},
-    {UINT, "Physical Cell ID", 2},
-    {UINT, "DL FREQ",2},
-    {UINT, "UL FREQ",2},
-    {UINT, "DL BW", 1},
-    {UINT, "UL BW", 1},
-    {UINT, "Cell Identity", 4},
-    {UINT, "TAC", 2},
-    {UINT, "Band Indicator", 4},
-    {UINT, "MCC", 2},
-    {UINT, "MCC Digit", 1},
-    {UINT, "MNC", 2},
-    {UINT, "Allowed Access", 1}
+    {UINT, "Physical Cell ID", 2},  //Physical cell ID
+    {UINT, "DL FREQ",2},    //Downlink frequency
+    {UINT, "UL FREQ",2},    //Uplink frequency
+    {UINT, "DL BW", 1},     //Downlink bandwidth
+    {UINT, "UL BW", 1},     //Uplink bandwidth
+    {UINT, "Cell Identity", 4}, //cell ID
+    {UINT, "TAC", 2},   //Tracking area code
+    {UINT, "Band Indicator", 4},    //Band indicator
+    {UINT, "MCC", 2},   //MCC
+    {UINT, "MCC Digit", 1}, //MCC digit
+    {UINT, "MNC", 2},   //MNC
+    {UINT, "Allowed Access", 1} //Allowed access
 };
 
 const Fmt LteRrcMibMessageLogPacketFmt [] = {
     {UINT, "Version", 1},
-    {UINT, "Physical Cell ID", 2},
-    {UINT, "Freq", 2},
+    {UINT, "Physical Cell ID", 2},  //cell ID
+    {UINT, "Freq", 2},  frequency
     {UINT, "SFN", 2},
     {UINT, "Number of Antenna", 1},
-    {UINT, "DL BW", 1}
+    {UINT, "DL BW", 1}  //downlink bandwidth
 };
 
 bool is_log_packet (const char *b, int length);
