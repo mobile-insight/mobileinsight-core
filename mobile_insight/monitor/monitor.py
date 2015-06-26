@@ -7,7 +7,7 @@ All specific trace collectors (DM, RIL, pcap, Replayer, etc.) derive from it.
 Author: Yuanjie Li
 """
 
-from element import Element, Event
+from ..element import Element, Event
 
 class Monitor(Element):
     """

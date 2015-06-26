@@ -7,7 +7,7 @@ including low-level msg filter and high-level analyzer
 Author: Yuanjie Li
 """
 
-from element import Element, Event
+from ..element import Element, Event
 import logging
 
 def setup_logger(logger_name, log_file, level=logging.INFO):

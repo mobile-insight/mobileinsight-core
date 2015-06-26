@@ -4,8 +4,8 @@ import os
 import sys
 
 #Import MobileInsight modules
-from monitor import Replayer
-from analyzer import LteRrcAnalyzer
+from mobile_insight.monitor import Replayer
+from mobile_insight.analyzer import LteRrcAnalyzer
 
 if __name__ == "__main__":
     

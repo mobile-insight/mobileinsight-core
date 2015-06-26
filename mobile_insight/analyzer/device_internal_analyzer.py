@@ -6,7 +6,7 @@ An analyzer for LTE user's internal events
 Author: Yuanjie Li
 """
 
-from analyzer import *
+from .analyzer import *
 
 # import pylab
 # from pylab import *

@@ -4,8 +4,8 @@ import os
 import sys
 
 #Import MobileInsight modules
-from monitor import DMCollector
-from analyzer import MsgLogger,MsgSerializer
+from mobile_insight.monitor import DMCollector
+from mobile_insight.analyzer import MsgLogger,MsgSerializer
 
 
 #Wireshark library path
@@ -19,8 +19,7 @@ if __name__ == "__main__":
 
     # Initialize a 3G/4G monitor
     src = DMCollector(prefs={
-                        "command_files_path": "../command_files",
-                        "ws_dissect_executable_path": "../ws_dissector/ws_dissector",
+                        "ws_dissect_executable_path": "./ws_dissector/ws_dissector",
                         "libwireshark_path": LIBWIRESHARK_PATH})
     src.set_serial_port(sys.argv[1]) #the serial port to collect the traces
     src.set_baudrate(int(sys.argv[2])) #the baudrate of the port
