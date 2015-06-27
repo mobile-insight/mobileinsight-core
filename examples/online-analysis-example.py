@@ -17,9 +17,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Initialize a 3G/4G monitor
-    src = DMCollector(prefs={
-                        "ws_dissect_executable_path": "./ws_dissector/ws_dissector",
-                        "libwireshark_path": LIBWIRESHARK_PATH})
+    src = DMCollector(prefs={"libwireshark_path": LIBWIRESHARK_PATH})
     src.set_serial_port(sys.argv[1]) #the serial port to collect the traces
     src.set_baudrate(int(sys.argv[2])) #the baudrate of the port
 

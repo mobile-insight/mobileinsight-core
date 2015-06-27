@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+recursive-include docs *
+recursive-include examples *.py
+recursive-include mobile_insight *.py *.so *.m README
+recursive-include ws_dissector ws_dissector
+prune dm_collector_c 
+prune docs/docs

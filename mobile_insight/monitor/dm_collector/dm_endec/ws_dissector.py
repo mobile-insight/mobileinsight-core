@@ -12,6 +12,7 @@ import os
 import binascii
 import struct
 import subprocess
+import sys
 
 
 class WSDissector:
@@ -54,18 +55,17 @@ class WSDissector:
     _init_proc_called = False
 
     @classmethod
-    def init_proc(cls, executable_path, ws_library_path):
+    # def init_proc(cls, executable_path, ws_library_path):
+    def init_proc(cls, ws_library_path):
         """
         Launch the ws_dissector program. Must be called before any actual 
         decoding, and should be called only once.
-
-        :param executable_path: the path to ws_dissector program
-        :type executable_path: string
 
         :param ws_library_path: a directory that contains libwireshark
         :type ws_library_path: string
         """
 
+        executable_path = sys.exec_prefix+"/mobile_insight/ws_dissector/ws_dissector"
         if cls._init_proc_called:
             return
         env = dict(os.environ)
@@ -128,9 +128,8 @@ if __name__ == "__main__":
                 ("RRC_SIB12", "b38111d024541a42a0"),
                 ("RRC_SIB19", "41a1001694e49470"),
                 ]
-    executable_path = os.path.join(os.path.abspath(os.getcwd()),
-                                    "../../ws_dissector/ws_dissector")
-    WSDissector.init_proc(executable_path, "/home/likayo/wireshark-local-1.12.3/lib")
+
+    WSDissector.init_proc(executable_path, "/usr/local/lib")
 
     for typ, b in tests:
         print WSDissector.decode_msg(typ, binascii.a2b_hex(b))
