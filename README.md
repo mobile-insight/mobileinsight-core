@@ -32,7 +32,9 @@ please install matplotlib:
 
 Third, MobileInsight relies on Wireshark to decode the 3G/4G messages. Please install [Wireshark](https://www.wireshark.org/download.html) with either binary executables or source code. 
 
-Last, download MobileInsight [here](download.html), and unpack the code::
+Last, download MobileInsight [here](http://metro.cs.ucla.edu/mobile_insight//download.html), and unpack the code::
 
-    tar -x mobile_insight.tar.bz2
+    tar -zxvf MobileInsight-1.0.tar.gz
+    cd MobileInsight-1.0
+    python setup.py install
 
