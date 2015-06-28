@@ -35,6 +35,6 @@ setup(
                 ],
     package_dir = {'mobile_insight.monitor.dm_collector':'mobile_insight/monitor/dm_collector'},
     package_data = {'mobile_insight.monitor.dm_collector':['./dm_collector_c.so']},
-    data_files = [('mobile_insight/ws_dissector/',['ws_dissector/ws_dissector'])],
+    data_files = [(sys.exec_prefix+'mobile_insight/ws_dissector/',['ws_dissector/ws_dissector'])],
     options = { 'py2exe' : PY2EXE_OPTIONS },
 )
