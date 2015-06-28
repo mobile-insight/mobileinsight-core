@@ -19,33 +19,22 @@ PY2EXE_OPTIONS = {
 }
 
 
-
-dm_collector_c_module = Extension('mobile_insight.monitor.dm_collector.dm_collector_c',
-                                sources = [ "dm_collector_c/dm_collector_c.cpp",
-                                            "dm_collector_c/hdlc.cpp",
-                                            "dm_collector_c/log_config.cpp",
-                                            "dm_collector_c/log_packet.cpp",],
-                                extra_compile_args=["-std=c++11"])
-
 setup(
-    # setting for console program
-    # console = [
-    #     {
-    #         "script": "mobile_insight/automator.py",
-    #         # "icon_resources": [(1, "resources/icon.ico")],
-    #     },
-    # ],
     name = 'MobileInsight',
     version = '1.0',
     description = 'Mobile network monitoring and analysis',
     author = 'Yuanjie Li, Jiayao Li',
+    author_email = 'yuanjie.li@cs.ucla.edu, likayao@ucla.edu',
     url = 'http://metro.cs.ucla.edu/mobile_insight',
+    license = 'Apache License 2.0',
     packages = ['mobile_insight',
                 'mobile_insight.analyzer',
                 'mobile_insight.monitor',
                 'mobile_insight.monitor.dm_collector',
                 'mobile_insight.monitor.dm_collector.dm_endec',
                 ],
+    package_dir = {'mobile_insight.monitor.dm_collector':'mobile_insight/monitor/dm_collector'},
+    package_data = {'mobile_insight.monitor.dm_collector':['./dm_collector_c.so']},
+    data_files = [('mobile_insight/ws_dissector/',['ws_dissector/ws_dissector'])],
     options = { 'py2exe' : PY2EXE_OPTIONS },
-    ext_modules = [dm_collector_c_module],
 )
