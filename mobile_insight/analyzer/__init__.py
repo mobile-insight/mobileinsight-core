@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__=["Analyzer",
     "MsgLogger","MsgSerializer",
-    "LteRrcAnalyzer","LteNasAnalyzer","DeviceInternalAnalyzer",
-    # "LteRrcAnalyzer","LteNasAnalyzer",
+    "LteRrcAnalyzer","LteNasAnalyzer","LteMeasurementAnalyzer",
 	"WcdmaRrcAnalyzer","RrcAnalyzer",
     "HandoffLoopAnalyzer"]
 
@@ -14,7 +13,7 @@ from msg_serializer import MsgSerializer
 # LTE
 from lte_rrc_analyzer import LteRrcAnalyzer
 from lte_nas_analyzer import LteNasAnalyzer
-from device_internal_analyzer import DeviceInternalAnalyzer
+from lte_measurement_analyzer import LteMeasurementAnalyzer
 
 # WCDMA (3G)
 from wcdma_rrc_analyzer import WcdmaRrcAnalyzer
