@@ -3,6 +3,7 @@ import os
 import sys
 from distutils.core import setup
 
+# a hack to include data files in pure library path
 from distutils.command.install import INSTALL_SCHEMES
 for scheme in INSTALL_SCHEMES.values():
     scheme['data'] = scheme['purelib']
