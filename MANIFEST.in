@@ -1,5 +1,7 @@
 include README.md
 include LICENSE
+include setup.py
+exclude setup-internal.py
 recursive-include docs *
 recursive-include examples *.py
 recursive-include mobile_insight *.py *.so *.m README
