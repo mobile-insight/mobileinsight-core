@@ -170,7 +170,7 @@ const Fmt LteRrcServCellInfoLogPacketFmt [] = {
 const Fmt LteRrcMibMessageLogPacketFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Physical Cell ID", 2},  //cell ID
-    {UINT, "Freq", 2},  frequency
+    {UINT, "Freq", 2},  //frequency
     {UINT, "SFN", 2},
     {UINT, "Number of Antenna", 1},
     {UINT, "DL BW", 1}  //downlink bandwidth
