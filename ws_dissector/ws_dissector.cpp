@@ -16,7 +16,19 @@
 
 #include "packet-aww.h"
 #include <stdio.h>
-#include <arpa/inet.h>
+
+#ifdef _WIN32
+    #include <winsock2.h>   // for ntohl()
+    #include <io.h>
+    #define SET_BINARY_MODE(handle) setmode(handle, O_BINARY)
+#elif __GNUC__
+    #include <arpa/inet.h>  // for ntohl()
+#else
+    #error Your compiler is not either Visual C compiler or GNU gcc.
+#endif
+
+typedef __int32 int32_t;
+typedef unsigned __int32 uint32_t;
 
 const int BUFFER_SIZE = 2000;
 guchar buffer[BUFFER_SIZE] = {};
@@ -86,6 +98,16 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
 
 int main(int argc, char** argv)
 {
+    // set stdin to binary mode
+#ifdef _WIN32
+    // On Windows, 0x1a will cause EOF in text mode, so we must change stdin to
+    // binary mode
+    SET_BINARY_MODE(fileno(stdin));
+#elif __GNUC__
+    // On Linux/OS X, this step may not be necessary
+    // freopen(NULL, "rb", stdin);
+#endif
+
     epan_init(register_all_protocols, register_all_protocol_handoffs, 
                 NULL, NULL);
  
@@ -111,7 +133,7 @@ int main(int argc, char** argv)
     while (!feof(stdin)) {  // stop dissect when the pipe is closed
         fflush(stdin);
         fflush(stdout);
-        int ign = fread(buffer, sizeof(uint32_t), 2, stdin);
+        size_t ign = fread(buffer, sizeof(uint32_t), 2, stdin);
         if (ign < 2)
             break;
         unsigned int type = ntohl(*(uint32_t *)buffer);
