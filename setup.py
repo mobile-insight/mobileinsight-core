@@ -30,6 +30,12 @@ if not os.path.exists("./ws_dissector"):
 print "Downloading libraries..."
 
 if platform.system()=="Darwin":
+    
+    arch=platform.architecture()
+    if arch[0]!='64bit':
+        print "Unsupported operating system: "+str(arch)
+        sys.exit()
+
     prefix="http://metro.cs.ucla.edu/mobile_insight/libs/osx/"
     urllib.urlretrieve (prefix+"libwireshark.5.dylib", "./libs/libwireshark.5.dylib")
     urllib.urlretrieve (prefix+"libwiretap.4.dylib", "./libs/libwiretap.4.dylib")
@@ -47,12 +53,16 @@ if platform.system()=="Darwin":
     DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector']),
                   ('/usr/local/lib/',['libs/libwireshark.5.dylib','libs/libwiretap.4.dylib','libs/libwsutil.4.dylib'])]
 elif platform.system()=="Linux":
+
     arch=platform.architecture()
-    prefix=""
     if arch[0]=='32bit':
         prefix="http://metro.cs.ucla.edu/mobile_insight/libs/linux-32/"
-    else:
+    elif arch[0]=='64bit':
         prefix="http://metro.cs.ucla.edu/mobile_insight/libs/linux-64/"
+    else:
+        print "Unsupported operating system: "+str(arch)
+        sys.exit()
+
     urllib.urlretrieve (prefix+"libwireshark.so.5", "./libs/libwireshark.so.5")
     urllib.urlretrieve (prefix+"libwiretap.so.4", "./libs/libwiretap.so.4")
     urllib.urlretrieve (prefix+"libwsutil.so.4", "./libs/libwsutil.so.4")
@@ -69,12 +79,23 @@ elif platform.system()=="Linux":
     DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector']),
                   ('/usr/local/lib/',['libs/libwireshark.so.5','libs/libwiretap.so.4','libs/libwsutil.so.4'])]
 elif platform.system() == "Windows":
+    arch=platform.architecture()
+    if arch[0]!='64bit':
+        print "Unsupported operating system: "+str(arch)
+        sys.exit()
+
+    prefix="http://metro.cs.ucla.edu/mobile_insight/libs/win-64/"
+    urllib.urlretrieve (prefix+"ws_dissector.exe", "./ws_dissector/ws_dissector.exe")
+    urllib.urlretrieve (prefix+"dm_collector_c.pyd", "./mobile_insight/monitor/dm_collector/dm_collector_c.pyd")
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.pyd']}
     ws_files = ['ws_dissector/ws_dissector.exe']
     # include all dlls
     for root, dirs, files in os.walk('ws_dissector'):
         ws_files.extend(['ws_dissector/' + name for name in files if name.endswith('.dll')])
     DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector',ws_files)]
+else:
+    print "Unsupported operating system: "+str(arch)
+    sys.exit()
 
 setup(
     name = 'MobileInsight',
