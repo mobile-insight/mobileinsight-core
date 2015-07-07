@@ -85,6 +85,9 @@ elif platform.system() == "Windows":
         sys.exit()
 
     prefix="http://metro.cs.ucla.edu/mobile_insight/libs/win-64/"
+    urllib.urlretrieve (prefix+"libwireshark.dll", "./libs/libwireshark.dll")
+    urllib.urlretrieve (prefix+"libwsutil.dll", "./libs/libwsutil.dll")
+    urllib.urlretrieve (prefix+"wiretap-1.12.0.dll", "./libs/wiretap-1.12.0.dll")
     urllib.urlretrieve (prefix+"ws_dissector.exe", "./ws_dissector/ws_dissector.exe")
     urllib.urlretrieve (prefix+"dm_collector_c.pyd", "./mobile_insight/monitor/dm_collector/dm_collector_c.pyd")
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.pyd']}
@@ -92,7 +95,8 @@ elif platform.system() == "Windows":
     # include all dlls
     for root, dirs, files in os.walk('ws_dissector'):
         ws_files.extend(['ws_dissector/' + name for name in files if name.endswith('.dll')])
-    DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector',ws_files)]
+    DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector',ws_files),
+                  ("C:\\Windows\\System32\\",["./libs/libwireshark.dll","./libs/libwsutil.dll","./libs/wiretap-1.12.0.dll"])]
 else:
     print "Unsupported operating system: "+str(arch)
     sys.exit()
