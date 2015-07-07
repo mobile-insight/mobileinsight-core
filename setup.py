@@ -35,6 +35,7 @@ setup(
                 ],
     package_dir = {'mobile_insight.monitor.dm_collector':'mobile_insight/monitor/dm_collector'},
     package_data = {'mobile_insight.monitor.dm_collector':['./dm_collector_c.so']},
-    data_files = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector'])],
+    data_files = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector']),
+                  ('/usr/local/lib/',['libs/libwireshark.5.dylib','libs/libwiretap.4.dylib','libs/libwsutil.4.dylib'])],
     options = { 'py2exe' : PY2EXE_OPTIONS },
 )
