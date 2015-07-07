@@ -51,13 +51,13 @@ class LteMeasurementAnalyzer(Analyzer):
 
     def serving_cell_rsrp(self,msg):
         if msg.type_id == "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results":
-            msg_dict=dict(msg.data)
+            msg_dict=dict(msg.data.decode())
             # print msg.timestamp,msg_dict['Serving Filtered RSRP(dBm)']
             rsrp_log = (self.__class__.__name__
                 + '	Serving cell measurements: '
-                + ' RSRP=' + str(msg.timestamp,msg_dict['Serving Filtered RSRP(dBm)'])
-                + ' RSRQ=' + str(msg.timestamp,msg_dict['Serving Filtered RSRQ(dB)'])
-                + ' #cell=' + str(msg.timestamp,msg_dict['Number of Neighbor Cells']))
+                + ' RSRP=' + str(msg_dict['Serving Filtered RSRP(dBm)'])
+                + ' RSRQ=' + str(msg_dict['Serving Filtered RSRQ(dB)'])
+                + ' #cell=' + str(msg_dict['Number of Neighbor Cells']))
 
             self.logger.info(rsrp_log)
             
