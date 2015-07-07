@@ -1,0 +1,818 @@
+2015-07-07 16:29:08,850 : LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+2015-07-07 16:29:08,853 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Outgoing_Message</pair><pair key="timestamp">2015-07-07 23:24:20.763750</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 12 bytes on wire (96 bits), 12 bytes captured (96 bits)" size="12">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="12" showname="Frame Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="12" showname="Capture Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="12" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="12">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="4" showname="Data length: 4" size="4" value="00000004" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="4">
+    <field name="nas_eps.security_header_type" pos="8" show="12" showname="1100 .... = Security header type: Security header for the SERVICE REQUEST message (12)" size="1" unmaskedvalue="c7" value="C" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="c7" value="7" />
+    <field name="" pos="9" show="KSI and sequence number" size="1" value="02">
+      <field name="nas_eps.emm.nas_key_set_id" pos="9" show="0" showname="000. .... = NAS key set identifier:  (0)" size="1" value="02" />
+      <field name="nas_eps.seq_no_short" pos="9" show="2" showname="...0 0010 = Sequence number (short): 2" size="1" value="02" />
+    </field>
+    <field name="" pos="10" show="Short MAC - Message authentication code (short)" size="2" value="1c00">
+      <field name="nas_eps.emm.short_mac" pos="10" show="7168" showname="Message authentication code (short): 0x1c00" size="2" value="1c00" />
+    </field>
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:08,855 : EmmStatus EMM.state=null EMM.substate=null MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:08,856 : LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+2015-07-07 16:29:08,857 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Outgoing_Message</pair><pair key="timestamp">2015-07-07 23:25:24.977500</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 12 bytes on wire (96 bits), 12 bytes captured (96 bits)" size="12">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="12" showname="Frame Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="12" showname="Capture Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="12" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="12">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="4" showname="Data length: 4" size="4" value="00000004" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="4">
+    <field name="nas_eps.security_header_type" pos="8" show="12" showname="1100 .... = Security header type: Security header for the SERVICE REQUEST message (12)" size="1" unmaskedvalue="c7" value="C" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="c7" value="7" />
+    <field name="" pos="9" show="KSI and sequence number" size="1" value="02">
+      <field name="nas_eps.emm.nas_key_set_id" pos="9" show="0" showname="000. .... = NAS key set identifier:  (0)" size="1" value="02" />
+      <field name="nas_eps.seq_no_short" pos="9" show="2" showname="...0 0010 = Sequence number (short): 2" size="1" value="02" />
+    </field>
+    <field name="" pos="10" show="Short MAC - Message authentication code (short)" size="2" value="1d00">
+      <field name="nas_eps.emm.short_mac" pos="10" show="7424" showname="Message authentication code (short): 0x1d00" size="2" value="1d00" />
+    </field>
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:08,858 : EmmStatus EMM.state=null EMM.substate=null MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:08,859 : LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+2015-07-07 16:29:08,860 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Outgoing_Message</pair><pair key="timestamp">2015-07-07 23:25:50.763750</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 12 bytes on wire (96 bits), 12 bytes captured (96 bits)" size="12">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="12" showname="Frame Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="12" showname="Capture Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="12" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="12">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="4" showname="Data length: 4" size="4" value="00000004" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="4">
+    <field name="nas_eps.security_header_type" pos="8" show="12" showname="1100 .... = Security header type: Security header for the SERVICE REQUEST message (12)" size="1" unmaskedvalue="c7" value="C" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="c7" value="7" />
+    <field name="" pos="9" show="KSI and sequence number" size="1" value="02">
+      <field name="nas_eps.emm.nas_key_set_id" pos="9" show="0" showname="000. .... = NAS key set identifier:  (0)" size="1" value="02" />
+      <field name="nas_eps.seq_no_short" pos="9" show="2" showname="...0 0010 = Sequence number (short): 2" size="1" value="02" />
+    </field>
+    <field name="" pos="10" show="Short MAC - Message authentication code (short)" size="2" value="1e00">
+      <field name="nas_eps.emm.short_mac" pos="10" show="7680" showname="Message authentication code (short): 0x1e00" size="2" value="1e00" />
+    </field>
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:08,861 : EmmStatus EMM.state=null EMM.substate=null MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:09,367 : LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+2015-07-07 16:29:09,369 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Outgoing_Message</pair><pair key="timestamp">2015-07-07 23:26:24.096250</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 12 bytes on wire (96 bits), 12 bytes captured (96 bits)" size="12">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="12" showname="Frame Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="12" showname="Capture Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="12" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="12">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="4" showname="Data length: 4" size="4" value="00000004" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="4">
+    <field name="nas_eps.security_header_type" pos="8" show="12" showname="1100 .... = Security header type: Security header for the SERVICE REQUEST message (12)" size="1" unmaskedvalue="c7" value="C" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="c7" value="7" />
+    <field name="" pos="9" show="KSI and sequence number" size="1" value="02">
+      <field name="nas_eps.emm.nas_key_set_id" pos="9" show="0" showname="000. .... = NAS key set identifier:  (0)" size="1" value="02" />
+      <field name="nas_eps.seq_no_short" pos="9" show="2" showname="...0 0010 = Sequence number (short): 2" size="1" value="02" />
+    </field>
+    <field name="" pos="10" show="Short MAC - Message authentication code (short)" size="2" value="1f00">
+      <field name="nas_eps.emm.short_mac" pos="10" show="7936" showname="Message authentication code (short): 0x1f00" size="2" value="1f00" />
+    </field>
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:09,371 : EmmStatus EMM.state=null EMM.substate=null MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:09,877 : LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+2015-07-07 16:29:09,879 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Outgoing_Message</pair><pair key="timestamp">2015-07-07 23:27:20.765000</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 12 bytes on wire (96 bits), 12 bytes captured (96 bits)" size="12">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="12" showname="Frame Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="12" showname="Capture Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="12" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="12">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="4" showname="Data length: 4" size="4" value="00000004" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="4">
+    <field name="nas_eps.security_header_type" pos="8" show="12" showname="1100 .... = Security header type: Security header for the SERVICE REQUEST message (12)" size="1" unmaskedvalue="c7" value="C" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="c7" value="7" />
+    <field name="" pos="9" show="KSI and sequence number" size="1" value="02">
+      <field name="nas_eps.emm.nas_key_set_id" pos="9" show="0" showname="000. .... = NAS key set identifier:  (0)" size="1" value="02" />
+      <field name="nas_eps.seq_no_short" pos="9" show="2" showname="...0 0010 = Sequence number (short): 2" size="1" value="02" />
+    </field>
+    <field name="" pos="10" show="Short MAC - Message authentication code (short)" size="2" value="0000">
+      <field name="nas_eps.emm.short_mac" pos="10" show="0" showname="Message authentication code (short): 0x0000" size="2" value="0000" />
+    </field>
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:09,882 : EmmStatus EMM.state=null EMM.substate=null MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:10,383 : LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+2015-07-07 16:29:10,385 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Outgoing_Message</pair><pair key="timestamp">2015-07-07 23:28:50.765000</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 12 bytes on wire (96 bits), 12 bytes captured (96 bits)" size="12">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="12" showname="Frame Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="12" showname="Capture Length: 12 bytes (96 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="12" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="12">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="4" showname="Data length: 4" size="4" value="00000004" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="4">
+    <field name="nas_eps.security_header_type" pos="8" show="12" showname="1100 .... = Security header type: Security header for the SERVICE REQUEST message (12)" size="1" unmaskedvalue="c7" value="C" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="c7" value="7" />
+    <field name="" pos="9" show="KSI and sequence number" size="1" value="02">
+      <field name="nas_eps.emm.nas_key_set_id" pos="9" show="0" showname="000. .... = NAS key set identifier:  (0)" size="1" value="02" />
+      <field name="nas_eps.seq_no_short" pos="9" show="2" showname="...0 0010 = Sequence number (short): 2" size="1" value="02" />
+    </field>
+    <field name="" pos="10" show="Short MAC - Message authentication code (short)" size="2" value="0100">
+      <field name="nas_eps.emm.short_mac" pos="10" show="256" showname="Message authentication code (short): 0x0100" size="2" value="0100" />
+    </field>
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:10,387 : EmmStatus EMM.state=null EMM.substate=null MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:19,764 : LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+2015-07-07 16:29:19,767 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Outgoing_Message</pair><pair key="timestamp">2015-07-07 23:29:17.518750</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 29 bytes on wire (232 bits), 29 bytes captured (232 bits)" size="29">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="29" showname="Frame Length: 29 bytes (232 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="29" showname="Capture Length: 29 bytes (232 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="29" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="29">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="21" showname="Data length: 21" size="4" value="00000015" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="21">
+    <field name="nas_eps.security_header_type" pos="8" show="0" showname="0000 .... = Security header type: Plain NAS message, not security protected (0)" size="1" unmaskedvalue="07" value="0" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="07" value="7" />
+    <field name="nas_eps.nas_msg_emm_type" pos="9" show="69" showname="NAS EPS Mobility Management Message Type: Detach request (0x45)" size="1" value="45" />
+    <field name="" pos="10" show="Uplink" size="19" value="2b0bf6130014ff5019f0afb274000000000000" />
+    <field name="nas_eps.emm.tsc" pos="10" show="0" showname="0... .... = Type of security context flag (TSC): Native security context (for KSIasme)" size="1" value="2b" />
+    <field name="nas_eps.emm.nas_key_set_id" pos="10" show="2" showname=".010 .... = NAS key set identifier:  (2)" size="1" value="2b" />
+    <field name="nas_eps.emm.switch_off" pos="10" show="1" showname=".... 1... = Switch off: Switch off (1)" size="1" value="2b" />
+    <field name="nas_eps.emm.detach_type_ul" pos="10" show="3" showname=".... .011 = Detach Type: Combined EPS/IMSI detach (3)" size="1" value="2b" />
+    <field name="" pos="11" show="EPS mobile identity" size="12" value="0bf6130014ff5019f0afb274">
+      <field name="gsm_a.len" pos="11" show="11" showname="Length: 11" size="1" value="0b" />
+      <field name="nas_eps.emm.odd_even" pos="12" show="0" showname=".... 0... = odd/even indic: 0" size="1" unmaskedvalue="f6" value="0" />
+      <field name="nas_eps.emm.type_of_id" pos="12" show="6" showname=".... .110 = Type of identity: GUTI (6)" size="1" unmaskedvalue="f6" value="6" />
+      <field name="e212.mcc" pos="13" show="310" showname="Mobile Country Code (MCC): United States of America (310)" size="2" value="1300" />
+      <field name="e212.mnc" pos="14" show="410" showname="Mobile Network Code (MNC): Cingular Wireless (410)" size="2" value="0014" />
+      <field name="nas_eps.emm.mme_grp_id" pos="16" show="65360" showname="MME Group ID: 65360" size="2" value="ff50" />
+      <field name="nas_eps.emm.mme_code" pos="18" show="25" showname="MME Code: 25" size="1" value="19" />
+      <field name="nas_eps.emm.m_tmsi" pos="19" show="4038046324" showname="M-TMSI: 0xf0afb274" size="4" value="f0afb274" />
+    </field>
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:19,770 : EmmStatus EMM.state=deregistered-initiated EMM.substate=null MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:22,919 : LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+2015-07-07 16:29:22,924 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Outgoing_Message</pair><pair key="timestamp">2015-07-07 23:29:21.178750</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 92 bytes on wire (736 bits), 92 bytes captured (736 bits)" size="92">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="92" showname="Frame Length: 92 bytes (736 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="92" showname="Capture Length: 92 bytes (736 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps:ipcp" showname="Protocols in frame: user_dlt:aww:nas-eps:ipcp" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="92" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="92">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="84" showname="Data length: 84" size="4" value="00000054" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="84">
+    <field name="nas_eps.security_header_type" pos="8" show="0" showname="0000 .... = Security header type: Plain NAS message, not security protected (0)" size="1" unmaskedvalue="07" value="0" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="07" value="7" />
+    <field name="nas_eps.nas_msg_emm_type" pos="9" show="65" showname="NAS EPS Mobility Management Message Type: Attach request (0x41)" size="1" value="41" />
+    <field name="nas_eps.emm.tsc" pos="10" show="0" showname="0... .... = Type of security context flag (TSC): Native security context (for KSIasme)" size="1" value="22" />
+    <field name="nas_eps.emm.nas_key_set_id" pos="10" show="2" showname=".010 .... = NAS key set identifier:  (2)" size="1" value="22" />
+    <field name="nas_eps.spare_bits" pos="10" show="0" showname=".... 0... = Spare bit(s): 0x00" size="1" value="22" />
+    <field name="nas_eps.emm.eps_att_type" pos="10" show="2" showname=".... .010 = EPS attach type: Combined EPS/IMSI attach (2)" size="1" value="22" />
+    <field name="" pos="11" show="EPS mobile identity" size="12" value="0bf6130014ff5019f0afb274">
+      <field name="gsm_a.len" pos="11" show="11" showname="Length: 11" size="1" value="0b" />
+      <field name="nas_eps.emm.odd_even" pos="12" show="0" showname=".... 0... = odd/even indic: 0" size="1" unmaskedvalue="f6" value="0" />
+      <field name="nas_eps.emm.type_of_id" pos="12" show="6" showname=".... .110 = Type of identity: GUTI (6)" size="1" unmaskedvalue="f6" value="6" />
+      <field name="e212.mcc" pos="13" show="310" showname="Mobile Country Code (MCC): United States of America (310)" size="2" value="1300" />
+      <field name="e212.mnc" pos="14" show="410" showname="Mobile Network Code (MNC): Cingular Wireless (410)" size="2" value="0014" />
+      <field name="nas_eps.emm.mme_grp_id" pos="16" show="65360" showname="MME Group ID: 65360" size="2" value="ff50" />
+      <field name="nas_eps.emm.mme_code" pos="18" show="25" showname="MME Code: 25" size="1" value="19" />
+      <field name="nas_eps.emm.m_tmsi" pos="19" show="4038046324" showname="M-TMSI: 0xf0afb274" size="4" value="f0afb274" />
+    </field>
+    <field name="" pos="23" show="UE network capability" size="3" value="02e060">
+      <field name="gsm_a.len" pos="23" show="2" showname="Length: 2" size="1" value="02" />
+      <field name="nas_eps.emm.eea0" pos="24" show="1" showname="1... .... = EEA0: Supported" size="1" unmaskedvalue="e0" value="1" />
+      <field name="nas_eps.emm.128eea1" pos="24" show="1" showname=".1.. .... = 128-EEA1: Supported" size="1" unmaskedvalue="e0" value="1" />
+      <field name="nas_eps.emm.128eea2" pos="24" show="1" showname="..1. .... = 128-EEA2: Supported" size="1" unmaskedvalue="e0" value="1" />
+      <field name="nas_eps.emm.eea3" pos="24" show="0" showname="...0 .... = 128-EEA3: Not Supported" size="1" unmaskedvalue="e0" value="0" />
+      <field name="nas_eps.emm.eea4" pos="24" show="0" showname=".... 0... = EEA4: Not Supported" size="1" unmaskedvalue="e0" value="0" />
+      <field name="nas_eps.emm.eea5" pos="24" show="0" showname=".... .0.. = EEA5: Not Supported" size="1" unmaskedvalue="e0" value="0" />
+      <field name="nas_eps.emm.eea6" pos="24" show="0" showname=".... ..0. = EEA6: Not Supported" size="1" unmaskedvalue="e0" value="0" />
+      <field name="nas_eps.emm.eea7" pos="24" show="0" showname=".... ...0 = EEA7: Not Supported" size="1" unmaskedvalue="e0" value="0" />
+      <field name="nas_eps.emm.eia0" pos="25" show="0" showname="0... .... = EIA0: Not Supported" size="1" unmaskedvalue="60" value="0" />
+      <field name="nas_eps.emm.128eia1" pos="25" show="1" showname=".1.. .... = 128-EIA1: Supported" size="1" unmaskedvalue="60" value="1" />
+      <field name="nas_eps.emm.128eia2" pos="25" show="1" showname="..1. .... = 128-EIA2: Supported" size="1" unmaskedvalue="60" value="1" />
+      <field name="nas_eps.emm.eia3" pos="25" show="0" showname="...0 .... = 128-EIA3: Not Supported" size="1" unmaskedvalue="60" value="0" />
+      <field name="nas_eps.emm.eia4" pos="25" show="0" showname=".... 0... = EIA4: Not Supported" size="1" unmaskedvalue="60" value="0" />
+      <field name="nas_eps.emm.eia5" pos="25" show="0" showname=".... .0.. = EIA5: Not Supported" size="1" unmaskedvalue="60" value="0" />
+      <field name="nas_eps.emm.eia6" pos="25" show="0" showname=".... ..0. = EIA6: Not Supported" size="1" unmaskedvalue="60" value="0" />
+      <field name="nas_eps.emm.eia7" pos="25" show="0" showname=".... ...0 = EIA7: Not Supported" size="1" unmaskedvalue="60" value="0" />
+    </field>
+    <field name="" pos="26" show="ESM message container" size="35" value="0021022bd011d1271a8080211001000010810600000000830600000000000d00000a00">
+      <field name="gsm_a.len" pos="26" show="33" showname="Length: 33" size="2" value="0021" />
+      <field name="nas_eps.emm.esm_msg_cont" pos="28" show="02:2b:d0:11:d1:27:1a:80:80:21:10:01:00:00:10:81:06:00:00:00:00:83:06:00:00:00:00:00:0d:00:00:0a:00" showname="ESM message container contents: 022bd011d1271a8080211001000010810600000000830600..." size="33" value="022bd011d1271a8080211001000010810600000000830600000000000d00000a00">
+        <field name="nas_eps.bearer_id" pos="28" show="0" showname="0000 .... = EPS bearer identity: No EPS bearer identity assigned (0)" size="1" unmaskedvalue="02" value="0" />
+        <field name="gsm_a.L3_protocol_discriminator" pos="28" show="2" showname=".... 0010 = Protocol discriminator: EPS session management messages (0x02)" size="1" unmaskedvalue="02" value="2" />
+        <field name="nas_eps.esm.proc_trans_id" pos="29" show="43" showname="Procedure transaction identity: 43" size="1" value="2b" />
+        <field name="nas_eps.nas_msg_esm_type" pos="30" show="208" showname="NAS EPS session management messages: PDN connectivity request (0xd0)" size="1" value="d0" />
+        <field name="nas_eps.esm_pdn_type" pos="31" show="1" showname="0001 .... = PDN type: IPv4 (1)" size="1" value="11" />
+        <field name="nas_eps.esm_request_type" pos="31" show="1" showname=".... 0001 = Request type: initial request (1)" size="1" value="11" />
+        <field name="" pos="32" show="ESM information transfer flag" size="1" value="d1">
+          <field name="" pos="32" show="1101 .... = Element ID: 0xd-" size="1" value="d1" />
+          <field name="nas_eps.spare_bits" pos="32" show="0" showname=".... 000. = Spare bit(s): 0x00" size="1" value="d1" />
+          <field name="nas_eps.emm.eit" pos="32" show="1" showname=".... ...1 = EIT (ESM information transfer): Security protected ESM information transfer required" size="1" unmaskedvalue="d1" value="1" />
+        </field>
+        <field name="" pos="33" show="Protocol Configuration Options" size="28" value="271a8080211001000010810600000000830600000000000d00000a00">
+          <field name="gsm_a.gm.elem_id" pos="33" show="39" showname="Element ID: 0x27" size="1" value="27" />
+          <field name="gsm_a.len" pos="34" show="26" showname="Length: 26" size="1" value="1a" />
+          <field name="gsm_a.gm.sm.link_dir" pos="35" show="0" showname="Link direction: MS to network (0)" size="0" />
+          <field name="gsm_a.gm.sm.ext" pos="35" show="1" showname="1... .... = Extension: True" size="1" unmaskedvalue="80" value="1" />
+          <field name="" pos="35" show="Configuration Protocol: PPP for use with IP PDP type or IP PDN type (0)" size="1" value="80" />
+          <field name="gsm_a.gm.sm.pco_pid" pos="36" show="32801" showname="Protocol or Container ID: Internet Protocol Control Protocol (0x8021)" size="2" value="8021">
+            <field name="" pos="38" show="Length: 0x10 (16)" size="1" value="10" />
+            <proto name="ipcp" pos="39" showname="PPP IP Control Protocol" size="16">
+              <field name="ppp.code" pos="39" show="1" showname="Code: Configuration Request (1)" size="1" value="01" />
+              <field name="ppp.identifier" pos="40" show="0" showname="Identifier: 0 (0x00)" size="1" value="00" />
+              <field name="ppp.length" pos="41" show="16" showname="Length: 16" size="2" value="0010" />
+              <field name="" pos="43" show="Options: (12 bytes), Primary DNS Server IP Address, Secondary DNS Server IP Address" size="12" value="810600000000830600000000">
+                <field name="" pos="43" show="Primary DNS Server IP Address: 0.0.0.0" size="6" value="810600000000">
+                  <field name="ipcp.opt.type" pos="43" show="129" showname="Type: Primary DNS Server IP Address (129)" size="1" value="81" />
+                  <field name="ipcp.opt.length" pos="44" show="6" showname="Length: 6" size="1" value="06" />
+                  <field name="ipcp.opt.pri_dns_address" pos="45" show="0.0.0.0" showname="Primary DNS Address: 0.0.0.0 (0.0.0.0)" size="4" value="00000000" />
+                </field>
+                <field name="" pos="49" show="Secondary DNS Server IP Address: 0.0.0.0" size="6" value="830600000000">
+                  <field name="ipcp.opt.type" pos="49" show="131" showname="Type: Secondary DNS Server IP Address (131)" size="1" value="83" />
+                  <field name="ipcp.opt.length" pos="50" show="6" showname="Length: 6" size="1" value="06" />
+                  <field name="ipcp.opt.sec_dns_address" pos="51" show="0.0.0.0" showname="Secondary DNS Address: 0.0.0.0 (0.0.0.0)" size="4" value="00000000" />
+                </field>
+              </field>
+            </proto>
+          </field>
+          <field name="gsm_a.gm.sm.pco_pid" pos="55" show="13" showname="Protocol or Container ID: DNS Server IPv4 Address Request (0x000d)" size="2" value="000d">
+            <field name="" pos="57" show="Length: 0x00 (0)" size="1" value="00" />
+          </field>
+          <field name="gsm_a.gm.sm.pco_pid" pos="58" show="10" showname="Protocol or Container ID: IP address allocation via NAS signalling (0x000a)" size="2" value="000a">
+            <field name="" pos="60" show="Length: 0x00 (0)" size="1" value="00" />
+          </field>
+        </field>
+      </field>
+    </field>
+    <field name="" pos="61" show="Tracking area identity - Last visited registered TAI" size="6" value="521300148740">
+      <field name="nas_eps.emm.elem_id" pos="61" show="82" showname="Element ID: 0x52" size="1" value="52" />
+      <field name="e212.mcc" pos="62" show="310" showname="Mobile Country Code (MCC): United States of America (310)" size="2" value="1300" />
+      <field name="e212.mnc" pos="63" show="410" showname="Mobile Network Code (MNC): Cingular Wireless (410)" size="2" value="0014" />
+      <field name="nas_eps.emm.tai_tac" pos="65" show="34624" showname="Tracking area code(TAC): 0x8740" size="2" value="8740" />
+    </field>
+    <field name="" pos="67" show="DRX Parameter" size="3" value="5c0a00">
+      <field name="gsm_a.gm.elem_id" pos="67" show="92" showname="Element ID: 0x5c" size="1" value="5c" />
+      <field name="gsm_a.gm.gmm.split_pg_cycle_code" pos="68" show="10" showname="SPLIT PG CYCLE CODE: 10 (10)" size="1" value="0a" />
+      <field name="gsm_a.gm.gmm.cn_spec_drx_cycle_len_coef" pos="69" show="0" showname="0000 .... = CN Specific DRX cycle length coefficient: CN Specific DRX cycle length coefficient / value not specified by the MS (0)" size="1" unmaskedvalue="00" value="0" />
+      <field name="gsm_a.gm.gmm.split_on_ccch" pos="69" show="0" showname=".... 0... = SPLIT on CCCH: Split pg cycle on CCCH is not supported by the mobile station" size="1" unmaskedvalue="00" value="0" />
+      <field name="gsm_a.gm.gmm.non_drx_timer" pos="69" show="0" showname=".... .000 = Non-DRX timer: no non-DRX mode after transfer state (0)" size="1" unmaskedvalue="00" value="0" />
+    </field>
+    <field name="" pos="70" show="Location area identification - Old location area identification" size="6" value="13130014d92c">
+      <field name="nas_eps.common.elem_id" pos="70" show="19" showname="Element ID: 0x13" size="1" value="13" />
+      <field name="" pos="71" show="Location Area Identification (LAI) - 310/410/55596" size="5" value="130014d92c">
+        <field name="e212.mcc" pos="71" show="310" showname="Mobile Country Code (MCC): United States of America (310)" size="2" value="1300" />
+        <field name="e212.mnc" pos="72" show="410" showname="Mobile Network Code (MNC): Cingular Wireless (410)" size="2" value="0014" />
+        <field name="gsm_a.lac" pos="74" show="55596" showname="Location Area Code (LAC): 0xd92c (55596)" size="2" value="d92c" />
+      </field>
+    </field>
+    <field name="" pos="76" show="Mobile station classmark 2" size="5" value="11034f18a6">
+      <field name="nas_eps.common.elem_id" pos="76" show="17" showname="Element ID: 0x11" size="1" value="11" />
+      <field name="gsm_a.len" pos="77" show="3" showname="Length: 3" size="1" value="03" />
+      <field name="gsm_a.spareb8" pos="78" show="0" showname="0... .... = Spare: 0" size="1" unmaskedvalue="4f" value="0" />
+      <field name="gsm_a.MSC_rev" pos="78" show="2" showname=".10. .... = Revision Level: Used by mobile stations supporting R99 or later versions of the protocol (2)" size="1" unmaskedvalue="4f" value="2" />
+      <field name="gsm_a.ES_IND" pos="78" show="0" showname="...0 .... = ES IND: Controlled Early Classmark Sending option is not implemented in the MS" size="1" unmaskedvalue="4f" value="0" />
+      <field name="gsm_a.A5_1_algorithm_sup" pos="78" show="1" showname=".... 1... = A5/1 algorithm supported: encryption algorithm A5/1 not available" size="1" unmaskedvalue="4f" value="1" />
+      <field name="gsm_a.RF_power_capability" pos="78" show="7" showname=".... .111 = RF Power Capability: RF Power capability is irrelevant in this information element (7)" size="1" unmaskedvalue="4f" value="7" />
+      <field name="gsm_a.spareb8" pos="79" show="0" showname="0... .... = Spare: 0" size="1" unmaskedvalue="18" value="0" />
+      <field name="gsm_a.ps_sup_cap" pos="79" show="0" showname=".0.. .... = PS capability (pseudo-synchronization capability): PS capability not present" size="1" unmaskedvalue="18" value="0" />
+      <field name="gsm_a.SS_screening_indicator" pos="79" show="1" showname="..01 .... = SS Screening Indicator: Capability of handling of ellipsis notation and phase 2 error handling  (1)" size="1" unmaskedvalue="18" value="1" />
+      <field name="gsm_a.SM_cap" pos="79" show="1" showname=".... 1... = SM capability (MT SMS pt to pt capability): Mobile station supports mobile terminated point to point SMS" size="1" unmaskedvalue="18" value="1" />
+      <field name="gsm_a.VBS_notification_rec" pos="79" show="0" showname=".... .0.. = VBS notification reception: no VBS capability or no notifications wanted" size="1" unmaskedvalue="18" value="0" />
+      <field name="gsm_a.VGCS_notification_rec" pos="79" show="0" showname=".... ..0. = VGCS notification reception: no VGCS capability or no notifications wanted" size="1" unmaskedvalue="18" value="0" />
+      <field name="gsm_a.FC_frequency_cap" pos="79" show="0" showname=".... ...0 = FC Frequency Capability: The MS does not support the E-GSM or R-GSM band" size="1" unmaskedvalue="18" value="0" />
+      <field name="gsm_a.CM3" pos="80" show="1" showname="1... .... = CM3: The MS supports options that are indicated in classmark 3 IE" size="1" unmaskedvalue="a6" value="1" />
+      <field name="gsm_a.spareb7" pos="80" show="0" showname=".0.. .... = Spare: 0" size="1" unmaskedvalue="a6" value="0" />
+      <field name="gsm_a.LCS_VA_cap" pos="80" show="1" showname="..1. .... = LCS VA capability (LCS value added location request notification capability): LCS value added location request notification capability supported" size="1" unmaskedvalue="a6" value="1" />
+      <field name="gsm_a.UCS2_treatment" pos="80" show="0" showname="...0 .... = UCS2 treatment: the ME has a preference for the default alphabet" size="1" unmaskedvalue="a6" value="0" />
+      <field name="gsm_a.SoLSA" pos="80" show="0" showname=".... 0... = SoLSA: The ME does not support SoLSA" size="1" unmaskedvalue="a6" value="0" />
+      <field name="gsm_a.CMSP" pos="80" show="1" showname=".... .1.. = CMSP: CM Service Prompt: Network initiated MO CM connection request supported for at least one CM protocol" size="1" unmaskedvalue="a6" value="1" />
+      <field name="gsm_a.A5_3_algorithm_sup" pos="80" show="1" showname=".... ..1. = A5/3 algorithm supported: encryption algorithm A5/3 available" size="1" unmaskedvalue="a6" value="1" />
+      <field name="gsm_a.A5_2_algorithm_sup" pos="80" show="0" showname=".... ...0 = A5/2 algorithm supported: encryption algorithm A5/2 not available" size="1" unmaskedvalue="a6" value="0" />
+    </field>
+    <field name="" pos="81" show="Additional update type" size="1" value="f1">
+      <field name="" pos="81" show="1111 .... = Element ID: 0xf-" size="1" value="f1" />
+      <field name="nas_eps.spare_bits" pos="81" show="0" showname=".... 000. = Spare bit(s): 0x00" size="1" value="f1" />
+      <field name="nas_eps.emm.add_upd_type" pos="81" show="1" showname=".... ...1 = AUTV: SMS only (1)" size="1" value="f1" />
+    </field>
+    <field name="" pos="82" show="Voice domain preference and UE's usage setting" size="3" value="5d0103">
+      <field name="gsm_a.gm.elem_id" pos="82" show="93" showname="Element ID: 0x5d" size="1" value="5d" />
+      <field name="gsm_a.len" pos="83" show="1" showname="Length: 1" size="1" value="01" />
+      <field name="gsm_a.spare_bits" pos="84" show="0" showname="0000 0... = Spare bit(s): 0" size="1" value="03" />
+      <field name="gsm_a.gm.gmm.ue_usage_setting" pos="84" show="0" showname=".... .0.. = UE's usage setting: Voice centric" size="1" value="03" />
+      <field name="gsm_a.gm.gmm.voice_domain_pref_for_eutran" pos="84" show="3" showname=".... ..11 = Voice domain preference for E-UTRAN: IMS PS voice preferred, CS Voice as secondary (3)" size="1" value="03" />
+    </field>
+    <field name="" pos="85" show="GUTI type - Old GUTI type" size="1" value="e0">
+      <field name="" pos="85" show="1110 .... = Element ID: 0xe-" size="1" value="e0" />
+      <field name="nas_eps.spare_bits" pos="85" show="0" showname=".... 000. = Spare bit(s): 0x00" size="1" value="e0" />
+      <field name="nas_eps.emm.guti_type" pos="85" show="0" showname=".... ...0 = GUTI type: Native GUTI" size="1" value="e0" />
+    </field>
+    <field name="" pos="86" show="Extraneous Data" size="6" value="000000000000" />
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:22,931 : EmmStatus EMM.state=deregistered EMM.substate=registered.attempting_to_update MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:23,432 : LTE_NAS_ESM_Plain_OTA_Incoming_Message
+2015-07-07 16:29:23,434 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_ESM_Plain_OTA_Incoming_Message</pair><pair key="timestamp">2015-07-07 23:29:21.362500</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 11 bytes on wire (88 bits), 11 bytes captured (88 bits)" size="11">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="11" showname="Frame Length: 11 bytes (88 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="11" showname="Capture Length: 11 bytes (88 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="11" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="11">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="3" showname="Data length: 3" size="4" value="00000003" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="3">
+    <field name="nas_eps.bearer_id" pos="8" show="0" showname="0000 .... = EPS bearer identity: No EPS bearer identity assigned (0)" size="1" unmaskedvalue="02" value="0" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="2" showname=".... 0010 = Protocol discriminator: EPS session management messages (0x02)" size="1" unmaskedvalue="02" value="2" />
+    <field name="nas_eps.esm.proc_trans_id" pos="9" show="43" showname="Procedure transaction identity: 43" size="1" value="2b" />
+    <field name="nas_eps.nas_msg_esm_type" pos="10" show="217" showname="NAS EPS session management messages: ESM information request (0xd9)" size="1" value="d9" />
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:23,435 : EmmStatus EMM.state=deregistered EMM.substate=registered.attempting_to_update MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:23,512 : LTE_NAS_ESM_Plain_OTA_Outgoing_Message
+2015-07-07 16:29:23,514 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_ESM_Plain_OTA_Outgoing_Message</pair><pair key="timestamp">2015-07-07 23:29:21.362500</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 25 bytes on wire (200 bits), 25 bytes captured (200 bits)" size="25">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="25" showname="Frame Length: 25 bytes (200 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="25" showname="Capture Length: 25 bytes (200 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="25" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="25">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="17" showname="Data length: 17" size="4" value="00000011" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="17">
+    <field name="nas_eps.bearer_id" pos="8" show="0" showname="0000 .... = EPS bearer identity: No EPS bearer identity assigned (0)" size="1" unmaskedvalue="02" value="0" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="2" showname=".... 0010 = Protocol discriminator: EPS session management messages (0x02)" size="1" unmaskedvalue="02" value="2" />
+    <field name="nas_eps.esm.proc_trans_id" pos="9" show="43" showname="Procedure transaction identity: 43" size="1" value="2b" />
+    <field name="nas_eps.nas_msg_esm_type" pos="10" show="218" showname="NAS EPS session management messages: ESM information response (0xda)" size="1" value="da" />
+    <field name="" pos="11" show="Access Point Name" size="8" value="28060570686f6e65">
+      <field name="gsm_a.gm.elem_id" pos="11" show="40" showname="Element ID: 0x28" size="1" value="28" />
+      <field name="gsm_a.len" pos="12" show="6" showname="Length: 6" size="1" value="06" />
+      <field name="gsm_a.gm.sm.apn" pos="13" show="phone" showname="APN: phone" size="6" value="0570686f6e65" />
+    </field>
+    <field name="" pos="19" show="Extraneous Data" size="6" value="000000000000" />
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:23,516 : EmmStatus EMM.state=deregistered EMM.substate=registered.attempting_to_update MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:23,518 : LTE_NAS_EMM_Plain_OTA_Incoming_Message
+2015-07-07 16:29:23,524 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Incoming_Message</pair><pair key="timestamp">2015-07-07 23:29:21.771250</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 130 bytes on wire (1040 bits), 130 bytes captured (1040 bits)" size="130">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="130" showname="Frame Length: 130 bytes (1040 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="130" showname="Capture Length: 130 bytes (1040 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps:ipcp" showname="Protocols in frame: user_dlt:aww:nas-eps:ipcp" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="130" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="130">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="122" showname="Data length: 122" size="4" value="0000007a" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="122">
+    <field name="nas_eps.security_header_type" pos="8" show="0" showname="0000 .... = Security header type: Plain NAS message, not security protected (0)" size="1" unmaskedvalue="07" value="0" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="07" value="7" />
+    <field name="nas_eps.nas_msg_emm_type" pos="9" show="66" showname="NAS EPS Mobility Management Message Type: Attach accept (0x42)" size="1" value="42" />
+    <field name="nas_eps.emm.spare_half_octet" pos="10" show="0" showname="0000 .... = Spare half octet: 0" size="1" value="02" />
+    <field name="nas_eps.spare_bits" pos="10" show="0" showname=".... 0... = Spare bit(s): 0x00" size="1" value="02" />
+    <field name="nas_eps.emm.EPS_attach_result" pos="10" show="2" showname=".... .010 = Attach result: Combined EPS/IMSI attach (2)" size="1" value="02" />
+    <field name="" pos="11" show="GPRS Timer - T3412 value" size="1" value="49">
+      <field name="" pos="11" show="GPRS Timer: 54 min" size="1" value="49">
+        <field name="gsm_a.gm.gmm.gprs_timer_unit" pos="11" show="2" showname="010. .... = Unit: value is incremented in multiples of decihours (2)" size="1" unmaskedvalue="49" value="2" />
+        <field name="gsm_a.gm.gmm.gprs_timer_value" pos="11" show="9" showname="...0 1001 = Timer value: 9" size="1" unmaskedvalue="49" value="9" />
+      </field>
+    </field>
+    <field name="" pos="12" show="Tracking area identity list - TAI list" size="7" value="06001300148740">
+      <field name="gsm_a.len" pos="12" show="6" showname="Length: 6" size="1" value="06" />
+      <field name="nas_eps.spare_bits" pos="13" show="0" showname="0... .... = Spare bit(s): 0x00" size="1" value="00" />
+      <field name="nas_eps.emm.tai_tol" pos="13" show="0" showname=".00. .... = Type of list: list of TACs belonging to one PLMN, with non-consecutive TAC values (0)" size="1" unmaskedvalue="00" value="0" />
+      <field name="nas_eps.emm.tai_n_elem" pos="13" show="0" showname="...0 0000 = Number of elements: 0 [+1 = 1 element(s)]" size="1" unmaskedvalue="00" value="0" />
+      <field name="e212.mcc" pos="14" show="310" showname="Mobile Country Code (MCC): United States of America (310)" size="2" value="1300" />
+      <field name="e212.mnc" pos="15" show="410" showname="Mobile Network Code (MNC): Cingular Wireless (410)" size="2" value="0014" />
+      <field name="nas_eps.emm.tai_tac" pos="17" show="34624" showname="Tracking area code(TAC): 0x8740" size="2" value="8740" />
+    </field>
+    <field name="" pos="19" show="ESM message container" size="81" value="004f522bc10108190570686f6e65066d6e63343130066d6363333130046770727305010a95c5fc5e04fefec553272280000d04ac1a2601000d04ac1a2602802110030000108106ac1a26018306ac1a2602">
+      <field name="gsm_a.len" pos="19" show="79" showname="Length: 79" size="2" value="004f" />
+      <field name="nas_eps.emm.esm_msg_cont" pos="21" show="52:2b:c1:01:08:19:05:70:68:6f:6e:65:06:6d:6e:63:34:31:30:06:6d:63:63:33:31:30:04:67:70:72:73:05:01:0a:95:c5:fc:5e:04:fe:fe:c5:53:27:22:80:00:0d:04:ac:1a:26:01:00:0d:04:ac:1a:26:02:80:21:10:03:00:00:10:81:06:ac:1a:26:01:83:06:ac:1a:26:02" showname="ESM message container contents: 522bc10108190570686f6e65066d6e63343130066d636333..." size="79" value="522bc10108190570686f6e65066d6e63343130066d6363333130046770727305010a95c5fc5e04fefec553272280000d04ac1a2601000d04ac1a2602802110030000108106ac1a26018306ac1a2602">
+        <field name="nas_eps.bearer_id" pos="21" show="5" showname="0101 .... = EPS bearer identity: EPS bearer identity value 5 (5)" size="1" unmaskedvalue="52" value="5" />
+        <field name="gsm_a.L3_protocol_discriminator" pos="21" show="2" showname=".... 0010 = Protocol discriminator: EPS session management messages (0x02)" size="1" unmaskedvalue="52" value="2" />
+        <field name="nas_eps.esm.proc_trans_id" pos="22" show="43" showname="Procedure transaction identity: 43" size="1" value="2b" />
+        <field name="nas_eps.nas_msg_esm_type" pos="23" show="193" showname="NAS EPS session management messages: Activate default EPS bearer context request (0xc1)" size="1" value="c1" />
+        <field name="" pos="24" show="EPS quality of service" size="2" value="0108">
+          <field name="gsm_a.len" pos="24" show="1" showname="Length: 1" size="1" value="01" />
+          <field name="nas_eps.emm.qci" pos="25" show="8" showname="Quality of Service Class Identifier (QCI): QCI 8 (8)" size="1" value="08" />
+        </field>
+        <field name="" pos="26" show="Access Point Name" size="26" value="190570686f6e65066d6e63343130066d63633331300467707273">
+          <field name="gsm_a.len" pos="26" show="25" showname="Length: 25" size="1" value="19" />
+          <field name="gsm_a.gm.sm.apn" pos="27" show="phone.mnc410.mcc310.gprs" showname="APN: phone.mnc410.mcc310.gprs" size="25" value="0570686f6e65066d6e63343130066d63633331300467707273" />
+        </field>
+        <field name="" pos="52" show="PDN address" size="6" value="05010a95c5fc">
+          <field name="gsm_a.len" pos="52" show="5" showname="Length: 5" size="1" value="05" />
+          <field name="nas_eps.spare_bits" pos="53" show="0" showname="0000 0... = Spare bit(s): 0x00" size="1" value="01" />
+          <field name="nas_eps.esm_pdn_type" pos="53" show="1" showname="PDN type: IPv4 (1)" size="1" value="01" />
+          <field name="nas_eps.esm.pdn_ipv4" pos="54" show="10.149.197.252" showname="PDN IPv4: 10.149.197.252 (10.149.197.252)" size="4" value="0a95c5fc" />
+        </field>
+        <field name="" pos="58" show="APN aggregate maximum bit rate" size="6" value="5e04fefec553">
+          <field name="nas_eps.esm.elem_id" pos="58" show="94" showname="Element ID: 0x5e" size="1" value="5e" />
+          <field name="gsm_a.len" pos="59" show="4" showname="Length: 4" size="1" value="04" />
+          <field name="nas_eps.emm.apn_ambr_dl" pos="60" show="254" showname="APN-AMBR for downlink: 8640 kbps" size="1" value="fe" />
+          <field name="nas_eps.emm.apn_ambr_ul" pos="61" show="254" showname="APN-AMBR for uplink: 8640 kbps" size="1" value="fe" />
+          <field name="nas_eps.emm.apn_ambr_dl_ext" pos="62" show="197" showname="APN-AMBR for downlink (extended): 150 Mbps" size="1" value="c5" />
+          <field name="" pos="62" show="Total APN-AMBR for downlink : 150.000 Mbps" size="1" value="c5" />
+          <field name="nas_eps.emm.apn_ambr_ul_ext" pos="63" show="83" showname="APN-AMBR for uplink (extended): 25 Mbps" size="1" value="53" />
+          <field name="" pos="63" show="Total APN-AMBR for uplink : 25.000 Mbps" size="1" value="53" />
+        </field>
+        <field name="" pos="64" show="Protocol Configuration Options" size="36" value="272280000d04ac1a2601000d04ac1a2602802110030000108106ac1a26018306ac1a2602">
+          <field name="gsm_a.gm.elem_id" pos="64" show="39" showname="Element ID: 0x27" size="1" value="27" />
+          <field name="gsm_a.len" pos="65" show="34" showname="Length: 34" size="1" value="22" />
+          <field name="gsm_a.gm.sm.link_dir" pos="66" show="1" showname="Link direction: Network to MS (1)" size="0" />
+          <field name="gsm_a.gm.sm.ext" pos="66" show="1" showname="1... .... = Extension: True" size="1" unmaskedvalue="80" value="1" />
+          <field name="" pos="66" show="Configuration Protocol: PPP for use with IP PDP type or IP PDN type (0)" size="1" value="80" />
+          <field name="gsm_a.gm.sm.pco_pid" pos="67" show="13" showname="Protocol or Container ID: DNS Server IPv4 Address (0x000d)" size="2" value="000d">
+            <field name="" pos="69" show="Length: 0x04 (4)" size="1" value="04" />
+            <field name="" pos="70" show="IPv4: 172.26.38.1" size="4" value="ac1a2601" />
+          </field>
+          <field name="gsm_a.gm.sm.pco_pid" pos="74" show="13" showname="Protocol or Container ID: DNS Server IPv4 Address (0x000d)" size="2" value="000d">
+            <field name="" pos="76" show="Length: 0x04 (4)" size="1" value="04" />
+            <field name="" pos="77" show="IPv4: 172.26.38.2" size="4" value="ac1a2602" />
+          </field>
+          <field name="gsm_a.gm.sm.pco_pid" pos="81" show="32801" showname="Protocol or Container ID: Internet Protocol Control Protocol (0x8021)" size="2" value="8021">
+            <field name="" pos="83" show="Length: 0x10 (16)" size="1" value="10" />
+            <proto name="ipcp" pos="84" showname="PPP IP Control Protocol" size="16">
+              <field name="ppp.code" pos="84" show="3" showname="Code: Configuration Nak (3)" size="1" value="03" />
+              <field name="ppp.identifier" pos="85" show="0" showname="Identifier: 0 (0x00)" size="1" value="00" />
+              <field name="ppp.length" pos="86" show="16" showname="Length: 16" size="2" value="0010" />
+              <field name="" pos="88" show="Options: (12 bytes), Primary DNS Server IP Address, Secondary DNS Server IP Address" size="12" value="8106ac1a26018306ac1a2602">
+                <field name="" pos="88" show="Primary DNS Server IP Address: 172.26.38.1" size="6" value="8106ac1a2601">
+                  <field name="ipcp.opt.type" pos="88" show="129" showname="Type: Primary DNS Server IP Address (129)" size="1" value="81" />
+                  <field name="ipcp.opt.length" pos="89" show="6" showname="Length: 6" size="1" value="06" />
+                  <field name="ipcp.opt.pri_dns_address" pos="90" show="172.26.38.1" showname="Primary DNS Address: 172.26.38.1 (172.26.38.1)" size="4" value="ac1a2601" />
+                </field>
+                <field name="" pos="94" show="Secondary DNS Server IP Address: 172.26.38.2" size="6" value="8306ac1a2602">
+                  <field name="ipcp.opt.type" pos="94" show="131" showname="Type: Secondary DNS Server IP Address (131)" size="1" value="83" />
+                  <field name="ipcp.opt.length" pos="95" show="6" showname="Length: 6" size="1" value="06" />
+                  <field name="ipcp.opt.sec_dns_address" pos="96" show="172.26.38.2" showname="Secondary DNS Address: 172.26.38.2 (172.26.38.2)" size="4" value="ac1a2602" />
+                </field>
+              </field>
+            </proto>
+          </field>
+        </field>
+      </field>
+    </field>
+    <field name="" pos="100" show="EPS mobile identity - GUTI" size="13" value="500bf6130014ff5019f0b1b254">
+      <field name="nas_eps.emm.elem_id" pos="100" show="80" showname="Element ID: 0x50" size="1" value="50" />
+      <field name="gsm_a.len" pos="101" show="11" showname="Length: 11" size="1" value="0b" />
+      <field name="nas_eps.emm.odd_even" pos="102" show="0" showname=".... 0... = odd/even indic: 0" size="1" unmaskedvalue="f6" value="0" />
+      <field name="nas_eps.emm.type_of_id" pos="102" show="6" showname=".... .110 = Type of identity: GUTI (6)" size="1" unmaskedvalue="f6" value="6" />
+      <field name="e212.mcc" pos="103" show="310" showname="Mobile Country Code (MCC): United States of America (310)" size="2" value="1300" />
+      <field name="e212.mnc" pos="104" show="410" showname="Mobile Network Code (MNC): Cingular Wireless (410)" size="2" value="0014" />
+      <field name="nas_eps.emm.mme_grp_id" pos="106" show="65360" showname="MME Group ID: 65360" size="2" value="ff50" />
+      <field name="nas_eps.emm.mme_code" pos="108" show="25" showname="MME Code: 25" size="1" value="19" />
+      <field name="nas_eps.emm.m_tmsi" pos="109" show="4038177364" showname="M-TMSI: 0xf0b1b254" size="4" value="f0b1b254" />
+    </field>
+    <field name="" pos="113" show="Location area identification" size="6" value="13130014d92c">
+      <field name="nas_eps.common.elem_id" pos="113" show="19" showname="Element ID: 0x13" size="1" value="13" />
+      <field name="" pos="114" show="Location Area Identification (LAI) - 310/410/55596" size="5" value="130014d92c">
+        <field name="e212.mcc" pos="114" show="310" showname="Mobile Country Code (MCC): United States of America (310)" size="2" value="1300" />
+        <field name="e212.mnc" pos="115" show="410" showname="Mobile Network Code (MNC): Cingular Wireless (410)" size="2" value="0014" />
+        <field name="gsm_a.lac" pos="117" show="55596" showname="Location Area Code (LAC): 0xd92c (55596)" size="2" value="d92c" />
+      </field>
+    </field>
+    <field name="" pos="119" show="Mobile identity - MS identity - TMSI/P-TMSI (0x8bf98f73)" size="7" value="2305f48bf98f73">
+      <field name="nas_eps.common.elem_id" pos="119" show="35" showname="Element ID: 0x23" size="1" value="23" />
+      <field name="gsm_a.len" pos="120" show="5" showname="Length: 5" size="1" value="05" />
+      <field name="gsm_a.unused" pos="121" show="15" showname="1111 .... = Unused: 0x0f" size="1" unmaskedvalue="f4" value="F" />
+      <field name="gsm_a.oddevenind" pos="121" show="0" showname=".... 0... = Odd/even indication: Even number of identity digits" size="1" unmaskedvalue="f4" value="0" />
+      <field name="gsm_a.ie.mobileid.type" pos="121" show="4" showname=".... .100 = Mobile Identity Type: TMSI/P-TMSI/M-TMSI (4)" size="1" unmaskedvalue="f4" value="4" />
+      <field name="gsm_a.tmsi" pos="122" show="2348388211" showname="TMSI/P-TMSI: 0x8bf98f73" size="4" value="8bf98f73" />
+    </field>
+    <field name="" pos="126" show="EPS network feature support" size="3" value="640100">
+      <field name="nas_eps.emm.elem_id" pos="126" show="100" showname="Element ID: 0x64" size="1" value="64" />
+      <field name="gsm_a.len" pos="127" show="1" showname="Length: 1" size="1" value="01" />
+      <field name="nas_eps.spare_bits" pos="128" show="0" showname="00.. .... = Spare bit(s): 0x00" size="1" value="00" />
+      <field name="nas_eps.emm.esr_ps" pos="128" show="0" showname="..0. .... = ESRPS: network does not support use of EXTENDED SERVICE REQUEST to request for packet services" size="1" value="00" />
+      <field name="nas_eps.emm.cs_lcs" pos="128" show="0" showname="...0 0... = CS-LCS: no information about support of location services via CS domain is available (0)" size="1" value="00" />
+      <field name="nas_eps.emm.epc_lcs" pos="128" show="0" showname=".... .0.. = EPC-LCS: location services via EPC not supported" size="1" value="00" />
+      <field name="nas_eps.emm.emc_bs" pos="128" show="0" showname=".... ..0. = EMC BS: emergency bearer services in S1 mode not supported" size="1" value="00" />
+      <field name="nas_eps.emm.ims_vops" pos="128" show="0" showname=".... ...0 = IMS VoPS: IMS voice over PS session in S1 mode not supported" size="1" value="00" />
+    </field>
+    <field name="" pos="129" show="Additional update result" size="1" value="f2">
+      <field name="" pos="129" show="1111 .... = Element ID: 0xf-" size="1" value="f2" />
+      <field name="nas_eps.spare_bits" pos="129" show="0" showname=".... 00.. = Spare bit(s): 0x00" size="1" value="f2" />
+      <field name="nas_eps.emm.add_upd_res" pos="129" show="2" showname=".... ..10 = AURV: SMS only (2)" size="1" value="f2" />
+    </field>
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:23,530 : EmmStatus EMM.state=deregistered EMM.substate=registered.attempting_to_update MCC=unknown MNC=unknown MMEGI=unknown MMEC=unknown TMSI=unknown
+2015-07-07 16:29:23,531 : EsmQos peak_tput=unknown mean_tput=unknown max_bitrate_ulink=unknown max_bitrate_dlink=unknown guaranteed_birate_ulink=unknown guaranteed_birate_dlink=unknown max_bitrate_ulink_ext=unknown max_bitrate_dlink_ext=unknown guaranteed_birate_ulink_ext=unknown guaranteed_birate_dlink_ext=unknown
+2015-07-07 16:29:23,531 : EsmQos delivery_order=unknown traffic_class=unknown QCI=8 delay_class=unknown transfer_delay=unknown residual_BER=unknown
+2015-07-07 16:29:23,532 : LTE_NAS_ESM_Plain_OTA_Incoming_Message
+2015-07-07 16:29:23,534 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_ESM_Plain_OTA_Incoming_Message</pair><pair key="timestamp">2015-07-07 23:29:21.771250</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 117 bytes on wire (936 bits), 117 bytes captured (936 bits)" size="117">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="117" showname="Frame Length: 117 bytes (936 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="117" showname="Capture Length: 117 bytes (936 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps:ipcp" showname="Protocols in frame: user_dlt:aww:nas-eps:ipcp" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="117" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="117">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="109" showname="Data length: 109" size="4" value="0000006d" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="109">
+    <field name="nas_eps.bearer_id" pos="8" show="5" showname="0101 .... = EPS bearer identity: EPS bearer identity value 5 (5)" size="1" unmaskedvalue="52" value="5" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="2" showname=".... 0010 = Protocol discriminator: EPS session management messages (0x02)" size="1" unmaskedvalue="52" value="2" />
+    <field name="nas_eps.esm.proc_trans_id" pos="9" show="43" showname="Procedure transaction identity: 43" size="1" value="2b" />
+    <field name="nas_eps.nas_msg_esm_type" pos="10" show="193" showname="NAS EPS session management messages: Activate default EPS bearer context request (0xc1)" size="1" value="c1" />
+    <field name="" pos="11" show="EPS quality of service" size="2" value="0108">
+      <field name="gsm_a.len" pos="11" show="1" showname="Length: 1" size="1" value="01" />
+      <field name="nas_eps.emm.qci" pos="12" show="8" showname="Quality of Service Class Identifier (QCI): QCI 8 (8)" size="1" value="08" />
+    </field>
+    <field name="" pos="13" show="Access Point Name" size="26" value="190570686f6e65066d6e63343130066d63633331300467707273">
+      <field name="gsm_a.len" pos="13" show="25" showname="Length: 25" size="1" value="19" />
+      <field name="gsm_a.gm.sm.apn" pos="14" show="phone.mnc410.mcc310.gprs" showname="APN: phone.mnc410.mcc310.gprs" size="25" value="0570686f6e65066d6e63343130066d63633331300467707273" />
+    </field>
+    <field name="" pos="39" show="PDN address" size="6" value="05010a95c5fc">
+      <field name="gsm_a.len" pos="39" show="5" showname="Length: 5" size="1" value="05" />
+      <field name="nas_eps.spare_bits" pos="40" show="0" showname="0000 0... = Spare bit(s): 0x00" size="1" value="01" />
+      <field name="nas_eps.esm_pdn_type" pos="40" show="1" showname="PDN type: IPv4 (1)" size="1" value="01" />
+      <field name="nas_eps.esm.pdn_ipv4" pos="41" show="10.149.197.252" showname="PDN IPv4: 10.149.197.252 (10.149.197.252)" size="4" value="0a95c5fc" />
+    </field>
+    <field name="" pos="45" show="APN aggregate maximum bit rate" size="6" value="5e04fefec553">
+      <field name="nas_eps.esm.elem_id" pos="45" show="94" showname="Element ID: 0x5e" size="1" value="5e" />
+      <field name="gsm_a.len" pos="46" show="4" showname="Length: 4" size="1" value="04" />
+      <field name="nas_eps.emm.apn_ambr_dl" pos="47" show="254" showname="APN-AMBR for downlink: 8640 kbps" size="1" value="fe" />
+      <field name="nas_eps.emm.apn_ambr_ul" pos="48" show="254" showname="APN-AMBR for uplink: 8640 kbps" size="1" value="fe" />
+      <field name="nas_eps.emm.apn_ambr_dl_ext" pos="49" show="197" showname="APN-AMBR for downlink (extended): 150 Mbps" size="1" value="c5" />
+      <field name="" pos="49" show="Total APN-AMBR for downlink : 150.000 Mbps" size="1" value="c5" />
+      <field name="nas_eps.emm.apn_ambr_ul_ext" pos="50" show="83" showname="APN-AMBR for uplink (extended): 25 Mbps" size="1" value="53" />
+      <field name="" pos="50" show="Total APN-AMBR for uplink : 25.000 Mbps" size="1" value="53" />
+    </field>
+    <field name="" pos="51" show="Protocol Configuration Options" size="36" value="272280000d04ac1a2601000d04ac1a2602802110030000108106ac1a26018306ac1a2602">
+      <field name="gsm_a.gm.elem_id" pos="51" show="39" showname="Element ID: 0x27" size="1" value="27" />
+      <field name="gsm_a.len" pos="52" show="34" showname="Length: 34" size="1" value="22" />
+      <field name="gsm_a.gm.sm.link_dir" pos="53" show="1" showname="Link direction: Network to MS (1)" size="0" />
+      <field name="gsm_a.gm.sm.ext" pos="53" show="1" showname="1... .... = Extension: True" size="1" unmaskedvalue="80" value="1" />
+      <field name="" pos="53" show="Configuration Protocol: PPP for use with IP PDP type or IP PDN type (0)" size="1" value="80" />
+      <field name="gsm_a.gm.sm.pco_pid" pos="54" show="13" showname="Protocol or Container ID: DNS Server IPv4 Address (0x000d)" size="2" value="000d">
+        <field name="" pos="56" show="Length: 0x04 (4)" size="1" value="04" />
+        <field name="" pos="57" show="IPv4: 172.26.38.1" size="4" value="ac1a2601" />
+      </field>
+      <field name="gsm_a.gm.sm.pco_pid" pos="61" show="13" showname="Protocol or Container ID: DNS Server IPv4 Address (0x000d)" size="2" value="000d">
+        <field name="" pos="63" show="Length: 0x04 (4)" size="1" value="04" />
+        <field name="" pos="64" show="IPv4: 172.26.38.2" size="4" value="ac1a2602" />
+      </field>
+      <field name="gsm_a.gm.sm.pco_pid" pos="68" show="32801" showname="Protocol or Container ID: Internet Protocol Control Protocol (0x8021)" size="2" value="8021">
+        <field name="" pos="70" show="Length: 0x10 (16)" size="1" value="10" />
+        <proto name="ipcp" pos="71" showname="PPP IP Control Protocol" size="16">
+          <field name="ppp.code" pos="71" show="3" showname="Code: Configuration Nak (3)" size="1" value="03" />
+          <field name="ppp.identifier" pos="72" show="0" showname="Identifier: 0 (0x00)" size="1" value="00" />
+          <field name="ppp.length" pos="73" show="16" showname="Length: 16" size="2" value="0010" />
+          <field name="" pos="75" show="Options: (12 bytes), Primary DNS Server IP Address, Secondary DNS Server IP Address" size="12" value="8106ac1a26018306ac1a2602">
+            <field name="" pos="75" show="Primary DNS Server IP Address: 172.26.38.1" size="6" value="8106ac1a2601">
+              <field name="ipcp.opt.type" pos="75" show="129" showname="Type: Primary DNS Server IP Address (129)" size="1" value="81" />
+              <field name="ipcp.opt.length" pos="76" show="6" showname="Length: 6" size="1" value="06" />
+              <field name="ipcp.opt.pri_dns_address" pos="77" show="172.26.38.1" showname="Primary DNS Address: 172.26.38.1 (172.26.38.1)" size="4" value="ac1a2601" />
+            </field>
+            <field name="" pos="81" show="Secondary DNS Server IP Address: 172.26.38.2" size="6" value="8306ac1a2602">
+              <field name="ipcp.opt.type" pos="81" show="131" showname="Type: Secondary DNS Server IP Address (131)" size="1" value="83" />
+              <field name="ipcp.opt.length" pos="82" show="6" showname="Length: 6" size="1" value="06" />
+              <field name="ipcp.opt.sec_dns_address" pos="83" show="172.26.38.2" showname="Secondary DNS Address: 172.26.38.2 (172.26.38.2)" size="4" value="ac1a2602" />
+            </field>
+          </field>
+        </proto>
+      </field>
+    </field>
+    <field name="" pos="87" show="Extraneous Data" size="30" value="500bf6130014ff5019f0b1b25413130014d92c2305f48bf98f73640100f2" />
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:23,538 : EmmStatus EMM.state=deregistered EMM.substate=registered.attempting_to_update MCC=310 MNC=410 MMEGI=65360 MMEC=25 TMSI=4038177364
+2015-07-07 16:29:23,539 : EsmQos peak_tput=unknown mean_tput=unknown max_bitrate_ulink=unknown max_bitrate_dlink=unknown guaranteed_birate_ulink=unknown guaranteed_birate_dlink=unknown max_bitrate_ulink_ext=unknown max_bitrate_dlink_ext=unknown guaranteed_birate_ulink_ext=unknown guaranteed_birate_dlink_ext=unknown
+2015-07-07 16:29:23,539 : EsmQos delivery_order=unknown traffic_class=unknown QCI=8 delay_class=unknown transfer_delay=unknown residual_BER=unknown
+2015-07-07 16:29:24,045 : LTE_NAS_EMM_Plain_OTA_Outgoing_Message
+2015-07-07 16:29:24,047 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Outgoing_Message</pair><pair key="timestamp">2015-07-07 23:29:21.775000</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 21 bytes on wire (168 bits), 21 bytes captured (168 bits)" size="21">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="21" showname="Frame Length: 21 bytes (168 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="21" showname="Capture Length: 21 bytes (168 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="21" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="21">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="13" showname="Data length: 13" size="4" value="0000000d" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="13">
+    <field name="nas_eps.security_header_type" pos="8" show="0" showname="0000 .... = Security header type: Plain NAS message, not security protected (0)" size="1" unmaskedvalue="07" value="0" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="07" value="7" />
+    <field name="nas_eps.nas_msg_emm_type" pos="9" show="67" showname="NAS EPS Mobility Management Message Type: Attach complete (0x43)" size="1" value="43" />
+    <field name="" pos="10" show="ESM message container" size="5" value="00035200c2">
+      <field name="gsm_a.len" pos="10" show="3" showname="Length: 3" size="2" value="0003" />
+      <field name="nas_eps.emm.esm_msg_cont" pos="12" show="52:00:c2" showname="ESM message container contents: 5200c2" size="3" value="5200c2">
+        <field name="nas_eps.bearer_id" pos="12" show="5" showname="0101 .... = EPS bearer identity: EPS bearer identity value 5 (5)" size="1" unmaskedvalue="52" value="5" />
+        <field name="gsm_a.L3_protocol_discriminator" pos="12" show="2" showname=".... 0010 = Protocol discriminator: EPS session management messages (0x02)" size="1" unmaskedvalue="52" value="2" />
+        <field name="nas_eps.esm.proc_trans_id" pos="13" show="0" showname="Procedure transaction identity: 0" size="1" value="00" />
+        <field name="nas_eps.nas_msg_esm_type" pos="14" show="194" showname="NAS EPS session management messages: Activate default EPS bearer context accept (0xc2)" size="1" value="c2" />
+      </field>
+    </field>
+    <field name="" pos="15" show="Extraneous Data" size="6" value="000000000000" />
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:24,049 : EmmStatus EMM.state=registered EMM.substate=registered.normal_service MCC=310 MNC=410 MMEGI=65360 MMEC=25 TMSI=4038177364
+2015-07-07 16:29:24,558 : LTE_NAS_EMM_Plain_OTA_Incoming_Message
+2015-07-07 16:29:24,561 : 
+<dm_log_packet><pair key="type_id">LTE_NAS_EMM_Plain_OTA_Incoming_Message</pair><pair key="timestamp">2015-07-07 23:29:21.840000</pair><pair key="Pkt Version">1</pair><pair key="RRC Release Number">9</pair><pair key="Major Version">5</pair><pair key="Minor Version">0</pair><pair key="Msg" type="list"><msg>
+<packet>
+  <proto name="frame" pos="0" showname="Frame 0: 37 bytes on wire (296 bits), 37 bytes captured (296 bits)" size="37">
+    <field name="frame.encap_type" pos="0" show="46" showname="Encapsulation type: USER 1 (46)" size="0" />
+    <field name="frame.number" pos="0" show="0" showname="Frame Number: 0" size="0" />
+    <field name="frame.len" pos="0" show="37" showname="Frame Length: 37 bytes (296 bits)" size="0" />
+    <field name="frame.cap_len" pos="0" show="37" showname="Capture Length: 37 bytes (296 bits)" size="0" />
+    <field name="frame.marked" pos="0" show="0" showname="Frame is marked: False" size="0" />
+    <field name="frame.ignored" pos="0" show="0" showname="Frame is ignored: False" size="0" />
+    <field name="frame.protocols" pos="0" show="user_dlt:aww:nas-eps" showname="Protocols in frame: user_dlt:aww:nas-eps" size="0" />
+  </proto>
+  <proto name="user_dlt" pos="0" showname="DLT: 148, Payload: aww (Automator Wireshark Wrapper)" size="37" />
+  <proto name="aww" pos="0" showname="Automator Wireshark Wrapper" size="37">
+    <field name="aww.proto" pos="0" show="250" showname="Protocol: 250" size="4" value="000000fa" />
+    <field name="aww.data_len" pos="4" show="29" showname="Data length: 29" size="4" value="0000001d" />
+  </proto>
+  <proto name="nas-eps" pos="8" showname="Non-Access-Stratum (NAS)PDU" size="29">
+    <field name="nas_eps.security_header_type" pos="8" show="0" showname="0000 .... = Security header type: Plain NAS message, not security protected (0)" size="1" unmaskedvalue="07" value="0" />
+    <field name="gsm_a.L3_protocol_discriminator" pos="8" show="7" showname=".... 0111 = Protocol discriminator: EPS mobility management messages (0x07)" size="1" unmaskedvalue="07" value="7" />
+    <field name="nas_eps.nas_msg_emm_type" pos="9" show="97" showname="NAS EPS Mobility Management Message Type: EMM information (0x61)" size="1" value="61" />
+    <field name="" pos="10" show="Network Name - Full name for network" size="7" value="43058441aa890a">
+      <field name="gsm_a.dtap.elem_id" pos="10" show="67" showname="Element ID: 0x43" size="1" value="43" />
+      <field name="gsm_a.len" pos="11" show="5" showname="Length: 5" size="1" value="05" />
+      <field name="gsm_a.extension" pos="12" show="1" showname="1... .... = Extension: No Extension" size="1" unmaskedvalue="84" value="1" />
+      <field name="gsm_a.dtap.coding_scheme" pos="12" show="0" showname=".000 .... = Coding Scheme: Cell Broadcast data coding scheme, GSM default alphabet, language unspecified, defined in 3GPP TS 23.038" size="1" unmaskedvalue="84" value="0" />
+      <field name="gsm_a.dtap.add_ci" pos="12" show="0" showname=".... 0... = Add CI: The MS should not add the letters for the Country's Initials to the text string" size="1" unmaskedvalue="84" value="0" />
+      <field name="gsm_a.dtap.number_of_spare_bits" pos="12" show="4" showname=".... .100 = Number of spare bits in last octet: bits 5 to 8(inclusive) are spare and set to '0' in octet n (4)" size="1" unmaskedvalue="84" value="4" />
+      <field name="gsm_a.dtap.text_string" pos="13" show="AT&amp;T" showname="Text String: AT&amp;T" size="4" value="41aa890a" />
+    </field>
+    <field name="" pos="17" show="Network Name - Short Name" size="7" value="45058441aa890a">
+      <field name="gsm_a.dtap.elem_id" pos="17" show="69" showname="Element ID: 0x45" size="1" value="45" />
+      <field name="gsm_a.len" pos="18" show="5" showname="Length: 5" size="1" value="05" />
+      <field name="gsm_a.extension" pos="19" show="1" showname="1... .... = Extension: No Extension" size="1" unmaskedvalue="84" value="1" />
+      <field name="gsm_a.dtap.coding_scheme" pos="19" show="0" showname=".000 .... = Coding Scheme: Cell Broadcast data coding scheme, GSM default alphabet, language unspecified, defined in 3GPP TS 23.038" size="1" unmaskedvalue="84" value="0" />
+      <field name="gsm_a.dtap.add_ci" pos="19" show="0" showname=".... 0... = Add CI: The MS should not add the letters for the Country's Initials to the text string" size="1" unmaskedvalue="84" value="0" />
+      <field name="gsm_a.dtap.number_of_spare_bits" pos="19" show="4" showname=".... .100 = Number of spare bits in last octet: bits 5 to 8(inclusive) are spare and set to '0' in octet n (4)" size="1" unmaskedvalue="84" value="4" />
+      <field name="gsm_a.dtap.text_string" pos="20" show="AT&amp;T" showname="Text String: AT&amp;T" size="4" value="41aa890a" />
+    </field>
+    <field name="" pos="24" show="Time Zone - Local" size="2" value="468a">
+      <field name="gsm_a.dtap.elem_id" pos="24" show="70" showname="Element ID: 0x46" size="1" value="46" />
+      <field name="" pos="25" show="Timezone: GMT - 7 hours 0 minutes" size="1" value="8a" />
+    </field>
+    <field name="" pos="26" show="Time Zone and Time - Universal Time and Local Time Zone" size="8" value="475170703292328a">
+      <field name="gsm_a.dtap.elem_id" pos="26" show="71" showname="Element ID: 0x47" size="1" value="47" />
+      <field name="gsm_a.dtap.time_zone_time" pos="27" show="Jul  7, 2015 23:29:23.000000000 PDT" showname="Time: Jul  7, 2015 23:29:23.000000000" size="6" value="517070329232" />
+      <field name="" pos="33" show="Timezone: GMT - 7 hours 0 minutes" size="1" value="8a" />
+    </field>
+    <field name="" pos="34" show="Daylight Saving Time" size="3" value="490101">
+      <field name="gsm_a.dtap.elem_id" pos="34" show="73" showname="Element ID: 0x49" size="1" value="49" />
+      <field name="gsm_a.len" pos="35" show="1" showname="Length: 1" size="1" value="01" />
+      <field name="gsm_a.spare_bits" pos="36" show="0" showname="0000 00.. = Spare bit(s): 0" size="1" value="01" />
+      <field name="gsm_a.dtap.dst_adjustment" pos="36" show="1" showname=".... ..01 = DST Adjustment: +1 hour adjustment for Daylight Saving Time (1)" size="1" unmaskedvalue="01" value="1" />
+    </field>
+  </proto>
+</packet>
+
+</msg></pair></dm_log_packet>
+2015-07-07 16:29:24,565 : EmmStatus EMM.state=registered EMM.substate=registered.normal_service MCC=310 MNC=410 MMEGI=65360 MMEC=25 TMSI=4038177364

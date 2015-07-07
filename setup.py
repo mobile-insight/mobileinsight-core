@@ -37,11 +37,16 @@ if platform.system()=="Darwin":
         sys.exit()
 
     prefix="http://metro.cs.ucla.edu/mobile_insight/libs/osx/"
-    urllib.urlretrieve (prefix+"libwireshark.5.dylib", "./libs/libwireshark.5.dylib")
-    urllib.urlretrieve (prefix+"libwiretap.4.dylib", "./libs/libwiretap.4.dylib")
-    urllib.urlretrieve (prefix+"libwsutil.4.dylib", "./libs/libwsutil.4.dylib")
-    urllib.urlretrieve (prefix+"ws_dissector", "./ws_dissector/ws_dissector")
-    urllib.urlretrieve (prefix+"dm_collector_c.so", "./mobile_insight/monitor/dm_collector/dm_collector_c.so")
+    if not os.path.isfile("./libs/libwireshark.5.dylib"):
+        urllib.urlretrieve (prefix+"libwireshark.5.dylib", "./libs/libwireshark.5.dylib")
+    if not os.path.isfile("./libs/libwiretap.4.dylib"):
+        urllib.urlretrieve (prefix+"libwiretap.4.dylib", "./libs/libwiretap.4.dylib")
+    if not os.path.isfile("./libs/libwsutil.4.dylib"):
+        urllib.urlretrieve (prefix+"libwsutil.4.dylib", "./libs/libwsutil.4.dylib")
+    if not os.path.isfile("./ws_dissector/ws_dissector"):
+        urllib.urlretrieve (prefix+"ws_dissector", "./ws_dissector/ws_dissector")
+    if not os.path.isfile("./mobile_insight/monitor/dm_collector/dm_collector_c.so"):
+        urllib.urlretrieve (prefix+"dm_collector_c.so", "./mobile_insight/monitor/dm_collector/dm_collector_c.so")
 
     os.chmod("./libs/libwireshark.5.dylib",0o777 | stat.S_IEXEC)
     os.chmod("./libs/libwiretap.4.dylib",0o777 | stat.S_IEXEC)
@@ -63,11 +68,16 @@ elif platform.system()=="Linux":
         print "Unsupported operating system: "+str(arch)
         sys.exit()
 
-    urllib.urlretrieve (prefix+"libwireshark.so.5", "./libs/libwireshark.so.5")
-    urllib.urlretrieve (prefix+"libwiretap.so.4", "./libs/libwiretap.so.4")
-    urllib.urlretrieve (prefix+"libwsutil.so.4", "./libs/libwsutil.so.4")
-    urllib.urlretrieve (prefix+"ws_dissector", "./ws_dissector/ws_dissector")
-    urllib.urlretrieve (prefix+"dm_collector_c.so", "./mobile_insight/monitor/dm_collector/dm_collector_c.so")
+    if not os.path.isfile("./libs/libwireshark.so.5"):
+        urllib.urlretrieve (prefix+"libwireshark.so.5", "./libs/libwireshark.so.5")
+    if not os.path.isfile("./libs/libwiretap.so.4"):
+        urllib.urlretrieve (prefix+"libwiretap.so.4", "./libs/libwiretap.so.4")
+    if not os.path.isfile("./libs/libwsutil.so.4"):
+        urllib.urlretrieve (prefix+"libwsutil.so.4", "./libs/libwsutil.so.4")
+    if not os.path.isfile("./ws_dissector/ws_dissector"):
+        urllib.urlretrieve (prefix+"ws_dissector", "./ws_dissector/ws_dissector")
+    if not os.path.isfile("./mobile_insight/monitor/dm_collector/dm_collector_c.so"):
+        urllib.urlretrieve (prefix+"dm_collector_c.so", "./mobile_insight/monitor/dm_collector/dm_collector_c.so")
     
     os.chmod("./libs/libwireshark.so.5",0o777 | stat.S_IEXEC)
     os.chmod("./libs/libwiretap.so.4",0o777 | stat.S_IEXEC)
@@ -85,11 +95,18 @@ elif platform.system() == "Windows":
         sys.exit()
 
     prefix="http://metro.cs.ucla.edu/mobile_insight/libs/win-64/"
-    urllib.urlretrieve (prefix+"libwireshark.dll", "./libs/libwireshark.dll")
-    urllib.urlretrieve (prefix+"libwsutil.dll", "./libs/libwsutil.dll")
-    urllib.urlretrieve (prefix+"wiretap-1.12.0.dll", "./libs/wiretap-1.12.0.dll")
-    urllib.urlretrieve (prefix+"ws_dissector.exe", "./ws_dissector/ws_dissector.exe")
-    urllib.urlretrieve (prefix+"dm_collector_c.pyd", "./mobile_insight/monitor/dm_collector/dm_collector_c.pyd")
+
+    if not os.path.isfile("./libs/libwireshark.dll"):
+        urllib.urlretrieve (prefix+"libwireshark.dll", "./libs/libwireshark.dll")
+    if not os.path.isfile("./libs/wiretap-1.12.0.dll"):
+        urllib.urlretrieve (prefix+"wiretap-1.12.0.dll", "./libs/wiretap-1.12.0.dll")
+    if not os.path.isfile("./libs/libwsutil.dll"):
+        urllib.urlretrieve (prefix+"libwsutil.dll", "./libs/libwsutil.dll")
+    if not os.path.isfile("./ws_dissector/ws_dissector.exe"):
+        urllib.urlretrieve (prefix+"ws_dissector.exe", "./ws_dissector/ws_dissector.exe")
+    if not os.path.isfile("./mobile_insight/monitor/dm_collector/dm_collector_c.pyd"):
+        urllib.urlretrieve (prefix+"dm_collector_c.pyd", "./mobile_insight/monitor/dm_collector/dm_collector_c.pyd")
+
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.pyd']}
     ws_files = ['ws_dissector/ws_dissector.exe']
     # include all dlls
