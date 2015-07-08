@@ -113,7 +113,7 @@ elif platform.system() == "Windows":
     for root, dirs, files in os.walk('ws_dissector'):
         ws_files.extend(['ws_dissector/' + name for name in files if name.endswith('.dll')])
     DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector',ws_files),
-                  ("C:\\Windows\\System32\\",["./libs/libwireshark.dll","./libs/libwsutil.dll","./libs/wiretap-1.12.0.dll"])]
+                  (sys.exec_prefix+'/mobile_insight/ws_dissector',["./libs/libwireshark.dll","./libs/libwsutil.dll","./libs/wiretap-1.12.0.dll"])]
 else:
     print "Unsupported operating system: "+str(arch)
     sys.exit()
