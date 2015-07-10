@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import platform
 import sys
 from distutils.core import setup
 try:
@@ -18,6 +19,17 @@ PY2EXE_OPTIONS = {
     "bundle_files": 1,      # 1: bundle everything
 }
 
+if platform.system() == "Windows":
+    PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.pyd']}
+    ws_files = ['ws_dissector/ws_dissector.exe']
+    # include all dlls
+    for root, dirs, files in os.walk('ws_dissector'):
+        ws_files.extend(['ws_dissector/' + name for name in files if name.endswith('.dll')])
+    DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector',ws_files)]
+else:   # Linux or OS X
+    PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
+    DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector']),
+                  ('/usr/local/lib/',['libs/libwireshark.5.dylib','libs/libwiretap.4.dylib','libs/libwsutil.4.dylib'])]
 
 setup(
     name = 'MobileInsight',
@@ -33,9 +45,7 @@ setup(
                 'mobile_insight.monitor.dm_collector',
                 'mobile_insight.monitor.dm_collector.dm_endec',
                 ],
-    package_dir = {'mobile_insight.monitor.dm_collector':'mobile_insight/monitor/dm_collector'},
-    package_data = {'mobile_insight.monitor.dm_collector':['./dm_collector_c.so']},
-    data_files = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector']),
-                  ('/usr/local/lib/',['libs/libwireshark.5.dylib','libs/libwiretap.4.dylib','libs/libwsutil.4.dylib'])],
+    package_data = PACKAGE_DATA,
+    data_files = DATA_FILES,
     options = { 'py2exe' : PY2EXE_OPTIONS },
 )

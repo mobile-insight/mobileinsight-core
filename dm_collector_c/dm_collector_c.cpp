@@ -27,10 +27,11 @@ static PyMethodDef DmCollectorCMethods[] = {
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+// sort, unique and bucketing
 static void
 sort_type_ids(IdVector& type_ids, std::vector<IdVector>& out_vectors) {
     sort(type_ids.begin(), type_ids.end());
-    auto itr = std::unique(type_ids.begin(), type_ids.end());
+    IdVector::iterator itr = std::unique(type_ids.begin(), type_ids.end());
     type_ids.resize(std::distance(type_ids.begin(), itr));
 
     out_vectors.clear();
@@ -97,15 +98,6 @@ dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
         return NULL;
 }
 
-static int
-find_id (const ValueString& id_to_name, const char *name) {
-    for (auto& pair: id_to_name) {
-        if (strcmp(name, pair.second) == 0)
-            return pair.first;
-    }
-    return -1;
-}
-
 // Return: successful or not
 static PyObject *
 dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
@@ -136,11 +128,11 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
         PyObject *item = PySequence_GetItem(sequence, i);
         if (PyString_Check(item)) {
             const char *name = PyString_AsString(item);
-            int id = find_id(LogPacketTypeID_To_Name, name);
-            if (id != -1)   // found
-                type_ids.push_back(id);
-            else {
-                PyErr_SetString(PyExc_ValueError, "Wrong type names.");
+            int cnt = find_ids(LogPacketTypeID_To_Name,
+                                ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
+                                name, type_ids);
+            if (cnt == 0) {
+                PyErr_SetString(PyExc_ValueError, "Wrong type name.");
                 Py_DECREF(item);
                 goto raise_exception;
             }
@@ -154,7 +146,8 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
 
     // send log config messages
     sort_type_ids(type_ids, type_id_vectors);
-    for (const IdVector& v: type_id_vectors) {
+    for (size_t i = 0; i < type_id_vectors.size(); i++) {
+        const IdVector& v = type_id_vectors[i];
         buf = encode_log_config(SET_MASK, v);
         if (buf.first == NULL || buf.second == 0) {
             Py_DECREF(serial_port);
@@ -201,13 +194,13 @@ initdm_collector_c(void)
 {
     PyObject *dm_collector_c = Py_InitModule("dm_collector_c", DmCollectorCMethods);
 
-    int n_types = LogPacketTypeID_To_Name.size();
+    int n_types = ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName);
     PyObject *log_packet_types = PyTuple_New(n_types);
-    int i = 0;
-    for (auto& pair: LogPacketTypeID_To_Name) {
+    for (int i = 0; i < n_types; i++) {
         // There is no leak here, because PyTuple_SetItem steals reference
-        PyTuple_SetItem(log_packet_types, i, Py_BuildValue("s", pair.second));
-        i++;
+        PyTuple_SetItem(log_packet_types,
+                        i,
+                        Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));
     }
     PyObject_SetAttrString(dm_collector_c, "log_packet_types", log_packet_types);
 }

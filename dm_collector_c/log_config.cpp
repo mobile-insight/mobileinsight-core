@@ -37,7 +37,8 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
         {
             int equip_id = -1;
             int highest = -1;
-            for (int id : type_ids) {
+            for (size_t i = 0; i < type_ids.size(); i++) {
+                int id = type_ids[i];
                 int e = get_equip_id(id);
                 if (equip_id == -1) {
                     equip_id = e;
@@ -65,9 +66,10 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
                 char *mask = buf.first + 16;
                 for (int i = 0; i < mask_len; i++)
                     mask[i] = 0;
-                for (int id : type_ids) {
-                    int i = get_item_id(id);
-                    mask[i / 8] |= 1 << (i % 8);
+                for (size_t i = 0; i < type_ids.size(); i++) {
+                    int id = type_ids[i];
+                    int x = get_item_id(id);
+                    mask[x / 8] |= 1 << (x % 8);
                 }
             }
             break;

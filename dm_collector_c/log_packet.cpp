@@ -164,8 +164,11 @@ static int
 _decode_wcdma_signaling_messages(const char *b, int offset, int length,
                                     PyObject *result) {
     int ch_num = _search_result_int(result, "Channel Type");
+    const char *ch_name = search_name(WcdmaSignalingMsgChannelType,
+                                        ARRAY_SIZE(WcdmaSignalingMsgChannelType, ValueName),
+                                        ch_num);
 
-    if (WcdmaSignalingMsgChannelType.count(ch_num) == 0) {
+    if (ch_name == NULL) {  // not found
         printf("Unknown WCDMA Signalling Messages Channel Type: 0x%x\n", ch_num);
         return 0;
     }
@@ -173,7 +176,7 @@ _decode_wcdma_signaling_messages(const char *b, int offset, int length,
     int pdu_length = _search_result_int(result, "Message Length");
 
     std::string type_str = "raw_msg/";
-    type_str += WcdmaSignalingMsgChannelType.at(ch_num);
+    type_str += ch_name;
     PyObject *t = Py_BuildValue("(ss#s)",
                                 "Msg", b + offset, pdu_length, type_str.c_str());
     PyList_Append(result, t);
@@ -190,12 +193,12 @@ _decode_lte_rrc_ota(const char *b, int offset, int length,
     switch (pkt_ver) {
     case 2:
         offset += _decode_by_fmt(LteRrcOtaPacketFmt_v2,
-                                    sizeof(LteRrcOtaPacketFmt_v2) / sizeof(Fmt),
+                                    ARRAY_SIZE(LteRrcOtaPacketFmt_v2, Fmt),
                                     b, offset, length, result);
         break;
     case 7:
         offset += _decode_by_fmt(LteRrcOtaPacketFmt_v7,
-                                    sizeof(LteRrcOtaPacketFmt_v7) / sizeof(Fmt),
+                                    ARRAY_SIZE(LteRrcOtaPacketFmt_v7, Fmt),
                                     b, offset, length, result);
         break;
     default:
@@ -205,13 +208,16 @@ _decode_lte_rrc_ota(const char *b, int offset, int length,
 
     int pdu_number = _search_result_int(result, "PDU Number");
     int pdu_length = _search_result_int(result, "Msg Length");
+    const char *type_name = search_name(LteRrcOtaPduType,
+                                        ARRAY_SIZE(LteRrcOtaPduType, ValueName),
+                                        pdu_number);
 
-    if (LteRrcOtaPduType.count(pdu_number) == 0) {
+    if (type_name == NULL) {    // not found
         printf("Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
         return 0;
     } else {
         std::string type_str = "raw_msg/";
-        type_str += LteRrcOtaPduType.at(pdu_number);
+        type_str += type_name;
         PyObject *t = Py_BuildValue("(ss#s)",
                                     "Msg", b + offset, pdu_length, type_str.c_str());
         PyList_Append(result, t);
@@ -229,7 +235,7 @@ _decode_lte_nas_plain(const char *b, int offset, int length,
     switch (pkt_ver) {
     case 1:
         offset += _decode_by_fmt(LteNasPlainFmt_v1,
-                                    sizeof(LteNasPlainFmt_v1) / sizeof(Fmt),
+                                    ARRAY_SIZE(LteNasPlainFmt_v1, Fmt),
                                     b, offset, length, result);
         break;
     default:
@@ -256,7 +262,7 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
     case 3:
         {
             offset += _decode_by_fmt(LteMl1CmlifmrFmt_v3_Header,
-                                        sizeof(LteMl1CmlifmrFmt_v3_Header) / sizeof(Fmt),
+                                        ARRAY_SIZE(LteMl1CmlifmrFmt_v3_Header, Fmt),
                                         b, offset, length, result);
             int n_neighbor_cells = _search_result_int(result, "Number of Neighbor Cells");
             int n_detected_cells = _search_result_int(result, "Number of Detected Cells");
@@ -268,7 +274,7 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
             for (int i = 0; i < n_neighbor_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
                 offset += _decode_by_fmt(LteMl1CmlifmrFmt_v3_Neighbor_Cell,
-                                            sizeof(LteMl1CmlifmrFmt_v3_Neighbor_Cell) / sizeof(Fmt),
+                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v3_Neighbor_Cell, Fmt),
                                             b, offset, length, result_cell);
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
@@ -284,7 +290,7 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
             for (int i = 0; i < n_detected_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
                 offset += _decode_by_fmt(LteMl1CmlifmrFmt_v3_Detected_Cell,
-                                            sizeof(LteMl1CmlifmrFmt_v3_Detected_Cell) / sizeof(Fmt),
+                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v3_Detected_Cell, Fmt),
                                             b, offset, length, result_cell);
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
@@ -318,21 +324,23 @@ _decode_lte_ml1_subpkt(const char *b, int offset, int length,
                 PyObject *result_subpkt = PyList_New(0);
                 // Decode subpacket header
                 offset += _decode_by_fmt(LteMl1SubpktFmt_v1_SubpktHeader,
-                                            sizeof(LteMl1SubpktFmt_v1_SubpktHeader) / sizeof(Fmt),
+                                            ARRAY_SIZE(LteMl1SubpktFmt_v1_SubpktHeader, Fmt),
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 int subpkt_id = _search_result_int(result_subpkt, "SubPacket ID");
                 int subpkt_ver = _search_result_int(result_subpkt, "Version");
-                if (LteMl1Subpkt_SubpktType.count(subpkt_id) == 0) {
+                const char *type_name = search_name(LteMl1Subpkt_SubpktType,
+                                                    ARRAY_SIZE(LteMl1Subpkt_SubpktType, ValueName),
+                                                    subpkt_id);
+                if (type_name == NULL) {    // not found
                     printf("Unknown LTE ML1 Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
-                    const char *type_name = LteMl1Subpkt_SubpktType.at(subpkt_id);
                     if (strcmp(type_name, "Serving_Cell_Measurement_Result") == 0) {
                         switch (subpkt_ver) {
                         case 4:
                             offset += _decode_by_fmt(LteMl1SubpktFmt_v1_Scmr_v4,
-                                                    sizeof(LteMl1SubpktFmt_v1_Scmr_v4) / sizeof(Fmt),
+                                                    ARRAY_SIZE(LteMl1SubpktFmt_v1_Scmr_v4, Fmt),
                                                     b, offset, length, result_subpkt);
                             success = true;
                             break;
@@ -340,6 +348,7 @@ _decode_lte_ml1_subpkt(const char *b, int offset, int length,
                             break;
                         }
                     }
+                    // TODO: replace type ID to name.
 
                     if (success) {
                         PyObject *t = Py_BuildValue("(sOs)",
@@ -380,7 +389,7 @@ decode_log_packet (const char *b, int length) {
     // Parse Header
     result = PyList_New(0);
     offset = 0;
-    offset += _decode_by_fmt(LogPacketHeaderFmt, sizeof(LogPacketHeaderFmt) / sizeof(Fmt),
+    offset += _decode_by_fmt(LogPacketHeaderFmt, ARRAY_SIZE(LogPacketHeaderFmt, Fmt),
                                 b, offset, length, result);
     PyObject *old_result = result;
     result = PyList_GetSlice(result, 2, 4);
@@ -388,11 +397,12 @@ decode_log_packet (const char *b, int length) {
     old_result = NULL;
 
     // Differentiate using type ID
+
     LogPacketType type_id = (LogPacketType) _search_result_int(result, "type_id");
-    const char* type_name = NULL;
-    if (LogPacketTypeID_To_Name.count(type_id) > 0)
-        type_name = LogPacketTypeID_To_Name.at(type_id);
-    else
+    const char* type_name = search_name(LogPacketTypeID_To_Name,
+                                        ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
+                                        (int) type_id);
+    if (type_name == NULL)  // not found
         type_name = "Unsupported";
     // There is no leak here
     PyList_SetItem(result, 0, Py_BuildValue("(sss)", "type_id", type_name, ""));
@@ -400,33 +410,33 @@ decode_log_packet (const char *b, int length) {
     switch (type_id) {
     case WCDMA_CELL_ID:
         offset += _decode_by_fmt(WcdmaCellIdFmt,
-                                    sizeof(WcdmaCellIdFmt) / sizeof(Fmt),
+                                    ARRAY_SIZE(WcdmaCellIdFmt, Fmt),
                                     b, offset, length, result);
         break;
 
     case WCDMA_Signaling_Messages:
         offset += _decode_by_fmt(WcdmaSignalingMessagesFmt,
-                                    sizeof(WcdmaSignalingMessagesFmt) / sizeof(Fmt),
+                                    ARRAY_SIZE(WcdmaSignalingMessagesFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_wcdma_signaling_messages(b, offset, length, result);
         break;
 
     case LTE_RRC_OTA_Packet:
         offset += _decode_by_fmt(LteRrcOtaPacketFmt,
-                                    sizeof(LteRrcOtaPacketFmt) / sizeof(Fmt),
+                                    ARRAY_SIZE(LteRrcOtaPacketFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_rrc_ota(b, offset, length, result);
         break;
 
     case LTE_RRC_Serv_Cell_Info_Log_Packet:
         offset += _decode_by_fmt(LteRrcServCellInfoLogPacketFmt,
-                                    sizeof(LteRrcServCellInfoLogPacketFmt) / sizeof(Fmt),
+                                    ARRAY_SIZE(LteRrcServCellInfoLogPacketFmt, Fmt),
                                     b, offset, length, result);
         break;
 
     case LTE_RRC_MIB_Message_Log_Packet:
         offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt,
-                                    sizeof(LteRrcMibMessageLogPacketFmt) / sizeof(Fmt),
+                                    ARRAY_SIZE(LteRrcMibMessageLogPacketFmt, Fmt),
                                     b, offset, length, result);
         break;
 
@@ -435,21 +445,21 @@ decode_log_packet (const char *b, int length) {
     case LTE_NAS_EMM_Plain_OTA_Incoming_Message:
     case LTE_NAS_EMM_Plain_OTA_Outgoing_Message:
         offset += _decode_by_fmt(LteNasPlainFmt,
-                                    sizeof(LteNasPlainFmt) / sizeof(Fmt),
+                                    ARRAY_SIZE(LteNasPlainFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_nas_plain(b, offset, length, result);
         break;
 
     case LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results:
         offset += _decode_by_fmt(LteMl1CmlifmrFmt,
-                                    sizeof(LteMl1CmlifmrFmt) / sizeof(Fmt),
+                                    ARRAY_SIZE(LteMl1CmlifmrFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_ml1_cmlifmr(b, offset, length, result);
         break;
 
     case LTE_ML1_Serving_Cell_Measurement_Result:
         offset += _decode_by_fmt(LteMl1SubpktFmt,
-                                    sizeof(LteMl1SubpktFmt) / sizeof(Fmt),
+                                    ARRAY_SIZE(LteMl1SubpktFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_ml1_subpkt(b, offset, length, result);
         break;
