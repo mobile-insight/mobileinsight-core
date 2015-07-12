@@ -34,7 +34,7 @@ class MsgSerializer(Analyzer):
         :type path: string
         """
         self.__output_path = path
-        self.__output_file = open(path, "wab")
+        self.__output_file = open(path, "wb")
 
     def __dump_message(self,msg):
         """
