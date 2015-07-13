@@ -1,6 +1,7 @@
 #ifndef __DM_COLLECTOR_C_LOG_CONFIG_H__
 #define __DM_COLLECTOR_C_LOG_CONFIG_H__
 
+#include "utils.h"
 #include "consts.h"
 
 #include <utility>
@@ -14,7 +15,6 @@ enum LogConfigOp {
 };
 
 typedef std::pair<char*, int> BinaryBuffer;
-typedef std::vector<int> IdVector;
 
 int get_equip_id (int type_id);
 int get_item_id (int type_id);

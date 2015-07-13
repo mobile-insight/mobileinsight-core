@@ -10,6 +10,7 @@ __all__ = ["WSDissector"]
 
 import os
 import binascii
+import platform
 import struct
 import subprocess
 import sys
@@ -49,6 +50,8 @@ class WSDissector:
                         "LTE-RRC_DL_DCCH": 201,
                         "LTE-RRC_UL_DCCH": 202,
                         "LTE-RRC_BCCH_DL_SCH":  203,
+                        "LTE-RRC_DL_CCCH": 204,
+                        "LTE-RRC_UL_CCCH": 205,
                         "LTE-NAS_EPS_PLAIN":    250,
                         }
     _proc = None
@@ -65,11 +68,17 @@ class WSDissector:
         :type ws_library_path: string
         """
 
-        executable_path = sys.exec_prefix+"/mobile_insight/ws_dissector/ws_dissector"
         if cls._init_proc_called:
             return
+        executable_path = sys.exec_prefix+"/mobile_insight/ws_dissector/ws_dissector"
         env = dict(os.environ)
-        env["LD_LIBRARY_PATH"] = ws_library_path + ":" + env.get("LD_LIBRARY_PATH", "")
+        if platform.system() == "Windows":
+            executable_path += ".exe"
+            if ws_library_path:
+                env["PATH"] = ws_library_path + ";" + env.get("PATH", "")
+        else:   # Linux or OS X
+            if ws_library_path:
+                env["LD_LIBRARY_PATH"] = ws_library_path + ":" + env.get("LD_LIBRARY_PATH", "")
         cls._proc = subprocess.Popen([executable_path],
                                     bufsize=-1,
                                     stdin=subprocess.PIPE,

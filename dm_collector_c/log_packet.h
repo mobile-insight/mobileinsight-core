@@ -41,7 +41,7 @@ const Fmt WcdmaSignalingMessagesFmt [] = {
     {UINT, "Message Length", 2}
 };
 
-const ValueString WcdmaSignalingMsgChannelType = {
+const ValueName WcdmaSignalingMsgChannelType [] = {
     {0x00, "RRC_UL_CCCH"},
     {0x01, "RRC_UL_DCCH"},
     {0x02, "RRC_DL_CCCH"},
@@ -74,10 +74,12 @@ const Fmt LteRrcOtaPacketFmt_v7 [] = {
     {UINT, "SIB Mask in SI", 1}
 };
 
-const ValueString LteRrcOtaPduType = {
+const ValueName LteRrcOtaPduType [] = {
     {0x02, "LTE-RRC_BCCH_DL_SCH"},
     {0x04, "LTE-RRC_PCCH"},
+    {0x05, "LTE-RRC_DL_CCCH"},
     {0x06, "LTE-RRC_DL_DCCH"},
+    {0x07, "LTE-RRC_UL_CCCH"},
     {0x08, "LTE-RRC_UL_DCCH"}
 };
 
@@ -140,7 +142,7 @@ const Fmt LteMl1SubpktFmt_v1_SubpktHeader [] = {
     {UINT, "SubPacket Size", 2},
 };
 
-const ValueString LteMl1Subpkt_SubpktType = {
+const ValueName LteMl1Subpkt_SubpktType [] = {
     {25, "Serving_Cell_Measurement_Result"}
 };
 

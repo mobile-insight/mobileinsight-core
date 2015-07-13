@@ -34,6 +34,8 @@ static void init_proto_names (const char *protos []) {
     protos[201] = "lte-rrc.dl.dcch";
     protos[202] = "lte-rrc.ul.dcch";
     protos[203] = "lte-rrc.bcch.dl.sch";
+    protos[204] = "lte-rrc.dl.ccch";
+    protos[205] = "lte-rrc.ul.ccch";
 
     protos[250] = "nas-eps_plain";
 }
