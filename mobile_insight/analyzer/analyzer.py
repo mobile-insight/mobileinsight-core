@@ -27,8 +27,13 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     streamHandler.setFormatter(formatter)
 
     l.setLevel(level)
-    l.addHandler(fileHandler)
-    l.addHandler(streamHandler)    
+    l.addHandler(streamHandler)
+
+    if log_file!="":
+        l.addHandler(fileHandler)  
+        l.disabled = False 
+    else:
+        l.disabled = True
 
 
 class Analyzer(Element):
@@ -43,9 +48,7 @@ class Analyzer(Element):
         self.source_callback=[]    
 
         #setup the logs
-        self.__logpath="automator.log"
-        self.__loglevel=logging.INFO
-        self.set_log(self.__logpath,self.__loglevel)
+        self.set_log("automator.log","",logging.INFO)
 
     def set_log(self,logpath,loglevel=logging.INFO):
         """
@@ -59,7 +62,7 @@ class Analyzer(Element):
         self.__loglevel=loglevel
         setup_logger('automator_logger',self.__logpath,self.__loglevel)
         self.logger=logging.getLogger('automator_logger')
-        self.logger.disabled = False
+
     
     def set_source(self,source):
         """
