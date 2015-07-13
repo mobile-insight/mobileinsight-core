@@ -45,8 +45,7 @@ class Analyzer(Element):
         #setup the logs
         self.__logpath="automator.log"
         self.__loglevel=logging.INFO
-        self.logger=logging.getLogger()
-        self.logger.disabled = True
+        self.set_log(self.__logpath,self.__loglevel)
 
     def set_log(self,logpath,loglevel=logging.INFO):
         """

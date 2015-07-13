@@ -4,7 +4,7 @@ include setup.py
 exclude setup-internal.py
 recursive-include docs *
 recursive-include examples *.py
-recursive-include mobile_insight *.py *.so *.m *.pyd README
+recursive-include mobile_insight *.py  *.m *.pyd README
 recursive-include ws_dissector ws_dissector ws_dissector.exe
 prune dm_collector_c 
 prune docs/docs

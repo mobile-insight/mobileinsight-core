@@ -34,11 +34,14 @@ class MsgLogger(Analyzer):
         :param msg: the received message
         """
         self.__msg_log.append(msg)
-        print msg.timestamp,msg.type_id
+        # print msg.timestamp,msg.type_id
+        self.logger.info(msg.type_id)
         if self.decode_type == self.XML:
             print msg.data.decode_xml()
+            # self.logger.info('\n'+msg.data.decode_xml())
         elif self.decode_type == self.JSON:
             print msg.data.decode_json()
+            # self.logger.info('\n'+msg.data.decode_json())
 
     #Decoding scheme
 

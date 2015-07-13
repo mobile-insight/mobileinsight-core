@@ -53,6 +53,19 @@ traffic_class={1:"conversional class", 2:"streaming class",
 residual_ber={1:5e-2, 2:1e-2, 3:5e-3, 4:4e-3, 5:1e-3, 6:1e-4, 7:1e-5,
         8:1e-6, 9:6e-8}
 
+def xstr(val):
+    '''
+    Return a string for valid value, or empty string for Nontype
+
+    :param val: a value
+    :returns: a string if val is not none, otherwise an empty string
+    '''
+
+    if val:
+        return str(val)
+    else:
+        return "unknown"
+
 
 def max_bitrate(val):
     '''
@@ -228,6 +241,8 @@ class LteNasAnalyzer(Analyzer):
 
             if field.get('name')=="nas_eps.emm.qci":
                 self.__esm_status.qos.qci=int(field.get('show'))
+                self.logger.info(self.__esm_status.qos.dump_rate())
+                self.logger.info(self.__esm_status.qos.dump_delivery())
 
             if field.get('show')=="Quality Of Service - Negotiated QoS": 
 
@@ -278,6 +293,9 @@ class EmmStatus:
         self.ciphering = None
         self.integrity = None
 
+    def inited(self):
+        return (self.state and self.substate and self.guti.inited())
+
     def dump(self):
         """
         Report the EMM status
@@ -288,10 +306,11 @@ class EmmStatus:
         # self.guti.mcc,self.guti.mnc,self.guti.mme_group_id, \
         # self.guti.mme_code,self.guti.m_tmsi,self.ciphering,self.integrity
 
-        return self.__class__.__name__+' '+str(self.state)+' '+str(self.substate)\
-        +' '+str(self.guti.mcc)+' '+str(self.guti.mnc)+' '+str(self.guti.mme_group_id)\
-        +' '+str(self.guti.mme_code)+' '+str(self.guti.m_tmsi)\
-        +' '+str(self.ciphering)+' '+str(self.integrity)
+        return (self.__class__.__name__
+            + ' EMM.state='+xstr(self.state) + ' EMM.substate='+xstr(self.substate)
+            + ' MCC=' + xstr(self.guti.mcc) + ' MNC=' + xstr(self.guti.mnc)
+            + ' MMEGI=' + xstr(self.guti.mme_group_id) + ' MMEC=' + xstr(self.guti.mme_code)
+            + ' TMSI=' + xstr(self.guti.m_tmsi))
 
 
 class Guti:
@@ -359,26 +378,31 @@ class EsmQos:
         # self.guaranteed_bitrate_ulink, self.guaranteed_bitrate_dlink, \
         # self.max_bitrate_ulink_ext, self.max_bitrate_dlink_ext, \
         # self.guaranteed_bitrate_ulink_ext, self.guaranteed_bitrate_dlink_ext
-        return (self.__class__.__name__ + " Throughput(Kbps):"
-            + ' ' + self.peak_tput + ' ' + self.mean_tput
-            + ' ' + self.max_bitrate_ulink + ' ' + self.max_bitrate_dlink
-            + ' ' + self.guaranteed_bitrate_ulink + ' ' + self.guaranteed_bitrate_dlink
-            + ' ' + self.max_bitrate_ulink_ext + ' ' + self.max_bitrate_dlink_ext
-            + ' ' + self.guaranteed_bitrate_ulink_ext + ' ' + self.guaranteed_bitrate_dlink_ext)
+        return (self.__class__.__name__ 
+            + ' peak_tput=' + xstr(self.peak_tput) + ' mean_tput=' + xstr(self.mean_tput)
+            + ' max_bitrate_ulink=' + xstr(self.max_bitrate_ulink) + ' max_bitrate_dlink=' + xstr(self.max_bitrate_dlink)
+            + ' guaranteed_birate_ulink=' + xstr(self.guaranteed_bitrate_ulink) + ' guaranteed_birate_dlink=' + xstr(self.guaranteed_bitrate_dlink)
+            + ' max_bitrate_ulink_ext=' + xstr(self.max_bitrate_ulink_ext) + ' max_bitrate_dlink_ext=' + xstr(self.max_bitrate_dlink_ext)
+            + ' guaranteed_birate_ulink_ext=' + xstr(self.guaranteed_bitrate_ulink_ext) + ' guaranteed_birate_dlink_ext=' + xstr(self.guaranteed_bitrate_dlink_ext))
 
     def dump_delivery(self):
         """
         Report the delivery profile in ESM QoS, including delivery order guarantee,
         traffic class, QCI, delay class, transfer delay, etc.
 
-        :returns: a string that encodes all the data rate 
+        :returns: a string that encodes all the data rate, or None if not ready 
         :rtype: string
         """
-        # print self.__class__.__name__,"delay:",delivery_order[self.delivery_order], \
-        # traffic_class[self.traffic_class],self.qci,self.delay_class,self.transfer_delay, \
-        # self.residual_ber
-        return (self.__class__.__name__ + " delivery profile:"
-            + ' ' + delivery_order[self.delivery_order]
-            + ' ' + traffic_class[self.traffic_class]
-            + ' ' + self.qci + ' ' + self.delay_class
-            + ' ' + self.transfer_delay + ' ' + self.residual_ber)
+        if self.delivery_order:
+            order = delivery_order[self.delivery_order]
+        else:
+            order = None
+        if self.traffic_class:
+            tra_class = traffic_class[self.traffic_class]
+        else:
+            tra_class = None
+        return (self.__class__.__name__
+            + ' delivery_order=' + xstr(order)
+            + ' traffic_class=' + xstr(tra_class)
+            + ' QCI=' + xstr(self.qci) + ' delay_class=' + xstr(self.delay_class)
+            + ' transfer_delay=' + xstr(self.transfer_delay) + ' residual_BER=' + xstr(self.residual_ber))
