@@ -50,6 +50,8 @@ class WSDissector:
                         "LTE-RRC_DL_DCCH": 201,
                         "LTE-RRC_UL_DCCH": 202,
                         "LTE-RRC_BCCH_DL_SCH":  203,
+                        "LTE-RRC_DL_CCCH": 204,
+                        "LTE-RRC_UL_CCCH": 205,
                         "LTE-NAS_EPS_PLAIN":    250,
                         }
     _proc = None
