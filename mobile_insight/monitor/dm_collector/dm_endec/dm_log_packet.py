@@ -248,7 +248,7 @@ class DMLogPacket:
         # WSDissector.init_proc(prefs["ws_dissect_executable_path"],
         #                         prefs["libwireshark_path"])
         # WSDissector.init_proc(None,prefs["libwireshark_path"])
-        WSDissector.init_proc(prefs["libwireshark_path"])
+        WSDissector.init_proc(prefs)
         cls._init_called = True
 
     @classmethod

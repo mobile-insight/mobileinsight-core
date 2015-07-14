@@ -31,12 +31,12 @@ class DMCollector(Monitor):
     #: a list containing the currently supported message types.
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
 
-    def __init__(self, prefs):
+    def __init__(self, prefs={}):
         """
         Configure this class with user preferences.
         This method should be called before any actual decoding.
 
-        :param prefs: configurations that contain *ws_dissect_executable_path* and *libwireshark_path*
+        :param prefs: configurations for message decoder. Empty by default.
         :type prefs: dictionary
         """
         Monitor.__init__(self)

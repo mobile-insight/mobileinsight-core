@@ -21,8 +21,6 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     '''
     l = logging.getLogger(logger_name)
     formatter = logging.Formatter('%(asctime)s : %(message)s')
-    fileHandler = logging.FileHandler(log_file, mode='w')
-    fileHandler.setFormatter(formatter)
     streamHandler = logging.StreamHandler()
     streamHandler.setFormatter(formatter)
 
@@ -30,11 +28,10 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     l.addHandler(streamHandler)
 
     if log_file!="":
+        fileHandler = logging.FileHandler(log_file, mode='w')
+        fileHandler.setFormatter(formatter)
         l.addHandler(fileHandler)  
-        l.disabled = False 
-    else:
-        l.disabled = True
-
+    l.disabled = False 
 
 class Analyzer(Element):
     """A base class for all the analyzers
@@ -48,7 +45,7 @@ class Analyzer(Element):
         self.source_callback=[]    
 
         #setup the logs
-        self.set_log("automator.log","",logging.INFO)
+        self.set_log("",logging.INFO)
 
     def set_log(self,logpath,loglevel=logging.INFO):
         """

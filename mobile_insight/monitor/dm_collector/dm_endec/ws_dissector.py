@@ -64,8 +64,8 @@ class WSDissector:
         Launch the ws_dissector program. Must be called before any actual 
         decoding, and should be called only once.
 
-        :param ws_library_path: a directory that contains libwireshark
-        :type ws_library_path: string
+        :param ws_library_path: a directory list that contains libwireshark
+        :type ws_library_path: dictionary
         """
 
         if cls._init_proc_called:
