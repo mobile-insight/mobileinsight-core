@@ -8,8 +8,6 @@ Author: Yuanjie Li
 
 from .analyzer import *
 
-from multiprocessing import Process,Pipe
-
 class LteMeasurementAnalyzer(Analyzer):
     """
     An analyzer for LTE radio measurements
