@@ -86,6 +86,11 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
 
 int main(int argc, char** argv)
 {
+    if (argc > 0) {
+        printf("This program works!\n");
+        return 0;
+    }
+
     epan_init(register_all_protocols, register_all_protocol_handoffs, 
                 NULL, NULL);
  
