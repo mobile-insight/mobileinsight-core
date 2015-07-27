@@ -10,6 +10,7 @@ from analyzer import *
 
 import xml.etree.ElementTree as ET
 import io
+import datetime
 
 __all__=["MsgLogger"]
 
@@ -35,7 +36,8 @@ class MsgLogger(Analyzer):
         """
         self.__msg_log.append(msg)
         # print msg.timestamp,msg.type_id
-        self.logger.info(msg.type_id)
+        date = datetime.datetime.fromtimestamp(msg.timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        self.logger.info(date+':'+msg.type_id)
         if self.decode_type == self.XML:
             # print msg.data.decode_xml()
             self.logger.info(msg.data.decode_xml())

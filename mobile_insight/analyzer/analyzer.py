@@ -20,7 +20,7 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     :param level: the loggoing level. The default value is logging.INFO.
     '''
     l = logging.getLogger(logger_name)
-    formatter = logging.Formatter('%(asctime)s : %(message)s')
+    formatter = logging.Formatter('%(message)s')
     streamHandler = logging.StreamHandler()
     streamHandler.setFormatter(formatter)
 
