@@ -36,7 +36,7 @@ class MsgLogger(Analyzer):
         """
         self.__msg_log.append(msg)
         # print msg.timestamp,msg.type_id
-        date = datetime.datetime.fromtimestamp(msg.timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        date = datetime.datetime.fromtimestamp(msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')
         self.logger.info(date+':'+msg.type_id)
         if self.decode_type == self.XML:
             # print msg.data.decode_xml()

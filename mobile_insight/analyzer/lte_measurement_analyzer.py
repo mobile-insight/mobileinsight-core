@@ -8,6 +8,8 @@ Author: Yuanjie Li
 
 from .analyzer import *
 
+import datetime
+
 class LteMeasurementAnalyzer(Analyzer):
     """
     An analyzer for LTE radio measurements
@@ -51,7 +53,9 @@ class LteMeasurementAnalyzer(Analyzer):
         if msg.type_id == "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results":
             msg_dict=dict(msg.data.decode())
             # print msg.timestamp,msg_dict['Serving Filtered RSRP(dBm)']
-            rsrp_log = (self.__class__.__name__
+            date = datetime.datetime.fromtimestamp(msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')
+            rsrp_log = (str(date)+":"
+                + self.__class__.__name__
                 + ' RSRP=' + str(msg_dict['Serving Filtered RSRP(dBm)'])+'dBm'
                 + ' RSRQ=' + str(msg_dict['Serving Filtered RSRQ(dB)'])+'dB'
                 + ' # of neighbors=' + str(msg_dict['Number of Neighbor Cells']))

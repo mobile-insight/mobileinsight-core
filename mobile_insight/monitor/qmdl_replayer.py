@@ -19,7 +19,7 @@ class QmdlReplayer(Monitor):
     
     """
 
-    def __init__(self, prefs):
+    def __init__(self, prefs={}):
         Monitor.__init__(self)
         DMLogPacket.init(prefs)
 
