@@ -86,7 +86,7 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
 
 int main(int argc, char** argv)
 {
-    if (argc > 0) {
+    if (argc > 1) {
         printf("This program works!\n");
         return 0;
     }
