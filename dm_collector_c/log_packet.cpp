@@ -7,11 +7,11 @@
 #include <map>
 #include <string>
 
-// Return: New reference
-static PyObject *
-_search_result(PyObject *result, const char *target) {
+// Return: i
+static int
+_find_result_index(PyObject *result, const char *target) {
     assert(PySequence_Check(result));
-    PyObject *ret = NULL;
+    int ret = -1;   // return -1 if fails
 
     Py_INCREF(result);
     int n = PySequence_Length(result);
@@ -20,9 +20,9 @@ _search_result(PyObject *result, const char *target) {
         PyObject *field_name = PySequence_GetItem(t, 0);
         const char *name = PyString_AsString(field_name);
         if (strcmp(name, target) == 0) {
+            ret = i;
             Py_DECREF(t);
             Py_DECREF(field_name);
-            ret = PySequence_GetItem(t, 1); // return new reference
             break;
         } else {
             Py_DECREF(t);
@@ -33,6 +33,20 @@ _search_result(PyObject *result, const char *target) {
     return ret;
 }
 
+// Return: New reference
+static PyObject *
+_search_result(PyObject *result, const char *target) {
+    int i = _find_result_index(result, target);
+    if (i >= 0) {
+        PyObject *t = PySequence_GetItem(result, i);
+        PyObject *ret = PySequence_GetItem(t, 1); // return new reference
+        Py_DECREF(t);
+        return ret;
+    } else {
+        return NULL;
+    }
+}
+
 static int
 _search_result_int(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
@@ -41,6 +55,52 @@ _search_result_int(PyObject *result, const char *target) {
     Py_DECREF(item);
 
     return val;
+}
+
+// Return: New reference to the old object
+static PyObject *
+_replace_result(PyObject *result, const char *target, PyObject *new_object) {
+    int i = _find_result_index(result, target);
+    if (i >= 0) {
+        PyObject *t = PySequence_GetItem(result, i);
+        PyObject *ret = PySequence_GetItem(t, 1); // return new reference
+        Py_DECREF(t);
+
+        PyList_SetItem(result, i, Py_BuildValue("(sOs)", target, new_object, ""));
+        return ret;
+    } else {
+        return NULL;
+    }
+}
+
+// Search a field that has a value of integer type, and map this integer to 
+// a string, which replace the original integer.
+// If there is no correponding string, or if the mapping is NULL, map this 
+// integer to *not_found*.
+// Return: old number
+static int
+_map_result_field_to_name(PyObject *result, const char *target,
+                            const ValueName mapping [], int n,
+                            const char *not_found) {
+    int i = _find_result_index(result, target);
+    if (i >= 0) {
+        PyObject *t = PySequence_GetItem(result, i);
+        PyObject *item = PySequence_GetItem(t, 1); // return new reference
+        Py_DECREF(t);
+        assert(PyInt_Check(item));
+        int val = (int) PyInt_AsLong(item);
+        Py_DECREF(item);
+
+        const char* name = search_name(mapping, n, val);
+        if (name == NULL)  // not found
+            name = not_found;
+        PyObject *pystr = Py_BuildValue("s", name);
+        PyList_SetItem(result, i, Py_BuildValue("(sOs)", target, pystr, ""));
+        Py_DECREF(pystr);
+        return val;
+    } else {
+        return -1;
+    }
 }
 
 // Append to result
@@ -78,6 +138,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                     break;
                 }
                 // Convert to a Python integer object or a Python long integer object
+                // TODO: make it little endian
                 if (fmt[i].len <= 4)
                     decoded = Py_BuildValue("I", ii);
                 else
@@ -86,7 +147,21 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 break;
             }
 
-        case PLMN:
+        case BYTE_STREAM:
+            {
+                assert(fmt[i].len > 0);
+                char hex[10] = {};
+                std::string ascii_data = "0x";
+                for (int k = 0; k < fmt[i].len; k++) {
+                    sprintf(hex, "%02x", p[k] & 0xFF);
+                    ascii_data += hex;
+                }
+                decoded = Py_BuildValue("s", ascii_data.c_str());
+                n_consumed += fmt[i].len;
+                break;
+            }
+
+        case PLMN_MK1:
             {
                 assert(fmt[i].len == 6);
                 const char *plmn = p;
@@ -97,6 +172,21 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                                                 plmn[3],
                                                 plmn[4],
                                                 plmn[5]);
+                n_consumed += fmt[i].len;
+                break;
+            }
+
+        case PLMN_MK2:
+            {
+                assert(fmt[i].len == 3);
+                const char *plmn = p;
+                decoded = PyString_FromFormat("%d%d%d-%d%d%d",
+                                                plmn[0] & 0x0F,
+                                                (plmn[0] >> 4) & 0x0F,
+                                                plmn[1] & 0x0F,
+                                                plmn[2] & 0x0F,
+                                                (plmn[2] >> 4) & 0x0F,
+                                                (plmn[1] >> 4) & 0x0F);
                 n_consumed += fmt[i].len;
                 break;
             }
@@ -185,6 +275,48 @@ _decode_wcdma_signaling_messages(const char *b, int offset, int length,
 }
 
 static int
+_decode_umts_nas_gmm_state(const char *b, int offset, int length,
+                            PyObject *result) {
+    (void) _map_result_field_to_name(result,
+                                        "GMM State",
+                                        UmtsNasGmmState_GmmState,
+                                        ARRAY_SIZE(UmtsNasGmmState_GmmState, ValueName),
+                                        "Unknown");
+    (void) _map_result_field_to_name(result,
+                                        "GMM Substate",
+                                        UmtsNasGmmState_GmmSubstate,
+                                        ARRAY_SIZE(UmtsNasGmmState_GmmSubstate, ValueName),
+                                        "Unknown");
+    (void) _map_result_field_to_name(result,
+                                        "GMM Update Status",
+                                        UmtsNasGmmState_GmmUpdateStatus,
+                                        ARRAY_SIZE(UmtsNasGmmState_GmmUpdateStatus, ValueName),
+                                        "Unknown");
+    return 0;
+}
+
+static int
+_decode_umts_nas_mm_state(const char *b, int offset, int length,
+                            PyObject *result) {
+    (void) _map_result_field_to_name(result,
+                                        "MM State",
+                                        UmtsNasMmState_MmState,
+                                        ARRAY_SIZE(UmtsNasMmState_MmState, ValueName),
+                                        "Unknown");
+    (void) _map_result_field_to_name(result,
+                                        "MM Substate",
+                                        UmtsNasMmState_MmSubstate,
+                                        ARRAY_SIZE(UmtsNasMmState_MmSubstate, ValueName),
+                                        "Unknown");
+    (void) _map_result_field_to_name(result,
+                                        "MM Update Status",
+                                        UmtsNasMmState_MmUpdateStatus,
+                                        ARRAY_SIZE(UmtsNasMmState_MmUpdateStatus, ValueName),
+                                        "Unknown");
+    return 0;
+}
+
+static int
 _decode_lte_rrc_ota(const char *b, int offset, int length,
                     PyObject *result) {
     int start = offset;
@@ -253,6 +385,70 @@ _decode_lte_nas_plain(const char *b, int offset, int length,
 }
 
 static int
+_decode_lte_nas_emm_state(const char *b, int offset, int length,
+                            PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+
+    switch (pkt_ver) {
+    case 2:
+        {
+            offset += _decode_by_fmt(LteNasEmmStateFmt_v2,
+                                        ARRAY_SIZE(LteNasEmmStateFmt_v2, Fmt),
+                                        b, offset, length, result);
+            int emm_state_id = _map_result_field_to_name(
+                                        result,
+                                        "EMM State",
+                                        LteNasEmmState_v2_EmmState,
+                                        ARRAY_SIZE(LteNasEmmState_v2_EmmState, ValueName),
+                                        "Unknown");
+            // Replace the value of "EMM Substate"
+            const ValueName *table = NULL;
+            int table_size = 0;
+            switch (emm_state_id) {
+            case 1: // EMM_DEREGISTERED
+                table = LteNasEmmState_v2_EmmSubstate_Deregistered;
+                table_size = ARRAY_SIZE(LteNasEmmState_v2_EmmSubstate_Deregistered, ValueName);
+                break;
+
+            case 2: // EMM_REGISTERED_INITIATED
+                table = LteNasEmmState_v2_EmmSubstate_Registered_Initiated;
+                table_size = ARRAY_SIZE(LteNasEmmState_v2_EmmSubstate_Registered_Initiated, ValueName);
+                break;
+
+            case 3: // EMM_REGISTERED
+            case 4: // EMM_TRACKING_AREA_UPDATING_INITIATED
+            case 5: // EMM_SERVICE_REQUEST_INITIATED
+                table = LteNasEmmState_v2_EmmSubstate_Registered;
+                table_size = ARRAY_SIZE(LteNasEmmState_v2_EmmSubstate_Registered, ValueName);
+                break;
+
+            case 0: // EMM_NULL
+            case 6: // EMM_DEREGISTERED_INITIATED
+            default:
+                // No Substate
+                break;
+            }
+            if (table != NULL && table_size > 0) {
+                (void) _map_result_field_to_name(result, "EMM Substate", table, table_size, "Unknown");
+            } else {
+                PyObject *pystr = Py_BuildValue("s", "Undefined");
+                PyObject *old_object = _replace_result(result, "EMM Substate", pystr);
+                Py_DECREF(old_object);
+                Py_DECREF(pystr);
+            }
+            break;
+        } // End of v2
+
+    default:
+        printf("Unknown LTE NAS EMM State version: 0x%x\n", pkt_ver);
+        return 0;
+    }
+
+    return offset - start;
+}
+
+static int
 _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
                         PyObject *result) {
     int start = offset;
@@ -279,6 +475,7 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
                 Py_DECREF(t);
+                Py_DECREF(result_cell);
             }
             t = Py_BuildValue("(sOs)", "Neighbor Cells", result_allcells, "list");
             PyList_Append(result, t);
@@ -295,6 +492,7 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
                 Py_DECREF(t);
+                Py_DECREF(result_cell);
             }
             t = Py_BuildValue("(sOs)", "Detected Cells", result_allcells, "list");
             PyList_Append(result, t);
@@ -398,14 +596,12 @@ decode_log_packet (const char *b, int length) {
 
     // Differentiate using type ID
 
-    LogPacketType type_id = (LogPacketType) _search_result_int(result, "type_id");
-    const char* type_name = search_name(LogPacketTypeID_To_Name,
-                                        ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
-                                        (int) type_id);
-    if (type_name == NULL)  // not found
-        type_name = "Unsupported";
-    // There is no leak here
-    PyList_SetItem(result, 0, Py_BuildValue("(sss)", "type_id", type_name, ""));
+    LogPacketType type_id = (LogPacketType) _map_result_field_to_name(
+                                result,
+                                "type_id",
+                                LogPacketTypeID_To_Name,
+                                ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
+                                "Unsupported");
 
     switch (type_id) {
     case WCDMA_CELL_ID:
@@ -419,6 +615,20 @@ decode_log_packet (const char *b, int length) {
                                     ARRAY_SIZE(WcdmaSignalingMessagesFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_wcdma_signaling_messages(b, offset, length, result);
+        break;
+
+    case UMTS_NAS_GMM_State:
+        offset += _decode_by_fmt(UmtsNasGmmStateFmt,
+                                    ARRAY_SIZE(UmtsNasGmmStateFmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_umts_nas_gmm_state(b, offset, length, result);
+        break;
+
+    case UMTS_NAS_MM_State:
+        offset += _decode_by_fmt(UmtsNasMmStateFmt,
+                                    ARRAY_SIZE(UmtsNasMmStateFmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_umts_nas_mm_state(b, offset, length, result);
         break;
 
     case LTE_RRC_OTA_Packet:
@@ -448,6 +658,13 @@ decode_log_packet (const char *b, int length) {
                                     ARRAY_SIZE(LteNasPlainFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_nas_plain(b, offset, length, result);
+        break;
+
+    case LTE_NAS_EMM_State:
+        offset += _decode_by_fmt(LteNasEmmStateFmt,
+                                    ARRAY_SIZE(LteNasEmmStateFmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_lte_nas_emm_state(b, offset, length, result);
         break;
 
     case LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results:
