@@ -212,6 +212,15 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 break;
             }
 
+        case BANDWIDTH:
+            {
+                assert(fmt[i].len == 1);
+                unsigned int ii = *((unsigned char *) p);
+                decoded = PyString_FromFormat("%d MHz", ii / 5);
+                n_consumed += fmt[i].len;
+                break;
+            }
+
         case RSRP:
             {
                 // (0.0625 * x - 180) dBm
@@ -359,6 +368,31 @@ _decode_lte_rrc_ota(const char *b, int offset, int length,
         Py_DECREF(t);
         return (offset - start) + pdu_length;
     }
+}
+
+static int
+_decode_lte_rrc_serv_cell_info(const char *b, int offset, int length,
+                                PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+
+    switch (pkt_ver) {
+    case 2:
+        offset += _decode_by_fmt(LteRrcServCellInfoLogPacketFmt_v2,
+                                    ARRAY_SIZE(LteRrcServCellInfoLogPacketFmt_v2, Fmt),
+                                    b, offset, length, result);
+        break;
+    case 3:
+        offset += _decode_by_fmt(LteRrcServCellInfoLogPacketFmt_v3,
+                                    ARRAY_SIZE(LteRrcServCellInfoLogPacketFmt_v3, Fmt),
+                                    b, offset, length, result);
+        break;
+    default:
+        printf("Unknown LTE RRC Serving Cell Info packet version: %d\n", pkt_ver);
+        return 0;
+    }
+
+    return offset - start;
 }
 
 static int
@@ -641,16 +675,17 @@ decode_log_packet (const char *b, int length) {
         offset += _decode_lte_rrc_ota(b, offset, length, result);
         break;
 
-    case LTE_RRC_Serv_Cell_Info_Log_Packet:
-        offset += _decode_by_fmt(LteRrcServCellInfoLogPacketFmt,
-                                    ARRAY_SIZE(LteRrcServCellInfoLogPacketFmt, Fmt),
-                                    b, offset, length, result);
-        break;
-
     case LTE_RRC_MIB_Message_Log_Packet:
         offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt,
                                     ARRAY_SIZE(LteRrcMibMessageLogPacketFmt, Fmt),
                                     b, offset, length, result);
+        break;
+
+    case LTE_RRC_Serv_Cell_Info_Log_Packet:
+        offset += _decode_by_fmt(LteRrcServCellInfoLogPacketFmt,
+                                    ARRAY_SIZE(LteRrcServCellInfoLogPacketFmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_lte_rrc_serv_cell_info(b, offset, length, result);
         break;
 
     case LTE_NAS_ESM_Plain_OTA_Incoming_Message:

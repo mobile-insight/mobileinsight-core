@@ -9,6 +9,7 @@ enum FmtType {
     QCDM_TIMESTAMP,
     PLMN_MK1,   // in WCDMA Cell ID
     PLMN_MK2,   // in LTE NAS EMM State
+    BANDWIDTH,  // in LTE RRC Serving Cell Info, LTE RRC MIB Message
     RSRP,
     RSRQ,
     SKIP
@@ -298,14 +299,18 @@ const Fmt LteMl1SubpktFmt_v1_Scmr_v4 [] = {
     {UINT, "Physical Cell ID", 2}   //cell ID
 };
 
-
+// ------------------------------------------------------------
+// LTE RRC Serving Cell Info Log Pkt
 const Fmt LteRrcServCellInfoLogPacketFmt [] = {
     {UINT, "Version", 1},
+};
+
+const Fmt LteRrcServCellInfoLogPacketFmt_v2 [] = {
     {UINT, "Physical Cell ID", 2},  //Physical cell ID
-    {UINT, "DL FREQ",2},    //Downlink frequency
-    {UINT, "UL FREQ",2},    //Uplink frequency
-    {UINT, "DL BW", 1},     //Downlink bandwidth
-    {UINT, "UL BW", 1},     //Uplink bandwidth
+    {UINT, "DL FREQ", 2},   //Downlink frequency
+    {UINT, "UL FREQ", 2},   //Uplink frequency
+    {BANDWIDTH, "DL BW", 1},    //Downlink bandwidth
+    {BANDWIDTH, "UL BW", 1},    //Uplink bandwidth
     {UINT, "Cell Identity", 4}, //cell ID
     {UINT, "TAC", 2},   //Tracking area code
     {UINT, "Band Indicator", 4},    //Band indicator
@@ -315,13 +320,29 @@ const Fmt LteRrcServCellInfoLogPacketFmt [] = {
     {UINT, "Allowed Access", 1} //Allowed access
 };
 
+const Fmt LteRrcServCellInfoLogPacketFmt_v3 [] = {
+    {UINT, "Physical Cell ID", 2},  //Physical cell ID
+    {UINT, "DL FREQ", 4},   //Downlink frequency
+    {UINT, "UL FREQ", 4},   //Uplink frequency
+    {BANDWIDTH, "DL BW", 1},    //Downlink bandwidth
+    {BANDWIDTH, "UL BW", 1},    //Uplink bandwidth
+    {UINT, "Cell Identity", 4}, //cell ID
+    {UINT, "TAC", 2},   //Tracking area code
+    {UINT, "Band Indicator", 4},    //Band indicator
+    {UINT, "MCC", 2},   //MCC
+    {UINT, "MCC Digit", 1}, //MCC digit
+    {UINT, "MNC", 2},   //MNC
+    {UINT, "Allowed Access", 1} //Allowed access
+};
+
+// ------------------------------------------------------------
 const Fmt LteRrcMibMessageLogPacketFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Physical Cell ID", 2},  //cell ID
     {UINT, "Freq", 2},  //frequency
     {UINT, "SFN", 2},
     {UINT, "Number of Antenna", 1},
-    {UINT, "DL BW", 1}  //downlink bandwidth
+    {BANDWIDTH, "DL BW", 1}     //downlink bandwidth
 };
 
 bool is_log_packet (const char *b, int length);
