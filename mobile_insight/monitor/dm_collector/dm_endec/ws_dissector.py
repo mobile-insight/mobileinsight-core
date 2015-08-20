@@ -58,28 +58,33 @@ class WSDissector:
     _init_proc_called = False
 
     @classmethod
-    # def init_proc(cls, executable_path, ws_library_path):
-    def init_proc(cls, ws_library_path):
+    def init_proc(cls, executable_path, ws_library_path):
         """
         Launch the ws_dissector program. Must be called before any actual 
         decoding, and should be called only once.
 
-        :param ws_library_path: a directory list that contains libwireshark
-        :type ws_library_path: dictionary
+        :param executable_path: path to ws_dissector. If set to None, uses the default path.
+        :type executable_path: string or None
+
+        :param ws_library_path: a directory that contains libwireshark. If set to None, uses the default path.
+        :type ws_library_path: string or None
         """
 
         if cls._init_proc_called:
             return
-        executable_path = sys.exec_prefix+"/mobile_insight/ws_dissector/ws_dissector"
+        if executable_path:
+            real_executable_path = executable_path
+        else:
+            real_executable_path = sys.exec_prefix+"/mobile_insight/ws_dissector/ws_dissector"
         env = dict(os.environ)
         if platform.system() == "Windows":
-            executable_path += ".exe"
+            real_executable_path += ".exe"
             if ws_library_path:
                 env["PATH"] = ws_library_path + ";" + env.get("PATH", "")
         else:   # Linux or OS X
             if ws_library_path:
                 env["LD_LIBRARY_PATH"] = ws_library_path + ":" + env.get("LD_LIBRARY_PATH", "")
-        cls._proc = subprocess.Popen([executable_path],
+        cls._proc = subprocess.Popen([real_executable_path],
                                     bufsize=-1,
                                     stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE,
