@@ -180,13 +180,16 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
             {
                 assert(fmt[i].len == 3);
                 const char *plmn = p;
-                decoded = PyString_FromFormat("%d%d%d-%d%d%d",
+                decoded = PyString_FromFormat("%d%d%d-%d%d",
                                                 plmn[0] & 0x0F,
                                                 (plmn[0] >> 4) & 0x0F,
                                                 plmn[1] & 0x0F,
                                                 plmn[2] & 0x0F,
-                                                (plmn[2] >> 4) & 0x0F,
-                                                (plmn[1] >> 4) & 0x0F);
+                                                (plmn[2] >> 4) & 0x0F);
+                // MNC can have two or three digits
+                int last_digit = (plmn[1] >> 4) & 0x0F;
+                if (last_digit < 10)    // last digit exists
+                    PyString_ConcatAndDel(&decoded, PyString_FromFormat("%d", last_digit));
                 n_consumed += fmt[i].len;
                 break;
             }
