@@ -203,4 +203,9 @@ initdm_collector_c(void)
                         Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));
     }
     PyObject_SetAttrString(dm_collector_c, "log_packet_types", log_packet_types);
+    Py_DECREF(log_packet_types);
+
+    PyObject *pystr = PyString_FromString("1.0.0");
+    PyObject_SetAttrString(dm_collector_c, "version", pystr);
+    Py_DECREF(pystr);
 }

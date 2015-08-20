@@ -335,6 +335,8 @@ const Fmt LteRrcServCellInfoLogPacketFmt_v3 [] = {
     {UINT, "Allowed Access", 1} //Allowed access
 };
 
+// TODO: interpret the value of "Allowed Access"
+
 // ------------------------------------------------------------
 const Fmt LteRrcMibMessageLogPacketFmt [] = {
     {UINT, "Version", 1},
