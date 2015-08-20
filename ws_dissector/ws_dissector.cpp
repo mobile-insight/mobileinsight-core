@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 
+#define WS_DISSECTOR_VERSION "1.0.0"
+
 const int BUFFER_SIZE = 2000;
 guchar buffer[BUFFER_SIZE] = {};
 
@@ -87,7 +89,9 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
 int main(int argc, char** argv)
 {
     if (argc > 1) {
-        printf("This program works!\n");
+        printf("Version " WS_DISSECTOR_VERSION "\n");
+        printf("Supported protocols:\n");
+        print_proto_list();
         return 0;
     }
 

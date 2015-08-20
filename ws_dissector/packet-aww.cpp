@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "packet-aww.h"
 
+static const int PROTO_MAX = 1000;
+
 static int proto_aww = -1;
 
 static dissector_table_t proto_table = NULL;
@@ -108,7 +110,6 @@ proto_register_aww(void)
 void
 proto_reg_handoff_aww(void)
 {
-    static const int PROTO_MAX = 1000;
     const char *protos[PROTO_MAX + 1] = {};
     init_proto_names(protos);
 
@@ -117,6 +118,16 @@ proto_reg_handoff_aww(void)
         if (protos[i] != NULL) {
             handle = find_dissector(protos[i]);
             dissector_add_uint("aww.proto", i, handle);
+        }
+    }
+}
+
+void print_proto_list () {
+    const char *protos[PROTO_MAX + 1] = {};
+    init_proto_names(protos);
+    for (int i = 0; i <= PROTO_MAX; i++) {
+        if (protos[i] != NULL) {
+            printf("%d: %s\n", i, protos[i]);
         }
     }
 }
