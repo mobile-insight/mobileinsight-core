@@ -86,7 +86,7 @@ const ValueName UmtsNasGmmState_GmmSubstate [] = {
     {6, "GMM_PLMN_SEARCH"},
     {7, "GMM_SUSPENDED"},
     {8, "GMM_UPDATE_NEEDED"},
-    {9, "GMM_ATTEMPING_TO_UPDATE"},
+    {9, "GMM_ATTEMPTING_TO_UPDATE"},
     {10, "GMM_ATTEMPTING_TO_UPDATE_MM"},
     {11, "GMM_IMSI_DETACH_INITIATED"}
 };
