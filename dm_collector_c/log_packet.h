@@ -328,7 +328,7 @@ const Fmt LteRrcServCellInfoLogPacketFmt_v2 [] = {
     {UINT, "TAC", 2},   //Tracking area code
     {UINT, "Band Indicator", 4},    //Band indicator
     {UINT, "MCC", 2},   //MCC
-    {UINT, "MCC Digit", 1}, //MCC digit
+    {UINT, "MNC Digit", 1}, //MNC digit
     {UINT, "MNC", 2},   //MNC
     {UINT, "Allowed Access", 1} //Allowed access
 };
@@ -343,7 +343,7 @@ const Fmt LteRrcServCellInfoLogPacketFmt_v3 [] = {
     {UINT, "TAC", 2},   //Tracking area code
     {UINT, "Band Indicator", 4},    //Band indicator
     {UINT, "MCC", 2},   //MCC
-    {UINT, "MCC Digit", 1}, //MCC digit
+    {UINT, "MNC Digit", 1}, //MNC digit
     {UINT, "MNC", 2},   //MNC
     {UINT, "Allowed Access", 1} //Allowed access
 };

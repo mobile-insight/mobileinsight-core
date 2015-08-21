@@ -9,6 +9,8 @@
 #include <vector>
 #include <algorithm>
 
+#define DM_COLLECTOR_C_VERSION "1.0.1"
+
 
 static PyObject *dm_collector_c_disable_logs (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_enable_logs (PyObject *self, PyObject *args);
@@ -205,7 +207,7 @@ initdm_collector_c(void)
     PyObject_SetAttrString(dm_collector_c, "log_packet_types", log_packet_types);
     Py_DECREF(log_packet_types);
 
-    PyObject *pystr = PyString_FromString("1.0.0");
+    PyObject *pystr = PyString_FromString(DM_COLLECTOR_C_VERSION);
     PyObject_SetAttrString(dm_collector_c, "version", pystr);
     Py_DECREF(pystr);
 }
