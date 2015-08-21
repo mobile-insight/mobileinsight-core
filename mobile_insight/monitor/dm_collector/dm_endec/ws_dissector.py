@@ -45,6 +45,8 @@ class WSDissector:
                         "RRC_SIB7": 157,
                         "RRC_SIB12":    162,
                         "RRC_SIB19":    169,
+                        # - NAS
+                        "NAS":  190,
                         # LTE: 200~299
                         "LTE-RRC_PCCH": 200,
                         "LTE-RRC_DL_DCCH": 201,

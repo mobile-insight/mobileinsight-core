@@ -329,6 +329,25 @@ _decode_umts_nas_mm_state(const char *b, int offset, int length,
 }
 
 static int
+_decode_umts_nas_ota(const char *b, int offset, int length,
+                        PyObject *result) {
+    int start = offset;
+    (void) _map_result_field_to_name(result,
+                                    "Message Direction",
+                                    UmtsNasOtaFmt_MessageDirection,
+                                    ARRAY_SIZE(UmtsNasOtaFmt_MessageDirection, ValueName),
+                                    "Unknown");
+
+    int pdu_length = _search_result_int(result, "Message Length");
+    PyObject *t = Py_BuildValue("(ss#s)",
+                                "Msg", b + offset, pdu_length,
+                                "raw_msg/NAS");
+    PyList_Append(result, t);
+    Py_DECREF(t);
+    return pdu_length;
+}
+
+static int
 _decode_lte_rrc_ota(const char *b, int offset, int length,
                     PyObject *result) {
     int start = offset;
@@ -666,6 +685,13 @@ decode_log_packet (const char *b, int length) {
                                     ARRAY_SIZE(UmtsNasMmStateFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_umts_nas_mm_state(b, offset, length, result);
+        break;
+
+    case UMTS_NAS_OTA:
+        offset += _decode_by_fmt(UmtsNasOtaFmt,
+                                    ARRAY_SIZE(UmtsNasOtaFmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_umts_nas_ota(b, offset, length, result);
         break;
 
     case LTE_RRC_OTA_Packet:

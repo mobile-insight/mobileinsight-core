@@ -32,6 +32,8 @@ static void init_proto_names (const char *protos []) {
     protos[162] = "rrc.si.sib12";
     protos[169] = "rrc.si.sib19";
 
+    protos[190] = "gsm_a_dtap";
+
     protos[200] = "lte-rrc.pcch";
     protos[201] = "lte-rrc.dl.dcch";
     protos[202] = "lte-rrc.ul.dcch";

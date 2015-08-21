@@ -8,6 +8,7 @@ enum LogPacketType {
     WCDMA_Signaling_Messages = 0x412F,
     UMTS_NAS_GMM_State = 0x7130,
     UMTS_NAS_MM_State = 0x7131,
+    UMTS_NAS_OTA = 0x713A,
     LTE_RRC_OTA_Packet = 0xB0C0,
     LTE_RRC_MIB_Message_Log_Packet = 0xB0C1,
     LTE_RRC_Serv_Cell_Info_Log_Packet = 0xB0C2,
@@ -31,6 +32,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "UMTS_NAS_GMM_State"},
     {UMTS_NAS_MM_State,
         "UMTS_NAS_MM_State"},
+    {UMTS_NAS_OTA,
+        "UMTS_NAS_OTA"},
     {LTE_RRC_OTA_Packet,    // LTE RRC signaling messages
         "LTE_RRC_OTA_Packet"},
     {LTE_RRC_MIB_Message_Log_Packet,    // LTE RRC MIB packet

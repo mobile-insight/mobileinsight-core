@@ -145,6 +145,19 @@ const ValueName UmtsNasMmState_MmUpdateStatus [] = {
 };
 
 // ------------------------------------------------------------
+// UMTS NAS MM State
+const Fmt UmtsNasOtaFmt [] = {
+    {UINT, "Message Direction", 1},
+    {UINT, "Message Length", 4}
+    // Followed by NAS messages
+};
+
+const ValueName UmtsNasOtaFmt_MessageDirection [] = {
+    {0, "TO_UE"},
+    {1, "FROM_UE"}
+};
+
+// ------------------------------------------------------------
 // LTE_RRC_OTA_Packet
 const Fmt LteRrcOtaPacketFmt [] = {
     {UINT, "Pkt Version", 1},           //version
