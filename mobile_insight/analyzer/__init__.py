@@ -18,6 +18,8 @@ from lte_measurement_analyzer import LteMeasurementAnalyzer
 # WCDMA (3G)
 from wcdma_rrc_analyzer import WcdmaRrcAnalyzer
 
+from mm_analyzer import MmAnalyzer
+
 # Higher-level analyzer
 from rrc_analyzer import RrcAnalyzer
 from handoff_loop_analyzer import HandoffLoopAnalyzer
