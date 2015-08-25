@@ -69,9 +69,11 @@ class DMLogPacket:
     @classmethod
     @static_var("wcdma_sib_types", {    0: "RRC_MIB",
                                         1: "RRC_SIB1",
+                                        2: "RRC_SIB2",
                                         3: "RRC_SIB3",
                                         7: "RRC_SIB7",
                                         12: "RRC_SIB12",
+                                        27: "RRC_SB1",
                                         31: "RRC_SIB19",
                                         })
     def _preparse_internal_list(cls, decoded_list):
@@ -92,6 +94,7 @@ class DMLogPacket:
                         for complete_sib in sibs:
                             field = complete_sib.find("field[@name='rrc.sib_Type']")
                             sib_id = int(field.get("show"))
+                            sib_name = field.get("showname")
                             field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
                             sib_msg = binascii.a2b_hex(field.get("value"))
                             if sib_id in sib_types:

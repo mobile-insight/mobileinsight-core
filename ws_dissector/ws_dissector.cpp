@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 
-#define WS_DISSECTOR_VERSION "1.0.0"
+#define WS_DISSECTOR_VERSION "1.0.1"
 
 const int BUFFER_SIZE = 2000;
 guchar buffer[BUFFER_SIZE] = {};

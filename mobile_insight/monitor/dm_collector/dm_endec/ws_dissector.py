@@ -37,14 +37,18 @@ class WSDissector:
                         "RRC_DL_CCCH":  102,
                         "RRC_DL_DCCH":  103,
                         "RRC_DL_BCCH_BCH":  104,
+                        "RRC_DL_PCCH":  106,
                         # - WCDMA RRC SysInfo: 150~199
                         "RRC_MIB":  150,
                         "RRC_SIB1": 151,
+                        "RRC_SIB2": 152,
                         "RRC_SIB3": 153,
                         "RRC_SIB5": 155,
                         "RRC_SIB7": 157,
                         "RRC_SIB12":    162,
                         "RRC_SIB19":    169,
+                        #   - WCDMA RRC SchedulingBlock
+                        "RRC_SB1":    181,
                         # - NAS
                         "NAS":  190,
                         # LTE: 200~299

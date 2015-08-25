@@ -56,7 +56,8 @@ const ValueName WcdmaSignalingMsgChannelType [] = {
     {0x01, "RRC_UL_DCCH"},
     {0x02, "RRC_DL_CCCH"},
     {0x03, "RRC_DL_DCCH"},
-    {0x04, "RRC_DL_BCCH_BCH"}
+    {0x04, "RRC_DL_BCCH_BCH"},
+    {0x06, "RRC_DL_PCCH"}
 };
 
 // ------------------------------------------------------------
@@ -162,24 +163,36 @@ const ValueName UmtsNasOtaFmt_MessageDirection [] = {
 const Fmt LteRrcOtaPacketFmt [] = {
     {UINT, "Pkt Version", 1},           //version
     {UINT, "RRC Release Number", 1},    //RRC release version
-    {UINT, "Major/minor", 1},   
+    {UINT, "Major/minor", 1},
     {UINT, "Radio Bearer ID", 1},       //no change
-    {UINT, "Physical Cell ID", 2},      //Cell ID
-    {UINT, "Freq", 2},                  //frequency
-    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
-    {UINT, "PDU Number", 1}             //PDU number
+    {UINT, "Physical Cell ID", 2}       //Cell ID
     // continued in LteRrcOtaPacketFmt_v2 or LteRrcOtaPacketFmt_v7
 };
 
 const Fmt LteRrcOtaPacketFmt_v2 [] = {
+    {UINT, "Freq", 2},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1},            //PDU number
     {UINT, "Msg Length", 1},
     {UINT, "SIB Mask in SI", 1}
 };
 
 const Fmt LteRrcOtaPacketFmt_v7 [] = {
+    {UINT, "Freq", 2},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1},            //PDU number
     {SKIP, NULL, 4},            // Unknown yet, only for Pkt Version = 7
     {UINT, "Msg Length", 1},
     {UINT, "SIB Mask in SI", 1}
+};
+
+const Fmt LteRrcOtaPacketFmt_v8 [] = {
+    {UINT, "Freq", 4},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1},            //PDU number
+    {UINT, "SIB Mask in SI", 1},
+    {SKIP, NULL, 3},
+    {UINT, "Msg Length", 2}
 };
 
 const ValueName LteRrcOtaPduType [] = {

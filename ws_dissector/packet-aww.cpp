@@ -23,14 +23,18 @@ static void init_proto_names (const char *protos []) {
     protos[102] = "rrc.dl.ccch";
     protos[103] = "rrc.dl.dcch";
     protos[104] = "rrc.bcch.bch";
+    protos[106] = "rrc.pcch";
     
     protos[150] = "rrc.si.mib";
     protos[151] = "rrc.si.sib1";
+    protos[152] = "rrc.si.sib2";
     protos[153] = "rrc.si.sib3";
     protos[155] = "rrc.si.sib5";
     protos[157] = "rrc.si.sib7";
     protos[162] = "rrc.si.sib12";
     protos[169] = "rrc.si.sib19";
+
+    protos[181] = "rrc.si.sb1";
 
     protos[190] = "gsm_a_dtap";
 
