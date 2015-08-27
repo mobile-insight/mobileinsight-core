@@ -4,6 +4,7 @@
 #include "utils.h"
 
 enum LogPacketType {
+    CDMA_Paging_Channel_Message = 0x1007,
     _1xEV_Signaling_Control_Channel_Broadcast = 0x107C,
     WCDMA_CELL_ID = 0x4127,
     WCDMA_Signaling_Messages = 0x412F,
@@ -25,6 +26,8 @@ enum LogPacketType {
 };
 
 const ValueName LogPacketTypeID_To_Name [] = {
+    {CDMA_Paging_Channel_Message,
+        "CDMA_Paging_Channel_Message"},
     {_1xEV_Signaling_Control_Channel_Broadcast,
         "1xEV_Signaling_Control_Channel_Broadcast"},
     {WCDMA_CELL_ID, // WCDMA cell status

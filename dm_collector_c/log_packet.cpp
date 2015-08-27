@@ -395,6 +395,31 @@ _decode_lte_rrc_ota(const char *b, int offset, int length,
 }
 
 static int
+_decode_lte_rrc_mib(const char *b, int offset, int length,
+                    PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+
+    switch (pkt_ver) {
+    case 1:
+        offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt_v1,
+                                    ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_v1, Fmt),
+                                    b, offset, length, result);
+        break;
+    case 2:
+        offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt_v2,
+                                    ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_v2, Fmt),
+                                    b, offset, length, result);
+        break;
+    default:
+        printf("Unknown LTE RRC MIB version: 0x%x\n", pkt_ver);
+        return 0;
+    }
+
+    return offset - start;
+}
+
+static int
 _decode_lte_rrc_serv_cell_info(const char *b, int offset, int length,
                                 PyObject *result) {
     int start = offset;
@@ -665,6 +690,10 @@ decode_log_packet (const char *b, int length) {
                                 "Unsupported");
 
     switch (type_id) {
+    case CDMA_Paging_Channel_Message:
+        // Not decoded yet.
+        break;
+
     case _1xEV_Signaling_Control_Channel_Broadcast:
         offset += _decode_by_fmt(_1xEVSignalingFmt,
                                     ARRAY_SIZE(_1xEVSignalingFmt, Fmt),
@@ -716,6 +745,7 @@ decode_log_packet (const char *b, int length) {
         offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt,
                                     ARRAY_SIZE(LteRrcMibMessageLogPacketFmt, Fmt),
                                     b, offset, length, result);
+        offset += _decode_lte_rrc_mib(b, offset, length, result);
         break;
 
     case LTE_RRC_Serv_Cell_Info_Log_Packet:
