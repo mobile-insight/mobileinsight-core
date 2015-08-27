@@ -4,6 +4,7 @@
 #include "utils.h"
 
 enum LogPacketType {
+    _1xEV_Signaling_Control_Channel_Broadcast = 0x107C,
     WCDMA_CELL_ID = 0x4127,
     WCDMA_Signaling_Messages = 0x412F,
     UMTS_NAS_GMM_State = 0x7130,
@@ -24,6 +25,8 @@ enum LogPacketType {
 };
 
 const ValueName LogPacketTypeID_To_Name [] = {
+    {_1xEV_Signaling_Control_Channel_Broadcast,
+        "1xEV_Signaling_Control_Channel_Broadcast"},
     {WCDMA_CELL_ID, // WCDMA cell status
         "WCDMA_CELL_ID"},
     {WCDMA_Signaling_Messages,  // WCDMA signaling messages

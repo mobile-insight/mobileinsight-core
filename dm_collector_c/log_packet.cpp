@@ -665,6 +665,12 @@ decode_log_packet (const char *b, int length) {
                                 "Unsupported");
 
     switch (type_id) {
+    case _1xEV_Signaling_Control_Channel_Broadcast:
+        offset += _decode_by_fmt(_1xEVSignalingFmt,
+                                    ARRAY_SIZE(_1xEVSignalingFmt, Fmt),
+                                    b, offset, length, result);
+        break;
+
     case WCDMA_CELL_ID:
         offset += _decode_by_fmt(WcdmaCellIdFmt,
                                     ARRAY_SIZE(WcdmaCellIdFmt, Fmt),
