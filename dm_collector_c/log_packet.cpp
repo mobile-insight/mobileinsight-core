@@ -73,6 +73,14 @@ _replace_result(PyObject *result, const char *target, PyObject *new_object) {
     }
 }
 
+static PyObject *
+_replace_result_int(PyObject *result, const char *target, int new_int) {
+    PyObject *pyint = Py_BuildValue("i", new_int);
+    PyObject *old_object = _replace_result(result, target, pyint);
+    Py_DECREF(pyint);
+    return old_object;
+}
+
 // Search a field that has a value of integer type, and map this integer to 
 // a string, which replace the original integer.
 // If there is no correponding string, or if the mapping is NULL, map this 
@@ -241,9 +249,28 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 break;
             }
 
+        case SFN_SUBFRAME:
+            {
+                const unsigned short SFN_MASK = (1 << 10) - 1;
+                const unsigned short SUBFRAME_MASK = (1 << 4) - 1;
+                assert(fmt[i].len == 2);
+                unsigned short val = *((short *) p);
+                decoded = Py_BuildValue("(ii)", (val >> 5) & SFN_MASK,
+                                                (val >> 1) & SUBFRAME_MASK);
+                n_consumed += fmt[i].len;
+                break;
+            }
+
         case SKIP:
             n_consumed += fmt[i].len;
             break;
+
+        case PLACEHOLDER:
+            {
+                assert(fmt[i].len == 0);
+                decoded = Py_BuildValue("I", 0);
+                break;
+            }
 
         default:
             assert(false);
@@ -535,6 +562,79 @@ _decode_lte_nas_emm_state(const char *b, int offset, int length,
 }
 
 static int
+_decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, int length,
+                                        PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+
+    switch (pkt_ver) {
+    case 23:
+        {
+            offset += _decode_by_fmt(LteLl1PdschDemapperConfigFmt_v23,
+                                        ARRAY_SIZE(LteLl1PdschDemapperConfigFmt_v23, Fmt),
+                                        b, offset, length, result);
+            // # antennas
+            int tmp = _search_result_int(result, "Number of Tx Antennas(M)");
+            tmp = (tmp >> 8) & 0x0f;
+            int M = tmp & 0x3;
+            M = (M != 3? (1 << M): -1);
+            int N = (tmp >> 2) & 0x1;
+            N = (1 << N);
+
+            PyObject *old_object = _replace_result_int(result, "Number of Tx Antennas(M)", M);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Number of Rx Antennas(N)", N);
+            Py_DECREF(old_object);
+
+            // modulation & ratio
+            tmp = _search_result_int(result, "Modulation Stream 0");
+            int mod_stream0 = (tmp >> 1) & 0x3;
+            float ratio = float((tmp >> 3) & 0x1fff) / 256.0;
+            tmp = _search_result_int(result, "Modulation Stream 1");
+            int mod_stream1 = (tmp >> 1) & 0x3;
+            int carrier_index = (tmp >> 9) & 0xf;
+
+            old_object = _replace_result_int(result, "Modulation Stream 0", mod_stream0);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "Modulation Stream 0",
+                                            LteLl1PdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Modulation, ValueName),
+                                            "Unknown");
+
+            PyObject *pyfloat = Py_BuildValue("f", ratio);
+            old_object = _replace_result(result, "Traffic to Pilot Ratio", pyfloat);
+            Py_DECREF(old_object);
+            Py_DECREF(pyfloat);
+
+            old_object = _replace_result_int(result, "Modulation Stream 1", mod_stream1);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "Modulation Stream 1",
+                                            LteLl1PdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Modulation, ValueName),
+                                            "Unknown");
+
+            // carrier index
+            old_object = _replace_result_int(result, "Carrier Index", carrier_index);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "Carrier Index",
+                                            LteLl1PdschDemapperConfig_v23_Carrier_Index,
+                                            ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Carrier_Index, ValueName),
+                                            "Unknown");
+            break;
+        }
+
+    default:
+        printf("Unknown LTE LL1 PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
+        return 0;
+    }
+
+    return offset - start;
+}
+
+static int
 _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
                         PyObject *result) {
     int start = offset;
@@ -770,6 +870,13 @@ decode_log_packet (const char *b, int length) {
                                     ARRAY_SIZE(LteNasEmmStateFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_nas_emm_state(b, offset, length, result);
+        break;
+
+    case LTE_LL1_PDSCH_Demapper_Configuration:
+        offset += _decode_by_fmt(LteLl1PdschDemapperConfigFmt,
+                                    ARRAY_SIZE(LteLl1PdschDemapperConfigFmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_lte_ll1_pdsch_demapper_config(b, offset, length, result);
         break;
 
     case LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results:

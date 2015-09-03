@@ -19,6 +19,7 @@ enum LogPacketType {
     LTE_NAS_EMM_Plain_OTA_Incoming_Message = 0xB0EC,
     LTE_NAS_EMM_Plain_OTA_Outgoing_Message = 0xB0ED,
     LTE_NAS_EMM_State = 0xB0EE,
+    LTE_LL1_PDSCH_Demapper_Configuration = 0xB126,
     LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results = 0xB179,
     LTE_ML1_IRAT_Measurement_Request = 0xB187,
     LTE_ML1_Serving_Cell_Measurement_Result = 0xB193,
@@ -56,6 +57,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_NAS_EMM_Plain_OTA_Outgoing_Message"},
     {LTE_NAS_EMM_State,
         "LTE_NAS_EMM_State"},
+    {LTE_LL1_PDSCH_Demapper_Configuration,
+        "LTE_LL1_PDSCH_Demapper_Configuration"},
     {LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results,    // LTE infra-frequency measurements (connected mode)
         "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results"},
     {LTE_ML1_IRAT_Measurement_Request,  // LTE inter-RAT measurement request

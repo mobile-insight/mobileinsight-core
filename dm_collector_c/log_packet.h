@@ -12,7 +12,9 @@ enum FmtType {
     BANDWIDTH,  // in LTE RRC Serving Cell Info, LTE RRC MIB Message
     RSRP,
     RSRQ,
-    SKIP
+    SFN_SUBFRAME,   // in LTE LL1
+    SKIP,
+    PLACEHOLDER
 };
 
 struct Fmt {
@@ -279,6 +281,41 @@ const ValueName LteNasEmmState_v2_EmmSubstate_Registered [] = {
     {3, "EMM_REGISTERED_NO_CELL_AVAILABLE"},
     {4, "EMM_REGISTERED_PLMN_SEARCH"},
     {5, "EMM_REGISTERED_LIMITED_SERVICE"}
+};
+
+// ------------------------------------------------------------
+const Fmt LteLl1PdschDemapperConfigFmt [] = {
+    {UINT, "Version", 1}
+};
+
+const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
+    {UINT, "Serving Cell ID", 1},
+    {SFN_SUBFRAME, "SFN/Subframe Number", 2},
+    {UINT, "PDSCH RNTIl ID", 2},
+    {UINT, "Number of Tx Antennas(M)", 2},
+    {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
+    {UINT, "RB Allocation Slot 0[0]", 8},
+    {UINT, "RB Allocation Slot 0[1]", 8},
+    {UINT, "RB Allocation Slot 1[0]", 8},
+    {UINT, "RB Allocation Slot 1[1]", 8},
+    {SKIP, NULL, 4},
+    {UINT, "Transport Block Size Stream 0", 2},
+    {UINT, "Modulation Stream 0", 2},
+    {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
+    {UINT, "Transport Block Size Stream 1", 2},
+    {UINT, "Modulation Stream 1", 2},
+    {PLACEHOLDER, "Carrier Index", 0}
+};
+
+const ValueName LteLl1PdschDemapperConfig_v23_Modulation [] = {
+    {0, "QPSK"},
+    {1, "16QAM"},
+    {2, "64QAM"}
+};
+
+const ValueName LteLl1PdschDemapperConfig_v23_Carrier_Index [] = {
+    {0, "PCC"},
+    {1, "SCC"}
 };
 
 // ------------------------------------------------------------
