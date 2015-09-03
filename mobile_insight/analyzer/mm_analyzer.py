@@ -205,11 +205,13 @@ class MmAnalyzer(Analyzer):
         if network == "LTE":
             start_span(self.__lte_plmn_search, log_item,
                         search_log=[],
-                        from_where=last_normal_service)
+                        from_where=last_normal_service,
+                        network=network)
         elif network == "UMTS":
             start_span(self.__umts_plmn_search, log_item,
                         search_log=[],
-                        from_where=last_normal_service)
+                        from_where=last_normal_service,
+                        network=network)
         else:
             raise RuntimeError("wtf")
 
