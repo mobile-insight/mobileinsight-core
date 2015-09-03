@@ -12,7 +12,6 @@ enum FmtType {
     BANDWIDTH,  // in LTE RRC Serving Cell Info, LTE RRC MIB Message
     RSRP,
     RSRQ,
-    SFN_SUBFRAME,   // in LTE LL1
     SKIP,
     PLACEHOLDER
 };
@@ -290,7 +289,8 @@ const Fmt LteLl1PdschDemapperConfigFmt [] = {
 
 const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
     {UINT, "Serving Cell ID", 1},
-    {SFN_SUBFRAME, "SFN/Subframe Number", 2},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
     {UINT, "PDSCH RNTIl ID", 2},
     {UINT, "Number of Tx Antennas(M)", 2},
     {PLACEHOLDER, "Number of Rx Antennas(N)", 0},

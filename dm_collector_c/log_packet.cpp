@@ -249,18 +249,6 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 break;
             }
 
-        case SFN_SUBFRAME:
-            {
-                const unsigned short SFN_MASK = (1 << 10) - 1;
-                const unsigned short SUBFRAME_MASK = (1 << 4) - 1;
-                assert(fmt[i].len == 2);
-                unsigned short val = *((short *) p);
-                decoded = Py_BuildValue("(ii)", (val >> 5) & SFN_MASK,
-                                                (val >> 1) & SUBFRAME_MASK);
-                n_consumed += fmt[i].len;
-                break;
-            }
-
         case SKIP:
             n_consumed += fmt[i].len;
             break;
@@ -573,15 +561,31 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, int length,
             offset += _decode_by_fmt(LteLl1PdschDemapperConfigFmt_v23,
                                         ARRAY_SIZE(LteLl1PdschDemapperConfigFmt_v23, Fmt),
                                         b, offset, length, result);
+
+            const unsigned int SFN_RSHIFT = 5, SFN_MASK = (1 << 10) - 1;
+            const unsigned int SUBFRAME_RSHIFT = 1, SUBFRAME_MASK = (1 << 4) - 1;
+            int tmp = _search_result_int(result, "System Frame Number");
+            int sfn = (tmp >> SFN_RSHIFT) & SFN_MASK;
+            int subframe = (tmp >> SUBFRAME_RSHIFT) & SUBFRAME_MASK;
+            int serv_cell = _search_result_int(result, "Serving Cell ID");
+            serv_cell += (tmp & 0x1) << 8;
+
+            PyObject *old_object = _replace_result_int(result, "Serving Cell ID", serv_cell);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "System Frame Number", sfn);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Subframe Number", subframe);
+            Py_DECREF(old_object);
+            
             // # antennas
-            int tmp = _search_result_int(result, "Number of Tx Antennas(M)");
+            tmp = _search_result_int(result, "Number of Tx Antennas(M)");
             tmp = (tmp >> 8) & 0x0f;
             int M = tmp & 0x3;
             M = (M != 3? (1 << M): -1);
             int N = (tmp >> 2) & 0x1;
             N = (1 << N);
 
-            PyObject *old_object = _replace_result_int(result, "Number of Tx Antennas(M)", M);
+            old_object = _replace_result_int(result, "Number of Tx Antennas(M)", M);
             Py_DECREF(old_object);
             old_object = _replace_result_int(result, "Number of Rx Antennas(N)", N);
             Py_DECREF(old_object);
