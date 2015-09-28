@@ -62,10 +62,16 @@ class MmAnalyzer(Analyzer):
         self.__lte_plmn_search = []
         self.__lte_attach = []
         self.__lte_tau = []
+        self.__lte_tau_qos_info = []
+        self.__lte_cell_resel_to_umts_config = []
+        self.__lte_drx_config = []
+        self.__lte_tdd_config = []
 
         self.__last_normal_service = ""
+        self.__last_lte_rrc_freq = 0
         self.__last_valid_timestamp = None
         self.__last_wcdma_rrc_mib_info = None
+        self.__n_lte_rrc_reconfig = 0
 
 
     def set_source(self,source):
@@ -151,6 +157,21 @@ class MmAnalyzer(Analyzer):
         Return the TAU (Tracking Area Upate) time span of LTE network.
         """
         return self.__lte_tau
+
+    def get_lte_tau_qos_info(self):
+        return self.__lte_tau_qos_info
+
+    def get_lte_cell_resel_to_umts_config(self):
+        return self.__lte_cell_resel_to_umts_config
+
+    def get_lte_drx_config(self):
+        return self.__lte_drx_config
+
+    def get_lte_tdd_config(self):
+        return self.__lte_tdd_config
+
+    def get_n_lte_rrc_reconfig(self):
+        return self.__n_lte_rrc_reconfig
 
 
     def __filter(self, event):
@@ -436,31 +457,127 @@ class MmAnalyzer(Analyzer):
                 end_span(self.__lte_tau, log_item)
                 self.__lte_tau[-1].response = nas_type
 
+        if nas_type == "Activate default EPS bearer context request":
+            keys = ("qci", "delay_class", "traffic_class", "delivery_err_sdu", "traffic_hand_pri", "traffic_hand_pri", "traffic_hand_pri", "apn_ambr_dl_ext", "apn_ambr_ul_ext", "apn_ambr_dl_ext2", "apn_ambr_ul_ext2")
+            info = dict([(k, None) for k in keys])
+            Pattern1 = re.compile(r": (.*) \((\d+)\)$")
+            Pattern2 = re.compile(r": (\d+ \w+)$")
+            for val in log_xml.iter("field"):
+                s = val.get("showname")
+                if val.get("name") == "nas_eps.emm.qci":
+                    info["qci"] = re.findall(Pattern1, s)[0][0]
+                elif val.get("name") == "gsm_a.gm.sm.qos.delay_cls":
+                    info["delay_class"] = re.findall(Pattern1, s)[0][0]
+                elif val.get("name") == "gsm_a.gm.sm.qos.traffic_cls":
+                    info["traffic_class"] = "%s (%s)" % re.findall(Pattern1, s)[0]
+                elif val.get("name") == "gsm_a.gm.sm.qos.del_of_err_sdu":
+                    info["delivery_err_sdu"] = "%s (%s)" % re.findall(Pattern1, s)[0]
+                elif val.get("name") == "gsm_a.gm.sm.qos.traff_hdl_pri":
+                    info["traffic_hand_pri"] = "%s (%s)" % re.findall(Pattern1, s)[0]
+                elif val.get("name") == "gsm_a.gm.sm.qos.max_bitrate_downl_ext":
+                    info["traffic_hand_pri"] = "%s (%s)" % re.findall(Pattern1, s)[0]
+                elif val.get("name") == "gsm_a.gm.sm.qos.max_bitrate_upl_ext":
+                    info["traffic_hand_pri"] = "%s (%s)" % re.findall(Pattern1, s)[0]
+                elif val.get("name") == "nas_eps.emm.apn_ambr_dl_ext":
+                    info["apn_ambr_dl_ext"] = re.findall(Pattern2, s)[0]
+                elif val.get("name") == "nas_eps.emm.apn_ambr_ul_ext":
+                    info["apn_ambr_ul_ext"] = re.findall(Pattern2, s)[0]
+                elif val.get("name") == "nas_eps.emm.apn_ambr_dl_ext2":
+                    info["apn_ambr_dl_ext2"] = re.findall(Pattern2, s)[0]
+                elif val.get("name") == "nas_eps.emm.apn_ambr_ul_ext2":
+                    info["apn_ambr_ul_ext2"] = re.findall(Pattern2, s)[0]
+            info["last_lte_rrc_freq"] = self.__last_lte_rrc_freq
+            self.__lte_tau_qos_info.append(info)
+
 
     def __callback_lte_rrc_ota(self, event):
         log_item = event.data
         log_xml = ET.fromstring(log_item["Msg"])
 
         is_sib1 = False
-        info = {"plmn": None, "tac": None, "cell_id": None}
+        is_sib6 = False
+        is_rrc_conn_reconfig = False
+
+        cell_info = {"plmn": None, "tac": None, "cell_id": None}
         if log_item["PDU Number"] == 2: # BCCH_DL_SCH
             for val in log_xml.iter("field"):
                 if val.get("name") == "lte-rrc.systemInformationBlockType1_element":
                     is_sib1 = True
+                elif val.get("name") == "lte-rrc.sib6_element":
+                    is_sib6 = True
                 elif val.get("name") == "lte-rrc.plmn_Identity_element":
                     mcc_mnc = ""
                     for digit in val.iter("field"):
                         if digit.get("name") == "lte-rrc.MCC_MNC_Digit":
                             mcc_mnc += digit.get("show")
-                    info["plmn"] = mcc_mnc[0:3] + "-" + mcc_mnc[3:]
+                    cell_info["plmn"] = mcc_mnc[0:3] + "-" + mcc_mnc[3:]
                 elif val.get("name") == "lte-rrc.trackingAreaCode":
-                    info["tac"] = int(val.get("value"), base=16)
+                    cell_info["tac"] = int(val.get("value"), base=16)
                 elif val.get("name") == "lte-rrc.cellIdentity":
-                    info["cell_id"] = int(val.get("value"), base=16) / 16
+                    cell_info["cell_id"] = int(val.get("value"), base=16) / 16
+
+        elif log_item["PDU Number"] == 6: # LTE-RRC_DL_DCCH
+            for val in log_xml.iter("field"):
+                if val.get("name") == "lte-rrc.rrcConnectionReconfiguration_element":
+                    is_rrc_conn_reconfig = True
+                    break
+
+        if is_sib1 or is_sib6 or is_rrc_conn_reconfig:
+            Pattern1 = re.compile(r": (.*) \([-\d]+\)$")
+            Pattern2 = re.compile(r": (.*)$")
 
         if is_sib1:
-            s = "LTE/%(plmn)s-%(tac)d-%(cell_id)d" % info
+            s = "LTE/%(plmn)s-%(tac)d-%(cell_id)d" % cell_info
             self.__add_plmn_search_cell(s, log_item)
+            info = {"subframeAssignment": None,
+                    "specialSubframePatterns": None,
+                    "si_WindowLength": None,
+                    "systemInfoValueTag": None
+                    }
+            for attr in log_xml.iter("field"):
+                ss = attr.get("showname")
+                if attr.get("name") in ("lte-rrc.subframeAssignment", "lte-rrc.specialSubframePatterns", "lte-rrc.si_WindowLength"):
+                    info[attr.get("name")[8:]] = re.findall(Pattern1, ss)[0]
+                elif attr.get("name") == "lte-rrc.systemInfoValueTag":
+                    info[attr.get("name")[8:]] = re.findall(Pattern2, ss)[0]
+            info["lte_rrc_freq"] = log_item["Freq"]
+            self.__lte_tdd_config.append(info)
+
+        if is_sib6:
+            # Iter over all CarrierFreqUTRA_FDD elements
+            for val in log_xml.iter("field"):
+                if val.get("name") == "lte-rrc.CarrierFreqUTRA_FDD_element":
+                    info = dict()
+                    # Iter over all attrs
+                    for attr in val.iter("field"):
+                        s = attr.get("showname")
+                        if attr.get("name") in ("lte-rrc.threshX_High", "lte-rrc.threshX_Low", "lte-rrc.q_RxLevMin"):
+                            info[attr.get("name")[8:]] = re.findall(Pattern1, s)[0]
+                        elif attr.get("name") in ("lte-rrc.carrierFreq", "lte-rrc.cellReselectionPriority", "lte-rrc.p_MaxUTRA", "lte-rrc.q_QualMin"):
+                            info[attr.get("name")[8:]] = re.findall(Pattern2, s)[0]
+                    info["lte_rrc_freq"] = log_item["Freq"]
+                    self.__lte_cell_resel_to_umts_config.append(info)
+
+        if is_rrc_conn_reconfig:
+            # Find drx-Config setup
+            for val in log_xml.iter("field"):
+                if val.get("name") == "lte-rrc.drx_Config" and val.get("show") == "1":
+                    info = {"shortDRX_Cycle": None, "drxShortCycleTimer": None}
+                    for attr in val.iter("field"):
+                        s = attr.get("showname")
+                        if attr.get("name") in ("lte-rrc.onDurationTimer",
+                                                "lte-rrc.drx_InactivityTimer",
+                                                "lte-rrc.drx_RetransmissionTimer",
+                                                "lte-rrc.shortDRX_Cycle"):
+                            info[attr.get("name")[8:]] = re.findall(Pattern1, s)[0]
+                        elif attr.get("name") == "lte-rrc.drxShortCycleTimer":
+                            info[attr.get("name")[8:]] = re.findall(Pattern2, s)[0]
+                    info["lte_rrc_freq"] = log_item["Freq"]
+                    self.__lte_drx_config.append(info)
+                    break
+            self.__n_lte_rrc_reconfig += 1
+
+        self.__last_lte_rrc_freq = log_item["Freq"]
 
 
     def __callback_lte_rrc_serv_cell_info(self, event):
