@@ -64,4 +64,5 @@ class QmdlReplayer(Monitor):
             self._input_file.close()
 
         except Exception, e:
-            sys.exit(e)
+            # sys.exit(e)
+            sys.exit(str(traceback.format_exc()))
