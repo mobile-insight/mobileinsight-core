@@ -125,7 +125,7 @@ class WSDissector:
         
         cls._proc.stdin.write(input_data)
         cls._proc.stdin.flush()
-        cls._proc.stdout.flush()
+        # cls._proc.stdout.flush()
         result = []
         while True:
             line = cls._proc.stdout.readline()
