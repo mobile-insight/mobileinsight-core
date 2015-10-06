@@ -91,7 +91,7 @@ class RrcAnalyzer(Analyzer):
         :rtype: LteRrcStatus   or WcdmaRrcStatus    
         """
         if self.__cur_RAT=="LTE":
-            return self.lte_rrc_analyzer.get_cur_cell()
+            return self.__lte_rrc_analyzer.get_cur_cell()
         elif self.__cur_RAT=="WCDMA":
             return self.__wcdma_rrc_analyzer.get_cur_cell()
         else:
