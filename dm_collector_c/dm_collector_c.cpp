@@ -9,23 +9,26 @@
 #include <vector>
 #include <algorithm>
 
-#define DM_COLLECTOR_C_VERSION "1.0.5"
+#define DM_COLLECTOR_C_VERSION "1.0.6"
 
 
 static PyObject *dm_collector_c_disable_logs (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_enable_logs (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_feed_binary (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_receive_log_packet (PyObject *self, PyObject *args);
 
 static PyMethodDef DmCollectorCMethods[] = {
     {"disable_logs", dm_collector_c_disable_logs, METH_VARARGS,
-        "hahaha"},
+        "Disable logs for a serial port."},
     {"enable_logs", dm_collector_c_enable_logs, METH_VARARGS,
-        "hahaha"},
+        "Enable logs for a serial port."},
     {"feed_binary", dm_collector_c_feed_binary, METH_VARARGS,
-        "hahaha"},
+        "Feed raw packets."},
+    {"generate_diag_cfg", dm_collector_c_generate_diag_cfg, METH_VARARGS,
+        "Generate a Diag.cfg file that can be loaded by diag_mdlog program on Android phones."},
     {"receive_log_packet", dm_collector_c_receive_log_packet, METH_VARARGS,
-        "hahaha"},
+        "Extract a log packet from feeded data and return its binary as a str."},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
@@ -54,6 +57,12 @@ sort_type_ids(IdVector& type_ids, std::vector<IdVector>& out_vectors) {
     return;
 }
 
+static bool
+check_file (PyObject *o) {
+    return PyObject_HasAttrString(o, "write");
+}
+
+// FIXME: currently it is the same with check_file(), but it should be stricter
 static bool
 check_serial_port (PyObject *o) {
     return PyObject_HasAttrString(o, "read");
@@ -100,15 +109,57 @@ dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
         return NULL;
 }
 
-// Return: successful or not
-static PyObject *
-dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
+// If error occurs, false is returned and PyErr_SetString() will be called.
+static bool
+generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
     IdVector type_ids;
     std::vector<IdVector> type_id_vectors;
     BinaryBuffer buf;
+    int n = PySequence_Length(type_names);
+
+    for (int i = 0; i < n; i++) {
+        PyObject *item = PySequence_GetItem(type_names, i);
+        if (PyString_Check(item)) {
+            const char *name = PyString_AsString(item);
+            int cnt = find_ids(LogPacketTypeID_To_Name,
+                                ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
+                                name, type_ids);
+            if (cnt == 0) {
+                PyErr_SetString(PyExc_ValueError, "Wrong type name.");
+                Py_DECREF(item);
+                return false;
+            }
+        } else {
+            // ignore non-strings
+        }
+        if (item != NULL)
+            Py_DECREF(item);    // Discard reference ownership
+    }
+
+    // send log config messages
+    sort_type_ids(type_ids, type_id_vectors);
+    for (size_t i = 0; i < type_id_vectors.size(); i++) {
+        const IdVector& v = type_id_vectors[i];
+        buf = encode_log_config(SET_MASK, v);
+        if (buf.first != NULL && buf.second != 0) {
+            (void) send_msg(file_or_serial, buf.first, buf.second);
+            delete [] buf.first;
+        } else {
+            PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Return: successful or not
+static PyObject *
+dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
     PyObject *serial_port = NULL;
     PyObject *sequence = NULL;
-    int n;
+    bool success = false;
+
     if (!PyArg_ParseTuple(args, "OO", &serial_port, &sequence)) {
         return NULL;
     }
@@ -125,38 +176,11 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
         goto raise_exception;
     }
 
-    n = PySequence_Length(sequence);
-    for (int i = 0; i < n; i++) {
-        PyObject *item = PySequence_GetItem(sequence, i);
-        if (PyString_Check(item)) {
-            const char *name = PyString_AsString(item);
-            int cnt = find_ids(LogPacketTypeID_To_Name,
-                                ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
-                                name, type_ids);
-            if (cnt == 0) {
-                PyErr_SetString(PyExc_ValueError, "Wrong type name.");
-                Py_DECREF(item);
-                goto raise_exception;
-            }
-        } else {
-            // ignore non-strings
-        }
-        if (item != NULL)
-            Py_DECREF(item);    // Discard reference ownership
+    success = generate_log_config_msgs(serial_port, sequence);
+    if (!success) {
+        goto raise_exception;
     }
-    Py_DECREF(sequence); sequence = NULL;
-
-    // send log config messages
-    sort_type_ids(type_ids, type_id_vectors);
-    for (size_t i = 0; i < type_id_vectors.size(); i++) {
-        const IdVector& v = type_id_vectors[i];
-        buf = encode_log_config(SET_MASK, v);
-        if (buf.first == NULL || buf.second == 0) {
-            Py_DECREF(serial_port);
-            Py_RETURN_FALSE;
-        }
-        (void) send_msg(serial_port, buf.first, buf.second);
-    }
+    Py_DECREF(sequence);
     Py_DECREF(serial_port);
     Py_RETURN_TRUE;
 
@@ -164,6 +188,43 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
         Py_DECREF(sequence);
         Py_DECREF(serial_port);
         return NULL;
+}
+
+// Return: successful or not
+static PyObject *
+dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
+    PyObject *file = NULL;
+    PyObject *sequence = NULL;
+    bool success = false;
+ 
+    if (!PyArg_ParseTuple(args, "OO", &file, &sequence)) {
+        return NULL;
+    }
+    Py_INCREF(file);
+    Py_INCREF(sequence);
+
+    // Check arguments
+    if (!check_file(file)) {
+        PyErr_SetString(PyExc_TypeError, "\'file\' is not a file object.");
+        goto raise_exception;
+    }
+    if (!PySequence_Check(sequence)) {
+        PyErr_SetString(PyExc_TypeError, "\'type_names\' is not a sequence.");
+        goto raise_exception;
+    }
+
+    success = generate_log_config_msgs(file, sequence);
+    if (!success) {
+        goto raise_exception;
+    }
+    Py_DECREF(sequence);
+    Py_DECREF(file);
+    Py_RETURN_TRUE;
+
+    raise_exception:
+        Py_DECREF(sequence);
+        Py_DECREF(file);
+        return NULL;   
 }
 
 // Return: None
