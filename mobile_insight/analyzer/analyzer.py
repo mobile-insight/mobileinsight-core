@@ -5,7 +5,18 @@ A event-driven analyzer abstraction,
 including low-level msg filter and high-level analyzer
 
 Author: Yuanjie Li
-This is for new-analyzer branch
+"""
+
+"""
+    Analyzer 2.0 development plan
+    
+        - A query() interface with SQLlite
+
+            - Backward compatability with Analyzer 1.0
+
+
+        - A global analyzer repo to guarantee consistency
+
 """
 
 from ..element import Element, Event
@@ -20,6 +31,9 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     :param log_file: the file to save the log.
     :param level: the loggoing level. The default value is logging.INFO.
     '''
+
+
+    # FIXME: python's logging module does not work well on Android
     l = logging.getLogger(logger_name)
     formatter = logging.Formatter('%(message)s')
     streamHandler = logging.StreamHandler()
@@ -103,6 +117,7 @@ class Analyzer(Element):
         if callback in self.source_callback:
             self.source_callback.remove(callback)
 
+    #TODO: depreciate this moudle. Replace with a registeration based approach
     def include_analyzer(self,analyzer,callback_list):
         """
         Declares the dependency from other analyzers.
