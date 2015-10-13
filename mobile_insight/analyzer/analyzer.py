@@ -14,13 +14,16 @@ Author: Yuanjie Li
 
             - Backward compatability with Analyzer 1.0
 
+        Step 2: replace logging with customized logger
 
-        Step 2: A global analyzer repo to guarantee consistency
+        Step 3: A global analyzer repo to guarantee consistency
 
 """
 
 from ..element import Element, Event
 import logging
+
+from jnius import autoclass
 
 def setup_logger(logger_name, log_file, level=logging.INFO):
     '''Setup the analyzer logger.
