@@ -5,6 +5,7 @@ A event-driven analyzer abstraction,
 including low-level msg filter and high-level analyzer
 
 Author: Yuanjie Li
+This is for new-analyzer branch
 """
 
 from ..element import Element, Event
