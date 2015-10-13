@@ -23,6 +23,7 @@ class RrcAnalyzer(Analyzer):
         Analyzer.__init__(self)
 
         #include analyzers
+        #FIXME: instead of declaring a new analyzer, use Macro-based declaration to guarantee globally uniqueness
         self.__lte_rrc_analyzer=LteRrcAnalyzer()
         self.__wcdma_rrc_analyzer=WcdmaRrcAnalyzer()
 

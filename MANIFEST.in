@@ -2,7 +2,6 @@ include README.md
 include LICENSE
 include setup.py
 exclude setup-internal.py
-recursive-include docs *
 recursive-include examples *.py qmdl_example.qmdl
 recursive-include mobile_insight *.py  *.m *.pyd README
 prune dm_collector_c 
