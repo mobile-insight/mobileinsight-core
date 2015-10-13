@@ -65,6 +65,36 @@ class Analyzer(Element):
         #setup the logs
         self.set_log("",logging.INFO)
 
+        #setup the database
+        activity = autoclass('org.renpy.android.PythonActivity') #FIXME: does activity work for Analyzer?
+        self.__db = activity.mActivity.openOrCreateDatabase('MobileInsight.db',0,None)
+        self.__setup_db()
+
+
+    def __setup_db(self):
+        """
+        Setup two tables for the analyzer: profile and status
+        """
+        self.__db.execSQL("CREATE TABLE IF NOT EXISTS "
+            + self.__class__.__name__ + "Status"
+            + "(timestamp,ID,profile)")
+
+        self.__db.execSQL("CREATE TABLE IF NOT EXISTS "
+            + self.__class__.__name__ + "Profile"
+            + "(timestamp,status)")
+
+    def query_status(self):
+        """
+        Query the current status of the analyzer
+
+        :returns: the latest stauts (String in a analyzer-specific format)
+
+        """
+        resultSet = mydatabase.rawQuery("selct status from " + self.__class__.__name__ + "Status"
+            + " order by timestamp desc limit 1")
+        resultSet.moveToFirst();
+        return resultSet.getString(0);
+
     def set_log(self,logpath,loglevel=logging.INFO):
         """
         Set the logging in analyzers.
@@ -77,8 +107,7 @@ class Analyzer(Element):
         self.__loglevel=loglevel
         setup_logger('automator_logger',self.__logpath,self.__loglevel)
         self.logger=logging.getLogger('automator_logger')
-
-    
+  
     def set_source(self,source):
         """
         Set the source of the trace. 
