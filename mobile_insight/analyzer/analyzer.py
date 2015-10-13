@@ -9,13 +9,13 @@ Author: Yuanjie Li
 
 """
     Analyzer 2.0 development plan
-    
-        - A query() interface with SQLlite
+
+        Step 1: A query() interface with SQLlite
 
             - Backward compatability with Analyzer 1.0
 
 
-        - A global analyzer repo to guarantee consistency
+        Step 2: A global analyzer repo to guarantee consistency
 
 """
 
