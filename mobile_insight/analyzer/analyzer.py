@@ -87,6 +87,8 @@ class Analyzer(Element):
         """
         Query the current status of the analyzer
 
+        NOTE: for advanced analyzers, they may provide more specific query interfaces
+
         :returns: the latest stauts (String in a analyzer-specific format)
 
         """
