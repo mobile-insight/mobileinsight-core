@@ -21,9 +21,8 @@ Author: Yuanjie Li
 """
 
 from ..element import Element, Event
+from profile import *
 import logging
-
-from jnius import autoclass
 
 def setup_logger(logger_name, log_file, level=logging.INFO):
     '''Setup the analyzer logger.
@@ -65,37 +64,38 @@ class Analyzer(Element):
         #setup the logs
         self.set_log("",logging.INFO)
 
-        #setup the database
-        activity = autoclass('org.renpy.android.PythonActivity') 
-        self.__db = activity.mActivity.openOrCreateDatabase('MobileInsight.db',0,None)
-        self.__setup_db()
+        #setup the profile database
+
+        # activity = autoclass('org.renpy.android.PythonActivity') 
+        # self.__db = activity.mActivity.openOrCreateDatabase('MobileInsight.db',0,None)
+        # self.__setup_db()
 
 
-    def __setup_db(self):
-        """
-        Setup two tables for the analyzer: profile and status
-        """
-        self.__db.execSQL("CREATE TABLE IF NOT EXISTS "
-            + self.__class__.__name__ + "Profile"
-            + "(timestamp,ID,profile)")
+    # def __setup_db(self):
+    #     """
+    #     Setup two tables for the analyzer: profile and status
+    #     """
+    #     self.__db.execSQL("CREATE TABLE IF NOT EXISTS "
+    #         + self.__class__.__name__ + "Profile"
+    #         + "(timestamp,ID,profile)")
 
-        self.__db.execSQL("CREATE TABLE IF NOT EXISTS "
-            + self.__class__.__name__ + "Status"
-            + "(timestamp,status)")
+    #     self.__db.execSQL("CREATE TABLE IF NOT EXISTS "
+    #         + self.__class__.__name__ + "Status"
+    #         + "(timestamp,status)")
 
-    def query_status(self):
-        """
-        Query the current status of the analyzer
+    # def query_status(self):
+    #     """
+    #     Query the current status of the analyzer
 
-        NOTE: for advanced analyzers, they may provide more specific query interfaces
+    #     NOTE: for advanced analyzers, they may provide more specific query interfaces
 
-        :returns: the latest stauts (String in a analyzer-specific format)
+    #     :returns: the latest stauts (String in a analyzer-specific format)
 
-        """
-        resultSet = mydatabase.rawQuery("selct status from " + self.__class__.__name__ + "Status"
-            + " order by timestamp desc limit 1")
-        resultSet.moveToFirst();
-        return resultSet.getString(0);
+    #     """
+    #     resultSet = mydatabase.rawQuery("selct status from " + self.__class__.__name__ + "Status"
+    #         + " order by timestamp desc limit 1")
+    #     resultSet.moveToFirst();
+    #     return resultSet.getString(0);
 
     def set_log(self,logpath,loglevel=logging.INFO):
         """

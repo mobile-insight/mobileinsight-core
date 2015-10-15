@@ -55,7 +55,14 @@ class ProfileHierarchy(object):
         :type root: string
         '''
         self.__root = Node(root)
-    
+
+
+    def get_root(self):
+        '''
+        Return the root node
+        '''
+        return self.__root
+
     def get_node(self,name):
         '''
         Get the node based on the hierarchical name
@@ -119,10 +126,29 @@ class Profile(object):
         self.__db = None
         self.__build_db()
 
-        
+       
+    def __create_table(self,node):
+    	'''
+    	Create SQL tables for the node
+
+    	:param node: a node in the profile hierarchy
+    	:type node: Node
+    	'''
+
+        if node.is_leaf():
+            return
+
+        sql_cmd = 'CREATE TABLE IF NOT EXISTS ' + node.name + "(id,"
+        for child in node.children:
+            sql_cmd = sql_cmd + child.name + ","
+        sql_cmd = sql_cmd + ")"
+        self.__db.execSQL
+
+        # Recursion
+        for child in node.children:
+            self.__create_table(child)    
 
     def __build_db(self):
-
         '''
         Build the internal DBs for the profile
         '''
@@ -133,16 +159,6 @@ class Profile(object):
             #setup internal database
             root = self.__profile_hierarchy.get_root()
             activity = autoclass('org.renpy.android.PythonActivity')
-            self.__db = activity.mActivity.openOrCreateDatabase(root+'.db',0,None)
+            self.__db = activity.mActivity.openOrCreateDatabase(root.name+'.db',0,None)
 
-            node_list = self.__profile_hierarchy.get_all_nodes()
-            for node in node_list:
-                children = self.__profile_hierarchy.get_children(node)
-                if children:
-                    # Non-leaf nodes
-                    sql_cmd = 'CREATE TABLE IF NOT EXISTS '
-                        + node + "(id, "
-                    for child in children:
-                        if self.__profile_hierarchy.check_node(child)==ProfileHierarchy.LEAF:
-
-
+            self.__create_table(root)

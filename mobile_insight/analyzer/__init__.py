@@ -6,6 +6,7 @@ __all__=["Analyzer",
     "HandoffLoopAnalyzer"]
 
 from analyzer import Analyzer
+from profile import Node,ProfileHierarchy,Profile
 
 from msg_logger import MsgLogger
 from msg_serializer import MsgSerializer
