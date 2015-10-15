@@ -676,6 +676,9 @@ class LteRrcConfig:
             - PHY/MAC/PDCP/RLC configuration
             - Measurement configurations
     """
+
+    # Update in 2.0: query and storage with hierarchical name
+    
     def __init__(self):
         self.status = LteRrcStatus() #the metadata of this cell
         self.status.rat = "LTE"

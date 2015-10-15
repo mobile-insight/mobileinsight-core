@@ -49,7 +49,7 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
         fileHandler = logging.FileHandler(log_file, mode='w')
         fileHandler.setFormatter(formatter)
         l.addHandler(fileHandler)  
-    l.disabled = False 
+    l.disabled = False    
 
 class Analyzer(Element):
     """A base class for all the analyzers
@@ -76,11 +76,11 @@ class Analyzer(Element):
         Setup two tables for the analyzer: profile and status
         """
         self.__db.execSQL("CREATE TABLE IF NOT EXISTS "
-            + self.__class__.__name__ + "Status"
+            + self.__class__.__name__ + "Profile"
             + "(timestamp,ID,profile)")
 
         self.__db.execSQL("CREATE TABLE IF NOT EXISTS "
-            + self.__class__.__name__ + "Profile"
+            + self.__class__.__name__ + "Status"
             + "(timestamp,status)")
 
     def query_status(self):
@@ -191,3 +191,4 @@ class Analyzer(Element):
         else:
             for f in self.from_list[module]:
                 f(event)
+
