@@ -66,7 +66,7 @@ class Analyzer(Element):
         self.set_log("",logging.INFO)
 
         #setup the database
-        activity = autoclass('org.renpy.android.PythonActivity') #FIXME: does activity work for Analyzer?
+        activity = autoclass('org.renpy.android.PythonActivity') 
         self.__db = activity.mActivity.openOrCreateDatabase('MobileInsight.db',0,None)
         self.__setup_db()
 
