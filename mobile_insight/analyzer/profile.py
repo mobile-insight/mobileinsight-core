@@ -15,6 +15,7 @@ class Node(object):
     def __init__(self,name):
         self.name = name
         self.children = [] # A node list to its children
+        self.__id = 0 # currently maximum index (useful for non-root nodes)
 
 
     def add(self,child):
@@ -55,7 +56,6 @@ class ProfileHierarchy(object):
         :type root: string
         '''
         self.__root = Node(root)
-
 
     def get_root(self):
         '''
@@ -101,7 +101,6 @@ class ProfileHierarchy(object):
                 return None
 
 
-
 class Profile(object):
     
     '''
@@ -125,24 +124,23 @@ class Profile(object):
         self.__profile_hierarchy = profile_hierarchy
         self.__db = None
         self.__build_db()
-
-       
+     
     def __create_table(self,node):
-    	'''
-    	Create SQL tables for the node
+        '''
+        Create SQL tables for the node
 
-    	:param node: a node in the profile hierarchy
-    	:type node: Node
-    	'''
-
+        :param node: a node in the profile hierarchy
+        :type node: Node
+        '''
         if node.is_leaf():
             return
 
-        sql_cmd = 'CREATE TABLE IF NOT EXISTS ' + node.name + "(id,"
+        sql_cmd = 'CREATE TABLE IF NOT EXISTS ' + node.name + "(id"
         for child in node.children:
-            sql_cmd = sql_cmd + child.name + ","
+            sql_cmd = sql_cmd + "," + child.name
+        
         sql_cmd = sql_cmd + ")"
-        self.__db.execSQL
+        self.__db.execSQL(sql_cmd)
 
         # Recursion
         for child in node.children:
@@ -152,7 +150,6 @@ class Profile(object):
         '''
         Build the internal DBs for the profile
         '''
-
         if self.__profile_hierarchy is None:
             self.__db = None
         else:
@@ -162,3 +159,86 @@ class Profile(object):
             self.__db = activity.mActivity.openOrCreateDatabase(root.name+'.db',0,None)
 
             self.__create_table(root)
+
+    #TODO: finish query, insert and update methods for the profile
+    #query: given init id and hierarchy name, return the value
+    #insert/update: called by analyzers. Given id and name, insert a new item if not exist, or update it otherwise
+
+    def query(self,profile_name,init_id):
+        '''
+        Query the profile value with a hierarchical name.
+        Example: self.query('LteRrc.Reconfig.Drx.Short_drx','cell_id=87')
+
+        :param profile_name: a hierarcical name separated by '.' (e.g., LteRrc.Reconfig.Drx.Short_drx)
+        :type profile_name: string
+        :init_id: the index in the root of the hierarchical name (e.g., Physical cell ID)
+        :type init_id: string
+        :returns: value list that satisfies the query, or None if the profile does not exist
+        '''
+
+        #Step 1: check if the profile_name is valid
+        if self.__profile_hierarchy is None: #no profile defined
+            return None
+        node = self.__profile_hierarchy.get_node(profile_name)
+        if node is None or not node.is_leaf():
+            return None
+
+        nodes = profile_name.split('.')
+
+        #Step 2: generate the SQL statement with JOIN operator
+        #In above example, the SQL command is
+        #    select Drx.Short_drx from LteRrc,Reconfig,Drx
+        #    where LteRrc.id=87 and LteRrc.Reconfig=Reconfig.id and Reconfig.Drx=Drx.id
+
+        sql_cmd = "select "+ nodes[-2]+"."+nodes[-1]
+        tmp = profile_name.replace('.',',')
+        tmp_index = tmp.rfind(',')
+        sql_cmd = sql_cmd + " from "+tmp[0:tmp_index]
+        sql_cmd = sql_cmd + " where "+nodes[0]+".id="+init_id
+        for i in range(0,len(nodes)-2):
+            sql_cmd = sql_cmd + " and "+nodes[i]+"."+nodes[i+1]+"="+nodes[i+1]+".id"
+
+      
+        #Step 3: if the return value is empty, return None, otherwise the first item
+        sql_res = self.__db.rawQuery(sql_cmd,None)
+        sql_res.moveToFirst();
+        res = []
+        while True:
+            res.append(sql_res.getString(0))
+            if not sql_res.moveToNext():
+                break
+        return res
+
+    def insert(self,profile_name,init_id,value):
+        '''
+        Insert/update a profile value 
+        Example: self.insert('LteRrc.Reconfig.Drx',{‘Short_Drx':'1s','Long_Drx':'5s'}) 
+
+        :param profile_name: a hierarcical name separated by '.' (e.g., LteRrc.Reconfig.Drx.Short_drx)
+        :type profile_name: string
+        :init_id: the index in the root of the hierarchical name (e.g., Physical cell ID)
+        :type init_id: string
+        :value: a dictionary of value_name:value
+        :type value: dictionary
+        '''
+
+        #Step 1: check if the profile_name is valid
+        if self.__profile_hierarchy is None: #no profile defined
+            return None
+        node = self.__profile_hierarchy.get_node(profile_name)
+        if node is None:
+            return None
+        #The profile node should have all its children as leaves 
+        valid_node=True
+        for child in node.children:
+            if not child.is_leaf():
+                valid_node = False
+                break
+        if not valid_node:
+            return None	
+
+        #Step 2: Update EVERY database in a reverse order
+        nodes = profile_name.split('.')
+
+
+
