@@ -82,32 +82,6 @@ class Analyzer(Element):
         '''
         self.__profile = Profile(profile_hierarchy)
 
-    # def __setup_db(self):
-    #     """
-    #     Setup two tables for the analyzer: profile and status
-    #     """
-    #     self.__db.execSQL("CREATE TABLE IF NOT EXISTS "
-    #         + self.__class__.__name__ + "Profile"
-    #         + "(timestamp,ID,profile)")
-
-    #     self.__db.execSQL("CREATE TABLE IF NOT EXISTS "
-    #         + self.__class__.__name__ + "Status"
-    #         + "(timestamp,status)")
-
-    # def query_status(self):
-    #     """
-    #     Query the current status of the analyzer
-
-    #     NOTE: for advanced analyzers, they may provide more specific query interfaces
-
-    #     :returns: the latest stauts (String in a analyzer-specific format)
-
-    #     """
-    #     resultSet = mydatabase.rawQuery("selct status from " + self.__class__.__name__ + "Status"
-    #         + " order by timestamp desc limit 1")
-    #     resultSet.moveToFirst();
-    #     return resultSet.getString(0);
-
     def set_log(self,logpath,loglevel=logging.INFO):
         """
         Set the logging in analyzers.

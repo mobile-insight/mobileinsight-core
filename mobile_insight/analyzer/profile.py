@@ -200,10 +200,12 @@ class Profile(object):
         #Step 2: extract the raw profile
         sql_cmd = "select profile from "+self.__get_root_name()+" where id="+init_id
         sql_res = self.__db.rawQuery(sql_cmd,None)
+        
+        if not sql_res.getColumnCount()==0: #the id does not exist
+            return None
+
         sql_res.moveToFirst();
         res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
-        if not res: #the id does not exist
-            return None
 
         #Step 3: extract the result from raw profile
         profile_nodes = profile_name.split('.')
@@ -264,6 +266,7 @@ class Profile(object):
             res=query_res
             profile_node = self.__profile_hierarchy.get_root()
 
+            #FIXME: the following name will cause bug: update("LteRrc",{'Sib':1})
 
             for i in range(1,len(profile_nodes)-1):
                 #Initialization
@@ -286,7 +289,7 @@ class Profile(object):
             #The id exists. Update the record
             res=query_res
             profile_node = self.__profile_hierarchy.get_root()
-            for i in range(1,len(profile_nodes)-1):
+            for i in range(1,len(profile_nodes)):
                 if res[profile_nodes[i]] is not None:
                     res = res[profile_nodes[i]]
                 else:
@@ -316,5 +319,13 @@ if __name__=="__main__":
     res = profile.update("87",'LteRrc.Reconfig.Drx',{'Drx_short':'1','Drx_long':'5'})
     
     print profile.query("87",'LteRrc.Reconfig.Drx')
+
+    # res =  profile.update("86",'LteRrc',{'Sib':'1'})
+
+    # print profile.query("86",'LteRrc.Sib')
+
+
+
+
 
 
