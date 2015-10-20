@@ -21,7 +21,7 @@ Author: Yuanjie Li
 """
 
 from ..element import Element, Event
-from profile import *
+#from profile import *
 import logging
 
 def setup_logger(logger_name, log_file, level=logging.INFO):
@@ -64,23 +64,7 @@ class Analyzer(Element):
         #setup the logs
         self.set_log("",logging.INFO)
 
-        #setup the profile database
-        self.__profile = None
-
-        # activity = autoclass('org.renpy.android.PythonActivity') 
-        # self.__db = activity.mActivity.openOrCreateDatabase('MobileInsight.db',0,None)
-        # self.__setup_db()
-
-    def __set_profile(self,profile_hierarchy):
-        '''
-        Setup the profile given the hierarchy description.
-        Since the hierarchy is protocol/analyzer-specific, 
-        this function would be called by each analyzer with specific hierarchy files
-
-        :param profile_hierarchy: a tree that describes the profiling hierarchy
-        :type profile_hierarchy: ProfileHierarchy
-        '''
-        self.__profile = Profile(profile_hierarchy)
+        #TODO: For Profile, each specific analyzer should declare it on demand
 
     def set_log(self,logpath,loglevel=logging.INFO):
         """

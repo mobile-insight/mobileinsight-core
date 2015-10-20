@@ -634,6 +634,38 @@ class LteRrcAnalyzer(Analyzer):
         return self.__history
 
 
+def LteRrcProfileHierarchy():
+    '''
+    Return a Lte Rrc ProfileHierarchy (configurations)
+
+    :returns: ProfileHierarchy for LTE RRC
+    '''
+
+    profile_hierarchy = ProfileHierarchy('LteRrc')
+    root = profile_hierarchy.get_root()
+    status = root.add('Status') #metadata
+    sib = root.add('Sib') #Idle-state configurations
+    active = root.add('Active') #Active-state configurations
+
+    #Status metadata
+    status.add('cell_id')
+    status.add('freq')
+    status.add('radio_technology')
+    status.add('tracking_area_code')
+    status.add('bandwidth')
+    status.add('conn_state')
+
+    #Idle-state configurations
+    sib_serv = sib.add('serv_config') #configuration as the serving cell
+    #Per-frequency configurations
+    intra_freq_config = sib.add('intra_freq_config') #Intra-frequency handoff config
+    #TODO: for inter-freq/RAT, should have a mapping from freq/RAT to config
+    inter_freq_config = sib.add('inter_freq_config') #Inter-frequency/RAT handoff config
+    intra_freq_cell_config = sib.add('intra_freq_cell_config') #per-cell offsets for intra-freq
+    inter_freq_cell_config = sib.add('inter_freq_cell_config') #per-cell offsets for inter-freq
+
+
+
 class LteRrcStatus:
     """
     The metadata of a cell, including its ID, frequency band, tracking area code, 
