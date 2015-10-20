@@ -643,26 +643,74 @@ def LteRrcProfileHierarchy():
 
     profile_hierarchy = ProfileHierarchy('LteRrc')
     root = profile_hierarchy.get_root()
-    status = root.add('Status') #metadata
-    sib = root.add('Sib') #Idle-state configurations
-    active = root.add('Active') #Active-state configurations
+    status = root.add('status') #metadata
+    sib = root.add('idle',False) #Idle-state configurations
+    active = root.add('active',False) #Active-state configurations
 
     #Status metadata
-    status.add('cell_id')
-    status.add('freq')
-    status.add('radio_technology')
-    status.add('tracking_area_code')
-    status.add('bandwidth')
-    status.add('conn_state')
+    status.add('cell_id',False)
+    status.add('freq',False)
+    status.add('radio_technology',False)
+    status.add('tracking_area_code',False)
+    status.add('bandwidth',False)
+    status.add('conn_state',False)
 
     #Idle-state configurations
-    sib_serv = sib.add('serv_config') #configuration as the serving cell
+    sib_serv = sib.add('serv_config',False) #configuration as the serving cell
     #Per-frequency configurations
-    intra_freq_config = sib.add('intra_freq_config') #Intra-frequency handoff config
+    intra_freq_config = sib.add('intra_freq_config',False) #Intra-frequency handoff config
     #TODO: for inter-freq/RAT, should have a mapping from freq/RAT to config
-    inter_freq_config = sib.add('inter_freq_config') #Inter-frequency/RAT handoff config
-    intra_freq_cell_config = sib.add('intra_freq_cell_config') #per-cell offsets for intra-freq
-    inter_freq_cell_config = sib.add('inter_freq_cell_config') #per-cell offsets for inter-freq
+    inter_freq_config = sib.add('inter_freq_config',True) #Inter-frequency/RAT handoff config
+    intra_freq_cell_config = sib.add('intra_freq_cell_config',True) #per-cell offsets for intra-freq
+    inter_freq_cell_config = sib.add('inter_freq_cell_config',True) #per-cell offsets for inter-freq
+
+    #Intra-frequency handoff parameter: frequency level
+    intra_freq_config.add('tReselection',False)
+    intra_freq_config.add('q_RxLevMin',False)
+    intra_freq_config.add('p_Max',False)
+    intra_freq_config.add('s_IntraSearch',False)
+
+    #Inter-frequency handoff parameter: frequency level
+    inter_freq_config.add('rat',False)
+    inter_freq_config.add('freq',False)
+    inter_freq_config.add('tReselection',False)
+    inter_freq_config.add('q_RxLevMin',False)
+    inter_freq_config.add('p_Max',False)
+    inter_freq_config.add('priority',False)
+    inter_freq_config.add('threshx_high',False)
+    inter_freq_config.add('threshx_low',False)
+    inter_freq_config.add('q_offset_freq',False)
+
+    #Intra/inter-frequency parameter: per-cell level
+    intra_freq_cell_config.add('offset',False)
+    inter_freq_cell_config.add('offset',False)
+
+    #Active-state configuration
+    meas_obj = active.add('meas_obj',True) #freq->measobject
+    report_list = active.add('report_list',True) #report_id->reportConfig
+    measid_list = active.add('measid_list',True) #meas_id->(obj_id,report_id)
+
+    #measurement object
+    meas_obj.add('obj_id',False) #meas object ID
+    meas_obj.add('freq',False) # carrier frequency
+    meas_obj.add('offset_freq',False) # frequency-specific measurement offset
+    individual_offset = meas_obj.add('offset',True) # cellID->cellIndividualOffset
+    individual_offset.add('offset',False) 
+    #TODO: add cell blacklist
+
+    report_list.add('id',False) #report ID
+    report_list.add('hyst',False) #Hysteresis
+    event = report_list.add('report_event',True) #report event: eventID->thresholds
+    event.add('event_type',False)
+    event.add('threshold_1',False)
+    event.add('threshold_2',False)
+
+
+    #measurement id
+    measid_list.add('obj_id',False)
+    measid_list.add('report_id',False)
+
+
 
 
 
