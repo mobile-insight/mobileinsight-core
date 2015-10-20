@@ -13,6 +13,7 @@
 #include <wiretap/wtap.h>
 #include <wsutil/plugins.h>
 #include <wsutil/privileges.h>
+#include <epan/dissectors/packet-pdcp-lte.h>
 
 #include "packet-aww.h"
 #include <stdio.h>
@@ -20,13 +21,14 @@
     #include <winsock2.h>   // for ntohl()
     #include <io.h>
     #define SET_BINARY_MODE(handle) setmode(handle, O_BINARY)
-    typedef __int32 int32_t;
-    typedef unsigned __int32 uint32_t;
 #elif __GNUC__
     #include <arpa/inet.h>  // for ntohl()
 #else
     #error Your compiler is not either MS Visual C compiler or GNU gcc.
 #endif
+
+//typedef __int32 int32_t;
+//typedef unsigned __int32 uint32_t;
 
 #define WS_DISSECTOR_VERSION "1.0.2"
 
@@ -48,7 +50,7 @@ void print_tree(const proto_tree* tree, int level)
         strcpy(field_str, tree->finfo->rep->representation);
 
     if(!PROTO_ITEM_IS_HIDDEN(tree))
-        printf("%s\n", field_str);   
+        printf("%s\n", field_str);
 
     print_tree(tree->first_child, level+1);
     print_tree(tree->next, level);
@@ -58,7 +60,7 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
 {
     wtap_pkthdr phdr;
     frame_data fdata;
-    
+
     memset(&phdr, 0, sizeof(wtap_pkthdr));
     frame_data_init(&fdata, 0, &phdr, 0, 0);
 
@@ -115,12 +117,12 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    epan_init(register_all_protocols, register_all_protocol_handoffs, 
+    epan_init(register_all_protocols, register_all_protocol_handoffs,
                 NULL, NULL);
- 
+
     proto_register_aww();
     proto_reg_handoff_aww();
- 
+
     epan_t *session = epan_new();
     char s[] = "uat:user_dlts:\"User 1 (DLT=148)\",\"aww\",\"0\",\"\",\"0\",\"\"";
     switch (prefs_set_pref(s)) {
@@ -145,10 +147,55 @@ int main(int argc, char** argv)
             break;
         unsigned int type = ntohl(*(uint32_t *)buffer);
         size_t data_len = ntohl(*((uint32_t *)(buffer + 4)));
-        fread(buffer + 2 * 4, 1, data_len, stdin);
+        size_t offset = 8;
+        size_t framingHeader_len = 0;
+        if (type == 300 || type == 301) {
+            /* If type is pdcp-lte signaling message, we need to add framing
+             * header before read pdcp PDU. */
+            /* Fixed start to each frame (allowing heuristic dissector to work
+             * ) */
+            memcpy(buffer + offset, PDCP_LTE_START_STRING,
+                    strlen(PDCP_LTE_START_STRING));
+            offset += strlen(PDCP_LTE_START_STRING);
+
+            /* Now write out fixed fields (the mandatory elements of struct
+             * pdcp_lte_info */
+
+            /* gboolean no_header_pdu */
+            buffer[offset++] = FALSE;
+
+            /* enum pdcp_plane */
+            buffer[offset++] = SIGNALING_PLANE;
+
+            /* gboolean rohc_compression */
+            buffer[offset++] = FALSE;
+
+            /* Optional fields */
+            /* Direction */
+            buffer[offset++] = PDCP_LTE_DIRECTION_TAG;
+            switch (type) {
+                case 300:   // downlink
+                    buffer[offset++] = DIRECTION_DOWNLINK;
+                    break;
+                case 301:   // uplink
+                    buffer[offset++] = DIRECTION_UPLINK;
+                    break;
+            }
+
+            /* Logical Channel Type */
+            buffer[offset++] = PDCP_LTE_LOG_CHAN_TYPE_TAG;
+            buffer[offset++] = Channel_DCCH;
+
+            /* BCCH Transport Type */
+            buffer[offset++] = PDCP_LTE_BCCH_TRANSPORT_TYPE_TAG;
+            buffer[offset++] = 0;
+
+            buffer[offset++] = PDCP_LTE_PAYLOAD_TAG;
+            framingHeader_len = offset - 8;
+        }
+        fread(buffer + offset, 1, data_len, stdin);
         // fprintf(stderr, "type = %u, size = %u\n", type, (unsigned int) data_len);
-        
-        try_dissect(session, data_len + 2 * 4, buffer);
+        try_dissect(session, data_len + 2 * 4 + framingHeader_len, buffer);
         printf("===___===\n");
     }
 

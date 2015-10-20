@@ -1,5 +1,5 @@
-WS_SRC_PATH=$(HOME)/wireshark-1.12.3
-WS_LIB_PATH=$(HOME)/wireshark-local-1.12.3/lib
+WS_SRC_PATH=/home/moonsky/wireshark-1.12.7
+WS_LIB_PATH=/usr/local/lib
 WS_ANDROID_LIB_PATH=$(HOME)/wireshark-local-1.12.3-armeabi/lib
 
 GLIB_SRC_PATH=$(HOME)/Code/glib
