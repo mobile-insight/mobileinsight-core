@@ -7,7 +7,21 @@ including low-level msg filter and high-level analyzer
 Author: Yuanjie Li
 """
 
+"""
+    Analyzer 2.0 development plan
+
+        Step 1: A query() interface with SQLlite
+
+            - Backward compatability with Analyzer 1.0
+
+        Step 2: replace logging with customized logger
+
+        Step 3: A global analyzer repo to guarantee consistency
+
+"""
+
 from ..element import Element, Event
+#from profile import *
 import logging
 
 def setup_logger(logger_name, log_file, level=logging.INFO):
@@ -19,6 +33,9 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     :param log_file: the file to save the log.
     :param level: the loggoing level. The default value is logging.INFO.
     '''
+
+
+    # FIXME: python's logging module does not work well on Android
     l = logging.getLogger(logger_name)
     formatter = logging.Formatter('%(message)s')
     streamHandler = logging.StreamHandler()
@@ -31,7 +48,7 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
         fileHandler = logging.FileHandler(log_file, mode='w')
         fileHandler.setFormatter(formatter)
         l.addHandler(fileHandler)  
-    l.disabled = False 
+    l.disabled = False    
 
 class Analyzer(Element):
     """A base class for all the analyzers
@@ -47,6 +64,8 @@ class Analyzer(Element):
         #setup the logs
         self.set_log("",logging.INFO)
 
+        #TODO: For Profile, each specific analyzer should declare it on demand
+
     def set_log(self,logpath,loglevel=logging.INFO):
         """
         Set the logging in analyzers.
@@ -59,8 +78,7 @@ class Analyzer(Element):
         self.__loglevel=loglevel
         setup_logger('automator_logger',self.__logpath,self.__loglevel)
         self.logger=logging.getLogger('automator_logger')
-
-    
+  
     def set_source(self,source):
         """
         Set the source of the trace. 
@@ -102,6 +120,7 @@ class Analyzer(Element):
         if callback in self.source_callback:
             self.source_callback.remove(callback)
 
+    #TODO: depreciate this moudle. Replace with a registeration based approach
     def include_analyzer(self,analyzer,callback_list):
         """
         Declares the dependency from other analyzers.
@@ -141,3 +160,4 @@ class Analyzer(Element):
         else:
             for f in self.from_list[module]:
                 f(event)
+

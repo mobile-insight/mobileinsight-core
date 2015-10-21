@@ -9,7 +9,6 @@ Author: Yuanjie Li
 __all__ = ["Event", "Element"]
 
 
-# Event abstraction
 class Event(object):
     '''The event is used to trigger the analyzer and perform some actions.
 

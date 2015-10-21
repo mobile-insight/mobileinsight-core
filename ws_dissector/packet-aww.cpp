@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "packet-aww.h"
 
+
 static const int PROTO_MAX = 1000;
 
 static int proto_aww = -1;
@@ -24,7 +25,7 @@ static void init_proto_names (const char *protos []) {
     protos[103] = "rrc.dl.dcch";
     protos[104] = "rrc.bcch.bch";
     protos[106] = "rrc.pcch";
-    
+
     protos[150] = "rrc.si.mib";
     protos[151] = "rrc.si.sib1";
     protos[152] = "rrc.si.sib2";
@@ -46,6 +47,9 @@ static void init_proto_names (const char *protos []) {
     protos[205] = "lte-rrc.ul.ccch";
 
     protos[250] = "nas-eps_plain";
+
+    protos[300] = "pdcp-lte"; // signaling plane - Downlink
+    protos[301] = "pdcp-lte"; // signaling plane - Uplink
 }
 
 static void
@@ -62,10 +66,10 @@ dissect_aww(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
         proto_tree_add_item(aww_tree, hf_data_len, tvb, 4, 4, ENC_BIG_ENDIAN);
 
         guint32 proto_id = tvb_get_ntohl(tvb, 0);
+        //printf ("[MoonSky]: proto_id: %d.\n", proto_id);
         tvbuff_t* next_tvb = tvb_new_subset_remaining(tvb, 8);
-        // fprintf(stderr, "len = %d\n", tvb_length(next_tvb));
-        gboolean success = dissector_try_uint(proto_table, proto_id, next_tvb, pinfo, tree);
-        if (!success) {
+        int rtBytesConsumed = dissector_try_uint(proto_table, proto_id, next_tvb, pinfo, tree);
+        if (rtBytesConsumed == 0) {
             fprintf(stderr, "Error: ws_dissector fails to decode protocol %d.\n", proto_id);
         }
     }
@@ -108,7 +112,7 @@ proto_register_aww(void)
                     FT_UINT16,
                     BASE_DEC
                     );
-    
+
     register_dissector("aww", dissect_aww, proto_aww);
 }
 
@@ -122,7 +126,14 @@ proto_reg_handoff_aww(void)
     dissector_handle_t handle = NULL;
     for (int i = 0; i <= PROTO_MAX; i++) {
         if (protos[i] != NULL) {
+            handle = NULL;
             handle = find_dissector(protos[i]);
+            // printf ("[MoonSky]: find_dissector[%s]: ", protos[i]);
+            // if (handle != NULL) {
+            //     printf ("Success\n");
+            // } else {
+            //     printf ("Fail\n");
+            // }
             dissector_add_uint("aww.proto", i, handle);
         }
     }
