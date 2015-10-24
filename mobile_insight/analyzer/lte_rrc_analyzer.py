@@ -38,6 +38,7 @@ class LteRrcAnalyzer(Analyzer):
         self.__status = LteRrcStatus()    # current cell status
         self.__history = {}    # cell history: timestamp -> LteRrcStatus()
         self.__config = {}    # (cell_id,freq) -> LteRrcConfig()
+        # self.__config = Profile(LteRrcProfileHierarchy())
 
     def set_source(self,source):
         """
@@ -641,7 +642,7 @@ def LteRrcProfileHierarchy():
     :returns: ProfileHierarchy for LTE RRC
     '''
 
-    profile_hierarchy = ProfileHierarchy('LteRrc')
+    profile_hierarchy = ProfileHierarchy('LteRrcProfile')
     root = profile_hierarchy.get_root()
     status = root.add('status') #metadata
     sib = root.add('idle',False) #Idle-state configurations

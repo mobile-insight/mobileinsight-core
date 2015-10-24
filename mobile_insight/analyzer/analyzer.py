@@ -89,8 +89,6 @@ class Analyzer(Element):
         """
 
         #Bottom-up setting: the included analyzers should be evaluated first, then top analyzer
-        # FIXME: current implementation is dangerous, any from/to analyzer can change source!
-        # FIXME: if looped analyzer dependency exists, dead lock happens here!!!
 
         #Recursion for analyzers it depends on
         for analyzer in self.from_list:
