@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __all__ = [
-            "AndroidQmdlMonitor"
+            "AndroidQmdlMonitor",
             "Monitor",
             "DMCollector",  ### P4A: THIS LINE WILL BE DELETED ###
             "Replayer",
