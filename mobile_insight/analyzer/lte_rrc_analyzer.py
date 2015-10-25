@@ -40,6 +40,8 @@ class LteRrcAnalyzer(Analyzer):
         self.__config = {}    # (cell_id,freq) -> LteRrcConfig()
         # self.__config = Profile(LteRrcProfileHierarchy())
 
+        self.__profile = LteRrcProfileHierarchy()
+
     def set_source(self,source):
         """
         Set the trace source. Enable the LTE RRC messages.
@@ -711,8 +713,7 @@ def LteRrcProfileHierarchy():
     measid_list.add('obj_id',False)
     measid_list.add('report_id',False)
 
-
-
+    return profile_hierarchy
 
 
 class LteRrcStatus:
