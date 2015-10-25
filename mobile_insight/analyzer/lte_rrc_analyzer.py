@@ -40,7 +40,7 @@ class LteRrcAnalyzer(Analyzer):
         self.__config = {}    # (cell_id,freq) -> LteRrcConfig()
         # self.__config = Profile(LteRrcProfileHierarchy())
 
-        self.__profile = LteRrcProfileHierarchy()
+        self.__profile = Profile(LteRrcProfileHierarchy())
 
     def set_source(self,source):
         """
