@@ -161,11 +161,26 @@ class LteRrcAnalyzer(Analyzer):
                     float(field_val['lte-rrc.s_NonIntraSearch'])*2,
                     int(field_val['lte-rrc.q_Hyst']))
 
+
+                #Test profile
+                self.__profile.update("LteRrcProfile:"+str(cur_pair)+".idle.serv_config",
+                	{'priority':field_val['lte-rrc.cellReselectionPriority'],
+                	 'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
+                	 's_nonintrasearch':str(float(field_val['lte-rrc.s_NonIntraSearch'])*2)),
+                     'q_hyst':field_val['lte-rrc.q_Hyst']})
+
                 self.__config[cur_pair].sib.intra_freq_config = LteRrcSibIntraFreqConfig(
                     int(field_val['lte-rrc.t_ReselectionEUTRA']),
                     int(field_val['lte-rrc.q_RxLevMin'])*2,
                     int(field_val['lte-rrc.p_Max']),
                     float(field_val['lte-rrc.s_IntraSearch'])*2) 
+
+                #Test profile
+                self.__profile.update("LteRrcProfile:"+str(cur_pair)+".idle.intra_freq_config",
+                	{'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
+                	 'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                	 'p_Max':field_val['lte-rrc.p_Max'],
+                	 's_IntraSearch':str(float(field_val['lte-rrc.s_IntraSearch'])*2)})
 
             #inter-frequency (LTE)
             if field.get('name') == "lte-rrc.interFreqCarrierFreqList":
@@ -668,6 +683,11 @@ def LteRrcProfileHierarchy():
     inter_freq_config = sib.add('inter_freq_config',True) #Inter-frequency/RAT handoff config
     intra_freq_cell_config = sib.add('intra_freq_cell_config',True) #per-cell offsets for intra-freq
     inter_freq_cell_config = sib.add('inter_freq_cell_config',True) #per-cell offsets for inter-freq
+
+    sib_serv.add('priority',False) #cell reselection priority
+    sib_serv.add('threshserv_low',False) #cell reselection threshold
+    sib_serv.add('s_nonintrasearch',False) #threshold for searching other frequencies
+    sib_serv.add('q_hyst',False)
 
     #Intra-frequency handoff parameter: frequency level
     intra_freq_config.add('tReselection',False)

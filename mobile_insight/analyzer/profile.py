@@ -250,9 +250,6 @@ class Profile(object):
                 res = res[profile_node_split[1]]
         return res
 
-
-        
-
     def update(self, profile_name, value_dict):
         
         '''
