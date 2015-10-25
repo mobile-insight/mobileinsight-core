@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 from analyzer import *
 import timeit
 
-from profile import *
+from profile import Profile,ProfileHierarchy
 
 __all__=["LteRrcAnalyzer"]
 
