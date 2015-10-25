@@ -648,7 +648,7 @@ def LteRrcProfileHierarchy():
 
     profile_hierarchy = ProfileHierarchy('LteRrcProfile')
     root = profile_hierarchy.get_root()
-    status = root.add('status') #metadata
+    status = root.add('status',False) #metadata
     sib = root.add('idle',False) #Idle-state configurations
     active = root.add('active',False) #Active-state configurations
 
