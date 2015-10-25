@@ -10,6 +10,8 @@ import xml.etree.ElementTree as ET
 from analyzer import *
 import timeit
 
+from profile import *
+
 __all__=["LteRrcAnalyzer"]
 
 #Q-offset range mapping (6.3.4, TS36.331)
