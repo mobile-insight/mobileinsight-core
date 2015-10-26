@@ -354,7 +354,7 @@ class Profile(object):
             # update_values = autoclass("android.content.ContentValues")
             # update_values.put("profile","\""+str(query_res)+"\"")
             # self.__db.update(self.__get_root_name(),update_values,"id=\""+profile_nodes[0].split(":")[1]+"\"",None)
-            sql_cmd = "update " +self.__get_root_name()+" set profile="+"\""+str(query_res)+"\""+" where id=\""+profile_nodes[0].split(":")[1])+"\""
+            sql_cmd = "update " +self.__get_root_name()+" set profile=\""+str(query_res)+"\" where id=\""+profile_nodes[0].split(":")[1]+"\""
 if __name__=="__main__":
 
     #Create a profile
