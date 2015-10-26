@@ -320,8 +320,8 @@ class Profile(object):
             #Insert the new record into table
             insert_values = autoclass("android.content.ContentValues")
             # insert_values.put("id","\""+str(profile_nodes[0].split(":")[1])+"\"")
-            insert_values.put("id","\""+profile_nodes[0].split(":")[1]+"\"")
             insert_values.put("profile","\""+str(query_res)+"\"")
+            insert_values.put("id","\""+profile_nodes[0].split(":")[1]+"\"")
             self.__db.insert(self.__get_root_name(),null,insert_values)
         else:
             sql_res.moveToFirst();
