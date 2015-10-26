@@ -288,10 +288,9 @@ class Profile(object):
         profile_nodes = profile_name.split('.')
 
         #Step 2: check if the id exists or not
-        # sql_cmd = "select profile from "+self.__get_root_name()+" where id="+profile_nodes[0].split(":")[1]
-        # sql_res = self.__db.rawQuery(sql_cmd,None)
-        sql_res = self.__db.rawQuery("select profile from "+self.__get_root_name()+" where id=?",
-                                     profile_nodes[0].split(":")[1])
+        sql_cmd = "select profile from "+self.__get_root_name()
+                +" where id=\""+profile_nodes[0].split(":")[1]+"\""
+        sql_res = self.__db.rawQuery(sql_cmd,None)
         
         # if not query_res: 
         if sql_res.getColumnCount()==0:
