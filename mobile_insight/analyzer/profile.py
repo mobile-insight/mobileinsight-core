@@ -319,7 +319,7 @@ class Profile(object):
  
             #Insert the new record into table
             insert_values = autoclass("android.content.ContentValues")
-            insert_values.put("id",init_id)
+            insert_values.put("id",profile_nodes[0].split(":")[1])
             insert_values.put("profile","\""+str(query_res)+"\"")
             self.__db.insert(self.__get_root_name(),null,insert_values)
         else:
@@ -351,7 +351,7 @@ class Profile(object):
 
             update_values = autoclass("android.content.ContentValues")
             update_values.put("profile","\""+str(query_res)+"\"")
-            self.__db.update(self.__get_root_name(),update_values,"id="+init_id,None)
+            self.__db.update(self.__get_root_name(),update_values,"id=\""+profile_nodes[0].split(":")[1]+"\"",None)
 
 if __name__=="__main__":
 
