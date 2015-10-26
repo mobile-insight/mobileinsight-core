@@ -231,10 +231,10 @@ class Profile(object):
 
         #Step 2: extract the raw profile
         #NOTE: root profile MUST have a id
-        sql_cmd = "select profile from "+self.__get_root_name()+" where id="+profile_nodes[0].split(":")[1]
+        sql_cmd = "select profile from "+self.__get_root_name()+" where id=\""+profile_nodes[0].split(":")[1]+"\""
         sql_res = self.__db.rawQuery(sql_cmd,None)
         
-        if sql_res.getColumnCount()==0: #the id does not exist
+        if sql_res.getCount()==0: #the id does not exist
             return None
 
         sql_res.moveToFirst();
@@ -292,7 +292,7 @@ class Profile(object):
         sql_res = self.__db.rawQuery(sql_cmd,None)
         
         # if not query_res: 
-        if sql_res.getColumnCount()==0:
+        if sql_res.getCount()==0:
             #The id does not exist. Create a new record
 
             query_res = {}
