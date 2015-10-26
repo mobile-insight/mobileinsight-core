@@ -322,7 +322,7 @@ class Profile(object):
             # insert_values.put("id","\""+profile_nodes[0].split(":")[1]+"\"")
             # insert_values.put("profile","\""+str(query_res)+"\"")
             # self.__db.insert(self.__get_root_name(),null,insert_values)
-            sql_cmd = "insert into "+self.__get_root_name() + "(id,profile) values(\""+str(query_res)+"\","+"\""+str(query_res)+"\")"
+            sql_cmd = "insert into "+self.__get_root_name() + "(id,profile) values(\""+profile_nodes[0].split(":")+"\","+"\""+str(query_res)+"\")"
             self.__db.execSQL(sql_cmd)
         else:
             sql_res.moveToFirst();
@@ -351,10 +351,10 @@ class Profile(object):
             for item in value_dict:
                 res[item]=value_dict[item]
 
-            update_values = autoclass("android.content.ContentValues")
-            update_values.put("profile","\""+str(query_res)+"\"")
-            self.__db.update(self.__get_root_name(),update_values,"id=\""+profile_nodes[0].split(":")[1]+"\"",None)
-
+            # update_values = autoclass("android.content.ContentValues")
+            # update_values.put("profile","\""+str(query_res)+"\"")
+            # self.__db.update(self.__get_root_name(),update_values,"id=\""+profile_nodes[0].split(":")[1]+"\"",None)
+            sql_cmd = "update " +self.__get_root_name()+" set profile="+"\""+str(query_res)+"\""+" where id=\""+profile_nodes[0].split(":")[1])+"\""
 if __name__=="__main__":
 
     #Create a profile
