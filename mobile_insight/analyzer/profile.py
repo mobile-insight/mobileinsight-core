@@ -318,10 +318,6 @@ class Profile(object):
                 res[item]=value_dict[item]
  
             #Insert the new record into table
-            # insert_values = autoclass("android.content.ContentValues")
-            # insert_values.put("id","\""+profile_nodes[0].split(":")[1]+"\"")
-            # insert_values.put("profile","\""+str(query_res)+"\"")
-            # self.__db.insert(self.__get_root_name(),null,insert_values)
             sql_cmd = "insert into "+self.__get_root_name() + "(id,profile) values(\""+profile_nodes[0].split(":")[1]+"\","+"\""+str(query_res)+"\")"
             self.__db.execSQL(sql_cmd)
         else:
@@ -351,9 +347,6 @@ class Profile(object):
             for item in value_dict:
                 res[item]=value_dict[item]
 
-            # update_values = autoclass("android.content.ContentValues")
-            # update_values.put("profile","\""+str(query_res)+"\"")
-            # self.__db.update(self.__get_root_name(),update_values,"id=\""+profile_nodes[0].split(":")[1]+"\"",None)
             sql_cmd = "update " +self.__get_root_name()+" set profile=\""+str(query_res)+"\" where id=\""+profile_nodes[0].split(":")[1]+"\""
 if __name__=="__main__":
 
