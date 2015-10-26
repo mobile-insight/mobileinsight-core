@@ -125,7 +125,6 @@ class LteRrcAnalyzer(Analyzer):
 
         :param msg: RRC SIB messages
         """
-        self.logger.info("hehe")
 
         for field in msg.data.iter('field'):
 
@@ -136,8 +135,6 @@ class LteRrcAnalyzer(Analyzer):
             #serving cell and intra-frequency reselection info
             if field.get('name') == "lte-rrc.sib3_element":
 
-            	self.logger.info("lte-rrc.sib3_element")
-            	
                 field_val = {}
 
                 #Default value setting
@@ -166,7 +163,7 @@ class LteRrcAnalyzer(Analyzer):
                     int(field_val['lte-rrc.q_Hyst']))
 
                 #Test profile
-                self.logger.info("LteRrcSibServ")
+                # self.logger.info("LteRrcSibServ")
                 self.__profile.update("LteRrcProfile:"+str(cur_pair)+".idle.sib_serv",
                 	{'priority':field_val['lte-rrc.cellReselectionPriority'],
                 	 'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
@@ -180,7 +177,7 @@ class LteRrcAnalyzer(Analyzer):
                     float(field_val['lte-rrc.s_IntraSearch'])*2) 
 
                 #Test profile
-                self.logger.info("LteRrcSibIntraFreqConfig")
+                # self.logger.info("LteRrcSibIntraFreqConfig")
                 self.__profile.update("LteRrcProfile:"+str(cur_pair)+".idle.intra_freq_config",
                 	{'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
                 	 'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
@@ -220,6 +217,20 @@ class LteRrcAnalyzer(Analyzer):
                         int(field_val['lte-rrc.threshX_High'])*2,
                         int(field_val['lte-rrc.threshX_Low'])*2,
                         int(field_val['lte-rrc.q_OffsetFreq']))
+
+                #Test profile
+                # self.logger.info("LteRrcSibInterFreqConfig")
+                self.__profile.update("LteRrcProfile:"+str(cur_pair)+".idle.inter_freq_config:"+str(neighbor_freq),
+                	{'rat':'LTE',
+                	 'freq':str(neighbor_freq),
+                	 'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
+                	 'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                	 'p_Max':field_val['lte-rrc.p_Max'],
+                	 'priority':field_val['lte-rrc.cellReselectionPriority'],
+                	 'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
+                	 'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
+                	 'q_offset_freq':field_val['lte-rrc.q_OffsetFreq']
+                	 })
 
                 #2nd round: inter-freq cell individual offset
                 for val in field.iter('field'):
@@ -271,6 +282,20 @@ class LteRrcAnalyzer(Analyzer):
                         int(field_val['lte-rrc.threshX_Low'])*2,
                         0)    #inter-RAT has no freq-offset
 
+                #Test profile
+                # self.logger.info("LteRrcSibInterFreqConfig")
+                self.__profile.update("LteRrcProfile:"+str(cur_pair)+".idle.inter_freq_config:"+str(neighbor_freq),
+                	{'rat':'UTRA',
+                	 'freq':str(neighbor_freq),
+                	 'tReselection':'null',
+                	 'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                	 'p_Max':field_val['lte-rrc.p_MaxUTRA'],
+                	 'priority':field_val['lte-rrc.cellReselectionPriority'],
+                	 'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
+                	 'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
+                	 'q_offset_freq':'0'
+                	 })
+
             if field.get('name') == "lte-rrc.t_ReselectionUTRA":
                 cur_pair = (self.__status.id,self.__status.freq)
                 for config in self.__config[cur_pair].sib.inter_freq_config.itervalues():
@@ -309,6 +334,20 @@ class LteRrcAnalyzer(Analyzer):
                         int(field_val['lte-rrc.threshX_High'])*2,
                         int(field_val['lte-rrc.threshX_Low'])*2,
                         0)    #inter-RAT has no freq-offset
+
+                #Test profile
+                # self.logger.info("LteRrcSibInterFreqConfig")
+                self.__profile.update("LteRrcProfile:"+str(cur_pair)+".idle.inter_freq_config:"+str(neighbor_freq),
+                	{'rat':'GERAN',
+                	 'freq':str(neighbor_freq),
+                	 'tReselection':'null',
+                	 'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                	 'p_Max':field_val['lte-rrc.p_MaxGERAN'],
+                	 'priority':field_val['lte-rrc.cellReselectionPriority'],
+                	 'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
+                	 'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
+                	 'q_offset_freq':'0'
+                	 })
 
             #FIXME: t_ReselectionGERAN appears BEFORE config, so this code does not work!
             if field.get('name') == "lte-rrc.t_ReselectionGERAN":
