@@ -161,7 +161,7 @@ class LteRrcAnalyzer(Analyzer):
                     float(field_val['lte-rrc.s_NonIntraSearch'])*2,
                     int(field_val['lte-rrc.q_Hyst']))
 
-                self.logger.info("LteRrcSibServ")
+                # self.logger.info("LteRrcSibServ")
                 #Test profile
                 self.__profile.update("LteRrcProfile:"+str(cur_pair)+".idle.serv_config",
                 	{'priority':field_val['lte-rrc.cellReselectionPriority'],
@@ -176,7 +176,7 @@ class LteRrcAnalyzer(Analyzer):
                     float(field_val['lte-rrc.s_IntraSearch'])*2) 
 
                 #Test profile
-                self.logger.info("LteRrcSibIntraFreqConfig:")
+                # self.logger.info("LteRrcSibIntraFreqConfig:")
                 self.__profile.update("LteRrcProfile:"+str(cur_pair)+".idle.intra_freq_config",
                 	{'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
                 	 'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
