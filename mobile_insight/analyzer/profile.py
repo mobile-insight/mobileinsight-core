@@ -318,11 +318,14 @@ class Profile(object):
                 res[item]=value_dict[item]
  
             #Insert the new record into table
-            insert_values = autoclass("android.content.ContentValues")
-            # insert_values.put("id","\""+str(profile_nodes[0].split(":")[1])+"\"")
-            insert_values.put("profile","\""+str(query_res)+"\"")
-            insert_values.put("id","\""+profile_nodes[0].split(":")[1]+"\"")
-            self.__db.insert(self.__get_root_name(),null,insert_values)
+            # insert_values = autoclass("android.content.ContentValues")
+            # insert_values.put("id","\""+profile_nodes[0].split(":")[1]+"\"")
+            # insert_values.put("profile","\""+str(query_res)+"\"")
+            # self.__db.insert(self.__get_root_name(),null,insert_values)
+            sql_cmd = "insert into "+self.__get_root_name()
+                    +"(id,profile) values(\""++str(query_res)+"\","
+                    +"\""+str(query_res)+"\")"
+            self.__db.execSQL(sql_cmd)
         else:
             sql_res.moveToFirst();
             query_res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
