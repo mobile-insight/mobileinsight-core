@@ -125,6 +125,7 @@ class LteRrcAnalyzer(Analyzer):
 
         :param msg: RRC SIB messages
         """
+        self.logger.info("hehe")
 
         for field in msg.data.iter('field'):
 
@@ -134,6 +135,9 @@ class LteRrcAnalyzer(Analyzer):
 
             #serving cell and intra-frequency reselection info
             if field.get('name') == "lte-rrc.sib3_element":
+
+            	self.logger.info("lte-rrc.sib3_element")
+            	
                 field_val = {}
 
                 #Default value setting
