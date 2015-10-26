@@ -162,6 +162,12 @@ class LteRrcAnalyzer(Analyzer):
                     int(field_val['lte-rrc.q_Hyst']))
 
                 #Test profile
+                self.logger.info("LteRrcSibServ")
+                self.__profile.update("LteRrcProfile:"+str(cur_pair)+".idle.sib_serv",
+                	{'priority':field_val['lte-rrc.cellReselectionPriority'],
+                	 'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
+                	 's_nonintrasearch':str(int(field_val['lte-rrc.s_NonIntraSearch'])*2),
+                	 'q_hyst':field_val['lte-rrc.q_Hyst']})
                 
                 self.__config[cur_pair].sib.intra_freq_config = LteRrcSibIntraFreqConfig(
                     int(field_val['lte-rrc.t_ReselectionEUTRA']),
