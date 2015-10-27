@@ -535,7 +535,7 @@ const Fmt LteMacConfiguration_LCConfig_LC [] = {
 };
 
 const Fmt LteMacConfigurationSubpkt_eMBMSConfig [] = {
-    {UINT, "Num eMBMS Active LCs", 2}, // Not sure
+    {UINT, "Num eMBMS Active LCs", 2}, // Not sure if this offset and length of this field is correct
     {SKIP, "NULL", 98}
 };
 
