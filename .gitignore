@@ -22,8 +22,16 @@ docs/_build
 # Pickle output
 *.p
 *.pkl
+*.pickle
 
 # Object files
 *.so
 *.pyd
+
+# APK
+*.apk
+
+# Archive files
+*.7z
+*.zip
 
