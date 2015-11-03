@@ -492,6 +492,8 @@ class MmAnalyzer(Analyzer):
 
     def __callback_lte_rrc_ota(self, event):
         log_item = event.data
+        if not log_item.has_key("Msg"):
+            return
         log_xml = ET.fromstring(log_item["Msg"])
 
         is_sib1 = False
@@ -582,6 +584,9 @@ class MmAnalyzer(Analyzer):
 
     def __callback_lte_rrc_serv_cell_info(self, event):
         log_item = event.data
+
+        if not log_item.has_key("MNC Digit"):
+            return
 
         if log_item["MNC Digit"] == 3:
             s = "LTE/%(MCC)03d-%(MNC)03d-%(TAC)d-%(Cell Identity)d" % log_item
