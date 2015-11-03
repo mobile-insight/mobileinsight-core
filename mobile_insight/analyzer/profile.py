@@ -6,9 +6,17 @@ Profile abstraction
 Author: Yuanjie Li
 """
 
-from jnius import autoclass
+is_android=False
+try:
+    from jnius import autoclass #For Android
+    is_android=True
+except Exception, e:
+    import sqlite3 #Laptop version
+    is_android=False
 
 import ast
+
+
 
 __all__=["ProfileHierarchy","Profile"]
 
@@ -189,7 +197,11 @@ class Profile(object):
         :type node: Node
         '''
         sql_cmd = 'CREATE TABLE IF NOT EXISTS ' + node.name + "(id,profile,primary key(id))"
-        self.__db.execSQL(sql_cmd) 
+        if is_android:
+            self.__db.execSQL(sql_cmd) 
+        else:
+            self.__db.execute(sql_cmd)
+            self.__conn.commit()
 
     def __get_root_name(self):
         return self.__profile_hierarchy.get_root().name
@@ -203,8 +215,12 @@ class Profile(object):
         else:
             #setup internal database
             root = self.__profile_hierarchy.get_root()
-            activity = autoclass('org.renpy.android.PythonActivity')
-            self.__db = activity.mActivity.openOrCreateDatabase(root.name+'.db',0,None)
+            if is_android:
+                activity = autoclass('org.renpy.android.PythonActivity')
+                self.__db = activity.mActivity.openOrCreateDatabase(root.name+'.db',0,None)
+            else:
+                self.__conn = sqlite3.connect(root.name+'.db')
+                self.__db = self.__conn.cursor()
 
             self.__create_table(root)
 
@@ -232,13 +248,21 @@ class Profile(object):
         #Step 2: extract the raw profile
         #NOTE: root profile MUST have a id
         sql_cmd = "select profile from "+self.__get_root_name()+" where id=\""+profile_nodes[0].split(":")[1]+"\""
-        sql_res = self.__db.rawQuery(sql_cmd,None)
         
-        if sql_res.getCount()==0: #the id does not exist
+        if is_android:
+            sql_res = self.__db.rawQuery(sql_cmd,None)
+        else:
+            sql_res = self.__db.execute(sql_cmd).fetchall()
+        
+        # if sql_res.getCount()==0: #the id does not exist
+        if (is_android and sql_res.getCount()==0) or (not is_android and len(sql_res)==0):
             return None
 
-        sql_res.moveToFirst();
-        res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
+        if is_android:
+            sql_res.moveToFirst();
+            res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
+        else:
+            res = ast.literal_eval(sql_res[0][0])
 
         #Step 3: extract the result from raw profile
         for i in range(1,len(profile_nodes)):
@@ -289,10 +313,14 @@ class Profile(object):
 
         #Step 2: check if the id exists or not
         sql_cmd = "select profile from "+self.__get_root_name()+" where id=\""+profile_nodes[0].split(":")[1]+"\""
-        sql_res = self.__db.rawQuery(sql_cmd,None)
+        if is_android:
+            sql_res = self.__db.rawQuery(sql_cmd,None)
+        else:
+            sql_res = self.__db.execute(sql_cmd).fetchall()
         
         # if not query_res: 
-        if sql_res.getCount()==0:
+        # if sql_res.getCount()==0:
+        if (is_android and sql_res.getCount()==0) or (not is_android and len(sql_res)==0):
             #The id does not exist. Create a new record
 
             query_res = {}
@@ -319,10 +347,17 @@ class Profile(object):
  
             #Insert the new record into table
             sql_cmd = "insert into "+self.__get_root_name() + "(id,profile) values(\""+profile_nodes[0].split(":")[1]+"\","+"\""+str(query_res)+"\")"
-            self.__db.execSQL(sql_cmd)
+            if is_android:
+                self.__db.execSQL(sql_cmd)
+            else:
+                self.__db.execute(sql_cmd)
+                self.__conn.commit()
         else:
-            sql_res.moveToFirst();
-            query_res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
+            if is_android:
+                sql_res.moveToFirst();
+                query_res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
+            else:
+                query_res = ast.literal_eval(sql_res[0][0])
             #The id exists. Update the record
             res=query_res
             profile_node = self.__profile_hierarchy.get_root()
@@ -348,6 +383,12 @@ class Profile(object):
                 res[item]=value_dict[item]
 
             sql_cmd = "update " +self.__get_root_name()+" set profile=\""+str(query_res)+"\" where id=\""+profile_nodes[0].split(":")[1]+"\""
+            if is_android:
+                self.__db.execSQL(sql_cmd)
+            else:
+                self.__db.execute(sql_cmd)
+                self.__conn.commit()
+
 if __name__=="__main__":
 
     #Create a profile
