@@ -8,49 +8,80 @@ Abstract protocol FSMs, and operationnal policies (algorithms)
 Author: Yuanjie Li
 """
 
-__all__=["StateMachnieProfile","StateMachnie"]
+__all__=["StateMachine"]
 
-class StateMachnieProfile(object):
-    '''
-    A graphical representation of state machnie profile
-    '''    
-
-    def __init__(self):
-        #TODO: a declarative approach for state machine
-        pass
-
-
-    def merge_state(self,partial_state):
-        '''
-        Merge partial state transitions from existing ones. 
-        This function is designed for operational analyzers (e.g., learning the handoff rules online)
-
-        :param partial_state: partial state transition
-        :type partial_state: dictionary
-        '''
-        pass
-        
-
-
-class StateMachnie(object):
+class StateMachine(object):
     
-    def __init__(self,profile,analyzer):
+    def __init__(self,state_machine,init_callback):
         '''
         Initialize a state machine with a pre-define profile
+        Example:
 
-        :param profile: a state machnie profile
-        :type profile: StateMachnieProfile
-        :param analyzer: the analyzer that includes this state machnie (used for callback)
-        :type analyzer: Analyzer
-        '''
-        pass
+            state_machine={'RRC-IDLE':{'RRC-CONNECTED':conn_callback},
+                           'RRC-CONNECTED':{'RRC-IDLE':idle_callback}}
+            #define initial state callback
+            def init_callback(event):
+                if event.type=="RRC setup" or event.type=="RRC reconfig":
+                    return "RRC-CONNECTED"
+                elif event.type=="SIB" or event.type=="RRC release":
+                    return "RRC-IDLE"
+            def conn_callback(event):
+                return event.type=="RRC Setup"
+            def idle_callback(event):
+                return event.type=="RRC release"
+            x = StateMachine(state_machine,init_callback)
 
-    def __trigger_transition(self):
-        '''
-        Trigger state transition from analyzer events
 
+        :param state_machine: a state machnie dictionary {FromState:{ToState:transition_callback}}
+        :type state_machine: dictionary
+        :param init_callback: the state initialization callback
+        :type analyzer: boolean function with 1 parameter
         '''
-        pass
+        self.state_machnie = state_machine
+        self.init_callback = init_callback
+        self.cur_state = None
+
+    def __init_state(self,event):
+        '''
+        A specical callback to initiate the current state.
+        Why this is needed: when MobileInsight starts, the device can be in any state. 
+        The state machnie must have a callback to determine the initial state.
+        This callback is protocol specific, since it depends on specific messages
+        '''
+        if not self.cur_state:
+            init_state = init_callback(event)
+            if init_state in self.state_machine.keys():
+                #Always check if the new state is declared
+                self.cur_state = init_state
+
+    def update_state(self,event):
+        '''
+        Trigger state transition from analyzer events. 
+        If more than one state transition is satisfied, return False
+
+        :param event: the event from analyzer
+        :type event: Event
+        :returns: True if state updated (including no change), or False if transition fails
+        '''
+
+        if not self.cur_state:
+            #state not initialized yet
+            self.__init_state(event)
+        else:
+            #assert: state always declared in state_machine (checked by __init_state)
+            tx_condition=[]
+            for item in self.state_machine[self.cur_state]:
+                #evaluate the transition condition 1-by-1
+                if self.state_machine[self.cur_state][item](event):
+                    tx_condition.append(item)
+            
+            if len(tx_condition)>1:
+                #More than 1 state transition is satisfied
+                return False
+            elif len(tx_condition)==1:
+                self.cur_state = tx_condition[0]
+            return True
+        
 
     def get_current_state(self):
         '''
@@ -58,7 +89,7 @@ class StateMachnie(object):
 
         :returns: current state
         '''
-        pass
+        return self.cur_state
 
     def get_transition_condition(self,src,dest):
         '''
