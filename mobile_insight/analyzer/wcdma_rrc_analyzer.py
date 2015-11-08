@@ -437,6 +437,8 @@ def WcdmaRrcProfileHierarchy():
     inter_freq_config.add('threshx_high',False)
     inter_freq_config.add('threshx_low',False)
 
+    return profile_hierarchy
+
 
 class WcdmaRrcStatus:
     """

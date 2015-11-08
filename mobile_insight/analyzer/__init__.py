@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__=["Analyzer",
+    "ProfileHierarchy","Profile",
+    "StateMachine",
     "MsgLogger","MsgSerializer",
     "LteRrcAnalyzer","LteNasAnalyzer","LteMeasurementAnalyzer",
 	"WcdmaRrcAnalyzer","RrcAnalyzer",
@@ -7,6 +9,7 @@ __all__=["Analyzer",
 
 from analyzer import Analyzer
 from profile import ProfileHierarchy,Profile
+from state_machine import StateMachine
 
 from msg_logger import MsgLogger
 from msg_serializer import MsgSerializer

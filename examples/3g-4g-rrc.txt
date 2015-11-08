@@ -1,6 +1,50 @@
-2015-07-14 09:02:17,123 : LteRrcStatus cellID=None frequency=5780 TAC=None connected=False
+LteRrcStatus cellID=None frequency=5780 TAC=None connected=False
 
-2015-07-14 09:02:17,124 : LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
 
-2015-07-14 09:02:20,719 : LteRrcStatus cellID=87 frequency=5780 TAC=87:40 connected=True
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=False
+
+LteRrcStatus cellID=87 frequency=5780 TAC=None connected=True
 

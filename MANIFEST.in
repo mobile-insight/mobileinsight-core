@@ -4,5 +4,7 @@ include setup.py
 exclude setup-internal.py
 recursive-include examples *.py qmdl_example.qmdl
 recursive-include mobile_insight *.py  *.m *.pyd README
+recursive-exclude examples *.db
+recursive-exclude mobile_insight *.db
 prune dm_collector_c 
 prune docs/docs
