@@ -475,12 +475,4 @@ def LteNasProfileHierarchy():
     qos.add('guaranteed_bitrate_dlink_ext',False)
     qos.add('residual_ber',False)
 
-    #Status metadata
-    status.add('cell_id',False)
-    status.add('freq',False)
-    status.add('radio_technology',False)
-    status.add('tracking_area_code',False)
-    status.add('bandwidth',False)
-    status.add('conn_state',False)
-
     return profile_hierarchy
