@@ -46,7 +46,7 @@ class ProtocolAnalyzer(Analyzer):
         self.add_source_callback(self.__update_state)
       
 
-    def __create_profile_hierarchy():
+    def __create_profile_hierarchy(self):
         """
         Declare a protocol-specific ProfileHierarchy
 
@@ -54,7 +54,7 @@ class ProtocolAnalyzer(Analyzer):
         """
         return None
 
-    def __create_state_machine():
+    def __create_state_machine(self):
         """
         Declare a state machine
 
@@ -62,7 +62,7 @@ class ProtocolAnalyzer(Analyzer):
         """
         return None
 
-    def __init_protocol_state():
+    def __init_protocol_state(self):
         """
         At bootstrap, determine the protocol's current state
 
@@ -70,7 +70,7 @@ class ProtocolAnalyzer(Analyzer):
         """
         return None
 
-    def declare_failure_flag():
+    def declare_failure_flag(self):
         """
         Initialize failure flags
         """
