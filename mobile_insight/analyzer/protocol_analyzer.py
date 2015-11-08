@@ -62,6 +62,14 @@ class ProtocolAnalyzer(Analyzer):
         """
         return None
 
+    def __init_protocol_state():
+        """
+        At bootstrap, determine the protocol's current state
+
+        :returns: a string of current state
+        """
+        return None
+
     def declare_failure_flag():
         """
         Initialize failure flags
@@ -74,4 +82,24 @@ class ProtocolAnalyzer(Analyzer):
 
         :param msg: the event (message) from the trace collector.
         """
-        self.__state_machine.update_state(msg)
+        
+        #Decode the message to XML format
+
+        #FIXME: duplicate message decoding, inefficient
+        log_item = msg.data.decode()
+        log_item_dict = dict(log_item)
+
+        #Convert msg to xml format
+        log_xml = ET.fromstring(log_item_dict['Msg'])
+        xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
+
+        self.__state_machine.update_state(xml_msg)
+
+    def get_protocol_state(self):
+        """
+        Returns protocol's current state
+
+        :returns: current state_machine
+        """
+        return self.__state_machine.get_current_state()
+

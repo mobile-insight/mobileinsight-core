@@ -8,6 +8,7 @@ Author: Yuanjie Li
 
 import xml.etree.ElementTree as ET
 from analyzer import *
+from protocol_analyzer import *
 import timeit
 
 from profile import Profile,ProfileHierarchy
@@ -24,14 +25,14 @@ q_offset_range = {
 }
 
 
-class LteRrcAnalyzer(Analyzer):
+class LteRrcAnalyzer(ProtocolAnalyzer):
 
     """
     A protocol ananlyzer for LTE Radio Resource Control (RRC) protocol.
     """
     def __init__(self):
 
-        Analyzer.__init__(self)
+        ProtocolAnalyzer.__init__(self)
 
         #init packet filters
         self.add_source_callback(self.__rrc_filter)
@@ -40,22 +41,126 @@ class LteRrcAnalyzer(Analyzer):
         self.__status = LteRrcStatus()    # current cell status
         self.__history = {}    # cell history: timestamp -> LteRrcStatus()
         self.__config = {}    # (cell_id,freq) -> LteRrcConfig()
-        # self.__config = Profile(LteRrcProfileHierarchy())
 
-        self.__profile = Profile(LteRrcProfileHierarchy())
+    def __create_profile_hierarchy(self):
+        '''
+        Return a Lte Rrc ProfileHierarchy (configurations)
 
-    def set_source(self,source):
+        :returns: ProfileHierarchy for LTE RRC
+        '''
+
+        profile_hierarchy = ProfileHierarchy('LteRrcProfile')
+        root = profile_hierarchy.get_root()
+        status = root.add('status',False) #metadata
+        sib = root.add('idle',False) #Idle-state configurations
+        active = root.add('active',False) #Active-state configurations
+
+        #Status metadata
+        status.add('cell_id',False)
+        status.add('freq',False)
+        status.add('radio_technology',False)
+        status.add('tracking_area_code',False)
+        status.add('bandwidth',False)
+        status.add('conn_state',False)
+
+        #Idle-state configurations
+        sib_serv = sib.add('serv_config',False) #configuration as the serving cell
+        #Per-frequency configurations
+        intra_freq_config = sib.add('intra_freq_config',False) #Intra-frequency handoff config
+        #TODO: for inter-freq/RAT, should have a mapping from freq/RAT to config
+        inter_freq_config = sib.add('inter_freq_config',True) #Inter-frequency/RAT handoff config
+        intra_freq_cell_config = sib.add('intra_freq_cell_config',True) #per-cell offsets for intra-freq
+        inter_freq_cell_config = sib.add('inter_freq_cell_config',True) #per-cell offsets for inter-freq
+
+        sib_serv.add('priority',False) #cell reselection priority
+        sib_serv.add('threshserv_low',False) #cell reselection threshold
+        sib_serv.add('s_nonintrasearch',False) #threshold for searching other frequencies
+        sib_serv.add('q_hyst',False)
+
+        #Intra-frequency handoff parameter: frequency level
+        intra_freq_config.add('tReselection',False)
+        intra_freq_config.add('q_RxLevMin',False)
+        intra_freq_config.add('p_Max',False)
+        intra_freq_config.add('s_IntraSearch',False)
+
+        #Inter-frequency handoff parameter: frequency level
+        inter_freq_config.add('rat',False)
+        inter_freq_config.add('freq',False)
+        inter_freq_config.add('tReselection',False)
+        inter_freq_config.add('q_RxLevMin',False)
+        inter_freq_config.add('p_Max',False)
+        inter_freq_config.add('priority',False)
+        inter_freq_config.add('threshx_high',False)
+        inter_freq_config.add('threshx_low',False)
+        inter_freq_config.add('q_offset_freq',False)
+
+        #Intra/inter-frequency parameter: per-cell level
+        intra_freq_cell_config.add('offset',False)
+        inter_freq_cell_config.add('offset',False)
+
+        #Active-state configuration
+        meas_obj = active.add('meas_obj',True) #freq->measobject
+        report_list = active.add('report_list',True) #report_id->reportConfig
+        measid_list = active.add('measid_list',True) #meas_id->(obj_id,report_id)
+
+        #measurement object
+        meas_obj.add('obj_id',False) #meas object ID
+        meas_obj.add('freq',False) # carrier frequency
+        meas_obj.add('offset_freq',False) # frequency-specific measurement offset
+        individual_offset = meas_obj.add('offset',True) # cellID->cellIndividualOffset
+        individual_offset.add('offset',False) 
+        #TODO: add cell blacklist
+
+        report_list.add('id',False) #report ID
+        report_list.add('hyst',False) #Hysteresis
+        event = report_list.add('report_event',True) #report event: eventID->thresholds
+        event.add('event_type',False)
+        event.add('threshold_1',False)
+        event.add('threshold_2',False)
+
+
+        #measurement id
+        measid_list.add('obj_id',False)
+        measid_list.add('report_id',False)
+
+        return profile_hierarchy
+        
+    def __create_state_machine(self):
         """
-        Set the trace source. Enable the LTE RRC messages.
+        Declare a RRC state machine
 
-        :param source: the trace source.
-        :type source: trace collector
+        returns: a StateMachnie
         """
-        Analyzer.set_source(self,source)
-        #enable LTE RRC log
-        source.enable_log("LTE_RRC_OTA_Packet")
-        source.enable_log("LTE_RRC_Serv_Cell_Info_Log_Packet")
+        
+        def idle_to_conn(msg):
+            for field in msg.data.iter('field'):
+                if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
+                    return True
 
+        def conn_to_idle(msg):
+            for field in msg.data.iter('field'):
+                if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
+                    return True
+
+        state_machine={'RRC_IDLE':{'RRC_CONNECTED':idle_to_conn},
+                       'RRC_CONNECTED':{'RRC_IDLE':conn_to_idle}}  
+
+        return state_machine
+
+    def __init_protocol_state(self, msg):
+        """
+        Determine RRC state at bootstrap
+
+        :returns: current RRC state, or None if not determinable 
+        """
+        for field in msg.data.iter('field'):
+            if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element" \
+            or field.get('name') == "lte-rrc.rrcConnectionReconfiguration_element":
+                return 'RRC_CONNECTED'
+            elif field.get('name') == "lte-rrc.rrcConnectionRelease_element":
+                return 'RRC_IDLE'
+        return None
+     
     def __rrc_filter(self,msg):
 
         """
@@ -165,10 +270,10 @@ class LteRrcAnalyzer(Analyzer):
                 #Test profile
                 # self.logger.info("LteRrcSibServ")
                 self.__profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.sib_serv",
-                	{'priority':field_val['lte-rrc.cellReselectionPriority'],
-                	 'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
-                	 's_nonintrasearch':str(int(field_val['lte-rrc.s_NonIntraSearch'])*2),
-                	 'q_hyst':field_val['lte-rrc.q_Hyst']})
+                    {'priority':field_val['lte-rrc.cellReselectionPriority'],
+                     'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
+                     's_nonintrasearch':str(int(field_val['lte-rrc.s_NonIntraSearch'])*2),
+                     'q_hyst':field_val['lte-rrc.q_Hyst']})
                 
                 self.__config[cur_pair].sib.intra_freq_config = LteRrcSibIntraFreqConfig(
                     int(field_val['lte-rrc.t_ReselectionEUTRA']),
@@ -179,10 +284,10 @@ class LteRrcAnalyzer(Analyzer):
                 #Test profile
                 # self.logger.info("LteRrcSibIntraFreqConfig")
                 self.__profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
-                	{'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
-                	 'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
-                	 'p_Max':field_val['lte-rrc.p_Max'],
-                	 's_IntraSearch':str(float(field_val['lte-rrc.s_IntraSearch'])*2)})
+                    {'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
+                     'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                     'p_Max':field_val['lte-rrc.p_Max'],
+                     's_IntraSearch':str(float(field_val['lte-rrc.s_IntraSearch'])*2)})
 
             #inter-frequency (LTE)
             if field.get('name') == "lte-rrc.interFreqCarrierFreqList":
@@ -221,16 +326,16 @@ class LteRrcAnalyzer(Analyzer):
                 #Test profile
                 # self.logger.info("LteRrcSibInterFreqConfig")
                 self.__profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
-                	{'rat':'LTE',
-                	 'freq':str(neighbor_freq),
-                	 'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
-                	 'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
-                	 'p_Max':field_val['lte-rrc.p_Max'],
-                	 'priority':field_val['lte-rrc.cellReselectionPriority'],
-                	 'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
-                	 'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
-                	 'q_offset_freq':field_val['lte-rrc.q_OffsetFreq']
-                	 })
+                    {'rat':'LTE',
+                     'freq':str(neighbor_freq),
+                     'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
+                     'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                     'p_Max':field_val['lte-rrc.p_Max'],
+                     'priority':field_val['lte-rrc.cellReselectionPriority'],
+                     'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
+                     'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
+                     'q_offset_freq':field_val['lte-rrc.q_OffsetFreq']
+                     })
 
                 #2nd round: inter-freq cell individual offset
                 for val in field.iter('field'):
@@ -285,16 +390,16 @@ class LteRrcAnalyzer(Analyzer):
                 #Test profile
                 # self.logger.info("LteRrcSibInterFreqConfig")
                 self.__profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
-                	{'rat':'UTRA',
-                	 'freq':str(neighbor_freq),
-                	 'tReselection':'null',
-                	 'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
-                	 'p_Max':field_val['lte-rrc.p_MaxUTRA'],
-                	 'priority':field_val['lte-rrc.cellReselectionPriority'],
-                	 'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
-                	 'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
-                	 'q_offset_freq':'0'
-                	 })
+                    {'rat':'UTRA',
+                     'freq':str(neighbor_freq),
+                     'tReselection':'null',
+                     'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                     'p_Max':field_val['lte-rrc.p_MaxUTRA'],
+                     'priority':field_val['lte-rrc.cellReselectionPriority'],
+                     'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
+                     'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
+                     'q_offset_freq':'0'
+                     })
 
             if field.get('name') == "lte-rrc.t_ReselectionUTRA":
                 cur_pair = (self.__status.id,self.__status.freq)
@@ -338,16 +443,16 @@ class LteRrcAnalyzer(Analyzer):
                 #Test profile
                 # self.logger.info("LteRrcSibInterFreqConfig")
                 self.__profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
-                	{'rat':'GERAN',
-                	 'freq':str(neighbor_freq),
-                	 'tReselection':'null',
-                	 'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
-                	 'p_Max':field_val['lte-rrc.p_MaxGERAN'],
-                	 'priority':field_val['lte-rrc.cellReselectionPriority'],
-                	 'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
-                	 'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
-                	 'q_offset_freq':'0'
-                	 })
+                    {'rat':'GERAN',
+                     'freq':str(neighbor_freq),
+                     'tReselection':'null',
+                     'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                     'p_Max':field_val['lte-rrc.p_MaxGERAN'],
+                     'priority':field_val['lte-rrc.cellReselectionPriority'],
+                     'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
+                     'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
+                     'q_offset_freq':'0'
+                     })
 
             #FIXME: t_ReselectionGERAN appears BEFORE config, so this code does not work!
             if field.get('name') == "lte-rrc.t_ReselectionGERAN":
@@ -638,10 +743,24 @@ class LteRrcAnalyzer(Analyzer):
             if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
                 self.__status.conn = True
                 self.logger.info(self.__status.dump())
+                self.logger.info("FSM test: "+self.get_protocol_state())
 
             if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
                 self.__status.conn = False
                 self.logger.info(self.__status.dump())
+                self.logger.info("FSM test: "+self.get_protocol_state())
+
+    def set_source(self,source):
+        """
+        Set the trace source. Enable the LTE RRC messages.
+
+        :param source: the trace source.
+        :type source: trace collector
+        """
+        Analyzer.set_source(self,source)
+        #enable LTE RRC log
+        source.enable_log("LTE_RRC_OTA_Packet")
+        source.enable_log("LTE_RRC_Serv_Cell_Info_Log_Packet")
 
     def get_cell_list(self):
         """
@@ -696,90 +815,6 @@ class LteRrcAnalyzer(Analyzer):
         :rtype: a dictionary of timestamp -> LteRrcStatus
         """
         return self.__history
-
-
-def LteRrcProfileHierarchy():
-    '''
-    Return a Lte Rrc ProfileHierarchy (configurations)
-
-    :returns: ProfileHierarchy for LTE RRC
-    '''
-
-    profile_hierarchy = ProfileHierarchy('LteRrcProfile')
-    root = profile_hierarchy.get_root()
-    status = root.add('status',False) #metadata
-    sib = root.add('idle',False) #Idle-state configurations
-    active = root.add('active',False) #Active-state configurations
-
-    #Status metadata
-    status.add('cell_id',False)
-    status.add('freq',False)
-    status.add('radio_technology',False)
-    status.add('tracking_area_code',False)
-    status.add('bandwidth',False)
-    status.add('conn_state',False)
-
-    #Idle-state configurations
-    sib_serv = sib.add('serv_config',False) #configuration as the serving cell
-    #Per-frequency configurations
-    intra_freq_config = sib.add('intra_freq_config',False) #Intra-frequency handoff config
-    #TODO: for inter-freq/RAT, should have a mapping from freq/RAT to config
-    inter_freq_config = sib.add('inter_freq_config',True) #Inter-frequency/RAT handoff config
-    intra_freq_cell_config = sib.add('intra_freq_cell_config',True) #per-cell offsets for intra-freq
-    inter_freq_cell_config = sib.add('inter_freq_cell_config',True) #per-cell offsets for inter-freq
-
-    sib_serv.add('priority',False) #cell reselection priority
-    sib_serv.add('threshserv_low',False) #cell reselection threshold
-    sib_serv.add('s_nonintrasearch',False) #threshold for searching other frequencies
-    sib_serv.add('q_hyst',False)
-
-    #Intra-frequency handoff parameter: frequency level
-    intra_freq_config.add('tReselection',False)
-    intra_freq_config.add('q_RxLevMin',False)
-    intra_freq_config.add('p_Max',False)
-    intra_freq_config.add('s_IntraSearch',False)
-
-    #Inter-frequency handoff parameter: frequency level
-    inter_freq_config.add('rat',False)
-    inter_freq_config.add('freq',False)
-    inter_freq_config.add('tReselection',False)
-    inter_freq_config.add('q_RxLevMin',False)
-    inter_freq_config.add('p_Max',False)
-    inter_freq_config.add('priority',False)
-    inter_freq_config.add('threshx_high',False)
-    inter_freq_config.add('threshx_low',False)
-    inter_freq_config.add('q_offset_freq',False)
-
-    #Intra/inter-frequency parameter: per-cell level
-    intra_freq_cell_config.add('offset',False)
-    inter_freq_cell_config.add('offset',False)
-
-    #Active-state configuration
-    meas_obj = active.add('meas_obj',True) #freq->measobject
-    report_list = active.add('report_list',True) #report_id->reportConfig
-    measid_list = active.add('measid_list',True) #meas_id->(obj_id,report_id)
-
-    #measurement object
-    meas_obj.add('obj_id',False) #meas object ID
-    meas_obj.add('freq',False) # carrier frequency
-    meas_obj.add('offset_freq',False) # frequency-specific measurement offset
-    individual_offset = meas_obj.add('offset',True) # cellID->cellIndividualOffset
-    individual_offset.add('offset',False) 
-    #TODO: add cell blacklist
-
-    report_list.add('id',False) #report ID
-    report_list.add('hyst',False) #Hysteresis
-    event = report_list.add('report_event',True) #report event: eventID->thresholds
-    event.add('event_type',False)
-    event.add('threshold_1',False)
-    event.add('threshold_2',False)
-
-
-    #measurement id
-    measid_list.add('obj_id',False)
-    measid_list.add('report_id',False)
-
-    return profile_hierarchy
 
 
 class LteRrcStatus:
