@@ -234,7 +234,7 @@ class WcdmaRrcAnalyzer(Analyzer):
                     {'priority':field_val['rrc.priority'],
                      'threshserv_low':str(int(field_val['rrc.threshServingLow'])*2),
                      's_priority_search1':str(int(field_val['rrc.s_PrioritySearch1'])*2),
-                     's_priority_search2':field_val['rrc.s_PrioritySearch2'],
+                     's_priority_search2':field_val['rrc.s_PrioritySearch2']
                      })
 
 
@@ -283,7 +283,7 @@ class WcdmaRrcAnalyzer(Analyzer):
                      's_InterSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
                      's_IntraSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
                      'q_Hyst1':str(int(field_val['rrc.q_Hyst_l_S'])*2),
-                     'q_Hyst2':str(int(field_val['rrc.q_HYST_2_S'])*2),
+                     'q_Hyst2':str(int(field_val['rrc.q_HYST_2_S'])*2)
                      })
 
 
@@ -326,13 +326,13 @@ class WcdmaRrcAnalyzer(Analyzer):
                     {'rat':'LTE',
                      'freq':str(neighbor_freq),
                      #'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
-                     'tReselection':None,
+                     'tReselection':'null',
                      'q_RxLevMin':str(int(field_val['rrc.qRxLevMinEUTRA'])*2),
                      #'p_Max':field_val['lte-rrc.p_Max'],
-                     'p_Max':None,
+                     'p_Max':'null',
                      'priority':field_val['rrc.priority'],
                      'threshx_high':str(int(field_val['rrc.threshXhigh'])*2),
-                     'threshx_low':str(int(field_val['rrc.threshXlow'])*2),
+                     'threshx_low':str(int(field_val['rrc.threshXlow'])*2)
                      })
 
             #TODO: RRC connection status update
