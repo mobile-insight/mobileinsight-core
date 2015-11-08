@@ -8,7 +8,7 @@ Author: Yuanjie Li
 
 from analyzer import *
 from profile import Profile,ProfileHierarchy
-from state_machine import StateMachnie
+from state_machine import StateMachine
 
 __all__=["ProtocolAnalyzer"]
 
