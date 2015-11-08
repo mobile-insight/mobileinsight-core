@@ -10,6 +10,8 @@ import xml.etree.ElementTree as ET
 from analyzer import *
 import timeit
 
+from profile import Profile,ProfileHierarchy
+
 __all__=["WcdmaRrcAnalyzer"]
 
 class WcdmaRrcAnalyzer(Analyzer):
@@ -36,6 +38,8 @@ class WcdmaRrcAnalyzer(Analyzer):
         #Temporary structure for holding the config
         #Qualcomm chipset does not report cellID BEFORE SIB, so the update should be delayed
         self.__config_tmp=WcdmaRrcConfig()
+
+        self.__profile = Profile(WcdmaRrcProfileHierarchy())
 
     def set_source(self,source):
         """
@@ -226,6 +230,13 @@ class WcdmaRrcAnalyzer(Analyzer):
                     cur_pair = (self.__status.id,self.__status.freq)
                     self.__config[cur_pair].sib.serv_config = serv_config
 
+                self.__profile.update("WcdmaRrcProfile"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.sib_serv",
+                    {'priority':field_val['rrc.priority'],
+                     'threshserv_low':str(int(field_val['rrc.threshServingLow'])*2),
+                     's_priority_search1':str(int(field_val['rrc.s_PrioritySearch1'])*2),
+                     's_priority_search2':field_val['rrc.s_PrioritySearch2'],
+                     })
+
 
             #intra-freq info
             if field.get('name') == "rrc.cellSelectReselectInfo_element":
@@ -266,6 +277,15 @@ class WcdmaRrcAnalyzer(Analyzer):
                     cur_pair = (self.__status.id,self.__status.freq)
                     self.__config[cur_pair].sib.intra_freq_config = intra_freq_config
 
+                self.__profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
+                    {'tReselection':field_val['rrc.t_Reselection_S',
+                     'q_RxLevMin':str(int(field_val['rrc.q_RxlevMin'])*2),
+                     's_InterSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
+                     's_IntraSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
+                     'q_Hyst1':str(int(field_val['rrc.q_Hyst_l_S'])*2),
+                     'q_Hyst2':str(int(field_val['rrc.q_HYST_2_S'])*2),
+                     })
+
 
             #inter-RAT cell info (LTE)
             if field.get('name') == "rrc.EUTRA_FrequencyAndPriorityInfo_element":
@@ -301,6 +321,19 @@ class WcdmaRrcAnalyzer(Analyzer):
                 else:
                     cur_pair = (self.__status.id,self.__status.freq)
                     self.__config[cur_pair].sib.inter_freq_config[neighbor_freq] = inter_freq_config
+
+                self.__profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
+                    {'rat':'LTE',
+                     'freq':str(neighbor_freq),
+                     #'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
+                     'tReselection':None,
+                     'q_RxLevMin':str(int(field_val['rrc.qRxLevMinEUTRA'])*2),
+                     #'p_Max':field_val['lte-rrc.p_Max'],
+                     'p_Max':None,
+                     'priority':field_val['rrc.priority'],
+                     'threshx_high':str(int(field_val['rrc.threshXhigh'])*2),
+                     'threshx_low':str(int(field_val['rrc.threshXlow'])*2),
+                     })
 
             #TODO: RRC connection status update
 
@@ -349,6 +382,60 @@ class WcdmaRrcAnalyzer(Analyzer):
             return self.__config[cur_pair]
         else:
             return None
+
+
+def WcdmaRrcProfileHierarchy():
+
+    '''
+    Return a Wcdma Rrc ProfileHierarchy (configurations)
+
+    :returns: ProfileHierarchy for WCDMA RRC
+    '''
+    
+    profile_hierarchy = ProfileHierarchy('WcdmaRrcProfile')
+    root = profile_hierarchy.get_root()
+    status = root.add('status',False) #metadata
+    sib = root.add('idle',False) #Idle-state configurations
+    active = root.add('active',False) #Active-state configurations
+
+    #Status metadata
+    status.add('cell_id',False)
+    status.add('freq',False)
+    status.add('radio_technology',False)
+    status.add('routing_area_code',False)
+    status.add('location_area_code',False)
+    status.add('bandwidth',False)
+    status.add('conn_state',False)
+
+    #Idle-state configurations
+    sib_serv = sib.add('serv_config',False) #configuration as the serving cell
+    #Per-frequency configurations
+    intra_freq_config = sib.add('intra_freq_config',False) #Intra-frequency handoff config
+    #TODO: for inter-freq/RAT, should have a mapping from freq/RAT to config
+    inter_freq_config = sib.add('inter_freq_config',True) #Inter-frequency/RAT handoff config
+
+    sib_serv.add('priority',False) #cell reselection priority
+    sib_serv.add('threshserv_low',False) #cell reselection threshold
+    sib_serv.add('s_priority_search1',False) #searching other frequencies
+    sib_serv.add('s_priority_search2',False)
+
+    #Intra-frequency handoff parameter: frequency level
+    intra_freq_config.add('tReselection',False)
+    intra_freq_config.add('q_RxLevMin',False)
+    intra_freq_config.add('s_InterSearch',False)
+    intra_freq_config.add('s_IntraSearch',False)
+    intra_freq_config.add('q_Hyst1',False)
+    intra_freq_config.add('q_Hyst2',False)
+
+    #Inter-frequency handoff parameter: frequency level
+    inter_freq_config.add('rat',False)
+    inter_freq_config.add('freq',False)
+    inter_freq_config.add('tReselection',False)
+    inter_freq_config.add('q_RxLevMin',False)
+    inter_freq_config.add('p_Max',False)
+    inter_freq_config.add('priority',False)
+    inter_freq_config.add('threshx_high',False)
+    inter_freq_config.add('threshx_low',False)
 
 
 class WcdmaRrcStatus:
@@ -591,6 +678,8 @@ class WcdmaRrcActive:
     RRC active-state configurations (from RRCReconfiguration 
     and MeasurementControl messsage)
     """
+
+    #TODO: parse measurement control messages
     def __init__(self):
         #TODO: initialize some containers
         pass
