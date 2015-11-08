@@ -40,7 +40,7 @@ class ProtocolAnalyzer(Analyzer):
 
         Analyzer.__init__(self)
         self.__profile = Profile(self.__create_profile_hierarchy())
-        self.__state_machine = StateMachnie(self.__create_state_machine())
+        self.__state_machine = StateMachine(self.__create_state_machine())
 
         #Update state dynamics
         self.add_source_callback(self.__update_state)

@@ -40,6 +40,7 @@ class StateMachine(object):
         self.state_machnie = state_machine
         self.init_callback = init_callback
         self.cur_state = None
+        self.state_history = {} #history of state transisions. timestamp-->state
 
     def __init_state(self,event):
         '''
@@ -53,6 +54,7 @@ class StateMachine(object):
             if init_state in self.state_machine.keys():
                 #Always check if the new state is declared
                 self.cur_state = init_state
+                self.state_history[event.timestamp] = init_state
 
     def update_state(self,event):
         '''
@@ -80,6 +82,7 @@ class StateMachine(object):
                 return False
             elif len(tx_condition)==1:
                 self.cur_state = tx_condition[0]
+                self.state_history[event.timestamp] = tx_condition[0]
             return True
         
 
