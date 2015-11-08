@@ -278,7 +278,7 @@ class WcdmaRrcAnalyzer(Analyzer):
                     self.__config[cur_pair].sib.intra_freq_config = intra_freq_config
 
                 self.__profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
-                    {'tReselection':field_val['rrc.t_Reselection_S',
+                    {'tReselection':field_val['rrc.t_Reselection_S'],
                      'q_RxLevMin':str(int(field_val['rrc.q_RxlevMin'])*2),
                      's_InterSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
                      's_IntraSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
