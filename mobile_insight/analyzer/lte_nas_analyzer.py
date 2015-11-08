@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 from analyzer import *
 import timeit
 
-from profile import Profile,ProfileHierarchy
+from profile import Profile, ProfileHierarchy
 
 __all__=["LteNasAnalyzer"]
 
@@ -136,6 +136,7 @@ class LteNasAnalyzer(Analyzer):
         self.__esm_status = EsmStatus()
 
         #define LTE NAS profile hierarchy
+        self.__eps_id = None
         self.__profile = Profile(LteNasProfileHierarchy())
 
     def set_source(self,source):
@@ -247,7 +248,7 @@ class LteNasAnalyzer(Analyzer):
         :param msg: the ESM NAS message
         """
 
-        self.__esm_status.id = 0;
+        self.__eps_id = xstr(self.__emm_status.guti.mme_group_id)+xstr(self.__emm_status.mme_code)
 
         for field in msg.data.iter('field'):
 
@@ -293,14 +294,14 @@ class LteNasAnalyzer(Analyzer):
                 # self.__esm_status.qos.dump_delay()
 
                 # profile update for esm qos
-                self.__profile.update("LteNasProfile:"+str(self.__esm_status.id),
+                self.__profile.update("LteNasProfile:"+str(self.__eps_id),
                     {
                     'delay_class':xstr(self.__esm_status.qos.delay_class),
-                    'threshserv_low':xstr(self.__esm_status.qos.reliability_class),
-                    's_nonintrasearch':xstr(self.__esm_status.qos.precedence_class),
+                    'reliability_class':xstr(self.__esm_status.qos.reliability_class),
+                    'precedence_class':xstr(self.__esm_status.qos.precedence_class),
                     'peak_tput':xstr(self.__esm_status.qos.peak_tput),
                     'mean_tput':xstr(self.__esm_status.qos.mean_tput),
-                    'traffic_class':xstr(self.__esm_status.qos.traffic_class),
+                    'traffic_class':xstr(self.__esm_sFtatus.qos.traffic_class),
                     'delivery_order':xstr(self.__esm_status.qos.delivery_order),
                     'traffic_handling_priority':xstr(self.__esm_status.qos.traffic_handling_priority),
                     'residual_ber':xstr(self.__esm_status.qos.residual_ber),
@@ -314,7 +315,6 @@ class LteNasAnalyzer(Analyzer):
                     'guaranteed_bitrate_ulink_ext':xstr(self.__esm_status.qos.guaranteed_bitrate_ulink_ext),
                     'guaranteed_bitrate_dlink_ext':xstr(self.__esm_status.qos.guaranteed_bitrate_dlink_ext),
                     })
-                self.__esm_status.id += 1;
 
 class EmmStatus:
     """
@@ -374,8 +374,8 @@ class EsmStatus:
     def __init__(self):
         self.qos=EsmQos()
 
-        # test profile
-        self.id=None
+        # # test profile
+        # self.id=None
 
 class EsmQos:
     """
@@ -444,7 +444,6 @@ class EsmQos:
             + ' QCI=' + xstr(self.qci) + ' delay_class=' + xstr(self.delay_class)
             + ' transfer_delay=' + xstr(self.transfer_delay) + ' residual_BER=' + xstr(self.residual_ber))
 
-
 def LteNasProfileHierarchy():
     '''
     Return a Lte Nas ProfileHierarchy (configurations)
@@ -454,7 +453,10 @@ def LteNasProfileHierarchy():
 
     profile_hierarchy = ProfileHierarchy('LteNasProfile')
     root = profile_hierarchy.get_root()
-    qos = root.add('qos',False) #Active-state configurations
+    eps = root.add('eps',False)
+    
+    eps.add('eps_id', False);
+    qos = eps.add('qos',False) #Active-state configurations
 
     #QoS parameters
     qos.add('qci',False)
