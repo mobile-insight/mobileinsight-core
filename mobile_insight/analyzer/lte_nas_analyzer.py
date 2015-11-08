@@ -301,7 +301,7 @@ class LteNasAnalyzer(Analyzer):
                     'precedence_class':xstr(self.__esm_status.qos.precedence_class),
                     'peak_tput':xstr(self.__esm_status.qos.peak_tput),
                     'mean_tput':xstr(self.__esm_status.qos.mean_tput),
-                    'traffic_class':xstr(self.__esm_sFtatus.qos.traffic_class),
+                    'traffic_class':xstr(self.__esm_status.qos.traffic_class),
                     'delivery_order':xstr(self.__esm_status.qos.delivery_order),
                     'traffic_handling_priority':xstr(self.__esm_status.qos.traffic_handling_priority),
                     'residual_ber':xstr(self.__esm_status.qos.residual_ber),
