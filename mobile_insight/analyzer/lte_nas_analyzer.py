@@ -5,6 +5,7 @@
 A LTE NAS layer (EMM/ESM) analyzer
 
 Author: Yuanjie Li
+        Zengwen Yuan
 """
 
 import xml.etree.ElementTree as ET
@@ -132,6 +133,9 @@ class LteNasAnalyzer(Analyzer):
         self.__emm_status = EmmStatus()
         self.__esm_status = EsmStatus()
 
+        #define LTE NAS profile hierarchy
+        self.__profile = Profile(LteNasProfileHierarchy())
+
     def set_source(self,source):
         """
         Set the trace source. Enable the LTE NAS messages.
@@ -231,12 +235,18 @@ class LteNasAnalyzer(Analyzer):
                 self.__emm_status.guti.mme_code=field_val['nas_eps.emm.mme_code']
                 self.__emm_status.guti.m_tmsi=field_val['nas_eps.emm.m_tmsi']
 
+
     def __callback_esm(self,msg):
         """
         Extrace EMM status and configurations from the NAS messages
+                 ^
+        Zengwen: is it ESM ??
 
         :param msg: the ESM NAS message
         """
+
+        self.__esm_status.id = 0;
+
         for field in msg.data.iter('field'):
 
             if field.get('name')=="nas_eps.emm.qci":
@@ -280,7 +290,30 @@ class LteNasAnalyzer(Analyzer):
                 # self.__esm_status.qos.dump_rate()
                 # self.__esm_status.qos.dump_delay()
 
-    
+                # profile update for esm qos
+                self.__profile.update("LteNasProfile:"+str(self.__esm_status.id),
+                    {
+                    'delay_class':xstr(self.__esm_status.qos.delay_class),
+                    'threshserv_low':xstr(self.__esm_status.qos.reliability_class),
+                    's_nonintrasearch':xstr(self.__esm_status.qos.precedence_class),
+                    'peak_tput':xstr(self.__esm_status.qos.peak_tput),
+                    'mean_tput':xstr(self.__esm_status.qos.mean_tput),
+                    'traffic_class':xstr(self.__esm_status.qos.traffic_class),
+                    'delivery_order':xstr(self.__esm_status.qos.delivery_order),
+                    'traffic_handling_priority':xstr(self.__esm_status.qos.traffic_handling_priority),
+                    'residual_ber':xstr(self.__esm_status.qos.residual_ber),
+                    'transfer_delay':xstr(self.__esm_status.qos.transfer_delay),
+                    'max_bitrate_ulink':xstr(self.__esm_status.qos.max_bitrate_ulink),
+                    'max_bitrate_dlink':xstr(self.__esm_status.qos.max_bitrate_dlink),
+                    'guaranteed_bitrate_ulink':xstr(self.__esm_status.qos.guaranteed_bitrate_ulink),
+                    'guaranteed_bitrate_dlink':xstr(self.__esm_status.qos.guaranteed_bitrate_dlink),
+                    'max_bitrate_ulink_ext':xstr(self.__esm_status.qos.max_bitrate_ulink_ext),
+                    'max_bitrate_dlink_ext':xstr(self.__esm_status.qos.max_bitrate_dlink_ext),
+                    'guaranteed_bitrate_ulink_ext':xstr(self.__esm_status.qos.guaranteed_bitrate_ulink_ext),
+                    'guaranteed_bitrate_dlink_ext':xstr(self.__esm_status.qos.guaranteed_bitrate_dlink_ext),
+                    })
+                self.__esm_status.id += 1;
+
 class EmmStatus:
     """
     An abstraction to maintain the EMM status, including the registeration states, 
@@ -339,6 +372,8 @@ class EsmStatus:
     def __init__(self):
         self.qos=EsmQos()
 
+        # test profile
+        self.id=None
 
 class EsmQos:
     """
@@ -406,3 +441,46 @@ class EsmQos:
             + ' traffic_class=' + xstr(tra_class)
             + ' QCI=' + xstr(self.qci) + ' delay_class=' + xstr(self.delay_class)
             + ' transfer_delay=' + xstr(self.transfer_delay) + ' residual_BER=' + xstr(self.residual_ber))
+
+
+def LteNasProfileHierarchy():
+    '''
+    Return a Lte Nas ProfileHierarchy (configurations)
+
+    :returns: ProfileHierarchy for LTE NAS
+    '''
+
+    profile_hierarchy = ProfileHierarchy('LteNasProfile')
+    root = profile_hierarchy.get_root()
+    qos = root.add('qos',False) #Active-state configurations
+
+    #QoS parameters
+    qos.add('qci',False)
+    qos.add('delay_class',False)
+    qos.add('reliability_class',False)
+    qos.add('precedence_class',False)
+    qos.add('peak_tput',False)
+    qos.add('mean_tput',False)
+    qos.add('traffic_class',False)
+    qos.add('delivery_order',False)
+    qos.add('transfer_delay',False)
+    qos.add('traffic_handling_priority',False)
+    qos.add('max_bitrate_ulink',False)
+    qos.add('max_bitrate_dlink',False)
+    qos.add('guaranteed_bitrate_ulink',False)
+    qos.add('guaranteed_bitrate_dlink',False)
+    qos.add('max_bitrate_ulink_ext',False)
+    qos.add('max_bitrate_dlink_ext',False)
+    qos.add('guaranteed_bitrate_ulink_ext',False)
+    qos.add('guaranteed_bitrate_dlink_ext',False)
+    qos.add('residual_ber',False)
+
+    #Status metadata
+    status.add('cell_id',False)
+    status.add('freq',False)
+    status.add('radio_technology',False)
+    status.add('tracking_area_code',False)
+    status.add('bandwidth',False)
+    status.add('conn_state',False)
+
+    return profile_hierarchy
