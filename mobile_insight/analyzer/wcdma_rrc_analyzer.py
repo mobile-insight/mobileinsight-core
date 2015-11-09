@@ -8,13 +8,14 @@ Author: Yuanjie Li
 
 import xml.etree.ElementTree as ET
 from analyzer import *
+from protocol_analyzer import *
 import timeit
 
 from profile import Profile,ProfileHierarchy
 
 __all__=["WcdmaRrcAnalyzer"]
 
-class WcdmaRrcAnalyzer(Analyzer):
+class WcdmaRrcAnalyzer(ProtocolAnalyzer):
 
     """
     A protocol ananlyzer for WCDMA (3G) Radio Resource Control (RRC) protocol.
@@ -22,7 +23,7 @@ class WcdmaRrcAnalyzer(Analyzer):
 
     def __init__(self):
 
-        Analyzer.__init__(self)
+        ProtocolAnalyzer.__init__(self)
 
         #init packet filters
         self.add_source_callback(self.__rrc_filter)
@@ -39,7 +40,7 @@ class WcdmaRrcAnalyzer(Analyzer):
         #Qualcomm chipset does not report cellID BEFORE SIB, so the update should be delayed
         self.__config_tmp=WcdmaRrcConfig()
 
-        self.__profile = Profile(WcdmaRrcProfileHierarchy())
+        # self.__profile = Profile(WcdmaRrcProfileHierarchy())
 
     def set_source(self,source):
         """
@@ -384,61 +385,97 @@ class WcdmaRrcAnalyzer(Analyzer):
             return None
 
 
-def WcdmaRrcProfileHierarchy():
+    def create_profile_hierarchy(self):
 
-    '''
-    Return a Wcdma Rrc ProfileHierarchy (configurations)
+        '''
+        Return a Wcdma Rrc ProfileHierarchy (configurations)
 
-    :returns: ProfileHierarchy for WCDMA RRC
-    '''
-    
-    profile_hierarchy = ProfileHierarchy('WcdmaRrcProfile')
-    root = profile_hierarchy.get_root()
-    status = root.add('status',False) #metadata
-    sib = root.add('idle',False) #Idle-state configurations
-    active = root.add('active',False) #Active-state configurations
+        :returns: ProfileHierarchy for WCDMA RRC
+        '''
+        
+        profile_hierarchy = ProfileHierarchy('WcdmaRrcProfile')
+        root = profile_hierarchy.get_root()
+        status = root.add('status',False) #metadata
+        sib = root.add('idle',False) #Idle-state configurations
+        active = root.add('active',False) #Active-state configurations
 
-    #Status metadata
-    status.add('cell_id',False)
-    status.add('freq',False)
-    status.add('radio_technology',False)
-    status.add('routing_area_code',False)
-    status.add('location_area_code',False)
-    status.add('bandwidth',False)
-    status.add('conn_state',False)
+        #Status metadata
+        status.add('cell_id',False)
+        status.add('freq',False)
+        status.add('radio_technology',False)
+        status.add('routing_area_code',False)
+        status.add('location_area_code',False)
+        status.add('bandwidth',False)
+        status.add('conn_state',False)
 
-    #Idle-state configurations
-    sib_serv = sib.add('serv_config',False) #configuration as the serving cell
-    #Per-frequency configurations
-    intra_freq_config = sib.add('intra_freq_config',False) #Intra-frequency handoff config
-    #TODO: for inter-freq/RAT, should have a mapping from freq/RAT to config
-    inter_freq_config = sib.add('inter_freq_config',True) #Inter-frequency/RAT handoff config
+        #Idle-state configurations
+        sib_serv = sib.add('serv_config',False) #configuration as the serving cell
+        #Per-frequency configurations
+        intra_freq_config = sib.add('intra_freq_config',False) #Intra-frequency handoff config
+        #TODO: for inter-freq/RAT, should have a mapping from freq/RAT to config
+        inter_freq_config = sib.add('inter_freq_config',True) #Inter-frequency/RAT handoff config
 
-    sib_serv.add('priority',False) #cell reselection priority
-    sib_serv.add('threshserv_low',False) #cell reselection threshold
-    sib_serv.add('s_priority_search1',False) #searching other frequencies
-    sib_serv.add('s_priority_search2',False)
+        sib_serv.add('priority',False) #cell reselection priority
+        sib_serv.add('threshserv_low',False) #cell reselection threshold
+        sib_serv.add('s_priority_search1',False) #searching other frequencies
+        sib_serv.add('s_priority_search2',False)
 
-    #Intra-frequency handoff parameter: frequency level
-    intra_freq_config.add('tReselection',False)
-    intra_freq_config.add('q_RxLevMin',False)
-    intra_freq_config.add('s_InterSearch',False)
-    intra_freq_config.add('s_IntraSearch',False)
-    intra_freq_config.add('q_Hyst1',False)
-    intra_freq_config.add('q_Hyst2',False)
+        #Intra-frequency handoff parameter: frequency level
+        intra_freq_config.add('tReselection',False)
+        intra_freq_config.add('q_RxLevMin',False)
+        intra_freq_config.add('s_InterSearch',False)
+        intra_freq_config.add('s_IntraSearch',False)
+        intra_freq_config.add('q_Hyst1',False)
+        intra_freq_config.add('q_Hyst2',False)
 
-    #Inter-frequency handoff parameter: frequency level
-    inter_freq_config.add('rat',False)
-    inter_freq_config.add('freq',False)
-    inter_freq_config.add('tReselection',False)
-    inter_freq_config.add('q_RxLevMin',False)
-    inter_freq_config.add('p_Max',False)
-    inter_freq_config.add('priority',False)
-    inter_freq_config.add('threshx_high',False)
-    inter_freq_config.add('threshx_low',False)
+        #Inter-frequency handoff parameter: frequency level
+        inter_freq_config.add('rat',False)
+        inter_freq_config.add('freq',False)
+        inter_freq_config.add('tReselection',False)
+        inter_freq_config.add('q_RxLevMin',False)
+        inter_freq_config.add('p_Max',False)
+        inter_freq_config.add('priority',False)
+        inter_freq_config.add('threshx_high',False)
+        inter_freq_config.add('threshx_low',False)
 
-    return profile_hierarchy
+        return profile_hierarchy
 
+    def create_state_machine(self):
+        """
+        Declare a RRC state machine
+
+        returns: a StateMachnie
+        """
+        
+        def idle_to_dch(msg):
+            for field in msg.data.iter('field'):
+                if field.get('name') == "rrc.rrcConnectionSetup":
+                    return True
+
+        def conn_to_idle(msg):
+            for field in msg.data.iter('field'):
+                if field.get('name') == "rrc.rrcConnectionRelease":
+                    return True
+
+        state_machine={'RRC_IDLE':{'RRC_DCH':idle_to_conn},
+                       'RRC_DCH':{'RRC_IDLE':conn_to_idle}}  
+
+        return state_machine 
+
+    def init_protocol_state(self, msg):
+        """
+        Determine RRC state at bootstrap
+
+        :returns: current RRC state, or None if not determinable 
+        """
+        for field in msg.data.iter('field'):
+            if field.get('name') == "rrc.rrcConnectionSetup" \
+            or field.get('name') == "rrc.radioBearerReconfiguration" \
+            or field.get('name') == "rrc.measurementReport_element":
+                return 'RRC_DCH'
+            elif field.get('name') == "rrc.rrcConnectionRelease":
+                return 'RRC_IDLE'
+        return None
 
 class WcdmaRrcStatus:
     """
