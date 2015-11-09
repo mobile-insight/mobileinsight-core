@@ -328,7 +328,7 @@ const Fmt LteMl1CmlifmrFmt [] = {
 const Fmt LteMl1CmlifmrFmt_v3_Header [] = {
     {UINT, "E-ARFCN", 2},
     {UINT, "Serving Physical Cell ID", 2},  //serving cell ID
-    {UINT, "Sub-frame Number", 2},          
+    {UINT, "Sub-frame Number", 2},
     {RSRP, "Serving Filtered RSRP(dBm)", 2}, //Filtered RSRP (dBm)
     {SKIP, NULL, 2},    // Duplicated
     {RSRQ, "Serving Filtered RSRQ(dB)", 2}, //Filtered RSRQ (dBm)
@@ -355,7 +355,7 @@ const Fmt LteMl1CmlifmrFmt_v3_Detected_Cell [] = {
 const Fmt LteMl1SubpktFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Number of SubPackets", 1},
-    {SKIP, NULL, 2}     // Unknown    
+    {SKIP, NULL, 2}     // Unknown
 };
 
 const Fmt LteMl1SubpktFmt_v1_SubpktHeader [] = {
@@ -432,6 +432,193 @@ const Fmt LteRrcMibMessageLogPacketFmt_v2 []  = {
     {UINT, "Number of Antenna", 1},
     {BANDWIDTH, "DL BW", 1}     //downlink bandwidth
 };
+
+// ----------------------------------------------------------------------------
+// TODO: Haotian
+const Fmt LtePdcpDlSrbIntegrityDataPduFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num SubPkt", 1},
+    {SKIP, NULL, 44},
+    {UINT, "PDU Size", 2}, // 47-48
+    {SKIP, NULL, 16}
+};
+
+// ----------------------------------------------------------------------------
+// TODO: Haotian
+const Fmt LtePdcpUlSrbIntegrityDataPduFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num SubPkt", 1},
+    {SKIP, NULL, 44},
+    {UINT, "PDU Size", 2}, // 47-48
+    {SKIP, NULL, 12}
+};
+
+// ----------------------------------------------------------------------------
+// MAC_Configuration
+// TODO: Jie
+const ValueName LteMacConfigurationSubpkt_SubpktType [] = {
+    {0, "Config Type Subpacket"},
+    {1, "DL Config SubPacket"},
+    {2, "UL Config SubPacket"},
+    {3, "RACH Config SubPacket"},
+    {4, "LC Config SubPacket"},
+    {7, "DL Transport Block"},
+    {8, "UL Transport Block"},
+    {13, "eMBMS Config SubPacket"}
+};
+
+const Fmt LteMacConfigurationFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num SubPkt", 1},
+    {SKIP, NULL, 2}
+};
+
+const Fmt LteMacConfiguration_SubpktHeader [] = {
+    {UINT, "SubPacket ID", 1},
+    {UINT, "Version", 1},
+    {UINT, "SubPacket Size", 2}
+};
+
+const Fmt LteMacConfigurationSubpkt_ConfigType [] = {
+    {UINT, "Config reason", 4}
+};
+
+const ValueName LteMacConfigurationConfigType_ConfigReason [] = {
+    {2050, "CONNECTION RELEASE"}
+};
+
+const Fmt LteMacConfigurationSubpkt_DLConfig [] = {
+    {UINT, "TA Timer", 2}, // 0xFF need to be read as infinity
+    {SKIP, "NULL", 2}
+};
+
+const Fmt LteMacConfigurationSubpkt_ULConfig [] = {
+    {UINT, "SR periodicity", 3},
+    {UINT, "BSR timer", 2},
+    {UINT, "SPS Number of Tx released", 2},
+    {UINT, "Retx BSR timer", 2}, // 0xFF need to be read as infinity
+    {SKIP, "NULL", 3}
+};
+
+const Fmt LteMacConfigurationSubpkt_RACHConfig [] = {
+    {RSRQ, "Preamble initial power", 2},
+    {UINT, "Power ramping step", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer", 1},
+    {SKIP, "NULL", 4},
+    {UINT, "PMax", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 2},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+    {SKIP, "NULL", 1},
+};
+
+const Fmt LteMacConfigurationSubpkt_LCConfig [] = {
+    {UINT, "Number of deleted LC", 1},
+    {SKIP, "NULL", 32},
+    {UINT, "Number of added/modified LC", 1}
+//    {SKIP, "NULL", 290}
+};
+
+const Fmt LteMacConfiguration_LCConfig_LC [] = {
+    {UINT, "LC ID", 1},
+    {UINT, "PBR(KBytes/s)", 2},
+    {UINT, "Priority", 1},
+    {UINT, "LC group", 1},
+    {UINT, "Token bucket size (bytes)", 4}
+};
+
+const Fmt LteMacConfigurationSubpkt_eMBMSConfig [] = {
+    {UINT, "Num eMBMS Active LCs", 2}, // Not sure if this offset and length of this field is correct
+    {SKIP, "NULL", 98}
+};
+
+// ----------------------------------------------------------
+// MAC UL Transport Block
+// TODO: Jie
+const ValueName BSREvent [] = {
+    {2, "High Data Arrival"},
+    {1, "Periodic"},
+};
+
+const ValueName BSRTrig [] = {
+    {4, "S-BSR"},
+    {3, "Pad L-BSR"}
+};
+
+const Fmt LteMacULTransportBlockFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num SubPkt", 1},
+    {SKIP, NULL, 2}
+};
+
+const Fmt LteMacULTransportBlock_SubpktHeaderFmt [] = {
+    {UINT, "SubPacket ID", 1},
+    {UINT, "Version", 1},
+    {UINT, "SubPacket Size", 2},
+    {UINT, "Num Samples", 1},
+    {SKIP, "NULL", 2}
+};
+
+const Fmt LteMacULTransportBlock_SubpktV1_SampleFmt [] = {
+    {SKIP, "SFN and Sub-FN", 2}, // not byte aligned
+    // QCAT show "RNTI Type" and "HARQ ID" before Grant, but there's no corresponding hex data
+    {UINT, "Grant (bytes)", 2},
+    {UINT, "RLC PDUs", 1},
+    {UINT, "Padding (bytes)", 2},
+    {UINT, "BSR event", 1},
+    {UINT, "BSR trig", 1},
+    {UINT, "HDR LEN", 1},
+    // 
+    //{SKIP, "Mac Hdr + CE", 5}, // a flexible length field of Hex value in "Mac Hdr + CE", observed 5 or 7
+    //{SKIP, "NULL", 2}
+};
+
+// ----------------------------------------------------------
+// MAC DL Transport Block
+// TODO: Jie
+const ValueName RNTIType [] = {
+    {0, "C-RNTI"},
+    {2, "P-RNTI"},
+    {3, "RA-RNTI"},
+    {4, "T-C-RNTI"},
+    {5, "SI-RNTI"}
+};
+
+const Fmt LteMacDLTransportBlockFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num SubPkt", 1},
+    {SKIP, NULL, 2}
+};
+
+const Fmt LteMacDLTransportBlock_SubpktHeaderFmt [] = {
+    {UINT, "SubPacket ID", 1},
+    {UINT, "Version", 1},
+    {UINT, "SubPacket Size", 2},
+    {UINT, "Num Samples", 1},
+};
+
+const Fmt LteMacDLTransportBlock_SubpktV2_SampleFmt [] = {
+    {SKIP, "SFN and Sub-FN", 2}, // not byte aligned
+    {UINT, "RNTI Type", 1},
+    {UINT, "HARQ ID", 1},
+    {SKIP, "Area ID & PMCH ID", 2},
+    {UINT, "DL TBS (bytes)", 2},
+    {UINT, "RLC PDUs", 1},
+    // QCAT shows a "EMBMS PDUs" but there's no corresponding hex data
+    {UINT, "Padding (bytes)", 2},
+    {UINT, "HDR LEN", 1},
+    //
+    //{SKIP, "Mac Hdr + CE", 5}, // a flexible length field of Hex value in "Mac Hdr + CE", observed 5 or 7
+    //{SKIP, "NULL", 2}
+};
+
 
 bool is_log_packet (const char *b, int length);
 PyObject * decode_log_packet (const char *b, int length);
