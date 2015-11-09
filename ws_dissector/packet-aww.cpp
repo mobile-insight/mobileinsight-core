@@ -55,6 +55,134 @@ static void init_proto_names (const char *protos []) {
     protos[301] = "pdcp-lte"; // signaling plane - Uplink
 }
 
+
+// Return: new offset or -1 (if error occurs)
+static gint32
+dissect_extra_pdcp_lte_info(tvbuff_t *tvb, packet_info *pinfo, gint32 offset)
+{
+    struct pdcp_lte_info *p_pdcp_lte_info;
+    guint8                tag                    = 0;
+    gboolean              infoAlreadySet         = FALSE;
+    gboolean              seqnumLengthTagPresent = FALSE;
+
+    /* Needs to be at least as long as:
+       - the signature string
+       - fixed header bytes
+       - tag for data
+       - at least one byte of PDCP PDU payload */
+    if (tvb_captured_length_remaining(tvb, offset) < (gint)(strlen(PDCP_LTE_START_STRING)+3+2)) {
+        return -1; // TODO: move to a separate function
+    }
+
+    /* OK, compare with signature string */
+    if (tvb_strneql(tvb, offset, PDCP_LTE_START_STRING, strlen(PDCP_LTE_START_STRING)) != 0) {
+        return -1;
+    }
+    offset += (gint) strlen(PDCP_LTE_START_STRING);
+
+    /* If redissecting, use previous info struct (if available) */
+    p_pdcp_lte_info = (pdcp_lte_info *) p_get_proto_data(wmem_file_scope(), pinfo, proto_pdcp_lte, 0);
+    if (p_pdcp_lte_info == NULL) {
+        /* Allocate new info struct for this frame */
+        p_pdcp_lte_info = wmem_new0(wmem_file_scope(), pdcp_lte_info);
+        infoAlreadySet = FALSE;
+    }
+    else {
+        infoAlreadySet = TRUE;
+    }
+
+
+    /* Read fixed fields */
+    p_pdcp_lte_info->no_header_pdu = (gboolean)tvb_get_guint8(tvb, offset++);
+    p_pdcp_lte_info->plane = (enum pdcp_plane)tvb_get_guint8(tvb, offset++);
+    if (p_pdcp_lte_info->plane == SIGNALING_PLANE) {
+        p_pdcp_lte_info->seqnum_length = PDCP_SN_LENGTH_5_BITS;
+    }
+    p_pdcp_lte_info->rohc.rohc_compression = (gboolean)tvb_get_guint8(tvb, offset++);
+
+    /* Read optional fields */
+    while (tag != PDCP_LTE_PAYLOAD_TAG) {
+        /* Process next tag */
+        tag = tvb_get_guint8(tvb, offset++);
+        switch (tag) {
+            case PDCP_LTE_SEQNUM_LENGTH_TAG:
+                p_pdcp_lte_info->seqnum_length = tvb_get_guint8(tvb, offset);
+                offset++;
+                seqnumLengthTagPresent = TRUE;
+                break;
+            case PDCP_LTE_DIRECTION_TAG:
+                p_pdcp_lte_info->direction = tvb_get_guint8(tvb, offset);
+                offset++;
+                break;
+            case PDCP_LTE_LOG_CHAN_TYPE_TAG:
+                p_pdcp_lte_info->channelType = (LogicalChannelType)tvb_get_guint8(tvb, offset);
+                offset++;
+                break;
+            case PDCP_LTE_BCCH_TRANSPORT_TYPE_TAG:
+                p_pdcp_lte_info->BCCHTransport = (BCCHTransportType)tvb_get_guint8(tvb, offset);
+                offset++;
+                break;
+            case PDCP_LTE_ROHC_IP_VERSION_TAG:
+                p_pdcp_lte_info->rohc.rohc_ip_version = tvb_get_ntohs(tvb, offset);
+                offset += 2;
+                break;
+            case PDCP_LTE_ROHC_CID_INC_INFO_TAG:
+                p_pdcp_lte_info->rohc.cid_inclusion_info = tvb_get_guint8(tvb, offset);
+                offset++;
+                break;
+            case PDCP_LTE_ROHC_LARGE_CID_PRES_TAG:
+                p_pdcp_lte_info->rohc.large_cid_present = tvb_get_guint8(tvb, offset);
+                offset++;
+                break;
+            case PDCP_LTE_ROHC_MODE_TAG:
+                p_pdcp_lte_info->rohc.mode = (enum rohc_mode)tvb_get_guint8(tvb, offset);
+                offset++;
+                break;
+            case PDCP_LTE_ROHC_RND_TAG:
+                p_pdcp_lte_info->rohc.rnd = tvb_get_guint8(tvb, offset);
+                offset++;
+                break;
+            case PDCP_LTE_ROHC_UDP_CHECKSUM_PRES_TAG:
+                p_pdcp_lte_info->rohc.udp_checksum_present = tvb_get_guint8(tvb, offset);
+                offset++;
+                break;
+            case PDCP_LTE_ROHC_PROFILE_TAG:
+                p_pdcp_lte_info->rohc.profile = tvb_get_ntohs(tvb, offset);
+                offset += 2;
+                break;
+            case PDCP_LTE_CHANNEL_ID_TAG:
+                p_pdcp_lte_info->channelId = tvb_get_ntohs(tvb, offset);
+                offset += 2;
+                break;
+            case PDCP_LTE_UEID_TAG:
+                p_pdcp_lte_info->ueid = tvb_get_ntohs(tvb, offset);
+                offset += 2;
+                break;
+
+            case PDCP_LTE_PAYLOAD_TAG:
+                /* Have reached data, so get out of loop */
+                continue;
+
+            default:
+                /* It must be a recognised tag */
+                return -1;
+        }
+    }
+
+    if ((p_pdcp_lte_info->plane == USER_PLANE) && (seqnumLengthTagPresent == FALSE)) {
+        /* Conditional field is not present */
+        return -1;
+    }
+
+    if (!infoAlreadySet) {
+        /* Store info in packet */
+        p_add_proto_data(wmem_file_scope(), pinfo, proto_pdcp_lte, (guint32) 0, p_pdcp_lte_info);
+    }
+
+    return offset;
+}
+
+
 static void
 dissect_aww(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
 {
@@ -72,129 +200,16 @@ dissect_aww(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
         gint32 offset = 8;
         // pdcp-lte
         if (proto_id == 300 || proto_id == 301) {
-            struct pdcp_lte_info *p_pdcp_lte_info;
-            guint8                tag                    = 0;
-            gboolean              infoAlreadySet         = FALSE;
-            gboolean              seqnumLengthTagPresent = FALSE;
-
-            /* Needs to be at least as long as:
-               - the signature string
-               - fixed header bytes
-               - tag for data
-               - at least one byte of PDCP PDU payload */
-            if (tvb_captured_length_remaining(tvb, offset) < (gint)(strlen(PDCP_LTE_START_STRING)+3+2)) {
-                return; // TODO: move to a separate function
-            }
-
-            /* OK, compare with signature string */
-            if (tvb_strneql(tvb, offset, PDCP_LTE_START_STRING, strlen(PDCP_LTE_START_STRING)) != 0) {
-                return;
-            }
-            offset += (gint)strlen(PDCP_LTE_START_STRING);
-
-            /* If redissecting, use previous info struct (if available) */
-            p_pdcp_lte_info = (pdcp_lte_info *) p_get_proto_data(wmem_file_scope(), pinfo, proto_pdcp_lte, 0);
-            if (p_pdcp_lte_info == NULL) {
-                /* Allocate new info struct for this frame */
-                p_pdcp_lte_info = wmem_new0(wmem_file_scope(), pdcp_lte_info);
-                infoAlreadySet = FALSE;
-            }
-            else {
-                infoAlreadySet = TRUE;
-            }
-
-
-            /* Read fixed fields */
-            p_pdcp_lte_info->no_header_pdu = (gboolean)tvb_get_guint8(tvb, offset++);
-            p_pdcp_lte_info->plane = (enum pdcp_plane)tvb_get_guint8(tvb, offset++);
-            if (p_pdcp_lte_info->plane == SIGNALING_PLANE) {
-                p_pdcp_lte_info->seqnum_length = PDCP_SN_LENGTH_5_BITS;
-            }
-            p_pdcp_lte_info->rohc.rohc_compression = (gboolean)tvb_get_guint8(tvb, offset++);
-
-            /* Read optional fields */
-            while (tag != PDCP_LTE_PAYLOAD_TAG) {
-                /* Process next tag */
-                tag = tvb_get_guint8(tvb, offset++);
-                switch (tag) {
-                    case PDCP_LTE_SEQNUM_LENGTH_TAG:
-                        p_pdcp_lte_info->seqnum_length = tvb_get_guint8(tvb, offset);
-                        offset++;
-                        seqnumLengthTagPresent = TRUE;
-                        break;
-                    case PDCP_LTE_DIRECTION_TAG:
-                        p_pdcp_lte_info->direction = tvb_get_guint8(tvb, offset);
-                        offset++;
-                        break;
-                    case PDCP_LTE_LOG_CHAN_TYPE_TAG:
-                        p_pdcp_lte_info->channelType = (LogicalChannelType)tvb_get_guint8(tvb, offset);
-                        offset++;
-                        break;
-                    case PDCP_LTE_BCCH_TRANSPORT_TYPE_TAG:
-                        p_pdcp_lte_info->BCCHTransport = (BCCHTransportType)tvb_get_guint8(tvb, offset);
-                        offset++;
-                        break;
-                    case PDCP_LTE_ROHC_IP_VERSION_TAG:
-                        p_pdcp_lte_info->rohc.rohc_ip_version = tvb_get_ntohs(tvb, offset);
-                        offset += 2;
-                        break;
-                    case PDCP_LTE_ROHC_CID_INC_INFO_TAG:
-                        p_pdcp_lte_info->rohc.cid_inclusion_info = tvb_get_guint8(tvb, offset);
-                        offset++;
-                        break;
-                    case PDCP_LTE_ROHC_LARGE_CID_PRES_TAG:
-                        p_pdcp_lte_info->rohc.large_cid_present = tvb_get_guint8(tvb, offset);
-                        offset++;
-                        break;
-                    case PDCP_LTE_ROHC_MODE_TAG:
-                        p_pdcp_lte_info->rohc.mode = (enum rohc_mode)tvb_get_guint8(tvb, offset);
-                        offset++;
-                        break;
-                    case PDCP_LTE_ROHC_RND_TAG:
-                        p_pdcp_lte_info->rohc.rnd = tvb_get_guint8(tvb, offset);
-                        offset++;
-                        break;
-                    case PDCP_LTE_ROHC_UDP_CHECKSUM_PRES_TAG:
-                        p_pdcp_lte_info->rohc.udp_checksum_present = tvb_get_guint8(tvb, offset);
-                        offset++;
-                        break;
-                    case PDCP_LTE_ROHC_PROFILE_TAG:
-                        p_pdcp_lte_info->rohc.profile = tvb_get_ntohs(tvb, offset);
-                        offset += 2;
-                        break;
-                    case PDCP_LTE_CHANNEL_ID_TAG:
-                        p_pdcp_lte_info->channelId = tvb_get_ntohs(tvb, offset);
-                        offset += 2;
-                        break;
-                    case PDCP_LTE_UEID_TAG:
-                        p_pdcp_lte_info->ueid = tvb_get_ntohs(tvb, offset);
-                        offset += 2;
-                        break;
-
-                    case PDCP_LTE_PAYLOAD_TAG:
-                        /* Have reached data, so get out of loop */
-                        continue;
-
-                    default:
-                        /* It must be a recognised tag */
-                        return;
-                }
-            }
-
-            if ((p_pdcp_lte_info->plane == USER_PLANE) && (seqnumLengthTagPresent == FALSE)) {
-                /* Conditional field is not present */
-                return;
-            }
-
-            if (!infoAlreadySet) {
-                /* Store info in packet */
-                p_add_proto_data(wmem_file_scope(), pinfo, proto_pdcp_lte, (guint32) 0, p_pdcp_lte_info);
-            }
+            offset = dissect_extra_pdcp_lte_info(tvb, pinfo, offset);
         }
-        tvbuff_t* next_tvb = tvb_new_subset_remaining(tvb, offset);
-        int rtBytesConsumed = dissector_try_uint(proto_table, proto_id, next_tvb, pinfo, tree);
-        if (rtBytesConsumed == 0) {
-            fprintf(stderr, "Error: ws_dissector fails to decode protocol %d.\n", proto_id);
+        if (offset == -1) {
+            fprintf(stderr, "Error: ws_dissector fails to decode extra info for LTE PDCP packets.\n");
+        } else {
+            tvbuff_t* next_tvb = tvb_new_subset_remaining(tvb, offset);
+            int rtBytesConsumed = dissector_try_uint(proto_table, proto_id, next_tvb, pinfo, tree);
+            if (rtBytesConsumed == 0) {
+                fprintf(stderr, "Error: ws_dissector fails to decode protocol %d.\n", proto_id);
+            }
         }
     }
 }
