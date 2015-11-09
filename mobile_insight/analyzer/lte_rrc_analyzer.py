@@ -42,7 +42,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         self.__history = {}    # cell history: timestamp -> LteRrcStatus()
         self.__config = {}    # (cell_id,freq) -> LteRrcConfig()
 
-    def __create_profile_hierarchy(self):
+    def create_profile_hierarchy(self):
         '''
         Return a Lte Rrc ProfileHierarchy (configurations)
 
@@ -125,7 +125,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
         return profile_hierarchy
         
-    def __create_state_machine(self):
+    def create_state_machine(self):
         """
         Declare a RRC state machine
 
@@ -147,7 +147,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
         return state_machine
 
-    def __init_protocol_state(self, msg):
+    def init_protocol_state(self, msg):
         """
         Determine RRC state at bootstrap
 

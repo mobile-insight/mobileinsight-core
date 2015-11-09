@@ -54,6 +54,9 @@ class Analyzer(Element):
     """A base class for all the analyzers
     """
 
+    #Guanratee global uniqueness of analyzer
+    __analyzer_array={}    #Analyzer name --> object address
+
     def __init__(self):
         Element.__init__(self)
         self.source=None    #trace source collector
@@ -63,6 +66,9 @@ class Analyzer(Element):
 
         #setup the logs
         self.set_log("",logging.INFO)
+
+        #Include itself into the global list
+        Analyzer.__analyzer_array[self.__class__.__name__]=self
 
         #TODO: For Profile, each specific analyzer should declare it on demand
 
@@ -118,31 +124,52 @@ class Analyzer(Element):
         if callback in self.source_callback:
             self.source_callback.remove(callback)
 
-    #TODO: depreciate this moudle. Replace with a registeration based approach
-    def include_analyzer(self,analyzer,callback_list):
+    def include_analyzer(self,analyzer_name,callback_list):
         """
         Declares the dependency from other analyzers.
         Once declared, the current analyzer will receive events 
         from other analyzers, then trigger functions in callback_list
 
-        :param analyzer: the analyzer to depend on
+        :param analyzer_name: the name of analyzer to depend on
+        :type analyzer_name: string
         :param callback_list: a list of callback functions. They will be triggered when an event from analyzer arrives
-        """
-        #WARNING: if analyzer exits, its callback_list would be overwritten!!!
-        self.from_list[analyzer]=callback_list
-        #Add the analyzer to the to_list
-        if self not in analyzer.to_list:
-            analyzer.to_list.append(self)
 
-    def exclude_analyzer(self,analyzer):
+        """
+        if analyzer_name in Analyzer.__analyzer_array:
+            #Analyzer has been declared. Reuse it directly
+            self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
+            if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
+                Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
+        else:
+            try:
+                #Dynamic import module and import analyzers
+                module_tmp = __import__("mobile_insight.analyzer")
+                self.logger.info("after import")
+                analyzer_tmp = getattr(module_tmp.analyzer,analyzer_name)
+                self.logger.info("after getattr")
+                Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp() 
+                self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
+                if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
+                    Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
+            except Exception, e:
+                #Either the analyzer is unavailable, or has semantic errors
+                self.logger.info("Runtime Error: unable to import "+analyzer_name)  
+
+    def exclude_analyzer(self,analyzer_name):
+        #TODO: this API would be depreciated
         """
         Remove the dependency from the ananlyzer
 
         :param analyzer: the analyzer to not depend on
+        :type analyzer: string
         """
-        if self in analyzer.to_list:
-            analyzer.to_list.remove(self)
-        del self.from_list[analyzer]
+
+        if analyzer_name in Analyzer.__analyzer_array \
+        and self in Analyzer.__analyzer_array:
+            del self.from_list[Analyzer.__analyzer_array[analyzer_name]]
+            Analyzer.__analyzer_array[analyzer_name].to_list.remove(self)
+            analyzer.to_list.remove(self) 
+
 
     def recv(self,module,event):
         """

@@ -9,6 +9,7 @@ Author: Yuanjie Li
 from analyzer import *
 from profile import Profile,ProfileHierarchy
 from state_machine import StateMachine
+import xml.etree.ElementTree as ET
 
 __all__=["ProtocolAnalyzer"]
 
@@ -39,14 +40,14 @@ class ProtocolAnalyzer(Analyzer):
         """
 
         Analyzer.__init__(self)
-        self.__profile = Profile(self.__create_profile_hierarchy())
-        self.__state_machine = StateMachine(self.__create_state_machine())
+        self.__profile = Profile(self.create_profile_hierarchy())
+        self.__state_machine = StateMachine(self.create_state_machine(),self.init_protocol_state)
 
         #Update state dynamics
         self.add_source_callback(self.__update_state)
       
 
-    def __create_profile_hierarchy(self):
+    def create_profile_hierarchy(self):
         """
         Declare a protocol-specific ProfileHierarchy
 
@@ -54,15 +55,15 @@ class ProtocolAnalyzer(Analyzer):
         """
         return None
 
-    def __create_state_machine(self):
+    def create_state_machine(self):
         """
         Declare a state machine
 
-        returns: ProfileHierarchy based on protocol-specific FSMs
+        returns: a dictinoary that describes the states and transition conditions
         """
         return None
 
-    def __init_protocol_state(self):
+    def init_protocol_state(self,msg):
         """
         At bootstrap, determine the protocol's current state
 
@@ -88,6 +89,9 @@ class ProtocolAnalyzer(Analyzer):
         #FIXME: duplicate message decoding, inefficient
         log_item = msg.data.decode()
         log_item_dict = dict(log_item)
+
+        if 'Msg' not in log_item_dict:
+            return
 
         #Convert msg to xml format
         log_xml = ET.fromstring(log_item_dict['Msg'])

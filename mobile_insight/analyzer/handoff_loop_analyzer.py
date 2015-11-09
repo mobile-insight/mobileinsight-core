@@ -20,8 +20,7 @@ class HandoffLoopAnalyzer(Analyzer):
         Initialization of the analyzer.
         """
         Analyzer.__init__(self)
-        self.__rrc_analyzer = RrcAnalyzer()
-        self.include_analyzer(self.__rrc_analyzer,[self.__loop_detection])
+        self.include_analyzer("RrcAnalyzer",[self.__loop_detection])
 
     def __loop_detection(self,msg):
         """

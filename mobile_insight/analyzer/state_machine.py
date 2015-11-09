@@ -32,12 +32,12 @@ class StateMachine(object):
             x = StateMachine(state_machine,init_callback)
 
 
-        :param state_machine: a state machnie dictionary {FromState:{ToState:transition_callback}}
+        :param state_machine: a state machine dictionary {FromState:{ToState:transition_callback}}
         :type state_machine: dictionary
         :param init_callback: the state initialization callback
         :type analyzer: boolean function with 1 parameter
         '''
-        self.state_machnie = state_machine
+        self.state_machine = state_machine
         self.init_callback = init_callback
         self.cur_state = None
         self.state_history = {} #history of state transisions. timestamp-->state
@@ -46,12 +46,13 @@ class StateMachine(object):
         '''
         A specical callback to initiate the current state.
         Why this is needed: when MobileInsight starts, the device can be in any state. 
-        The state machnie must have a callback to determine the initial state.
+        The state machine must have a callback to determine the initial state.
         This callback is protocol specific, since it depends on specific messages
         '''
         if not self.cur_state:
-            init_state = init_callback(event)
-            if init_state in self.state_machine.keys():
+            init_state = self.init_callback(event)
+            if self.state_machine \
+            and init_state in self.state_machine.keys():
                 #Always check if the new state is declared
                 self.cur_state = init_state
                 self.state_history[event.timestamp] = init_state
