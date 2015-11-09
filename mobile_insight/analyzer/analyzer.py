@@ -68,7 +68,10 @@ class Analyzer(Element):
         self.set_log("",logging.INFO)
 
         #Include itself into the global list
-        Analyzer.__analyzer_array[self.__class__.__name__]=self
+        if not self.__class__.__name__ in Analyzer.__analyzer_array:
+            Analyzer.__analyzer_array[self.__class__.__name__]=self
+        else:
+            self.logger.info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
 
         #TODO: For Profile, each specific analyzer should declare it on demand
 
