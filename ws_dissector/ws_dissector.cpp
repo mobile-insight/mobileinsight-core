@@ -30,7 +30,7 @@
 //typedef __int32 int32_t;
 //typedef unsigned __int32 uint32_t;
 
-#define WS_DISSECTOR_VERSION "1.0.2"
+#define WS_DISSECTOR_VERSION "1.0.3"
 
 const int BUFFER_SIZE = 2000;
 guchar buffer[BUFFER_SIZE] = {};
