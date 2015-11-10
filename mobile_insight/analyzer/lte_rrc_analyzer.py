@@ -269,7 +269,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 #Test profile
                 # self.logger.info("LteRrcSibServ")
-                self.__profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.sib_serv",
+                self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.sib_serv",
                     {'priority':field_val['lte-rrc.cellReselectionPriority'],
                      'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
                      's_nonintrasearch':str(int(field_val['lte-rrc.s_NonIntraSearch'])*2),
@@ -283,7 +283,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 #Test profile
                 # self.logger.info("LteRrcSibIntraFreqConfig")
-                self.__profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
+                self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
                     {'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
                      'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
                      'p_Max':field_val['lte-rrc.p_Max'],
@@ -325,7 +325,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 #Test profile
                 # self.logger.info("LteRrcSibInterFreqConfig")
-                self.__profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
+                self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
                     {'rat':'LTE',
                      'freq':str(neighbor_freq),
                      'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
@@ -389,7 +389,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 #Test profile
                 # self.logger.info("LteRrcSibInterFreqConfig")
-                self.__profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
+                self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
                     {'rat':'UTRA',
                      'freq':str(neighbor_freq),
                      'tReselection':'null',
@@ -442,7 +442,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 #Test profile
                 # self.logger.info("LteRrcSibInterFreqConfig")
-                self.__profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
+                self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
                     {'rat':'GERAN',
                      'freq':str(neighbor_freq),
                      'tReselection':'null',

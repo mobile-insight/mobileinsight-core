@@ -40,8 +40,8 @@ class ProtocolAnalyzer(Analyzer):
         """
 
         Analyzer.__init__(self)
-        self.__profile = Profile(self.create_profile_hierarchy())
-        self.__state_machine = StateMachine(self.create_state_machine(),self.init_protocol_state)
+        self.profile = Profile(self.create_profile_hierarchy())
+        self.state_machine = StateMachine(self.create_state_machine(),self.init_protocol_state)
 
         #Update state dynamics
         self.add_source_callback(self.__update_state)
@@ -97,7 +97,7 @@ class ProtocolAnalyzer(Analyzer):
         log_xml = ET.fromstring(log_item_dict['Msg'])
         xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
 
-        self.__state_machine.update_state(xml_msg)
+        self.state_machine.update_state(xml_msg)
 
     def get_protocol_state(self):
         """
@@ -105,5 +105,5 @@ class ProtocolAnalyzer(Analyzer):
 
         :returns: current state_machine
         """
-        return self.__state_machine.get_current_state()
+        return self.state_machine.get_current_state()
 

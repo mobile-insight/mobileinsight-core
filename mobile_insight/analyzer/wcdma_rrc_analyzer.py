@@ -231,7 +231,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                     cur_pair = (self.__status.id,self.__status.freq)
                     self.__config[cur_pair].sib.serv_config = serv_config
 
-                self.__profile.update("WcdmaRrcProfile"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.sib_serv",
+                self.profile.update("WcdmaRrcProfile"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.sib_serv",
                     {'priority':field_val['rrc.priority'],
                      'threshserv_low':str(int(field_val['rrc.threshServingLow'])*2),
                      's_priority_search1':str(int(field_val['rrc.s_PrioritySearch1'])*2),
@@ -278,7 +278,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                     cur_pair = (self.__status.id,self.__status.freq)
                     self.__config[cur_pair].sib.intra_freq_config = intra_freq_config
 
-                self.__profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
+                self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
                     {'tReselection':field_val['rrc.t_Reselection_S'],
                      'q_RxLevMin':str(int(field_val['rrc.q_RxlevMin'])*2),
                      's_InterSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
@@ -323,7 +323,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                     cur_pair = (self.__status.id,self.__status.freq)
                     self.__config[cur_pair].sib.inter_freq_config[neighbor_freq] = inter_freq_config
 
-                self.__profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
+                self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
                     {'rat':'LTE',
                      'freq':str(neighbor_freq),
                      #'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
@@ -452,13 +452,13 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                 if field.get('name') == "rrc.rrcConnectionSetup":
                     return True
 
-        def conn_to_idle(msg):
+        def dch_to_idle(msg):
             for field in msg.data.iter('field'):
                 if field.get('name') == "rrc.rrcConnectionRelease":
                     return True
 
-        state_machine={'RRC_IDLE':{'RRC_DCH':idle_to_conn},
-                       'RRC_DCH':{'RRC_IDLE':conn_to_idle}}  
+        state_machine={'RRC_IDLE':{'RRC_DCH':idle_to_dch},
+                       'RRC_DCH':{'RRC_IDLE':dch_to_idle}}  
 
         return state_machine 
 

@@ -23,8 +23,9 @@ class RrcAnalyzer(Analyzer):
         Analyzer.__init__(self)
 
         #include analyzers
-        self.include_analyzer("LteRrcAnalyzer",[self.__on_event])
         self.include_analyzer("WcdmaRrcAnalyzer",[self.__on_event])
+        self.include_analyzer("LteRrcAnalyzer",[self.__on_event])
+        
 
         self.__cur_RAT = None    #current RAT
 

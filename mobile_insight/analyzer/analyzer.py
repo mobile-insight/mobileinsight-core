@@ -68,10 +68,10 @@ class Analyzer(Element):
         self.set_log("",logging.INFO)
 
         #Include itself into the global list
-        if not self.__class__.__name__ in Analyzer.__analyzer_array:
-            Analyzer.__analyzer_array[self.__class__.__name__]=self
-        else:
-            self.logger.info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
+        # if not self.__class__.__name__ in Analyzer.__analyzer_array:
+        #     Analyzer.__analyzer_array[self.__class__.__name__]=self
+        # else:
+        #     self.logger.info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
 
         #TODO: For Profile, each specific analyzer should declare it on demand
 
@@ -147,10 +147,10 @@ class Analyzer(Element):
             try:
                 #Dynamic import module and import analyzers
                 module_tmp = __import__("mobile_insight.analyzer")
-                self.logger.info("after import")
                 analyzer_tmp = getattr(module_tmp.analyzer,analyzer_name)
-                self.logger.info("after getattr")
+                # self.logger.info("after getattr " + analyzer_name + str(Analyzer.__analyzer_array.keys()))
                 Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp() 
+                # self.logger.info("after init " + analyzer_name)
                 self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
                 if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                     Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
