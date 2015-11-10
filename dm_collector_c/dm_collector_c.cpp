@@ -9,7 +9,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DM_COLLECTOR_C_VERSION "1.0.6"
+#define DM_COLLECTOR_C_VERSION "1.0.7"
 
 
 static PyObject *dm_collector_c_disable_logs (PyObject *self, PyObject *args);
