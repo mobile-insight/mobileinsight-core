@@ -59,6 +59,8 @@ class WSDissector:
                         "LTE-RRC_DL_CCCH": 204,
                         "LTE-RRC_UL_CCCH": 205,
                         "LTE-NAS_EPS_PLAIN":    250,
+                        "LTE-PDCP_DL_SRB": 300,
+                        "LTE-PDCP_UL_SRB": 301,
                         }
     _proc = None
     _init_proc_called = False

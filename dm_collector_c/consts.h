@@ -23,7 +23,12 @@ enum LogPacketType {
     LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results = 0xB179,
     LTE_ML1_IRAT_Measurement_Request = 0xB187,
     LTE_ML1_Serving_Cell_Measurement_Result = 0xB193,
-    LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp = 0xB195
+    LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp = 0xB195,
+    LTE_PDCP_DL_SRB_Integrity_Data_PDU = 0xB0A5,
+    LTE_PDCP_UL_SRB_Integrity_Data_PDU = 0xB0B5,
+    LTE_MAC_Configuration = 0xB060,
+    LTE_MAC_DL_Transport_Block = 0xB063,
+    LTE_MAC_UL_Transport_Block = 0xB064,
 };
 
 const ValueName LogPacketTypeID_To_Name [] = {
@@ -66,7 +71,17 @@ const ValueName LogPacketTypeID_To_Name [] = {
     {LTE_ML1_Serving_Cell_Measurement_Result,   // LTE serving cell measurement result
         "LTE_ML1_Serving_Cell_Measurement_Result"},
     {LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp, // LTE neighbor measurement request (connected mode)
-        "LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp"}
+        "LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp"},
+    {LTE_PDCP_DL_SRB_Integrity_Data_PDU,
+        "LTE_PDCP_DL_SRB_Integrity_Data_PDU"},
+    {LTE_PDCP_UL_SRB_Integrity_Data_PDU,
+        "LTE_PDCP_UL_SRB_Integrity_Data_PDU"},
+    {LTE_MAC_Configuration,
+        "LTE_MAC_Configuration"},
+    {LTE_MAC_UL_Transport_Block,
+        "LTE_MAC_UL_Transport_Block"},
+    {LTE_MAC_DL_Transport_Block,
+        "LTE_MAC_DL_Transport_Block"},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

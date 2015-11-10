@@ -8,6 +8,7 @@ __all__=["Analyzer",
     "HandoffLoopAnalyzer"]
 
 from analyzer import Analyzer
+
 from profile import ProfileHierarchy,Profile
 from state_machine import StateMachine
 
