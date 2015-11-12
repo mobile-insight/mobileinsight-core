@@ -95,7 +95,7 @@ class AndroidDevDiagMonitor(Monitor):
             cmd = "su -c %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"))
             print cmd
             proc = subprocess.Popen(cmd,
-                                    bufsize=-1,
+                                    bufsize=0,
                                     shell=True,
                                     executable=ANDROID_SHELL,
                                     stdout=subprocess.PIPE,
