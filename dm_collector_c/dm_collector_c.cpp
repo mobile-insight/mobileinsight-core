@@ -9,7 +9,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DM_COLLECTOR_C_VERSION "1.0.7"
+#define DM_COLLECTOR_C_VERSION "1.0.8"
 
 
 static PyObject *dm_collector_c_disable_logs (PyObject *self, PyObject *args);
@@ -102,6 +102,7 @@ dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
     }
     (void) send_msg(serial_port, buf.first, buf.second);
     Py_DECREF(serial_port);
+    delete [] buf.first;
     Py_RETURN_TRUE;
 
     raise_exception:
@@ -196,6 +197,8 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
     PyObject *file = NULL;
     PyObject *sequence = NULL;
     bool success = false;
+    BinaryBuffer buf;
+    IdVector empty;
  
     if (!PyArg_ParseTuple(args, "OO", &file, &sequence)) {
         return NULL;
@@ -210,6 +213,15 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
     }
     if (!PySequence_Check(sequence)) {
         PyErr_SetString(PyExc_TypeError, "\'type_names\' is not a sequence.");
+        goto raise_exception;
+    }
+
+    buf = encode_log_config(DISABLE, empty);
+    if (buf.first != NULL && buf.second != 0) {
+        (void) send_msg(file, buf.first, buf.second);
+        delete [] buf.first;
+    } else {
+        PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
         goto raise_exception;
     }
 
