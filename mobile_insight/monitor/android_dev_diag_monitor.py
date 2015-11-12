@@ -18,6 +18,8 @@ import timeit
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
+ANDROID_SHELL = "/system/bin/sh"
+
 
 class AndroidDevDiagMonitor(Monitor):
     """
@@ -43,7 +45,6 @@ class AndroidDevDiagMonitor(Monitor):
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
     def _run_shell_cmd(self, cmd, wait=False):
-        ANDROID_SHELL = "/system/bin/sh"
         p = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True)
         if wait:
             p.wait()
