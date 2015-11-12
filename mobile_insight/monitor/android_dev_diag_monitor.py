@@ -39,9 +39,8 @@ class AndroidDevDiagMonitor(Monitor):
         """
         Monitor.__init__(self)
         self._executable_path = prefs.get("diag_revealer_path", "/system/bin/diag_revealer")
-        
-        # Initialize Wireshark dissector
-        DMLogPacket.init(prefs)
+        self._type_names = []
+        DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
     def enable_log(self, type_name):
         """
@@ -77,7 +76,6 @@ class AndroidDevDiagMonitor(Monitor):
                 print "AndroidQmdlMonitor: existing Diag.cfg file will be used."
             else:
                 raise RuntimeError("Log type not specified. Please call enable_log() first.")
-
 
         try:
             if generate_diag_cfg:
