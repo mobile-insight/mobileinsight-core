@@ -42,6 +42,12 @@ class AndroidDevDiagMonitor(Monitor):
         self._type_names = []
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
+    def _run_shell_cmd(self, cmd, wait=False):
+        ANDROID_SHELL = "/system/bin/sh"
+        p = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True)
+        if wait:
+            p.wait()
+
     def enable_log(self, type_name):
         """
         Enable the messages to be monitored. Refer to cls.SUPPORTED_TYPES for supported types.
@@ -86,6 +92,7 @@ class AndroidDevDiagMonitor(Monitor):
 
             # TODO(likayo): need to protect aganist user input
             cmd = "su -c %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"))
+            print cmd
             proc = subprocess.Popen(cmd,
                                     bufsize=-1,
                                     shell=True,
