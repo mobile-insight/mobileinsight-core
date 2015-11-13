@@ -93,7 +93,7 @@ class AndroidDevDiagMonitor(Monitor):
                 fd.close()
 
             # TODO(likayo): need to protect aganist user input
-            cmd = "su -c %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self.TMP_FIFO_FILE)
+            cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self.TMP_FIFO_FILE)
             print cmd
             os.mkfifo(self.TMP_FIFO_FILE)
             proc = subprocess.Popen(cmd,
