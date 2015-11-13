@@ -248,7 +248,8 @@ class LteNasAnalyzer(Analyzer):
         :param msg: the ESM NAS message
         """
 
-        self.__eps_id = xstr(self.__emm_status.guti.mme_group_id)+xstr(self.__emm_status.mme_code)
+        self.__eps_id = xstr(self.__emm_status.guti.mme_group_id)
+        # self.__eps_id = xstr(self.__emm_status.guti.mme_group_id)+xstr(self.__emm_status.mme_code)
 
         for field in msg.data.iter('field'):
 
