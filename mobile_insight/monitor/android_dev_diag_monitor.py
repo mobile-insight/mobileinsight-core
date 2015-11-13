@@ -30,6 +30,7 @@ class AndroidDevDiagMonitor(Monitor):
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
 
     DIAG_CFG_DIR = "/sdcard/diag_logs"
+    TMP_FIFO_FILE = "/sdcard/diag_revealer_fifo"
 
     def __init__(self, prefs={}):
         """
@@ -92,19 +93,19 @@ class AndroidDevDiagMonitor(Monitor):
                 fd.close()
 
             # TODO(likayo): need to protect aganist user input
-            cmd = "su -c %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"))
+            cmd = "su -c %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self.TMP_FIFO_FILE)
             print cmd
             proc = subprocess.Popen(cmd,
                                     bufsize=0,
                                     shell=True,
                                     executable=ANDROID_SHELL,
-                                    stdout=subprocess.PIPE,
                                     )
+            fifo = open(self.TMP_FIFO_FILE, "r")
 
             # Read log packets from diag_revealer
             BLOCK_SIZE = 64
             while True:
-                s = proc.stdout.read(BLOCK_SIZE)
+                s = fifo.read(BLOCK_SIZE)
                 if s:
                     print "Received %d bytes" % len(s)
                 dm_collector_c.feed_binary(s)
@@ -129,6 +130,8 @@ class AndroidDevDiagMonitor(Monitor):
 
         except (KeyboardInterrupt, RuntimeError), e:
             print "\n\n%s Detected: Disabling all logs" % type(e).__name__
+            fifo.close()
+            proc.terminate()
             sys.exit(e)
         except Exception, e:
             sys.exit(e)
