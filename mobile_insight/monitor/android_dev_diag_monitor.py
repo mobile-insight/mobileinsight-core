@@ -101,7 +101,7 @@ class AndroidDevDiagMonitor(Monitor):
                                     shell=True,
                                     executable=ANDROID_SHELL,
                                     )
-            fifo = open(self.TMP_FIFO_FILE, "r")
+            fifo = open(self.TMP_FIFO_FILE, "r", buffering=0)
 
             # Read log packets from diag_revealer
             BLOCK_SIZE = 64
