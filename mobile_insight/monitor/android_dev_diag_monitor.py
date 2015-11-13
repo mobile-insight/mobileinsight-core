@@ -12,6 +12,7 @@ __all__ = ["AndroidDevDiagMonitor"]
 import os
 import re
 import subprocess
+import stat
 import sys
 import timeit
 
@@ -95,7 +96,7 @@ class AndroidDevDiagMonitor(Monitor):
             # TODO(likayo): need to protect aganist user input
             cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self.TMP_FIFO_FILE)
             print cmd
-            os.mkfifo(self.TMP_FIFO_FILE)
+            os.mknod(self.TMP_FIFO_FILE, 0666 | stat.S_IFIFO)
             proc = subprocess.Popen(cmd,
                                     shell=True,
                                     executable=ANDROID_SHELL,
