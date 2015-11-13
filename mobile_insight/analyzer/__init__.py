@@ -5,6 +5,7 @@ __all__=["Analyzer",
     "MsgLogger","MsgSerializer",
     "LteRrcAnalyzer","LteNasAnalyzer","LteMeasurementAnalyzer",
 	"WcdmaRrcAnalyzer","RrcAnalyzer",
+	"MobilityMngt"
     "HandoffLoopAnalyzer"]
 
 from analyzer import Analyzer
@@ -26,5 +27,6 @@ from wcdma_rrc_analyzer import WcdmaRrcAnalyzer
 from mm_analyzer import MmAnalyzer
 
 # Higher-level analyzer
+from mobility_mngt import MobilityMngt
 from rrc_analyzer import RrcAnalyzer
 from handoff_loop_analyzer import HandoffLoopAnalyzer

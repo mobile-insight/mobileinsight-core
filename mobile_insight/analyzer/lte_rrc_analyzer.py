@@ -129,7 +129,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         """
         Declare a RRC state machine
 
-        returns: a StateMachnie
+        returns: a StateMachine
         """
         
         def idle_to_conn(msg):
@@ -192,10 +192,10 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             self.__callback_rrc_reconfig(xml_msg)
             #TODO: callback RRC
 
-        # Raise event to other analyzers
-        # FIXME: the timestamp is incoherent with that from the trace collector
-        e = Event(timeit.default_timer(),self.__class__.__name__,"")
-        self.send(e)
+            # Raise event to other analyzers
+            # e = Event(timeit.default_timer(),self.__class__.__name__,"")
+            # self.send(e)
+            self.send(msg) #only deliver LTE RRC signaling messages
 
     def __callback_serv_cell(self,msg):
 
@@ -213,12 +213,16 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 self.logger.info(self.__status.dump())
         else:
             if 'Freq' in msg.data and self.__status.freq != msg.data['Freq']:
+                curr_conn = self.__status.conn
                 self.__status = LteRrcStatus()
+                self.__status.conn = curr_conn
                 self.__status.freq = msg.data['Freq']
                 self.__history[msg.timestamp] = self.__status
                 self.logger.info(self.__status.dump())
             if 'Physical Cell ID' in msg.data and self.__status.id != msg.data['Physical Cell ID']:
+                curr_conn = self.__status.conn
                 self.__status = LteRrcStatus()
+                self.__status.conn = curr_conn
                 self.__status.id = msg.data['Physical Cell ID']
                 self.__history[msg.timestamp] = self.__status
                 self.logger.info(self.__status.dump())

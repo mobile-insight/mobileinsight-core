@@ -86,13 +86,16 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
             self.__callback_sib_config(xml_msg)
             #TODO: callback RRC
 
+            # Raise event to other analyzers
+            # FIXME: the timestamp is incoherent with that from the trace collector
+            # e = Event(timeit.default_timer(),self.__class__.__name__,"")
+            # self.send(e)
+            self.send(msg)
+
         else: #nothing to update
             return
 
-        # Raise event to other analyzers
-        # FIXME: the timestamp is incoherent with that from the trace collector
-        e = Event(timeit.default_timer(),self.__class__.__name__,"")
-        self.send(e)
+        
 
     def __callback_serv_cell(self,msg):
         """
