@@ -37,18 +37,19 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
 
     # FIXME: python's logging module does not work well on Android
     l = logging.getLogger(logger_name)
-    formatter = logging.Formatter('%(message)s')
-    streamHandler = logging.StreamHandler()
-    streamHandler.setFormatter(formatter)
+    if not len(l.handlers):
+        formatter = logging.Formatter('%(message)s')
+        streamHandler = logging.StreamHandler()
+        streamHandler.setFormatter(formatter)
 
-    l.setLevel(level)
-    l.addHandler(streamHandler)
+        l.setLevel(level)
+        l.addHandler(streamHandler)
 
-    if log_file!="":
-        fileHandler = logging.FileHandler(log_file, mode='w')
-        fileHandler.setFormatter(formatter)
-        l.addHandler(fileHandler)  
-    l.disabled = False    
+        if log_file!="":
+            fileHandler = logging.FileHandler(log_file, mode='w')
+            fileHandler.setFormatter(formatter)
+            l.addHandler(fileHandler)  
+        l.disabled = False    
 
 class Analyzer(Element):
     """A base class for all the analyzers
@@ -68,10 +69,10 @@ class Analyzer(Element):
         self.set_log("",logging.INFO)
 
         #Include itself into the global list
-        # if not self.__class__.__name__ in Analyzer.__analyzer_array:
-        #     Analyzer.__analyzer_array[self.__class__.__name__]=self
-        # else:
-        #     self.logger.info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
+        if not self.__class__.__name__ in Analyzer.__analyzer_array:
+            Analyzer.__analyzer_array[self.__class__.__name__]=self
+        else:
+            self.logger.info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
 
         #TODO: For Profile, each specific analyzer should declare it on demand
 
@@ -154,6 +155,8 @@ class Analyzer(Element):
                 self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
                 if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                     Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
+                # self.logger.info(self.__class__.__name__+" from_list: "+str(self.from_list))
+                # self.logger.info(Analyzer.__analyzer_array[analyzer_name].__class__.__name__+" to_list: "+str(Analyzer.__analyzer_array[analyzer_name].to_list))
             except Exception, e:
                 #Either the analyzer is unavailable, or has semantic errors
                 self.logger.info("Runtime Error: unable to import "+analyzer_name)  

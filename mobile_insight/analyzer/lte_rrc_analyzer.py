@@ -204,28 +204,32 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
         :param msg: the RRC messages with cell status
         """
+        status_updated = False
         if not self.__status.inited():
             if 'Freq' in msg.data:
+                status_updated = True
                 self.__status.freq = msg.data['Freq']
-                self.logger.info(self.__status.dump())
             if 'Physical Cell ID' in msg.data:
+                status_updated = True
                 self.__status.id = msg.data['Physical Cell ID']
-                self.logger.info(self.__status.dump())
         else:
             if 'Freq' in msg.data and self.__status.freq != msg.data['Freq']:
+                status_updated = True
                 curr_conn = self.__status.conn
                 self.__status = LteRrcStatus()
                 self.__status.conn = curr_conn
                 self.__status.freq = msg.data['Freq']
                 self.__history[msg.timestamp] = self.__status
-                self.logger.info(self.__status.dump())
             if 'Physical Cell ID' in msg.data and self.__status.id != msg.data['Physical Cell ID']:
+                status_updated = True
                 curr_conn = self.__status.conn
                 self.__status = LteRrcStatus()
                 self.__status.conn = curr_conn
                 self.__status.id = msg.data['Physical Cell ID']
                 self.__history[msg.timestamp] = self.__status
-                self.logger.info(self.__status.dump())
+        
+        if status_updated:
+            self.logger.info(self.__status.dump())
 
     def __callback_sib_config(self,msg):
         """

@@ -5,7 +5,7 @@ __all__=["Analyzer",
     "MsgLogger","MsgSerializer",
     "LteRrcAnalyzer","LteNasAnalyzer","LteMeasurementAnalyzer",
 	"WcdmaRrcAnalyzer","RrcAnalyzer",
-	"MobilityMngt"
+	"MobilityMngt",
     "HandoffLoopAnalyzer"]
 
 from analyzer import Analyzer

@@ -31,6 +31,15 @@ class MobilityMngt(Analyzer):
 
         Analyzer.__init__(self)
 
+        #Track current freq and RAT. If any one changes, load the new state machine
+        self.__cur_RAT = None
+        self.__cur_freq = None
+
+        self.__handoff_sample = HandoffSample()
+        self.__mobility_state_machine = MobilityStateMachine()
+
+
+
         #include analyzers
         self.include_analyzer("WcdmaRrcAnalyzer",[self.__on_wcdma_rrc_msg])
         self.include_analyzer("LteRrcAnalyzer",[self.__on_lte_rrc_msg])
@@ -62,7 +71,6 @@ class MobilityMngt(Analyzer):
         """    
 
         pass
-
 
     def __on_lte_nas_msg(self,msg):
         """
@@ -135,6 +143,20 @@ class MeasState:
             return None
         else:
             return self.measid_list[meas_id][1]
+
+
+    def get_meas_report_obj(self,meas_id):
+        """
+        return the measurement report obj
+        :param meas_id: measurement ID
+        :type meas_id: integer
+        :returns: (measobj,report_config) pair
+        """
+        measobj = self.get_measobj(meas_id)
+        report_config = self.get_reportconfig(meas_id)
+
+        return (measobj,report_config)
+
 
     def equals(self,meas_state):
         """
