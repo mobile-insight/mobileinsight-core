@@ -115,7 +115,7 @@ class AndroidDevDiagMonitor(Monitor):
                 dm_collector_c.generate_diag_cfg(fd, self._type_names)
                 fd.close()
 
-            self._mkfifo(fifo_path)
+            self._mkfifo(self._fifo_path)
 
             # TODO(likayo): need to protect aganist user input
             cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
