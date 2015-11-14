@@ -32,6 +32,7 @@ class AndroidDevDiagMonitor(Monitor):
 
     DIAG_CFG_DIR = "/sdcard/diag_logs"
     TMP_FIFO_FILE = "/sdcard/diag_revealer_fifo"
+    BLOCK_SIZE = 64
 
     def __init__(self, prefs={}):
         """
@@ -71,6 +72,9 @@ class AndroidDevDiagMonitor(Monitor):
             else:
                 self._type_names.append(n)
 
+    def set_block_size(self, n):
+        self.BLOCK_SIZE = n
+
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
@@ -101,15 +105,21 @@ class AndroidDevDiagMonitor(Monitor):
                                     shell=True,
                                     executable=ANDROID_SHELL,
                                     )
-            fifo = open(self.TMP_FIFO_FILE, "r", buffering=0)
+            io = os.open(fifo, os.O_RDONLY | os.O_NONBLOCK)
+            # fifo = open(self.TMP_FIFO_FILE, "r", buffering=0)
 
             # Read log packets from diag_revealer
-            BLOCK_SIZE = 64
             while True:
-                s = fifo.read(BLOCK_SIZE)
-                if s:
+                try:
+                    s = os.read(fifo, self.BLOCK_SIZE)
+                except OSError as err:
+                    if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
+                        s = None
+                    else:
+                        raise err # something else has happened -- better reraise
+                if s:   # received some data
                     print "Received %d bytes" % len(s)
-                dm_collector_c.feed_binary(s)
+                    dm_collector_c.feed_binary(s)
                 decoded = dm_collector_c.receive_log_packet()
                 if decoded:
                     try:
