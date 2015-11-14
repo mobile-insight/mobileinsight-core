@@ -44,7 +44,7 @@ class AndroidDevDiagMonitor(Monitor):
         :type prefs: dictionary
         """
         Monitor.__init__(self)
-        self._executable_path = prefs.get("diag_revealer_path", "/system/bin/diag_revealer")
+        self._executable_path = prefs.get("diag_revealer_executable_path", "/system/bin/diag_revealer")
         self._type_names = []
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
@@ -147,6 +147,10 @@ class AndroidDevDiagMonitor(Monitor):
         except (KeyboardInterrupt, RuntimeError), e:
             os.close(fifo)
             proc.terminate()
-            sys.exit(e)
+            import traceback
+            sys.exit(str(traceback.format_exc()))
+            # sys.exit(e)
         except Exception, e:
-            sys.exit(e)
+            import traceback
+            sys.exit(str(traceback.format_exc()))
+            # sys.exit(e)
