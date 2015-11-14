@@ -9,6 +9,7 @@ Author: Jiayao Li
 __all__ = ["AndroidDevDiagMonitor"]
 
 
+import errno
 import os
 import re
 import subprocess
