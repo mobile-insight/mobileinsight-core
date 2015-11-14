@@ -105,7 +105,7 @@ class AndroidDevDiagMonitor(Monitor):
                                     shell=True,
                                     executable=ANDROID_SHELL,
                                     )
-            io = os.open(fifo, os.O_RDONLY | os.O_NONBLOCK)
+            fifo = os.open(fifo, os.O_RDONLY | os.O_NONBLOCK)
             # fifo = open(self.TMP_FIFO_FILE, "r", buffering=0)
 
             # Read log packets from diag_revealer
@@ -141,7 +141,7 @@ class AndroidDevDiagMonitor(Monitor):
 
         except (KeyboardInterrupt, RuntimeError), e:
             print "\n\n%s Detected: Disabling all logs" % type(e).__name__
-            fifo.close()
+            os.close(fifo)
             proc.terminate()
             sys.exit(e)
         except Exception, e:
