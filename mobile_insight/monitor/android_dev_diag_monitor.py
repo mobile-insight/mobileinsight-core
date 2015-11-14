@@ -105,7 +105,7 @@ class AndroidDevDiagMonitor(Monitor):
                                     shell=True,
                                     executable=ANDROID_SHELL,
                                     )
-            fifo = os.open(fifo, os.O_RDONLY | os.O_NONBLOCK)
+            fifo = os.open(self.TMP_FIFO_FILE, os.O_RDONLY | os.O_NONBLOCK)
             # fifo = open(self.TMP_FIFO_FILE, "r", buffering=0)
 
             # Read log packets from diag_revealer
