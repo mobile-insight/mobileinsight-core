@@ -5,7 +5,10 @@ An analyzer for handoff persistent loop detection
 
 Author: Yuanjie Li
 """
-import xml.etree.ElementTree as ET
+try: 
+    import xml.etree.cElementTree as ET 
+except ImportError: 
+    import xml.etree.ElementTree as ET
 from analyzer import *
 from rrc_analyzer import RrcAnalyzer
 

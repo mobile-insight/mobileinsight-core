@@ -6,7 +6,10 @@ A Mobility management analyzer.
 Author: Yuanjie Li
 """
 
-import xml.etree.ElementTree as ET
+try: 
+    import xml.etree.cElementTree as ET 
+except ImportError: 
+    import xml.etree.ElementTree as ET
 from analyzer import *
 from wcdma_rrc_analyzer import WcdmaRrcAnalyzer
 from lte_rrc_analyzer import LteRrcAnalyzer
@@ -46,7 +49,7 @@ class MobilityMngt(Analyzer):
         #include analyzers
         self.include_analyzer("WcdmaRrcAnalyzer",[self.__on_wcdma_rrc_msg])
         self.include_analyzer("LteRrcAnalyzer",[self.__on_lte_rrc_msg])
-        # self.include_analyzer("LteNasAnalyzer",[self.__on_lte_nas_msg])
+        self.include_analyzer("LteNasAnalyzer",[self.__on_lte_nas_msg])
 
         #no source callbacks are included
 

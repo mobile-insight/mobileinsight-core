@@ -8,7 +8,10 @@ Author: Yuanjie Li
 
 from analyzer import *
 
-import xml.etree.ElementTree as ET
+try: 
+    import xml.etree.cElementTree as ET 
+except ImportError: 
+    import xml.etree.ElementTree as ET
 import io
 import datetime
 
@@ -44,12 +47,15 @@ class MsgLogger(Analyzer):
         elif self.decode_type == self.JSON:
             # print msg.data.decode_json()
             self.logger.info(msg.data.decode_json())
+        elif self.decode_type == self.NORMAL:
+            self.logger.info(msg.data.decode())
 
     #Decoding scheme
 
     NO_DECODING = 0
     XML = 1
     JSON = 2
+    NORMAL = 3
 
     def set_decoding (self, decode_type):
         """

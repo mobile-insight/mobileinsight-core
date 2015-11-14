@@ -36,7 +36,7 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     '''
 
     l = logging.getLogger(logger_name)
-    if not len(l.handlers):
+    if len(l.handlers)<2:
         formatter = logging.Formatter('%(message)s')
         streamHandler = logging.StreamHandler()
         streamHandler.setFormatter(formatter)
@@ -193,5 +193,6 @@ class Analyzer(Element):
             for f in self.from_list[module]:
                 f(event)
         msg_end=time.time()
-        self.logger.debug((msg_end-msg_start)*1000) #processing latency (in ms)
+        self.logger.info(event.type_id + " "\
+                        + str((msg_end-msg_start)*1000)) #processing latency (in ms)
 

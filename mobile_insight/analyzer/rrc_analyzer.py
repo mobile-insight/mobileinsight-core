@@ -5,7 +5,10 @@ A RRC analyzer that integrates LTE and WCDMA RRC
 
 Author: Yuanjie Li
 """
-import xml.etree.ElementTree as ET
+try: 
+    import xml.etree.cElementTree as ET 
+except ImportError: 
+    import xml.etree.ElementTree as ET
 from analyzer import *
 from wcdma_rrc_analyzer import WcdmaRrcAnalyzer
 from lte_rrc_analyzer import LteRrcAnalyzer

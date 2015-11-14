@@ -12,7 +12,11 @@ import binascii
 from datetime import *
 import json
 import struct
-import xml.etree.ElementTree as ET
+#import xml.etree.ElementTree as ET
+try: 
+    import xml.etree.cElementTree as ET 
+except ImportError: 
+    import xml.etree.ElementTree as ET
 
 try:
     from utils import *

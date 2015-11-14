@@ -6,7 +6,10 @@ A LTE RRC analyzer.
 Author: Yuanjie Li
 """
 
-import xml.etree.ElementTree as ET
+try: 
+    import xml.etree.cElementTree as ET 
+except ImportError: 
+    import xml.etree.ElementTree as ET
 from analyzer import *
 from protocol_analyzer import *
 import timeit
@@ -286,7 +289,6 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     int(field_val['lte-rrc.q_Hyst']))
 
                 #Test profile
-                # self.logger.info("LteRrcSibServ")
                 self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.sib_serv",
                     {'priority':field_val['lte-rrc.cellReselectionPriority'],
                      'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
@@ -300,7 +302,6 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     float(field_val['lte-rrc.s_IntraSearch'])*2) 
 
                 #Test profile
-                # self.logger.info("LteRrcSibIntraFreqConfig")
                 self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
                     {'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
                      'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
@@ -342,7 +343,6 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                         int(field_val['lte-rrc.q_OffsetFreq']))
 
                 #Test profile
-                # self.logger.info("LteRrcSibInterFreqConfig")
                 self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
                     {'rat':'LTE',
                      'freq':str(neighbor_freq),
@@ -406,7 +406,6 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                         0)    #inter-RAT has no freq-offset
 
                 #Test profile
-                # self.logger.info("LteRrcSibInterFreqConfig")
                 self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
                     {'rat':'UTRA',
                      'freq':str(neighbor_freq),
@@ -459,7 +458,6 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                         0)    #inter-RAT has no freq-offset
 
                 #Test profile
-                # self.logger.info("LteRrcSibInterFreqConfig")
                 self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
                     {'rat':'GERAN',
                      'freq':str(neighbor_freq),
