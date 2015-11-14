@@ -74,6 +74,24 @@ class MobilityMngt(Analyzer):
 
         pass
 
+# Handoff rule inference modules
+############################################
+class HandoffState:
+    """
+    A state abstraction to represent the handoff target
+    This is used for handoff policy inference.
+
+    In current implement, we choose frequency-level handoff target granualrity 
+    (rather than cell level). This is based on the observation that cells of the 
+    same frequency are homogeneous. Operators in reality tend to not differentiate them
+    """
+    def __init__(self,rat, to_freq):
+        self.rat = rat #Radio access technology (3G or 4G)
+        self.freq = freq #Frequency band
+
+    def equals(self,handoff_state):
+        return handoff_state.freq==self.freq \
+        and handoff.rat==self.rat 
 
 
 class MeasState:
@@ -118,7 +136,6 @@ class MeasState:
         else:
             return self.measid_list[meas_id][1]
 
-
     def equals(self,meas_state):
         """
         Compare two states to see if they are equivalent
@@ -155,8 +172,176 @@ class MeasState:
         return True
 
 
+class MeasReportSeq:
+    """
+    An abstraction for measurement report sequence
+    """
+    def __init__(self):
+        self.meas_report_queue=[]
+
+    def add_meas_report(self,meas_report):
+        """
+        Append a measurement report.
+        Currently we abstract the concrete measured signal strength
+
+        :param meas_report: a (MeasObject,ReportConfig) pair for that report
+        :type meas_report:(MeasObject,ReportConfig)
+        :returns: True if successfully appended, False otherwise
+        """
+        if meas_report.__class__.__name__!="tuple":
+            return False
+        if meas_report[0].__class__.__name__!="LteMeasObjectEutra" \
+        and meas_report[0].__class__.__name__!="LteMeasObjectUtra" \
+        and meas_report[1].__class__.__name__!="LteReportConfig":
+            return False
+        self.meas_report_queue.append(meas_report)
+        return True
+
+    def merge_seq(self,meas_report_seq):
+        """
+        Merge two measurement report sequence with longest common substring (LCS) algorithm
+        This is the core function of mobility policy inference
+        
+        :param meas_report_seq: measurement report sequence
+        :type meas_report_seq: MeasReportSeq
+        :returns: True if succeeded, False otherwise
+        """
+        if meas_report_seq.__class__.__name__!="MeasReportSeq":
+            return False
+
+        #TODO: this function should be moved to MobilityStateMachine, 
+        #because it needs to resolve global conflicts
+        #TODO: replace the following code with LCS algorithm
+        #As first step, we simply replace the existing sequence
+        self.meas_report_queue = meas_report_seq.meas_report_queue
 
 
+class HandoffSample:
+    """
+    A handoff sample based on observation
+    """
+    def __init__(self):
+        self.cur_state = None
+        #(From_State,To_State,tx_cond)
+        #For the first element, its tx_cond is meaningless
+        self.tx_list=[] 
+
+    def reset(self):
+        """
+        Reset the handoff sample
+        """
+        self.cur_state = None
+        del self.tx_list[:]
+
+    def add_state_transition(self,new_state,tx_cond):
+        """
+        Append a new state and its transition condition.
+
+        :param new_state: a MeasState or a HandoffState
+        :type new_state: MeasState or HandoffState
+        :param tx_cond: state transition condition, represented as meas report sequence
+        :type tx_cond: MeasReportSeq
+        :returns: True if succeeds, or False otherwise
+        """
+        if new_state.__class__.__name__!="MeasState" \
+        and new_state.__class__.__name__!="HandoffState" \
+        and tx_cond.__class__.__name__!="MeasReportSeq":
+            return False
+
+        self.tx_list.append((self.cur_state,new_state,tx_cond))
+        self.cur_state=new_state
+        return True
+
+
+
+class MobilityStateMachine:
+    """
+    A mobility policy inference model based on state machine
+
+    The state machine is in following from
+    state_machine={MeasState:{MeasState:MeasReportSeq,MeasState:MeasReportSeq,...},
+                   MeasState:{HandoffState:MeasReportSeq,MeasState:MeasReportSeq,...}
+                   ...}
+    """
+    def __init__(self):
+        self.state_machine={} 
+
+    def load_state_machine(self,state_machine):
+        """
+        Load a state machine from a historical profile.
+        WARNING: this method would also reset the current handoff state
+
+        :param state_machine: the stored state machine
+        :type state_machine: MobilityStateMachine
+        :returns: True if succeeds, False otherwise
+        """
+        if state_machine.__class__.__name__!="MobilityStateMachine":
+            return False
+        self.state_machine=state_machine
+        self.cur_state=None
+        return True
+
+    def update_state_machine(self,handoff_sample):
+        """
+        Update the state machine based on the new handoff sample
+
+        :param handoff_sample: a new handoff sample
+        :type handoff_sample: HandoffSample
+        :returns: True if succeeds, or False otherwise
+        """
+        if handoff_sample.__class__.__name__!="HandoffSample":
+            return False
+
+        for item in handoff_sample:
+            self.__merge_transition(item)
+
+
+    def __merge_transition(self,transition):
+        """
+        Merge a new state and its transition condition.
+        This is the core function of the handoff rule inference
+
+        :param transition: a tuple of (From_State,To_State,tx_cond)
+        :type new_state: (MeasState,MeasState/HandoffState,MeasReportSeq)
+        :returns: True if the addition succeeds, False otherwise.
+        """
+        from_state = transition[0]
+        to_state = transition[1]
+        tx_cond = transition[2]
+
+        if new_state.__class__.__name__!="MeasState" \
+        and to_state.__class__.__name__!="MeasState" \
+        and to_state.__class__.__name__!="HandoffState" \
+        and tx_cond.__class__.__name__!="MeasReportSeq":
+            #Invalid input
+            return False
+
+        if not from_state:
+            #First configuration: add to_state only
+            if to_state not in self.state_machine:
+                self.state_machine[to_state]={}
+            return True
+        else:
+            if from_state not in self.state_machine:
+                #Invalid input
+                return False
+            if to_state not in self.state_machine[from_state]:
+                #Transition to a new state: this is the first sample
+                self.state_machine[from_state][to_state]= tx_cond
+            else:
+                #the state has been observed before: merge the sequence
+                self.state_machine[from_state][to_state].merge_seq(tx_cond)
+
+            if to_state not in self.state_machine:
+                #new state observed
+                self.state_machine[to_state]={}
+            return True 
+
+############################################
+
+
+# Helper modules
+############################################
 class LteMeasObjectEutra:
     """
     LTE Measurement object configuration
@@ -285,5 +470,5 @@ class LteRportEvent:
         and self.type == report_event.type \
         and self.threshold1 ==  report_event.threshold1 \
         and self.threshold2 ==  report_event.threshold2
-
+############################################
 
