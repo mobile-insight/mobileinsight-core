@@ -90,7 +90,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
             # FIXME: the timestamp is incoherent with that from the trace collector
             # e = Event(timeit.default_timer(),self.__class__.__name__,"")
             # self.send(e)
-            self.send(msg)
+            self.send(xml_msg) #deliver WCDMA signaling messages only (decoded)
 
         else: #nothing to update
             return

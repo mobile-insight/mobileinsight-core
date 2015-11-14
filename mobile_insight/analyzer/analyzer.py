@@ -23,6 +23,7 @@ Author: Yuanjie Li
 from ..element import Element, Event
 #from profile import *
 import logging
+import time
 
 def setup_logger(logger_name, log_file, level=logging.INFO):
     '''Setup the analyzer logger.
@@ -34,21 +35,20 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     :param level: the loggoing level. The default value is logging.INFO.
     '''
 
-
-    # FIXME: python's logging module does not work well on Android
     l = logging.getLogger(logger_name)
-    formatter = logging.Formatter('%(message)s')
-    streamHandler = logging.StreamHandler()
-    streamHandler.setFormatter(formatter)
+    if not len(l.handlers):
+        formatter = logging.Formatter('%(message)s')
+        streamHandler = logging.StreamHandler()
+        streamHandler.setFormatter(formatter)
 
-    l.setLevel(level)
-    l.addHandler(streamHandler)
+        l.setLevel(level)
+        l.addHandler(streamHandler)
 
-    if log_file!="":
-        fileHandler = logging.FileHandler(log_file, mode='w')
-        fileHandler.setFormatter(formatter)
-        l.addHandler(fileHandler)  
-    l.disabled = False    
+        if log_file!="":
+            fileHandler = logging.FileHandler(log_file, mode='w')
+            fileHandler.setFormatter(formatter)
+            l.addHandler(fileHandler)  
+        l.disabled = False    
 
 class Analyzer(Element):
     """A base class for all the analyzers
@@ -68,10 +68,10 @@ class Analyzer(Element):
         self.set_log("",logging.INFO)
 
         #Include itself into the global list
-        # if not self.__class__.__name__ in Analyzer.__analyzer_array:
-        #     Analyzer.__analyzer_array[self.__class__.__name__]=self
-        # else:
-        #     self.logger.info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
+        if not self.__class__.__name__ in Analyzer.__analyzer_array:
+            Analyzer.__analyzer_array[self.__class__.__name__]=self
+        else:
+            self.logger.info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
 
         #TODO: For Profile, each specific analyzer should declare it on demand
 
@@ -154,6 +154,8 @@ class Analyzer(Element):
                 self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
                 if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                     Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
+                # self.logger.info(self.__class__.__name__+" from_list: "+str(self.from_list))
+                # self.logger.info(Analyzer.__analyzer_array[analyzer_name].__class__.__name__+" to_list: "+str(Analyzer.__analyzer_array[analyzer_name].to_list))
             except Exception, e:
                 #Either the analyzer is unavailable, or has semantic errors
                 self.logger.info("Runtime Error: unable to import "+analyzer_name)  
@@ -173,7 +175,6 @@ class Analyzer(Element):
             Analyzer.__analyzer_array[analyzer_name].to_list.remove(self)
             analyzer.to_list.remove(self) 
 
-
     def recv(self,module,event):
         """
         Handle the received events.
@@ -182,10 +183,15 @@ class Analyzer(Element):
         :param module: the analyzer/trace collector who raise the event
         :param event: the event to be raised
         """
+
+        #Add evaluation code for analyzer per-message processing latency
+        msg_start=time.time()
         if module==self.source:
             for f in self.source_callback:
                 f(event)
         else:
             for f in self.from_list[module]:
                 f(event)
+        msg_end=time.time()
+        self.logger.debug((msg_end-msg_start)*1000) #processing latency (in ms)
 
