@@ -45,6 +45,7 @@ class AndroidDevDiagMonitor(Monitor):
         """
         Monitor.__init__(self)
         self._executable_path = prefs.get("diag_revealer_executable_path", "/system/bin/diag_revealer")
+        self._fifo_path = prefs.get("diag_revealer_fifo_path", self.TMP_FIFO_FILE)
         self._type_names = []
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
@@ -98,20 +99,20 @@ class AndroidDevDiagMonitor(Monitor):
                 dm_collector_c.generate_diag_cfg(fd, self._type_names)
                 fd.close()
 
-            # TODO(likayo): need to protect aganist user input
-            cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self.TMP_FIFO_FILE)
             try:
-                os.mknod(self.TMP_FIFO_FILE, 0666 | stat.S_IFIFO)
+                os.mknod(self._fifo_path, 0666 | stat.S_IFIFO)
             except OSError as err:
                 if err.errno == errno.EEXIST:   # if already exists, skip this step
                     pass
                 else:
                     raise err
+            # TODO(likayo): need to protect aganist user input
+            cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
             proc = subprocess.Popen(cmd,
                                     shell=True,
                                     executable=ANDROID_SHELL,
                                     )
-            fifo = os.open(self.TMP_FIFO_FILE, os.O_RDONLY | os.O_NONBLOCK)
+            fifo = os.open(self._fifo_path, os.O_RDONLY | os.O_NONBLOCK)
 
             # Read log packets from diag_revealer
             while True:
