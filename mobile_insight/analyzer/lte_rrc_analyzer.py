@@ -195,7 +195,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             # Raise event to other analyzers
             # e = Event(timeit.default_timer(),self.__class__.__name__,"")
             # self.send(e)
-            self.send(msg) #only deliver LTE RRC signaling messages
+            self.send(xml_msg) #deliver LTE RRC signaling messages (decoded)
 
     def __callback_serv_cell(self,msg):
 
@@ -212,6 +212,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             if 'Physical Cell ID' in msg.data:
                 status_updated = True
                 self.__status.id = msg.data['Physical Cell ID']
+            if 'TAC' in msg.data:
+                status_updated = True
+                self.__status.tac = msg.data['TAC']
         else:
             if 'Freq' in msg.data and self.__status.freq != msg.data['Freq']:
                 status_updated = True
@@ -226,6 +229,13 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 self.__status = LteRrcStatus()
                 self.__status.conn = curr_conn
                 self.__status.id = msg.data['Physical Cell ID']
+                self.__history[msg.timestamp] = self.__status
+            if 'TAC' in msg.data and self.__status.id != msg.data['TAC']:
+                status_updated = True
+                curr_conn = self.__status.conn
+                self.__status = LteRrcStatus()
+                self.__status.conn = curr_conn
+                self.__status.tac = msg.data['TAC']
                 self.__history[msg.timestamp] = self.__status
         
         if status_updated:

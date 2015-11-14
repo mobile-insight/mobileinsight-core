@@ -23,6 +23,7 @@ Author: Yuanjie Li
 from ..element import Element, Event
 #from profile import *
 import logging
+import time
 
 def setup_logger(logger_name, log_file, level=logging.INFO):
     '''Setup the analyzer logger.
@@ -34,8 +35,6 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     :param level: the loggoing level. The default value is logging.INFO.
     '''
 
-
-    # FIXME: python's logging module does not work well on Android
     l = logging.getLogger(logger_name)
     if not len(l.handlers):
         formatter = logging.Formatter('%(message)s')
@@ -176,7 +175,6 @@ class Analyzer(Element):
             Analyzer.__analyzer_array[analyzer_name].to_list.remove(self)
             analyzer.to_list.remove(self) 
 
-
     def recv(self,module,event):
         """
         Handle the received events.
@@ -185,10 +183,15 @@ class Analyzer(Element):
         :param module: the analyzer/trace collector who raise the event
         :param event: the event to be raised
         """
+
+        #Add evaluation code for analyzer per-message processing latency
+        msg_start=time.time()
         if module==self.source:
             for f in self.source_callback:
                 f(event)
         else:
             for f in self.from_list[module]:
                 f(event)
+        msg_end=time.time()
+        self.logger.debug((msg_end-msg_start)*1000) #processing latency
 
