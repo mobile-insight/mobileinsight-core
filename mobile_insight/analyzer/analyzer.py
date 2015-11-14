@@ -193,5 +193,5 @@ class Analyzer(Element):
             for f in self.from_list[module]:
                 f(event)
         msg_end=time.time()
-        self.logger.debug((msg_end-msg_start)*1000) #processing latency
+        self.logger.debug((msg_end-msg_start)*1000) #processing latency (in ms)
 

@@ -13,6 +13,8 @@ from lte_rrc_analyzer import LteRrcAnalyzer
 from lte_nas_analyzer import LteNasAnalyzer
 #TODO: import UmtsNasAnalyzer
 
+import copy
+
 __all__=["MobilityMngt"]
 
 class MobilityMngt(Analyzer):
@@ -27,18 +29,19 @@ class MobilityMngt(Analyzer):
         (3) A handoff rule inference module
     """    
 
+    """
+    Development plan:
+        Step 1: make it work in single cell, LTE only
+        Step 2: support cell change with loading/saving state machine for different freq under LTE
+        Step 3: support in-RAT
+    """
+
     def __init__(self):
 
         Analyzer.__init__(self)
 
-        #Track current freq and RAT. If any one changes, load the new state machine
-        self.__cur_RAT = None
-        self.__cur_freq = None
-
         self.__handoff_sample = HandoffSample()
         self.__mobility_state_machine = MobilityStateMachine()
-
-
 
         #include analyzers
         self.include_analyzer("WcdmaRrcAnalyzer",[self.__on_wcdma_rrc_msg])
@@ -58,7 +61,246 @@ class MobilityMngt(Analyzer):
         :param msg: the event (message) from the trace collector.
         """    
 
-        pass
+        #The message from LteRrcAnalyzer is decoded XML messages
+        for field in msg.data.iter('field'):
+
+            if field.get('name')=="lte-rrc.measurementReport_element":
+                #A measurement report: parse it, push it into Handoff sample
+                meas_id = None
+                for val in field.iter('field'):
+                    if val.get('name')=='lte-rrc.measId':
+                        meas_id = val.get('show')
+                if meas_id:
+                    meas_report =  self.__handoff_sample.cur_state.get_meas_report_obj(meas_id)
+                    self.__handoff_sample.add_meas_report(meas_report)
+
+            if field.get('name')=="lte-rrc.measConfig_element":
+                #A Measurement control reconfiguration
+                meas_state = None
+                if self.__handoff_sample.cur_state:
+                    #Meas control may take stateful addition/deletion, 
+                    #So need current copy whenever available
+                    meas_state = copy.deepcopy(self.__handoff_sample.cur_state)
+                else:
+                    meas_state = MeasState()
+
+                for val in field.iter('field'):
+                    if val.get('name')=='lte-rrc.MeasObjectToAddMod_element':
+                        #Add measurement object
+                        meas_obj = self.__get_meas_obj(val)
+                        meas_state.measobj[meas_obj.obj_id] = meas_obj
+
+                    if val.get('name')=='lte-rrc.measObjectToRemoveList':
+                        #Remove measurement object
+                        for item in val.iter('field'):
+                            if item.get('name')=='lte-rrc.MeasObjectId' \
+                            and item.get('show') in meas_state.measobj:
+                                del meas_state.measobj[item.get('show')]
+
+                    if val.get('name')=='lte-rrc.ReportConfigToAddMod_element':
+                        #Add/modify a report config
+                        report_config = self.__get_report_config(val)
+                        meas_state.report_list[report_config.report_id]=report_config
+            
+                    if val.get('name')=='lte-rrc.reportConfigToRemoveList':
+                        #Remove a report config
+                        for item in val.iter('field'):
+                            if item.get('name')=='lte-rrc.ReportConfigId' \
+                            and item.get('show') in meas_state.report_list:
+                                del meas_state.report_list[item.get('show')]
+
+                    if val.get('name')=='lte-rrc.MeasIdToAddMod_element':
+                        #Add a measurement ID
+                        meas_id = -1
+                        meas_obj_id = -1
+                        report_id = -1
+                        for item in val.iter('field'):
+                            if item.get('name')=='lte-rrc.measId':
+                                meas_id = item.get('show')
+                            if item.get('name')=='lte-rrc.measObjectId':
+                                meas_obj_id = item.get('show')
+                            if item.get('name')=='lte-rrc.reportConfigId':
+                                report_id = item.get('show')
+                        meas_state.measid_list[meas_id]=(meas_obj_id,report_id)
+                    
+                    if val.get('name')=='lte-rrc.measIdToRemoveList':
+                        #Remove a measurement ID
+                        for item in val.iter('field'):
+                            if item.get('name')=='lte-rrc.MeasId' \
+                            and item.get('show') in meas_state.measid_list:
+                                del meas_state.measid_list[item.get('show')]
+            
+                #Generate a new state to the handoff sample
+                self.__handoff_sample.add_state_transition(meas_state)
+                # self.logger.info("Meas State: \n"+meas_state.dump())
+
+            if field.get('name')=="lte-rrc.mobilityControlInfo_element":
+                #A handoff command: create a new HandoffState
+                target_cell = None
+                for val in field.iter('field'):
+                    #Currently we focus on freq-level handoff
+                    if val.get('name')=='lte-rrc.dl_CarrierFreq':
+                        target_cell = val.get('show')
+                if target_cell:
+                    #FIXME: consider 4G->3G handover (e.g., SRVCC, CSFB)
+                    handoff_state = HandoffState("LTE",target_cell)
+                    self.__handoff_sample.add_state_transition(handoff_state)
+                    #Trigger merging function
+                    self.__mobility_state_machine.update_state_machine(self.__handoff_sample)
+                    #Reset handoff sample
+                    self.__handoff_sample = HandoffSample()
+
+    def __get_meas_obj(self,msg):
+        """
+        Parse MeasObjectToAddMod_element, return a measurement object
+
+        :param msg: the XML msg with MeasObjectToAddMod_element
+        :returns: a measurement objects to be added
+        """
+        measobj_id = -1
+        for field in msg.iter('field'):
+            if field.get('name') == "lte-rrc.measObjectId":
+                measobj_id = field.get('show')
+
+            if field.get('name') == "lte-rrc.measObjectEUTRA_element": 
+                #A LTE meas obj
+                field_val = {}
+
+                field_val['lte-rrc.carrierFreq'] = None
+                field_val['lte-rrc.offsetFreq'] = 0
+
+                for val in field.iter('field'):
+                    field_val[val.get('name')] = val.get('show')
+
+                freq = int(field_val['lte-rrc.carrierFreq'])
+                offsetFreq = int(field_val['lte-rrc.offsetFreq'])
+                return LteMeasObjectEutra(measobj_id,freq,offsetFreq)
+
+            if field.get('name') == "lte-rrc.measObjectUTRA_element":
+                field_val = {}
+
+                field_val['lte-rrc.carrierFreq'] = None
+                field_val['lte-rrc.offsetFreq'] = 0
+
+                for val in field.iter('field'):
+                    field_val[val.get('name')] = val.get('show')
+
+                freq = int(field_val['lte-rrc.carrierFreq'])
+                offsetFreq = int(field_val['lte-rrc.offsetFreq'])
+                return LteMeasObjectUtra(measobj_id,freq,offsetFreq)
+
+    def __get_report_config(self,msg):
+        """
+        Parse ReportConfigToAddMod_element, return a report config
+
+        :param msg: the XML msg with ReportConfigToAddMod_element
+        :returns: a measurement objects to be added
+        """
+        report_id = -1
+        hyst = 0
+        for val in msg.iter('field'):
+            if val.get('name') == "lte-rrc.reportConfigId":
+                report_id = val.get('show')
+            if val.get('name') == 'lte-rrc.hysteresis':
+                hyst = int(val.get('show'))
+
+        report_config = LteReportConfig(report_id,hyst/2)
+
+        for val in msg.iter('field'):
+            if val.get('name') == 'lte-rrc.eventA1_element':
+                for item in val.iter('field'):
+                    if item.get('name') == 'lte-rrc.threshold_RSRP':
+                        report_config.add_event('a1',int(item.get('show'))-140)
+                        break
+                    if item.get('name') == 'lte-rrc.threshold_RSRQ':
+                        report_config.add_event('a1',(int(item.get('show'))-40)/2)
+                        break
+
+            if val.get('name') == 'lte-rrc.eventA2_element':
+                for item in val.iter('field'):
+                    if item.get('name') == 'lte-rrc.threshold_RSRP':
+                        report_config.add_event('a2',int(item.get('show'))-140)
+                        break
+                    if item.get('name') == 'lte-rrc.threshold_RSRQ':
+                        report_config.add_event('a2',(int(item.get('show'))-40)/2)
+                        break
+
+            if val.get('name') == 'lte-rrc.eventA3_element':
+                for item in val.iter('field'):
+                    if item.get('name') == 'lte-rrc.a3_Offset':
+                        report_config.add_event('a3',int(item.get('show'))/2)
+                        break
+
+            if val.get('name') == 'lte-rrc.eventA4_element':
+                for item in val.iter('field'):
+                    if item.get('name') == 'lte-rrc.threshold_RSRP':
+                        report_config.add_event('a4',int(item.get('show'))-140)
+                        break
+                    if item.get('name') == 'lte-rrc.threshold_RSRQ':
+                        report_config.add_event('a4',(int(item.get('show'))-40)/2)
+                        break
+
+            if val.get('name') == 'lte-rrc.eventA5_element':
+                threshold1 = None
+                threshold2 = None
+                for item in val.iter('field'):
+                    if item.get('name') == 'lte-rrc.a5_Threshold1':
+                        for item2 in item.iter('field'):
+                            if item2.get('name') == 'lte-rrc.threshold_RSRP':
+                                threshold1 = int(item2.get('show'))-140
+                                break
+                            if item2.get('name') == 'lte-rrc.threshold_RSRQ':
+                                threshold1 = (int(item2.get('show'))-40)/2
+                                break
+                    if item.get('name') == 'lte-rrc.a5_Threshold2':
+                        for item2 in item.iter('field'):
+                            if item2.get('name') == 'lte-rrc.threshold_RSRP':
+                                threshold2 = int(item2.get('show'))-140
+                                break
+                            if item2.get('name') == 'lte-rrc.threshold_RSRQ':
+                                threshold2 = (int(item2.get('show'))-40)/2
+                                break
+                report_config.add_event('a5',threshold1,threshold2)
+
+            if val.get('name') == 'lte-rrc.eventB1_element':
+                for item in val.iter('field'):
+                    if item.get('name') == 'lte-rrc.threshold_RSRP':
+                        report_config.add_event('b1',int(item.get('show'))-140)
+                        break
+                    if item.get('name') == 'lte-rrc.threshold_RSRQ':
+                        report_config.add_event('b1',(int(item.get('show'))-40)/2)
+                        break
+                    if item.get('name') == 'lte-rrc.threshold_RSCP':
+                        report_config.add_event('b1',int(item.get('show'))-115)
+                        break
+            
+            if val.get('name') == 'lte-rrc.eventB2_element':
+
+                threshold1 = None
+                threshold2 = None
+                for item in val.iter('field'):
+                    if item.get('name') == 'lte-rrc.b2_Threshold1':
+                        for item2 in item.iter('field'):
+                            if item2.get('name') == 'lte-rrc.threshold_RSRP':
+                                threshold1 = int(item2.get('show'))-140
+                                break
+                            if item2.get('name') == 'lte-rrc.threshold_RSRQ':
+                                threshold1 = (int(item2.get('show'))-40)/2
+                                break
+                    if item.get('name') == 'lte-rrc.b2_Threshold2':
+                        for item2 in item.iter('field'):
+                            if item2.get('name') == 'lte-rrc.threshold_RSRP':
+                                threshold2 = int(item2.get('show'))-140
+                                break
+                            if item2.get('name') == 'lte-rrc.threshold_RSRQ':
+                                threshold2 = (int(item2.get('show'))-40)/2
+                                break
+                            if item2.get('name') == 'lte-rrc.utra_RSCP':
+                                threshold2 = int(item2.get('show'))-115
+                                break
+                report_config.add_event('b2',threshold1,threshold2)
+
+        return report_config
 
     def __on_wcdma_rrc_msg(self,msg):
         """
@@ -93,13 +335,16 @@ class HandoffState:
     (rather than cell level). This is based on the observation that cells of the 
     same frequency are homogeneous. Operators in reality tend to not differentiate them
     """
-    def __init__(self,rat, to_freq):
+    def __init__(self,rat, freq):
         self.rat = rat #Radio access technology (3G or 4G)
         self.freq = freq #Frequency band
 
     def equals(self,handoff_state):
         return handoff_state.freq==self.freq \
         and handoff.rat==self.rat 
+
+    def dump(self):
+        return "Handoff to ("+str(self.rat)+","+str(self.freq)+")"
 
 
 class MeasState:
@@ -126,10 +371,11 @@ class MeasState:
         #     if self.measobj[i].obj_id == self.measid_list[item][0]:
         #         meas_obj = self.measobj[i]
         # return meas_obj
-        if not self.measobj.has_key(self.measid_list[meas_id][0]):
+        if not self.measid_list.has_key(meas_id) \
+        or not self.measobj.has_key(self.measid_list[meas_id][0]):
             return None
         else:
-            return self.measobj[meas_id][0]
+            return self.measobj[self.measid_list[meas_id][0]]
 
     def get_reportconfig(self,meas_id):
         """
@@ -139,11 +385,11 @@ class MeasState:
         :type meas_id: integer
         :returns: ReportConfig in it, or None if the id does not exist
         """
-        if not self.report_list.has_key(self.measid_list[meas_id][1]):
+        if not self.measid_list.has_key(meas_id) \
+        or not self.report_list.has_key(self.measid_list[meas_id][1]):
             return None
         else:
-            return self.measid_list[meas_id][1]
-
+            return self.measid_list[self.measid_list[meas_id][1]]
 
     def get_meas_report_obj(self,meas_id):
         """
@@ -156,7 +402,6 @@ class MeasState:
         report_config = self.get_reportconfig(meas_id)
 
         return (measobj,report_config)
-
 
     def equals(self,meas_state):
         """
@@ -192,6 +437,22 @@ class MeasState:
             if not meas_id_exist:
                 return False
         return True
+
+    def dump(self):
+        """
+        Report the cell's active-state configurations
+
+        :returns: a string that encodes the cell's active-state configurations
+        :rtype: string
+        """
+        res = ""
+        for item in self.measobj:
+            res += self.measobj[item].dump()
+        for item in self.report_list:
+            res += self.report_list[item].dump()
+        for item in self.measid_list:
+            res += "MeasObj "+str(item)+' '+str(self.measid_list[item])+'\n'
+        return res
 
 
 class MeasReportSeq:
@@ -247,33 +508,39 @@ class HandoffSample:
         #(From_State,To_State,tx_cond)
         #For the first element, its tx_cond is meaningless
         self.tx_list=[] 
+        self.tx_cond=MeasReportSeq()
 
-    def reset(self):
+    def add_meas_report(self,meas_report):
         """
-        Reset the handoff sample
-        """
-        self.cur_state = None
-        del self.tx_list[:]
+        Add a measurement report_event
 
-    def add_state_transition(self,new_state,tx_cond):
+        :param meas_report: a new measurement report
+        :type meas_report: (meas_obj,report_config)
+        """
+
+        #If current state is None, ignore the input (i.e., drop this sample)
+        if self.cur_state:
+           self.tx_cond.add_meas_report(meas_report) 
+
+
+    def add_state_transition(self,new_state):
         """
         Append a new state and its transition condition.
 
         :param new_state: a MeasState or a HandoffState
         :type new_state: MeasState or HandoffState
-        :param tx_cond: state transition condition, represented as meas report sequence
-        :type tx_cond: MeasReportSeq
         :returns: True if succeeds, or False otherwise
         """
         if new_state.__class__.__name__!="MeasState" \
-        and new_state.__class__.__name__!="HandoffState" \
-        and tx_cond.__class__.__name__!="MeasReportSeq":
+        and new_state.__class__.__name__!="HandoffState":
             return False
 
-        self.tx_list.append((self.cur_state,new_state,tx_cond))
+        self.tx_list.append((self.cur_state,new_state,self.tx_cond))
         self.cur_state=new_state
-        return True
 
+        #Reset measurement sequence
+        self.tx_cond=MeasReportSeq()
+        return True
 
 
 class MobilityStateMachine:
@@ -314,9 +581,10 @@ class MobilityStateMachine:
         if handoff_sample.__class__.__name__!="HandoffSample":
             return False
 
-        for item in handoff_sample:
+        for item in handoff_sample.tx_list:
             self.__merge_transition(item)
 
+        # self.dump()
 
     def __merge_transition(self,transition):
         """
@@ -331,7 +599,7 @@ class MobilityStateMachine:
         to_state = transition[1]
         tx_cond = transition[2]
 
-        if new_state.__class__.__name__!="MeasState" \
+        if from_state.__class__.__name__!="MeasState" \
         and to_state.__class__.__name__!="MeasState" \
         and to_state.__class__.__name__!="HandoffState" \
         and tx_cond.__class__.__name__!="MeasReportSeq":
@@ -359,6 +627,17 @@ class MobilityStateMachine:
                 self.state_machine[to_state]={}
             return True 
 
+
+    def dump(self):
+        print "State machine"
+        for item in self.state_machine:
+            
+            for item2 in self.state_machine[item]:
+                print item.__class__.__name__+"->" \
+                    +item2.__class__.__name__+": " \
+                    +str(self.state_machine[item][item2].meas_report_queue)
+                print item.dump()
+                print item2.dump()
 ############################################
 
 
@@ -375,7 +654,6 @@ class LteMeasObjectEutra:
         self.offset_freq = offset_freq # frequency-specific measurement offset
         self.cell_list = {} # cellID->cellIndividualOffset
         #TODO: add cell blacklist
-
 
     def equals(self,meas_obj):
         """
@@ -401,6 +679,24 @@ class LteMeasObjectEutra:
         """
         self.cell_list[cell_id]=cell_offset
 
+    def dump(self):
+        """
+        Report the cell's LTE measurement configurations
+
+        :returns: a string that encodes the cell's LTE measurement configurations
+        :rtype: string
+        """
+        # res = self.__class__.__name__+' '+str(self.obj_id)+' '\
+        # +str(self.freq)+' '+ str(self.offset_freq)+'\n'
+        res = (self.__class__.__name__
+            + ' ' + str(self.obj_id)
+            + ' ' + str(self.freq)
+            + ' ' + str(self.offset_freq)
+            +'\n')
+        for item in self.cell_list:
+            res += str(item) + ' ' + str(self.cell_list[item]) + '\n'
+        return res
+
 
 class LteMeasObjectUtra:
     """
@@ -425,6 +721,19 @@ class LteMeasObjectUtra:
         and self.freq == meas_obj.freq \
         and self.offset_freq == meas_obj.offset_freq \
         and self.cell_list == meas_obj.cell_list
+
+    def dump(self):
+        """
+        Report the cell's 3G measurement configurations
+
+        :returns: a string that encodes the cell's 3G measurement configurations
+        :rtype: string
+        """
+        # return self.__class__.__name__+' '+str(self.obj_id)+' '\
+        # +str(self.freq,self.offset_freq)+'\n'
+        return (self.__class__.__name__
+            + ' ' + str(self.obj_id)
+            + ' ' + str(self.freq)+' '+str(self.offset_freq) + '\n')
 
 
 class LteReportConfig:
@@ -469,6 +778,22 @@ class LteReportConfig:
         :type threshold2: int
         """
         self.event_list.append(LteRportEvent(event_type,threshold1,threshold2))
+
+    def dump(self):
+        """
+        Report the cell's measurement report configurations
+
+        :returns: a string that encodes the cell's measurement report configurations
+        :rtype: string
+        """
+        res = (self.__class__.__name__
+            + ' ' + str(self.report_id)
+            + ' ' + str(self.hyst) + '\n')
+        for item in self.event_list:
+            res += (str(item.type) 
+                + ' ' + str(item.threshold1) 
+                + ' ' + str(item.threshold2) + '\n')
+        return res
 
 
 class LteRportEvent:
