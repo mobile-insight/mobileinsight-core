@@ -632,18 +632,18 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                             if item.get('name') == 'lte-rrc.a5_Threshold1':
                                 for item2 in item.iter('field'):
                                     if item2.get('name') == 'lte-rrc.threshold_RSRP':
-                                        threshold1 = int(item.get('show'))-140
+                                        threshold1 = int(item2.get('show'))-140
                                         break
                                     if item2.get('name') == 'lte-rrc.threshold_RSRQ':
-                                        threshold1 = (int(item.get('show'))-40)/2
+                                        threshold1 = (int(item2.get('show'))-40)/2
                                         break
                             if item.get('name') == 'lte-rrc.a5_Threshold2':
                                 for item2 in item.iter('field'):
                                     if item2.get('name') == 'lte-rrc.threshold_RSRP':
-                                        threshold2 = int(item.get('show'))-140
+                                        threshold2 = int(item2.get('show'))-140
                                         break
                                     if item2.get('name') == 'lte-rrc.threshold_RSRQ':
-                                        threshold2 = (int(item.get('show'))-40)/2
+                                        threshold2 = (int(item2.get('show'))-40)/2
                                         break
                         report_config.add_event('a5',threshold1,threshold2)
 
@@ -655,21 +655,21 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                             if item.get('name') == 'lte-rrc.b2_Threshold1':
                                 for item2 in item.iter('field'):
                                     if item2.get('name') == 'lte-rrc.threshold_RSRP':
-                                        threshold1 = int(item.get('show'))-140
+                                        threshold1 = int(item2.get('show'))-140
                                         break
                                     if item2.get('name') == 'lte-rrc.threshold_RSRQ':
-                                        threshold1 = (int(item.get('show'))-40)/2
+                                        threshold1 = (int(item2.get('show'))-40)/2
                                         break
                             if item.get('name') == 'lte-rrc.b2_Threshold2':
                                 for item2 in item.iter('field'):
                                     if item2.get('name') == 'lte-rrc.threshold_RSRP':
-                                        threshold2 = int(item.get('show'))-140
+                                        threshold2 = int(item2.get('show'))-140
                                         break
                                     if item2.get('name') == 'lte-rrc.threshold_RSRQ':
-                                        threshold2 = (int(item.get('show'))-40)/2
+                                        threshold2 = (int(item2.get('show'))-40)/2
                                         break
                                     if item2.get('name') == 'lte-rrc.utra_RSCP':
-                                        threshold2 = int(item.get('show'))-115
+                                        threshold2 = int(item2.get('show'))-115
                                         break
                         report_config.add_event('b2',threshold1,threshold2)
 
