@@ -53,6 +53,9 @@ class AndroidDevDiagMonitor(Monitor):
         p = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True)
         if wait:
             p.wait()
+            return p.returncode
+        else:
+            return None
 
     def enable_log(self, type_name):
         """
@@ -77,6 +80,19 @@ class AndroidDevDiagMonitor(Monitor):
     def set_block_size(self, n):
         self.BLOCK_SIZE = n
 
+    def _mkfifo(self, fifo_path):
+        try:
+            os.mknod(fifo_path, 0666 | stat.S_IFIFO)
+        except OSError as err:
+            if err.errno == errno.EEXIST:   # if already exists, skip this step
+                pass
+            elif err.errno == errno.EPERM:  # not permitted, try shell command
+                retcode = self._run_shell_cmd("su -c mknod %s p" % fifo_path, wait=True)
+                if retcode != 0:
+                    raise RuntimeError("mknod returns %s" % str(retcode))
+            else:
+                raise err
+
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
@@ -99,13 +115,8 @@ class AndroidDevDiagMonitor(Monitor):
                 dm_collector_c.generate_diag_cfg(fd, self._type_names)
                 fd.close()
 
-            try:
-                os.mknod(self._fifo_path, 0666 | stat.S_IFIFO)
-            except OSError as err:
-                if err.errno == errno.EEXIST:   # if already exists, skip this step
-                    pass
-                else:
-                    raise err
+            self._mkfifo(fifo_path)
+
             # TODO(likayo): need to protect aganist user input
             cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
             proc = subprocess.Popen(cmd,
