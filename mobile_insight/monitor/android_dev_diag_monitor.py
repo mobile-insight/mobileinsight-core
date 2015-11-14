@@ -100,14 +100,18 @@ class AndroidDevDiagMonitor(Monitor):
 
             # TODO(likayo): need to protect aganist user input
             cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self.TMP_FIFO_FILE)
-            print cmd
-            os.mknod(self.TMP_FIFO_FILE, 0666 | stat.S_IFIFO)
+            try:
+                os.mknod(self.TMP_FIFO_FILE, 0666 | stat.S_IFIFO)
+            except OSError as err:
+                if err.errno == errno.EEXIST:   # if already exists, skip this step
+                    pass
+                else:
+                    raise err
             proc = subprocess.Popen(cmd,
                                     shell=True,
                                     executable=ANDROID_SHELL,
                                     )
             fifo = os.open(self.TMP_FIFO_FILE, os.O_RDONLY | os.O_NONBLOCK)
-            # fifo = open(self.TMP_FIFO_FILE, "r", buffering=0)
 
             # Read log packets from diag_revealer
             while True:
@@ -141,7 +145,6 @@ class AndroidDevDiagMonitor(Monitor):
 
 
         except (KeyboardInterrupt, RuntimeError), e:
-            print "\n\n%s Detected: Disabling all logs" % type(e).__name__
             os.close(fifo)
             proc.terminate()
             sys.exit(e)
