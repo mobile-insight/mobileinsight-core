@@ -194,7 +194,8 @@ class Analyzer(Element):
                 f(event)
         msg_end=time.time()
         if event.type_id!="Unsupported":
-            self.logger.info(self.__class__.__name__ + " "\
+            self.logger.info(str(event.timestamp) + " "\
+                        + self.__class__.__name__ + " "\
                         + event.type_id + " "\
                         + str((msg_end-msg_start)*1000)) #processing latency (in ms)
 

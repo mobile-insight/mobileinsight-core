@@ -244,7 +244,6 @@ class LteNasAnalyzer(Analyzer):
                 self.__emm_status.guti.mme_code=field_val['nas_eps.emm.mme_code']
                 self.__emm_status.guti.m_tmsi=field_val['nas_eps.emm.m_tmsi']
 
-
     def __callback_esm(self,msg):
         """
         Extrace EMM status and configurations from the NAS messages

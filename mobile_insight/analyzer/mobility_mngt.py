@@ -14,6 +14,7 @@ from analyzer import *
 from wcdma_rrc_analyzer import WcdmaRrcAnalyzer
 from lte_rrc_analyzer import LteRrcAnalyzer
 from lte_nas_analyzer import LteNasAnalyzer
+from umts_nas_analyzer import UmtsNasAnalyzer
 #TODO: import UmtsNasAnalyzer
 
 import copy
@@ -50,6 +51,7 @@ class MobilityMngt(Analyzer):
         self.include_analyzer("WcdmaRrcAnalyzer",[self.__on_wcdma_rrc_msg])
         self.include_analyzer("LteRrcAnalyzer",[self.__on_lte_rrc_msg])
         self.include_analyzer("LteNasAnalyzer",[self.__on_lte_nas_msg])
+        self.include_analyzer("UmtsNasAnalyzer",[self.__on_umts_nas_msg])
 
         #no source callbacks are included
 
@@ -336,6 +338,16 @@ class MobilityMngt(Analyzer):
     def __on_lte_nas_msg(self,msg):
         """
         Handle LTE NAS messages (traking area update and attach/detach)
+        It updates the mobility state, 
+
+        :param msg: the event (message) from the trace collector.
+        """    
+
+        pass
+
+    def __on_umts_nas_msg(self,msg):
+        """
+        Handle UMTS NAS messages (location/routing area update and attach/detach)
         It updates the mobility state, 
 
         :param msg: the event (message) from the trace collector.
