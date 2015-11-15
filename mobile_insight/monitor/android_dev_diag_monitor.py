@@ -85,8 +85,9 @@ class AndroidDevDiagMonitor(Monitor):
             os.mknod(fifo_path, 0666 | stat.S_IFIFO)
         except OSError as err:
             if err.errno == errno.EEXIST:   # if already exists, skip this step
-                pass
+                print "Fifo file already exists, skipping..."
             elif err.errno == errno.EPERM:  # not permitted, try shell command
+                print "Not permitted to create fifo file, try to switch to root..."
                 retcode = self._run_shell_cmd("su -c mknod %s p" % fifo_path, wait=True)
                 if retcode != 0:
                     raise RuntimeError("mknod returns %s" % str(retcode))
@@ -135,7 +136,7 @@ class AndroidDevDiagMonitor(Monitor):
                     else:
                         raise err # something else has happened -- better reraise
                 if s:   # received some data
-                    print "Received %d bytes" % len(s)
+                    # print "Received %d bytes" % len(s)
                     dm_collector_c.feed_binary(s)
                 decoded = dm_collector_c.receive_log_packet()
                 if decoded:
