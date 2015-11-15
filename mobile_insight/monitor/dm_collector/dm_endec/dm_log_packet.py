@@ -91,7 +91,8 @@ class DMLogPacket:
 
                 if msg_type == "RRC_DL_BCCH_BCH":
                     sib_types = cls._preparse_internal_list.wcdma_sib_types
-                    xml = ET.fromstring(decoded)
+                    # xml = ET.fromstring(decoded)
+                    xml = ET.XML(decoded)
                     sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
                     if sibs:
                         # deal with a list of complete SIBs
@@ -176,7 +177,8 @@ class DMLogPacket:
                     sub_tag.text = xx
                 else:
                     if type_str == "msg":
-                        xx = ET.fromstring(xx)
+                        # xx = ET.fromstring(xx)
+                        xx = ET.XML(xx)
                         sub_tag.set("type", "list")
                     else:
                         sub_tag.set("type", type_str)

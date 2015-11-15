@@ -170,7 +170,8 @@ class LteNasAnalyzer(Analyzer):
             return
 
         #Convert msg to xml format
-        log_xml = ET.fromstring(log_item_dict['Msg'])
+        # log_xml = ET.fromstring(log_item_dict['Msg'])
+        log_xml = ET.XML(log_item_dict['Msg'])
         xml_msg=Event(msg.timestamp,msg.type_id,log_xml)
 
         if msg.type_id == "LTE_NAS_ESM_Plain_OTA_Incoming_Message" \

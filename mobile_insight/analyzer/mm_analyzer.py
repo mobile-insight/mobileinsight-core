@@ -309,7 +309,8 @@ class MmAnalyzer(Analyzer):
 
     def __callback_wcdma_rrc_ota(self, event):
         log_item = event.data
-        log_xml = ET.fromstring(log_item["Msg"])
+        # log_xml = ET.fromstring(log_item["Msg"])
+        log_xml = ET.XML(log_item["Msg"])
 
         mib = None
         sib3 = None
@@ -367,7 +368,8 @@ class MmAnalyzer(Analyzer):
 
     def __callback_umts_nas(self, event):
         log_item = event.data
-        log_xml = ET.fromstring(log_item["Msg"])
+        # log_xml = ET.fromstring(log_item["Msg"])
+        log_xml = ET.XML(log_item["Msg"])
         NasTypePattern = re.compile(r": (.*) \(0x[\da-fA-F]+\)$")
 
         nas_type = ""
@@ -433,7 +435,8 @@ class MmAnalyzer(Analyzer):
 
     def __callback_lte_nas(self, event):
         log_item = event.data
-        log_xml = ET.fromstring(log_item["Msg"])
+        # log_xml = ET.fromstring(log_item["Msg"])
+        log_xml = ET.XML(log_item["Msg"])
         NasTypePattern = re.compile(r": (.*) \(0x[\da-fA-F]+\)")
 
         nas_type = ""
@@ -497,7 +500,8 @@ class MmAnalyzer(Analyzer):
         log_item = event.data
         if not log_item.has_key("Msg"):
             return
-        log_xml = ET.fromstring(log_item["Msg"])
+        # log_xml = ET.fromstring(log_item["Msg"])
+        log_xml = ET.XML(log_item["Msg"])
 
         is_sib1 = False
         is_sib6 = False

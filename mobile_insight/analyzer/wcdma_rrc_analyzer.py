@@ -76,12 +76,13 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         log_xml = None
         # if log_item_dict.has_key('Msg'):
         if 'Msg' in log_item_dict:
-            log_xml = ET.fromstring(log_item_dict['Msg'])
+            # log_xml = ET.fromstring(log_item_dict['Msg'])
+            log_xml = ET.XML(log_item_dict['Msg'])
         else:
             return
 
         #Convert msg to xml format
-        log_xml = ET.fromstring(log_item_dict['Msg'])
+        # log_xml = ET.fromstring(log_item_dict['Msg'])
         xml_msg=Event(msg.timestamp,msg.type_id,log_xml)
 
 
