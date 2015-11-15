@@ -65,28 +65,27 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         :param msg: the event (message) from the trace collector.
         """
 
-        # log_item = msg.data
-        log_item = msg.data.decode()
-        log_item_dict = dict(log_item)
-
         if msg.type_id=="WCDMA_CELL_ID":
+            log_item = msg.data.decode()
+            log_item_dict = dict(log_item)
             raw_msg=Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_serv_cell(raw_msg)
 
-        log_xml = None
-        # if log_item_dict.has_key('Msg'):
-        if 'Msg' in log_item_dict:
+        if msg.type_id == "WCDMA_Signaling_Messages": 
+            log_item = msg.data.decode()
+            log_item_dict = dict(log_item) 
+            log_xml = None
+            # if log_item_dict.has_key('Msg'):
+            if 'Msg' in log_item_dict:
+                # log_xml = ET.fromstring(log_item_dict['Msg'])
+                log_xml = ET.XML(log_item_dict['Msg'])
+            else:
+                return
+
+            #Convert msg to xml format
             # log_xml = ET.fromstring(log_item_dict['Msg'])
-            log_xml = ET.XML(log_item_dict['Msg'])
-        else:
-            return
+            xml_msg=Event(msg.timestamp,msg.type_id,log_xml)
 
-        #Convert msg to xml format
-        # log_xml = ET.fromstring(log_item_dict['Msg'])
-        xml_msg=Event(msg.timestamp,msg.type_id,log_xml)
-
-
-        if msg.type_id == "WCDMA_Signaling_Messages":    
             self.__callback_sib_config(xml_msg)
             #TODO: callback RRC
 
@@ -95,11 +94,6 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
             # e = Event(timeit.default_timer(),self.__class__.__name__,"")
             # self.send(e)
             self.send(xml_msg) #deliver WCDMA signaling messages only (decoded)
-
-        else: #nothing to update
-            return
-
-        
 
     def __callback_serv_cell(self,msg):
         """

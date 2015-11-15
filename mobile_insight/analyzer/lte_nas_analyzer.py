@@ -161,31 +161,32 @@ class LteNasAnalyzer(Analyzer):
 
         :param msg: the event (message) from the trace collector.
         """
-        # log_item = msg.data
-        log_item = msg.data.decode()
-        log_item_dict = dict(log_item)
-
-        # if not log_item_dict.has_key('Msg'):
-        if 'Msg' not in log_item_dict:
-            return
-
-        #Convert msg to xml format
-        # log_xml = ET.fromstring(log_item_dict['Msg'])
-        log_xml = ET.XML(log_item_dict['Msg'])
-        xml_msg=Event(msg.timestamp,msg.type_id,log_xml)
 
         if msg.type_id == "LTE_NAS_ESM_Plain_OTA_Incoming_Message" \
         or msg.type_id == "LTE_NAS_ESM_Plain_OTA_Outgoing_Message" \
         or msg.type_id == "LTE_NAS_EMM_Plain_OTA_Incoming_Message" \
         or msg.type_id == "LTE_NAS_EMM_Plain_OTA_Outgoing_Message":    
+            # log_item = msg.data
+            log_item = msg.data.decode()
+            log_item_dict = dict(log_item)
+
+            # if not log_item_dict.has_key('Msg'):
+            if 'Msg' not in log_item_dict:
+                return
+
+            #Convert msg to xml format
+            # log_xml = ET.fromstring(log_item_dict['Msg'])
+            log_xml = ET.XML(log_item_dict['Msg'])
+            xml_msg=Event(msg.timestamp,msg.type_id,log_xml)
+
             self.__callback_emm_state(xml_msg)
             self.__callback_emm(xml_msg)
             self.__callback_esm(xml_msg)
 
 
-        # e = Event(timeit.default_timer(),self.__class__.__name__,"")
-        # self.send(e)
-        self.send(xml_msg)
+            # e = Event(timeit.default_timer(),self.__class__.__name__,"")
+            # self.send(e)
+            self.send(xml_msg)
 
     def __callback_emm_state(self,msg):
         """

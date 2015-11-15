@@ -183,14 +183,14 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         if 'Msg' not in log_item_dict:
             return
         
-        #Convert msg to xml format
-        # log_xml = ET.fromstring(log_item_dict['Msg'])
-        log_xml = ET.XML(log_item_dict['Msg'])
-        xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
-
         # Calllbacks triggering
+        if msg.type_id == "LTE_RRC_OTA_Packet":   
 
-        if msg.type_id == "LTE_RRC_OTA_Packet":    
+            #Convert msg to xml format
+            # log_xml = ET.fromstring(log_item_dict['Msg'])
+            log_xml = ET.XML(log_item_dict['Msg'])
+            xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
+
             self.__callback_rrc_conn(xml_msg)
             self.__callback_sib_config(xml_msg)
             self.__callback_rrc_reconfig(xml_msg)
