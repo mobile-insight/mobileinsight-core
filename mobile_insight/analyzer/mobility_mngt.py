@@ -91,7 +91,8 @@ class MobilityMngt(Analyzer):
                     if val.get('name')=='lte-rrc.MeasObjectToAddMod_element':
                         #Add measurement object
                         meas_obj = self.__get_meas_obj(val)
-                        meas_state.measobj[meas_obj.obj_id] = meas_obj
+                        if not meas_obj:
+                            meas_state.measobj[meas_obj.obj_id] = meas_obj
 
                     if val.get('name')=='lte-rrc.measObjectToRemoveList':
                         #Remove measurement object
@@ -192,6 +193,21 @@ class MobilityMngt(Analyzer):
                 offsetFreq = int(field_val['lte-rrc.offsetFreq'])
                 return LteMeasObjectUtra(measobj_id,freq,offsetFreq)
 
+            if field.get('name') == "lte-rrc.measObjectGERAN_element":
+                field_val = {}
+
+                field_val['lte-rrc.bandIndicator'] = None
+                field_val['lte-rrc.offsetFreq'] = 0
+
+                for val in field.iter('field'):
+                    field_val[val.get('name')] = val.get('show')
+
+                freq = int(field_val['lte-rrc.bandIndicator'])
+                offsetFreq = int(field_val['lte-rrc.offsetFreq'])
+                return LteMeasObjectGERAN(measobj_id,freq,offsetFreq)
+        
+        return None #How can this happen?
+    
     def __get_report_config(self,msg):
         """
         Parse ReportConfigToAddMod_element, return a report config
@@ -478,6 +494,7 @@ class MeasReportSeq:
             return False
         if meas_report[0].__class__.__name__!="LteMeasObjectEutra" \
         and meas_report[0].__class__.__name__!="LteMeasObjectUtra" \
+        and meas_report[0].__class__.__name__!="LteMeasObjectGERAN" \
         and meas_report[1].__class__.__name__!="LteReportConfig":
             return False
         self.meas_report_queue.append(meas_report)
@@ -721,6 +738,44 @@ class LteMeasObjectUtra:
         :returns: True if they are equivalent, False otherwise
         """
         return meas_obj.__class__.__name__ == "LteMeasObjectUtra" \
+        and self.freq == meas_obj.freq \
+        and self.offset_freq == meas_obj.offset_freq \
+        and self.cell_list == meas_obj.cell_list
+
+    def dump(self):
+        """
+        Report the cell's 3G measurement configurations
+
+        :returns: a string that encodes the cell's 3G measurement configurations
+        :rtype: string
+        """
+        # return self.__class__.__name__+' '+str(self.obj_id)+' '\
+        # +str(self.freq,self.offset_freq)+'\n'
+        return (self.__class__.__name__
+            + ' ' + str(self.obj_id)
+            + ' ' + str(self.freq)+' '+str(self.offset_freq) + '\n')
+
+
+class LteMeasObjectGERAN:
+    """
+    2G Measurement object configuration
+    """
+
+    def __init__(self,measobj_id,freq,offset_freq):
+        self.obj_id = measobj_id
+        self.freq = freq # carrier frequency
+        self.offset_freq = offset_freq # frequency-specific measurement offset
+        #TODO: add cell list
+
+    def equals(self,meas_obj):
+        """
+        Compare if this meas_obj is equal to another one
+
+        :param meas_obj: a measurement object
+        :type meas_obj: LteMeasObjectGERAN
+        :returns: True if they are equivalent, False otherwise
+        """
+        return meas_obj.__class__.__name__ == "LteMeasObjectGERAN" \
         and self.freq == meas_obj.freq \
         and self.offset_freq == meas_obj.offset_freq \
         and self.cell_list == meas_obj.cell_list
