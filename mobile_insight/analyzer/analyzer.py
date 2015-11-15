@@ -193,6 +193,8 @@ class Analyzer(Element):
             for f in self.from_list[module]:
                 f(event)
         msg_end=time.time()
-        self.logger.info(event.type_id + " "\
+        if event.type_id!="Unsupported":
+            self.logger.info(self.__class__.__name__ + " "\
+                        + event.type_id + " "\
                         + str((msg_end-msg_start)*1000)) #processing latency (in ms)
 

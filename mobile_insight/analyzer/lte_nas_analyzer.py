@@ -183,8 +183,9 @@ class LteNasAnalyzer(Analyzer):
             self.__callback_esm(xml_msg)
 
 
-        e = Event(timeit.default_timer(),self.__class__.__name__,"")
-        self.send(e)
+        # e = Event(timeit.default_timer(),self.__class__.__name__,"")
+        # self.send(e)
+        self.send(xml_msg)
 
     def __callback_emm_state(self,msg):
         """
