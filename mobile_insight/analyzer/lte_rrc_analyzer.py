@@ -474,6 +474,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             #FIXME: t_ReselectionGERAN appears BEFORE config, so this code does not work!
             if field.get('name') == "lte-rrc.t_ReselectionGERAN":
                 cur_pair = (self.__status.id,self.__status.freq)
+                if cur_pair not in self.__config:
+                    self.__config[cur_pair] = LteRrcConfig()
+                    self.__config[cur_pair].status = self.__status
                 for config in self.__config[cur_pair].sib.inter_freq_config.itervalues():
                     if config.rat == "GERAN":
                         config.tReselection = float(field.get('show'))

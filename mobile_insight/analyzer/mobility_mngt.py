@@ -73,7 +73,7 @@ class MobilityMngt(Analyzer):
                 for val in field.iter('field'):
                     if val.get('name')=='lte-rrc.measId':
                         meas_id = val.get('show')
-                if meas_id:
+                if meas_id and self.__handoff_sample.cur_state:
                     meas_report =  self.__handoff_sample.cur_state.get_meas_report_obj(meas_id)
                     self.__handoff_sample.add_meas_report(meas_report)
 
