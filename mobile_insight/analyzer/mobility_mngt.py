@@ -15,7 +15,6 @@ from wcdma_rrc_analyzer import WcdmaRrcAnalyzer
 from lte_rrc_analyzer import LteRrcAnalyzer
 from lte_nas_analyzer import LteNasAnalyzer
 from umts_nas_analyzer import UmtsNasAnalyzer
-#TODO: import UmtsNasAnalyzer
 
 import copy
 
