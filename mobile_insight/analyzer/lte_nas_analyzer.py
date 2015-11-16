@@ -196,6 +196,11 @@ class LteNasAnalyzer(Analyzer):
         """
 
         for field in msg.data.iter('field'):
+            ''' samples
+            <field name="nas_eps.nas_msg_emm_type" pos="9" show="72" showname="NAS EPS Mobility Management Message Type: Tracking area update request (0x48)" size="1" value="48" />
+            <field name="nas_eps.emm.tsc" pos="10" show="0" showname="0... .... = Type of security context flag (TSC): Native security context (for KSIasme)" size="1" value="02" />
+            <field name="nas_eps.emm.nas_key_set_id" pos="10" show="0" showname=".000 .... = NAS key set identifier:  (0) ASME" size="1" value="02" />
+            '''
 
             if field.get('showname')=="NAS EPS Mobility Management Message Type: Attach request (0x41)":
                 self.__emm_status.state="deregistered"
@@ -218,10 +223,23 @@ class LteNasAnalyzer(Analyzer):
 
     def __callback_emm(self,msg):
         """
-        Extrace EMM status and configurations from the NAS messages
+        Extract EMM status and configurations from the NAS messages
 
         :param msg: the EMM NAS message
         """
+        '''
+        <field name="" pos="11" show="EPS mobile identity - GUTI" size="13" value="500bf6130062800170eb5b09cf">
+            <field name="nas_eps.emm.elem_id" pos="11" show="80" showname="Element ID: 0x50" size="1" value="50" />
+            <field name="gsm_a.len" pos="12" show="11" showname="Length: 11" size="1" value="0b" />
+            <field name="nas_eps.emm.odd_even" pos="13" show="0" showname=".... 0... = odd/even indic: 0" size="1" unmaskedvalue="f6" value="0" />
+            <field name="nas_eps.emm.type_of_id" pos="13" show="6" showname=".... .110 = Type of identity: GUTI (6)" size="1" unmaskedvalue="f6" value="6" />
+            <field name="e212.mcc" pos="14" show="310" showname="Mobile Country Code (MCC): United States of America (310)" size="2" value="1300" />
+            <field name="e212.mnc" pos="15" show="260" showname="Mobile Network Code (MNC): T-Mobile USA (260)" size="2" value="0062" />
+            <field name="nas_eps.emm.mme_grp_id" pos="17" show="32769" showname="MME Group ID: 32769" size="2" value="8001" />
+            <field name="nas_eps.emm.mme_code" pos="19" show="112" showname="MME Code: 112" size="1" value="70" />
+            <field name="nas_eps.emm.m_tmsi" pos="20" show="3948612047" showname="M-TMSI: 0xeb5b09cf" size="4" value="eb5b09cf" />
+        </field>
+        '''
 
         for field in msg.data.iter('field'):
 
@@ -246,9 +264,7 @@ class LteNasAnalyzer(Analyzer):
 
     def __callback_esm(self,msg):
         """
-        Extrace EMM status and configurations from the NAS messages
-                 ^
-        Zengwen: is it ESM ??
+        Extract ESM status and configurations from the NAS messages
 
         :param msg: the ESM NAS message
         """
