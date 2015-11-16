@@ -192,7 +192,7 @@ class UmtsNasAnalyzer(Analyzer):
 
         # for proto in msg.data.iter('proto'):
         #     if proto.get('name') == "gsm_a.dtap": #GSM A-I/F DTAP - Location Updating Request
-        for field in proto.iter('field'):
+        for field in msg.data.iter('field'):
             if field.get('show') == "DRX Parameter"
                 field_val = {}
 
@@ -267,12 +267,12 @@ class UmtsNasAnalyzer(Analyzer):
                 self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink_ext = max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
 
-                self.__mm_nas_status.qos_negotiated.del_of_err_sdu = field_val["gsm_a.gm.sm.qos.del_of_err_sdu"]
-                self.__mm_nas_status.qos_negotiated.max_sdu = field_val["gsm_a.gm.sm.qos.max_sdu"]
-                self.__mm_nas_status.qos_negotiated.sdu_err_rat = field_val["gsm_a.gm.sm.qos.sdu_err_rat"]
-                self.__mm_nas_status.qos_negotiated.spare_bits = field_val["gsm_a.spare_bits"]
-                self.__mm_nas_status.qos_negotiated.signalling_ind = field_val["gsm_a.gm.sm.qos.signalling_ind"]
-                self.__mm_nas_status.qos_negotiated.source_stat_desc = field_val["gsm_a.gm.sm.qos.source_stat_desc"]
+                # self.__mm_nas_status.qos_negotiated.del_of_err_sdu = field_val["gsm_a.gm.sm.qos.del_of_err_sdu"]
+                # self.__mm_nas_status.qos_negotiated.max_sdu = field_val["gsm_a.gm.sm.qos.max_sdu"]
+                # self.__mm_nas_status.qos_negotiated.sdu_err_rat = field_val["gsm_a.gm.sm.qos.sdu_err_rat"]
+                # self.__mm_nas_status.qos_negotiated.spare_bits = field_val["gsm_a.spare_bits"]
+                # self.__mm_nas_status.qos_negotiated.signalling_ind = field_val["gsm_a.gm.sm.qos.signalling_ind"]
+                # self.__mm_nas_status.qos_negotiated.source_stat_desc = field_val["gsm_a.gm.sm.qos.source_stat_desc"]
 
             if "Mobile Identity - TMSI/P-TMSI" in field.get('show'):
                 field_val = {}
