@@ -8,8 +8,9 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <sys/time.h>
 
-#define DM_COLLECTOR_C_VERSION "1.0.8"
+#define DM_COLLECTOR_C_VERSION "1.0.9"
 
 
 static PyObject *dm_collector_c_disable_logs (PyObject *self, PyObject *args);
@@ -76,6 +77,13 @@ send_msg (PyObject *serial_port, const char *b, int length) {
                                         (char *) "s#", frame.c_str(), frame.size());
     Py_DECREF(o);
     return true;
+}
+
+static double
+get_posix_timestamp () {
+    struct timeval tv;
+    (void) gettimeofday(&tv, NULL);
+    return (double)(tv.tv_sec) + (double)(tv.tv_usec) / 1.0e6;
 }
 
 // Return: successful or not
@@ -254,11 +262,39 @@ dm_collector_c_feed_binary (PyObject *self, PyObject *args) {
 static PyObject *
 dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     std::string frame;
-    bool crc_correct;
+    bool crc_correct = false;
+    bool skip_decoding = false, include_timestamp = false;
+    PyObject *arg_skip_decoding = NULL;
+    PyObject *arg_include_timestamp = NULL;
+    if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
+                                &arg_skip_decoding, &arg_include_timestamp))
+        return NULL;
+    if (arg_skip_decoding != NULL) {
+        Py_INCREF(arg_skip_decoding);
+        skip_decoding = (PyObject_IsTrue(arg_skip_decoding) == 1);
+        Py_DECREF(arg_skip_decoding);
+    }
+    if (arg_include_timestamp != NULL) {
+        Py_INCREF(arg_include_timestamp);
+        include_timestamp = (PyObject_IsTrue(arg_include_timestamp) == 1);
+        Py_DECREF(arg_include_timestamp);
+    }
+    // printf("skip_decoding=%d, include_timestamp=%d\n", skip_decoding, include_timestamp);
+    double posix_timestamp = (include_timestamp? get_posix_timestamp(): -1.0);
+
     bool success = get_next_frame(frame, crc_correct);
     if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
         const char *s = frame.c_str();
-        return decode_log_packet(s + 2, frame.size() - 2);  // skip first two bytes
+        PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
+                                                frame.size() - 2,
+                                                skip_decoding);
+        if (include_timestamp) {
+            PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+            Py_DECREF(decoded);
+            return ret;
+        } else {
+            return decoded;
+        }
     } else {
         Py_RETURN_NONE;
     }

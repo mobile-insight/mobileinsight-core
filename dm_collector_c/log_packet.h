@@ -621,6 +621,6 @@ const Fmt LteMacDLTransportBlock_SubpktV2_SampleFmt [] = {
 
 
 bool is_log_packet (const char *b, int length);
-PyObject * decode_log_packet (const char *b, int length);
+PyObject * decode_log_packet (const char *b, int length, bool skip_decoding);
 
 #endif  // __DM_COLLECTOR_C_LOG_PACKET_H__

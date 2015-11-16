@@ -1127,7 +1127,7 @@ is_log_packet (const char *b, int length) {
 }
 
 PyObject *
-decode_log_packet (const char *b, int length) {
+decode_log_packet (const char *b, int length, bool skip_decoding) {
     if (PyDateTimeAPI == NULL)
         PyDateTime_IMPORT;
 
@@ -1152,6 +1152,10 @@ decode_log_packet (const char *b, int length) {
                                 LogPacketTypeID_To_Name,
                                 ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
                                 "Unsupported");
+
+    if (skip_decoding) {    // skip further decoding
+        return result;
+    }
 
     switch (type_id) {
     case CDMA_Paging_Channel_Message:
