@@ -47,6 +47,7 @@ class AndroidDevDiagMonitor(Monitor):
         self._executable_path = prefs.get("diag_revealer_executable_path", "/system/bin/diag_revealer")
         self._fifo_path = prefs.get("diag_revealer_fifo_path", self.TMP_FIFO_FILE)
         self._type_names = []
+        self._skip_decoding = False
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
     def _run_shell_cmd(self, cmd, wait=False):
@@ -56,6 +57,9 @@ class AndroidDevDiagMonitor(Monitor):
             return p.returncode
         else:
             return None
+
+    def set_skip_decoding(self, val):
+        self._skip_decoding = val
 
     def enable_log(self, type_name):
         """
@@ -138,17 +142,19 @@ class AndroidDevDiagMonitor(Monitor):
                 if s:   # received some data
                     # print "Received %d bytes" % len(s)
                     dm_collector_c.feed_binary(s)
-                decoded = dm_collector_c.receive_log_packet()
-                if decoded:
+                result = dm_collector_c.receive_log_packet(self._skip_decoding,
+                                                            True,   # include_timestamp
+                                                            )
+                if result:     # result = (decoded, posix_timestamp)
                     try:
-                        packet = DMLogPacket(decoded)
+                        packet = DMLogPacket(result[0])
                         d = packet.decode()
                         # print d["type_id"], d["timestamp"]
                         # xml = packet.decode_xml()
                         # print xml
                         # print ""
                         # Send event to analyzers
-                        event = Event(  timeit.default_timer(),
+                        event = Event(  result[1],
                                         d["type_id"],
                                         packet)
                         self.send(event)
