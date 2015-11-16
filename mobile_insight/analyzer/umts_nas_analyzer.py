@@ -193,7 +193,7 @@ class UmtsNasAnalyzer(Analyzer):
         # for proto in msg.data.iter('proto'):
         #     if proto.get('name') == "gsm_a.dtap": #GSM A-I/F DTAP - Location Updating Request
         for field in msg.data.iter('field'):
-            if field.get('show') == "DRX Parameter"
+            if field.get('show') == "DRX Parameter":
                 field_val = {}
 
                 # Default value setting
@@ -234,7 +234,7 @@ class UmtsNasAnalyzer(Analyzer):
                 field_val["gsm_a.gm.sm.qos.trans_delay"] = None
                 field_val["gsm_a.gm.sm.qos.traff_hdl_pri"] = None
                 field_val["gsm_a.gm.sm.qos.guar_bitrate_upl"] = None
-                field_val["gsm_a.gm.sm.qos.guar_bitrate_downl" = None
+                field_val["gsm_a.gm.sm.qos.guar_bitrate_downl"] = None
                 # field_val["gsm_a.spare_bits"] = None
                 # field_val["gsm_a.gm.sm.qos.signalling_ind"] = None
                 # field_val["gsm_a.gm.sm.qos.source_stat_desc"] = None
@@ -317,7 +317,7 @@ class UmtsNasAnalyzer(Analyzer):
                 field_val["gsm_a.gm.sm.qos.trans_delay"] = None
                 field_val["gsm_a.gm.sm.qos.traff_hdl_pri"] = None
                 field_val["gsm_a.gm.sm.qos.guar_bitrate_upl"] = None
-                field_val["gsm_a.gm.sm.qos.guar_bitrate_downl" = None
+                field_val["gsm_a.gm.sm.qos.guar_bitrate_downl"] = None
                 # field_val["gsm_a.spare_bits"] = None
                 # field_val["gsm_a.gm.sm.qos.signalling_ind"] = None
                 # field_val["gsm_a.gm.sm.qos.source_stat_desc"] = None
