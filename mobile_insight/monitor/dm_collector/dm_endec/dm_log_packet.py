@@ -68,18 +68,8 @@ class DMLogPacket:
         :type decoded_list: list
         """
         cls = self.__class__
-        try:
-            self._decoded_list = cls._preparse_internal_list(decoded_list)
-        except OverflowError, e:
-            print len(decoded_list)
-            print decoded_list[0]
-            print decoded_list[1]
-            print decoded_list[2]
-            print decoded_list[3]
-            print decoded_list[4]
-            print decoded_list
-            import traceback
-            raise str(traceback.format_exc())
+        self._decoded_list = cls._preparse_internal_list(decoded_list)
+
 
     @classmethod
     @static_var("wcdma_sib_types", {    0: "RRC_MIB",
@@ -93,48 +83,60 @@ class DMLogPacket:
                                         })
     def _preparse_internal_list(cls, decoded_list):
         lst = []
-        for i in range(len(decoded_list)):
-            field_name, val, type_str = decoded_list[i]
-            if type_str.startswith("raw_msg/"):
-                msg_type = type_str[len("raw_msg/"):]
-                decoded = cls._decode_msg(msg_type, val)
-                xmls = [decoded,]
+        try:
+            for i in range(len(decoded_list)):
+                field_name, val, type_str = decoded_list[i]
+                if type_str.startswith("raw_msg/"):
+                    msg_type = type_str[len("raw_msg/"):]
+                    decoded = cls._decode_msg(msg_type, val)
+                    xmls = [decoded,]
 
-                if msg_type == "RRC_DL_BCCH_BCH":
-                    sib_types = cls._preparse_internal_list.wcdma_sib_types
-                    # xml = ET.fromstring(decoded)
-                    xml = ET.XML(decoded)
-                    sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
-                    if sibs:
-                        # deal with a list of complete SIBs
-                        for complete_sib in sibs:
-                            field = complete_sib.find("field[@name='rrc.sib_Type']")
-                            sib_id = int(field.get("show"))
-                            sib_name = field.get("showname")
-                            field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
-                            sib_msg = binascii.a2b_hex(field.get("value"))
-                            if sib_id in sib_types:
-                                decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
-                                xmls.append(decoded)
-                                # print sib_types[sib_id]
-                            else:
-                                print "Unknown RRC SIB Type: %d" % sib_id
-                    else:
-                        # deal with a segmented SIB
-                        sib_segment = xml.find(".//field[@name='rrc.firstSegment_element']")
-                        if sib_segment is None:
-                            sib_segment = xml.find(".//field[@name='rrc.subsequentSegment_element']")
-                        if sib_segment is None:
-                            sib_segment = xml.find(".//field[@name='rrc.lastSegmentShort_element']")
-                        if sib_segment is not None:
-                            field = sib_segment.find("field[@name='rrc.sib_Type']")
-                            sib_id = int(field.get("show"))
-                            print "RRC SIB Segment(type: %d) not handled" % sib_id
-                xx = cls._wrap_decoded_xml(xmls)
-                lst.append( (field_name, xx, "msg") )
-            else:
-                lst.append(decoded_list[i])
-        return lst
+                    if msg_type == "RRC_DL_BCCH_BCH":
+                        sib_types = cls._preparse_internal_list.wcdma_sib_types
+                        # xml = ET.fromstring(decoded)
+                        xml = ET.XML(decoded)
+                        sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
+                        if sibs:
+                            # deal with a list of complete SIBs
+                            for complete_sib in sibs:
+                                field = complete_sib.find("field[@name='rrc.sib_Type']")
+                                sib_id = int(field.get("show"))
+                                sib_name = field.get("showname")
+                                field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
+                                sib_msg = binascii.a2b_hex(field.get("value"))
+                                if sib_id in sib_types:
+                                    decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
+                                    xmls.append(decoded)
+                                    # print sib_types[sib_id]
+                                else:
+                                    print "Unknown RRC SIB Type: %d" % sib_id
+                        else:
+                            # deal with a segmented SIB
+                            sib_segment = xml.find(".//field[@name='rrc.firstSegment_element']")
+                            if sib_segment is None:
+                                sib_segment = xml.find(".//field[@name='rrc.subsequentSegment_element']")
+                            if sib_segment is None:
+                                sib_segment = xml.find(".//field[@name='rrc.lastSegmentShort_element']")
+                            if sib_segment is not None:
+                                field = sib_segment.find("field[@name='rrc.sib_Type']")
+                                sib_id = int(field.get("show"))
+                                print "RRC SIB Segment(type: %d) not handled" % sib_id
+                    xx = cls._wrap_decoded_xml(xmls)
+                    lst.append( (field_name, xx, "msg") )
+                else:
+                    lst.append(decoded_list[i])
+            return lst
+            
+        except Exception, e:
+            print len(decoded_list)
+            print decoded_list[0]
+            print decoded_list[1]
+            print decoded_list[2]
+            print decoded_list[3]
+            print decoded_list[4]
+            print decoded_list
+            import traceback
+            raise str(traceback.format_exc())
 
     @classmethod
     def _parse_internal_list(cls, out_type, decoded_list):
