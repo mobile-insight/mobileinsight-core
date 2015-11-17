@@ -383,3 +383,23 @@ class UmtsNasAnalyzer(Analyzer):
             # show="GPRS Timer - Ready Timer"
             # show="P-TMSI type"
             # show="Routing Area Identification - Old routing area identification - RAI: 310-260-26281-1"
+
+
+class GmmStatus:
+    """
+    An abstraction to maintain the GMM status.
+    """
+    def __init__(self):
+        self.state = None
+        self.substate = None
+        self.update_status = None
+
+class MmStatus:
+    """
+    An abstraction to maintain the MM status.
+    """
+    def __init__(self):
+        self.state = None
+        self.substate = None
+        self.update_status = None
+        
