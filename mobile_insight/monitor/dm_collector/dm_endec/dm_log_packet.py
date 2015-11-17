@@ -126,17 +126,17 @@ class DMLogPacket:
                 else:
                     lst.append(decoded_list[i])
             return lst
-            
+
         except Exception, e:
             print len(decoded_list)
-            print decoded_list[0]
-            print decoded_list[1]
-            print decoded_list[2]
-            print decoded_list[3]
-            print decoded_list[4]
             print decoded_list
+            i = 0
+            while i < len(decoded_list):
+                print i
+                print decoded_list[i]
+                i += 1
             import traceback
-            raise str(traceback.format_exc())
+            raise RuntimeError(str(traceback.format_exc()))
 
     @classmethod
     def _parse_internal_list(cls, out_type, decoded_list):
