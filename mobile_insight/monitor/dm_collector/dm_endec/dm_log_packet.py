@@ -81,8 +81,15 @@ class DMLogPacket:
                                         31: "RRC_SIB19",
                                         })
     def _preparse_internal_list(cls, decoded_list):
+        try:
+            item_range = xrange(len(decoded_list))
+        except OverflowError, e:
+            print len(decoded_list)
+            print decoded_list
+            raise e
+        
         lst = []
-        for i in range(len(decoded_list)):
+        for i in item_range:
             field_name, val, type_str = decoded_list[i]
             if type_str.startswith("raw_msg/"):
                 msg_type = type_str[len("raw_msg/"):]
