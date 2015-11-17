@@ -82,7 +82,7 @@ class DMLogPacket:
                                         })
     def _preparse_internal_list(cls, decoded_list):
         try:
-            item_range = xrange(len(decoded_list))
+            item_range = range(len(decoded_list))
         except OverflowError, e:
             print len(decoded_list)
             print decoded_list
