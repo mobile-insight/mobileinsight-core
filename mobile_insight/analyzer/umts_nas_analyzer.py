@@ -112,6 +112,9 @@ class UmtsNasAnalyzer(Analyzer):
         #init packet filters
         self.add_source_callback(self.__nas_filter)
 
+        self.__mm_status = MmStatus()
+        self.__gmm_status = GmmStatus()
+
     def set_source(self,source):
         """
         Set the trace source. Enable the LTE NAS messages.
