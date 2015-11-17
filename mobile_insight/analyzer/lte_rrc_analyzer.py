@@ -13,6 +13,7 @@ except ImportError:
 from analyzer import *
 from protocol_analyzer import *
 import timeit
+import time
 
 from profile import Profile,ProfileHierarchy
 
@@ -193,7 +194,14 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
             self.__callback_rrc_conn(xml_msg)
             self.__callback_sib_config(xml_msg)
+            tic = time.clock()
             self.__callback_rrc_reconfig(xml_msg)
+            toc = time.clock()
+
+            self.logger.info(str(time.mktime(tmp['timestamp'].utctimetuple())) + " "\
+                        + "LTE_RRC_RECONFIG_CALLBK "\
+                        + str((toc - tic)*1000)) #processing latency (in ms)
+
             #TODO: callback RRC
 
             # Raise event to other analyzers

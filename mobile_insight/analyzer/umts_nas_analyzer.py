@@ -114,6 +114,7 @@ class UmtsNasAnalyzer(Analyzer):
 
         self.__mm_status = MmStatus()
         self.__gmm_status = GmmStatus()
+        self.__mm_nas_status = MmNasStatus()
 
     def set_source(self,source):
         """
@@ -405,4 +406,54 @@ class MmStatus:
         self.state = None
         self.substate = None
         self.update_status = None
+
+class MmNasStatus:
+    """
+    An abstraction to maintain the MM NAS status.
+    """
+    def __init__(self):
+        self.__mm_nas_status.drx.split_pg_cycle_code = None
+        self.__mm_nas_status.drx.cn_spec_drx_cycle_len_coef = None
+        self.__mm_nas_status.drx.split_on_ccch = None
+        self.__mm_nas_status.drx.non_drx_timer = None
+
+        self.__mm_nas_status.qos_negotiated.delay_class = None
+        self.__mm_nas_status.qos_negotiated.reliability_class = None
+        self.__mm_nas_status.qos_negotiated.peak_throughput = None
+        self.__mm_nas_status.qos_negotiated.precedence_class = None
+        self.__mm_nas_status.qos_negotiated.mean_throughput = None
+        self.__mm_nas_status.qos_negotiated.traffic_class = None
+        self.__mm_nas_status.qos_negotiated.delivery_order = None
+        self.__mm_nas_status.qos_negotiated.traffic_handling_priority = None
+        self.__mm_nas_status.qos_negotiated.residual_ber = None
+        self.__mm_nas_status.qos_negotiated.transfer_delay = None
+        self.__mm_nas_status.qos_negotiated.max_bitrate_ulink = None
+        self.__mm_nas_status.qos_negotiated.max_bitrate_dlink = None
+        self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_ulink = None
+        self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink = None
+        self.__mm_nas_status.qos_negotiated.max_bitrate_dlink_ext = None
+        self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink_ext = None
+
+        self.__mm_nas_status.qos_requested.delay_class = None
+        self.__mm_nas_status.qos_requested.reliability_class = None
+        self.__mm_nas_status.qos_requested.peak_throughput = None
+        self.__mm_nas_status.qos_requested.precedence_class = None
+        self.__mm_nas_status.qos_requested.mean_throughput = None
+        self.__mm_nas_status.qos_requested.traffic_class = None
+        self.__mm_nas_status.qos_requested.delivery_order = None
+        self.__mm_nas_status.qos_requested.traffic_handling_priority = None
+        self.__mm_nas_status.qos_requested.residual_ber = None
+        self.__mm_nas_status.qos_requested.transfer_delay = None
+        self.__mm_nas_status.qos_requested.max_bitrate_ulink = None
+        self.__mm_nas_status.qos_requested.max_bitrate_dlink = None
+        self.__mm_nas_status.qos_requested.guaranteed_bitrate_ulink = None
+        self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink = None
+        self.__mm_nas_status.qos_requested.max_bitrate_dlink_ext = None
+        self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink_ext = None
+
+        self.__mm_nas_status.tmsi.len = None
+        self.__mm_nas_status.tmsi.unused = None
+        self.__mm_nas_status.tmsi.oddevenind = None
+        self.__mm_nas_status.tmsi.mobileid = None
+        self.__mm_nas_status.tmsi.tmsi = None
         
