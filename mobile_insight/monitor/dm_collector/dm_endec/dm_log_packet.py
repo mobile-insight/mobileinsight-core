@@ -68,7 +68,18 @@ class DMLogPacket:
         :type decoded_list: list
         """
         cls = self.__class__
-        self._decoded_list = cls._preparse_internal_list(decoded_list)
+        try:
+            self._decoded_list = cls._preparse_internal_list(decoded_list)
+        except OverflowError, e:
+            print len(decoded_list)
+            print decoded_list[0]
+            print decoded_list[1]
+            print decoded_list[2]
+            print decoded_list[3]
+            print decoded_list[4]
+            print decoded_list
+            import traceback
+            raise str(traceback.format_exc())
 
     @classmethod
     @static_var("wcdma_sib_types", {    0: "RRC_MIB",
@@ -81,15 +92,8 @@ class DMLogPacket:
                                         31: "RRC_SIB19",
                                         })
     def _preparse_internal_list(cls, decoded_list):
-        try:
-            item_range = range(len(decoded_list))
-        except OverflowError, e:
-            print len(decoded_list)
-            print decoded_list
-            raise e
-        
         lst = []
-        for i in item_range:
+        for i in range(len(decoded_list)):
             field_name, val, type_str = decoded_list[i]
             if type_str.startswith("raw_msg/"):
                 msg_type = type_str[len("raw_msg/"):]
