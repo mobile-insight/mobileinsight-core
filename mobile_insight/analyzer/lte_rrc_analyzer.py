@@ -192,14 +192,28 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             log_xml = ET.XML(log_item_dict['Msg'])
             xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
 
+            tic = time.clock()
             self.__callback_rrc_conn(xml_msg)
+            toc = time.clock()
+
+            self.logger.info(str(time.time()) + " "\
+                        + "CALLBK_LTE_RRC_CONN "\
+                        + str((toc - tic)*1000)) #processing latency (in ms)
+
+            tic = time.clock()
             self.__callback_sib_config(xml_msg)
+            toc = time.clock()
+
+            self.logger.info(str(time.time()) + " "\
+                        + "CALLBK_LTE_RRC_SIB_CONFG "\
+                        + str((toc - tic)*1000)) #processing latency (in ms)
+
             tic = time.clock()
             self.__callback_rrc_reconfig(xml_msg)
             toc = time.clock()
 
             self.logger.info(str(time.time()) + " "\
-                        + "LTE_RRC_RECONFIG_CALLBK "\
+                        + "CALLBK_LTE_RRC_RECONFIG "\
                         + str((toc - tic)*1000)) #processing latency (in ms)
 
             #TODO: callback RRC

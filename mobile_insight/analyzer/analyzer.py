@@ -198,7 +198,7 @@ class Analyzer(Element):
             if not callable(invert_op):
                 return
             tmp = dict(event.data.decode())
-            self.logger.info(str(time.mktime(tmp['timestamp'].utctimetuple())) + " "\
+            self.logger.info(str(time.time()) + " "\
                         + self.__class__.__name__ + " "\
                         + event.type_id + " "\
                         + str((msg_end-msg_start)*1000)) #processing latency (in ms)
