@@ -198,7 +198,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             self.__callback_rrc_reconfig(xml_msg)
             toc = time.clock()
 
-            self.logger.info(str(time.mktime(tmp['timestamp'].utctimetuple())) + " "\
+            self.logger.info(str(time.time()) + " "\
                         + "LTE_RRC_RECONFIG_CALLBK "\
                         + str((toc - tic)*1000)) #processing latency (in ms)
 
