@@ -1140,7 +1140,7 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
     offset += _decode_by_fmt(LogPacketHeaderFmt, ARRAY_SIZE(LogPacketHeaderFmt, Fmt),
                                 b, offset, length, result);
     PyObject *old_result = result;
-    result = PyList_GetSlice(result, 2, 4);
+    result = PyList_GetSlice(result, 1, 4); // remove the duplicate "len1" field
     Py_DECREF(old_result);
     old_result = NULL;
 

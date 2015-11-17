@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <sys/time.h>
 
-#define DM_COLLECTOR_C_VERSION "1.0.9"
+#define DM_COLLECTOR_C_VERSION "1.0.10"
 
 
 static PyObject *dm_collector_c_disable_logs (PyObject *self, PyObject *args);

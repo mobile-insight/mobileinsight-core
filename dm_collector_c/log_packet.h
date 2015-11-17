@@ -24,7 +24,7 @@ struct Fmt {
 
 const Fmt LogPacketHeaderFmt [] = {
     {UINT, "len1", 2},
-    {UINT, "len2", 2},
+    {UINT, "log_msg_len", 2},
     {UINT, "type_id", 2},
     {QCDM_TIMESTAMP, "timestamp", 8}
 };
