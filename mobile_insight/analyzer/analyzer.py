@@ -185,14 +185,14 @@ class Analyzer(Element):
         """
 
         #Add evaluation code for analyzer per-message processing latency
-        msg_start=time.time()
+        msg_start=time.clock()
         if module==self.source:
             for f in self.source_callback:
                 f(event)
         else:
             for f in self.from_list[module]:
                 f(event)
-        msg_end=time.time()
+        msg_end=time.clock()
         if event.type_id!="Unsupported":
             invert_op = getattr(event.data, "decode", None)
             if not callable(invert_op):
