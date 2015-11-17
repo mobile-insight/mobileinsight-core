@@ -172,14 +172,23 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
         :param msg: the event (message) from the trace collector.
         """
-
+        tic = time.clock()
         # log_item = msg.data
         log_item = msg.data.decode()
         log_item_dict = dict(log_item)
+        toc = time.clock()
+        self.logger.info(str(time.time()) + " "\
+                    + "CALLBK_LTE_RRC_DECODE "\
+                    + str((toc - tic)*1000)) #processing latency (in ms)
 
         #Convert msg to dictionary format
         raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
+        tic = time.clock()
         self.__callback_serv_cell(raw_msg)
+        toc = time.clock()
+        self.logger.info(str(time.time()) + " "\
+                    + "CALLBK_LTE_RRC_SERV_CELL "\
+                    + str((toc - tic)*1000)) #processing latency (in ms)
 
         if 'Msg' not in log_item_dict:
             return
