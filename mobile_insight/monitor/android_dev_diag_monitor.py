@@ -101,6 +101,22 @@ class AndroidDevDiagMonitor(Monitor):
         self._last_diag_revealer_ts = None
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
+        self.__check_security_policy()
+
+
+    def __check_security_policy(self):
+        """
+        Update SELinux policy.
+        For Nexus 6/6P, the SELinux policy may forbids the log collection.
+        """
+
+        self._run_shell_cmd("su -c setenforce 0")
+        self._run_shell_cmd("su -c upolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
+        self._run_shell_cmd("su -c upolicy --live \"allow init properties_device file execute\"")
+        self._run_shell_cmd("su -c upolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
+        self._run_shell_cmd("su -c upolicy --live \"allow system_server diag_device chr_file {read write}\"")
+        self._run_shell_cmd("su -c upolicy --live \"allow untrusted_app app_data_file file {rename}\"")
+
     def _run_shell_cmd(self, cmd, wait=False):
         p = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True)
         if wait:
