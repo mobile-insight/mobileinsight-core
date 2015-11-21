@@ -41,7 +41,7 @@ class ChronicleProcessor(object):
         ret_payload = None
 
         while len(b) > 0:
-            if b <= self.to_read[self.state]:
+            if len(b) <= self.to_read[self.state]:
                 self.bytes[self.state] += b
                 self.to_read[self.state] -= len(b)
                 b = ""
