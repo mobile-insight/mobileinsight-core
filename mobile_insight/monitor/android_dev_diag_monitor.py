@@ -3,7 +3,7 @@
 """
 android_dev_diag_monitor.py
 
-Author: Jiayao Li
+Author: Jiayao Li, Yuanjie Li
 """
 
 __all__ = ["AndroidDevDiagMonitor"]
