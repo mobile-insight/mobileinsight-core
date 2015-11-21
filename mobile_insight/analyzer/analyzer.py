@@ -193,13 +193,13 @@ class Analyzer(Element):
             for f in self.from_list[module]:
                 f(event)
         msg_end=time.clock()
-        if event.type_id!="Unsupported":
-            invert_op = getattr(event.data, "decode", None)
-            if not callable(invert_op):
-                return
-            tmp = dict(event.data.decode())
-            self.logger.info(str(time.time()) + " "\
-                        + self.__class__.__name__ + " "\
-                        + event.type_id + " "\
-                        + str((msg_end-msg_start)*1000)) #processing latency (in ms)
+        # if event.type_id!="Unsupported":
+        #     invert_op = getattr(event.data, "decode", None)
+        #     if not callable(invert_op):
+        #         return
+        #     tmp = dict(event.data.decode())
+        #     self.logger.info(str(time.time()) + " "\
+        #                 + self.__class__.__name__ + " "\
+        #                 + event.type_id + " "\
+        #                 + str((msg_end-msg_start)*1000)) #processing latency (in ms)
 
