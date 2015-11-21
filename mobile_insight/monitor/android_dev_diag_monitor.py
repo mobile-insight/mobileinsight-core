@@ -13,6 +13,7 @@ import errno
 import os
 import re
 import subprocess
+import struct
 import stat
 import sys
 import timeit
@@ -21,6 +22,50 @@ from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
 ANDROID_SHELL = "/system/bin/sh"
+
+
+class ChronicleProcessor(object):
+    READ_PAYLOAD_LEN = 0
+    READ_TS = 1
+    READ_PAYLOAD = 2
+
+    def __init__(self):
+        cls = self.__class__
+        self.state = cls.READ_PAYLOAD_LEN
+        self.bytes = ["", "", ""]
+        self.to_read = [4, 8, None] # int, double, variable-length string
+
+    def process(self, b):
+        cls = self.__class__
+        ret_ts = None
+        ret_payload = None
+
+        while len(b) > 0:
+            if b <= self.to_read[self.state]:
+                self.bytes[self.state] += b
+                self.to_read[self.state] -= len(b)
+                b = ""
+            else:
+                idx = self.to_read[self.state]
+                self.bytes[self.state] += b[0:idx]
+                self.to_read[self.state] = 0
+                b = b[idx:]
+            if self.to_read[self.state] == 0:   # the current field is complete
+                if self.state == cls.READ_PAYLOAD_LEN:
+                    pyld_len = struct.unpack("<i", self.bytes[self.state])[0]
+                    self.to_read[cls.READ_PAYLOAD] = pyld_len
+                    self.state = cls.READ_TS
+                elif self.state == cls.READ_TS:
+                    ret_ts = struct.unpack("<d", self.bytes[self.state])[0]
+                    self.state = cls.READ_PAYLOAD
+                else:   # READ_PAYLOAD
+                    ret_payload = self.bytes[self.state]
+                    self.state = cls.READ_PAYLOAD_LEN
+                    self.bytes = ["", "", ""]
+                    self.to_read = [4, 8, None]
+                    break
+        remain = b
+        return ret_ts, ret_payload, remain
 
 
 class AndroidDevDiagMonitor(Monitor):
@@ -48,6 +93,7 @@ class AndroidDevDiagMonitor(Monitor):
         self._fifo_path = prefs.get("diag_revealer_fifo_path", self.TMP_FIFO_FILE)
         self._type_names = []
         self._skip_decoding = False
+        self._last_diag_revealer_ts = None
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
     def _run_shell_cmd(self, cmd, wait=False):
@@ -98,6 +144,12 @@ class AndroidDevDiagMonitor(Monitor):
             else:
                 raise err
 
+    def get_last_diag_revealer_ts(self):
+        """
+        Return the timestamp when the lastest msg is sent by diag_revealer
+        """
+        return self._last_diag_revealer_ts
+
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
@@ -131,6 +183,7 @@ class AndroidDevDiagMonitor(Monitor):
             fifo = os.open(self._fifo_path, os.O_RDONLY | os.O_NONBLOCK)
 
             # Read log packets from diag_revealer
+            chproc = ChronicleProcessor()
             while True:
                 try:
                     s = os.read(fifo, self.BLOCK_SIZE)
@@ -139,9 +192,15 @@ class AndroidDevDiagMonitor(Monitor):
                         s = None
                     else:
                         raise err # something else has happened -- better reraise
-                if s:   # received some data
-                    # print "Received %d bytes" % len(s)
-                    dm_collector_c.feed_binary(s)
+
+                while s:   # preprocess metadata
+                    ret_ts, ret_payload, remain = chproc.process(s)
+                    if ret_ts:
+                        self._last_diag_revealer_ts = ret_ts
+                    if ret_payload:
+                        dm_collector_c.feed_binary(ret_payload)
+                    s = remain
+
                 result = dm_collector_c.receive_log_packet(self._skip_decoding,
                                                             True,   # include_timestamp
                                                             )
