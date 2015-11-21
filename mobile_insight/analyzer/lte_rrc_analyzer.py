@@ -274,7 +274,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 self.__history[msg.timestamp] = self.__status
         
         if status_updated:
-            self.logger.info(self.__status.dump())
+            # self.logger.info(self.__status.dump())
+            pass
 
     def __callback_sib_config(self,msg):
         """
@@ -793,13 +794,13 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         for field in msg.data.iter('field'):
             if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
                 self.__status.conn = True
-                self.logger.info(self.__status.dump())
-                self.logger.info("FSM test: "+self.get_protocol_state())
+                # self.logger.info(self.__status.dump())
+                # self.logger.info("FSM test: "+self.get_protocol_state())
 
             if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
                 self.__status.conn = False
-                self.logger.info(self.__status.dump())
-                self.logger.info("FSM test: "+self.get_protocol_state())
+                # self.logger.info(self.__status.dump())
+                # self.logger.info("FSM test: "+self.get_protocol_state())
 
     def set_source(self,source):
         """

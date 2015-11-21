@@ -49,7 +49,7 @@ class MobilityMngt(Analyzer):
         #include analyzers
         self.include_analyzer("WcdmaRrcAnalyzer",[self.__on_wcdma_rrc_msg])
         self.include_analyzer("LteRrcAnalyzer",[self.__on_lte_rrc_msg])
-        self.include_analyzer("LteNasAnalyzer",[self.__on_lte_nas_msg])
+        # self.include_analyzer("LteNasAnalyzer",[self.__on_lte_nas_msg])
         # self.include_analyzer("UmtsNasAnalyzer",[self.__on_umts_nas_msg])
 
         #no source callbacks are included
@@ -92,8 +92,9 @@ class MobilityMngt(Analyzer):
                     if val.get('name')=='lte-rrc.MeasObjectToAddMod_element':
                         #Add measurement object
                         meas_obj = self.__get_meas_obj(val)
-                        if not meas_obj:
+                        if meas_obj:
                             meas_state.measobj[meas_obj.obj_id] = meas_obj
+                            self.logger.info("measobj debugging: "+str(meas_state.measobj.keys()))
 
                     if val.get('name')=='lte-rrc.measObjectToRemoveList':
                         #Remove measurement object
@@ -403,6 +404,8 @@ class MeasState:
         # return meas_obj
         if not self.measid_list.has_key(meas_id) \
         or not self.measobj.has_key(self.measid_list[meas_id][0]):
+            print "get_measobj: meas_id="+str(meas_id)+" meas_obj="+str(self.measid_list[meas_id])
+            print "debug: "+str(self.measobj.keys())
             return None
         else:
             return self.measobj[self.measid_list[meas_id][0]]
@@ -659,16 +662,26 @@ class MobilityStateMachine:
             return True 
 
 
-    def dump(self):
-        print "State machine"
-        for item in self.state_machine:
+    # def dump(self):
+    #     print "State machine"
+    #     for item in self.state_machine:
             
+    #         for item2 in self.state_machine[item]:
+    #             print item.__class__.__name__+"->" \
+    #                 +item2.__class__.__name__+": " \
+    #                 +str(self.state_machine[item][item2].meas_report_queue)
+    #             print item.dump()
+    #             print item2.dump()
+
+    def dump(self):
+        print "Handoff State Machine"
+        for item in self.state_machine:
             for item2 in self.state_machine[item]:
                 print item.__class__.__name__+"->" \
                     +item2.__class__.__name__+": " \
-                    +str(self.state_machine[item][item2].meas_report_queue)
-                print item.dump()
-                print item2.dump()
+                    +str(self.state_machine[item][item2].meas_report_queue) 
+                print "From State:\n",item.dump()
+                print "To State:\n",item2.dump()
 ############################################
 
 
