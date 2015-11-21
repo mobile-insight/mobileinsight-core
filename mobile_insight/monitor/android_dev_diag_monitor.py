@@ -50,16 +50,21 @@ class ChronicleProcessor(object):
                 self.bytes[self.state] += b[0:idx]
                 self.to_read[self.state] = 0
                 b = b[idx:]
-            if self.to_read[self.state] == 0:   # the current field is complete
-                if self.state == cls.READ_PAYLOAD_LEN:
+
+            if self.state == cls.READ_PAYLOAD_LEN:
+                if self.to_read[self.state] == 0:   # current field is complete
                     pyld_len = struct.unpack("<i", self.bytes[self.state])[0]
                     self.to_read[cls.READ_PAYLOAD] = pyld_len
                     self.state = cls.READ_TS
-                elif self.state == cls.READ_TS:
+            elif self.state == cls.READ_TS:
+                if self.to_read[self.state] == 0:   # current field is complete
                     ret_ts = struct.unpack("<d", self.bytes[self.state])[0]
                     self.state = cls.READ_PAYLOAD
-                else:   # READ_PAYLOAD
+            else:   # READ_PAYLOAD
+                if len(self.bytes[self.state]) > 0: # don't need to wait for complete field
                     ret_payload = self.bytes[self.state]
+                    self.bytes[self.state] = ""
+                if self.to_read[self.state] == 0:   # current field is complete
                     self.state = cls.READ_PAYLOAD_LEN
                     self.bytes = ["", "", ""]
                     self.to_read = [4, 8, None]
@@ -78,7 +83,7 @@ class AndroidDevDiagMonitor(Monitor):
 
     DIAG_CFG_DIR = "/sdcard/diag_logs"
     TMP_FIFO_FILE = "/sdcard/diag_revealer_fifo"
-    BLOCK_SIZE = 64
+    BLOCK_SIZE = 128
 
     def __init__(self, prefs={}):
         """
