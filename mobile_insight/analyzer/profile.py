@@ -217,7 +217,11 @@ class Profile(object):
             root = self.__profile_hierarchy.get_root()
             if is_android:
                 activity = autoclass('org.renpy.android.PythonActivity')
-                self.__db = activity.mActivity.openOrCreateDatabase(root.name+'.db',0,None)
+                if activity.mActivity:
+                    self.__db = activity.mActivity.openOrCreateDatabase(root.name+'.db',0,None)
+                else:
+                    service = autoclass('org.renpy.android.PythonService')
+                    self.__db = service.mService.openOrCreateDatabase(root.name+'.db',0,None)
             else:
                 self.__conn = sqlite3.connect(root.name+'.db')
                 self.__db = self.__conn.cursor()

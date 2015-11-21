@@ -146,6 +146,7 @@ class Analyzer(Element):
         else:
             try:
                 #Dynamic import module and import analyzers
+                # self.logger.info("before __import__")
                 module_tmp = __import__("mobile_insight.analyzer")
                 analyzer_tmp = getattr(module_tmp.analyzer,analyzer_name)
                 # self.logger.info("after getattr " + analyzer_name + str(Analyzer.__analyzer_array.keys()))
@@ -159,6 +160,9 @@ class Analyzer(Element):
             except Exception, e:
                 #Either the analyzer is unavailable, or has semantic errors
                 self.logger.info("Runtime Error: unable to import "+analyzer_name)  
+                import traceback
+                import sys
+                sys.exit(str(traceback.format_exc()))
 
     def exclude_analyzer(self,analyzer_name):
         #TODO: this API would be depreciated

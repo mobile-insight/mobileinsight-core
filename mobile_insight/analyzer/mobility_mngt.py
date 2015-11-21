@@ -50,7 +50,7 @@ class MobilityMngt(Analyzer):
         self.include_analyzer("WcdmaRrcAnalyzer",[self.__on_wcdma_rrc_msg])
         self.include_analyzer("LteRrcAnalyzer",[self.__on_lte_rrc_msg])
         self.include_analyzer("LteNasAnalyzer",[self.__on_lte_nas_msg])
-        self.include_analyzer("UmtsNasAnalyzer",[self.__on_umts_nas_msg])
+        # self.include_analyzer("UmtsNasAnalyzer",[self.__on_umts_nas_msg])
 
         #no source callbacks are included
 
@@ -419,7 +419,7 @@ class MeasState:
         or not self.report_list.has_key(self.measid_list[meas_id][1]):
             return None
         else:
-            return self.measid_list[self.measid_list[meas_id][1]]
+            return self.report_list[self.measid_list[meas_id][1]]
 
     def get_meas_report_obj(self,meas_id):
         """
@@ -615,7 +615,7 @@ class MobilityStateMachine:
         for item in handoff_sample.tx_list:
             self.__merge_transition(item)
 
-        # self.dump()
+        self.dump()
 
     def __merge_transition(self,transition):
         """
