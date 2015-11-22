@@ -68,6 +68,23 @@ class MobilityMngt(Analyzer):
         #The message from LteRrcAnalyzer is decoded XML messages
         for field in msg.data.iter('field'):
 
+            if field.get('name')=="lte-rrc.mobilityControlInfo_element":
+                #A handoff command: create a new HandoffState
+                target_cell = None
+                for val in field.iter('field'):
+                    #Currently we focus on freq-level handoff
+                    if val.get('name')=='lte-rrc.dl_CarrierFreq':
+                        target_cell = val.get('show')
+                if target_cell:
+                    #FIXME: consider 4G->3G handover (e.g., SRVCC, CSFB)
+                    handoff_state = HandoffState("LTE",target_cell)
+                    self.__handoff_sample.add_state_transition(handoff_state)
+                    #Trigger merging function
+                    self.__mobility_state_machine.update_state_machine(self.__handoff_sample)
+                    #Reset handoff sample
+                    self.__handoff_sample = HandoffSample()
+                    return
+
             if field.get('name')=="lte-rrc.measurementReport_element":
                 #A measurement report: parse it, push it into Handoff sample
                 meas_id = None
@@ -94,7 +111,6 @@ class MobilityMngt(Analyzer):
                         meas_obj = self.__get_meas_obj(val)
                         if meas_obj:
                             meas_state.measobj[meas_obj.obj_id] = meas_obj
-                            self.logger.info("measobj debugging: "+str(meas_state.measobj.keys()))
 
                     if val.get('name')=='lte-rrc.measObjectToRemoveList':
                         #Remove measurement object
@@ -106,7 +122,8 @@ class MobilityMngt(Analyzer):
                     if val.get('name')=='lte-rrc.ReportConfigToAddMod_element':
                         #Add/modify a report config
                         report_config = self.__get_report_config(val)
-                        meas_state.report_list[report_config.report_id]=report_config
+                        if report_config:
+                            meas_state.report_list[report_config.report_id]=report_config
             
                     if val.get('name')=='lte-rrc.reportConfigToRemoveList':
                         #Remove a report config
@@ -139,22 +156,6 @@ class MobilityMngt(Analyzer):
                 #Generate a new state to the handoff sample
                 self.__handoff_sample.add_state_transition(meas_state)
                 # self.logger.info("Meas State: \n"+meas_state.dump())
-
-            if field.get('name')=="lte-rrc.mobilityControlInfo_element":
-                #A handoff command: create a new HandoffState
-                target_cell = None
-                for val in field.iter('field'):
-                    #Currently we focus on freq-level handoff
-                    if val.get('name')=='lte-rrc.dl_CarrierFreq':
-                        target_cell = val.get('show')
-                if target_cell:
-                    #FIXME: consider 4G->3G handover (e.g., SRVCC, CSFB)
-                    handoff_state = HandoffState("LTE",target_cell)
-                    self.__handoff_sample.add_state_transition(handoff_state)
-                    #Trigger merging function
-                    self.__mobility_state_machine.update_state_machine(self.__handoff_sample)
-                    #Reset handoff sample
-                    self.__handoff_sample = HandoffSample()
 
     def __get_meas_obj(self,msg):
         """
@@ -321,7 +322,11 @@ class MobilityMngt(Analyzer):
                                 break
                 report_config.add_event('b2',threshold1,threshold2)
 
-        return report_config
+        if report_config.event_list:
+            return report_config
+        else:
+            #periodical report. No impact on handoff
+            return None
 
     def __on_wcdma_rrc_msg(self,msg):
         """
@@ -511,7 +516,8 @@ class MeasReportSeq:
         and meas_report[0].__class__.__name__!="LteMeasObjectGERAN" \
         and meas_report[1].__class__.__name__!="LteReportConfig":
             return False
-        self.meas_report_queue.append(meas_report)
+        if meas_report[0] and meas_report[1]:
+            self.meas_report_queue.append(meas_report)
         return True
 
     def merge_seq(self,meas_report_seq):
@@ -677,9 +683,12 @@ class MobilityStateMachine:
         print "Handoff State Machine"
         for item in self.state_machine:
             for item2 in self.state_machine[item]:
+                meas_report=""
+                for report in self.state_machine[item][item2].meas_report_queue:
+                    meas_report=meas_report+"("+str(report[0].freq)+","+str(report[1].event_list[0].type)+") "
                 print item.__class__.__name__+"->" \
                     +item2.__class__.__name__+": " \
-                    +str(self.state_machine[item][item2].meas_report_queue) 
+                    +meas_report
                 print "From State:\n",item.dump()
                 print "To State:\n",item2.dump()
 ############################################
