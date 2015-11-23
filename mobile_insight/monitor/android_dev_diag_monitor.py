@@ -111,11 +111,11 @@ class AndroidDevDiagMonitor(Monitor):
         """
 
         self._run_shell_cmd("su -c setenforce 0")
-        self._run_shell_cmd("su -c upolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
-        self._run_shell_cmd("su -c upolicy --live \"allow init properties_device file execute\"")
-        self._run_shell_cmd("su -c upolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
-        self._run_shell_cmd("su -c upolicy --live \"allow system_server diag_device chr_file {read write}\"")
-        self._run_shell_cmd("su -c upolicy --live \"allow untrusted_app app_data_file file {rename}\"")
+        self._run_shell_cmd("su -c supolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
+        self._run_shell_cmd("su -c supolicy --live \"allow init properties_device file execute\"")
+        self._run_shell_cmd("su -c supolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
+        self._run_shell_cmd("su -c supolicy --live \"allow system_server diag_device chr_file {read write}\"")
+        self._run_shell_cmd("su -c supolicy --live \"allow untrusted_app app_data_file file {rename}\"")
 
     def _run_shell_cmd(self, cmd, wait=False):
         p = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True)
