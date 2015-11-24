@@ -384,6 +384,11 @@ _decode_lte_rrc_ota(const char *b, int offset, int length,
                                     ARRAY_SIZE(LteRrcOtaPacketFmt_v8, Fmt),
                                     b, offset, length, result);
         break;
+    case 9:
+        offset += _decode_by_fmt(LteRrcOtaPacketFmt_v9,
+                                    ARRAY_SIZE(LteRrcOtaPacketFmt_v9, Fmt),
+                                    b, offset, length, result);
+        break;
     default:
         printf("Unknown LTE RRC OTA packet version: %d\n", pkt_ver);
         return 0;
@@ -391,6 +396,9 @@ _decode_lte_rrc_ota(const char *b, int offset, int length,
 
     int pdu_number = _search_result_int(result, "PDU Number");
     int pdu_length = _search_result_int(result, "Msg Length");
+    if (pdu_number > 8) {   // Hack. This is not confirmed.
+        pdu_number -= 7;
+    }
     const char *type_name = search_name(LteRrcOtaPduType,
                                         ARRAY_SIZE(LteRrcOtaPduType, ValueName),
                                         pdu_number);
