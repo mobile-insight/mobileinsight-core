@@ -24,6 +24,14 @@ class MsgStatistics(Analyzer):
 
         self.msg_lengh={} #type_id->list of message length
 
+    def reset(self):
+        self.msg_type_statistics={} #type_id->msg_count
+
+        self.msg_arrival_rate={} #type_id->list of arrival interval
+
+        self.msg_lengh={} #type_id->list of message length
+
+
     def set_source(self,source):
         """
         Set the trace source. Enable the cellular signaling messages
@@ -43,6 +51,10 @@ class MsgStatistics(Analyzer):
     def __msg_callback(self,msg):
 
     	log_item = msg.data.decode()
+
+        if not log_item.has_key("timestamp") \
+        or not log_item.has_key("log_msg_len"):
+            return
         
         if msg.type_id not in self.msg_type_statistics:
             self.msg_type_statistics[msg.type_id] = 1
