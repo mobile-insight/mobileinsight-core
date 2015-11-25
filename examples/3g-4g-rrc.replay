@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta content='GitLab Community Edition' name='description'>
+<title>
+
+GitLab
+</title>
+<link href="/assets/favicon-d6aa61c7c265900a7d4c45d3ac2b461f.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
+<link href="/assets/application-715bc4efac6b42deb84d495309f19f9a.css" media="all" rel="stylesheet" />
+<link href="/assets/print-8597f8b497e02f892aa5a4b25d5a857b.css" media="print" rel="stylesheet" />
+<script src="/assets/application-5ec1aeb4604cbfbeff836f956308b0ed.js"></script>
+<meta content="authenticity_token" name="csrf-param" />
+<meta content="DSzIzABbKGzePWJAqFhuIfx4PYDlj5oNlizh/B33JoQ=" name="csrf-token" />
+<script type="text/javascript">
+//<![CDATA[
+window.gon={};gon.default_issues_tracker="gitlab";gon.api_version="v3";gon.relative_url_root="";gon.default_avatar_url="http://metro.cs.ucla.edu:8081/assets/no_avatar-fd406ccede8cb1881f20921c8bfa169b.png";
+//]]>
+</script>
+<meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport'>
+<meta content='#474D57' name='theme-color'>
+
+
+</head>
+
+<body class='ui_mars login-page application'>
+
+<header class='navbar navbar-fixed-top navbar-gitlab'>
+<div class='navbar-inner'>
+<div class='container'>
+<div class='app_logo'>
+<a class="home" href="/explore"><img alt="Logo white" src="/assets/logo-white-0b53cd4ea06811d79b3acd486384e047.png" />
+</a></div>
+<h1 class='title'></h1>
+<button class='navbar-toggle' data-target='.navbar-collapse' data-toggle='collapse' type='button'>
+<span class='sr-only'>Toggle navigation</span>
+<i class='fa fa-bars'></i>
+</button>
+</div>
+</div>
+</header>
+
+
+<div class='container navless-container'>
+<div class='content'>
+<div class='flash-container'>
+<div class='flash-alert'>
+You need to sign in before continuing.
+</div>
+</div>
+
+<div class='row prepend-top-20'>
+<div class='col-sm-5 pull-right'>
+<div>
+<div class='login-box'>
+<div class='login-heading'>
+<h3>Existing user? Sign in</h3>
+</div>
+<div class='login-body'>
+<form accept-charset="UTF-8" action="/users/sign_in" class="new_user" id="new_user" method="post"><div style="display:none"><input name="utf8" type="hidden" value="&#x2713;" /><input name="authenticity_token" type="hidden" value="DSzIzABbKGzePWJAqFhuIfx4PYDlj5oNlizh/B33JoQ=" /></div><input autofocus="autofocus" class="form-control top" id="user_login" name="user[login]" placeholder="Username or Email" type="text" />
+<input class="form-control bottom" id="user_password" name="user[password]" placeholder="Password" type="password" />
+<div class='remember-me checkbox'>
+<label for='user_remember_me'>
+<input name="user[remember_me]" type="hidden" value="0" /><input id="user_remember_me" name="user[remember_me]" type="checkbox" value="1" />
+<span>Remember me</span>
+</label>
+<div class='pull-right'>
+<a href="/users/password/new">Forgot your password?</a>
+</div>
+</div>
+<div>
+<input class="btn btn-save" name="commit" type="submit" value="Sign in" />
+</div>
+</form>
+
+
+</div>
+</div>
+
+<div class='prepend-top-20'>
+<div class='login-box'>
+<div class='login-heading'>
+<h3>New user? Create an account</h3>
+</div>
+<div class='login-body'>
+<form accept-charset="UTF-8" action="/users" class="new_user" id="new_user" method="post"><div style="display:none"><input name="utf8" type="hidden" value="&#x2713;" /><input name="authenticity_token" type="hidden" value="DSzIzABbKGzePWJAqFhuIfx4PYDlj5oNlizh/B33JoQ=" /></div><div class='devise-errors'>
+
+</div>
+<div>
+<input class="form-control top" id="user_name" name="user[name]" placeholder="Name" required="required" type="text" />
+</div>
+<div>
+<input class="form-control middle" id="user_username" name="user[username]" placeholder="Username" required="required" type="text" />
+</div>
+<div>
+<input class="form-control middle" id="user_email" name="user[email]" placeholder="Email" required="required" type="email" value="" />
+</div>
+<div class='form-group append-bottom-20' id='password-strength'>
+<input class="form-control bottom" id="user_password_sign_up" name="user[password]" placeholder="Password" required="required" type="password" />
+</div>
+<div>
+<input class="btn-create btn" name="commit" type="submit" value="Sign up" />
+</div>
+</form>
+
+</div>
+</div>
+<div class='clearfix prepend-top-20'>
+<p>
+<span class='light'>Did not receive confirmation email?</span>
+<a href="/users/confirmation/new">Send again</a>
+</p>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class='col-sm-7 brand-holder pull-left'>
+<h1>
+GitLab Community Edition
+</h1>
+<h3>Open source software to collaborate on code</h3>
+<p>
+Manage git repositories with fine grained access controls that keep your code secure.
+Perform code reviews and enhance collaboration with merge requests.
+Each project can also have an issue tracker and a wiki.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+<div class='container'>
+<div class='footer-links'>
+<a href="/explore">Explore</a>
+<a href="http://doc.gitlab.com/" rel="nofollow">Documentation</a>
+<a href="https://about.gitlab.com/" rel="nofollow">About GitLab</a>
+</div>
+</div>
+</body>
+</html>
