@@ -2,7 +2,7 @@
 __all__=["Analyzer",
     "ProfileHierarchy","Profile",
     "StateMachine",
-    "MsgLogger","MsgSerializer",
+    "MsgLogger","MsgSerializer","MsgStatistics",
     "LteRrcAnalyzer","LteNasAnalyzer","LteMeasurementAnalyzer",
 	"WcdmaRrcAnalyzer","UmtsNasAnalyzer","RrcAnalyzer",
 	"MobilityMngt",
@@ -15,6 +15,7 @@ from state_machine import StateMachine
 
 from msg_logger import MsgLogger
 from msg_serializer import MsgSerializer
+from msg_statistics import MsgStatistics
 
 # LTE
 from lte_rrc_analyzer import LteRrcAnalyzer
