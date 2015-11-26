@@ -48,13 +48,16 @@ class MsgStatistics(Analyzer):
         source.enable_log("LTE_NAS_EMM_Plain_OTA_Incoming_Message")
         source.enable_log("LTE_NAS_EMM_Plain_OTA_Outgoing_Message")
 
+        #Phy-layer logs
+        source.enable_log("LTE_LL1_PDSCH_Demapper_Configuration")
+
+        source.enable_log("LTE_MAC_Configuration")
+        source.enable_log("LTE_MAC_UL_Transport_Block")
+        source.enable_log("LTE_MAC_DL_Transport_Block")
+
     def __msg_callback(self,msg):
 
     	log_item = msg.data.decode()
-
-        if not log_item.has_key("timestamp") \
-        or not log_item.has_key("log_msg_len"):
-            return
         
         if msg.type_id not in self.msg_type_statistics:
             self.msg_type_statistics[msg.type_id] = 1
@@ -67,9 +70,22 @@ class MsgStatistics(Analyzer):
         	self.msg_arrival_rate[msg.type_id].append(log_item["timestamp"])
 
         if msg.type_id not in self.msg_lengh:
-            self.msg_lengh[msg.type_id]=[log_item["log_msg_len"]]
+
+            if log_item.has_key("log_msg_len"):
+                self.msg_lengh[msg.type_id]=[log_item["log_msg_len"]]
+            elif log_item.has_key("Msg Length"):
+                self.msg_lengh[msg.type_id]=[log_item["Msg Length"]]
+            elif log_item.has_key("Message Length"):
+                self.msg_lengh[msg.type_id]=[log_item["Message Length"]] 
+            #TODO: For EMM/ESM, why the metadata header does not have msg length?
         else:
-        	self.msg_lengh[msg.type_id].append(log_item["log_msg_len"])
+            if log_item.has_key("log_msg_len"):
+                self.msg_lengh[msg.type_id].append(log_item["log_msg_len"])
+            elif log_item.has_key("Msg Length"):
+                self.msg_lengh[msg.type_id].append(log_item["Msg Length"])
+            elif log_item.has_key("Message Length"):
+                self.msg_lengh[msg.type_id].append(log_item["Message Length"])
+        	
 
 
 
