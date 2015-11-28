@@ -9,6 +9,7 @@ Author: Jiayao Li, Yuanjie Li
 __all__ = ["AndroidDevDiagMonitor"]
 
 
+import binascii
 import errno
 import os
 import re
@@ -260,6 +261,7 @@ class AndroidDevDiagMonitor(Monitor):
                         raise err # something else has happened -- better reraise
 
                 while s:   # preprocess metadata
+                    print binascii.b2a_hex(s)
                     ret_msg_type, ret_ts, ret_payload, ret_filename, remain = chproc.process(s)
                     if ret_msg_type == ChronicleProcessor.TYPE_LOG:
                         if ret_ts:
