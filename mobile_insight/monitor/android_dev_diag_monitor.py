@@ -39,7 +39,7 @@ class ChronicleProcessor(object):
 
     def _init_state(self):
         cls = self.__class__
-        self.state = cls.READ_PAYLOAD_LEN
+        self.state = cls.READ_TYPE
         self.msg_type = None
         self.bytes = ["", "", "", "", ""]
         self.to_read = [2, 2, 8, None, None] # short, short, double, varstring, varstring
