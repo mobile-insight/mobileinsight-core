@@ -274,7 +274,7 @@ class AndroidDevDiagMonitor(Monitor):
                     elif ret_msg_type == ChronicleProcessor.TYPE_END_LOG_FILE:
                         if ret_filename:
                             print "End of %s" % ret_filename
-                    else:
+                    elif ret_msg_type is not None:
                         raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
                     s = remain
 
