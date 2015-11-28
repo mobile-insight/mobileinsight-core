@@ -25,20 +25,30 @@ ANDROID_SHELL = "/system/bin/sh"
 
 
 class ChronicleProcessor(object):
-    READ_PAYLOAD_LEN = 0
-    READ_TS = 1
-    READ_PAYLOAD = 2
+    TYPE_LOG = 1
+    TYPE_START_LOG_FILE = 2
+    TYPE_END_LOG_FILE = 3
+    READ_TYPE = 0
+    READ_MSG_LEN = 1
+    READ_TS = 2
+    READ_PAYLOAD = 3
+    READ_FILENAME = 4
 
     def __init__(self):
-        cls = self.__class__
+        self._init_state()
+
+    def _init_state(self):
         self.state = cls.READ_PAYLOAD_LEN
-        self.bytes = ["", "", ""]
-        self.to_read = [4, 8, None] # int, double, variable-length string
+        self.msg_type = None
+        self.bytes = ["", "", "", "", ""]
+        self.to_read = [2, 2, 8, None, None] # short, short, double, varstring, varstring
 
     def process(self, b):
         cls = self.__class__
+        ret_msg_type = self.msg_type
         ret_ts = None
         ret_payload = None
+        ret_filename = None
 
         while len(b) > 0:
             if len(b) <= self.to_read[self.state]:
@@ -50,27 +60,41 @@ class ChronicleProcessor(object):
                 self.bytes[self.state] += b[0:idx]
                 self.to_read[self.state] = 0
                 b = b[idx:]
-
-            if self.state == cls.READ_PAYLOAD_LEN:
+            # Process input data
+            if self.state == cls.READ_TYPE:
                 if self.to_read[self.state] == 0:   # current field is complete
-                    pyld_len = struct.unpack("<i", self.bytes[self.state])[0]
-                    self.to_read[cls.READ_PAYLOAD] = pyld_len
-                    self.state = cls.READ_TS
+                    self.msg_type = struct.unpack("<h", self.bytes[self.state])[0]
+                    ret_msg_type = self.msg_type
+                    self.state = cls.READ_MSG_LEN
+            elif self.state == cls.READ_MSG_LEN:
+                if self.to_read[self.state] == 0:   # current field is complete
+                    msg_len = struct.unpack("<h", self.bytes[self.state])[0]
+                    if self.msg_type == cls.TYPE_LOG:
+                        self.to_read[cls.READ_PAYLOAD] = msg_len - 8
+                        self.state = cls.READ_TS
+                    elif self.msg_type in {cls.TYPE_START_LOG_FILE, cls.TYPE_END_LOG_FILE}:
+                        self.to_read[cls.READ_FILENAME] = msg_len
+                        self.state = cls.READ_FILENAME
+                    else:
+                        raise RuntimeError("Unknown msg type %s" % str(self.msg_type))
             elif self.state == cls.READ_TS:
                 if self.to_read[self.state] == 0:   # current field is complete
                     ret_ts = struct.unpack("<d", self.bytes[self.state])[0]
                     self.state = cls.READ_PAYLOAD
-            else:   # READ_PAYLOAD
+            elif self.state == cls.READ_PAYLOAD:
                 if len(self.bytes[self.state]) > 0: # don't need to wait for complete field
                     ret_payload = self.bytes[self.state]
                     self.bytes[self.state] = ""
                 if self.to_read[self.state] == 0:   # current field is complete
-                    self.state = cls.READ_PAYLOAD_LEN
-                    self.bytes = ["", "", ""]
-                    self.to_read = [4, 8, None]
+                    self._init_state()
+                    break
+            else:   # READ_FILENAME
+                if self.to_read[self.state] == 0:   # current field is complete
+                    ret_filename = self.bytes[self.state]
+                    self._init_state()
                     break
         remain = b
-        return ret_ts, ret_payload, remain
+        return ret_msg_type, ret_ts, ret_payload, ret_filename, remain
 
 
 class AndroidDevDiagMonitor(Monitor):
@@ -96,8 +120,10 @@ class AndroidDevDiagMonitor(Monitor):
         Monitor.__init__(self)
         self._executable_path = prefs.get("diag_revealer_executable_path", "/system/bin/diag_revealer")
         self._fifo_path = prefs.get("diag_revealer_fifo_path", self.TMP_FIFO_FILE)
-        self._type_names = []
+        self._input_dir = None
+        self._log_cut_size = 1.0
         self._skip_decoding = False
+        self._type_names = []
         self._last_diag_revealer_ts = None
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
@@ -128,6 +154,19 @@ class AndroidDevDiagMonitor(Monitor):
 
     def set_skip_decoding(self, val):
         self._skip_decoding = val
+
+    def set_log_directory(self, directory):
+        """
+        Set the directory that will store output log files.
+
+        :param directory: the path of dir
+        :type directory: string
+        """
+        self._input_dir = directory
+
+    def set_log_cut_size(self, siz):
+        if siz > 0.0:
+            self._log_cut_size = siz
 
     def enable_log(self, type_name):
         """
@@ -198,6 +237,10 @@ class AndroidDevDiagMonitor(Monitor):
 
             # TODO(likayo): need to protect aganist user input
             cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
+            if self._input_dir:
+                cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
+                self._run_shell_cmd("su -c mkdir \"%s\"" % self._input_dir)
+                self._run_shell_cmd("su -c chmod -R 777 \"%s\"" % self._input_dir, wait=True)
             proc = subprocess.Popen(cmd,
                                     shell=True,
                                     executable=ANDROID_SHELL,
@@ -216,11 +259,20 @@ class AndroidDevDiagMonitor(Monitor):
                         raise err # something else has happened -- better reraise
 
                 while s:   # preprocess metadata
-                    ret_ts, ret_payload, remain = chproc.process(s)
-                    if ret_ts:
-                        self._last_diag_revealer_ts = ret_ts
-                    if ret_payload:
-                        dm_collector_c.feed_binary(ret_payload)
+                    ret_msg_type, ret_ts, ret_payload, ret_filename, remain = chproc.process(s)
+                    if ret_msg_type == ChronicleProcessor.TYPE_LOG:
+                        if ret_ts:
+                            self._last_diag_revealer_ts = ret_ts
+                        if ret_payload:
+                            dm_collector_c.feed_binary(ret_payload)
+                    elif ret_msg_type == ChronicleProcessor.TYPE_START_LOG_FILE:
+                        if ret_filename:
+                            print "Start of %s" % ret_filename
+                    elif ret_msg_type == ChronicleProcessor.TYPE_END_LOG_FILE:
+                        if ret_filename:
+                            print "End of %s" % ret_filename
+                    else:
+                        raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
                     s = remain
 
                 result = dm_collector_c.receive_log_packet(self._skip_decoding,
