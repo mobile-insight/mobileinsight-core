@@ -261,7 +261,6 @@ class AndroidDevDiagMonitor(Monitor):
                         raise err # something else has happened -- better reraise
 
                 while s:   # preprocess metadata
-                    print binascii.b2a_hex(s)
                     ret_msg_type, ret_ts, ret_payload, ret_filename, remain = chproc.process(s)
                     if ret_msg_type == ChronicleProcessor.TYPE_LOG:
                         if ret_ts:
@@ -274,6 +273,10 @@ class AndroidDevDiagMonitor(Monitor):
                     elif ret_msg_type == ChronicleProcessor.TYPE_END_LOG_FILE:
                         if ret_filename:
                             print "End of %s" % ret_filename
+                            event = Event(  timeit.default_timer(),
+                                            "new_qmdl_file",
+                                            filename)
+                            self.send(event)
                     elif ret_msg_type is not None:
                         raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
                     s = remain
