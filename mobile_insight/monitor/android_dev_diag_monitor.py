@@ -275,7 +275,7 @@ class AndroidDevDiagMonitor(Monitor):
                             print "End of %s" % ret_filename
                             event = Event(  timeit.default_timer(),
                                             "new_qmdl_file",
-                                            filename)
+                                            ret_filename)
                             self.send(event)
                     elif ret_msg_type is not None:
                         raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
