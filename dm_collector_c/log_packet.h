@@ -1,25 +1,34 @@
+/* log_packet.h
+ * Author: Jiayao Li
+ * Defines constants and functions related to log packet messages.
+ * The most important thing is a struct called Fmt, which defines a message 
+ * field. With this struct and other helper functions, message decoding can be
+ * greatly simplified.
+ */
+
 #ifndef __DM_COLLECTOR_C_LOG_PACKET_H__
 #define __DM_COLLECTOR_C_LOG_PACKET_H__
 
 #include "consts.h"
 
+// Field types
 enum FmtType {
-    UINT,       // Little endian
-    BYTE_STREAM,
-    QCDM_TIMESTAMP,
+    UINT,       // Little endian. len = 1, 2, 4, 8
+    BYTE_STREAM,    // A stream of bytes.
+    QCDM_TIMESTAMP, // Timestamp in all messages. len = 8
     PLMN_MK1,   // in WCDMA Cell ID
     PLMN_MK2,   // in LTE NAS EMM State
     BANDWIDTH,  // in LTE RRC Serving Cell Info, LTE RRC MIB Message
     RSRP,
     RSRQ,
-    SKIP,
-    PLACEHOLDER
+    SKIP,   // This field is ignored (but bytes are consumed)
+    PLACEHOLDER // This field is created with a dummy value (no byte is consumed)
 };
 
 struct Fmt {
     FmtType type;
     const char *field_name;
-    int len;
+    int len;    // Some FmtType has restrictions on this field.
 };
 
 const Fmt LogPacketHeaderFmt [] = {
@@ -182,6 +191,7 @@ const Fmt LteRrcOtaPacketFmt [] = {
     // continued in LteRrcOtaPacketFmt_v2 or LteRrcOtaPacketFmt_v7
 };
 
+// Apply to version 2 packets
 const Fmt LteRrcOtaPacketFmt_v2 [] = {
     {UINT, "Freq", 2},                  //frequency
     {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
@@ -630,6 +640,10 @@ const Fmt LteMacDLTransportBlock_SubpktV2_SampleFmt [] = {
 
 
 bool is_log_packet (const char *b, int length);
+
+// Given a binary string, try to decode it as a log packet.
+// Return a specailly formatted Python list that stores the decoding result.
+// If skip_decoding is True, only the header would be decoded.
 PyObject * decode_log_packet (const char *b, int length, bool skip_decoding);
 
 #endif  // __DM_COLLECTOR_C_LOG_PACKET_H__

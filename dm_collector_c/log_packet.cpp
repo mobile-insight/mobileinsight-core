@@ -1,3 +1,8 @@
+/* log_packet.cpp
+ * Author: Jiayao Li, Jie Zhao
+ * Implements log packet message decoding.
+ */
+
 #include <Python.h>
 #include <datetime.h>
 
@@ -7,7 +12,25 @@
 #include <map>
 #include <string>
 
-// Return: i
+/*
+ * The decoding result is represented using a Python list object (called result
+ * list in the source code).
+ * All elements in a result list is a 3-element tuple: (name, value, type).
+ * "name" is a C string, and "value" is a reference to a Python object.
+ * "type" is a C string that can be one of the following values: 
+ * - "" (empty string): an ordinary field. The "value" could be a Python 
+ *      integer, str, etc.
+ * - "list": The "value" is another result list, and each element is of the same
+ *      "type".
+ * - "dict": The "value" is another result list, and each element can be of
+ *      different "types".
+ * - "raw_msg/*": The value is a binary string that contains raw messages.
+ */
+
+// TODO: split this .cpp to multiple files.
+
+// Find a field by its name in a result list.
+// Return: i or -1
 static int
 _find_result_index(PyObject *result, const char *target) {
     assert(PySequence_Check(result));
@@ -33,7 +56,8 @@ _find_result_index(PyObject *result, const char *target) {
     return ret;
 }
 
-// Return: New reference
+// Find a field by its name in a result list.
+// Return: A new reference to the field or NULL
 static PyObject *
 _search_result(PyObject *result, const char *target) {
     int i = _find_result_index(result, target);
@@ -47,6 +71,9 @@ _search_result(PyObject *result, const char *target) {
     }
 }
 
+// Find an integer field by its name in a result list, and return a C int with
+// the same value (overflow is ignored).
+// Return: int
 static int
 _search_result_int(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
@@ -57,6 +84,7 @@ _search_result_int(PyObject *result, const char *target) {
     return val;
 }
 
+// Find a field in a result list and replace it with a new Python object.
 // Return: New reference to the old object
 static PyObject *
 _replace_result(PyObject *result, const char *target, PyObject *new_object) {
@@ -73,6 +101,8 @@ _replace_result(PyObject *result, const char *target, PyObject *new_object) {
     }
 }
 
+// Find a field in a result list and replace it with an integer.
+// Return: New reference to the old object
 static PyObject *
 _replace_result_int(PyObject *result, const char *target, int new_int) {
     PyObject *pyint = Py_BuildValue("i", new_int);
@@ -111,7 +141,8 @@ _map_result_field_to_name(PyObject *result, const char *target,
     }
 }
 
-// Append to result
+// Decode a binary string according to an array of field description (fmt[]).
+// Decoded fields are appended to result
 static int
 _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 const char *b, int offset, int length,
@@ -1136,7 +1167,7 @@ is_log_packet (const char *b, int length) {
 
 PyObject *
 decode_log_packet (const char *b, int length, bool skip_decoding) {
-    if (PyDateTimeAPI == NULL)
+    if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
 
     PyObject *result = NULL;
@@ -1153,7 +1184,6 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
     old_result = NULL;
 
     // Differentiate using type ID
-
     LogPacketType type_id = (LogPacketType) _map_result_field_to_name(
                                 result,
                                 "type_id",

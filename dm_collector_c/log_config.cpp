@@ -1,3 +1,7 @@
+/* log_config.cpp
+ * Author: Jiayao Li
+ */
+
 #include <Python.h>
 
 #include "consts.h"
@@ -17,6 +21,7 @@ get_item_id (int type_id) {
     return type_id & ITEM_ID_MASK;
 }
 
+// Note that all type IDs should have the same equip ID.
 BinaryBuffer
 encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
     BinaryBuffer buf;
@@ -77,6 +82,8 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
 
     case GET_RANGE:
     case GET_MASK:
+        // not implemented
+        // fall through
     default:
         break;
     }

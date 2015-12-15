@@ -1,8 +1,14 @@
+/* consts.h
+ * Author: Jiayao Li
+ * Defines constants general to the whole module.
+ */
+
 #ifndef __DM_COLLECTOR_C_CONSTS_H__
 #define __DM_COLLECTOR_C_CONSTS_H__
 
 #include "utils.h"
 
+// All supported type IDs
 enum LogPacketType {
     CDMA_Paging_Channel_Message = 0x1007,
     _1xEV_Signaling_Control_Channel_Broadcast = 0x107C,
@@ -31,6 +37,7 @@ enum LogPacketType {
     LTE_MAC_UL_Transport_Block = 0xB064,
 };
 
+// Mapping type IDs to names
 const ValueName LogPacketTypeID_To_Name [] = {
     {CDMA_Paging_Channel_Message,
         "CDMA_Paging_Channel_Message"},

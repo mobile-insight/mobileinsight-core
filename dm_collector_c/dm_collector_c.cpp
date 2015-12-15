@@ -1,3 +1,9 @@
+/* dn_collector_c.cpp
+ * Author: Jiayao Li
+ * This file defines dm_collector_c, a Python extension module that collects
+ * and decodes diagnositic logs from Qualcomm chipsets.
+ */
+
 #include <Python.h>
 
 #include "consts.h"
@@ -10,6 +16,7 @@
 #include <algorithm>
 #include <sys/time.h>
 
+// NOTE: the following number should be updated every time.
 #define DM_COLLECTOR_C_VERSION "1.0.11"
 
 
@@ -21,15 +28,47 @@ static PyObject *dm_collector_c_receive_log_packet (PyObject *self, PyObject *ar
 
 static PyMethodDef DmCollectorCMethods[] = {
     {"disable_logs", dm_collector_c_disable_logs, METH_VARARGS,
-        "Disable logs for a serial port."},
+        "Disable logs for a serial port.\n"
+        "\n"
+        "Args:\n"
+        "    port: a diagnositic serial port.\n"
+        "\n"
+        "Returns:\n"
+        "    Successful or not.\n"
+    },
     {"enable_logs", dm_collector_c_enable_logs, METH_VARARGS,
-        "Enable logs for a serial port."},
+        "Enable logs for a serial port.\n"
+        "\n"
+        "Args:\n"
+        "    port: a diagnositic serial port.\n"
+        "    type_names: a sequence of type names.\n"
+        "\n"
+        "Returns:\n"
+        "    Successful or not.\n"
+        "\n"
+        "Raises\n"
+        "    ValueError: when an unrecognized type name is passed in.\n"
+    },
     {"feed_binary", dm_collector_c_feed_binary, METH_VARARGS,
         "Feed raw packets."},
     {"generate_diag_cfg", dm_collector_c_generate_diag_cfg, METH_VARARGS,
-        "Generate a Diag.cfg file that can be loaded by diag_mdlog program on Android phones."},
+        "Generate a Diag.cfg file.\n"
+        "\n"
+        "This file can be loaded by diag_mdlog program on Android phones.\n"
+    },
     {"receive_log_packet", dm_collector_c_receive_log_packet, METH_VARARGS,
-        "Extract a log packet from feeded data and return its binary as a str."},
+        "Extract a log packet from feeded data.\n"
+        "\n"
+        "Args:\n"
+        "    skip_decoding: If set to True, only the header would be decoded.\n"
+        "        Default to False.\n"
+        "    include_timestamp: Return the time when the message is received.\n"
+        "        Default to False.\n"
+        "\n"
+        "Returns:\n"
+        "    If include_timestamp is True, return (decoded, posix_timestamp);\n"
+        "    otherwise only return decoded message.\n"
+    },
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
@@ -118,6 +157,8 @@ dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
         return NULL;
 }
 
+// A helper function that generated binary code to enable the specified types
+// of messages.
 // If error occurs, false is returned and PyErr_SetString() will be called.
 static bool
 generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
@@ -263,7 +304,7 @@ static PyObject *
 dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     std::string frame;
     bool crc_correct = false;
-    bool skip_decoding = false, include_timestamp = false;
+    bool skip_decoding = false, include_timestamp = false;  // default values
     PyObject *arg_skip_decoding = NULL;
     PyObject *arg_include_timestamp = NULL;
     if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
@@ -300,11 +341,14 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     }
 }
 
+// Init the module
 PyMODINIT_FUNC
 initdm_collector_c(void)
 {
-    PyObject *dm_collector_c = Py_InitModule("dm_collector_c", DmCollectorCMethods);
+    PyObject *dm_collector_c = Py_InitModule3("dm_collector_c", DmCollectorCMethods,
+        "collects and decodes diagnositic logs from Qualcomm chipsets.");
 
+    // dm_ccllector_c.log_packet_types: stores all supported type names
     int n_types = ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName);
     PyObject *log_packet_types = PyTuple_New(n_types);
     for (int i = 0; i < n_types; i++) {
@@ -316,6 +360,7 @@ initdm_collector_c(void)
     PyObject_SetAttrString(dm_collector_c, "log_packet_types", log_packet_types);
     Py_DECREF(log_packet_types);
 
+    // dm_ccllector_c.version: stores the value of DM_COLLECTOR_C_VERSION
     PyObject *pystr = PyString_FromString(DM_COLLECTOR_C_VERSION);
     PyObject_SetAttrString(dm_collector_c, "version", pystr);
     Py_DECREF(pystr);
