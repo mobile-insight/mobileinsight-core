@@ -123,7 +123,7 @@ class AndroidDevDiagMonitor(Monitor):
         self._executable_path = prefs.get("diag_revealer_executable_path", "/system/bin/diag_revealer")
         self._fifo_path = prefs.get("diag_revealer_fifo_path", self.TMP_FIFO_FILE)
         self._input_dir = None
-        self._log_cut_size = 1.0
+        self._log_cut_size = 5.0
         self._skip_decoding = False
         self._type_names = []
         self._last_diag_revealer_ts = None

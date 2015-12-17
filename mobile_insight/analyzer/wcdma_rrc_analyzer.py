@@ -40,7 +40,6 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         self.__history[0]=self.__config
 
         #Temporary structure for holding the config
-        #Qualcomm chipset does not report cellID BEFORE SIB, so the update should be delayed
         self.__config_tmp=WcdmaRrcConfig()
 
         # self.__profile = Profile(WcdmaRrcProfileHierarchy())
@@ -187,7 +186,6 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         for field in msg.data.iter('field'):
 
             #Cell Identity: should be done in __callback_serv_cell
-            #But Qualcomm's chipset may report cellID AFTER some configurations
             if field.get('name') == "rrc.cellIdentity":
                 cellId = int(field.get('value')[0:-1],16)
                 # self.__status.dump()
