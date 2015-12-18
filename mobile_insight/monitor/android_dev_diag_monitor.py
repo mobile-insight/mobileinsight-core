@@ -274,7 +274,7 @@ class AndroidDevDiagMonitor(Monitor):
                         if ret_filename:
                             print "End of %s" % ret_filename
                             event = Event(  timeit.default_timer(),
-                                            "new_diag_log",
+                                            "new_qmdl_file",
                                             ret_filename)
                             self.send(event)
                     elif ret_msg_type is not None:
