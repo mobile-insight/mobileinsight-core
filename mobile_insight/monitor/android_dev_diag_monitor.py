@@ -101,7 +101,7 @@ class ChronicleProcessor(object):
 
 class AndroidDevDiagMonitor(Monitor):
     """
-    An QMDL monitor for Android devics. Require root access to run.
+    An Device Diag monitor for Android devices. Require root access to run.
     """
 
     #: a list containing the currently supported message types.
@@ -305,10 +305,18 @@ class AndroidDevDiagMonitor(Monitor):
         except (KeyboardInterrupt, RuntimeError), e:
             os.close(fifo)
             proc.terminate()
+            event = Event(  timeit.default_timer(),
+                            "sys_shutdown",
+                            "Mayday")
+            self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
         except Exception, e:
+            event = Event(  timeit.default_timer(),
+                            "sys_shutdown",
+                            "Mayday")
+            self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
