@@ -30,6 +30,8 @@ except ImportError, e:
 
 from ws_dissector import *
 
+import itertools
+range = lambda stop: iter(itertools.count().next, stop)
 
 class SuperEncoder(json.JSONEncoder):
     def default(self, obj):
