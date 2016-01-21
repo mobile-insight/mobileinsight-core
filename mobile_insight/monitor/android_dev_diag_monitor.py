@@ -198,9 +198,9 @@ class AndroidDevDiagMonitor(Monitor):
             os.mknod(fifo_path, 0666 | stat.S_IFIFO)
         except OSError as err:
             if err.errno == errno.EEXIST:   # if already exists, skip this step
-                print "Fifo file already exists, skipping..."
+                # print "Fifo file already exists, skipping..."
             elif err.errno == errno.EPERM:  # not permitted, try shell command
-                print "Not permitted to create fifo file, try to switch to root..."
+                # print "Not permitted to create fifo file, try to switch to root..."
                 retcode = self._run_shell_cmd("su -c mknod %s p" % fifo_path, wait=True)
                 if retcode != 0:
                     raise RuntimeError("mknod returns %s" % str(retcode))
@@ -224,7 +224,7 @@ class AndroidDevDiagMonitor(Monitor):
         if not self._type_names:
             if os.path.exists(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg")):
                 generate_diag_cfg = False
-                print "AndroidQmdlMonitor: existing Diag.cfg file will be used."
+                # print "AndroidDevDiagMonitor: existing Diag.cfg file will be used."
             else:
                 raise RuntimeError("Log type not specified. Please call enable_log() first.")
 
@@ -269,10 +269,10 @@ class AndroidDevDiagMonitor(Monitor):
                             dm_collector_c.feed_binary(ret_payload)
                     elif ret_msg_type == ChronicleProcessor.TYPE_START_LOG_FILE:
                         if ret_filename:
-                            print "Start of %s" % ret_filename
+                            # print "Start of %s" % ret_filename
                     elif ret_msg_type == ChronicleProcessor.TYPE_END_LOG_FILE:
                         if ret_filename:
-                            print "End of %s" % ret_filename
+                            # print "End of %s" % ret_filename
                             event = Event(  timeit.default_timer(),
                                             "new_diag_log",
                                             ret_filename)
