@@ -198,6 +198,7 @@ class AndroidDevDiagMonitor(Monitor):
             os.mknod(fifo_path, 0666 | stat.S_IFIFO)
         except OSError as err:
             if err.errno == errno.EEXIST:   # if already exists, skip this step
+                pass
                 # print "Fifo file already exists, skipping..."
             elif err.errno == errno.EPERM:  # not permitted, try shell command
                 # print "Not permitted to create fifo file, try to switch to root..."
@@ -269,6 +270,7 @@ class AndroidDevDiagMonitor(Monitor):
                             dm_collector_c.feed_binary(ret_payload)
                     elif ret_msg_type == ChronicleProcessor.TYPE_START_LOG_FILE:
                         if ret_filename:
+                            pass
                             # print "Start of %s" % ret_filename
                     elif ret_msg_type == ChronicleProcessor.TYPE_END_LOG_FILE:
                         if ret_filename:
