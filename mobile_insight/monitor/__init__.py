@@ -7,6 +7,7 @@ __all__ = [
             "DMCollector",  ### P4A: THIS LINE WILL BE DELETED ###
             "Replayer",
             "QmdlReplayer",
+            "DatahintAndroidDevDiagMonitor",
             ]
 
 from android_dev_diag_monitor import AndroidDevDiagMonitor
@@ -15,3 +16,4 @@ from monitor import Monitor
 from dm_collector import *
 from replayer import Replayer
 from qmdl_replayer import QmdlReplayer
+from datahint_android_dev_diag_monitor import DatahintAndroidDevDiagMonitor
