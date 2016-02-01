@@ -1,12 +1,12 @@
 #!/usr/bin/python
-# Filename: android_dev_diag_monitor.py
+# Filename: datahint_android_dev_diag_monitor.py
 """
-android_dev_diag_monitor.py
+datahint_android_dev_diag_monitor.py
 
-Author: Jiayao Li, Yuanjie Li
+Author: Haotian
 """
 
-__all__ = ["AndroidDevDiagMonitor"]
+__all__ = ["DatahintAndroidDevDiagMonitor"]
 
 
 import binascii
@@ -18,12 +18,14 @@ import struct
 import stat
 import sys
 import timeit
+import datetime
+import time
+import logging
 
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
 ANDROID_SHELL = "/system/bin/sh"
-
 
 class ChronicleProcessor(object):
     TYPE_LOG = 1
@@ -99,9 +101,9 @@ class ChronicleProcessor(object):
         return ret_msg_type, ret_ts, ret_payload, ret_filename, remain
 
 
-class AndroidDevDiagMonitor(Monitor):
+class DatahintAndroidDevDiagMonitor(Monitor):
     """
-    An Device Diag monitor for Android devices. Require root access to run.
+    An QMDL monitor for Android devics. Require root access to run.
     """
 
     #: a list containing the currently supported message types.
@@ -123,7 +125,7 @@ class AndroidDevDiagMonitor(Monitor):
         self._executable_path = prefs.get("diag_revealer_executable_path", "/system/bin/diag_revealer")
         self._fifo_path = prefs.get("diag_revealer_fifo_path", self.TMP_FIFO_FILE)
         self._input_dir = None
-        self._log_cut_size = 0.5 # change size to 1.0 M
+        self._log_cut_size = 1 # change size to 0.5 M
         self._skip_decoding = False
         self._type_names = []
         self._last_diag_revealer_ts = None
@@ -138,13 +140,26 @@ class AndroidDevDiagMonitor(Monitor):
         For Nexus 6/6P, the SELinux policy may forbids the log collection.
         """
 
-        self._run_shell_cmd("su -c setenforce 0")
-        self._run_shell_cmd("su -c supolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
-        self._run_shell_cmd("su -c supolicy --live \"allow init init process execmem\"")
-        self._run_shell_cmd("su -c supolicy --live \"allow init properties_device file execute\"")
-        self._run_shell_cmd("su -c supolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
-        self._run_shell_cmd("su -c supolicy --live \"allow system_server diag_device chr_file {read write}\"")
-        self._run_shell_cmd("su -c supolicy --live \"allow untrusted_app app_data_file file {rename}\"")
+        self._run_shell_cmd("su -c setenforce 0", wait=True)
+        self._run_shell_cmd("su -c supolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"", wait=True)
+        self._run_shell_cmd("su -c supolicy --live \"allow init init process execmem\"", wait=True)
+        self._run_shell_cmd("su -c supolicy --live \"allow init properties_device file execute\"", wait=True)
+        self._run_shell_cmd("su -c supolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"", wait=True)
+        self._run_shell_cmd("su -c supolicy --live \"allow system_server diag_device chr_file {read write}\"", wait=True)
+        self._run_shell_cmd("su -c supolicy --live \"allow untrusted_app app_data_file file {rename}\"", wait=True)
+        # Haotian Nexus 6P
+        # self._run_shell_cmd("su -c supolicy --live \"allow untrusted_app properties_device file {execute}\"", wait=True)
+        # self._run_shell_cmd("su -c supolicy --live \"allow init app_data_file fifo_file {write open getattr}\"", wait=True)
+        # self._run_shell_cmd("su -c supolicy --live \"allow zygote system_server binder {call transfer}\"", wait=True)
+        # self._run_shell_cmd("su -c supolicy --live \"allow system_server zygote binder {call}\"", wait=True)
+        # self._run_shell_cmd("su -c supolicy --live \"allow rild diag_device chr_file {read}\"", wait=True)
+        # self._run_shell_cmd("su -c supolicy --live \"allow ims diag_device chr_file {read}\"", wait=True)
+        # Haotian Nexus 6 doesn't work even without any denied msg
+        # self._run_shell_cmd("su -c supolicy --live \"allow zygote servicemanager binder {call}\"", wait=True)
+        # self._run_shell_cmd("su -c supolicy --live \"allow servicemanager zygote dir {search}\"", wait=True)
+        # self._run_shell_cmd("su -c supolicy --live \"allow servicemanager zygote file {read open}\"", wait=True)
+        # self._run_shell_cmd("su -c supolicy --live \"allow servicemanager zygote process {getattr}\"", wait=True)
+
 
     def _run_shell_cmd(self, cmd, wait=False):
         p = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True)
@@ -175,7 +190,7 @@ class AndroidDevDiagMonitor(Monitor):
         Enable the messages to be monitored. Refer to cls.SUPPORTED_TYPES for supported types.
 
         If this method is never called, the config file existing on the SD card will be used.
-        
+
         :param type_name: the message type(s) to be monitored
         :type type_name: string or list
 
@@ -198,10 +213,9 @@ class AndroidDevDiagMonitor(Monitor):
             os.mknod(fifo_path, 0666 | stat.S_IFIFO)
         except OSError as err:
             if err.errno == errno.EEXIST:   # if already exists, skip this step
-                pass
-                # print "Fifo file already exists, skipping..."
+                logging.info("Fifo file already exists, skipping...")
             elif err.errno == errno.EPERM:  # not permitted, try shell command
-                # print "Not permitted to create fifo file, try to switch to root..."
+                logging.info("Not permitted to create fifo file, try to switch to root...")
                 retcode = self._run_shell_cmd("su -c mknod %s p" % fifo_path, wait=True)
                 if retcode != 0:
                     raise RuntimeError("mknod returns %s" % str(retcode))
@@ -225,15 +239,45 @@ class AndroidDevDiagMonitor(Monitor):
         if not self._type_names:
             if os.path.exists(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg")):
                 generate_diag_cfg = False
-                # print "AndroidDevDiagMonitor: existing Diag.cfg file will be used."
+                logging.info("AndroidQmdlMonitor: existing Diag.cfg file will be used.")
             else:
                 raise RuntimeError("Log type not specified. Please call enable_log() first.")
 
         try:
+            # FIXME(Haotian)
+
+            time_current = str(datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H-%M-%S-%f'))
+            log_pdsch = "/sdcard/log_pdsch/"
+            if not os.path.exists(log_pdsch):
+                os.makedirs(log_pdsch)
+
+            # f_pdsch = open("/sdcard/log_pdsch/pdsch_" + time_current + ".csv", "w")
+            # f_pdsch.write("# datetime.now, "
+            #         "type_id, "
+            #         "QxDM_timestamp, "
+            #         "Version, "
+            #         "Serving_Cell_ID, "
+            #         "System_Frame_Number, "
+            #         "Subframe_Number, "
+            #         "PDSCH_RNTIl_ID, "
+            #         "Number_of_Tx_Antennas(M), "
+            #         "Number_of_Rx_Antennas(N), "
+            #         "RB_Allocation_Slot_0[0], "
+            #         "RB_Allocation_Slot_0[1], "
+            #         "RB_Allocation_Slot_1[0], "
+            #         "RB_Allocation_Slot_1[1], "
+            #         "Transport_Block_Size_Stream_0, "
+            #         "Modulation_Stream_0, "
+            #         "Traffic_to_Pilot_Ratio, "
+            #         "Transport_Block_Size_Stream_1, "
+            #         "Modulation_Stream_1, "
+            #         "Carrier_Index\n")
             if generate_diag_cfg:
                 self._run_shell_cmd("su -c mkdir \"%s\"" % self.DIAG_CFG_DIR)
                 fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "wb")
                 dm_collector_c.generate_diag_cfg(fd, self._type_names)
+                logging.info("Haotian: generate the following diag cfg:")
+                logging.info(self._type_names)
                 fd.close()
 
             self._mkfifo(self._fifo_path)
@@ -270,11 +314,10 @@ class AndroidDevDiagMonitor(Monitor):
                             dm_collector_c.feed_binary(ret_payload)
                     elif ret_msg_type == ChronicleProcessor.TYPE_START_LOG_FILE:
                         if ret_filename:
-                            pass
-                            # print "Start of %s" % ret_filename
+                            logging.info("Start of %s" % ret_filename)
                     elif ret_msg_type == ChronicleProcessor.TYPE_END_LOG_FILE:
                         if ret_filename:
-                            # print "End of %s" % ret_filename
+                            logging.info("End of %s" % ret_filename)
                             event = Event(  timeit.default_timer(),
                                             "new_diag_log",
                                             ret_filename)
@@ -290,10 +333,34 @@ class AndroidDevDiagMonitor(Monitor):
                     try:
                         packet = DMLogPacket(result[0])
                         d = packet.decode()
-                        # print d["type_id"], d["timestamp"]
-                        # xml = packet.decode_xml()
-                        # print xml
-                        # print ""
+                        # FIXME(Haotian: only for PDSCH)
+                        # output_pdsch = str(datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S.%f')) + "," + \
+                        #         str(d["type_id"]) + "," + \
+                        #         str(d["timestamp"]) + "," + \
+                        #         str(d["Version"]) + "," + \
+                        #         str(d["Serving Cell ID"]) + "," + \
+                        #         str(d["System Frame Number"]) + "," + \
+                        #         str(d["Subframe Number"]) + "," + \
+                        #         str(d["PDSCH RNTIl ID"]) + "," + \
+                        #         str(d["Number of Tx Antennas(M)"]) + "," + \
+                        #         str(d["Number of Rx Antennas(N)"]) + "," + \
+                        #         str(d["RB Allocation Slot 0[0]"]) + "," + \
+                        #         str(d["RB Allocation Slot 0[1]"]) + "," + \
+                        #         str(d["RB Allocation Slot 1[0]"]) + "," + \
+                        #         str(d["RB Allocation Slot 1[1]"]) + "," + \
+                        #         str(d["Transport Block Size Stream 0"]) + "," + \
+                        #         str(d["Modulation Stream 0"]) + "," + \
+                        #         str(d["Traffic to Pilot Ratio"]) + "," + \
+                        #         str(d["Transport Block Size Stream 1"]) + "," + \
+                        #         str(d["Modulation Stream 1"]) + "," + \
+                        #         str(d["Carrier Index"]) + "\n"
+                        # f_pdsch.write(output_pdsch)
+                        # logging.info(output_pdsch)
+                        output = str(datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S.%f')) + "\t" + str(d["type_id"])
+                        logging.info(output)
+                        xml = packet.decode_xml()
+                        logging.info(xml)
+                        # logging.info("")
                         # Send event to analyzers
                         event = Event(  result[1],
                                         d["type_id"],
@@ -301,24 +368,16 @@ class AndroidDevDiagMonitor(Monitor):
                         self.send(event)
                     except FormatError, e:
                         # skip this packet
-                        print "FormatError: ", e
+                        logging.info("FormatError: ", e)
 
 
         except (KeyboardInterrupt, RuntimeError), e:
             os.close(fifo)
             proc.terminate()
-            event = Event(  timeit.default_timer(),
-                            "sys_shutdown",
-                            "Mayday")
-            self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
         except Exception, e:
-            event = Event(  timeit.default_timer(),
-                            "sys_shutdown",
-                            "Mayday")
-            self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)

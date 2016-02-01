@@ -483,6 +483,8 @@ const ValueName LteMacConfigurationSubpkt_SubpktType [] = {
     {4, "LC Config SubPacket"},
     {7, "DL Transport Block"},
     {8, "UL Transport Block"},
+    {10, "UL Buffer Status SubPacket"},
+    {11, "UL Tx Statistics SubPacket"},
     {13, "eMBMS Config SubPacket"}
 };
 
@@ -638,6 +640,63 @@ const Fmt LteMacDLTransportBlock_SubpktV2_SampleFmt [] = {
     //{SKIP, "NULL", 2}
 };
 
+// ----------------------------------------------------------
+// LTE Mac UL Tx Statistics
+// TODO: Jie
+const Fmt LteMacULTxStatisticsFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num SubPkt", 1},
+    {SKIP, NULL, 2}
+};
+
+const Fmt LteMacULTxStatistics_SubpktHeaderFmt [] = {
+    {UINT, "SubPacket ID", 1},
+    {UINT, "Version", 1},
+    {UINT, "SubPacket Size", 2},
+};
+
+const Fmt LteMacULTxStatistics_ULTxStatsSubPacketFmt [] = {
+    {UINT, "Number of samples", 1},
+    {UINT, "Number of padding BSR", 1},
+    {UINT, "Number of regular BSR", 1},
+    {UINT, "Number of periodic BSR", 1},
+    {UINT, "Number of cancel BSR", 1},
+    {UINT, "Grant received", 4},
+    {UINT, "Grant utilized", 4},
+    {SKIP, NULL, 3}
+};
+
+// ----------------------------------------------------------
+// LTE MAC UL Buffer Status Internal
+// TODO: Jie
+const Fmt LteMacULBufferStatusInternalFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num SubPkt", 1},
+    {SKIP, NULL, 2}
+};
+
+const Fmt LteMacULBufferStatusInternal_SubpktHeaderFmt [] = {
+    {UINT, "SubPacket ID", 1},
+    {UINT, "Version", 1},
+    {UINT, "SubPacket Size", 2},
+    {UINT, "Num Samples", 1}
+};
+
+const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt [] = {
+    // Currently parsing half a byte is not supported
+    //{UINT, "SFN", 1.5},
+    //{UINT, "Sub FN", 0.5},
+    {UINT, "SFN and Sub FN", 2},
+    {UINT, "Number of active LCID", 1}
+};
+
+const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt [] = {
+    {UINT, "Ld Id", 1},
+    {UINT, "Priority", 1},
+    {UINT, "New bytes", 4},
+    {UINT, "Ret bytes", 4},
+    {UINT, "Ctrl bytes", 2},
+};
 
 bool is_log_packet (const char *b, int length);
 

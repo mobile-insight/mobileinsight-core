@@ -30,6 +30,8 @@ except ImportError, e:
 
 from ws_dissector import *
 
+import itertools
+range = lambda stop: iter(itertools.count().next, stop)
 
 class SuperEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -120,7 +122,8 @@ class DMLogPacket:
                             if sib_segment is not None:
                                 field = sib_segment.find("field[@name='rrc.sib_Type']")
                                 sib_id = int(field.get("show"))
-                                print "RRC SIB Segment(type: %d) not handled" % sib_id
+                                ## Zengwen: need to use log it back
+                                # print "RRC SIB Segment(type: %d) not handled" % sib_id
                     xx = cls._wrap_decoded_xml(xmls)
                     lst.append( (field_name, xx, "msg") )
                 else:
@@ -241,6 +244,7 @@ class DMLogPacket:
         cls = self.__class__
 
         xml = cls._parse_internal_list("xml/dict", self._decoded_list)
+        # Zengwen: what about this name?
         xml.tag = "dm_log_packet"
         return ET.tostring(xml)
 
