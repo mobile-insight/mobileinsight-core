@@ -92,7 +92,7 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
     epan_dissect_run(edt, 0, &phdr, tvb_new_real_data(raw_data, data_len, data_len), &fdata, NULL);
     // const proto_tree *payload_tree = edt->tree->first_child->next;
     // print_tree(payload_tree, 0);
-    write_pdml_proto_tree(edt, stdout);
+    // write_pdml_proto_tree(edt, stdout); //Yuanjie: it cannot compile...
 
     epan_dissect_free(edt);
     frame_data_destroy(&fdata);
