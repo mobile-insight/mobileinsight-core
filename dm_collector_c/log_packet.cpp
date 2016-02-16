@@ -1330,6 +1330,42 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, int length,
     }
 }
 
+
+//Yuanjie: decode modem's internal debugging message
+static int
+_decode_modem_debug_msg(const char *b, int offset, int length,
+                                PyObject *result) {
+
+
+    printf("A modem debug message\n");
+
+    int start = offset;
+    int argc = _search_result_int(result, "Number of parameters");
+
+    PyObject *argv = PyList_New(0);
+
+    //Get parameters
+    for(int i=0; i!=argc; i++)
+    {
+        const char *p = b + offset;
+
+        unsigned int ii = *((unsigned int *) p);    //a new parameter
+        PyObject *decoded = Py_BuildValue("I", ii);
+        PyList_Append(argv,decoded);
+        offset += 4;    //one parameter
+    }
+
+    //Get the debug string
+    std::string type_str = "";
+    PyObject *t = Py_BuildValue("(ss#s)", "Msg", b + offset, length - offset, type_str.c_str());
+
+    PyList_Append(result, t);
+    Py_DECREF(t);
+    return length-start;
+
+}
+
+
 bool
 is_log_packet (const char *b, int length) {
     return length >= 2 && b[0] == '\x10';
@@ -1514,6 +1550,13 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                                     b, offset, length, result);
         offset += _decode_lte_mac_ul_txstatistics_subpkt(b, offset, length, result);
         break;
+
+    case modem_debug_msg: //Yuanjie: modem debugging message
+        offset += _decode_by_fmt(ModemDebug_Fmt,
+                                    ARRAY_SIZE(ModemDebug_Fmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_modem_debug_msg(b, offset, length, result); 
+        break;       
 
 
     default:

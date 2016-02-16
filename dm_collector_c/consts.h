@@ -37,6 +37,7 @@ enum LogPacketType {
     LTE_MAC_UL_Transport_Block = 0xB064,
     LTE_MAC_UL_Buffer_Status_Internal = 0xB066,
     LTE_MAC_UL_Tx_Statistics = 0xB067,
+    modem_debug_msg = 0x1FEB,
 };
 
 // Mapping type IDs to names
@@ -95,6 +96,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_MAC_UL_Buffer_Status_Internal"},
     {LTE_MAC_UL_Tx_Statistics,
         "LTE_MAC_UL_Tx_Statistics"},
+    {modem_debug_msg,
+        "Modem_debug_message"},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

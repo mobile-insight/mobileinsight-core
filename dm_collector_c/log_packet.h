@@ -698,6 +698,15 @@ const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt [] = {
     {UINT, "Ctrl bytes", 2},
 };
 
+const Fmt ModemDebug_Fmt [] = {
+    {UINT, "Version", 1},
+    {SKIP, NULL, 1},
+    {UINT, "Number of parameters", 2},
+    {UINT, "Timestamp", 8},
+    {UINT, "Line of code", 2},
+    {SKIP, NULL, 6},
+};
+
 bool is_log_packet (const char *b, int length);
 
 // Given a binary string, try to decode it as a log packet.
