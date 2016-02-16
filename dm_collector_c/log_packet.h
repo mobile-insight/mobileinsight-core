@@ -708,6 +708,7 @@ const Fmt ModemDebug_Fmt [] = {
 };
 
 bool is_log_packet (const char *b, int length);
+bool is_debug_packet (const char *b, int length);   //Yuanjie: test if it's a debugging message
 
 // Given a binary string, try to decode it as a log packet.
 // Return a specailly formatted Python list that stores the decoding result.

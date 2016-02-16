@@ -1337,8 +1337,6 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
                                 PyObject *result) {
 
 
-    printf("A modem debug message\n");
-
     int start = offset;
     int argc = _search_result_int(result, "Number of parameters");
 
@@ -1356,7 +1354,7 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
     }
 
     //Get the debug string
-    PyObject *t = Py_BuildValue("(ss#s)", "Msg", b + offset, length - offset, "dict");
+    PyObject *t = Py_BuildValue("(ss#s)", "Msg", b + offset, length - offset, "");
 
     PyList_Append(result, t);
     Py_DECREF(t);
@@ -1368,7 +1366,12 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
 bool
 is_log_packet (const char *b, int length) {
     return length >= 2 && b[0] == '\x10';
-    // return length >= 2 && (b[0] == '\x10' || b[0] == '\x79');
+}
+
+bool
+is_debug_packet (const char *b, int length) {
+    // return length >=2 && (b[0] ==  '\x79' || b[0] == '\x92');
+    return length >=2 && (b[0] ==  '\x79');
 }
 
 PyObject *
@@ -1396,8 +1399,6 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                                 LogPacketTypeID_To_Name,
                                 ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
                                 "Unsupported");
-
-    printf("type_id=%x\n",type_id);
 
     if (skip_decoding) {    // skip further decoding
         return result;
@@ -1554,7 +1555,6 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
         break;
 
     case Modem_debug_message: //Yuanjie: modem debugging message
-        printf("modem_debug_msg\n");
         offset += _decode_by_fmt(ModemDebug_Fmt,
                                     ARRAY_SIZE(ModemDebug_Fmt, Fmt),
                                     b, offset, length, result);

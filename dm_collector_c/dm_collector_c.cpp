@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <sys/time.h>
 #include <iostream>
+#include <sstream>
 
 // NOTE: the following number should be updated every time.
 #define DM_COLLECTOR_C_VERSION "1.0.11"
@@ -328,20 +329,58 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
 
     bool success = get_next_frame(frame, crc_correct);
     // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
-    // printf("%x %d\n",frame.c_str()[0],frame.size());
-    // std::cout<<frame.c_str()<<std::endl;
-    if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
-        const char *s = frame.c_str();
-        PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
-                                                frame.size() - 2,
-                                                skip_decoding);
-        if (include_timestamp) {
-            PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
-            Py_DECREF(decoded);
-            return ret;
-        } else {
-            return decoded;
+    // if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
+    if (success && crc_correct) {
+
+        if(is_log_packet(frame.c_str(), frame.size())){
+            const char *s = frame.c_str();
+            PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
+                                                    frame.size() - 2,
+                                                    skip_decoding);
+            if (include_timestamp) {
+                PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+                Py_DECREF(decoded);
+                return ret;
+            } else {
+                return decoded;
+            }
+
         }
+        else if(is_debug_packet(frame.c_str(), frame.size())){
+            //Yuanjie: original debug msg does not have header...
+            char tmp[14]={
+                0x00, 0x00,
+                0x00, 0x00, 0xeb, 0x1f,
+                0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00
+            };
+            tmp[2]=(char)(frame.size()+14);
+            char *s = new char[14+frame.size()];
+            memcpy(s,tmp,14);
+            memcpy(s+14,frame.c_str(),frame.size());
+
+            // const char *s = frame.c_str();
+            // const char *s = frame_with_header.c_str();
+            for(int i=0;i!=14+frame.size();i++)
+                printf("%x ", s[i]);
+            printf("\n\n");
+            //Decode entire packet
+            // PyObject *decoded = decode_log_packet(s, frame.size(), skip_decoding);
+            PyObject *decoded = decode_log_packet(s, frame.size()+14, skip_decoding);
+            if (include_timestamp) {
+                PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+                Py_DECREF(decoded);
+                delete [] s;
+                return ret;
+            } else {
+                delete [] s;
+                return decoded;
+            }
+        }
+        else {
+            Py_RETURN_NONE;
+        }
+        
     } else {
         // printf("dm_collector_c_receive_log_packet returns None\n");
         Py_RETURN_NONE;
