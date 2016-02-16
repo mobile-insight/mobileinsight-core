@@ -1356,8 +1356,7 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
     }
 
     //Get the debug string
-    std::string type_str = "";
-    PyObject *t = Py_BuildValue("(ss#s)", "Msg", b + offset, length - offset, type_str.c_str());
+    PyObject *t = Py_BuildValue("(ss#s)", "Msg", b + offset, length - offset, "dict");
 
     PyList_Append(result, t);
     Py_DECREF(t);
@@ -1369,6 +1368,7 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
 bool
 is_log_packet (const char *b, int length) {
     return length >= 2 && b[0] == '\x10';
+    // return length >= 2 && (b[0] == '\x10' || b[0] == '\x79');
 }
 
 PyObject *
@@ -1396,6 +1396,8 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                                 LogPacketTypeID_To_Name,
                                 ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
                                 "Unsupported");
+
+    printf("type_id=%x\n",type_id);
 
     if (skip_decoding) {    // skip further decoding
         return result;
@@ -1551,7 +1553,8 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
         offset += _decode_lte_mac_ul_txstatistics_subpkt(b, offset, length, result);
         break;
 
-    case modem_debug_msg: //Yuanjie: modem debugging message
+    case Modem_debug_message: //Yuanjie: modem debugging message
+        printf("modem_debug_msg\n");
         offset += _decode_by_fmt(ModemDebug_Fmt,
                                     ARRAY_SIZE(ModemDebug_Fmt, Fmt),
                                     b, offset, length, result);

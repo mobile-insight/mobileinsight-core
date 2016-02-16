@@ -16,12 +16,36 @@ from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
 class QmdlReplayer(Monitor):
     """
-    
+    A log replayer for offline analysis.
     """
+
+    SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
 
     def __init__(self, prefs={}):
         Monitor.__init__(self)
         DMLogPacket.init(prefs)
+
+        self._type_names=[]
+
+    def enable_log(self, type_name):
+        """
+        Enable the messages to be monitored. Refer to cls.SUPPORTED_TYPES for supported types.
+
+        If this method is never called, the config file existing on the SD card will be used.
+        
+        :param type_name: the message type(s) to be monitored
+        :type type_name: string or list
+
+        :except ValueError: unsupported message type encountered
+        """
+        cls = self.__class__
+        if isinstance(type_name, str):
+            type_name = [type_name]
+        for n in type_name:
+            if n not in cls.SUPPORTED_TYPES:
+                raise ValueError("Unsupported log message type: %s" % n)
+            elif n not in self._type_names:
+                self._type_names.append(n)
 
     def set_input_path(self, path):
         """
@@ -53,10 +77,14 @@ class QmdlReplayer(Monitor):
                         # print xml
                         # print ""
                         # Send event to analyzers
-                        event = Event(  timeit.default_timer(),
-                                        d["type_id"],
-                                        packet)
-                        self.send(event)
+
+                        print d["type_id"], self._type_names
+
+                        if d["type_id"] in self._type_names:
+                            event = Event(  timeit.default_timer(),
+                                            d["type_id"],
+                                            packet)
+                            self.send(event)
                     except FormatError, e:
                         # skip this packet
                         print "FormatError: ", e

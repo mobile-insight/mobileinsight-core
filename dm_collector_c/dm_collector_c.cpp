@@ -15,6 +15,7 @@
 #include <vector>
 #include <algorithm>
 #include <sys/time.h>
+#include <iostream>
 
 // NOTE: the following number should be updated every time.
 #define DM_COLLECTOR_C_VERSION "1.0.11"
@@ -293,8 +294,10 @@ static PyObject *
 dm_collector_c_feed_binary (PyObject *self, PyObject *args) {
     const char *b;
     int length;
-    if (!PyArg_ParseTuple(args, "s#", &b, &length))
+    if (!PyArg_ParseTuple(args, "s#", &b, &length)){
+        // printf("dm_collector_c_feed_binary returns NULL\n");
         return NULL;
+    }
     feed_binary(b, length);
     Py_RETURN_NONE;
 }
@@ -324,6 +327,9 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     double posix_timestamp = (include_timestamp? get_posix_timestamp(): -1.0);
 
     bool success = get_next_frame(frame, crc_correct);
+    // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
+    // printf("%x %d\n",frame.c_str()[0],frame.size());
+    // std::cout<<frame.c_str()<<std::endl;
     if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
         const char *s = frame.c_str();
         PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
@@ -337,6 +343,7 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
             return decoded;
         }
     } else {
+        // printf("dm_collector_c_receive_log_packet returns None\n");
         Py_RETURN_NONE;
     }
 }

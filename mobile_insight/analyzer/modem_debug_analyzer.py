@@ -18,8 +18,6 @@ class ModemDebugAnalyzer(Analyzer):
 
         self.add_source_callback(self.__msg_callback)
 
-        self.init_timestamp=None
-
 
     def set_source(self,source):
         """

@@ -95,8 +95,15 @@ class DMLogPacket:
 
                     if msg_type == "RRC_DL_BCCH_BCH":
                         sib_types = cls._preparse_internal_list.wcdma_sib_types
-                        # xml = ET.fromstring(decoded)
-                        xml = ET.XML(decoded)
+                        try:
+                            # xml = ET.fromstring(decoded)
+                            xml = ET.XML(decoded)
+                        except Exception, e:
+                            print "Unsupported RRC_DL_BCCH_BCH"
+                            xx = cls._wrap_decoded_xml(xmls)
+                            lst.append(("Unsupported", xx, "msg"))
+                            return lst
+                            
                         sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
                         if sibs:
                             # deal with a list of complete SIBs
