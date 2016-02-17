@@ -347,7 +347,7 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
 
         }
         else if(is_debug_packet(frame.c_str(), frame.size())){
-            //Yuanjie: original debug msg does not have header...
+            //Yuanjie: the original debug msg does not have header...
             char tmp[14]={
                 0x00, 0x00,
                 0x00, 0x00, 0xeb, 0x1f,
@@ -359,13 +359,6 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
             memcpy(s,tmp,14);
             memcpy(s+14,frame.c_str(),frame.size());
 
-            // const char *s = frame.c_str();
-            // const char *s = frame_with_header.c_str();
-            for(int i=0;i!=14+frame.size();i++)
-                printf("%x ", s[i]);
-            printf("\n\n");
-            //Decode entire packet
-            // PyObject *decoded = decode_log_packet(s, frame.size(), skip_decoding);
             PyObject *decoded = decode_log_packet(s, frame.size()+14, skip_decoding);
             if (include_timestamp) {
                 PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
@@ -382,7 +375,6 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
         }
         
     } else {
-        // printf("dm_collector_c_receive_log_packet returns None\n");
         Py_RETURN_NONE;
     }
 }

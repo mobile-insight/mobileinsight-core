@@ -11,6 +11,7 @@
 
 #include <map>
 #include <string>
+#include <sstream>
 
 /*
  * The decoding result is represented using a Python list object (called result
@@ -1339,26 +1340,154 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
 
     int start = offset;
     int argc = _search_result_int(result, "Number of parameters");
+    char version = _search_result_int(result, "Version");
 
-    PyObject *argv = PyList_New(0);
 
-    //Get parameters
-    for(int i=0; i!=argc; i++)
-    {
-        const char *p = b + offset;
+    if(version=='\x79'){
+        //Yuanjie: these logs can be directly decoded
+        PyObject *argv = PyList_New(0);
 
-        unsigned int ii = *((unsigned int *) p);    //a new parameter
-        PyObject *decoded = Py_BuildValue("I", ii);
-        PyList_Append(argv,decoded);
-        offset += 4;    //one parameter
+        int *tmp_argv = new int[argc];
+
+        //Get parameters
+        for(int i=0; i!=argc; i++)
+        {
+            const char *p = b + offset;
+
+            int ii = *((int *) p);    //a new parameter
+            PyObject *decoded = Py_BuildValue("I", ii);
+            tmp_argv[i] = ii;
+
+            PyList_Append(argv,decoded);
+            offset += 4;    //one parameter
+        }
+
+        char* s = new char[length - offset];
+        memcpy(s,b+offset,length - offset);
+        std::string res = s;
+
+        for(int i=0; i!=argc; i++)
+        {
+            std::size_t found = res.find("%");
+            if (found==std::string::npos)
+                break;
+            std::string tmp = std::to_string(tmp_argv[i]);
+            std::stringstream ss;
+            switch(res[found+1]){
+                case 'd':
+                    res.replace(found,2,tmp);
+                    break;
+                case 'x': case 'X':
+                    ss << std::hex << tmp_argv[i];
+                    tmp = ss.str();
+                    res.replace(found,2,tmp); //for simplicity, we don't convert to hex
+                    break;
+                case 'l':
+                    switch(res[found+2]){
+                        case 'd': case 'u':
+                            tmp = std::to_string(tmp_argv[i]);
+                            res.replace(found,3,tmp); //%lu or %ld
+                            break;
+                        case 'x': case 'X':
+                            ss << std::hex << tmp_argv[i];
+                            tmp = ss.str();
+                            res.replace(found,3,tmp); //for simplicity, we don't convert to hex
+                            break;
+                        default:
+                            res.replace(found,2,""); 
+                            break;
+                    }
+                    break;
+                    
+                default:
+                    res.replace(found,1,""); 
+                    break;
+
+            }
+        }
+
+        //Get the debug string
+        // PyObject *t = Py_BuildValue("(ss#s)", "Msg", b + offset, length - offset, "");
+        PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
+
+        PyList_Append(result, t);
+        Py_DECREF(t);
+        return length-start;
     }
+    else if(version=='\x92'){
 
-    //Get the debug string
-    PyObject *t = Py_BuildValue("(ss#s)", "Msg", b + offset, length - offset, "");
+        //Yuanjie: these logs are encoded in unknown approach (signature based?)
+        //Currently only ad-hoc approach is available
 
-    PyList_Append(result, t);
-    Py_DECREF(t);
-    return length-start;
+        /* Yuanjie: for this type of debugging message, a "fingerprint" exists before the parameters
+         * The fingerprint seems the **unique** identifier of one message.
+         * The message is pre-stored (thus not transferred) as a database.
+         */
+        argc++;
+        int *tmp_argv = new int[argc];
+
+        //Get parameters
+        for(int i=0; i!=argc; i++)
+        {
+            const char *p = b + offset;
+
+            int ii = *((int *) p);    //a new parameter
+            tmp_argv[i] = ii;
+
+            offset += 4;    //one parameter
+        }
+
+
+        // if(argc>=2)
+        //     printf("argc=%d argv[0]=%x argv[1]=%d\n", argc, tmp_argv[0], tmp_argv[1]);
+        
+        if(argc==2 && tmp_argv[0]==0x2e3bbbed)
+        {
+            /*
+             * Yuanjie: for icellular only, 4G RSRP result in manual network search
+             * get log "BPLMN LOG: Saved measurement results. rsrp=-121"
+             * The fingerprint is tmp_argv[0]==0xedbb3b2e, tmp_argv[1]=rsrp value
+             */
+            std::string res = "BPLMN LOG: Saved measurement results. rsrp=";
+            res+=std::to_string(tmp_argv[1]);
+            PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return length-start;
+        }
+        else if(argc==10 && tmp_argv[0]==0x81700a47)
+        {
+            /*
+             * Yuanjie: for icellular only, 3G RSRP result in manual network search
+             * The fingerprint is tmp_argv[0]==0x81700a47, tmp_argv[1]=rscp value
+             */
+            std::string res = "Freq=%d, psc=%d, eng=%d filt_eng=%d, rscp=%d, RxAGC=%d 2*ecio=%d 2*squal=%d srxlv=%d";
+            for(int i=1; i!=argc; i++)
+            {
+
+                std::size_t found = res.find("%d");
+                std::string tmp = std::to_string(tmp_argv[i]);
+                res.replace(found,2,tmp);
+            }
+            PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return length-start;
+
+        }
+        else{
+
+            //Ignore other unknown messages
+            PyObject *t = Py_BuildValue("(ss#s)", "Msg", "", 0, "");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return length-start;
+
+        }
+
+
+    }
+    return 0;
 
 }
 
@@ -1370,8 +1499,8 @@ is_log_packet (const char *b, int length) {
 
 bool
 is_debug_packet (const char *b, int length) {
-    // return length >=2 && (b[0] ==  '\x79' || b[0] == '\x92');
-    return length >=2 && (b[0] ==  '\x79');
+    return length >=2 && (b[0] ==  '\x79' || b[0] == '\x92');
+    // return length >=2 && (b[0] ==  '\x79');
 }
 
 PyObject *
