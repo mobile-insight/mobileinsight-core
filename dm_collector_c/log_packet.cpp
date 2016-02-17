@@ -13,6 +13,17 @@
 #include <string>
 #include <sstream>
 
+//Yuanjie: In-phone version cannot locate std::to_string
+namespace patch
+{
+    template < typename T > std::string to_string( const T& n )
+    {
+        std::ostringstream stm ;
+        stm << n ;
+        return stm.str() ;
+    }
+}
+
 /*
  * The decoding result is represented using a Python list object (called result
  * list in the source code).
@@ -1371,7 +1382,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
             std::size_t found = res.find("%");
             if (found==std::string::npos)
                 break;
-            std::string tmp = std::to_string(tmp_argv[i]);
+            // std::string tmp = std::to_string(tmp_argv[i]);
+            std::string tmp = patch::to_string(tmp_argv[i]);
             std::stringstream ss;
             switch(res[found+1]){
                 case 'd':
@@ -1385,7 +1397,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
                 case 'l':
                     switch(res[found+2]){
                         case 'd': case 'u':
-                            tmp = std::to_string(tmp_argv[i]);
+                            // tmp = std::to_string(tmp_argv[i]);
+                            tmp = patch::to_string(tmp_argv[i]);
                             res.replace(found,3,tmp); //%lu or %ld
                             break;
                         case 'x': case 'X':
@@ -1449,7 +1462,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
              * The fingerprint is tmp_argv[0]==0xedbb3b2e, tmp_argv[1]=rsrp value
              */
             std::string res = "BPLMN LOG: Saved measurement results. rsrp=";
-            res+=std::to_string(tmp_argv[1]);
+            // res+=std::to_string(tmp_argv[1]);
+            res+=patch::to_string(tmp_argv[1]);
             PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
             PyList_Append(result, t);
             Py_DECREF(t);
@@ -1466,7 +1480,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
             {
 
                 std::size_t found = res.find("%d");
-                std::string tmp = std::to_string(tmp_argv[i]);
+                // std::string tmp = std::to_string(tmp_argv[i]);
+                std::string tmp = patch::to_string(tmp_argv[i]);
                 res.replace(found,2,tmp);
             }
             PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
