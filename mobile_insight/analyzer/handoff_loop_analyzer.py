@@ -37,19 +37,22 @@ class HandoffLoopAnalyzer(Analyzer):
             return
 
         #Get cell list and configurations
-        cell_list = self.__rrc_analyzer.get_cell_list()
+        # cell_list = self.__rrc_analyzer.get_cell_list()
+        cell_list = self.get_analyzer("RrcAnalyzer").get_cell_list()
         # mark if a cell has been visited
         cell_visited = {x:False for x in cell_list} 
         
         # print cell_list
         for cell in cell_list:
             # self.__rrc_analyzer.get_cell_config(cell).dump()
-            self.logger.info(self.__rrc_analyzer.get_cell_config(cell).dump())
+            # self.logger.info(self.__rrc_analyzer.get_cell_config(cell).dump())
+            self.logger.info(self.get_analyzer("RrcAnalyzer").get_cell_config(cell).dump())
 
         # each cell's configuration
         cell_config = {}
         for cell in cell_list:
-            cell_config[cell]=self.__rrc_analyzer.get_cell_config(cell)
+            # cell_config[cell]=self.__rrc_analyzer.get_cell_config(cell)
+            cell_config[cell]=self.get_analyzer("RrcAnalyzer").get_cell_config(cell)
         
         if cell_list:
 
@@ -67,7 +70,8 @@ class HandoffLoopAnalyzer(Analyzer):
                         unvisited_cell=cell
                         break
 
-                neighbor_cells = self.__rrc_analyzer.get_cell_neighbor(unvisited_cell)
+                # neighbor_cells = self.__rrc_analyzer.get_cell_neighbor(unvisited_cell)
+                neighbor_cells = self.get_analyzer("RrcAnalyzer").get_cell_neighbor(unvisited_cell)
                 #For each cell: 0 for unvisited, 1 for idle-only visited, 2 for idle-active visited
                 neighbor_visited = {x: 0 for x in neighbor_cells}
 
@@ -134,7 +138,8 @@ class HandoffLoopAnalyzer(Analyzer):
                         src_pref = dst_pref = None
 
                     
-                    dst_neighbor_cells=self.__rrc_analyzer.get_cell_neighbor(dst_cell)
+                    # dst_neighbor_cells=self.__rrc_analyzer.get_cell_neighbor(dst_cell)
+                    dst_neighbor_cells=self.get_analyzer("RrcAnalyzer").get_cell_neighbor(dst_cell)
                     dst_neighbor={x: 0 for x in dst_neighbor_cells}
                     for item in dst_neighbor:
                         # if cell_visited.has_key(item) and cell_visited[item]:

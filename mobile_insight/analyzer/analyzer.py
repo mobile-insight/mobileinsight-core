@@ -73,6 +73,8 @@ class Analyzer(Element):
         else:
             self.logger.info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
 
+        self.__parent_analyzer=[] #a list of analyzers it depends on
+
         #TODO: For Profile, each specific analyzer should declare it on demand
 
     def set_log(self,logpath,loglevel=logging.INFO):
@@ -143,6 +145,7 @@ class Analyzer(Element):
             self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
             if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                 Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
+            self.__parent_analyzer.append(analyzer_name)
         else:
             try:
                 #Dynamic import module and import analyzers
@@ -157,6 +160,7 @@ class Analyzer(Element):
                     Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
                 # self.logger.info(self.__class__.__name__+" from_list: "+str(self.from_list))
                 # self.logger.info(Analyzer.__analyzer_array[analyzer_name].__class__.__name__+" to_list: "+str(Analyzer.__analyzer_array[analyzer_name].to_list))
+                self.__parent_analyzer.append(analyzer_name)
             except Exception, e:
                 #Either the analyzer is unavailable, or has semantic errors
                 self.logger.info("Runtime Error: unable to import "+analyzer_name)  
@@ -178,6 +182,23 @@ class Analyzer(Element):
             del self.from_list[Analyzer.__analyzer_array[analyzer_name]]
             Analyzer.__analyzer_array[analyzer_name].to_list.remove(self)
             analyzer.to_list.remove(self) 
+
+            self.__parent_analyzer.remove(analyzer_name)
+
+    def get_analyzer(self, analyzer_name):
+        """
+        Get the instance of an analyzer from the global repository.
+        This API is useful if query for this analyzer is needed.
+
+        :param analyzer: the analyzer to not depend on
+        :type analyzer: string
+        :returns: the instance of the specificed analyzer, or None if it does not exist
+        """
+        if analyzer_name in Analyzer.__analyzer_array \
+        and analyzer_name in self.__parent_analyzer:
+            return Analyzer.__analyzer_array[analyzer_name]
+        else:
+            return None
 
     def recv(self,module,event):
         """

@@ -65,8 +65,10 @@ class RrcAnalyzer(Analyzer):
     
         :returns: a list of cells the device has associated with
         """
-        lte_cell_list=self.__lte_rrc_analyzer.get_cell_list()
-        wcdma_cell_list=self.__wcdma_rrc_analyzer.get_cell_list()
+        # lte_cell_list=self.__lte_rrc_analyzer.get_cell_list()
+        lte_cell_list=self.get_analyzer("LteRrcAnalyzer").get_cell_list()
+        # wcdma_cell_list=self.__wcdma_rrc_analyzer.get_cell_list()
+        wcdma_cell_list=self.get_analyzer("WcdmaRrcAnalyzer").get_cell_list()
         return lte_cell_list+wcdma_cell_list
 
     def get_cell_config(self,cell):
@@ -78,11 +80,13 @@ class RrcAnalyzer(Analyzer):
         :returns: this cell's active/idle-state configurations
         :rtype: LteRrcConfig or WcdmaRrcConfig
         """
-        res=self.__lte_rrc_analyzer.get_cell_config(cell)
+        # res=self.__lte_rrc_analyzer.get_cell_config(cell)
+        res=self.get_analyzer("LteRrcAnalyzer").get_cell_config(cell)
         if res != None:
             return res
         else:
-            return self.__wcdma_rrc_analyzer.get_cell_config(cell)
+            # return self.__wcdma_rrc_analyzer.get_cell_config(cell)
+            return self.get_analyzer("WcdmaRrcAnalyzer").get_cell_config(cell)
 
     def get_cur_cell(self):
         """
@@ -92,9 +96,11 @@ class RrcAnalyzer(Analyzer):
         :rtype: LteRrcStatus   or WcdmaRrcStatus    
         """
         if self.__cur_RAT=="LTE":
-            return self.__lte_rrc_analyzer.get_cur_cell()
+            # return self.__lte_rrc_analyzer.get_cur_cell()
+            return self.get_analyzer("LteRrcAnalyzer").get_cur_cell()
         elif self.__cur_RAT=="WCDMA":
-            return self.__wcdma_rrc_analyzer.get_cur_cell()
+            # return self.__wcdma_rrc_analyzer.get_cur_cell()
+            return self.get_analyzer("WcdmaRrcAnalyzer").get_cur_cell()
         else:
             return None
 
@@ -106,9 +112,11 @@ class RrcAnalyzer(Analyzer):
         :rtype: LteRrcConfig or WcdmaRrcConfig
         """
         if self.__cur_RAT=="LTE":
-            return self.__lte_rrc_analyzer.get_cur_cell_config()
+            # return self.__lte_rrc_analyzer.get_cur_cell_config()
+            return self.get_analyzer("LteRrcAnalyzer").get_cur_cell_config()
         elif self.__cur_RAT=="WCDMA":
-            return self.__wcdma_rrc_analyzer.get_cur_cell_config()
+            # return self.__wcdma_rrc_analyzer.get_cur_cell_config()
+            return self.get_analyzer("WcdmaRrcAnalyzer").get_cur_cell_config()
         else:
             return None
 
