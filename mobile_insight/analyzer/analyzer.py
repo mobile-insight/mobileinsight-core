@@ -129,6 +129,24 @@ class Analyzer(Element):
         if callback in self.source_callback:
             self.source_callback.remove(callback)
 
+    def __get_module_name(self, analyzer_name):
+        """
+        Given analyzer name (local), create corresponding module name
+
+        :param analyzer_name: the local analyzer name
+        :type analyzer_name: string
+        """    
+        res=""
+        for i in analyzer_name:
+            if i.isupper():
+                if res:
+                    res=res+"_"+i.lower()
+                else:
+                    res=res+i.lower()
+            else:
+                res=res+i
+        return res
+
     def include_analyzer(self,analyzer_name,callback_list):
         """
         Declares the dependency from other analyzers.
@@ -148,25 +166,31 @@ class Analyzer(Element):
             self.__parent_analyzer.append(analyzer_name)
         else:
             try:
-                #Dynamic import module and import analyzers
-                # self.logger.info("before __import__")
+                #If it's built-in analyzer, import from mobile_insight.analyzer
                 module_tmp = __import__("mobile_insight.analyzer")
                 analyzer_tmp = getattr(module_tmp.analyzer,analyzer_name)
-                # self.logger.info("after getattr " + analyzer_name + str(Analyzer.__analyzer_array.keys()))
                 Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp() 
-                # self.logger.info("after init " + analyzer_name)
                 self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
                 if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                     Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
-                # self.logger.info(self.__class__.__name__+" from_list: "+str(self.from_list))
-                # self.logger.info(Analyzer.__analyzer_array[analyzer_name].__class__.__name__+" to_list: "+str(Analyzer.__analyzer_array[analyzer_name].to_list))
                 self.__parent_analyzer.append(analyzer_name)
             except Exception, e:
-                #Either the analyzer is unavailable, or has semantic errors
-                self.logger.info("Runtime Error: unable to import "+analyzer_name)  
-                import traceback
-                import sys
-                sys.exit(str(traceback.format_exc()))
+                #Not a built-in analyzer. Try to import it from local directory
+                try:
+                    module_name = self.__get_module_name(analyzer_name)
+                    module_tmp = __import__(module_name)
+                    analyzer_tmp = getattr(module_tmp,analyzer_name)
+                    Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp() 
+                    self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
+                    if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
+                        Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
+                    self.__parent_analyzer.append(analyzer_name)
+                except Exception, e:
+                    #Either the analyzer is unavailable, or has semantic errors
+                    self.logger.info("Runtime Error: unable to import "+analyzer_name)  
+                    import traceback
+                    import sys
+                    sys.exit(str(traceback.format_exc()))
 
     def exclude_analyzer(self,analyzer_name):
         #TODO: this API would be depreciated
