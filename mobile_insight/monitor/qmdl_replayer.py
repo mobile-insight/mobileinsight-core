@@ -78,8 +78,6 @@ class QmdlReplayer(Monitor):
                         # print ""
                         # Send event to analyzers
 
-                        print d["type_id"], self._type_names
-
                         if d["type_id"] in self._type_names:
                             event = Event(  timeit.default_timer(),
                                             d["type_id"],
