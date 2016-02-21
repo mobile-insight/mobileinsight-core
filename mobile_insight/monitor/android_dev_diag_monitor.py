@@ -319,7 +319,7 @@ class AndroidDevDiagMonitor(Monitor):
                             "sys_shutdown",
                             "Mayday")
             print "iCellular debug -- exception here "+str(e)
-            self.send(event)
+            # self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
