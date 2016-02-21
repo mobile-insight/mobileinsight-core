@@ -318,6 +318,7 @@ class AndroidDevDiagMonitor(Monitor):
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
                             "Mayday")
+            print "iCellular debug -- exception here "+str(e)
             self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))
