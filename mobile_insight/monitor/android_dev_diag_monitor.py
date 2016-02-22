@@ -261,7 +261,9 @@ class AndroidDevDiagMonitor(Monitor):
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
                         s = None
+                        print "iCellular debug -- step 1"
                     else:
+                        print "iCellular debug -- step 2"
                         raise err # something else has happened -- better reraise
 
                 while s:   # preprocess metadata
@@ -273,16 +275,20 @@ class AndroidDevDiagMonitor(Monitor):
                             dm_collector_c.feed_binary(ret_payload)
                     elif ret_msg_type == ChronicleProcessor.TYPE_START_LOG_FILE:
                         if ret_filename:
+
+                            print "iCellular debug -- step 3"
                             pass
                             # print "Start of %s" % ret_filename
                     elif ret_msg_type == ChronicleProcessor.TYPE_END_LOG_FILE:
                         if ret_filename:
                             # print "End of %s" % ret_filename
+                            print "iCellular debug -- step 4"
                             event = Event(  timeit.default_timer(),
                                             "new_diag_log",
                                             ret_filename)
                             self.send(event)
                     elif ret_msg_type is not None:
+                        print "iCellular debug -- step 5"
                         raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
                     s = remain
 
