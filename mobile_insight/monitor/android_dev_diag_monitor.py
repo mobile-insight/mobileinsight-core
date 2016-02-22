@@ -250,13 +250,14 @@ class AndroidDevDiagMonitor(Monitor):
                                     shell=True,
                                     executable=ANDROID_SHELL,
                                     )
-            fifo = os.open(self._fifo_path, os.O_RDONLY | os.O_NONBLOCK)
+            # fifo = os.open(self._fifo_path, os.O_RDONLY | os.O_NONBLOCK)
+            fifo = os.open(self._fifo_path, os.O_RDONLY)    #Blocking mode: save CPU
 
             # Read log packets from diag_revealer
             chproc = ChronicleProcessor()
             while True:
                 try:
-                    sleep(0.1)
+                    # sleep(0.1)
                     s = os.read(fifo, self.BLOCK_SIZE)
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
