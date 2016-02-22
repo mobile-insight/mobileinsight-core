@@ -19,6 +19,8 @@ import stat
 import sys
 import timeit
 
+from time import sleep
+
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
@@ -254,6 +256,7 @@ class AndroidDevDiagMonitor(Monitor):
             chproc = ChronicleProcessor()
             while True:
                 try:
+                    sleep(0.1)
                     s = os.read(fifo, self.BLOCK_SIZE)
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
