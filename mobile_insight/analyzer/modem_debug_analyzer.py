@@ -36,7 +36,8 @@ class ModemDebugAnalyzer(Analyzer):
 
             log_item = msg.data.decode()
 
-            self.logger.info(log_item["Msg"])
+            if log_item.has_key('Msg'):
+                self.logger.info(log_item["Msg"])
         	
 
 

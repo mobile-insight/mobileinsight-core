@@ -1515,6 +1515,7 @@ is_log_packet (const char *b, int length) {
 bool
 is_debug_packet (const char *b, int length) {
     return length >=2 && (b[0] ==  '\x79' || b[0] == '\x92');
+    // return length >=2 && (b[0] == '\x92');  //Yuanjie: optimization for iCellular, avoid unuseful debug msg
     // return length >=2 && (b[0] ==  '\x79');
 }
 
