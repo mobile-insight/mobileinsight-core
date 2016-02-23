@@ -79,7 +79,8 @@ const ValueName WcdmaSignalingMsgChannelType [] = {
     {0x02, "RRC_DL_CCCH"},
     {0x03, "RRC_DL_DCCH"},
     {0x04, "RRC_DL_BCCH_BCH"},
-    {0x06, "RRC_DL_PCCH"}
+    {0x06, "RRC_DL_PCCH"},
+    {0xfe, "RRC_COMPLETE_SIB"}, 
 };
 
 // ------------------------------------------------------------

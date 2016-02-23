@@ -326,5 +326,7 @@ class DMLogPacket:
         """
         if isinstance(xmls, str):
             xmls = [xmls]
+        if None in xmls:
+            return "<msg>\n</msg>\n"
         assert isinstance(xmls, (list, tuple))
         return "<msg>\n" + "".join(xmls) + "</msg>\n"

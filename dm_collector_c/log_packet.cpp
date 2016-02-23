@@ -335,7 +335,7 @@ _decode_wcdma_signaling_messages(const char *b, int offset, int length,
 
     int pdu_length = _search_result_int(result, "Message Length");
 
-    std::string type_str = "raw_msg/";
+    std::string type_str = "raw_msg/"; 
     type_str += ch_name;
     PyObject *t = Py_BuildValue("(ss#s)",
                                 "Msg", b + offset, pdu_length, type_str.c_str());
@@ -1348,6 +1348,7 @@ static int
 _decode_modem_debug_msg(const char *b, int offset, int length,
                                 PyObject *result) {
 
+    // printf("__decode_modem_debug_msg\n");
 
     int start = offset;
     int argc = _search_result_int(result, "Number of parameters");
@@ -1548,6 +1549,8 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
     if (skip_decoding) {    // skip further decoding
         return result;
     }
+
+    // printf("type_id=%x\n",type_id);
 
     switch (type_id) {
     case CDMA_Paging_Channel_Message:
