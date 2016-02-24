@@ -188,6 +188,35 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
             Py_DECREF(item);    // Discard reference ownership
     }
 
+    // Yuanjie: check if Modem_debug_message exists. If so, enable it in slightly different way
+    IdVector::iterator debug_ind = type_ids.begin();
+    for(; debug_ind != type_ids.end(); debug_ind++) {
+        if(*debug_ind==Modem_debug_message){
+            break;
+        }
+    }
+    if(debug_ind!=type_ids.end()){
+        //Modem_debug_message should be enabled
+        type_ids.erase(debug_ind);
+        buf = encode_log_config(DEBUG_LTE_ML1, type_ids);
+        if (buf.first != NULL && buf.second != 0) {
+            (void) send_msg(file_or_serial, buf.first, buf.second);
+            delete [] buf.first;
+        } else {
+            PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
+            return false;
+        }
+        buf = encode_log_config(DEBUG_WCDMA_L1, type_ids);
+        if (buf.first != NULL && buf.second != 0) {
+            (void) send_msg(file_or_serial, buf.first, buf.second);
+            delete [] buf.first;
+        } else {
+            PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
+            return false;
+        }
+
+    }
+
     // send log config messages
     sort_type_ids(type_ids, type_id_vectors);
     for (size_t i = 0; i < type_id_vectors.size(); i++) {

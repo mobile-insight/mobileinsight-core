@@ -61,6 +61,11 @@ class QmdlReplayer(Monitor):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
         """
+
+        fd = open('./Diag.cfg','wb')
+        dm_collector_c.generate_diag_cfg(fd, self._type_names)
+        fd.close()
+
         try:
             while True:
                 s = self._input_file.read(64)
