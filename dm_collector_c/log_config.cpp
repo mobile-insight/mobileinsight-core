@@ -84,42 +84,40 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
 
     case DEBUG_LTE_ML1:
         //Yuanjie: enable debugging messages (currently for iCellular only)
-        buf.second = 13;
+        buf.second = 12;
         buf.first = new char[buf.second];
         //Enable LTE ML1 debug message (for RSRP)
         buf.first[0] = 0x7d;
-        buf.first[1] = 0x5d;
-        buf.first[2] = 0x04;
-        buf.first[3] = 0xb9;
-        buf.first[4] = 0x0b;
-        buf.first[5] = 0xb9;
-        buf.first[6] = 0x0b;
+        buf.first[1] = 0x04;
+        buf.first[2] = 0xb9;
+        buf.first[3] = 0x0b;
+        buf.first[4] = 0xb9;
+        buf.first[5] = 0x0b;
+        buf.first[6] = 0x00;
         buf.first[7] = 0x00;
-        buf.first[8] = 0x00;
-        buf.first[9] = 0x04;
+        buf.first[8] = 0x04;
+        buf.first[9] = 0x00;
         buf.first[10] = 0x00;
         buf.first[11] = 0x00;
-        buf.first[12] = 0x00;
         break;
 
     case DEBUG_WCDMA_L1:
         //Yuanjie: enable debugging messages (currently for iCellular only)
-        buf.second = 13;
+        buf.second = 12;
         buf.first = new char[buf.second];
         //Enable WCDMA L1 debug message (for RSCP)
         buf.first[0] = 0x7d;
-        buf.first[1] = 0x5d;
-        buf.first[2] = 0x04;
+        buf.first[1] = 0x04;
+        buf.first[2] = 0x25;
         buf.first[3] = 0x25;
         buf.first[4] = 0x25;
         buf.first[5] = 0x25;
-        buf.first[6] = 0x25;
+        buf.first[6] = 0x00;
         buf.first[7] = 0x00;
-        buf.first[8] = 0x00;
-        buf.first[9] = 0x04;
+        buf.first[8] = 0x04;
+        buf.first[9] = 0x00;
         buf.first[10] = 0x00;
         buf.first[11] = 0x00;
-        buf.first[12] = 0x00;
 
         break;
 
