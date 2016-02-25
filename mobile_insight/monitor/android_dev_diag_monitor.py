@@ -233,7 +233,9 @@ class AndroidDevDiagMonitor(Monitor):
 
         try:
             if generate_diag_cfg:
-                self._run_shell_cmd("su -c mkdir \"%s\"" % self.DIAG_CFG_DIR)
+                # self._run_shell_cmd("su -c mkdir \"%s\"" % self.DIAG_CFG_DIR)
+                if not os.path.exists(self.DIAG_CFG_DIR):
+                    os.makedirs(self.DIAG_CFG_DIR)
                 fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "w+b")
                 dm_collector_c.generate_diag_cfg(fd, self._type_names)
                 fd.close()
