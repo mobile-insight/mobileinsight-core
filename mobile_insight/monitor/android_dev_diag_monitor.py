@@ -19,12 +19,16 @@ import stat
 import sys
 import timeit
 
+
 from time import sleep
 
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
 ANDROID_SHELL = "/system/bin/sh"
+
+def get_cache_dir():
+    return str(service_context.getCacheDir().getAbsolutePath())
 
 
 class ChronicleProcessor(object):
@@ -109,8 +113,10 @@ class AndroidDevDiagMonitor(Monitor):
     #: a list containing the currently supported message types.
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
 
-    DIAG_CFG_DIR = "/sdcard/diag_logs"
-    TMP_FIFO_FILE = "/sdcard/diag_revealer_fifo"
+    # DIAG_CFG_DIR = "/sdcard/diag_logs"
+    DIAG_CFG_DIR = get_cache_dir()
+    # TMP_FIFO_FILE = "/sdcard/diag_revealer_fifo"
+    TMP_FIFO_FILE = os.path.join(get_cache_dir(), "diag_revealer_fifo") 
     BLOCK_SIZE = 128
 
     def __init__(self, prefs={}):
