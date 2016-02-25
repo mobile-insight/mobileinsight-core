@@ -25,7 +25,10 @@ from time import sleep
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
+from jnius import autoclass
+
 ANDROID_SHELL = "/system/bin/sh"
+service_context = autoclass('org.renpy.android.PythonService').mService
 
 def get_cache_dir():
     return str(service_context.getCacheDir().getAbsolutePath())
