@@ -13,6 +13,13 @@
 #include <string>
 #include <sstream>
 
+#include <fstream>
+
+// #ifdef __ANDROID__
+// #include <android/log.h>
+// #define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "TAG", __VA_ARGS__);
+// #endif 
+
 //Yuanjie: In-phone version cannot locate std::to_string
 namespace patch
 {
@@ -258,7 +265,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 PyObject *delta = PyDelta_FromDSU(0, seconds, useconds);
                 decoded = PyNumber_Add(epoch, delta);
                 n_consumed += fmt[i].len;
-                Py_DECREF(epoch);
+                Py_DECREF(epoch); 
                 Py_DECREF(delta);
                 break;
             }
@@ -1344,6 +1351,7 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, int length,
 
 
 //Yuanjie: decode modem's internal debugging message
+
 static int
 _decode_modem_debug_msg(const char *b, int offset, int length,
                                 PyObject *result) {
@@ -1378,6 +1386,7 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
         memcpy(s,b+offset,length - offset);
         std::string res = s;
 
+        //Replace printf parameters with numbers
         for(int i=0; i!=argc; i++)
         {
             std::size_t found = res.find("%");
@@ -1433,10 +1442,10 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
         //Yuanjie: these logs are encoded in unknown approach (signature based?)
         //Currently only ad-hoc approach is available
 
-        /* Yuanjie: for this type of debugging message, a "fingerprint" exists before the parameters
-         * The fingerprint seems the **unique** identifier of one message.
-         * The message is pre-stored (thus not transferred) as a database.
-         */
+        // Yuanjie: for this type of debugging message, a "fingerprint" exists before the parameters
+        // The fingerprint seems the **unique** identifier of one message.
+        // The message is pre-stored (thus not transferred) as a database.
+        //
         argc++;
         int *tmp_argv = new int[argc];
 
@@ -1457,11 +1466,11 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
         
         if(argc==2 && tmp_argv[0]==0x2e3bbbed)
         {
-            /*
-             * Yuanjie: for icellular only, 4G RSRP result in manual network search
-             * get log "BPLMN LOG: Saved measurement results. rsrp=-121"
-             * The fingerprint is tmp_argv[0]==0xedbb3b2e, tmp_argv[1]=rsrp value
-             */
+        
+             // Yuanjie: for icellular only, 4G RSRP result in manual network search
+             // get log "BPLMN LOG: Saved measurement results. rsrp=-121"
+             // The fingerprint is tmp_argv[0]==0xedbb3b2e, tmp_argv[1]=rsrp value
+             //
             std::string res = "BPLMN LOG: Saved measurement results. rsrp=";
             // res+=std::to_string(tmp_argv[1]);
             res+=patch::to_string(tmp_argv[1]);
@@ -1472,10 +1481,10 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
         }
         else if(argc==10 && tmp_argv[0]==0x81700a47)
         {
-            /*
-             * Yuanjie: for icellular only, 3G RSRP result in manual network search
-             * The fingerprint is tmp_argv[0]==0x81700a47, tmp_argv[1]=rscp value
-             */
+            
+             // Yuanjie: for icellular only, 3G RSRP result in manual network search
+             // The fingerprint is tmp_argv[0]==0x81700a47, tmp_argv[1]=rscp value
+             //
             std::string res = "Freq=%d, psc=%d, eng=%d filt_eng=%d, rscp=%d, RxAGC=%d 2*ecio=%d 2*squal=%d srxlv=%d";
             for(int i=1; i!=argc; i++)
             {
@@ -1508,6 +1517,7 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
 }
 
 
+
 bool
 is_log_packet (const char *b, int length) {
     return length >= 2 && b[0] == '\x10';
@@ -1520,10 +1530,13 @@ is_debug_packet (const char *b, int length) {
     // return length >=2 && (b[0] ==  '\x79');
 }
 
+
+
 PyObject *
 decode_log_packet (const char *b, int length, bool skip_decoding) {
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
+
 
     PyObject *result = NULL;
     int offset = 0;
@@ -1549,8 +1562,6 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
     if (skip_decoding) {    // skip further decoding
         return result;
     }
-
-    // printf("type_id=%x\n",type_id);
 
     switch (type_id) {
     case CDMA_Paging_Channel_Message:
@@ -1713,5 +1724,144 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
     default:
         break;
     };
+    return result;
+}
+
+
+/*-----------------------------------------------------------------------
+ * DEBUG ONLY
+ */
+
+static int
+_decode_by_fmt_modem (const Fmt fmt [], int n_fmt,
+                const char *b, int offset, int length,
+                PyObject *result) {
+    assert(PyList_Check(result));
+    int n_consumed = 0;
+
+    Py_INCREF(result);
+    for (int i = 0; i < n_fmt; i++) {
+        PyObject *decoded = NULL;
+        const char *p = b + offset + n_consumed;
+        switch (fmt[i].type) {
+        case UINT:
+            {
+                unsigned int ii = 0;
+                unsigned long long iiii = 0;
+                switch (fmt[i].len) {
+                case 1:
+                    ii = *((unsigned char *) p);
+                    break;
+                case 2:
+                    ii = *((unsigned short *) p);
+                    break;
+                case 4:
+                    ii = *((unsigned int *) p);
+                    break;
+                case 8:
+                    // iiii = *((unsigned long long *) p);
+                    iiii = 0;   //Yuanjie: quick work-around to avoid crash. For modem debug, this is timestamp
+                    break;
+                default:
+                    assert(false);
+                    break;
+                }
+                // Convert to a Python integer object or a Python long integer object
+                // TODO: make it little endian
+                if (fmt[i].len <= 4)
+                    decoded = Py_BuildValue("I", ii);
+                else
+                    decoded = Py_BuildValue("K", iiii);
+                n_consumed += fmt[i].len;
+                break;
+            }
+
+        case QCDM_TIMESTAMP:
+            {
+                const double PER_SECOND = 52428800.0;
+                const double PER_USECOND = 52428800.0 / 1.0e6;
+                assert(fmt[i].len == 8);
+                // Convert to a Python long integer object
+                // unsigned long long iiii = *((unsigned long long *) p);
+                unsigned long long iiii = 0;    //Yuanjie: FIX crash on Android
+                int seconds = int(double(iiii) / PER_SECOND);
+                int useconds = (double(iiii) / PER_USECOND) - double(seconds) * 1.0e6;
+                PyObject *epoch = PyDateTime_FromDateAndTime(1980, 1, 6, 0, 0, 0, 0);
+                PyObject *delta = PyDelta_FromDSU(0, seconds, useconds);
+                decoded = PyNumber_Add(epoch, delta);
+                n_consumed += fmt[i].len;
+                Py_DECREF(epoch); 
+                Py_DECREF(delta);
+                break;
+            }
+
+        default:
+            // assert(false);
+            break;
+        }
+
+        if (decoded != NULL) {
+            PyObject *t = Py_BuildValue("(sOs)",
+                                        fmt[i].field_name, decoded, "");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(decoded);
+        }
+    }
+    Py_DECREF(result);
+    return n_consumed;
+}
+
+
+
+PyObject *
+decode_log_packet_modem (const char *b, int length, bool skip_decoding) {
+    if (PyDateTimeAPI == NULL)  // import datetime module
+        PyDateTime_IMPORT;
+
+
+    PyObject *result = NULL;
+    int offset = 0;
+
+    // Parse Header
+    result = PyList_New(0);
+    offset = 0;
+    
+    offset += _decode_by_fmt_modem(LogPacketHeaderFmt, ARRAY_SIZE(LogPacketHeaderFmt, Fmt),
+                                b, offset, length, result);
+
+    PyObject *old_result = result;
+    result = PyList_GetSlice(result, 1, 4); // remove the duplicate "len1" field
+    Py_DECREF(old_result);
+    old_result = NULL;
+
+    
+    // Differentiate using type ID
+    LogPacketType type_id = (LogPacketType) _map_result_field_to_name(
+                                result,
+                                "type_id",
+                                LogPacketTypeID_To_Name,
+                                ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
+                                "Unsupported");
+
+    if (skip_decoding) {    // skip further decoding
+        return result;
+    }
+
+    switch (type_id) {
+
+    case Modem_debug_message: //Yuanjie: modem debugging message
+        offset += _decode_by_fmt_modem(ModemDebug_Fmt,
+                                    ARRAY_SIZE(ModemDebug_Fmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_modem_debug_msg(b, offset, length, result); 
+        break;       
+
+
+    default:
+        break;
+    };
+
+    
     return result;
 }

@@ -716,4 +716,7 @@ bool is_debug_packet (const char *b, int length);   //Yuanjie: test if it's a de
 // If skip_decoding is True, only the header would be decoded.
 PyObject * decode_log_packet (const char *b, int length, bool skip_decoding);
 
+
+PyObject * decode_log_packet_modem (const char *b, int length, bool skip_decoding);
+
 #endif  // __DM_COLLECTOR_C_LOG_PACKET_H__

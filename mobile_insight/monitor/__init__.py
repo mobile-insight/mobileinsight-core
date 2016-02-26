@@ -10,8 +10,18 @@ __all__ = [
             "DatahintAndroidDevDiagMonitor",
             ]
 
-from android_dev_diag_monitor import AndroidDevDiagMonitor
-from android_qmdl_monitor import AndroidQmdlMonitor
+is_android=False
+try:
+    from jnius import autoclass #For Android
+    is_android = True
+except Exception, e:
+    #not used, but bugs may exist on laptop
+    is_android=False
+
+
+if is_android:
+    from android_dev_diag_monitor import AndroidDevDiagMonitor
+    from android_qmdl_monitor import AndroidQmdlMonitor
 from monitor import Monitor
 from dm_collector import *
 from replayer import Replayer

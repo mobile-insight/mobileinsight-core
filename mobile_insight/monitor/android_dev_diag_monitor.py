@@ -25,13 +25,24 @@ from time import sleep
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
-from jnius import autoclass
+is_android=False
+try:
+    from jnius import autoclass #For Android
+    service_context = autoclass('org.renpy.android.PythonService').mService
+    is_android=True
+except Exception, e:
+    #not used, but bugs may exist on laptop
+    is_android=False
 
 ANDROID_SHELL = "/system/bin/sh"
-service_context = autoclass('org.renpy.android.PythonService').mService
+
+
 
 def get_cache_dir():
-    return str(service_context.getCacheDir().getAbsolutePath())
+    if is_android:
+        return str(service_context.getCacheDir().getAbsolutePath())
+    else:
+        return None
 
 
 class ChronicleProcessor(object):
