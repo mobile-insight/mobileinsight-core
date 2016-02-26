@@ -1356,8 +1356,6 @@ static int
 _decode_modem_debug_msg(const char *b, int offset, int length,
                                 PyObject *result) {
 
-    // printf("__decode_modem_debug_msg\n");
-
     int start = offset;
     int argc = _search_result_int(result, "Number of parameters");
     char version = _search_result_int(result, "Version");
@@ -1795,8 +1793,12 @@ _decode_by_fmt_modem (const Fmt fmt [], int n_fmt,
                 break;
             }
 
+        case SKIP:
+            n_consumed += fmt[i].len;
+            break;
+
         default:
-            // assert(false);
+            assert(false);
             break;
         }
 
@@ -1825,8 +1827,7 @@ decode_log_packet_modem (const char *b, int length, bool skip_decoding) {
 
     // Parse Header
     result = PyList_New(0);
-    offset = 0;
-    
+    offset = 0;  
     offset += _decode_by_fmt_modem(LogPacketHeaderFmt, ARRAY_SIZE(LogPacketHeaderFmt, Fmt),
                                 b, offset, length, result);
 
