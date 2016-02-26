@@ -98,10 +98,15 @@ class ProtocolAnalyzer(Analyzer):
 
         #Convert msg to xml format
         # log_xml = ET.fromstring(log_item_dict['Msg'])
-        log_xml = ET.XML(log_item_dict['Msg'])
-        xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
+        try:
 
-        self.state_machine.update_state(xml_msg)
+            log_xml = ET.XML(log_item_dict['Msg'])
+            xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
+
+            self.state_machine.update_state(xml_msg)
+        except Exception, e:
+            #Not an XML message
+            return
 
     def get_protocol_state(self):
         """

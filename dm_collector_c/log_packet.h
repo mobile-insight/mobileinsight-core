@@ -703,7 +703,7 @@ const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
     {SKIP, NULL, 1},
     {UINT, "Number of parameters", 2},
-    {UINT, "Timestamp", 8},
+    {QCDM_TIMESTAMP, "Timestamp", 8},
     {UINT, "Line of code", 2},
     {SKIP, NULL, 6},
 };

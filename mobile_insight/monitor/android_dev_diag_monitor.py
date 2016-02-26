@@ -322,7 +322,7 @@ class AndroidDevDiagMonitor(Monitor):
                     try:
                         packet = DMLogPacket(result[0])
                         d = packet.decode()
-                        # print d["type_id"], d["timestamp"]
+                        # print d["type_id"], d["timestamp"], result[1]
                         # xml = packet.decode_xml()
                         # print xml
                         # print ""

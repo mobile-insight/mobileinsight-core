@@ -1501,7 +1501,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
         else{
 
             //Ignore other unknown messages
-            PyObject *t = Py_BuildValue("(ss#s)", "Msg", "", 0, "");
+            std::string res="(Unknown debug message)";
+            PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
             PyList_Append(result, t);
             Py_DECREF(t);
             return length-start;
@@ -1795,7 +1796,7 @@ _decode_by_fmt_modem (const Fmt fmt [], int n_fmt,
 
         case SKIP:
             n_consumed += fmt[i].len;
-            break;
+            break; 
 
         default:
             assert(false);
