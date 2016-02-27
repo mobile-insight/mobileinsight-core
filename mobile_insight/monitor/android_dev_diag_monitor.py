@@ -165,16 +165,33 @@ class AndroidDevDiagMonitor(Monitor):
         For Nexus 6/6P, the SELinux policy may forbids the log collection.
         """
 
-        self._run_shell_cmd("su -c setenforce 0")
-        self._run_shell_cmd("su -c supolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
-        self._run_shell_cmd("su -c supolicy --live \"allow init init process execmem\"")
-        self._run_shell_cmd("su -c supolicy --live \"allow init properties_device file execute\"")
-        self._run_shell_cmd("su -c supolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
-        self._run_shell_cmd("su -c supolicy --live \"allow system_server diag_device chr_file {read write}\"")
-        self._run_shell_cmd("su -c supolicy --live \"allow untrusted_app app_data_file file {rename}\"")
+        # self._run_shell_cmd("su -c setenforce 0")
+        # self._run_shell_cmd("su -c supolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
+        # self._run_shell_cmd("su -c supolicy --live \"allow init init process execmem\"")
+        # self._run_shell_cmd("su -c supolicy --live \"allow init properties_device file execute\"")
+        # self._run_shell_cmd("su -c supolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
+        # self._run_shell_cmd("su -c supolicy --live \"allow system_server diag_device chr_file {read write}\"")
+        # self._run_shell_cmd("su -c supolicy --live \"allow untrusted_app app_data_file file {rename}\"")
 
-    def _run_shell_cmd(self, cmd, wait=False):
-        p = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True)
+        self._run_shell_cmd("setenforce 0")
+        self._run_shell_cmd("supolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
+        self._run_shell_cmd("supolicy --live \"allow init init process execmem\"")
+        self._run_shell_cmd("supolicy --live \"allow init properties_device file execute\"")
+        self._run_shell_cmd("supolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
+        self._run_shell_cmd("supolicy --live \"allow system_server diag_device chr_file {read write}\"")
+        self._run_shell_cmd("supolicy --live \"allow untrusted_app app_data_file file {rename}\"")
+
+    # def _run_shell_cmd(self, cmd, wait=False):
+    #     p = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True)
+    #     if wait:
+    #         p.wait()
+    #         return p.returncode
+    #     else:
+    #         return None
+
+    def _run_shell_cmd(self, cmd, wait = False):
+        p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        p.communicate(cmd+'\n')
         if wait:
             p.wait()
             return p.returncode
@@ -229,7 +246,8 @@ class AndroidDevDiagMonitor(Monitor):
                 # print "Fifo file already exists, skipping..."
             elif err.errno == errno.EPERM:  # not permitted, try shell command
                 # print "Not permitted to create fifo file, try to switch to root..."
-                retcode = self._run_shell_cmd("su -c mknod %s p" % fifo_path, wait=True)
+                # retcode = self._run_shell_cmd("su -c mknod %s p" % fifo_path, wait=True)
+                retcode = self._run_shell_cmd("mknod %s p" % fifo_path, wait=True)
                 if retcode != 0:
                     raise RuntimeError("mknod returns %s" % str(retcode))
             else:
@@ -258,7 +276,6 @@ class AndroidDevDiagMonitor(Monitor):
 
         try:
             if generate_diag_cfg:
-                # self._run_shell_cmd("su -c mkdir \"%s\"" % self.DIAG_CFG_DIR)
                 if not os.path.exists(self.DIAG_CFG_DIR):
                     os.makedirs(self.DIAG_CFG_DIR)
                 fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "w+b")
@@ -271,8 +288,10 @@ class AndroidDevDiagMonitor(Monitor):
             cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
             if self._input_dir:
                 cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
-                self._run_shell_cmd("su -c mkdir \"%s\"" % self._input_dir)
-                self._run_shell_cmd("su -c chmod -R 777 \"%s\"" % self._input_dir, wait=True)
+                # self._run_shell_cmd("su -c mkdir \"%s\"" % self._input_dir)
+                # self._run_shell_cmd("su -c chmod -R 777 \"%s\"" % self._input_dir, wait=True)
+                self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
+                self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
             proc = subprocess.Popen(cmd,
                                     shell=True,
                                     executable=ANDROID_SHELL,
