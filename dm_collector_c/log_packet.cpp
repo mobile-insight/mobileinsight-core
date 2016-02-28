@@ -1361,78 +1361,82 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
     char version = _search_result_int(result, "Version");
 
 
-    if(version=='\x79'){
-        //Yuanjie: these logs can be directly decoded
-        PyObject *argv = PyList_New(0);
+    // if(version=='\x79'){
+    //     //Yuanjie: these logs can be directly decoded
+    //     PyObject *argv = PyList_New(0);
 
-        int *tmp_argv = new int[argc];
+    //     int *tmp_argv = new int[argc];
 
-        //Get parameters
-        for(int i=0; i!=argc; i++)
-        {
-            const char *p = b + offset;
+    //     //Get parameters
+    //     for(int i=0; i!=argc; i++)
+    //     {
+    //         const char *p = b + offset;
 
-            int ii = *((int *) p);    //a new parameter
-            PyObject *decoded = Py_BuildValue("I", ii);
-            tmp_argv[i] = ii;
+    //         int ii = *((int *) p);    //a new parameter
+    //         PyObject *decoded = Py_BuildValue("I", ii);
+    //         tmp_argv[i] = ii;
 
-            PyList_Append(argv,decoded);
-            offset += 4;    //one parameter
-        }
+    //         PyList_Append(argv,decoded);
+    //         offset += 4;    //one parameter
+    //     }
 
-        char* s = new char[length - offset];
-        memcpy(s,b+offset,length - offset);
-        std::string res = s;
+    //     char* s = new char[length - offset];
+    //     memcpy(s,b+offset,length - offset);
+    //     std::string res = s;
 
-        //Replace printf parameters with numbers
-        for(int i=0; i!=argc; i++)
-        {
-            std::size_t found = res.find("%");
-            if (found==std::string::npos)
-                break;
-            // std::string tmp = std::to_string(tmp_argv[i]);
-            std::string tmp = patch::to_string(tmp_argv[i]);
-            std::stringstream ss;
-            switch(res[found+1]){
-                case 'd':
-                    res.replace(found,2,tmp);
-                    break;
-                case 'x': case 'X':
-                    ss << std::hex << tmp_argv[i];
-                    tmp = ss.str();
-                    res.replace(found,2,tmp); //for simplicity, we don't convert to hex
-                    break;
-                case 'l':
-                    switch(res[found+2]){
-                        case 'd': case 'u':
-                            // tmp = std::to_string(tmp_argv[i]);
-                            tmp = patch::to_string(tmp_argv[i]);
-                            res.replace(found,3,tmp); //%lu or %ld
-                            break;
-                        case 'x': case 'X':
-                            ss << std::hex << tmp_argv[i];
-                            tmp = ss.str();
-                            res.replace(found,3,tmp); //for simplicity, we don't convert to hex
-                            break;
-                        default:
-                            res.replace(found,2,""); 
-                            break;
-                    }
-                    break;
+    //     //Replace printf parameters with numbers
+    //     for(int i=0; i!=argc; i++)
+    //     {
+    //         std::size_t found = res.find("%");
+    //         if (found==std::string::npos)
+    //             break;
+    //         // std::string tmp = std::to_string(tmp_argv[i]);
+    //         std::string tmp = patch::to_string(tmp_argv[i]);
+    //         std::stringstream ss;
+    //         switch(res[found+1]){
+    //             case 'd':
+    //                 res.replace(found,2,tmp);
+    //                 break;
+    //             case 'x': case 'X':
+    //                 ss << std::hex << tmp_argv[i];
+    //                 tmp = ss.str();
+    //                 res.replace(found,2,tmp); //for simplicity, we don't convert to hex
+    //                 break;
+    //             case 'l':
+    //                 switch(res[found+2]){
+    //                     case 'd': case 'u':
+    //                         // tmp = std::to_string(tmp_argv[i]);
+    //                         tmp = patch::to_string(tmp_argv[i]);
+    //                         res.replace(found,3,tmp); //%lu or %ld
+    //                         break;
+    //                     case 'x': case 'X':
+    //                         ss << std::hex << tmp_argv[i];
+    //                         tmp = ss.str();
+    //                         res.replace(found,3,tmp); //for simplicity, we don't convert to hex
+    //                         break;
+    //                     default:
+    //                         res.replace(found,2,""); 
+    //                         break;
+    //                 }
+    //                 break;
                     
-                default:
-                    res.replace(found,1,""); 
-                    break;
+    //             default:
+    //                 res.replace(found,1,""); 
+    //                 break;
 
-            }
-        }
+    //         }
+    //     }
 
-        //Get the debug string
-        // PyObject *t = Py_BuildValue("(ss#s)", "Msg", b + offset, length - offset, "");
-        PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
+    //     //Get the debug string
+    //     // PyObject *t = Py_BuildValue("(ss#s)", "Msg", b + offset, length - offset, "");
+    //     PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
 
-        PyList_Append(result, t);
-        Py_DECREF(t);
+    //     PyList_Append(result, t);
+    //     Py_DECREF(t);
+    //     return length-start;
+    // }
+    if(version=='\x79'){
+        //Yuanjie: optimization for iCellular. Don't show unnecessary logs
         return length-start;
     }
     else if(version=='\x92'){
@@ -1500,18 +1504,18 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
         }
         else{
 
-            //Ignore other unknown messages
-            std::string res="(Unknown debug message)";
-            PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
-            PyList_Append(result, t);
-            Py_DECREF(t);
+            //Ignore other unknown messages. Don't send to MobileInsight Analyzers
+            // std::string res="(Unknown debug message)";
+            // PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
+            // PyList_Append(result, t);
+            // Py_DECREF(t);
             return length-start;
 
         }
 
 
     }
-    return 0;
+    return length-start;
 
 }
 
