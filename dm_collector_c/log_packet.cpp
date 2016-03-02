@@ -749,6 +749,52 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
 
             return offset - start;
         }
+    case 4:
+        {
+            offset += _decode_by_fmt(LteMl1CmlifmrFmt_v4_Header,
+                                        ARRAY_SIZE(LteMl1CmlifmrFmt_v4_Header, Fmt),
+                                        b, offset, length, result);
+            int n_neighbor_cells = _search_result_int(result, "Number of Neighbor Cells");
+            int n_detected_cells = _search_result_int(result, "Number of Detected Cells");
+
+            PyObject *t = NULL;
+            PyObject *result_allcells = NULL;
+            // decode "Neighbor Cells"
+            result_allcells = PyList_New(0);
+            for (int i = 0; i < n_neighbor_cells; i++) {
+                PyObject *result_cell = PyList_New(0);
+                offset += _decode_by_fmt(LteMl1CmlifmrFmt_v4_Neighbor_Cell,
+                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v4_Neighbor_Cell, Fmt),
+                                            b, offset, length, result_cell);
+                t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
+                PyList_Append(result_allcells, t);
+                Py_DECREF(t);
+                Py_DECREF(result_cell);
+            }
+            t = Py_BuildValue("(sOs)", "Neighbor Cells", result_allcells, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_allcells);
+
+            // decode "Detected Cells"
+            result_allcells = PyList_New(0);
+            for (int i = 0; i < n_detected_cells; i++) {
+                PyObject *result_cell = PyList_New(0);
+                offset += _decode_by_fmt(LteMl1CmlifmrFmt_v4_Detected_Cell,
+                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v4_Detected_Cell, Fmt),
+                                            b, offset, length, result_cell);
+                t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
+                PyList_Append(result_allcells, t);
+                Py_DECREF(t);
+                Py_DECREF(result_cell);
+            }
+            t = Py_BuildValue("(sOs)", "Detected Cells", result_allcells, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_allcells);
+
+            return offset - start;
+        }
     default:
         printf("Unknown LTE ML1 CMLIFMR version: 0x%x\n", pkt_ver);
         return 0;

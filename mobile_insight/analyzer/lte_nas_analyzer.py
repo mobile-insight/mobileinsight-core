@@ -338,6 +338,9 @@ class LteNasAnalyzer(Analyzer):
                     'guaranteed_bitrate_dlink_ext':xstr(self.__esm_status.qos.guaranteed_bitrate_dlink_ext),
                     })
 
+    def get_qos(self):
+        return self.__esm_status.qos
+
 class EmmStatus:
     """
     An abstraction to maintain the EMM status, including the registeration states, 
