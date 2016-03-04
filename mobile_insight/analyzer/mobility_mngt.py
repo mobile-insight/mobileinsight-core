@@ -631,7 +631,7 @@ class MobilityStateMachine:
         for item in handoff_sample.tx_list:
             self.__merge_transition(item)
 
-        self.dump()
+        # self.dump()
 
     def __merge_transition(self,transition):
         """
