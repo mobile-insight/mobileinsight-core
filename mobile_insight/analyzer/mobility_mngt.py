@@ -18,6 +18,8 @@ from umts_nas_analyzer import UmtsNasAnalyzer
 
 import copy
 
+import pickle
+
 __all__=["MobilityMngt"]
 
 class MobilityMngt(Analyzer):
@@ -66,6 +68,28 @@ class MobilityMngt(Analyzer):
         Reset the state machine
         """
         self.__mobility_state_machine.reset()
+
+    def save_state_machine(self,output_path):
+        """
+        Save the mobility state machine
+
+        :param output_path: file path to save the state machine
+        :type output_path: string
+        """
+        f = open(output_path, "wb")
+        pickle.dump(self.__mobility_state_machine,f)
+        f.close()
+
+    def load_state_machine(self,path):
+        """
+        Load the mobility state machine from file
+        """
+        try:
+            f = open(path,'rb')
+            self.__mobility_state_machine = pickle.load(f)
+            f.close()
+        except Exception, e:
+            pass    
 
 
     def __on_lte_rrc_msg(self,msg):
