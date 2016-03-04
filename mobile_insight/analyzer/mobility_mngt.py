@@ -865,8 +865,8 @@ class LteMeasObjectGERAN:
         """
         return meas_obj.__class__.__name__ == "LteMeasObjectGERAN" \
         and self.freq == meas_obj.freq \
-        and self.offset_freq == meas_obj.offset_freq \
-        and self.cell_list == meas_obj.cell_list
+        and self.offset_freq == meas_obj.offset_freq 
+        # and self.cell_list == meas_obj.cell_list
 
     def dump(self):
         """
