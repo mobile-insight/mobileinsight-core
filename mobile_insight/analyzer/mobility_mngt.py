@@ -489,6 +489,9 @@ class MeasState:
         :returns: True if two states are equivalent, False otherwise
         """
 
+        if meas_state.__class__.__name__ != "MeasState":
+            return False
+
         #Algorithm for comparison:
         #Compare all objects in measid_list
         #For each one, check its freq, and the event/threshold configurations
