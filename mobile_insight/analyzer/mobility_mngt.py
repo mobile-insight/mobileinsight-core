@@ -54,6 +54,13 @@ class MobilityMngt(Analyzer):
 
         #no source callbacks are included
 
+    def print_mobility_policy(self):
+        """
+        Print out the handoff strategies
+        """
+
+        self.__mobility_state_machine.dump()
+
 
     def __on_lte_rrc_msg(self,msg):
         """
