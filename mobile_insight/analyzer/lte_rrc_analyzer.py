@@ -465,7 +465,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 #FIXME: set to default based on TS25.331
                 field_val['lte-rrc.startingARFCN'] = None #mandatory
                 field_val['lte-rrc.q_RxLevMin'] = None #mandatory
-                field_val['lte-rrc.p_MaxGERAN'] = None #mandatory
+                field_val['lte-rrc.p_MaxGERAN'] = 0 #mandatory
                 field_val['lte-rrc.cellReselectionPriority'] = 0 #mandatory
                 field_val['lte-rrc.threshX_High'] = None #mandatory
                 field_val['lte-rrc.threshX_High'] = None #mandatory
