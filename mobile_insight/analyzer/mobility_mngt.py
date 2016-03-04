@@ -83,6 +83,8 @@ class MobilityMngt(Analyzer):
     def load_state_machine(self,path):
         """
         Load the mobility state machine from file
+
+        :param path: the file path to load the state machine
         """
         try:
             f = open(path,'rb')
@@ -417,7 +419,7 @@ class HandoffState:
         and handoff.rat==self.rat 
 
     def dump(self):
-        return "Handoff to ("+str(self.rat)+","+str(self.freq)+")"
+        return "Handoff to ("+str(self.rat)+","+str(self.freq)+")\n"
 
 
 class MeasState:
@@ -611,6 +613,10 @@ class HandoffSample:
         if new_state.__class__.__name__!="MeasState" \
         and new_state.__class__.__name__!="HandoffState":
             return False
+
+        if new_state.equals(self.cur_state):
+            #If they are same states, no transition
+            return False   
 
         self.tx_list.append((self.cur_state,new_state,self.tx_cond))
         self.cur_state=new_state
