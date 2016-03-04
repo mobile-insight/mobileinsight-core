@@ -508,7 +508,7 @@ class MeasState:
 
             #Find if this measurement object also exists int meas_state
             meas_id_exist = False
-            for meas_id2 in meas_state:
+            for meas_id2 in meas_state.measid_list:
                 meas_obj2 = meas_state.get_measobj(meas_id2)
                 report_obj2 = meas_state.get_reportconfig(meas_id2)
                 if meas_obj.equals(meas_obj2) and report_obj.equals(report_obj2):
