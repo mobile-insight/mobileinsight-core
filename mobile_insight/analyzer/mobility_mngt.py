@@ -61,6 +61,12 @@ class MobilityMngt(Analyzer):
 
         self.__mobility_state_machine.dump()
 
+    def reset(self):
+        """
+        Reset the state machine
+        """
+        self.__mobility_state_machine.reset()
+
 
     def __on_lte_rrc_msg(self,msg):
         """
@@ -601,6 +607,12 @@ class MobilityStateMachine:
     """
     def __init__(self):
         self.state_machine={} 
+
+    def reset(self):
+        """
+        Reset the state machine (test purpose)
+        """
+        self.state_machine={}
 
     def load_state_machine(self,state_machine):
         """
