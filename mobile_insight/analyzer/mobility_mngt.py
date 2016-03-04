@@ -416,9 +416,9 @@ class MeasState:
         # return meas_obj
         if not self.measid_list.has_key(meas_id) \
         or not self.measobj.has_key(self.measid_list[meas_id][0]):
-            print "get_measobj: meas_id="+str(meas_id)+" meas_obj="+str(self.measid_list[meas_id])
+            # print "get_measobj: meas_id="+str(meas_id)+" meas_obj="+str(self.measid_list[meas_id])
             print "debug: "+str(self.measobj.keys())
-            return None
+            return None 
         else:
             return self.measobj[self.measid_list[meas_id][0]]
 
