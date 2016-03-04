@@ -415,6 +415,9 @@ class HandoffState:
         self.freq = freq #Frequency band
 
     def equals(self,handoff_state):
+
+        if handoff_state.__class__.__name__!="HandoffState":
+            return False
         return handoff_state.freq==self.freq \
         and handoff.rat==self.rat 
 
