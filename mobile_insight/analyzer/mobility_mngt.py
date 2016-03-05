@@ -48,6 +48,10 @@ class MobilityMngt(Analyzer):
         self.__handoff_sample = HandoffSample()
         self.__mobility_state_machine = MobilityStateMachine()
 
+
+        self.__b_prediction = False #handoff prediction is disabled by default
+        self.__predict_target = None #predicted target cell
+
         #include analyzers
         self.include_analyzer("WcdmaRrcAnalyzer",[self.__on_wcdma_rrc_msg])
         self.include_analyzer("LteRrcAnalyzer",[self.__on_lte_rrc_msg])
@@ -55,6 +59,8 @@ class MobilityMngt(Analyzer):
         # self.include_analyzer("UmtsNasAnalyzer",[self.__on_umts_nas_msg])
 
         #no source callbacks are included
+
+
 
     def print_mobility_policy(self):
         """
@@ -93,6 +99,14 @@ class MobilityMngt(Analyzer):
         except Exception, e:
             pass    
 
+    def set_handoff_prediction(self,b_predict):
+        """
+        Enable/disable handoff prediction
+
+        :param b_prediction: True if prediction should be enabled, False otherwise
+        :type b_prediction: boolean
+        """
+
 
     def __on_lte_rrc_msg(self,msg):
         """
@@ -115,6 +129,7 @@ class MobilityMngt(Analyzer):
                     if val.get('name')=='lte-rrc.dl_CarrierFreq':
                         target_cell = val.get('show')
                 if target_cell:
+                    print "handover to WCDMA "+str(target_cell)
                     #FIXME: consider 4G->3G handover (e.g., SRVCC, CSFB)
                     handoff_state = HandoffState("LTE",target_cell)
                     self.__handoff_sample.add_state_transition(handoff_state)
@@ -123,6 +138,44 @@ class MobilityMngt(Analyzer):
                     #Reset handoff sample
                     self.__handoff_sample = HandoffSample()
                     return
+
+            if field.get('name')=="lte-rrc.handoverFromEUTRAPreparationRequest_element":
+                #4G->CDMA2000 handover
+                target_cell = None
+                for val in field.iter('field'):
+                    #Currently we focus on freq-level handoff
+                    if val.get('name')=='lte-rrc.cdma2000_Type':
+                        target_cell = int(val.get('show'))
+                        if target_cell==0:
+                            target_cell="1xRTT"
+                        else:
+                            target_cell="HRPD"
+                if target_cell:
+                    print "handover to CDMA2000 "+target_cell
+                    handoff_state = HandoffState("CDMA2000",target_cell)
+                    self.__handoff_sample.add_state_transition(handoff_state)
+                    #Trigger merging function
+                    self.__mobility_state_machine.update_state_machine(self.__handoff_sample)
+                    #Reset handoff sample
+                    self.__handoff_sample = HandoffSample()
+                    return
+
+
+            if field.get('name')=="lte-rrc.redirectedCarrierInfo":
+                #4G->3G/2G RRC release with redirection:
+                target_cell = None #3G/2G target frequency bands
+                for val in field.iter('field'):
+                    #Currently we focus on freq-level handoff
+                    if val.get('name')=='lte-rrc.utra_FDD':
+                        #4G->3G handoff
+                        target_cell = val.get('show')
+                        handoff_state = HandoffState("WCDMA",target_cell)
+                        self.__handoff_sample.add_state_transition(handoff_state)
+                        #Trigger merging function
+                        self.__mobility_state_machine.update_state_machine(self.__handoff_sample)
+                        #Reset handoff sample
+                        self.__handoff_sample = HandoffSample()
+                        break
 
             if field.get('name')=="lte-rrc.measurementReport_element":
                 #A measurement report: parse it, push it into Handoff sample
@@ -134,7 +187,18 @@ class MobilityMngt(Analyzer):
                     meas_report =  self.__handoff_sample.cur_state.get_meas_report_obj(meas_id)
                     self.__handoff_sample.add_meas_report(meas_report)
 
+            if field.get('name')=="lte-rrc.measResultsCDMA2000_element":
+                #CDMA2000 measurement report
+                #NOTE: Different from normal meas report, this one does not have measid/reportid
+                tmp = LteReportConfig("CDMA2000",0)
+                tmp.add_event("CDMA2000",0)
+                meas_report = (LteMeasObjectCDMA2000(None,0),tmp)   #fake an empty report
+                
+                self.__handoff_sample.add_meas_report(meas_report)
+
+
             if field.get('name')=="lte-rrc.measConfig_element":
+
                 #A Measurement control reconfiguration
                 meas_state = None
                 if self.__handoff_sample.cur_state:
@@ -194,7 +258,11 @@ class MobilityMngt(Analyzer):
             
                 #Generate a new state to the handoff sample
                 self.__handoff_sample.add_state_transition(meas_state)
-                # self.logger.info("Meas State: \n"+meas_state.dump())
+
+                # self.__mobility_state_machine.update_state_machine(self.__handoff_sample)
+                # #Reset handoff sample
+                # self.__handoff_sample = HandoffSample()
+                # # self.logger.info("Meas State: \n"+meas_state.dump())
 
     def __get_meas_obj(self,msg):
         """
@@ -209,6 +277,7 @@ class MobilityMngt(Analyzer):
                 measobj_id = field.get('show')
 
             if field.get('name') == "lte-rrc.measObjectEUTRA_element": 
+
                 #A LTE meas obj
                 field_val = {}
 
@@ -247,6 +316,17 @@ class MobilityMngt(Analyzer):
                 freq = int(field_val['lte-rrc.bandIndicator'])
                 offsetFreq = int(field_val['lte-rrc.offsetFreq'])
                 return LteMeasObjectGERAN(measobj_id,freq,offsetFreq)
+
+            if field.get('name') == 'lte-rrc.measObjectCDMA2000_element':
+                field_val = {}
+
+                field_val['lte-rrc.bandClass'] = None
+
+                for val in field.iter('field'):
+                    field_val[val.get('name')] = val.get('show')
+
+                freq = int(field_val['lte-rrc.bandClass'])
+                return LteMeasObjectCDMA2000(measobj_id,freq)
         
         return None #How can this happen?
     
@@ -559,6 +639,7 @@ class MeasReportSeq:
         if meas_report[0].__class__.__name__!="LteMeasObjectEutra" \
         and meas_report[0].__class__.__name__!="LteMeasObjectUtra" \
         and meas_report[0].__class__.__name__!="LteMeasObjectGERAN" \
+        and meas_report[0].__class__.__name__!="LteMeasObjectCDMA2000" \
         and meas_report[1].__class__.__name__!="LteReportConfig":
             return False
         if meas_report[0] and meas_report[1]:
@@ -843,6 +924,41 @@ class LteMeasObjectUtra:
             + ' ' + str(self.obj_id)
             + ' ' + str(self.freq)+' '+str(self.offset_freq) + '\n')
 
+class LteMeasObjectCDMA2000:
+
+    """
+    CDMA2000 3G Measurement object configuration
+    """
+
+    def __init__(self,measobj_id,freq=None,offset_freq=0):
+        self.obj_id = measobj_id
+        self.freq = freq # carrier frequency
+        self.offset_freq = offset_freq # frequency-specific measurement offset
+        #TODO: add cell list
+
+    def equals(self,meas_obj):
+        """
+        Compare if this meas_obj is equal to another one
+
+        :param meas_obj: a measurement object
+        :type meas_obj: LteMeasObjectCDMA2000
+        :returns: True if they are equivalent, False otherwise
+        """
+        return meas_obj.__class__.__name__ == "LteMeasObjectCDMA2000" \
+        and self.freq == meas_obj.freq \
+        and self.offset_freq == meas_obj.offset_freq 
+
+    def dump(self):
+        """
+        Report the cell's 3G measurement configurations
+
+        :returns: a string that encodes the cell's 3G measurement configurations
+        :rtype: string
+        """
+        return (self.__class__.__name__
+            + ' ' + str(self.obj_id)
+            + ' ' + str(self.freq)+' '+str(self.offset_freq) + '\n')
+
 
 class LteMeasObjectGERAN:
     """
@@ -886,7 +1002,7 @@ class LteReportConfig:
     """
     LTE measurement report configuration
     """
-    def __init__(self,report_id,hyst):
+    def __init__(self,report_id=None,hyst=None):
         self.report_id = report_id
         self.hyst = hyst
         self.event_list = []
