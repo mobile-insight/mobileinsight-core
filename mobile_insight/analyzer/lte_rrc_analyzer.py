@@ -586,7 +586,10 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                         if 'lte-rrc.physCellId' in cell_val:
                             cell_id = int(cell_val['lte-rrc.physCellId'])
-                            cell_offset = q_offset_range[int(cell_val['lte-rrc.cellIndividualOffset'])]
+                            if cell_val.has_key('lte-rrc.cellIndividualOffset'):
+                                cell_offset = q_offset_range[int(cell_val['lte-rrc.cellIndividualOffset'])]
+                            else:
+                                cell_offset = 0
                             self.__config[cur_pair].active.measobj[freq].add_cell(cell_id,cell_offset)
 
             #Add a UTRA (3G) measurement object:

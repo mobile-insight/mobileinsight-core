@@ -41,6 +41,10 @@ class MobilityMngt(Analyzer):
         Step 3: support in-RAT
     """
 
+    #Used for the evaluation of prediction accuracy 
+    training_sample = 0
+    test_sample = 0
+
     def __init__(self):
 
         Analyzer.__init__(self)
@@ -74,6 +78,7 @@ class MobilityMngt(Analyzer):
         Reset the state machine
         """
         self.__mobility_state_machine.reset()
+        self.__handoff_sample = HandoffSample()
 
     def save_state_machine(self,output_path):
         """
@@ -680,6 +685,19 @@ class MeasReportSeq:
         #As first step, we simply replace the existing sequence
         self.meas_report_queue = meas_report_seq.meas_report_queue
 
+    def equals(self,meas_report_seq):
+        """
+        Compare if two measurement sequences are equivalent
+        
+        :param meas_report_seq: measurement report sequence
+        :type meas_report_seq: MeasReportSeq
+        :returns: True if equivalent, False otherwise
+        """
+        if meas_report_seq.__class__.__name__!="MeasReportSeq":
+            return False
+
+        
+
 
 class HandoffSample:
     """
@@ -777,6 +795,30 @@ class MobilityStateMachine:
             self.__merge_transition(item)
 
         # self.dump()
+
+    def predict_handoff(self, handoff_sample):
+        """
+        Based on current state and measseq, predict potential handoff
+
+        :param handoff_sample: current handoff sample that includes current state and meas sequence
+        :type handoff_sample: HandoffSample
+        :returns: a handoffstate that indicates the prediction, or None if unpredictable
+        """
+
+        cur_state = handoff_state.cur_state
+        cur_meas_seq = handoff_state.tx_cond
+
+        equal_state = None
+
+        #Note that states may not be identical but equivalent
+        for state in self.state_machine:
+            if state.equals(cur_state):
+                equal_state = state
+                break
+        if not equal_state:
+            return None #unknown state, unpredictable
+
+
 
     def __merge_transition(self,transition):
         """
