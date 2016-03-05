@@ -139,6 +139,22 @@ class MobilityMngt(Analyzer):
                     self.__handoff_sample = HandoffSample()
                     return
 
+            if field.get('name')=="lte-rrc.mobilityFromEUTRACommand_element":
+                #4G->3G/2G handover
+                target_rat = None
+                for val in field.iter('field'):
+                    #Currently we focus on freq-level handoff
+                    if val.get('name')=='lte-rrc.targetRAT_Type':
+                        target_rat = val.get('show')
+                if target_cell:
+                    handoff_state = HandoffState(target_rat,"n/a")
+                    self.__handoff_sample.add_state_transition(handoff_state)
+                    #Trigger merging function
+                    self.__mobility_state_machine.update_state_machine(self.__handoff_sample)
+                    #Reset handoff sample
+                    self.__handoff_sample = HandoffSample()
+                    return
+
             if field.get('name')=="lte-rrc.handoverFromEUTRAPreparationRequest_element":
                 #4G->CDMA2000 handover
                 target_cell = None
