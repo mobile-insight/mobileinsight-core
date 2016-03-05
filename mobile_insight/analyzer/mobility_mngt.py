@@ -129,7 +129,6 @@ class MobilityMngt(Analyzer):
                     if val.get('name')=='lte-rrc.dl_CarrierFreq':
                         target_cell = val.get('show')
                 if target_cell:
-                    print "handover to WCDMA "+str(target_cell)
                     #FIXME: consider 4G->3G handover (e.g., SRVCC, CSFB)
                     handoff_state = HandoffState("LTE",target_cell)
                     self.__handoff_sample.add_state_transition(handoff_state)
@@ -146,7 +145,8 @@ class MobilityMngt(Analyzer):
                     #Currently we focus on freq-level handoff
                     if val.get('name')=='lte-rrc.targetRAT_Type':
                         target_rat = val.get('show')
-                if target_cell:
+                if target_rat:
+                    # print "handover to "+str(target_rat)
                     handoff_state = HandoffState(target_rat,"n/a")
                     self.__handoff_sample.add_state_transition(handoff_state)
                     #Trigger merging function
@@ -167,7 +167,7 @@ class MobilityMngt(Analyzer):
                         else:
                             target_cell="HRPD"
                 if target_cell:
-                    print "handover to CDMA2000 "+target_cell
+                    # print "handover to CDMA2000 "+target_cell
                     handoff_state = HandoffState("CDMA2000",target_cell)
                     self.__handoff_sample.add_state_transition(handoff_state)
                     #Trigger merging function
