@@ -836,6 +836,10 @@ _decode_lte_ml1_subpkt(const char *b, int offset, int length,
                                                     b, offset, length, result_subpkt);
                             success = true;
                             break;
+                        // case 19:
+                        //     offset += _decode_by_fmt(LteMl1SubpktFmt_v1_Scmr_v19,
+                        //                             ARRAY_SIZE(LteMl1SubpktFmt_v1_Scmr_v19, Fmt),
+                        //                             b, offset, length, result_subpkt);
                         default:
                             break;
                         }
@@ -848,7 +852,7 @@ _decode_lte_ml1_subpkt(const char *b, int offset, int length,
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        printf("Unknown LTE ML1 Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        // printf("Unknown LTE ML1 Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
             }
@@ -1533,7 +1537,7 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
              // Yuanjie: for icellular only, 3G RSRP result in manual network search
              // The fingerprint is tmp_argv[0]==0x81700a47, tmp_argv[1]=rscp value
              //
-            std::string res = "Freq=%d, psc=%d, eng=%d filt_eng=%d, rscp=%d, RxAGC=%d 2*ecio=%d 2*squal=%d srxlv=%d";
+            std::string res = "Freq=%d psc=%d eng=%d filt_eng=%d rscp=%d RxAGC=%d 2*ecio=%d 2*squal=%d srxlv=%d";
             for(int i=1; i!=argc; i++)
             {
 

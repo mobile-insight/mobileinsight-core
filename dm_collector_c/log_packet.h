@@ -421,6 +421,19 @@ const Fmt LteMl1SubpktFmt_v1_Scmr_v4 [] = {
     {UINT, "Physical Cell ID", 2}   //cell ID
 };
 
+const Fmt LteMl1SubpktFmt_v1_Scmr_v19 [] = {
+    {UINT, "E-ARFCN", 4},
+    {UINT, "Num-of-cells", 2},
+    {SKIP, NULL, 2},
+
+    {UINT, "Physical Cell ID", 2},
+    {SKIP, NULL, 2}, 
+    {UINT, "Current subframe", 2},
+    {SKIP, NULL, 2}, 
+    {SKIP, NULL, 9},    //Cell timing [1]
+    {RSRP, "RSRP", 2}
+};
+
 // ------------------------------------------------------------
 // LTE RRC Serving Cell Info Log Pkt
 const Fmt LteRrcServCellInfoLogPacketFmt [] = {
