@@ -562,7 +562,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             if field.get('name') == "lte-rrc.measObjectEUTRA_element": 
                 field_val = {}
 
-                field_val['lte-rrc.carrierFreq'] = None
+                field_val['lte-rrc.carrierFreq'] = 0
                 field_val['lte-rrc.offsetFreq'] = 0
 
                 for val in field.iter('field'):
