@@ -307,10 +307,10 @@ class MobilityMngt(Analyzer):
 
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
-
-                freq = int(field_val['lte-rrc.carrierFreq'])
-                offsetFreq = int(field_val['lte-rrc.offsetFreq'])
-                return LteMeasObjectEutra(measobj_id,freq,offsetFreq)
+                if field_val['lte-rrc.carrierFreq']:
+                    freq = int(field_val['lte-rrc.carrierFreq'])
+                    offsetFreq = int(field_val['lte-rrc.offsetFreq'])
+                    return LteMeasObjectEutra(measobj_id,freq,offsetFreq)
 
             if field.get('name') == "lte-rrc.measObjectUTRA_element":
                 field_val = {}
@@ -320,10 +320,11 @@ class MobilityMngt(Analyzer):
 
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
-
-                freq = int(field_val['lte-rrc.carrierFreq'])
-                offsetFreq = int(field_val['lte-rrc.offsetFreq'])
-                return LteMeasObjectUtra(measobj_id,freq,offsetFreq)
+                
+                if field_val['lte-rrc.carrierFreq']:
+                    freq = int(field_val['lte-rrc.carrierFreq'])
+                    offsetFreq = int(field_val['lte-rrc.offsetFreq'])
+                    return LteMeasObjectUtra(measobj_id,freq,offsetFreq)
 
             if field.get('name') == "lte-rrc.measObjectGERAN_element":
                 field_val = {}
@@ -334,9 +335,10 @@ class MobilityMngt(Analyzer):
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
 
-                freq = int(field_val['lte-rrc.bandIndicator'])
-                offsetFreq = int(field_val['lte-rrc.offsetFreq'])
-                return LteMeasObjectGERAN(measobj_id,freq,offsetFreq)
+                if field_val['lte-rrc.bandIndicator']:
+                    freq = int(field_val['lte-rrc.bandIndicator'])
+                    offsetFreq = int(field_val['lte-rrc.offsetFreq'])
+                    return LteMeasObjectGERAN(measobj_id,freq,offsetFreq)
 
             if field.get('name') == 'lte-rrc.measObjectCDMA2000_element':
                 field_val = {}
@@ -346,8 +348,9 @@ class MobilityMngt(Analyzer):
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
 
-                freq = int(field_val['lte-rrc.bandClass'])
-                return LteMeasObjectCDMA2000(measobj_id,freq)
+                if field_val['lte-rrc.bandClass']:
+                    freq = int(field_val['lte-rrc.bandClass'])
+                    return LteMeasObjectCDMA2000(measobj_id,freq)
         
         return None #How can this happen?
     
