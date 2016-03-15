@@ -127,12 +127,18 @@ class MobilityMngt(Analyzer):
         for field in msg.data.iter('field'):
 
             if field.get('name')=="lte-rrc.mobilityControlInfo_element":
+
                 #A handoff command: create a new HandoffState
                 target_cell = None
                 for val in field.iter('field'):
                     #Currently we focus on freq-level handoff
                     if val.get('name')=='lte-rrc.dl_CarrierFreq':
                         target_cell = val.get('show')
+                if not target_cell:
+                    #In T-Mobile, some logs does not carry dl_CarrierFreq.
+                    #These are intra-frequency handoff
+                    target_cell = self.get_analyzer("LteRrcAnalyzer").get_cur_cell().freq
+
                 if target_cell:
                     #FIXME: consider 4G->3G handover (e.g., SRVCC, CSFB)
                     handoff_state = HandoffState("LTE",target_cell)
