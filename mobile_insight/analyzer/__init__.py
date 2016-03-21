@@ -7,7 +7,9 @@ __all__=["Analyzer",
 	"WcdmaRrcAnalyzer","UmtsNasAnalyzer","RrcAnalyzer",
 	"MobilityMngt",
     "HandoffLoopAnalyzer",
-    "ModemDebugAnalyzer"]
+    "ModemDebugAnalyzer",
+    "LogAnalyzer",
+    "GuiAnalyzer"]
 
 from analyzer import Analyzer
 
@@ -37,3 +39,7 @@ from rrc_analyzer import RrcAnalyzer
 from handoff_loop_analyzer import HandoffLoopAnalyzer
 
 from modem_debug_analyzer import ModemDebugAnalyzer
+
+#Visualization
+from log_analyzer import LogAnalyzer
+from gui_analyzer import GuiAnalyzer
