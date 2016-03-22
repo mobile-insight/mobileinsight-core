@@ -439,15 +439,49 @@ initdm_collector_c(void)
     PyObject *dm_collector_c = Py_InitModule3("dm_collector_c", DmCollectorCMethods,
         "collects and decodes diagnositic logs from Qualcomm chipsets.");
 
+    PyObject *log_packet_types;
+
     // dm_ccllector_c.log_packet_types: stores all supported type names
-    int n_types = ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName);
-    PyObject *log_packet_types = PyTuple_New(n_types);
-    for (int i = 0; i < n_types; i++) {
-        // There is no leak here, because PyTuple_SetItem steals reference
-        PyTuple_SetItem(log_packet_types,
+    if(EXPOSE_INTERNAL_LOGS){
+        //YUANJIE: expose all logs to MobileInsight
+        int n_types = ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName);
+        log_packet_types = PyTuple_New(n_types);
+        for (int i = 0; i < n_types; i++) {
+            // There is no leak here, because PyTuple_SetItem steals reference
+            
+
+            // Yuanjie: only expose public logs to py module
+            // Refer to consts.h
+            // printf("%s\n",LogPacketTypeID_To_Name[i].name);
+            PyTuple_SetItem(log_packet_types,
                         i,
-                        Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));
+                        Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));            
+        }
+
     }
+    else{
+        //YUANJIE: internal logs are not exposed
+        int n_types = 0;
+        for (int i = 0; i < ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++)
+        {
+            if(LogPacketTypeID_To_Name[i].b_public)
+                n_types++;
+        }
+        log_packet_types = PyTuple_New(n_types);
+        int count=0;
+        for (int i = 0; i < ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++)
+        {
+            if(LogPacketTypeID_To_Name[i].b_public){
+                printf("%s\n",LogPacketTypeID_To_Name[i].name);
+                PyTuple_SetItem(log_packet_types,
+                        count,
+                        Py_BuildValue("s", LogPacketTypeID_To_Name[i].name)); 
+                count++;
+            }
+
+        }
+    }
+    
     PyObject_SetAttrString(dm_collector_c, "log_packet_types", log_packet_types);
     Py_DECREF(log_packet_types);
 
