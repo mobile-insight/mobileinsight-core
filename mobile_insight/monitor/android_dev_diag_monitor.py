@@ -285,17 +285,19 @@ class AndroidDevDiagMonitor(Monitor):
             self._mkfifo(self._fifo_path)
 
             # TODO(likayo): need to protect aganist user input
-            cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
+            # cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
+            cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
             if self._input_dir:
                 cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
                 # self._run_shell_cmd("su -c mkdir \"%s\"" % self._input_dir)
                 # self._run_shell_cmd("su -c chmod -R 777 \"%s\"" % self._input_dir, wait=True)
                 self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
                 self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
-            proc = subprocess.Popen(cmd,
-                                    shell=True,
-                                    executable=ANDROID_SHELL,
-                                    )
+            # proc = subprocess.Popen(cmd,
+            #                         shell=True,
+            #                         executable=ANDROID_SHELL,
+            #                         )
+            self._run_shell_cmd(cmd)
             # fifo = os.open(self._fifo_path, os.O_RDONLY | os.O_NONBLOCK)
             fifo = os.open(self._fifo_path, os.O_RDONLY)    #Blocking mode: save CPU
 
@@ -308,9 +310,7 @@ class AndroidDevDiagMonitor(Monitor):
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
                         s = None
-                        print "iCellular debug -- step 1"
                     else:
-                        print "iCellular debug -- step 2"
                         raise err # something else has happened -- better reraise
 
                 while s:   # preprocess metadata
@@ -322,20 +322,16 @@ class AndroidDevDiagMonitor(Monitor):
                             dm_collector_c.feed_binary(ret_payload)
                     elif ret_msg_type == ChronicleProcessor.TYPE_START_LOG_FILE:
                         if ret_filename:
-
-                            print "iCellular debug -- step 3"
                             pass
                             # print "Start of %s" % ret_filename
                     elif ret_msg_type == ChronicleProcessor.TYPE_END_LOG_FILE:
                         if ret_filename:
                             # print "End of %s" % ret_filename
-                            print "iCellular debug -- step 4"
                             event = Event(  timeit.default_timer(),
                                             "new_diag_log",
                                             ret_filename)
                             self.send(event)
                     elif ret_msg_type is not None:
-                        print "iCellular debug -- step 5"
                         raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
                     s = remain
 
@@ -374,7 +370,6 @@ class AndroidDevDiagMonitor(Monitor):
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
                             "Mayday")
-            print "iCellular debug -- exception here "+str(e)
             # self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))

@@ -23,7 +23,7 @@ if is_android:
     from android_dev_diag_monitor import AndroidDevDiagMonitor
     from android_qmdl_monitor import AndroidQmdlMonitor
 from monitor import Monitor
-from dm_collector import *
+from dm_collector import * ### P4A: THIS LINE WILL BE DELETED ###
 from replayer import Replayer
 from qmdl_replayer import QmdlReplayer
 from datahint_android_dev_diag_monitor import DatahintAndroidDevDiagMonitor
