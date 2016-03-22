@@ -259,12 +259,36 @@ class AndroidDevDiagMonitor(Monitor):
         """
         return self._last_diag_revealer_ts
 
+    def _stop_collection(self):
+        ANDROID_SHELL = "/system/bin/sh"
+        self.collecting = False
+
+        # Find diag_mdlog process
+        diag_procs = []
+        pids = [pid for pid in os.listdir("/proc") if pid.isdigit()]
+        for pid in pids:
+            try:
+                cmdline = open(os.path.join("/proc", pid, "cmdline"), "rb").read()
+                if cmdline.startswith("/system/bin/diag_revealer"):
+                    diag_procs.append(int(pid))
+            except IOError:     # proc has been terminated
+                continue
+
+        if len(diag_procs) > 0:
+            # cmd2 = "su -c kill " + " ".join([str(pid) for pid in diag_procs])
+            # subprocess.Popen(cmd2, executable=ANDROID_SHELL, shell=True)
+            cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
+            self._run_shell_cmd(cmd2)
+
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
 
         This function does NOT return or raise any exception.
         """
+
+        #Stop running loggers
+        self._stop_collection()
 
         generate_diag_cfg = True
         if not self._type_names:
@@ -359,6 +383,7 @@ class AndroidDevDiagMonitor(Monitor):
         except (KeyboardInterrupt, RuntimeError), e:
             os.close(fifo)
             proc.terminate()
+            self._stop_collection()
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
                             "Mayday")
@@ -367,6 +392,7 @@ class AndroidDevDiagMonitor(Monitor):
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
         except Exception, e:
+            self._stop_collection()
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
                             "Mayday")
