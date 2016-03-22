@@ -138,7 +138,27 @@ class AndroidDevDiagMonitor(Monitor):
     TMP_FIFO_FILE = os.path.join(get_cache_dir(), "diag_revealer_fifo") 
     BLOCK_SIZE = 128
 
-    def __init__(self, prefs={}):
+    # def __init__(self, prefs={}):
+    #     """
+    #     Configure this class with user preferences.
+    #     This method should be called before any actual decoding.
+
+    #     :param prefs: configurations for message decoder. Empty by default.
+    #     :type prefs: dictionary
+    #     """
+    #     Monitor.__init__(self)
+    #     self._executable_path = prefs.get("diag_revealer_executable_path", "/system/bin/diag_revealer")
+    #     self._fifo_path = prefs.get("diag_revealer_fifo_path", self.TMP_FIFO_FILE)
+    #     self._input_dir = None
+    #     self._log_cut_size = 0.5 # change size to 1.0 M
+    #     self._skip_decoding = False
+    #     self._type_names = []
+    #     self._last_diag_revealer_ts = None
+    #     DMLogPacket.init(prefs)     # Initialize Wireshark dissector
+
+    #     self.__check_security_policy()
+
+    def __init__(self):
         """
         Configure this class with user preferences.
         This method should be called before any actual decoding.
@@ -147,13 +167,16 @@ class AndroidDevDiagMonitor(Monitor):
         :type prefs: dictionary
         """
         Monitor.__init__(self)
-        self._executable_path = prefs.get("diag_revealer_executable_path", "/system/bin/diag_revealer")
-        self._fifo_path = prefs.get("diag_revealer_fifo_path", self.TMP_FIFO_FILE)
+        self._executable_path = "/system/bin/diag_revealer"
+        self._fifo_path = self.TMP_FIFO_FILE
         self._input_dir = None
         self._log_cut_size = 0.5 # change size to 1.0 M
         self._skip_decoding = False
         self._type_names = []
         self._last_diag_revealer_ts = None
+        prefs={
+            "ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
+            "libwireshark_path": "/system/lib"}
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
         self.__check_security_policy()
