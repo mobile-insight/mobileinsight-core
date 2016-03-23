@@ -472,7 +472,7 @@ initdm_collector_c(void)
         for (int i = 0; i < ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++)
         {
             if(LogPacketTypeID_To_Name[i].b_public){
-                printf("%s\n",LogPacketTypeID_To_Name[i].name);
+                // printf("%s\n",LogPacketTypeID_To_Name[i].name);
                 PyTuple_SetItem(log_packet_types,
                         count,
                         Py_BuildValue("s", LogPacketTypeID_To_Name[i].name)); 

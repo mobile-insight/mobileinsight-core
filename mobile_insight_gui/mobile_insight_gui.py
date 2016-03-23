@@ -19,6 +19,8 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 from matplotlib.figure import Figure
 
+import xml.dom.minidom
+
 from mobile_insight.analyzer import LogAnalyzer
 from mobile_insight.monitor.dm_collector.dm_endec.dm_log_packet import DMLogPacket
 
@@ -229,8 +231,9 @@ class WindowClass(wx.Frame):
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		self.grid = wx.grid.Grid(self) #
-		self.grid.CreateGrid(350, 2)
+		self.grid.CreateGrid(50, 2)
 		self.grid.SetSelectionMode(1) # 1 is Select Row
+
 
 		self.grid.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.OnGridSelect)
 		self.grid.SetColLabelValue(0, "Timestamp")
@@ -242,8 +245,7 @@ class WindowClass(wx.Frame):
 		leftPanel = wx.Panel(self, -1, size=(-1,-1), style=wx.BORDER_RAISED)
 
 		leftbox = wx.BoxSizer(wx.VERTICAL)
-		self.status_text = wx.StaticText(leftPanel, label="...", style=wx.ALIGN_LEFT)
-		self.status_text.SetBackgroundColour("#ee1b1b")
+		self.status_text = wx.StaticText(leftPanel, label="Welcome to MobileInsight!\n\nMobileInsight is a Python (2.7) package for mobile network monitoring and analysis on the end device. It is developed by UCLA Wireless Networking Group (Wing) and OSU MSSN lab.", style=wx.ALIGN_LEFT)
 		self.details_text = wx.TextCtrl(leftPanel, style=wx.ALIGN_LEFT|wx.TE_MULTILINE)
 
 		leftbox.Add(self.status_text, 1, wx.EXPAND | wx.HORIZONTAL)
@@ -262,7 +264,7 @@ class WindowClass(wx.Frame):
 		self.SetSizer(mainSizer)
 		self.statusbar = self.CreateStatusBar()
 		self.Bind(wx.EVT_CLOSE, self.Quit)
-		self.SetTitle("Mobile Insight")
+		self.SetTitle("MobileInsight")
 		self.SetSize((1200, 800))
 		self.Centre()
 		self.Show(True)
@@ -271,12 +273,12 @@ class WindowClass(wx.Frame):
 
 
 	def OnResult(self, event):
-		if not  self.progressDialog is None:
+		if self.progressDialog:
 			self.progressDialog.EndModal(wx.ID_CANCEL)
 			self.progressDialog.Destroy()
 
 		data = event.data
-		if not data is None:
+		if data:
 			self.statusbar.SetStatusText("Read %d logs" %len(data))
 			self.data = data
 			self.data_view = self.data
@@ -288,11 +290,16 @@ class WindowClass(wx.Frame):
 		if (openFileDialog.ShowModal() == wx.ID_OK):
 			print 'Selected %s' %openFileDialog.GetPath()
 			try:
+				self.grid.ClearGrid()
+
+
 				#thread.start_new_thread(openFile,(openFileDialog.GetPath(),))
 				t = Thread(target = self.openFile, args=(openFileDialog.GetPath(),))
 				self.progressDialog = ProgressDialog(self)
 				t.start()
 				self.progressDialog.ShowModal()
+
+				self.SetTitle(openFileDialog.GetPath())
 
 			except e:
 				print "Error while opening file.", e
@@ -354,14 +361,14 @@ class WindowClass(wx.Frame):
 		row = e.GetRow()
 		if (row < len(self.data_view)):
 			self.status_text.SetLabel("Time Stamp : %s    Type : %s" %(str(self.data_view[row]["Timestamp"]), str(self.data_view[row]["TypeID"])))
-			self.details_text.SetValue(str(self.data_view[row]["Payload"]))
+			# self.details_text.SetValue(str(self.data_view[row]["Payload"]))
+			val = xml.dom.minidom.parseString(str(self.data_view[row]["Payload"]))
+			pretty_xml_as_string = val.toprettyxml(indent="  ",newl="\n")
+			self.details_text.SetValue(pretty_xml_as_string)
 		e.Skip()
 
 	def Quit(self, e):
-		yesNoBox = wx.MessageDialog(None, "Do you want to exit ?", "Confirm", wx.YES_NO)
-		yesNoAnswer = yesNoBox.ShowModal()
-		if (yesNoAnswer == wx.ID_YES):
-			self.Destroy()
+		self.Destroy()
 
 	def OnReadComplete(self):
 		evt = ResultEvent(self._log_analyzer.msg_logs)
@@ -372,13 +379,22 @@ class WindowClass(wx.Frame):
 	def SetupGrid(self):
 		self.min_time = datetime.strptime("3000 Jan 1" ,'%Y %b %d')
 		self.max_time = datetime.strptime("1900 Jan 1", '%Y %b %d')
-		self.grid.ClearGrid()
+		
 		n = len(self.data_view)
-		self.grid.CreateGrid(max(25, len(self.data_view)), 2)
+		# self.grid.CreateGrid(max(25, n), 2)
+		if n>self.grid.GetNumberRows():
+			self.grid.InsertRows(0,n-self.grid.GetNumberRows())
+		else:
+			self.grid.DeleteRows(0,self.grid.GetNumberRows()-n)
+
+		self.grid.ClearGrid()
 		self.grid.SetColLabelValue(0, "Timestamp")
 		self.grid.SetColLabelValue(1, "Type ID")
 		for i in range(n):
-			cur_time = datetime.strptime(self.data_view[i]["Timestamp"], '%Y-%m-%d  %H:%M:%S.%f')
+			try:
+			    cur_time = datetime.strptime(self.data_view[i]["Timestamp"], '%Y-%m-%d  %H:%M:%S.%f')
+			except Exception, e:
+				cur_time = datetime.strptime(self.data_view[i]["Timestamp"], '%Y-%m-%d  %H:%M:%S')
 			self.min_time = min(self.min_time, cur_time)
 			self.max_time = max(self.max_time, cur_time)
 			self.grid.SetCellValue(i, 0, str(self.data_view[i]["Timestamp"]))
@@ -386,6 +402,7 @@ class WindowClass(wx.Frame):
 			self.grid.SetReadOnly(i, 0)
 			self.grid.SetReadOnly(i, 1)
 		#self.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.onRowClick)
+
 
 
 

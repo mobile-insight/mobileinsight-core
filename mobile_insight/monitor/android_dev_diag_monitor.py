@@ -138,26 +138,6 @@ class AndroidDevDiagMonitor(Monitor):
     TMP_FIFO_FILE = os.path.join(get_cache_dir(), "diag_revealer_fifo") 
     BLOCK_SIZE = 128
 
-    # def __init__(self, prefs={}):
-    #     """
-    #     Configure this class with user preferences.
-    #     This method should be called before any actual decoding.
-
-    #     :param prefs: configurations for message decoder. Empty by default.
-    #     :type prefs: dictionary
-    #     """
-    #     Monitor.__init__(self)
-    #     self._executable_path = prefs.get("diag_revealer_executable_path", "/system/bin/diag_revealer")
-    #     self._fifo_path = prefs.get("diag_revealer_fifo_path", self.TMP_FIFO_FILE)
-    #     self._input_dir = None
-    #     self._log_cut_size = 0.5 # change size to 1.0 M
-    #     self._skip_decoding = False
-    #     self._type_names = []
-    #     self._last_diag_revealer_ts = None
-    #     DMLogPacket.init(prefs)     # Initialize Wireshark dissector
-
-    #     self.__check_security_policy()
-
     def __init__(self):
         """
         Configure this class with user preferences.
@@ -174,8 +154,7 @@ class AndroidDevDiagMonitor(Monitor):
         self._skip_decoding = False
         self._type_names = []
         self._last_diag_revealer_ts = None
-        prefs={
-            "ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
+        prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
             "libwireshark_path": "/system/lib"}
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
@@ -187,15 +166,6 @@ class AndroidDevDiagMonitor(Monitor):
         Update SELinux policy.
         For Nexus 6/6P, the SELinux policy may forbids the log collection.
         """
-
-        # self._run_shell_cmd("su -c setenforce 0")
-        # self._run_shell_cmd("su -c supolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
-        # self._run_shell_cmd("su -c supolicy --live \"allow init init process execmem\"")
-        # self._run_shell_cmd("su -c supolicy --live \"allow init properties_device file execute\"")
-        # self._run_shell_cmd("su -c supolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
-        # self._run_shell_cmd("su -c supolicy --live \"allow system_server diag_device chr_file {read write}\"")
-        # self._run_shell_cmd("su -c supolicy --live \"allow untrusted_app app_data_file file {rename}\"")
-
         self._run_shell_cmd("setenforce 0")
         self._run_shell_cmd("supolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
         self._run_shell_cmd("supolicy --live \"allow init init process execmem\"")
@@ -269,7 +239,6 @@ class AndroidDevDiagMonitor(Monitor):
                 # print "Fifo file already exists, skipping..."
             elif err.errno == errno.EPERM:  # not permitted, try shell command
                 # print "Not permitted to create fifo file, try to switch to root..."
-                # retcode = self._run_shell_cmd("su -c mknod %s p" % fifo_path, wait=True)
                 retcode = self._run_shell_cmd("mknod %s p" % fifo_path, wait=True)
                 if retcode != 0:
                     raise RuntimeError("mknod returns %s" % str(retcode))
@@ -298,9 +267,7 @@ class AndroidDevDiagMonitor(Monitor):
                 continue
 
         if len(diag_procs) > 0:
-            # cmd2 = "su -c kill " + " ".join([str(pid) for pid in diag_procs])
-            # subprocess.Popen(cmd2, executable=ANDROID_SHELL, shell=True)
-            cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
+            cmd2 = "su -c kill " + " ".join([str(pid) for pid in diag_procs])
             self._run_shell_cmd(cmd2)
 
     def run(self):
@@ -332,19 +299,22 @@ class AndroidDevDiagMonitor(Monitor):
             self._mkfifo(self._fifo_path)
 
             # TODO(likayo): need to protect aganist user input
-            # cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
-            cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
+            cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
+            # cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
             if self._input_dir:
                 cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
-                # self._run_shell_cmd("su -c mkdir \"%s\"" % self._input_dir)
-                # self._run_shell_cmd("su -c chmod -R 777 \"%s\"" % self._input_dir, wait=True)
                 self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
                 self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
-            # proc = subprocess.Popen(cmd,
-            #                         shell=True,
-            #                         executable=ANDROID_SHELL,
-            #                         )
-            self._run_shell_cmd(cmd)
+            proc = subprocess.Popen(cmd,
+                                    shell=True,
+                                    executable=ANDROID_SHELL,
+                                    )
+            # proc = subprocess.Popen("su", shell=True, executable=ANDROID_SHELL)
+            # proc.communicate(cmd)
+
+
+
+            # self._run_shell_cmd(cmd)
             # fifo = os.open(self._fifo_path, os.O_RDONLY | os.O_NONBLOCK)
             fifo = os.open(self._fifo_path, os.O_RDONLY)    #Blocking mode: save CPU
 
