@@ -220,15 +220,23 @@ class MobilityMngt(Analyzer):
             if field.get('name')=="lte-rrc.measurementReport_element":
                 #A measurement report: parse it, push it into Handoff sample
                 meas_id = None
+                rss = None
                 for val in field.iter('field'):
                     if val.get('name')=='lte-rrc.measId':
                         meas_id = val.get('show')
+                    if val.get('name')=='lte-rrc.rsrpResult':
+                        rss = int(val.get('show'))-140
                 if meas_id and self.__handoff_sample.cur_state:
                     meas_report =  self.__handoff_sample.cur_state.get_meas_report_obj(meas_id)
                     self.__handoff_sample.add_meas_report(meas_report)
-                self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement report")
+                self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement report "+str(rss))
 
             if field.get('name')=="lte-rrc.measResultsCDMA2000_element":
+
+                rss = None
+                for val in field.iter('field'):
+                    if val.get('name')=='lte-rrc.pilotStrength':
+                        rss = val.get('show')
                 #CDMA2000 measurement report
                 #NOTE: Different from normal meas report, this one does not have measid/reportid
                 tmp = LteReportConfig("CDMA2000",0)
@@ -236,7 +244,7 @@ class MobilityMngt(Analyzer):
                 meas_report = (LteMeasObjectCDMA2000(None,0),tmp)   #fake an empty report
                 
                 self.__handoff_sample.add_meas_report(meas_report)
-                self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement report")
+                self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement report "+str(rss))
 
 
             if field.get('name')=="lte-rrc.measConfig_element":
