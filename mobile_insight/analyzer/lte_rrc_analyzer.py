@@ -199,7 +199,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             #Convert msg to xml format
             # log_xml = ET.fromstring(log_item_dict['Msg'])
             log_xml = ET.XML(log_item_dict['Msg'])
-            xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
+            # xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
+            xml_msg = Event(log_item_dict['timestamp'],msg.type_id,log_xml)
 
             tic = time.clock()
             self.__callback_rrc_conn(xml_msg)
