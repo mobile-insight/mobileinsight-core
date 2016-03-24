@@ -9,7 +9,6 @@ __all__=["Analyzer",
     "HandoffLoopAnalyzer",
     "ModemDebugAnalyzer",
     "LogAnalyzer",	### P4A: THIS LINE WILL BE DELETED ###
-    "GuiAnalyzer",	### P4A: THIS LINE WILL BE DELETED ###
     ]
 
 from analyzer import Analyzer
@@ -43,4 +42,3 @@ from modem_debug_analyzer import ModemDebugAnalyzer
 
 #Visualization
 from log_analyzer import LogAnalyzer ### P4A: THIS LINE WILL BE DELETED ###
-from gui_analyzer import GuiAnalyzer ### P4A: THIS LINE WILL BE DELETED ###
