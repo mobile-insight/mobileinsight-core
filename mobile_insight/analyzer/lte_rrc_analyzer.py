@@ -1310,7 +1310,8 @@ class LteMeasObjectUtra:
         # +str(self.freq,self.offset_freq)+'\n'
         return (self.__class__.__name__
             + ' ' + str(self.obj_id)
-            + ' ' + str(self.freq,self.offset_freq) + '\n')
+            + ' ' + str(self.freq) 
+            + ' ' + str(self.offset_freq) + '\n')
 
 
 class LteReportConfig:

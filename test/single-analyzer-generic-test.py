@@ -36,9 +36,9 @@ def test_replayer_generator(analyzer_name, log_path):
         test_analyzer = Analyzer()
         test_analyzer.include_analyzer(analyzer_name,[])
         test_analyzer.set_source(src)
-
-        #Disable all MobileInsight logs
-        logging.getLogger('mobileinsight_logger').setLevel(logging.CRITICAL)
+# 
+        Disable all MobileInsight logs
+        # logging.getLogger('mobileinsight_logger').setLevel(logging.CRITICAL)
 
         src.run()
 
@@ -52,18 +52,21 @@ class SingleAnalyzerTest(unittest.TestCase):
 
 if __name__ == "__main__":
 
-    operator_logs={"att" : "./test-logs/ATT.mi2log",
+    operator_logs={
+                   "att" : "./test-logs/ATT.mi2log",
                    "tmobile" : "./test-logs/tmobile.mi2log",
                    "verizon" : "./test-logs/verizon.mi2log",
                    "sprint" : "./test-logs/sprint.mi2log",
                    "cmcc" : "./test-logs/CMCC.mi2log",
-                   "att-iphone" : "./test-logs/ATT-iphone.mi2log"}
+                   "att-iphone" : "./test-logs/ATT-iphone.mi2log",
+                   }
 
 
-    analyzers=["UmtsNasAnalyzer"]
-    # analyzers = mobile_insight.analyzer.__all__
-    # forbidden_list=["HandoffLoopAnalyzer","Analyzer","LogAnalyzer","ProfileHierarchy","Profile","StateMachine","GuiAnalyzer"]
-    # analyzers = [x for x in analyzers if x not in forbidden_list]
+    analyzers = mobile_insight.analyzer.__all__
+    forbidden_list=["Analyzer","LogAnalyzer","ProfileHierarchy","Profile","StateMachine","GuiAnalyzer"]
+    analyzers = [x for x in analyzers if x not in forbidden_list]
+
+    # analyzers = ["HandoffLoopAnalyzer"]
 
 
     for analyzer_name in analyzers:
