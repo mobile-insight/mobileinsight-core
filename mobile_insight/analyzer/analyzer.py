@@ -77,6 +77,13 @@ class Analyzer(Element):
 
         #TODO: For Profile, each specific analyzer should declare it on demand
 
+    @staticmethod
+    def reset():
+        """
+        Clean up all the analyzers
+        """
+        Analyzer.__analyzer_array={}
+
     def set_log(self,logpath,loglevel=logging.INFO):
         """
         Set the logging in analyzers.
@@ -87,8 +94,8 @@ class Analyzer(Element):
         """
         self.__logpath=logpath
         self.__loglevel=loglevel
-        setup_logger('automator_logger',self.__logpath,self.__loglevel)
-        self.logger=logging.getLogger('automator_logger')
+        setup_logger('mobileinsight_logger',self.__logpath,self.__loglevel)
+        self.logger=logging.getLogger('mobileinsight_logger')
   
     def set_source(self,source):
         """

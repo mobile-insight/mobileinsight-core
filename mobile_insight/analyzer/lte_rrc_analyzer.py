@@ -453,6 +453,10 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
             if field.get('name') == "lte-rrc.t_ReselectionUTRA":
                 cur_pair = (self.__status.id,self.__status.freq)
+                if cur_pair not in self.__config:
+                    self.__config[cur_pair] = LteRrcConfig()
+                    self.__config[cur_pair].status = self.__status
+                    # return
                 for config in self.__config[cur_pair].sib.inter_freq_config.itervalues():
                     if config.rat == "UTRA":
                         config.tReselection = float(field.get('show'))

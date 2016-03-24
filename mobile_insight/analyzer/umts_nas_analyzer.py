@@ -407,53 +407,71 @@ class MmStatus:
         self.substate = None
         self.update_status = None
 
+class MmNasStatusDrx:
+    def __init__(self):
+        self.split_pg_cycle_code = None
+        self.cn_spec_drx_cycle_len_coef = None
+        self.split_on_ccch = None
+        self.non_drx_timer = None
+
+class MmNasQosNegotiated:
+    def __init__(self):
+        self.elay_class = None
+        self.reliability_class = None
+        self.peak_throughput = None
+        self.precedence_class = None
+        self.mean_throughput = None
+        self.traffic_class = None
+        self.delivery_order = None
+        self.traffic_handling_priority = None
+        self.residual_ber = None
+        self.transfer_delay = None
+        self.max_bitrate_ulink = None
+        self.max_bitrate_dlink = None
+        self.guaranteed_bitrate_ulink = None
+        self.guaranteed_bitrate_dlink = None
+        self.max_bitrate_dlink_ext = None
+        self.guaranteed_bitrate_dlink_ext = None
+
+class MmNasQosRequested:
+    def __init__(self):
+        self.delay_class = None
+        self.reliability_class = None
+        self.peak_throughput = None
+        self.precedence_class = None
+        self.mean_throughput = None
+        self.traffic_class = None
+        self.delivery_order = None
+        self.traffic_handling_priority = None
+        self.residual_ber = None
+        self.transfer_delay = None
+        self.max_bitrate_ulink = None
+        self.max_bitrate_dlink = None
+        self.guaranteed_bitrate_ulink = None
+        self.guaranteed_bitrate_dlink = None
+        self.max_bitrate_dlink_ext = None
+        self.guaranteed_bitrate_dlink_ext = None
+
+class MmNasTmsi:
+    def __init__(self):
+        self.len = None
+        self.unused = None
+        self.oddevenind = None
+        self.mobileid = None
+        self.tmsi = None
+
+
 class MmNasStatus:
     """
     An abstraction to maintain the MM NAS status.
     """
     def __init__(self):
-        self.drx.split_pg_cycle_code = None
-        self.drx.cn_spec_drx_cycle_len_coef = None
-        self.drx.split_on_ccch = None
-        self.drx.non_drx_timer = None
+        self.drx = MmNasStatusDrx()
+        self.qos_negotiated = MmNasQosNegotiated ()
+        self.qos_requested= MmNasQosRequested()
+        self.tmsi = MmNasTmsi()
 
-        self.qos_negotiated.delay_class = None
-        self.qos_negotiated.reliability_class = None
-        self.qos_negotiated.peak_throughput = None
-        self.qos_negotiated.precedence_class = None
-        self.qos_negotiated.mean_throughput = None
-        self.qos_negotiated.traffic_class = None
-        self.qos_negotiated.delivery_order = None
-        self.qos_negotiated.traffic_handling_priority = None
-        self.qos_negotiated.residual_ber = None
-        self.qos_negotiated.transfer_delay = None
-        self.qos_negotiated.max_bitrate_ulink = None
-        self.qos_negotiated.max_bitrate_dlink = None
-        self.qos_negotiated.guaranteed_bitrate_ulink = None
-        self.qos_negotiated.guaranteed_bitrate_dlink = None
-        self.qos_negotiated.max_bitrate_dlink_ext = None
-        self.qos_negotiated.guaranteed_bitrate_dlink_ext = None
+        
 
-        self.qos_requested.delay_class = None
-        self.qos_requested.reliability_class = None
-        self.qos_requested.peak_throughput = None
-        self.qos_requested.precedence_class = None
-        self.qos_requested.mean_throughput = None
-        self.qos_requested.traffic_class = None
-        self.qos_requested.delivery_order = None
-        self.qos_requested.traffic_handling_priority = None
-        self.qos_requested.residual_ber = None
-        self.qos_requested.transfer_delay = None
-        self.qos_requested.max_bitrate_ulink = None
-        self.qos_requested.max_bitrate_dlink = None
-        self.qos_requested.guaranteed_bitrate_ulink = None
-        self.qos_requested.guaranteed_bitrate_dlink = None
-        self.qos_requested.max_bitrate_dlink_ext = None
-        self.qos_requested.guaranteed_bitrate_dlink_ext = None
-
-        self.tmsi.len = None
-        self.tmsi.unused = None
-        self.tmsi.oddevenind = None
-        self.tmsi.mobileid = None
-        self.tmsi.tmsi = None
+        
         

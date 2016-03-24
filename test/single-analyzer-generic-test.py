@@ -38,7 +38,7 @@ def test_replayer_generator(analyzer_name, log_path):
         test_analyzer.set_source(src)
 
         #Disable all MobileInsight logs
-        logging.getLogger('mobileinsight_logger').setLevel(0)
+        logging.getLogger('mobileinsight_logger').setLevel(logging.CRITICAL)
 
         src.run()
 
@@ -56,11 +56,15 @@ if __name__ == "__main__":
                    "tmobile" : "./test-logs/tmobile.mi2log",
                    "verizon" : "./test-logs/verizon.mi2log",
                    "sprint" : "./test-logs/sprint.mi2log",
-                   "cmcc" : "./test-logs/CMCC.mi2log"}
+                   "cmcc" : "./test-logs/CMCC.mi2log",
+                   "att-iphone" : "./test-logs/ATT-iphone.mi2log"}
 
 
-    # analyzers=["LteRrcAnalyzer","WcdmaRrcAnalyzer"]
-    analyzers = mobile_insight.analyzer.__all__
+    analyzers=["UmtsNasAnalyzer"]
+    # analyzers = mobile_insight.analyzer.__all__
+    # forbidden_list=["HandoffLoopAnalyzer","Analyzer","LogAnalyzer","ProfileHierarchy","Profile","StateMachine","GuiAnalyzer"]
+    # analyzers = [x for x in analyzers if x not in forbidden_list]
+
 
     for analyzer_name in analyzers:
         for operator in operator_logs:
