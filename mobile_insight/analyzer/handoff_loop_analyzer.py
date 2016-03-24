@@ -42,11 +42,11 @@ class HandoffLoopAnalyzer(Analyzer):
         # mark if a cell has been visited
         cell_visited = {x:False for x in cell_list} 
         
-        # print cell_list
-        for cell in cell_list:
-            # self.__rrc_analyzer.get_cell_config(cell).dump()
-            # self.logger.info(self.__rrc_analyzer.get_cell_config(cell).dump())
-            self.logger.info(self.get_analyzer("RrcAnalyzer").get_cell_config(cell).dump())
+        # # print cell_list
+        # for cell in cell_list:
+        #     # self.__rrc_analyzer.get_cell_config(cell).dump()
+        #     # self.logger.info(self.__rrc_analyzer.get_cell_config(cell).dump())
+        #     self.logger.info(self.get_analyzer("RrcAnalyzer").get_cell_config(cell).dump())
 
         # each cell's configuration
         cell_config = {}

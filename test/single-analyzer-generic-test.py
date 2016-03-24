@@ -36,8 +36,8 @@ def test_replayer_generator(analyzer_name, log_path):
         test_analyzer = Analyzer()
         test_analyzer.include_analyzer(analyzer_name,[])
         test_analyzer.set_source(src)
-# 
-        Disable all MobileInsight logs
+
+        # Disable all MobileInsight logs
         # logging.getLogger('mobileinsight_logger').setLevel(logging.CRITICAL)
 
         src.run()
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
 
     analyzers = mobile_insight.analyzer.__all__
-    forbidden_list=["Analyzer","LogAnalyzer","ProfileHierarchy","Profile","StateMachine","GuiAnalyzer"]
+    forbidden_list=["Analyzer","LogAnalyzer","ProfileHierarchy","Profile","StateMachine"]
     analyzers = [x for x in analyzers if x not in forbidden_list]
 
     # analyzers = ["HandoffLoopAnalyzer"]
