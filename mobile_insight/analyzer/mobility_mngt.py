@@ -29,7 +29,7 @@ import datetime
 def string2timestamp(s):
     # dt=datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S.%f")
     # return time.mktime(dt.timetuple()) + (dt.microsecond / 1000000.0)
-    return s.fromtimestamp(0)
+    return time.mktime(s.timetuple())*1e3 + s.microsecond/1e3
 
 
 class MobilityMngt(Analyzer):
