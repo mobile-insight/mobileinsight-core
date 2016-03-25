@@ -229,7 +229,7 @@ class MobilityMngt(Analyzer):
                 if meas_id and self.__handoff_sample.cur_state:
                     meas_report =  self.__handoff_sample.cur_state.get_meas_report_obj(meas_id)
                     self.__handoff_sample.add_meas_report(meas_report)
-                self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement report "+str(rss))
+                self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement report "+str(meas_report[1].event_list[0].type)+" "+str(rss))
 
             if field.get('name')=="lte-rrc.measResultsCDMA2000_element":
 
@@ -244,7 +244,7 @@ class MobilityMngt(Analyzer):
                 meas_report = (LteMeasObjectCDMA2000(None,0),tmp)   #fake an empty report
                 
                 self.__handoff_sample.add_meas_report(meas_report)
-                self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement report "+str(rss))
+                self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement report cdma2000 "+str(rss))
 
 
             if field.get('name')=="lte-rrc.measConfig_element":
