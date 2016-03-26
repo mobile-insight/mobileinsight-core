@@ -442,7 +442,7 @@ initdm_collector_c(void)
     PyObject *log_packet_types;
 
     // dm_ccllector_c.log_packet_types: stores all supported type names
-    if(EXPOSE_INTERNAL_LOGS){
+    if(EXPOSE_INTERNAL_LOGS==1){
         //YUANJIE: expose all logs to MobileInsight
         int n_types = ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName);
         log_packet_types = PyTuple_New(n_types);
@@ -452,7 +452,7 @@ initdm_collector_c(void)
 
             // Yuanjie: only expose public logs to py module
             // Refer to consts.h
-            // printf("%s\n",LogPacketTypeID_To_Name[i].name);
+            printf("%s\n",LogPacketTypeID_To_Name[i].name);
             PyTuple_SetItem(log_packet_types,
                         i,
                         Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));            
@@ -472,7 +472,7 @@ initdm_collector_c(void)
         for (int i = 0; i < ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++)
         {
             if(LogPacketTypeID_To_Name[i].b_public){
-                // printf("%s\n",LogPacketTypeID_To_Name[i].name);
+                printf("%s\n",LogPacketTypeID_To_Name[i].name);
                 PyTuple_SetItem(log_packet_types,
                         count,
                         Py_BuildValue("s", LogPacketTypeID_To_Name[i].name)); 

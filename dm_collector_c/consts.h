@@ -8,7 +8,7 @@
 
 #include "utils.h"
 
-const int EXPOSE_INTERNAL_LOGS=1;  //Yuanjie: 1 means expose all logs, 0 means only public logs are exposed
+// const int EXPOSE_INTERNAL_LOGS=1;  //Yuanjie: 1 means expose all logs, 0 means only public logs are exposed
 
 // All supported type IDs
 enum LogPacketType {
