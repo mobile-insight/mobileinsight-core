@@ -267,7 +267,7 @@ class AndroidDevDiagMonitor(Monitor):
                 continue
 
         if len(diag_procs) > 0:
-            cmd2 = "su -c kill " + " ".join([str(pid) for pid in diag_procs])
+            cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
             self._run_shell_cmd(cmd2)
 
     def run(self):
@@ -299,18 +299,15 @@ class AndroidDevDiagMonitor(Monitor):
             self._mkfifo(self._fifo_path)
 
             # TODO(likayo): need to protect aganist user input
-            cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
-            # cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
+            # cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
+            cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
             if self._input_dir:
                 cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
                 self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
                 self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
-            proc = subprocess.Popen(cmd,
-                                    shell=True,
-                                    executable=ANDROID_SHELL,
-                                    )
-            # proc = subprocess.Popen("su", shell=True, executable=ANDROID_SHELL)
-            # proc.communicate(cmd)
+            # proc = subprocess.Popen(cmd, shell=True, executable=ANDROID_SHELL)
+            proc = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            proc.stdin.write(cmd+'\n')
 
 
 
