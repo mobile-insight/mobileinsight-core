@@ -27,7 +27,7 @@ def test_replayer_generator(analyzer_name, log_path):
     def test(self):
 
         #Single analyzer test only
-    	Analyzer.reset()
+        Analyzer.reset()
 
         src = QmdlReplayer()
         src.set_input_path(log_path)
@@ -52,21 +52,33 @@ class SingleAnalyzerTest(unittest.TestCase):
 
 if __name__ == "__main__":
 
-    operator_logs={
-                   "att" : "./test-logs/ATT.mi2log",
-                   "tmobile" : "./test-logs/tmobile.mi2log",
+    
+    if len(sys.argv) > 1:
+        #Test with a specified log
+    
+        operator_logs={
+            "external":sys.argv.pop()
+
+        }
+    else:
+        #Test with built-in logs
+
+        operator_logs={
+                   # "att" : "./test-logs/ATT.mi2log",
+                   # "tmobile" : "./test-logs/tmobile.mi2log",
                    "verizon" : "./test-logs/verizon.mi2log",
-                   "sprint" : "./test-logs/sprint.mi2log",
-                   "cmcc" : "./test-logs/CMCC.mi2log",
-                   "att-iphone" : "./test-logs/ATT-iphone.mi2log",
+                   # "sprint" : "./test-logs/sprint.mi2log",
+                   # "cmcc" : "./test-logs/CMCC.mi2log",
+                   # "att-iphone" : "./test-logs/ATT-iphone.mi2log",
                    }
-
-
+        
     analyzers = mobile_insight.analyzer.__all__
     forbidden_list=["Analyzer","LogAnalyzer","ProfileHierarchy","Profile","StateMachine"]
     analyzers = [x for x in analyzers if x not in forbidden_list]
 
     # analyzers = ["HandoffLoopAnalyzer"]
+
+
 
 
     for analyzer_name in analyzers:

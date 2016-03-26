@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
 
     analyzers = mobile_insight.analyzer.__all__
-    forbidden_list=["Analyzer","LogAnalyzer","ProfileHierarchy","Profile","StateMachine"]
+    forbidden_list=["Analyzer","LogAnalyzer","ProfileHierarchy","Profile","StateMachine","HandoffLoopAnalyzer"]
     analyzers = [x for x in analyzers if x not in forbidden_list]
 
     # analyzers = ["HandoffLoopAnalyzer"]
