@@ -81,8 +81,8 @@ class DMCollector(Monitor):
             type_name = [type_name]
         for n in type_name:
             if n not in cls.SUPPORTED_TYPES:
-                # raise ValueError("Unsupported log message type: %s" % n)
-                print "Unsupported log message type: %s" % n
+                raise ValueError("Unsupported log message type: %s" % n)
+                # print "Unsupported log message type: %s" % n
             else:
                 self._type_names.append(n)
 

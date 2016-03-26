@@ -14,7 +14,8 @@ This example shows how to LTE EMM/ESM layer information with LteNasAnalyzer
 if __name__ == "__main__":
     
     if len(sys.argv) < 3:
-        opt.error("please specify physical port name and baudrate.")
+        print "Error: please specify physical port name and baudrate."
+        print __file__,"SERIAL_PORT_NAME BAUNRATE"
         sys.exit(1)
 
     # Initialize a DM monitor

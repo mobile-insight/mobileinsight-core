@@ -10,7 +10,8 @@ from mobile_insight.analyzer import MsgLogger,MsgSerializer
 if __name__ == "__main__":
     
     if len(sys.argv) < 3:
-        opt.error("please specify physical port name and baudrate.")
+        print "Error: please specify physical port name and baudrate."
+        print __file__,"SERIAL_PORT_NAME BAUNRATE"
         sys.exit(1)
 
     # Initialize a 3G/4G monitor
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     src.set_baudrate(int(sys.argv[2])) #the baudrate of the port
 
     #Enable 3G/4G messages to be monitored. Here we enable RRC (radio resource control) monitoring
-    src.enable_log("LTE_RRC_OTA_Packet")
+    src.enable_log("LTE_RRC_OTA_Pdacket")
     src.enable_log("WCDMA_Signaling_Messages")
     src.enable_log("WCDMA_CELL_ID")
 

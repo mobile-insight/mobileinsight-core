@@ -15,7 +15,8 @@ This example shows how to get LTE radio measurements with LteMeasurementAnalyzer
 if __name__ == "__main__":
     
     if len(sys.argv) < 3:
-        opt.error("please specify physical port name and baudrate.")
+        print "Error: please specify physical port name and baudrate."
+        print __file__,"SERIAL_PORT_NAME BAUNRATE"
         sys.exit(1)
 
     # Initialize a 3G/4G monitor

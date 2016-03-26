@@ -10,7 +10,8 @@ from mobile_insight.monitor import *
 if __name__ == "__main__":
     
     if len(sys.argv) < 3:
-        opt.error("please specify physical port name and baudrate.")
+        print "Error: please specify physical port name and baudrate."
+        print __file__,"SERIAL_PORT_NAME BAUNRATE"
         sys.exit(1)
 
     # Initialize a 3G/4G monitor
@@ -29,9 +30,6 @@ if __name__ == "__main__":
     #3G RRC analyzer
     wcdma_rrc_analyzer = WcdmaRrcAnalyzer()
     wcdma_rrc_analyzer.set_source(src) #bind with the monitor
-
-    #save the analysis result. All analyzers share the same output file.
-    wcdma_rrc_analyzer.set_log("3g-4g-rrc.txt") 
 
     #Start the monitoring
     src.run()
