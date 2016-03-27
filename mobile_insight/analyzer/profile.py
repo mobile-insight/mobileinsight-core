@@ -300,17 +300,21 @@ class Profile(object):
         :returns: True if the update succeeds, False otherwise
         '''
 
+
         #Step 1: check if the name conforms to the hierarchy
-        if self.__profile_hierarchy is None: #no profile defined
+        if not self.__profile_hierarchy: #no profile defined
+            raise Exception('No profile defined')
             return False
         #Check if the field to update is valid
         test_node = self.__profile_hierarchy.get_node(profile_name)
-        if test_node is None:
+        if not test_node:
+            raise Exception('Invalid update: '+profile_name)
             return False
         #Check the value fileds to update are indeed included based on hierarchy
         for field_name in value_dict:
             if field_name not in test_node.children:
                 #Invalid node
+                raise Exception('Invalid update field: '+str(value_dict))
                 return False
 
         profile_nodes = profile_name.split('.')
@@ -356,6 +360,8 @@ class Profile(object):
             else:
                 self.__db.execute(sql_cmd)
                 self.__conn.commit()
+
+            return True
         else:
             if is_android:
                 sql_res.moveToFirst();
@@ -392,6 +398,8 @@ class Profile(object):
             else:
                 self.__db.execute(sql_cmd)
                 self.__conn.commit()
+
+            return True
 
 if __name__=="__main__":
 

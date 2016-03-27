@@ -17,6 +17,8 @@ mean_tput={1:100,2:200,3:500,4:1000,5:2000,6:5000,7:10000,8:20000,
 
 delivery_order={1:"with delivery order", 2:"without delivery order"}
 
+bearer_type={0:"default", 1:"dedicated"}
+
 
 traffic_class={1:"conversional class", 2:"streaming class",
         3:"interactive class", 4:"background class"}

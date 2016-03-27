@@ -125,6 +125,18 @@ const ValueName UmtsNasGmmState_GmmUpdateStatus [] = {
 
 // ------------------------------------------------------------
 // UMTS NAS MM State
+
+const Fmt UmtsNasMmRegStateFmt [] = {
+    {UINT, "Network operation mode", 1},
+    {UINT, "CS/PS service type", 1},
+    {PLMN_MK2, "PLMN", 3},
+    {UINT, "LAC", 2},
+    {UINT, "RAC", 1},
+    {UINT, "Available PLMN count",1},
+    {UINT, "CSG", 4}
+};
+
+
 const Fmt UmtsNasMmStateFmt [] = {
     {UINT, "MM State", 1},
     {UINT, "MM Substate", 1},
@@ -266,6 +278,27 @@ const Fmt LteNasEmmStateFmt_v2 [] = {
     {BYTE_STREAM, "GUTI MME Group ID", 2},
     {BYTE_STREAM, "GUTI MME Code", 1},
     {BYTE_STREAM, "GUTI M-TMSI", 4}
+};
+
+const Fmt LteNasEsmStateFmt [] = {
+    {UINT, "Version", 1}
+};
+
+const Fmt LteNasEsmStateFmt_v1 [] = {
+    {UINT, "EPS bearer type", 1},
+    {UINT, "EPS bearer ID", 1},
+    {UINT, "EPS bearer state", 1},
+    {SKIP, NULL, 6},
+    {UINT, "Len", 1},
+    {UINT, "QCI", 1},
+    {UINT, "UL MBR", 1},
+    {UINT, "DL MBR", 1},
+    {UINT, "UL GBR", 1},
+    {UINT, "DL GBR", 1},
+    {UINT, "UL MBR ext", 1},
+    {UINT, "DL MBR ext", 1},
+    {UINT, "UL GBR ext", 1},
+    {UINT, "DL GBR ext", 1},
 };
 
 const ValueName LteNasEmmState_v2_EmmState [] = {

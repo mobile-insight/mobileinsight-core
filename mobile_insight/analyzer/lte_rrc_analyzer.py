@@ -323,7 +323,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     int(field_val['lte-rrc.q_Hyst']))
 
                 #Test profile
-                self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.sib_serv",
+                self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.serv_config",
                     {'priority':field_val['lte-rrc.cellReselectionPriority'],
                      'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
                      's_nonintrasearch':str(int(field_val['lte-rrc.s_NonIntraSearch'])*2),

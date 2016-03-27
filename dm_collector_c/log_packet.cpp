@@ -544,6 +544,32 @@ _decode_lte_nas_plain(const char *b, int offset, int length,
 }
 
 static int
+_decode_lte_nas_esm_state(const char *b, int offset, int length,
+                            PyObject *result) {
+
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+    switch (pkt_ver) {
+
+        case 1:{
+            offset += _decode_by_fmt(LteNasEsmStateFmt_v1,
+                                        ARRAY_SIZE(LteNasEsmStateFmt_v1, Fmt),
+                                        b, offset, length, result);
+
+            break;
+
+        }
+
+        default:
+            printf("Unknown LTE NAS ESM State version: 0x%x\n", pkt_ver);
+            return 0;
+
+    }
+
+    return offset - start;
+}
+
+static int
 _decode_lte_nas_emm_state(const char *b, int offset, int length,
                             PyObject *result) {
     int start = offset;
@@ -1654,6 +1680,12 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
         offset += _decode_umts_nas_mm_state(b, offset, length, result);
         break;
 
+    case UMTS_NAS_MM_REG_State:
+        offset += _decode_by_fmt(UmtsNasMmRegStateFmt,
+                                    ARRAY_SIZE(UmtsNasMmRegStateFmt, Fmt),
+                                    b, offset, length, result);
+        break;
+
     case UMTS_NAS_OTA:
         offset += _decode_by_fmt(UmtsNasOtaFmt,
                                     ARRAY_SIZE(UmtsNasOtaFmt, Fmt),
@@ -1697,6 +1729,13 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                                     ARRAY_SIZE(LteNasEmmStateFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_nas_emm_state(b, offset, length, result);
+        break;
+
+    case LTE_NAS_ESM_State:
+        offset += _decode_by_fmt(LteNasEsmStateFmt,
+                                    ARRAY_SIZE(LteNasEsmStateFmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_lte_nas_esm_state(b, offset, length, result);
         break;
 
     case LTE_LL1_PDSCH_Demapper_Configuration:

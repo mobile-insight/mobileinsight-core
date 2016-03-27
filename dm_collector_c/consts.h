@@ -18,6 +18,7 @@ enum LogPacketType {
     WCDMA_Signaling_Messages = 0x412F,
     UMTS_NAS_GMM_State = 0x7130,
     UMTS_NAS_MM_State = 0x7131,
+    UMTS_NAS_MM_REG_State = 0x7135,
     UMTS_NAS_OTA = 0x713A,
     LTE_RRC_OTA_Packet = 0xB0C0,
     LTE_RRC_MIB_Message_Log_Packet = 0xB0C1,
@@ -27,6 +28,7 @@ enum LogPacketType {
     LTE_NAS_EMM_Plain_OTA_Incoming_Message = 0xB0EC,
     LTE_NAS_EMM_Plain_OTA_Outgoing_Message = 0xB0ED,
     LTE_NAS_EMM_State = 0xB0EE,
+    LTE_NAS_ESM_State = 0xB0E5,
     LTE_LL1_PDSCH_Demapper_Configuration = 0xB126,
     LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results = 0xB179,
     LTE_ML1_IRAT_Measurement_Request = 0xB187,
@@ -56,6 +58,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "UMTS_NAS_GMM_State",false},
     {UMTS_NAS_MM_State,
         "UMTS_NAS_MM_State",false},
+    {UMTS_NAS_MM_REG_State,
+        "UMTS_NAS_MM_REG_State",false},
     {UMTS_NAS_OTA,
         "UMTS_NAS_OTA",true},
     {LTE_RRC_OTA_Packet,    // LTE RRC signaling messages
@@ -74,6 +78,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_NAS_EMM_Plain_OTA_Outgoing_Message",true},
     {LTE_NAS_EMM_State,
         "LTE_NAS_EMM_State",false},
+    {LTE_NAS_ESM_State,
+        "LTE_NAS_ESM_State",false},
     {LTE_LL1_PDSCH_Demapper_Configuration,
         "LTE_LL1_PDSCH_Demapper_Configuration",false},
     {LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results,    // LTE infra-frequency measurements (connected mode)

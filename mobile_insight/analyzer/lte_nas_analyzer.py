@@ -15,6 +15,7 @@ except ImportError:
 from analyzer import *
 import timeit
 
+from protocol_analyzer import *
 from profile import Profile, ProfileHierarchy
 
 from nas_util import *
@@ -45,23 +46,31 @@ emm_substate={
 #ESM session connection state
 esm_state={0:"disconnected",1:"connected"}
 
-class LteNasAnalyzer(Analyzer):
+# class LteNasAnalyzer(Analyzer):
+class LteNasAnalyzer(ProtocolAnalyzer):
 
     """
     A protocol analyzer for LTE NAS messages (EMM and ESM)
     """
 
     def __init__(self):
-        Analyzer.__init__(self)
+        
+        ProtocolAnalyzer.__init__(self)
         #init packet filters
         self.add_source_callback(self.__nas_filter)
         #EMM/ESM status initialization
         self.__emm_status = EmmStatus()
-        self.__esm_status = EsmStatus()
+        self.__esm_status = {} #EPS ID -> EsmStatus()
+        self.__cur_eps_id = None
+        # self.__esm_status = EsmStatus()
 
-        #define LTE NAS profile hierarchy
-        self.__eps_id = None
-        self.__profile = Profile(LteNasProfileHierarchy())
+    def create_profile_hierarchy(self):
+        '''
+        Return a Lte NAS ProfileHierarchy (configurations)
+
+        :returns: ProfileHierarchy for LTE NAS
+        '''
+        return LteNasProfileHierarchy()
 
     def set_source(self,source):
         """
@@ -75,6 +84,8 @@ class LteNasAnalyzer(Analyzer):
         source.enable_log("LTE_NAS_ESM_Plain_OTA_Outgoing_Message")
         source.enable_log("LTE_NAS_EMM_Plain_OTA_Incoming_Message")
         source.enable_log("LTE_NAS_EMM_Plain_OTA_Outgoing_Message")
+        source.enable_log("LTE_NAS_EMM_State")
+        source.enable_log("LTE_NAS_ESM_State")
 
     def __nas_filter(self,msg):
         """
@@ -100,7 +111,9 @@ class LteNasAnalyzer(Analyzer):
             log_xml = ET.XML(log_item_dict['Msg'])
             xml_msg=Event(msg.timestamp,msg.type_id,log_xml)
 
-            self.__callback_emm_state(xml_msg)
+            # print log_item_dict['Msg']
+
+            # self.__callback_emm_state(xml_msg)
             self.__callback_emm(xml_msg)
             self.__callback_esm(xml_msg)
 
@@ -108,39 +121,68 @@ class LteNasAnalyzer(Analyzer):
             # e = Event(timeit.default_timer(),self.__class__.__name__,"")
             # self.send(e)
             self.send(xml_msg)
+        if msg.type_id == "LTE_NAS_EMM_State":
+            log_item = msg.data.decode()
+            log_item_dict = dict(log_item)
+            raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
+            self.__callback_emm_state(raw_msg)
+        if msg.type_id == "LTE_NAS_ESM_State":
+            log_item = msg.data.decode()
+            log_item_dict = dict(log_item)
+            raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
+            self.__callback_esm_state(raw_msg)
 
     def __callback_emm_state(self,msg):
         """
         Given the EMM message, update EMM state and substate.
 
         :param msg: the NAS signaling message that carries EMM state
-        """
-
-        for field in msg.data.iter('field'):
-            ''' samples
-            <field name="nas_eps.nas_msg_emm_type" pos="9" show="72" showname="NAS EPS Mobility Management Message Type: Tracking area update request (0x48)" size="1" value="48" />
-            <field name="nas_eps.emm.tsc" pos="10" show="0" showname="0... .... = Type of security context flag (TSC): Native security context (for KSIasme)" size="1" value="02" />
-            <field name="nas_eps.emm.nas_key_set_id" pos="10" show="0" showname=".000 .... = NAS key set identifier:  (0) ASME" size="1" value="02" />
-            '''
-
-            if field.get('showname')=="NAS EPS Mobility Management Message Type: Attach request (0x41)":
-                self.__emm_status.state="deregistered"
-                self.__emm_status.substate="registered.attempting_to_update"
-
-            if field.get('showname')=="NAS EPS Mobility Management Message Type: Attach complete (0x43)":
-                self.__emm_status.state="registered"
-                self.__emm_status.substate="registered.normal_service"
-
-            if field.get('showname')=="NAS EPS Mobility Management Message Type: Detach request (0x45)":
-                self.__emm_status.state="deregistered-initiated"
-                self.__emm_status.substate="null"
-
-            if field.get('showname')=="NAS EPS Mobility Management Message Type: Detach accept (0x45)":
-                self.__emm_status.state="deregistered"
-                self.__emm_status.substate="deregistered.attach_needed"
-
+        """  
+        self.__emm_status.state = msg.data["EMM State"]
+        self.__emm_status.substate = msg.data["EMM Substate"]  
+        tmp = msg.data["PLMN"].split('-')
+        self.__emm_status.guti.mcc = tmp[0]
+        self.__emm_status.guti.mnc = tmp[1]
+        self.__emm_status.guti.mme_group_id = msg.data["GUTI MME Group ID"] 
+        self.__emm_status.guti.mme_code = msg.data["GUTI MME Code"] 
+        self.__emm_status.guti.m_tmsi = msg.data["GUTI M-TMSI"] 
         self.logger.info(self.__emm_status.dump())
-        # self.__emm_status.dump()
+
+    def __callback_esm_state(self,msg):
+        """
+        Given the ESM message, update ESM state 
+
+        :param msg: the NAS signaling message that carries EMM state
+        """
+        self.__cur_eps_id = msg.data["EPS bearer ID"]
+        if self.__cur_eps_id not in self.__esm_status:
+            self.__esm_status[self.__cur_eps_id] = EsmStatus()
+
+        self.__esm_status[self.__cur_eps_id].eps_id = int(msg.data["EPS bearer ID"])
+        self.__esm_status[self.__cur_eps_id].type = int(msg.data["EPS bearer type"])
+        self.__esm_status[self.__cur_eps_id].qos.qci = msg.data["QCI"]
+        self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink = msg.data["UL MBR"]
+        self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink = msg.data["DL MBR"]
+        self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink=msg.data["UL GBR"]
+        self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink=msg.data["DL MBR"]
+        self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink_ext=msg.data["UL MBR ext"]
+        self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink_ext=msg.data["DL MBR ext"]
+        self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext=msg.data["UL GBR ext"]
+        self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=msg.data["DL MBR ext"]
+
+        self.logger.info(self.__esm_status[self.__cur_eps_id].dump())
+
+        # self.profile.update("LteNasProfile:"+self.__emm_status.profile_id()+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
+        #             {'qci':self.__esm_status[self.__cur_eps_id].qos.qci,
+        #              'max_bitrate_ulink':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink,
+        #              'max_bitrate_dlink':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink,
+        #              'guaranteed_bitrate_ulink':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink,
+        #              'guaranteed_bitrate_dlink':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink,
+        #              'max_bitrate_ulink_ext':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink_ext,
+        #              'max_bitrate_dlink_ext':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink_ext,
+        #              'guaranteed_bitrate_ulink_ext':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext,
+        #              'guaranteed_bitrate_dlink_ext':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext,
+        #              })
 
     def __callback_emm(self,msg):
         """
@@ -182,10 +224,13 @@ class LteNasAnalyzer(Analyzer):
 
         for field in msg.data.iter('field'):
 
+            if field.get('name')=="nas_eps.bearer_id":
+                self.__cur_eps_id = int(field.get('show'))
+                if self.__cur_eps_id not in self.__esm_status:
+                    self.__esm_status[self.__cur_eps_id]=EsmStatus()
+
             if field.get('name')=="nas_eps.emm.qci":
-                self.__esm_status.qos.qci=int(field.get('show'))
-                self.logger.info(self.__esm_status.qos.dump_rate())
-                self.logger.info(self.__esm_status.qos.dump_delivery())
+                self.__esm_status[self.__cur_eps_id].qos.qci=int(field.get('show'))
 
             if field.get('show')=="Quality Of Service - Negotiated QoS": 
 
@@ -194,60 +239,58 @@ class LteNasAnalyzer(Analyzer):
                 for val in field.iter('field'):
                     field_val[val.get('name')]=val.get('show')
 
-                
-                self.__esm_status.qos.delay_class=int(field_val['gsm_a.gm.sm.qos.delay_cls'])
-                self.__esm_status.qos.reliability_class=int(field_val['gsm_a.gm.sm.qos.reliability_cls'])
-                self.__esm_status.qos.precedence_class=int(field_val['gsm_a.gm.sm.qos.prec_class'])
+                self.__esm_status[self.__cur_eps_id].eps_id = int(self.__cur_eps_id)
+                self.__esm_status[self.__cur_eps_id].qos.delay_class=int(field_val['gsm_a.gm.sm.qos.delay_cls'])
+                self.__esm_status[self.__cur_eps_id].qos.reliability_class=int(field_val['gsm_a.gm.sm.qos.reliability_cls'])
+                self.__esm_status[self.__cur_eps_id].qos.precedence_class=int(field_val['gsm_a.gm.sm.qos.prec_class'])
                 #10.5.6.5, TS24.008
-                self.__esm_status.qos.peak_tput=1000*pow(2,int(field_val['gsm_a.gm.sm.qos.peak_throughput'])-1)
-                self.__esm_status.qos.mean_tput=mean_tput[int(field_val['gsm_a.gm.sm.qos.mean_throughput'])]
-                self.__esm_status.qos.traffic_class=int(field_val['gsm_a.gm.sm.qos.traffic_cls'])
-                self.__esm_status.qos.delivery_order=int(field_val['gsm_a.gm.sm.qos.del_order'])
-                self.__esm_status.qos.traffic_handling_priority=int(field_val['gsm_a.gm.sm.qos.traff_hdl_pri'])
-                self.__esm_status.qos.residual_ber=residual_ber[int(field_val['gsm_a.gm.sm.qos.ber'])]
+                self.__esm_status[self.__cur_eps_id].qos.peak_tput=1000*pow(2,int(field_val['gsm_a.gm.sm.qos.peak_throughput'])-1)
+                self.__esm_status[self.__cur_eps_id].qos.mean_tput=mean_tput[int(field_val['gsm_a.gm.sm.qos.mean_throughput'])]
+                self.__esm_status[self.__cur_eps_id].qos.traffic_class=int(field_val['gsm_a.gm.sm.qos.traffic_cls'])
+                self.__esm_status[self.__cur_eps_id].qos.delivery_order=int(field_val['gsm_a.gm.sm.qos.del_order'])
+                self.__esm_status[self.__cur_eps_id].qos.traffic_handling_priority=int(field_val['gsm_a.gm.sm.qos.traff_hdl_pri'])
+                self.__esm_status[self.__cur_eps_id].qos.residual_ber=residual_ber[int(field_val['gsm_a.gm.sm.qos.ber'])]
 
-                self.__esm_status.qos.transfer_delay=trans_delay(int(field_val['gsm_a.gm.sm.qos.trans_delay']))
+                self.__esm_status[self.__cur_eps_id].qos.transfer_delay=trans_delay(int(field_val['gsm_a.gm.sm.qos.trans_delay']))
 
-                self.__esm_status.qos.max_bitrate_ulink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl']))
-                self.__esm_status.qos.max_bitrate_dlink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl']))
-                self.__esm_status.qos.guaranteed_bitrate_ulink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl']))
-                self.__esm_status.qos.guaranteed_bitrate_dlink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl']))
+                self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl']))
+                self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl']))
+                self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl']))
+                self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl']))
                 
-                self.__esm_status.qos.max_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl_ext']))
-                self.__esm_status.qos.max_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
-                self.__esm_status.qos.guaranteed_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl_ext']))
-                self.__esm_status.qos.guaranteed_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
+                self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl_ext']))
+                self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
+                self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl_ext']))
+                self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
-                self.logger.info(self.__esm_status.qos.dump_rate())
-                self.logger.info(self.__esm_status.qos.dump_delivery())
-                # self.__esm_status.qos.dump_rate()
-                # self.__esm_status.qos.dump_delay()
+                self.logger.info(self.__esm_status[self.__cur_eps_id].dump())
 
                 # profile update for esm qos
-                self.__profile.update("LteNasProfile:"+str(self.__eps_id),
+                self.profile.update("LteNasProfile:"+self.__emm_status.profile_id()+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
                     {
-                    'delay_class':xstr(self.__esm_status.qos.delay_class),
-                    'reliability_class':xstr(self.__esm_status.qos.reliability_class),
-                    'precedence_class':xstr(self.__esm_status.qos.precedence_class),
-                    'peak_tput':xstr(self.__esm_status.qos.peak_tput),
-                    'mean_tput':xstr(self.__esm_status.qos.mean_tput),
-                    'traffic_class':xstr(self.__esm_status.qos.traffic_class),
-                    'delivery_order':xstr(self.__esm_status.qos.delivery_order),
-                    'traffic_handling_priority':xstr(self.__esm_status.qos.traffic_handling_priority),
-                    'residual_ber':xstr(self.__esm_status.qos.residual_ber),
-                    'transfer_delay':xstr(self.__esm_status.qos.transfer_delay),
-                    'max_bitrate_ulink':xstr(self.__esm_status.qos.max_bitrate_ulink),
-                    'max_bitrate_dlink':xstr(self.__esm_status.qos.max_bitrate_dlink),
-                    'guaranteed_bitrate_ulink':xstr(self.__esm_status.qos.guaranteed_bitrate_ulink),
-                    'guaranteed_bitrate_dlink':xstr(self.__esm_status.qos.guaranteed_bitrate_dlink),
-                    'max_bitrate_ulink_ext':xstr(self.__esm_status.qos.max_bitrate_ulink_ext),
-                    'max_bitrate_dlink_ext':xstr(self.__esm_status.qos.max_bitrate_dlink_ext),
-                    'guaranteed_bitrate_ulink_ext':xstr(self.__esm_status.qos.guaranteed_bitrate_ulink_ext),
-                    'guaranteed_bitrate_dlink_ext':xstr(self.__esm_status.qos.guaranteed_bitrate_dlink_ext),
+                    'delay_class':xstr(self.__esm_status[self.__cur_eps_id].qos.delay_class),
+                    'reliability_class':xstr(self.__esm_status[self.__cur_eps_id].qos.reliability_class),
+                    'precedence_class':xstr(self.__esm_status[self.__cur_eps_id].qos.precedence_class),
+                    'peak_tput':xstr(self.__esm_status[self.__cur_eps_id].qos.peak_tput),
+                    'mean_tput':xstr(self.__esm_status[self.__cur_eps_id].qos.mean_tput),
+                    'traffic_class':xstr(self.__esm_status[self.__cur_eps_id].qos.traffic_class),
+                    'delivery_order':xstr(self.__esm_status[self.__cur_eps_id].qos.delivery_order),
+                    'traffic_handling_priority':xstr(self.__esm_status[self.__cur_eps_id].qos.traffic_handling_priority),
+                    'residual_ber':xstr(self.__esm_status[self.__cur_eps_id].qos.residual_ber),
+                    'transfer_delay':xstr(self.__esm_status[self.__cur_eps_id].qos.transfer_delay),
+                    'max_bitrate_ulink':xstr(self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink),
+                    'max_bitrate_dlink':xstr(self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink),
+                    'guaranteed_bitrate_ulink':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink),
+                    'guaranteed_bitrate_dlink':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink),
+                    'max_bitrate_ulink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink_ext),
+                    'max_bitrate_dlink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink_ext),
+                    'guaranteed_bitrate_ulink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext),
+                    'guaranteed_bitrate_dlink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext),
                     })
 
     def get_qos(self):
-        return self.__esm_status.qos
+        # return self.__esm_status.qos
+        self.__esm_status[self.__cur_eps_id].qos
 
 class EmmStatus:
     """
@@ -263,6 +306,15 @@ class EmmStatus:
 
     def inited(self):
         return (self.state and self.substate and self.guti.inited())
+
+    def profile_id(self):
+        """
+        Return a globally unique id (MCC-MNC-MMEGI-MMEC) for profiling
+        """
+        return (str(self.guti.mcc)
+            + '-' + str(self.guti.mnc)
+            + '-' + str(int(self.guti.mme_group_id))
+            + '-' + str(int(self.guti.mme_code)))
 
     def dump(self):
         """
@@ -302,10 +354,14 @@ class EsmStatus:
     An abstraction to maintain the ESM status
     """
     def __init__(self):
+        self.eps_id = None
+        self.type = 0    #default or dedicated
         self.qos=EsmQos()
 
-        # # test profile
-        # self.id=None
+    def dump(self):
+        return (self.__class__.__name__
+            + ' EPS_ID=' + xstr(self.eps_id) + ' type=' + xstr(bearer_type[self.type])
+            + ":\n\t"+self.qos.dump_rate()+'\n\t'+self.qos.dump_delivery())
 
 class EsmQos:
     """
@@ -380,8 +436,7 @@ def LteNasProfileHierarchy():
     root = profile_hierarchy.get_root()
     eps = root.add('eps',False)
     
-    eps.add('eps_id', False);
-    qos = eps.add('qos',False) #Active-state configurations
+    qos = eps.add('qos',True) #Active-state configurations (indexed by EPS type: default or dedicated)
 
     #QoS parameters
     qos.add('qci',False)
