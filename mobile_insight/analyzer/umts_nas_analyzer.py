@@ -259,7 +259,7 @@ class UmtsNasAnalyzer(Analyzer):
                 self.__mm_nas_status.qos_negotiated.traffic_class = int(field_val['gsm_a.gm.sm.qos.traffic_cls'])
                 self.__mm_nas_status.qos_negotiated.delivery_order = int(field_val['gsm_a.gm.sm.qos.del_order'])
                 self.__mm_nas_status.qos_negotiated.traffic_handling_priority = int(field_val['gsm_a.gm.sm.qos.traff_hdl_pri'])
-                self.__mm_nas_status.qos_negotiated.residual_ber = residual_ber(int(field_val['gsm_a.gm.sm.qos.ber']))
+                self.__mm_nas_status.qos_negotiated.residual_ber = residual_ber[int(field_val['gsm_a.gm.sm.qos.ber'])]
                 self.__mm_nas_status.qos_negotiated.transfer_delay = trans_delay(int(field_val['gsm_a.gm.sm.qos.trans_delay']))
                 self.__mm_nas_status.qos_negotiated.max_bitrate_ulink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl']))
                 self.__mm_nas_status.qos_negotiated.max_bitrate_dlink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl']))
@@ -309,7 +309,7 @@ class UmtsNasAnalyzer(Analyzer):
                 # field_val["gsm_a.spare_bits"] = None
                 field_val["gsm_a.gm.sm.qos.prec_class"] = None
                 # field_val["gsm_a.spare_bits"] = None
-                field_val["gsm_a.gm.sm.qos.mean_throughput"] = None
+                field_val["gsm_a.gm.sm.qos.mean_throughput"] = 31 #best-effort by default
                 field_val["gsm_a.gm.sm.qos.traffic_cls"] = None
                 field_val["gsm_a.gm.sm.qos.del_order"] = None
                 # field_val["gsm_a.gm.sm.qos.del_of_err_sdu"] = None
