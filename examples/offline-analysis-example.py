@@ -9,7 +9,7 @@ Offline analysis with Qualcomm's QMDL traces
 
 #Import MobileInsight modules
 from mobile_insight.monitor import QmdlReplayer
-from mobile_insight.analyzer import LteRrcAnalyzer,WcdmaRrcAnalyzer
+from mobile_insight.analyzer import LteRrcAnalyzer,WcdmaRrcAnalyzer,LteNasAnalyzer,UmtsNasAnalyzer
 
 if __name__ == "__main__":
     
@@ -23,9 +23,17 @@ if __name__ == "__main__":
 
     #RRC analyzer
     lte_rrc_analyzer = LteRrcAnalyzer()
-    wcdma_rrc_analyzer = WcdmaRrcAnalyzer()
     lte_rrc_analyzer.set_source(src) #bind with the monitor
+    
+    wcdma_rrc_analyzer = WcdmaRrcAnalyzer()
     wcdma_rrc_analyzer.set_source(src) #bind with the monitor
+
+
+    lte_nas_analyzer = LteNasAnalyzer()
+    lte_nas_analyzer.set_source(src)
+
+    umts_nas_analyzer = UmtsNasAnalyzer()
+    umts_nas_analyzer.set_source(src)
 
     #Start the monitoring
     src.run()

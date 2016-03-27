@@ -17,6 +17,8 @@ import timeit
 
 from profile import Profile, ProfileHierarchy
 
+from nas_util import *
+
 __all__=["LteNasAnalyzer"]
 
 #EMM registeration state 
@@ -42,87 +44,6 @@ emm_substate={
 
 #ESM session connection state
 esm_state={0:"disconnected",1:"connected"}
-
-#QoS mapping: 10.5.6.5, TS24.008
-mean_tput={1:100,2:200,3:500,4:1000,5:2000,6:5000,7:10000,8:20000,
-        9:50000,10:100000,11:200000,12:500000,13:1000000,14:2000000,
-        15:5000000,16:10000000,17:20000000,18:50000000,31:"best effort"}
-
-
-delivery_order={1:"with delivery order", 2:"without delivery order"}
-
-
-traffic_class={1:"conversional class", 2:"streaming class",
-        3:"interactive class", 4:"background class"}
-
-
-residual_ber={1:5e-2, 2:1e-2, 3:5e-3, 4:4e-3, 5:1e-3, 6:1e-4, 7:1e-5,
-        8:1e-6, 9:6e-8}
-
-def xstr(val):
-    '''
-    Return a string for valid value, or empty string for Nontype
-
-    :param val: a value
-    :returns: a string if val is not none, otherwise an empty string
-    '''
-
-    if val:
-        return str(val)
-    else:
-        return "unknown"
-
-
-def max_bitrate(val):
-    '''
-    Given ESM value, return maximum bit rate (Kbps).
-    Please refer to 10.5.6.5, TS24.008 for more details.
-
-    :param val: the value encoded in the ESM NAS message
-    '''
-    if val<=63:
-        return val
-    elif val<=127:
-        return 64+(val-64)*8
-    elif val<=254:
-        return 576+(val-128)*64
-    else:
-        return 0
-
-
-def max_bitrate_ext(val):
-    """
-    Given ESM value, return extended maximum bit rate (Kbps).
-    Please refer to 10.5.6.5, TS24.008 for more details.
-
-    :param val: the value encoded in the ESM NAS message
-    """
-    if val<=74:
-        return 8600+val*100
-    elif val<=186:
-        return 16000+(val-74)*1000
-    elif val<=250:
-        return 128000+(val-186)*2000
-    else:
-        return None
-
-
-def trans_delay(val):
-    """
-    Given ESM value, return transfer delay (ms).
-    Please refer to 10.5.6.5, TS24.008 for more details.
-
-    :param val: the value encoded in the ESM NAS message
-    """
-    if val<=15:
-        return val*10
-    elif val<=31:
-        return 200+(val-16)*50
-    elif val<=62:
-        return 1000+(val-32)*100
-    else:
-        return None
-
 
 class LteNasAnalyzer(Analyzer):
 
@@ -227,19 +148,6 @@ class LteNasAnalyzer(Analyzer):
 
         :param msg: the EMM NAS message
         """
-        '''
-        <field name="" pos="11" show="EPS mobile identity - GUTI" size="13" value="500bf6130062800170eb5b09cf">
-            <field name="nas_eps.emm.elem_id" pos="11" show="80" showname="Element ID: 0x50" size="1" value="50" />
-            <field name="gsm_a.len" pos="12" show="11" showname="Length: 11" size="1" value="0b" />
-            <field name="nas_eps.emm.odd_even" pos="13" show="0" showname=".... 0... = odd/even indic: 0" size="1" unmaskedvalue="f6" value="0" />
-            <field name="nas_eps.emm.type_of_id" pos="13" show="6" showname=".... .110 = Type of identity: GUTI (6)" size="1" unmaskedvalue="f6" value="6" />
-            <field name="e212.mcc" pos="14" show="310" showname="Mobile Country Code (MCC): United States of America (310)" size="2" value="1300" />
-            <field name="e212.mnc" pos="15" show="260" showname="Mobile Network Code (MNC): T-Mobile USA (260)" size="2" value="0062" />
-            <field name="nas_eps.emm.mme_grp_id" pos="17" show="32769" showname="MME Group ID: 32769" size="2" value="8001" />
-            <field name="nas_eps.emm.mme_code" pos="19" show="112" showname="MME Code: 112" size="1" value="70" />
-            <field name="nas_eps.emm.m_tmsi" pos="20" show="3948612047" showname="M-TMSI: 0xeb5b09cf" size="4" value="eb5b09cf" />
-        </field>
-        '''
 
         for field in msg.data.iter('field'):
 
@@ -362,9 +270,6 @@ class EmmStatus:
 
         :returns: a string that encodes EMM status
         """
-        # print self.__class__.__name__,self.state,self.substate, \
-        # self.guti.mcc,self.guti.mnc,self.guti.mme_group_id, \
-        # self.guti.mme_code,self.guti.m_tmsi,self.ciphering,self.integrity
 
         return (self.__class__.__name__
             + ' EMM.state='+xstr(self.state) + ' EMM.substate='+xstr(self.substate)
@@ -435,11 +340,6 @@ class EsmQos:
         :returns: a string that encodes all the data rate 
         :rtype: string
         """
-        # print self.__class__.__name__,"Throughput(Kbps):",self.peak_tput,self.mean_tput, \
-        # self.max_bitrate_ulink, self.max_bitrate_dlink, \
-        # self.guaranteed_bitrate_ulink, self.guaranteed_bitrate_dlink, \
-        # self.max_bitrate_ulink_ext, self.max_bitrate_dlink_ext, \
-        # self.guaranteed_bitrate_ulink_ext, self.guaranteed_bitrate_dlink_ext
         return (self.__class__.__name__ 
             + ' peak_tput=' + xstr(self.peak_tput) + ' mean_tput=' + xstr(self.mean_tput)
             + ' max_bitrate_ulink=' + xstr(self.max_bitrate_ulink) + ' max_bitrate_dlink=' + xstr(self.max_bitrate_dlink)
