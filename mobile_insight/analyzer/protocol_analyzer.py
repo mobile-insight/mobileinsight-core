@@ -93,6 +93,7 @@ class ProtocolAnalyzer(Analyzer):
         log_item = msg.data.decode()
         if len(log_item)<1:
             return
+        print log_item
         log_item_dict = dict(log_item)
 
         if 'Msg' not in log_item_dict:
