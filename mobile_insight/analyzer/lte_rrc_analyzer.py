@@ -820,7 +820,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         Analyzer.set_source(self,source)
         #enable LTE RRC log
         source.enable_log("LTE_RRC_OTA_Packet")
-        source.enable_log("LTE_RRC_Serv_Cell_Info_Log_Packet")
+        source.enable_log("LTE_RRC_Serv_Cell_Info")
 
     def get_cell_list(self):
         """

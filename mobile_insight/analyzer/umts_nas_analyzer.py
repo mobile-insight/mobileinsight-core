@@ -56,7 +56,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         """
         Analyzer.set_source(self,source)
         #Enable MM/GMM/CM/SM logs
-        source.enable_log("UMTS_NAS_OTA")
+        source.enable_log("UMTS_NAS_OTA_Packet")
         source.enable_log("UMTS_NAS_GMM_State")
         source.enable_log("UMTS_NAS_MM_State")
         source.enable_log("UMTS_NAS_MM_REG_State")
@@ -91,7 +91,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
 
 
 
-        if msg.type_id == "UMTS_NAS_OTA":
+        if msg.type_id == "UMTS_NAS_OTA_Packet":
             # log_item = msg.data
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)

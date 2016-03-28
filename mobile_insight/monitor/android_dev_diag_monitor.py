@@ -228,6 +228,12 @@ class AndroidDevDiagMonitor(Monitor):
             else:
                 self._type_names.append(n)
 
+    def enable_log_all(self):
+        """
+        Enable all supported logs
+        """
+        self.enable_log(cls.SUPPORTED_TYPES)
+
     def set_block_size(self, n):
         self.BLOCK_SIZE = n
 

@@ -80,10 +80,10 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         """
         Analyzer.set_source(self,source)
         #Enable EMM/ESM logs
-        source.enable_log("LTE_NAS_ESM_Plain_OTA_Incoming_Message")
-        source.enable_log("LTE_NAS_ESM_Plain_OTA_Outgoing_Message")
-        source.enable_log("LTE_NAS_EMM_Plain_OTA_Incoming_Message")
-        source.enable_log("LTE_NAS_EMM_Plain_OTA_Outgoing_Message")
+        source.enable_log("LTE_NAS_ESM_OTA_Incoming_Packet")
+        source.enable_log("LTE_NAS_ESM_OTA_Outgoing_Packet")
+        source.enable_log("LTE_NAS_EMM_OTA_Incoming_Packet")
+        source.enable_log("LTE_NAS_EMM_OTA_Outgoing_Packet")
         source.enable_log("LTE_NAS_EMM_State")
         source.enable_log("LTE_NAS_ESM_State")
 
@@ -94,10 +94,10 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         :param msg: the event (message) from the trace collector.
         """
 
-        if msg.type_id == "LTE_NAS_ESM_Plain_OTA_Incoming_Message" \
-        or msg.type_id == "LTE_NAS_ESM_Plain_OTA_Outgoing_Message" \
-        or msg.type_id == "LTE_NAS_EMM_Plain_OTA_Incoming_Message" \
-        or msg.type_id == "LTE_NAS_EMM_Plain_OTA_Outgoing_Message":    
+        if msg.type_id == "LTE_NAS_ESM_OTA_Incoming_Packet" \
+        or msg.type_id == "LTE_NAS_ESM_OTA_Outgoing_Packet" \
+        or msg.type_id == "LTE_NAS_EMM_OTA_Incoming_Packet" \
+        or msg.type_id == "LTE_NAS_EMM_OTA_Outgoing_Packet":    
             # log_item = msg.data
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)

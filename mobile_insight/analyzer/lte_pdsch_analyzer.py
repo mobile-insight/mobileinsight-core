@@ -30,11 +30,11 @@ class LtePdschAnalyzer(Analyzer):
         Analyzer.set_source(self,source)
 
         #Phy-layer logs
-        source.enable_log("LTE_LL1_PDSCH_Demapper_Configuration")
+        source.enable_log("LTE_PHY_PDSCH_Packet")
 
     def __msg_callback(self,msg):
 
-        if msg.type_id=="LTE_LL1_PDSCH_Demapper_Configuration":
+        if msg.type_id=="LTE_PHY_PDSCH_Packet":
             log_item = msg.data.decode()
 
             if not self.init_timestamp:

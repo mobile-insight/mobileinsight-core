@@ -64,12 +64,12 @@ if __name__ == "__main__":
         #Test with built-in logs
 
         operator_logs={
-                   # "att" : "./test-logs/ATT.mi2log",
-                   # "tmobile" : "./test-logs/tmobile.mi2log",
+                   "att" : "./test-logs/ATT.mi2log",
+                   "tmobile" : "./test-logs/tmobile.mi2log",
                    "verizon" : "./test-logs/verizon.mi2log",
-                   # "sprint" : "./test-logs/sprint.mi2log",
-                   # "cmcc" : "./test-logs/CMCC.mi2log",
-                   # "att-iphone" : "./test-logs/ATT-iphone.mi2log",
+                   "sprint" : "./test-logs/sprint.mi2log",
+                   "cmcc" : "./test-logs/CMCC.mi2log",
+                   "att-iphone" : "./test-logs/ATT-iphone.mi2log",
                    }
         
     analyzers = mobile_insight.analyzer.__all__

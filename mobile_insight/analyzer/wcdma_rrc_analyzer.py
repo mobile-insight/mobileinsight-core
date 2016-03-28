@@ -53,8 +53,8 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         """
         Analyzer.set_source(self,source)
         #enable WCDMA RRC log
-        source.enable_log("WCDMA_Signaling_Messages")
-        source.enable_log("WCDMA_CELL_ID")
+        source.enable_log("WCDMA_RRC_OTA_Packet")
+        source.enable_log("WCDMA_RRC_Serv_Cell_Info")
 
     def __rrc_filter(self,msg):
         
@@ -64,13 +64,13 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         :param msg: the event (message) from the trace collector.
         """
 
-        if msg.type_id=="WCDMA_CELL_ID":
+        if msg.type_id=="WCDMA_RRC_Serv_Cell_Info":
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
             raw_msg=Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_serv_cell(raw_msg)
 
-        if msg.type_id == "WCDMA_Signaling_Messages": 
+        if msg.type_id == "WCDMA_RRC_OTA_Packet": 
             log_item = msg.data.decode()
             log_item_dict = dict(log_item) 
             log_xml = None

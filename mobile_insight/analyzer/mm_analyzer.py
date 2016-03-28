@@ -86,24 +86,26 @@ class MmAnalyzer(Analyzer):
         """
         Analyzer.set_source(self,source)
 
-        source.enable_log("CDMA_Paging_Channel_Message")
+        source.enable_log_all()
 
-        source.enable_log("1xEV_Signaling_Control_Channel_Broadcast")
+        # source.enable_log("CDMA_Paging_Channel_Message")
 
-        source.enable_log("UMTS_NAS_GMM_State")
-        source.enable_log("UMTS_NAS_MM_State")
-        source.enable_log("UMTS_NAS_OTA")
-        source.enable_log("WCDMA_CELL_ID")
-        source.enable_log("WCDMA_Signaling_Messages")
+        # source.enable_log("1xEV_Signaling_Control_Channel_Broadcast")
 
-        source.enable_log("LTE_RRC_OTA_Packet")
-        # source.enable_log("LTE_RRC_MIB_Message_Log_Packet")
-        source.enable_log("LTE_RRC_Serv_Cell_Info_Log_Packet")
-        source.enable_log("LTE_NAS_EMM_State")
-        source.enable_log("LTE_NAS_ESM_Plain_OTA_Incoming_Message")
-        source.enable_log("LTE_NAS_ESM_Plain_OTA_Outgoing_Message")
-        source.enable_log("LTE_NAS_EMM_Plain_OTA_Incoming_Message")
-        source.enable_log("LTE_NAS_EMM_Plain_OTA_Outgoing_Message")
+        # source.enable_log("UMTS_NAS_GMM_State")
+        # source.enable_log("UMTS_NAS_MM_State")
+        # source.enable_log("UMTS_NAS_OTA_Packet")
+        # source.enable_log("WCDMA_RRC_Serv_Cell_Info")
+        # source.enable_log("WCDMA_RRC_OTA_Packet")
+
+        # source.enable_log("LTE_RRC_OTA_Packet")
+        # # source.enable_log("LTE_RRC_MIB_Packet")
+        # source.enable_log("LTE_RRC_Serv_Cell_Info")
+        # source.enable_log("LTE_NAS_EMM_State")
+        # source.enable_log("LTE_NAS_ESM_OTA_Incoming_Packet")
+        # source.enable_log("LTE_NAS_ESM_OTA_Outgoing_Packet")
+        # source.enable_log("LTE_NAS_EMM_OTA_Incoming_Packet")
+        # source.enable_log("LTE_NAS_EMM_OTA_Outgoing_Packet")
 
 
     def get_umts_normal_service_log(self):
@@ -199,11 +201,11 @@ class MmAnalyzer(Analyzer):
             pass
         elif event.type_id == "UMTS_NAS_GMM_State":
             self.__callback_umts_nas_gmm(decoded_event)
-        elif event.type_id == "UMTS_NAS_OTA":
+        elif event.type_id == "UMTS_NAS_OTA_Packet":
             self.__callback_umts_nas(decoded_event)
-        elif event.type_id == "WCDMA_CELL_ID":
+        elif event.type_id == "WCDMA_RRC_Serv_Cell_Info":
             self.__callback_wcdma_cell_id(decoded_event)
-        elif event.type_id == "WCDMA_Signaling_Messages":
+        elif event.type_id == "WCDMA_RRC_OTA_Packet":
             if "Msg" in log_item:
                 self.__callback_wcdma_rrc_ota(decoded_event)
         elif event.type_id == "LTE_NAS_EMM_State":
@@ -212,7 +214,7 @@ class MmAnalyzer(Analyzer):
             self.__callback_lte_nas(decoded_event)
         elif event.type_id == "LTE_RRC_OTA_Packet":
             self.__callback_lte_rrc_ota(decoded_event)
-        elif event.type_id == "LTE_RRC_Serv_Cell_Info_Log_Packet":
+        elif event.type_id == "LTE_RRC_Serv_Cell_Info":
             self.__callback_lte_rrc_serv_cell_info(decoded_event)
 
 

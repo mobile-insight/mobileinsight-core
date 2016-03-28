@@ -34,10 +34,10 @@ class LteMeasurementAnalyzer(Analyzer):
         """
         Analyzer.set_source(self,source)
         #enable user's internal events
-        source.enable_log("LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results")
-        source.enable_log("LTE_ML1_IRAT_Measurement_Request")
-        source.enable_log("LTE_ML1_Serving_Cell_Measurement_Result")
-        source.enable_log("LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp")
+        source.enable_log("LTE_PHY_Connected_Mode_Intra_Freq_Meas")
+        source.enable_log("LTE_PHY_Inter_RAT_Measurement")
+        source.enable_log("LTE_PHY_Serv_Cell_Measurement")
+        source.enable_log("LTE_PHY_Connected_Mode_Neighbor_Measurement")
 
     def ue_event_filter(self,msg):
         """
@@ -50,7 +50,7 @@ class LteMeasurementAnalyzer(Analyzer):
         self.serving_cell_rsrp(msg)
 
     def serving_cell_rsrp(self,msg):
-        if msg.type_id == "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results":
+        if msg.type_id == "LTE_PHY_Connected_Mode_Intra_Freq_Meas":
             msg_dict=dict(msg.data.decode())
             # print msg.timestamp,msg_dict['Serving Filtered RSRP(dBm)']
             date = datetime.datetime.fromtimestamp(msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')

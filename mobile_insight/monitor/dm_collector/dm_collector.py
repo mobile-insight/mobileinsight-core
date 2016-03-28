@@ -86,6 +86,12 @@ class DMCollector(Monitor):
             else:
                 self._type_names.append(n)
 
+    def enable_log_all(self):
+        """
+        Enable all supported logs
+        """
+        self.enable_log(cls.SUPPORTED_TYPES)
+
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.

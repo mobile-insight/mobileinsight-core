@@ -39,21 +39,23 @@ class MsgStatistics(Analyzer):
         :param source: the trace source (collector).
         """
         Analyzer.set_source(self,source)
-        source.enable_log("WCDMA_Signaling_Messages")
-        source.enable_log("LTE_RRC_OTA_Packet")
-        #Enable EMM/ESM logs
-        source.enable_log("UMTS_NAS_OTA")
-        source.enable_log("LTE_NAS_ESM_Plain_OTA_Incoming_Message")
-        source.enable_log("LTE_NAS_ESM_Plain_OTA_Outgoing_Message")
-        source.enable_log("LTE_NAS_EMM_Plain_OTA_Incoming_Message")
-        source.enable_log("LTE_NAS_EMM_Plain_OTA_Outgoing_Message")
+        source.enable_log_all()
 
-        #Phy-layer logs
-        source.enable_log("LTE_LL1_PDSCH_Demapper_Configuration")
+        # source.enable_log("WCDMA_RRC_OTA_Packet")
+        # source.enable_log("LTE_RRC_OTA_Packet")
+        # #Enable EMM/ESM logs
+        # source.enable_log("UMTS_NAS_OTA_Packet")
+        # source.enable_log("LTE_NAS_ESM_OTA_Incoming_Packet")
+        # source.enable_log("LTE_NAS_ESM_OTA_Outgoing_Packet")
+        # source.enable_log("LTE_NAS_EMM_OTA_Incoming_Packet")
+        # source.enable_log("LTE_NAS_EMM_OTA_Outgoing_Packet")
 
-        source.enable_log("LTE_MAC_Configuration")
-        source.enable_log("LTE_MAC_UL_Transport_Block")
-        source.enable_log("LTE_MAC_DL_Transport_Block")
+        # #Phy-layer logs
+        # source.enable_log("LTE_PHY_PDSCH_Packet")
+
+        # source.enable_log("LTE_MAC_Configuration")
+        # source.enable_log("LTE_MAC_UL_Transport_Block")
+        # source.enable_log("LTE_MAC_DL_Transport_Block")
 
     def __msg_callback(self,msg):
 

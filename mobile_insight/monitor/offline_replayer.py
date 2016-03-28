@@ -45,7 +45,14 @@ class OfflineReplayer(Monitor):
             if n not in cls.SUPPORTED_TYPES:
                 raise ValueError("Unsupported log message type: %s" % n)
             elif n not in self._type_names:
-                self._type_names.append(n)
+                self._type_names.append(n)  
+
+    def enable_log_all(self):
+        """
+        Enable all supported logs
+        """
+        cls = self.__class__
+        self.enable_log(cls.SUPPORTED_TYPES) 
 
     def set_input_path(self, path):
         """
