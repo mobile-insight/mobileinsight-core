@@ -228,9 +228,12 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                     self.__config_tmp.sib.serv_config = serv_config
                 else:
                     cur_pair = (self.__status.id,self.__status.freq)
+                    if cur_pair not in self.__config:
+                        self.__config[cur_pair] = WcdmaRrcConfig()
+                        self.__config[cur_pair].status=self.__status
+
                     self.__config[cur_pair].sib.serv_config = serv_config
 
-                print "test 1"
                 self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.serv_config",
                     {'priority':field_val['rrc.priority'],
                      'threshserv_low':str(int(field_val['rrc.threshServingLow'])*2),
@@ -276,9 +279,11 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                     self.__config_tmp.sib.intra_freq_config = intra_freq_config
                 else:
                     cur_pair = (self.__status.id,self.__status.freq)
+                    if cur_pair not in self.__config:
+                        self.__config[cur_pair] = WcdmaRrcConfig()
+                        self.__config[cur_pair].status=self.__status
                     self.__config[cur_pair].sib.intra_freq_config = intra_freq_config
 
-                print "test 2"
                 self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
                     {'tReselection':field_val['rrc.t_Reselection_S'],
                      'q_RxLevMin':str(int(field_val['rrc.q_RxlevMin'])*2),
@@ -322,6 +327,9 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                     self.__config_tmp.sib.inter_freq_config[neighbor_freq] = inter_freq_config
                 else:
                     cur_pair = (self.__status.id,self.__status.freq)
+                    if cur_pair not in self.__config:
+                        self.__config[cur_pair] = WcdmaRrcConfig()
+                        self.__config[cur_pair].status=self.__status
                     self.__config[cur_pair].sib.inter_freq_config[neighbor_freq] = inter_freq_config
 
                 self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),

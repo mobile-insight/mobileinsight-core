@@ -266,7 +266,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                 self.logger.info(self.__esm_status[self.__cur_eps_id].dump())
 
                 # profile update for esm qos
-                self.profile.update("LteNasProfile:"+self.__emm_status.profile_id()+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
+                self.profile.update("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
                     {
                     'delay_class':xstr(self.__esm_status[self.__cur_eps_id].qos.delay_class),
                     'reliability_class':xstr(self.__esm_status[self.__cur_eps_id].qos.reliability_class),
@@ -311,10 +311,13 @@ class EmmStatus:
         """
         Return a globally unique id (MCC-MNC-MMEGI-MMEC) for profiling
         """
-        return (str(self.guti.mcc)
-            + '-' + str(self.guti.mnc)
-            + '-' + str(int(self.guti.mme_group_id))
-            + '-' + str(int(self.guti.mme_code)))
+        if not self.guti.inited():
+            return None
+        else:
+            return (str(self.guti.mcc)
+                + '-' + str(self.guti.mnc)
+                + '-' + str(int(self.guti.mme_group_id,0))
+                + '-' + str(int(self.guti.mme_code,0)))
 
     def dump(self):
         """

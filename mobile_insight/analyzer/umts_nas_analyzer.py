@@ -191,19 +191,19 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                 field_val["gsm_a.gm.sm.qos.del_order"] = None
                 # field_val["gsm_a.gm.sm.qos.del_of_err_sdu"] = None
                 # field_val["gsm_a.gm.sm.qos.max_sdu"] = None
-                field_val["gsm_a.gm.sm.qos.max_bitrate_upl"] = None
-                field_val["gsm_a.gm.sm.qos.max_bitrate_downl"] = None
+                field_val["gsm_a.gm.sm.qos.max_bitrate_upl"] = 0
+                field_val["gsm_a.gm.sm.qos.max_bitrate_downl"] = 0
                 field_val["gsm_a.gm.sm.qos.ber"] = None
                 # field_val["gsm_a.gm.sm.qos.sdu_err_rat"] = None
                 field_val["gsm_a.gm.sm.qos.trans_delay"] = None
                 field_val["gsm_a.gm.sm.qos.traff_hdl_pri"] = None
-                field_val["gsm_a.gm.sm.qos.guar_bitrate_upl"] = None
-                field_val["gsm_a.gm.sm.qos.guar_bitrate_downl"] = None
+                field_val["gsm_a.gm.sm.qos.guar_bitrate_upl"] = 0
+                field_val["gsm_a.gm.sm.qos.guar_bitrate_downl"] = 0
                 # field_val["gsm_a.spare_bits"] = None
                 # field_val["gsm_a.gm.sm.qos.signalling_ind"] = None
                 # field_val["gsm_a.gm.sm.qos.source_stat_desc"] = None
-                field_val["gsm_a.gm.sm.qos.max_bitrate_downl_ext"] = None
-                field_val["gsm_a.gm.sm.qos.guar_bitrate_downl_ext"] = None
+                field_val["gsm_a.gm.sm.qos.max_bitrate_downl_ext"] = 0
+                field_val["gsm_a.gm.sm.qos.guar_bitrate_downl_ext"] = 0
 
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
@@ -240,7 +240,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
 
                 self.logger.info(self.__mm_nas_status.dump())
                 # profile update for esm qos
-                self.profile.update("UmtsNasProfile:"+self.__mm_status.profile_id()+".pdp.qos",
+                self.profile.update("UmtsNasProfile:"+xstr(self.__mm_status.profile_id())+".pdp.qos",
                     {
                     'delay_class':xstr(self.__mm_nas_status.qos_negotiated.delay_class),
                     'reliability_class':xstr(self.__mm_nas_status.qos_negotiated.reliability_class),
@@ -326,7 +326,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                 self.__mm_nas_status.qos_requested.traffic_class = int(field_val['gsm_a.gm.sm.qos.traffic_cls'])
                 self.__mm_nas_status.qos_requested.delivery_order = int(field_val['gsm_a.gm.sm.qos.del_order'])
                 self.__mm_nas_status.qos_requested.traffic_handling_priority = int(field_val['gsm_a.gm.sm.qos.traff_hdl_pri'])
-                self.__mm_nas_status.qos_requested.residual_ber = residual_ber(int(field_val['gsm_a.gm.sm.qos.ber']))
+                self.__mm_nas_status.qos_requested.residual_ber = residual_ber[int(field_val['gsm_a.gm.sm.qos.ber'])]
                 self.__mm_nas_status.qos_requested.transfer_delay = trans_delay(int(field_val['gsm_a.gm.sm.qos.trans_delay']))
                 self.__mm_nas_status.qos_requested.max_bitrate_ulink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl']))
                 self.__mm_nas_status.qos_requested.max_bitrate_dlink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl']))
@@ -335,7 +335,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                 self.__mm_nas_status.qos_requested.max_bitrate_dlink_ext = max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
                 self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink_ext = max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
-                self.profile.update("UmtsNasProfile:"+self.__mm_status.profile_id()+".pdp.qos",
+                self.profile.update("UmtsNasProfile:"+xstr(self.__mm_status.profile_id())+".pdp.qos",
                     {
                     'delay_class':xstr(self.__mm_nas_status.qos_requested.delay_class),
                     'reliability_class':xstr(self.__mm_nas_status.qos_requested.reliability_class),
@@ -392,9 +392,12 @@ class MmStatus:
         """
         Return a globally unique id (MCC-MNC-MMEGI-MMEC) for profiling
         """
-        return (str(self.plmn)
-            + '-' + str(self.lac)
-            + '-' + str(self.rac))
+        if not self.plmn or not self.lac or not self.rac:
+            return None
+        else:
+            return (str(self.plmn)
+                + '-' + str(self.lac)
+                + '-' + str(self.rac))
 
     def dump(self):
     	"""
