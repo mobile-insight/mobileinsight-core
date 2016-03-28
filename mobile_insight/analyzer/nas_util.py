@@ -26,7 +26,9 @@ traffic_class={1:"conversional class", 2:"streaming class",
         3:"interactive class", 4:"background class"}
 
 
-residual_ber={1:5e-2, 2:1e-2, 3:5e-3, 4:4e-3, 5:1e-3, 6:1e-4, 7:1e-5,
+residual_ber={
+        0:"subscribed residual bit error rate"
+        1:5e-2, 2:1e-2, 3:5e-3, 4:4e-3, 5:1e-3, 6:1e-4, 7:1e-5,
         8:1e-6, 9:6e-8}
 
 

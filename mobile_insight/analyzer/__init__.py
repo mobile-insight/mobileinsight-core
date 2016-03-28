@@ -3,7 +3,7 @@ __all__=["Analyzer",
     "ProfileHierarchy","Profile",
     "StateMachine",
     "MsgLogger","MsgSerializer","MsgStatistics",
-    "LteRrcAnalyzer","LteNasAnalyzer","LteMeasurementAnalyzer","LtePdschAnalyzer",
+    "LteRrcAnalyzer","LteNasAnalyzer","LteMeasurementAnalyzer","LtePhyAnalyzer",
 	"WcdmaRrcAnalyzer","UmtsNasAnalyzer","RrcAnalyzer",
 	"MobilityMngt",
     "HandoffLoopAnalyzer",
@@ -24,7 +24,7 @@ from msg_statistics import MsgStatistics
 from lte_rrc_analyzer import LteRrcAnalyzer
 from lte_nas_analyzer import LteNasAnalyzer
 from lte_measurement_analyzer import LteMeasurementAnalyzer
-from lte_pdsch_analyzer import LtePdschAnalyzer
+from lte_phy_analyzer import LtePhyAnalyzer
 
 # WCDMA (3G)
 from wcdma_rrc_analyzer import WcdmaRrcAnalyzer

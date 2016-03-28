@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     #Enable 3G/4G RRC (radio resource control) monitoring
     src.enable_log("LTE_RRC_OTA_Packet")
-    src.enable_log("WCDMA_Signaling_Messages")
+    src.enable_log("WCDMA_RRC_OTA_Packet")
 
     #4G RRC analyzer
     lte_rrc_analyzer = LteRrcAnalyzer()

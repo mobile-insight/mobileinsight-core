@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     #Enable 3G/4G messages to be monitored. Here we enable RRC (radio resource control) monitoring
     src.enable_log("LTE_RRC_OTA_Pdacket")
-    src.enable_log("WCDMA_Signaling_Messages")
+    src.enable_log("WCDMA_RRC_OTA_Packet")
     src.enable_log("WCDMA_CELL_ID")
 
     #Dump the messages to std I/O. Comment it if it is not needed.

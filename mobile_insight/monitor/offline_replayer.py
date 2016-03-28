@@ -14,6 +14,15 @@ import timeit
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
+
+is_android=False
+try:
+    from jnius import autoclass #For Android
+    is_android=True
+except Exception, e:
+    #not used, but bugs may exist on laptop
+    is_android=False
+
 class OfflineReplayer(Monitor):
     """
     A log replayer for offline analysis.
@@ -21,8 +30,20 @@ class OfflineReplayer(Monitor):
 
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
 
-    def __init__(self, prefs={}):
+    # def __init__(self, prefs={}):
+    #     Monitor.__init__(self)
+    #     DMLogPacket.init(prefs)
+
+    #     self._type_names=[]
+
+    def __init__(self):
         Monitor.__init__(self)
+
+        if is_android:
+            prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
+                   "libwireshark_path": "/system/lib"}
+        else:
+            prefs={}
         DMLogPacket.init(prefs)
 
         self._type_names=[]

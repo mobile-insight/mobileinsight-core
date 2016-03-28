@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Filename: lte_pdsch_analyzer.py
+# Filename: lte_phy_analyzer.py
 """
 A 4G PHY analyzer to get Modulation and coding Scheme (MCS)
 
@@ -9,9 +9,9 @@ Author: Yuanjie Li
 
 from mobile_insight.analyzer.analyzer import *
 
-__all__=["LtePdschAnalyzer"]
+__all__=["LtePhyAnalyzer"]
 
-class LtePdschAnalyzer(Analyzer):
+class LtePhyAnalyzer(Analyzer):
 
     def __init__(self):
         Analyzer.__init__(self)

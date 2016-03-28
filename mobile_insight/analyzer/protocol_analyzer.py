@@ -91,7 +91,7 @@ class ProtocolAnalyzer(Analyzer):
 
         #FIXME: duplicate message decoding, inefficient
         log_item = msg.data.decode()
-        if len(log_item)<=1:
+        if len(log_item)<1:
             return
         log_item_dict = dict(log_item)
 

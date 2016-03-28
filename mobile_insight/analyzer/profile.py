@@ -214,14 +214,22 @@ class Profile(object):
             self.__db = None
         else:
             #setup internal database
+            
             root = self.__profile_hierarchy.get_root()
             if is_android:
+                DB_PATH="/sdcard/mobile_insight_dbs/"
+                #Create DB directory (Android only)
+                import subprocess
+                cmd = "mkdir "+DB_PATH+"; chmod -R 777 "+DB_PATH
+                proc = subprocess.Popen("su", executable="/system/bin/sh", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                proc.stdin.write(cmd+'\n')
+
                 activity = autoclass('org.renpy.android.PythonActivity')
                 if activity.mActivity:
-                    self.__db = activity.mActivity.openOrCreateDatabase(root.name+'.db',0,None)
+                    self.__db = activity.mActivity.openOrCreateDatabase(DB_PATH+root.name+'.db',0,None)
                 else:
                     service = autoclass('org.renpy.android.PythonService')
-                    self.__db = service.mService.openOrCreateDatabase(root.name+'.db',0,None)
+                    self.__db = service.mService.openOrCreateDatabase(DB_PATH+root.name+'.db',0,None)
             else:
                 self.__conn = sqlite3.connect(root.name+'.db')
                 self.__db = self.__conn.cursor()
