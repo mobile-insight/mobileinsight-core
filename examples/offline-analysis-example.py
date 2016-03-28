@@ -1,20 +1,20 @@
 #!/usr/bin/python
-# Filename: online-analysis-qmdl.py
+# Filename: offline-analysis-example.py
 import os
 import sys
 
 """
-Offline analysis with Qualcomm's QMDL traces
+Offline analysis by replaying logs
 """
 
 #Import MobileInsight modules
-from mobile_insight.monitor import QmdlReplayer
+from mobile_insight.monitor import OfflineReplayer
 from mobile_insight.analyzer import LteRrcAnalyzer,WcdmaRrcAnalyzer,LteNasAnalyzer,UmtsNasAnalyzer
 
 if __name__ == "__main__":
     
     # Initialize a 3G/4G monitor
-    src = QmdlReplayer()
+    src = OfflineReplayer()
     src.set_input_path("./offline_log_example.mi2log")
 
     #Enable 3G/4G RRC (radio resource control) monitoring

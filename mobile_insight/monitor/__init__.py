@@ -6,7 +6,7 @@ __all__ = [
             "Monitor",
             "DMCollector",  ### P4A: THIS LINE WILL BE DELETED ###
             "Replayer",
-            "QmdlReplayer",
+            "OfflineReplayer"
             ]
 
 is_android=False
@@ -24,4 +24,4 @@ if is_android:
 from monitor import Monitor
 from dm_collector import * ### P4A: THIS LINE WILL BE DELETED ###
 from replayer import Replayer
-from qmdl_replayer import QmdlReplayer
+from offline_replayer import OfflineReplayer

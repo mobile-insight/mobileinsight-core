@@ -12,7 +12,7 @@ except ImportError:
     import xml.etree.ElementTree as ET
 import io
 import datetime
-from mobile_insight.monitor import QmdlReplayer
+from mobile_insight.monitor import OfflineReplayer
 from mobile_insight.monitor.dm_collector import dm_collector_c
 from mobile_insight.monitor.dm_collector.dm_endec.dm_log_packet import DMLogPacket
 
@@ -30,7 +30,7 @@ class LogAnalyzer(Analyzer):
         # it only has a single callback for the source
 
         self.msg_logs=[] # in-memory message log
-        self.src = QmdlReplayer()
+        self.src = OfflineReplayer()
         self.set_source(self.src)
         self.add_source_callback(self.__dump_message)
         self.listener_callback = listener_callback

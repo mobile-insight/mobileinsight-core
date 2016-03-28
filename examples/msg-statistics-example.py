@@ -4,7 +4,7 @@ import os
 import sys
 
 #Import MobileInsight modules
-from mobile_insight.monitor import QmdlReplayer
+from mobile_insight.monitor import OfflineReplayer
 # from mobile_insight.analyzer import MobilityMngt
 from mobile_insight.analyzer.msg_statistics import MsgStatistics
 
@@ -14,7 +14,7 @@ This example shows how to get basic statistics of a offline log
 if __name__ == "__main__":
 
     # Initialize a 3G/4G monitor
-    src = QmdlReplayer()
+    src = OfflineReplayer()
     src.set_input_path("./offline_log_example.mi2log")
 
     statistics = MsgStatistics()

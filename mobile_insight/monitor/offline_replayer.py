@@ -1,12 +1,12 @@
 #!/usr/bin/python
-# Filename: qmdl_replayer.py
+# Filename: offline_replayer.py
 """
-A QMDL format replayer
+An offline log replayer
 
 Author: Jiayao Li
 """
 
-__all__ = ["QmdlReplayer"]
+__all__ = ["OfflineReplayer"]
 
 import sys
 import timeit
@@ -14,7 +14,7 @@ import timeit
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
-class QmdlReplayer(Monitor):
+class OfflineReplayer(Monitor):
     """
     A log replayer for offline analysis.
     """
