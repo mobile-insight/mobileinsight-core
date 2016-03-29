@@ -88,25 +88,6 @@ class MmAnalyzer(Analyzer):
 
         source.enable_log_all()
 
-        # source.enable_log("CDMA_Paging_Channel_Message")
-
-        # source.enable_log("1xEV_Signaling_Control_Channel_Broadcast")
-
-        # source.enable_log("UMTS_NAS_GMM_State")
-        # source.enable_log("UMTS_NAS_MM_State")
-        # source.enable_log("UMTS_NAS_OTA_Packet")
-        # source.enable_log("WCDMA_RRC_Serv_Cell_Info")
-        # source.enable_log("WCDMA_RRC_OTA_Packet")
-
-        # source.enable_log("LTE_RRC_OTA_Packet")
-        # # source.enable_log("LTE_RRC_MIB_Packet")
-        # source.enable_log("LTE_RRC_Serv_Cell_Info")
-        # source.enable_log("LTE_NAS_EMM_State")
-        # source.enable_log("LTE_NAS_ESM_OTA_Incoming_Packet")
-        # source.enable_log("LTE_NAS_ESM_OTA_Outgoing_Packet")
-        # source.enable_log("LTE_NAS_EMM_OTA_Incoming_Packet")
-        # source.enable_log("LTE_NAS_EMM_OTA_Outgoing_Packet")
-
 
     def get_umts_normal_service_log(self):
         """

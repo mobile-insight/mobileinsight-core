@@ -224,8 +224,8 @@ class AndroidDevDiagMonitor(Monitor):
             type_name = [type_name]
         for n in type_name:
             if n not in cls.SUPPORTED_TYPES:
-                raise ValueError("Unsupported log message type: %s" % n)
-            else:
+                print "WARNING: Unsupported log message type: %s" % n
+            if n not in self._type_names:
                 self._type_names.append(n)
 
     def enable_log_all(self):

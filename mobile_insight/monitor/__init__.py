@@ -2,7 +2,6 @@
 
 __all__ = [
             "AndroidDevDiagMonitor",
-            "AndroidQmdlMonitor",
             "Monitor",
             "DMCollector",  ### P4A: THIS LINE WILL BE DELETED ###
             "Replayer",
@@ -20,7 +19,6 @@ except Exception, e:
 
 if is_android:
     from android_dev_diag_monitor import AndroidDevDiagMonitor
-    from android_qmdl_monitor import AndroidQmdlMonitor
 from monitor import Monitor
 from dm_collector import * ### P4A: THIS LINE WILL BE DELETED ###
 from replayer import Replayer

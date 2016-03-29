@@ -41,22 +41,6 @@ class MsgStatistics(Analyzer):
         Analyzer.set_source(self,source)
         source.enable_log_all()
 
-        # source.enable_log("WCDMA_RRC_OTA_Packet")
-        # source.enable_log("LTE_RRC_OTA_Packet")
-        # #Enable EMM/ESM logs
-        # source.enable_log("UMTS_NAS_OTA_Packet")
-        # source.enable_log("LTE_NAS_ESM_OTA_Incoming_Packet")
-        # source.enable_log("LTE_NAS_ESM_OTA_Outgoing_Packet")
-        # source.enable_log("LTE_NAS_EMM_OTA_Incoming_Packet")
-        # source.enable_log("LTE_NAS_EMM_OTA_Outgoing_Packet")
-
-        # #Phy-layer logs
-        # source.enable_log("LTE_PHY_PDSCH_Packet")
-
-        # source.enable_log("LTE_MAC_Configuration")
-        # source.enable_log("LTE_MAC_UL_Transport_Block")
-        # source.enable_log("LTE_MAC_DL_Transport_Block")
-
     def __msg_callback(self,msg):
 
     	log_item = msg.data.decode()

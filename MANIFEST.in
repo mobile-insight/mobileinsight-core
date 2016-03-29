@@ -7,5 +7,6 @@ recursive-include examples *.py qmdl_example.qmdl
 recursive-include mobile_insight *.py  *.m *.pyd README
 recursive-exclude examples *.db
 recursive-exclude mobile_insight *.db
+exclude mobile_insight/monitor/android_qmdl_monitor.py
 prune dm_collector_c 
 prune docs/docs
