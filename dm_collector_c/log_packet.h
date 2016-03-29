@@ -398,9 +398,11 @@ const Fmt LteMl1CmlifmrFmt_v4_Header [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Serving Physical Cell ID", 2},  //serving cell ID
     {UINT, "Sub-frame Number", 2},
-    {RSRP, "Serving Filtered RSRP(dBm)", 2}, //Filtered RSRP (dBm)
+    // {RSRP, "Serving Filtered RSRP(dBm)", 2}, //Filtered RSRP (dBm)
+    {RSRP, "RSRP(dBm)", 2}, //Filtered RSRP (dBm)
     {SKIP, NULL, 2},    // Duplicated
-    {RSRQ, "Serving Filtered RSRQ(dB)", 2}, //Filtered RSRQ (dBm)
+    // {RSRQ, "Serving Filtered RSRQ(dB)", 2}, //Filtered RSRQ (dBm)
+    {RSRQ, "RSRQ(dB)", 2}, //Filtered RSRQ (dBm)
     {SKIP, NULL, 2},    // Duplicated
     {UINT, "Number of Neighbor Cells", 1},
     {UINT, "Number of Detected Cells", 1}
@@ -408,17 +410,21 @@ const Fmt LteMl1CmlifmrFmt_v4_Header [] = {
 
 const Fmt LteMl1CmlifmrFmt_v3_Neighbor_Cell [] = {
     {UINT, "Physical Cell ID", 2},  //cell ID
-    {RSRP, "Filtered RSRP(dBm)", 2},
+    // {RSRP, "Filtered RSRP(dBm)", 2},
+    {RSRP, "RSRP(dBm)", 2},
     {SKIP, NULL, 2},    // Duplicated
-    {RSRQ, "Filtered RSRQ(dB)", 2},
+    // {RSRQ, "Filtered RSRQ(dB)", 2},
+    {RSRQ, "RSRQ(dB)", 2},
     {SKIP, NULL, 4}     // Duplicated & reserved
 };
 
 const Fmt LteMl1CmlifmrFmt_v4_Neighbor_Cell [] = {
     {UINT, "Physical Cell ID", 2},  //cell ID
-    {RSRP, "Filtered RSRP(dBm)", 2},
+    // {RSRP, "Filtered RSRP(dBm)", 2},
+    {RSRP, "RSRP(dBm)", 2},
     {SKIP, NULL, 2},    // Duplicated
-    {RSRQ, "Filtered RSRQ(dB)", 2},
+    // {RSRQ, "Filtered RSRQ(dB)", 2},
+    {RSRQ, "RSRQ(dB)", 2},
     {SKIP, NULL, 4}     // Duplicated & reserved
 };
 

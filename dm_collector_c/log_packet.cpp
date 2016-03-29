@@ -675,17 +675,17 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, int length,
             Py_DECREF(old_object);
 
             // modulation & ratio
-            tmp = _search_result_int(result, "Modulation Stream 0");
+            tmp = _search_result_int(result, "MCS 0");
             int mod_stream0 = (tmp >> 1) & 0x3;
             float ratio = float((tmp >> 3) & 0x1fff) / 256.0;
-            tmp = _search_result_int(result, "Modulation Stream 1");
+            tmp = _search_result_int(result, "MCS 1");
             int mod_stream1 = (tmp >> 1) & 0x3;
             int carrier_index = (tmp >> 9) & 0xf;
 
-            old_object = _replace_result_int(result, "Modulation Stream 0", mod_stream0);
+            old_object = _replace_result_int(result, "MCS 0", mod_stream0);
             Py_DECREF(old_object);
             (void)_map_result_field_to_name(result,
-                                            "Modulation Stream 0",
+                                            "MCS 0",
                                             LteLl1PdschDemapperConfig_v23_Modulation,
                                             ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Modulation, ValueName),
                                             "Unknown");
@@ -695,10 +695,10 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, int length,
             Py_DECREF(old_object);
             Py_DECREF(pyfloat);
 
-            old_object = _replace_result_int(result, "Modulation Stream 1", mod_stream1);
+            old_object = _replace_result_int(result, "MCS 1", mod_stream1);
             Py_DECREF(old_object);
             (void)_map_result_field_to_name(result,
-                                            "Modulation Stream 1",
+                                            "MCS 1",
                                             LteLl1PdschDemapperConfig_v23_Modulation,
                                             ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Modulation, ValueName),
                                             "Unknown");

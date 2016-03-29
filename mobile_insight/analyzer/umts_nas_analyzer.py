@@ -587,7 +587,7 @@ def UmtsNasProfileHierarchy():
     qos.add('max_bitrate_dlink',False)
     qos.add('guaranteed_bitrate_ulink',False)
     qos.add('guaranteed_bitrate_dlink',False)
-    qos.add('max_bitrate_ulink_ext',False)
+    # qos.add('max_bitrate_ulink_ext',False)
     qos.add('max_bitrate_dlink_ext',False)
     qos.add('guaranteed_bitrate_ulink_ext',False)
     qos.add('guaranteed_bitrate_dlink_ext',False)
