@@ -351,7 +351,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                     'max_bitrate_dlink':xstr(self.__mm_nas_status.qos_requested.max_bitrate_dlink),
                     # 'guaranteed_bitrate_ulink':xstr(self.__mm_nas_status.qos_requested.guaranteed_bitrate_ulink),
                     'guaranteed_bitrate_dlink':xstr(self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink),
-                    'max_bitrate_ulink_ext':xstr(self.__mm_nas_status.qos_requested.max_bitrate_ulink_ext),
+                    # 'max_bitrate_ulink_ext':xstr(self.__mm_nas_status.qos_requested.max_bitrate_ulink_ext),
                     'max_bitrate_dlink_ext':xstr(self.__mm_nas_status.qos_requested.max_bitrate_dlink_ext),
                     # 'guaranteed_bitrate_ulink_ext':xstr(self.__mm_nas_status.qos_requested.guaranteed_bitrate_ulink_ext),
                     'guaranteed_bitrate_dlink_ext':xstr(self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink_ext),
