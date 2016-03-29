@@ -5,7 +5,7 @@ import sys
 
 #Import MobileInsight modules
 from mobile_insight.analyzer import *
-from mobile_insight.monitor import *
+from mobile_insight.monitor import OnlineMonitor
 
 """
 This example shows how to LTE EMM/ESM layer information with LteNasAnalyzer
@@ -19,7 +19,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Initialize a DM monitor
-    src = DMCollector()
+    src = OnlineMonitor()
     src.set_serial_port(sys.argv[1]) #the serial port to collect the traces
     src.set_baudrate(int(sys.argv[2])) #the baudrate of the port
 

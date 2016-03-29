@@ -100,10 +100,14 @@ class OfflineReplayer(Monitor):
                 if not s:   # EOF encountered
                     break
                 dm_collector_c.feed_binary(s)
-                decoded = dm_collector_c.receive_log_packet()
+                # decoded = dm_collector_c.receive_log_packet()
+                decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
+                                                            True,   # include_timestamp
+                                                            )
                 if decoded:
                     try:
-                        packet = DMLogPacket(decoded)
+                        # packet = DMLogPacket(decoded)
+                        packet = DMLogPacket(decoded[0])
                         d = packet.decode()
                         # print d["type_id"], d["timestamp"]
                         # xml = packet.decode_xml()

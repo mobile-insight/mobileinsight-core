@@ -5,7 +5,6 @@ import sys
 
 #Import MobileInsight modules
 from mobile_insight.monitor import OfflineReplayer
-# from mobile_insight.analyzer import MobilityMngt
 from mobile_insight.analyzer.msg_statistics import MsgStatistics
 
 """

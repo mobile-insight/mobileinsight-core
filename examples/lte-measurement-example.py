@@ -5,7 +5,7 @@ import sys
 
 #Import MobileInsight modules
 from mobile_insight.analyzer import *
-from mobile_insight.monitor import *
+from mobile_insight.monitor import OnlineMonitor
 
 
 """
@@ -20,11 +20,9 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Initialize a 3G/4G monitor
-    src = DMCollector()
+    src = OnlineMonitor()
     src.set_serial_port(sys.argv[1]) #the serial port to collect the traces
     src.set_baudrate(int(sys.argv[2])) #the baudrate of the port
-
-    src.enable_log("LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results")
 
     ML1_analyzer = LteMeasurementAnalyzer()
     ML1_analyzer.set_source(src)

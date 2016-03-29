@@ -47,7 +47,7 @@ def get_cache_dir():
     if is_android:
         return str(service_context.getCacheDir().getAbsolutePath())
     else:
-        return None
+        return ""
 
 
 class ChronicleProcessor(object):
@@ -151,7 +151,7 @@ class AndroidDevDiagMonitor(Monitor):
         self._fifo_path = self.TMP_FIFO_FILE
         self._input_dir = None
         self._log_cut_size = 0.5 # change size to 1.0 M
-        self._skip_decoding = False
+        # self._skip_decoding = False
         self._type_names = []
         self._last_diag_revealer_ts = None
         prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
@@ -174,14 +174,6 @@ class AndroidDevDiagMonitor(Monitor):
         self._run_shell_cmd("supolicy --live \"allow system_server diag_device chr_file {read write}\"")
         self._run_shell_cmd("supolicy --live \"allow untrusted_app app_data_file file {rename}\"")
 
-    # def _run_shell_cmd(self, cmd, wait=False):
-    #     p = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True)
-    #     if wait:
-    #         p.wait()
-    #         return p.returncode
-    #     else:
-    #         return None
-
     def _run_shell_cmd(self, cmd, wait = False):
         p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         p.communicate(cmd+'\n')
@@ -191,9 +183,6 @@ class AndroidDevDiagMonitor(Monitor):
             return p.returncode
         else:
             return None
-
-    def set_skip_decoding(self, val):
-        self._skip_decoding = val
 
     def set_log_directory(self, directory):
         """

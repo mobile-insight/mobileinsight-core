@@ -4,7 +4,7 @@ import os
 import sys
 
 #Import MobileInsight modules
-from mobile_insight.monitor import DMCollector
+from mobile_insight.monitor import OnlineMonitor
 from mobile_insight.analyzer import MsgLogger,MsgSerializer
 
 if __name__ == "__main__":
@@ -15,14 +15,14 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Initialize a 3G/4G monitor
-    src = DMCollector()
+    src = OnlineMonitor()
     src.set_serial_port(sys.argv[1]) #the serial port to collect the traces
     src.set_baudrate(int(sys.argv[2])) #the baudrate of the port
 
     #Enable 3G/4G messages to be monitored. Here we enable RRC (radio resource control) monitoring
-    src.enable_log("LTE_RRC_OTA_Pdacket")
+    src.enable_log("LTE_RRC_OTA_Packet")
     src.enable_log("WCDMA_RRC_OTA_Packet")
-    src.enable_log("WCDMA_CELL_ID")
+    src.enable_log("WCDMA_RRC_Serv_Cell_Info")
 
     #Dump the messages to std I/O. Comment it if it is not needed.
     dumper = MsgLogger()

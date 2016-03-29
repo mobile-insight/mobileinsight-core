@@ -18,6 +18,18 @@ class Monitor(Element):
         # No source for Monitor
         Element.__init__(self)
 
+        self._skip_decoding = False
+
+
+    def set_skip_decoding(self, decoding):
+        """
+        Configure whether deferred message decoding is enabled
+
+        :param decoding: if True, only the message header would be decoded, otherwise the entire packet would be decoded
+        :type decoding: Boolean 
+        """
+        self._skip_decoding = decoding
+
 
     # Add an analyzer that needs the message
     def register(self,analyzer):
