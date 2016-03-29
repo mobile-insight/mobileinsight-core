@@ -35,7 +35,6 @@ class LteMeasurementAnalyzer(Analyzer):
         Analyzer.set_source(self,source)
         #enable user's internal events
         source.enable_log("LTE_PHY_Connected_Mode_Intra_Freq_Meas")
-        source.enable_log("LTE_PHY_Inter_RAT_Measurement")
         source.enable_log("LTE_PHY_Serv_Cell_Measurement")
         source.enable_log("LTE_PHY_Connected_Mode_Neighbor_Measurement")
 
@@ -52,18 +51,17 @@ class LteMeasurementAnalyzer(Analyzer):
     def serving_cell_rsrp(self,msg):
         if msg.type_id == "LTE_PHY_Connected_Mode_Intra_Freq_Meas":
             msg_dict=dict(msg.data.decode())
-            # print msg.timestamp,msg_dict['Serving Filtered RSRP(dBm)']
             date = datetime.datetime.fromtimestamp(msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')
             rsrp_log = (str(date)+":"
                 + self.__class__.__name__
-                + ' RSRP=' + str(msg_dict['Serving Filtered RSRP(dBm)'])+'dBm'
-                + ' RSRQ=' + str(msg_dict['Serving Filtered RSRQ(dB)'])+'dB'
+                + ' RSRP=' + str(msg_dict['RSRP(dBm)'])+'dBm'
+                + ' RSRQ=' + str(msg_dict['RSRQ(dB)'])+'dB'
                 + ' # of neighbors=' + str(msg_dict['Number of Neighbor Cells']))
 
             self.logger.info(rsrp_log)
             
-            self.serv_cell_rsrp.append(msg_dict['Serving Filtered RSRP(dBm)'])
-            self.serv_cell_rsrq.append(msg_dict['Serving Filtered RSRP(dBm)'])
+            self.serv_cell_rsrp.append(msg_dict['RSRP(dBm)'])
+            self.serv_cell_rsrq.append(msg_dict['RSRP(dBm)'])
 
     def get_rsrp_list(self):
     	"""

@@ -62,16 +62,12 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "UMTS_NAS_MM_State",true},
     {UMTS_NAS_MM_REG_State,
         "UMTS_NAS_MM_REG_State",true},
-
     {UMTS_NAS_OTA,
         "UMTS_NAS_OTA_Packet",true},
-
     {LTE_RRC_OTA_Packet,    // LTE RRC signaling messages
         "LTE_RRC_OTA_Packet",true},
-
     {LTE_RRC_MIB_Message_Log_Packet,    // LTE RRC MIB packet
         "LTE_RRC_MIB_Packet",true},
-
     {LTE_RRC_MIB_Message_Log_Packet,    // LTE RRC MIB packet
         "LTE_RRC_MIB_Message_Log_Packet",true},
     // {LTE_RRC_Serv_Cell_Info_Log_Packet, // LTE RRC cell status
@@ -87,39 +83,28 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_NAS_EMM_OTA_Incoming_Packet",true},
     {LTE_NAS_EMM_Plain_OTA_Outgoing_Message,    // LTE EMM signaling message (merge incoming/outgoing)
         "LTE_NAS_EMM_OTA_Outgoing_Packet",true},
-
     {LTE_NAS_EMM_State,
         "LTE_NAS_EMM_State",true},
     {LTE_NAS_ESM_State,
         "LTE_NAS_ESM_State",true},
-
     {LTE_LL1_PDSCH_Demapper_Configuration,
         "LTE_PHY_PDSCH_Packet",true},
-
     // {LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results,    // LTE infra-frequency measurements (connected mode)
     //     "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results",false},
-
     {LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results,    // LTE infra-frequency measurements (connected mode)
         "LTE_PHY_Connected_Mode_Intra_Freq_Meas",true},
-
     // {LTE_ML1_IRAT_Measurement_Request,  // LTE inter-RAT measurement request
     //     "LTE_ML1_IRAT_Measurement_Request",false},
-
     {LTE_ML1_IRAT_Measurement_Request,  // LTE inter-RAT measurement request
-        "LTE_PHY_Inter_RAT_Measurement",true},
-
+        "LTE_PHY_Inter_RAT_Measurement",false},
     // {LTE_ML1_Serving_Cell_Measurement_Result,   // LTE serving cell measurement result
     //     "LTE_ML1_Serving_Cell_Measurement_Result",false},
-
     {LTE_ML1_Serving_Cell_Measurement_Result,   // LTE serving cell measurement result
-        "LTE_PHY_Serv_Cell_Measurement",true},
-            
+        "LTE_PHY_Serv_Cell_Measurement",true},           
     // {LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp, // LTE neighbor measurement request (connected mode)
-    //     "LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp",false},
-
+    //     "LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp",false}
     {LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp, // LTE neighbor measurement request (connected mode)
-        "LTE_PHY_Connected_Mode_Neighbor_Measurement",true},
-            
+        "LTE_PHY_Connected_Mode_Neighbor_Measurement",true},            
     {LTE_PDCP_DL_SRB_Integrity_Data_PDU,
         "LTE_PDCP_DL_SRB_Integrity_Data_PDU",false},
     {LTE_PDCP_UL_SRB_Integrity_Data_PDU,
@@ -135,7 +120,7 @@ const ValueName LogPacketTypeID_To_Name [] = {
     {LTE_MAC_UL_Tx_Statistics,
         "LTE_MAC_UL_Tx_Statistics",false},
     {Modem_debug_message,
-        "Modem_debug_message",true},
+        "Modem_debug_message",false},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

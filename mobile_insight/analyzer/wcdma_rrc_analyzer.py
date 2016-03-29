@@ -102,21 +102,17 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         """
         if not self.__status.inited():
             #old yet incomplete config would be discarded
-            # if msg.data.has_key('UTRA DL Absolute RF channel number'):
-            if 'UTRA DL Absolute RF channel number' in msg.data:
-                self.__status.freq = msg.data['UTRA DL Absolute RF channel number']
+            if 'Download RF channel number' in msg.data:
+                self.__status.freq = msg.data['Download RF channel number']
                 self.logger.info(self.__status.dump())
-            # if msg.data.has_key('Cell identity (28-bits)'):
-            if 'Cell identity (28-bits)' in msg.data:
-                self.__status.id = msg.data['Cell identity (28-bits)']
+            if 'Cell ID' in msg.data:
+                self.__status.id = msg.data['Cell ID']
                 self.logger.info(self.__status.dump())
-            # if msg.data.has_key('LAC id'):
-            if 'LAC id' in msg.data:
-                self.__status.lac = msg.data['LAC id']
+            if 'LAC' in msg.data:
+                self.__status.lac = msg.data['LAC']
                 self.logger.info(self.__status.dump())
-            # if msg.data.has_key('RAC id'):
-            if 'RAC id' in msg.data:
-                self.__status.rac = msg.data['RAC id']
+            if 'RAC' in msg.data:
+                self.__status.rac = msg.data['RAC']
                 self.logger.info(self.__status.dump())
 
             if self.__status.inited():
@@ -137,38 +133,34 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                             self.logger.info(self.__status.dump())
         else:
             #if new config arrives, push new one to the history
-            # if msg.data.has_key('UTRA DL Absolute RF channel number') \
-            if ('UTRA DL Absolute RF channel number' in msg.data
-            and self.__status.freq!=msg.data['UTRA DL Absolute RF channel number']):
+            if ('Download RF channel number' in msg.data
+            and self.__status.freq!=msg.data['Download RF channel number']):
                 self.__status=WcdmaRrcStatus()
-                self.__status.freq=msg.data['UTRA DL Absolute RF channel number']
+                self.__status.freq=msg.data['Download RF channel number']
                 self.__history[msg.timestamp]=self.__status
                 #Initialize a new config
                 self.__config_tmp=WcdmaRrcConfig()
 
-            # if msg.data.has_key('Cell identity (28-bits)') \
-            if ('Cell identity (28-bits)' in msg.data
-            and self.__status.id!=msg.data['Cell identity (28-bits)']):
+            if ('Cell ID' in msg.data
+            and self.__status.id!=msg.data['Cell ID']):
                 self.__status=WcdmaRrcStatus()
-                self.__status.id=msg.data['Cell identity (28-bits)']
+                self.__status.id=msg.data['Cell ID']
                 self.__history[msg.timestamp]=self.__status
                 #Initialize a new config
                 self.__config_tmp=WcdmaRrcConfig()
         
-            # if msg.data.has_key('LAC id') \
-            if ('LAC id' in msg.data
-            and self.__status.lac!=msg.data['LAC id']):
+            if ('LAC' in msg.data
+            and self.__status.lac!=msg.data['LAC']):
                 self.__status=WcdmaRrcStatus()
-                self.__status.lac=msg.data['LAC id']
+                self.__status.lac=msg.data['LAC']
                 self.__history[msg.timestamp]=self.__status
                 #Initialize a new config
                 self.__config_tmp=WcdmaRrcConfig()
         
-            # if msg.data.has_key('RAC id') \
             if ('RAC id' in msg.data
-            and self.__status.rac!=msg.data['RAC id']):
+            and self.__status.rac!=msg.data['RAC']):
                 self.__status=WcdmaRrcStatus()
-                self.__status.rac=msg.data['RAC id']
+                self.__status.rac=msg.data['RAC']
                 self.__history[msg.timestamp]=self.__status
                 #Initialize a new config
                 self.__config_tmp=WcdmaRrcConfig()

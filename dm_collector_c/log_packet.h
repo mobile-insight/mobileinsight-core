@@ -54,16 +54,16 @@ const Fmt _1xEVSignalingFmt [] = {
 };
 
 const Fmt WcdmaCellIdFmt [] = {
-    {UINT, "UTRA UL Absolute RF channel number", 4},    //Uplink RF channel number
-    {UINT, "UTRA DL Absolute RF channel number", 4},    //Download RF channel number
-    {UINT, "Cell identity (28-bits)", 4},               //Cell ID
-    {UINT, "URA to use in case of overlapping URAs", 1}, // UTRA registration area (overlapping URAs)
+    {UINT, "Uplink RF channel number", 4},    //Uplink RF channel number
+    {UINT, "Download RF channel number", 4},    //Download RF channel number
+    {UINT, "Cell ID", 4},               //Cell ID
+    {UINT, "UTRA registration area (overlapping URAs)", 1}, // UTRA registration area (overlapping URAs)
     {SKIP, NULL, 2},    // Unknown yet
-    {UINT, "Allowed Call Access", 1},   //Allowed call access
+    {UINT, "Allowed call access", 1},   //Allowed call access
     {UINT, "PSC", 2},   //PSC
     {PLMN_MK1, "PLMN", 6},  //PLMN
-    {UINT, "LAC id", 4},    //Location area code
-    {UINT, "RAC id", 4}     //routing area code
+    {UINT, "LAC", 4},    //Location area code
+    {UINT, "RAC", 4}     //routing area code
 };
 
 // ------------------------------------------------------------
@@ -352,11 +352,15 @@ const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
     {UINT, "RB Allocation Slot 1[0]", 8},
     {UINT, "RB Allocation Slot 1[1]", 8},
     {SKIP, NULL, 4},
-    {UINT, "Transport Block Size Stream 0", 2},
-    {UINT, "Modulation Stream 0", 2},
+    // {UINT, "Transport Block Size Stream 0", 2},
+    {UINT, "TBS 0", 2},
+    // {UINT, "Modulation Stream 0", 2},
+    {UINT, "MCS 0", 2},
     {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
-    {UINT, "Transport Block Size Stream 1", 2},
-    {UINT, "Modulation Stream 1", 2},
+    // {UINT, "Transport Block Size Stream 1", 2},
+    {UINT, "TBS 1", 2},
+    // {UINT, "Modulation Stream 1", 2},
+    {UINT, "MCS 1", 2},
     {PLACEHOLDER, "Carrier Index", 0}
 };
 
@@ -382,9 +386,9 @@ const Fmt LteMl1CmlifmrFmt_v3_Header [] = {
     {UINT, "E-ARFCN", 2},
     {UINT, "Serving Physical Cell ID", 2},  //serving cell ID
     {UINT, "Sub-frame Number", 2},
-    {RSRP, "Serving Filtered RSRP(dBm)", 2}, //Filtered RSRP (dBm)
+    {RSRP, "RSRP(dBm)", 2}, //Filtered RSRP (dBm)
     {SKIP, NULL, 2},    // Duplicated
-    {RSRQ, "Serving Filtered RSRQ(dB)", 2}, //Filtered RSRQ (dBm)
+    {RSRQ, "RSRQ(dB)", 2}, //Filtered RSRQ (dBm)
     {SKIP, NULL, 2},    // Duplicated
     {UINT, "Number of Neighbor Cells", 1},
     {UINT, "Number of Detected Cells", 1}
@@ -474,14 +478,14 @@ const Fmt LteRrcServCellInfoLogPacketFmt [] = {
 };
 
 const Fmt LteRrcServCellInfoLogPacketFmt_v2 [] = {
-    {UINT, "Physical Cell ID", 2},  //Physical cell ID
-    {UINT, "DL FREQ", 2},   //Downlink frequency
-    {UINT, "UL FREQ", 2},   //Uplink frequency
-    {BANDWIDTH, "DL BW", 1},    //Downlink bandwidth
-    {BANDWIDTH, "UL BW", 1},    //Uplink bandwidth
+    {UINT, "Cell ID", 2},  //Physical cell ID
+    {UINT, "Downlink frequency", 2},   //Downlink frequency
+    {UINT, "Uplink frequency", 2},   //Uplink frequency
+    {BANDWIDTH, "Downlink bandwidth", 1},    //Downlink bandwidth
+    {BANDWIDTH, "Uplink bandwidth", 1},    //Uplink bandwidth
     {UINT, "Cell Identity", 4}, //cell ID
     {UINT, "TAC", 2},   //Tracking area code
-    {UINT, "Band Indicator", 4},    //Band indicator
+    {UINT, "Band indicator", 4},    //Band indicator
     {UINT, "MCC", 2},   //MCC
     {UINT, "MNC Digit", 1}, //MNC digit
     {UINT, "MNC", 2},   //MNC

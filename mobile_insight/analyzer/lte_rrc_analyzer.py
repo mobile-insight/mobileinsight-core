@@ -245,9 +245,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             if 'Freq' in msg.data:
                 status_updated = True
                 self.__status.freq = msg.data['Freq']
-            if 'Physical Cell ID' in msg.data:
+            if 'Cell ID' in msg.data:
                 status_updated = True
-                self.__status.id = msg.data['Physical Cell ID']
+                self.__status.id = msg.data['Cell ID']
             if 'TAC' in msg.data:
                 status_updated = True
                 self.__status.tac = msg.data['TAC']
@@ -259,12 +259,12 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 self.__status.conn = curr_conn
                 self.__status.freq = msg.data['Freq']
                 self.__history[msg.timestamp] = self.__status
-            if 'Physical Cell ID' in msg.data and self.__status.id != msg.data['Physical Cell ID']:
+            if 'Cell ID' in msg.data and self.__status.id != msg.data['Cell ID']:
                 status_updated = True
                 curr_conn = self.__status.conn
                 self.__status = LteRrcStatus()
                 self.__status.conn = curr_conn
-                self.__status.id = msg.data['Physical Cell ID']
+                self.__status.id = msg.data['Cell ID']
                 self.__history[msg.timestamp] = self.__status
             if 'TAC' in msg.data and self.__status.id != msg.data['TAC']:
                 status_updated = True
