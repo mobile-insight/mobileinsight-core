@@ -224,10 +224,10 @@ else:
 
 setup(
     name = 'MobileInsight',
-    version = '1.0',
+    version = '2.0',
     description = 'Mobile network monitoring and analysis',
-    author = 'Yuanjie Li, Jiayao Li',
-    author_email = 'yuanjie.li@cs.ucla.edu, likayo@ucla.edu',
+    author = 'UCLA Wing Group and OSU MSSN lab',
+    author_email = 'yuanjie.li@cs.ucla.edu, zyuan@cs.ucla.edu',
     url = 'http://metro.cs.ucla.edu/mobile_insight',
     license = 'Apache License 2.0',
     packages = ['mobile_insight',

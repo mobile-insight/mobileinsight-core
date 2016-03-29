@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 """
 Python GUI for MobileInsight
 Author: Moustafa Alzantot
