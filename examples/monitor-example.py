@@ -19,6 +19,9 @@ if __name__ == "__main__":
     src.set_serial_port(sys.argv[1]) #the serial port to collect the traces
     src.set_baudrate(int(sys.argv[2])) #the baudrate of the port
 
+    # Save the monitoring results as an offline log
+    src.save_log_as("./3g-4g-rrc.mi2log")
+
     #Enable 3G/4G messages to be monitored. Here we enable RRC (radio resource control) monitoring
     src.enable_log("LTE_RRC_OTA_Packet")
     src.enable_log("WCDMA_RRC_OTA_Packet")

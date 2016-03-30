@@ -330,6 +330,8 @@ class AndroidDevDiagMonitor(Monitor):
                             self._last_diag_revealer_ts = ret_ts
                         if ret_payload:
                             dm_collector_c.feed_binary(ret_payload)
+                            if self._save_file:
+                                self._save_file.write(ret_payload)
                     elif ret_msg_type == ChronicleProcessor.TYPE_START_LOG_FILE:
                         if ret_filename:
                             pass
@@ -374,11 +376,13 @@ class AndroidDevDiagMonitor(Monitor):
                             "sys_shutdown",
                             "Mayday")
             self.send(event)
+            self._save_file.close()
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
         except Exception, e:
             self._stop_collection()
+            self._save_file.close()
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
                             "Mayday")

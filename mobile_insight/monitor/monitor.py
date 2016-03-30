@@ -20,6 +20,24 @@ class Monitor(Element):
 
         self._skip_decoding = False
 
+        self._save_log_path = None
+        self._save_file = None
+
+
+    def save_log_as(self,path):
+        """
+        Save the log as a mi2log file (for offline analysis)
+
+        :param path: the file name to be saved
+        :type path: string
+        """
+        self._save_log_path = path
+        try:
+            self._save_file = open(self._save_log_path, "wb")
+        except Exception, e:
+            print "Failed to save log to %s" % path
+            sys.exit(e)    
+
 
     def set_skip_decoding(self, decoding):
         """
