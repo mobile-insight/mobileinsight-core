@@ -217,15 +217,18 @@ class WindowClass(wx.Frame):
         toolbar_time = self.toolbar.AddLabelTool(ID_TB_TIME, "Time Window", wx.Bitmap("icons/time.png"))
         self.toolbar.AddSeparator()
         toolbar_reset = self.toolbar.AddLabelTool(ID_TB_RESET, "Reset", wx.Bitmap("icons/reset.png"))
+        # self.toolbar.AddSeparator()
+        # toolbar_graph = self.toolbar.AddLabelTool(ID_TB_GRAPH, "Graph", wx.Bitmap("icons/graph.png"))
         self.toolbar.AddSeparator()
-        toolbar_graph = self.toolbar.AddLabelTool(ID_TB_GRAPH, "Graph", wx.Bitmap("icons/graph.png"))
+        toolbar_about = self.toolbar.AddLabelTool(ID_TB_GRAPH, "About", wx.Bitmap("icons/about.png"))
 
         self.Bind(wx.EVT_TOOL, self.Open, toolbar_open)
         self.Bind(wx.EVT_TOOL, self.OnFilter, toolbar_filter)
         self.Bind(wx.EVT_TOOL, self.OnSearch, toolbar_search);
         self.Bind(wx.EVT_TOOL, self.OnTime, toolbar_time)
         self.Bind(wx.EVT_TOOL, self.OnReset, toolbar_reset)
-        self.Bind(wx.EVT_TOOL, self.OnGraph, toolbar_graph)
+        # self.Bind(wx.EVT_TOOL, self.OnGraph, toolbar_graph)
+        self.Bind(wx.EVT_TOOL, self.OnAbout, toolbar_about)
         self.toolbar.Realize()
 
         #### Main Panel
@@ -271,6 +274,8 @@ class WindowClass(wx.Frame):
         self.SetSize((1200, 800))
         self.Centre()
         self.Show(True)
+
+        self.data = None
 
         EVT_RESULT(self, self.OnResult)
 
@@ -328,8 +333,9 @@ class WindowClass(wx.Frame):
             self.SetupGrid()
 
     def OnReset(self, e):
-        self.data_view = self.data
-        self.SetupGrid()
+        if self.data:
+            self.data_view = self.data
+            self.SetupGrid()
 
     def openFile(self, filePath):
         self._log_analyzer.AnalyzeFile(filePath)
@@ -360,6 +366,15 @@ class WindowClass(wx.Frame):
             self.data_view = [x for x in self.data_view if keyword in x["Payload"]]
             self.SetupGrid()
         search_dlg.Destroy()
+
+    def OnAbout(self, e):
+        about_text = ('MobileInsight 2.0 GUI\n' 
+                   + 'UCLA Wing Group & OSU MSSN Lab\n\n' 
+                   + 'Developers: \n   Moustafa Alzantot, \n    Priyanka Avinash Kachare,\n'
+                   + '    Michael Ivan, \n    Yuanjie Li\n\n'
+                   + 'Copyright 2014-2016')
+        search_dlg = wx.MessageDialog(self, about_text, "About MobileInsight GUI", wx.OK)
+        search_dlg.ShowModal()
 
     def OnGridSelect(self, e):
         #self.statusbar.SetStatusText("Selected %d" %e.GetRow())
