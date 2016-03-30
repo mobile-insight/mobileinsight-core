@@ -220,8 +220,6 @@ class Profile(object):
                 DB_PATH="/sdcard/mobile_insight/dbs/"
                 #Create DB directory (Android only)
                 import subprocess
-                cmd = "mkdir /sdcard/mobile_insight/; "
-                cmd = cmd + "mkdir "+DB_PATH+"; chmod -R 777 "+DB_PATH
                 proc = subprocess.Popen("su", executable="/system/bin/sh", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
                 proc.stdin.write(cmd+'\n')
 
