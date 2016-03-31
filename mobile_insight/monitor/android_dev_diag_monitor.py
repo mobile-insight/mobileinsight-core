@@ -382,7 +382,8 @@ class AndroidDevDiagMonitor(Monitor):
             # sys.exit(e)
         except Exception, e:
             self._stop_collection()
-            self._save_file.close()
+            if self._save_file:
+                self._save_file.close()
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
                             "Mayday")

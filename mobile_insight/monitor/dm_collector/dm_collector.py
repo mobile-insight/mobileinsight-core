@@ -152,7 +152,8 @@ class DMCollector(Monitor):
             # Disable logs
             dm_collector_c.disable_logs(phy_ser)
             phy_ser.close()
-            self._save_file.close()
+            if self._save_file:
+                self._save_file.close()
             sys.exit(e)
         except Exception, e:
             self._save_file.close()
