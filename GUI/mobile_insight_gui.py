@@ -14,7 +14,6 @@ from threading import Thread
 from random import random 
 from datetime import datetime, timedelta
 
-import pandas as pd
 import matplotlib
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 # from matplotlib.backends.backend_wx import NavigationToolbar2Wx, wxc
@@ -48,32 +47,6 @@ class ResultEvent(wx.PyEvent):
         wx.PyEvent.__init__(self)
         self.SetEventType(EVT_RESULT_ID)
         self.data = data
-
-class CanvasDialog(wx.Dialog):
-    def __init__(self, parent, myDf):
-        wx.Dialog.__init__(self, parent, -1)
-        self.SetBackgroundColour(wx.NamedColour("WHITE"))
-
-        self.df = myDf
-        self.figure = Figure()
-        self.canvas = FigureCanvas(self, -1, self.figure)
-        self.axes = self.figure.add_subplot(111)
-        self.axes.clear()
-
-        types = list(myDf.TypeId.unique())
-        colors =['r', 'g', 'b', 'k', 'c', 'y']
-        k = 0
-        for type_id in types:
-            myDf.loc[myDf.TypeId==type_id].groupby(pd.TimeGrouper('s')).count()['TypeId'].plot(ax=self.axes, label=type_id, color=colors[k])
-            k += 1
-        #myDf.to_csv('~/output.csv')
-        self.axes.legend(loc='best')
-        self.axes.set_xlabel("Time")
-        self.axes.set_ylabel("Number of messages")
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.sizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
-        self.SetSizer(self.sizer)
-        self.Fit()
 
 
 class ProgressDialog(wx.Dialog):
@@ -339,25 +312,6 @@ class WindowClass(wx.Frame):
 
     def openFile(self, filePath):
         self._log_analyzer.AnalyzeFile(filePath)
-
-    def OnGraph(self, e):
-        time_list = []
-        type_list = []
-        if not hasattr(self,'data_view'):
-            return    
-        n = len(self.data_view)
-        for k in range(n):
-            time_list += [datetime.strptime(self.data_view[k]["Timestamp"], '%Y-%m-%d  %H:%M:%S.%f')]
-            type_list += [(self.data_view[k]["TypeID"])]
-        myDf = pd.DataFrame({'Timestamp' : time_list,
-            'TypeId': type_list})
-        myDf.index = myDf['Timestamp']
-        #df.plot('Timestamp', 'TypeId')
-
-        dlg = CanvasDialog(self, myDf)
-        #myDf.groupby(pd.TimeGrouper('s')).count().plot()
-        dlg.ShowModal()
-
 
     def OnSearch(self, e):
         search_dlg = wx.TextEntryDialog(self, "Search for", "", "", style=wx.OK | wx.CANCEL)
