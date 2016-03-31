@@ -41,15 +41,15 @@ def download_libs(url,libs,chmod=True):
             urllib.urlretrieve (url+lib, "./libs/"+lib)
     if chmod:   
         for lib in libs: 
-            os.chmod("./libs/"+lib,0o777 | stat.S_IEXEC)
+            os.chmod("./libs/"+lib,0o755 | stat.S_IEXEC)
 
 def download_unix(url):
     if not os.path.isfile("./ws_dissector/ws_dissector"):
         urllib.urlretrieve (url+"ws_dissector", "./ws_dissector/ws_dissector")
     if not os.path.isfile("./mobile_insight/monitor/dm_collector/dm_collector_c.so"):
         urllib.urlretrieve (url+"dm_collector_c.so", "./mobile_insight/monitor/dm_collector/dm_collector_c.so")
-    os.chmod("./ws_dissector/ws_dissector",0o777 | stat.S_IEXEC)
-    os.chmod("./mobile_insight/monitor/dm_collector/dm_collector_c.so",0o777 | stat.S_IEXEC)
+    os.chmod("./ws_dissector/ws_dissector",0o755 | stat.S_IEXEC)
+    os.chmod("./mobile_insight/monitor/dm_collector/dm_collector_c.so",0o755 | stat.S_IEXEC)
 
 def download_win(url):
     if not os.path.isfile("./ws_dissector/ws_dissector.exe"):
@@ -133,7 +133,7 @@ setup(
     name = 'MobileInsight',
     version = '2.0',
     description = 'Mobile network monitoring and analysis',
-    author = 'UCLA Wing Group and OSU MSSN lab',
+    author = 'UCLA WiNG Group and OSU MSSN lab',
     author_email = 'yuanjie.li@cs.ucla.edu, zyuan@cs.ucla.edu',
     url = 'http://metro.cs.ucla.edu/mobile_insight',
     license = 'Apache License 2.0',
