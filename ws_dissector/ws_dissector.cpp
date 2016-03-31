@@ -30,7 +30,7 @@
 //typedef __int32 int32_t;
 //typedef unsigned __int32 uint32_t;
 
-#define WS_DISSECTOR_VERSION "1.0.2"
+#define WS_DISSECTOR_VERSION "2.0.1"
 
 const int BUFFER_SIZE = 2000;
 guchar buffer[BUFFER_SIZE] = {};
@@ -92,7 +92,7 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
     epan_dissect_run(edt, 0, &phdr, tvb_new_real_data(raw_data, data_len, data_len), &fdata, NULL);
     // const proto_tree *payload_tree = edt->tree->first_child->next;
     // print_tree(payload_tree, 0);
-    proto_tree_write_pdml(edt, stdout);
+    write_pdml_proto_tree(edt, stdout);
 
     epan_dissect_free(edt);
     frame_data_destroy(&fdata);
@@ -196,7 +196,7 @@ int main(int argc, char** argv)
         fread(buffer + offset, 1, data_len, stdin);
         // fprintf(stderr, "type = %u, size = %u\n", type, (unsigned int) data_len);
         try_dissect(session, data_len + 2 * 4 + framingHeader_len, buffer);
-        printf("===___===\n");
+        // printf("===___===\n");
     }
 
     epan_free(session);
