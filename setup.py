@@ -80,7 +80,7 @@ if platform.system()=="Darwin":
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
     DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector']),
-                  ('/usr/local/lib/',lib_list)]
+                  ('/usr/lib/',lib_list)]
 
 elif platform.system()=="Linux":
 
@@ -100,7 +100,7 @@ elif platform.system()=="Linux":
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
     DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector']),
-                  ('/usr/local/lib/',lib_list)]
+                  ('/usr/lib/',lib_list)]
 
 elif platform.system() == "Windows":
     arch=platform.architecture()
