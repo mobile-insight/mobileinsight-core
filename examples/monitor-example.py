@@ -5,7 +5,7 @@ import sys
 
 #Import MobileInsight modules
 from mobile_insight.monitor import OnlineMonitor
-from mobile_insight.analyzer import MsgLogger,MsgSerializer
+from mobile_insight.analyzer import MsgLogger
 
 if __name__ == "__main__":
     
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     src.set_baudrate(int(sys.argv[2])) #the baudrate of the port
 
     # Save the monitoring results as an offline log
-    src.save_log_as("./3g-4g-rrc.mi2log")
+    src.save_log_as("./monitor-example.mi2log")
 
     #Enable 3G/4G messages to be monitored. Here we enable RRC (radio resource control) monitoring
     src.enable_log("LTE_RRC_OTA_Packet")
@@ -31,11 +31,6 @@ if __name__ == "__main__":
     dumper = MsgLogger()
     dumper.set_source(src)
     dumper.set_decoding(MsgLogger.XML)  #decode the message as xml
-
-    #Save the messages to disk. Comment it if it is not needed.
-    serializer = MsgSerializer()
-    serializer.set_source(src)
-    serializer.set_output_path("3g-4g-rrc.replay")
 
     #Start the monitoring
     src.run()
