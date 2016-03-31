@@ -153,7 +153,7 @@ class DMCollector(Monitor):
             dm_collector_c.disable_logs(phy_ser)
             phy_ser.close()
             if self._save_file:
-                self._save_file.close()
+                self._save_file.close()qmdl
             sys.exit(e)
         except Exception, e:
             self._save_file.close()
