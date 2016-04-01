@@ -357,7 +357,7 @@ class Profile(object):
             #Insert the new record into table
             sql_cmd = "insert into "+self.__get_root_name() + "(id,profile) values(\""+profile_nodes[0].split(":")[1]+"\","+"\""+str(query_res)+"\")"
             if is_android:
-                print "Yuanjie: execSQL"
+                # print "Yuanjie: execSQL"
                 self.__db.execSQL(sql_cmd)
             else:
                 self.__db.execute(sql_cmd)
