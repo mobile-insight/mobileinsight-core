@@ -196,7 +196,7 @@ int main(int argc, char** argv)
         fread(buffer + offset, 1, data_len, stdin);
         // fprintf(stderr, "type = %u, size = %u\n", type, (unsigned int) data_len);
         try_dissect(session, data_len + 2 * 4 + framingHeader_len, buffer);
-        // printf("===___===\n");
+        printf("===___===\n");  // this line CANNOT be deleted. used to seperate msgs
     }
 
     epan_free(session);
