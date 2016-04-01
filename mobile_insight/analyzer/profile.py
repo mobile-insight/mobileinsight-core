@@ -214,7 +214,7 @@ class Profile(object):
             self.__db = None
         else:
             #setup internal database
-            
+            DB_PATH = "/sdcard/mobile_insight/dbs/"
             root = self.__profile_hierarchy.get_root()
             if is_android:
                 activity = autoclass('org.renpy.android.PythonActivity')
