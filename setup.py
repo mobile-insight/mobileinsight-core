@@ -107,7 +107,8 @@ elif platform.system() == "Windows":
     if arch[0]=='32bit':
         url="http://metro.cs.ucla.edu/mobile_insight/libs/win-32/libs/"
     elif arch[0]=='64bit':
-        url="http://metro.cs.ucla.edu/mobile_insight/libs/win-64/libs/"
+        # url="http://metro.cs.ucla.edu/mobile_insight/libs/win-64/libs/"
+        url="http://metro.cs.ucla.edu/mobile_insight/libs/win-32/libs/"
     else:
         print "Unsupported operating system: "+str(arch)
         sys.exit()
@@ -124,7 +125,7 @@ elif platform.system() == "Windows":
 
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
     DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector',ws_files),
-                  (sys.exec_prefix,lib_list)]
+                  (sys.exec_prefix+'/mobile_insight/ws_dissector',lib_list)]
 else:
     print "Unsupported operating system: "+str(arch)
     sys.exit()

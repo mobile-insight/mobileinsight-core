@@ -86,7 +86,9 @@ class DMLogPacket:
     def _preparse_internal_list(cls, decoded_list):
         lst = []
         try:
-            for i in range(len(decoded_list)):
+            # for i in range(len(decoded_list)):
+            i = 0
+            while i<len(decoded_list):
                 field_name, val, type_str = decoded_list[i]
                 if type_str.startswith("raw_msg/"):
                     msg_type = type_str[len("raw_msg/"):]
@@ -135,6 +137,7 @@ class DMLogPacket:
                     lst.append( (field_name, xx, "msg") )
                 else:
                     lst.append(decoded_list[i])
+                i = i+1
             return lst
 
         except Exception, e:
@@ -168,7 +171,11 @@ class DMLogPacket:
             tag_name = out_type[len("xml/"):]
             output_xml = ET.Element(tag_name)
 
-        for field_name, val, type_str in decoded_list:
+        # for field_name, val, type_str in decoded_list:
+        i = 0
+        while i < len(decoded_list):
+            field_name, val, type_str = decoded_list[i]
+
             if not type_str:    # default type
                 xx = val
             elif type_str == "msg":
@@ -206,6 +213,8 @@ class DMLogPacket:
                     else:
                         sub_tag.set("type", type_str)
                     sub_tag.append(xx)
+
+            i = i+1
 
         if out_type == "dict":
             return output_d

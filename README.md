@@ -3,19 +3,17 @@ MobileInsight
 
 # Introduction #
 
-MobileInsight is a Python (2.7) library for mobile network monitoring and analysis on the end device. It is developed by UCLA Wireless Networking Group (Wing), and licensed under Apache Licence 2.0.
+MobileInsight is a cross-platform package for mobile network monitoring and analysis on end device. It is developed by UCLA Wireless Networking Group (WiNG) and OSU Mobile System, Security and Networking (MSSN) lab, licensed under Apache Licence 2.0.
 
-It provides low-level monitors for mobile network (3G/4G), and extensible event-driven analyzers, such as those for radio resource control (RRC), mobility management (EMM), and session management (ESM). 
-You can also define your own analyzers for customized usage.
+MobileInsight provides low-level monitors for mobile network, and extensible event-driven analyzers for major cellular protocols, such as radio resource control (RRC), mobility management (EMM), and session management (ESM). You can also define your own analyzers for customized usage.
 
-Typical use involves declaring a monitor to track the network status, and ananlyzers for online/offline analysis. See [overview](http://metro.cs.ucla.edu/mobile_insight/overview.html) on how this works, and [examples](http://metro.cs.ucla.edu/mobile_insight/examples.html) on how to use it.
 
-![Module structure](docs/overview.png)
+Typical usage of MobileInsight consists of declaring a monitor to track the network status and calling ananlyzer for online/offline analysis. See [overview](http://metro.cs.ucla.edu/mobile_insight/overview.html) on how this works, and [examples](http://metro.cs.ucla.edu/mobile_insight/examples.html) on how to use it.
 
 
 # Installation #
 
-Please see [here](http://metro.cs.ucla.edu/mobile_insight/installation.html) for more detailed instructions. The following is a quick summary of installation:
+Please see [here](http://metro.cs.ucla.edu/mobile_insight/get_started.html) for more detailed instructions. The following is a quick summary of installation:
 
 First install [Python 2.7](https://www.python.org/) if you do not have them. 
 
@@ -24,17 +22,15 @@ Second, MobileInsight builds on top of pyserial and crcmod, so please install bo
     pip install pyserial
     pip install crcmod
 
-If you need visualization for some results (e.g., plotting the signal strength), 
-please install matplotlib:
+To run MobileInsight GUI, please install the following Python libraries:
 
+    pip install wxPython
     pip install matplotlib
 
 
-Third, MobileInsight relies on Wireshark to decode the 3G/4G messages. Please install [Wireshark](https://www.wireshark.org/download.html) with either binary executables or source code. 
+Last, download MobileInsight, and unpack the code:
 
-Last, download MobileInsight [here](http://metro.cs.ucla.edu/mobile_insight//download.html), and unpack the code::
-
-    tar -zxvf MobileInsight-1.0.tar.gz
-    cd MobileInsight-1.0
+    tar -zxvf MobileInsight-2.0.tar.gz
+    cd MobileInsight-2.0
     python setup.py install
 
