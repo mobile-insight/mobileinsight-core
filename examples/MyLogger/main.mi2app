@@ -1,0 +1,20 @@
+import os
+import sys
+
+from mobile_insight.monitor import OnlineMonitor
+from mobile_insight.analyzer import MsgLogger
+
+
+# Initialize a 3G/4G monitor
+src = OnlineMonitor()
+
+# Save the monitoring results as an offline log
+src.save_log_as("/sdcard/mobile_insight/log/monitor-example.mi2log")
+
+#Enable 3G/4G messages to be monitored. Here we enable RRC (radio resource control) monitoring
+src.enable_log("LTE_RRC_OTA_Packet")
+src.enable_log("WCDMA_RRC_OTA_Packet")
+
+
+#Start the monitoring
+src.run()
