@@ -14,9 +14,12 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <sys/time.h>
 #include <iostream>
 #include <sstream>
+
+#ifndef _WIN32
+#include <sys/time.h>
+#endif
 
 // NOTE: the following number should be updated every time.
 #define DM_COLLECTOR_C_VERSION "1.0.11"
@@ -120,12 +123,19 @@ send_msg (PyObject *serial_port, const char *b, int length) {
     return true;
 }
 
+#ifndef _WIN32
 static double
 get_posix_timestamp () {
     struct timeval tv;
     (void) gettimeofday(&tv, NULL);
     return (double)(tv.tv_sec) + (double)(tv.tv_usec) / 1.0e6;
 }
+#else
+static double
+get_posix_timestamp () {
+    return 0;
+}
+#endif
 
 // Return: successful or not
 static PyObject *
