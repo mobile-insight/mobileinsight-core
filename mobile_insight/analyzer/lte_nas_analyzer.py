@@ -260,7 +260,8 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                 
                 if field_val.has_key('gsm_a.gm.sm.qos.max_bitrate_upl_ext'):
                     self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl_ext']))
-                self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
+                if field_val.has_key('gsm_a.gm.sm.qos.max_bitrate_downl_ext'):    
+                    self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
                 self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl_ext']))
                 self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
