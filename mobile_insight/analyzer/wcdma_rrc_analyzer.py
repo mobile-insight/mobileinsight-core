@@ -104,16 +104,16 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
             #old yet incomplete config would be discarded
             if 'Download RF channel number' in msg.data:
                 self.__status.freq = msg.data['Download RF channel number']
-                self.logger.info(self.__status.dump())
+                self.log_info(self.__status.dump())
             if 'Cell ID' in msg.data:
                 self.__status.id = msg.data['Cell ID']
-                self.logger.info(self.__status.dump())
+                self.log_info(self.__status.dump())
             if 'LAC' in msg.data:
                 self.__status.lac = msg.data['LAC']
-                self.logger.info(self.__status.dump())
+                self.log_info(self.__status.dump())
             if 'RAC' in msg.data:
                 self.__status.rac = msg.data['RAC']
-                self.logger.info(self.__status.dump())
+                self.log_info(self.__status.dump())
 
             if self.__status.inited():
                 #push the config to the library
@@ -122,7 +122,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                 if cur_pair not in self.__config:
                     self.__config[cur_pair] = self.__config_tmp
                     self.__config[cur_pair].status = self.__status
-                    self.logger.info(self.__status.dump())
+                    self.log_info(self.__status.dump())
                 else:
                     #FIXME: merge two config? Critical for itner-freq
                     for item in self.__config_tmp.sib.inter_freq_config:
@@ -130,7 +130,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                         if item not in self.__config[cur_pair].sib.inter_freq_config:
                             self.__config[cur_pair].sib.inter_freq_config[item]\
                             =self.__config_tmp.sib.inter_freq_config[item]
-                            self.logger.info(self.__status.dump())
+                            self.log_info(self.__status.dump())
         else:
             #if new config arrives, push new one to the history
             if ('Download RF channel number' in msg.data

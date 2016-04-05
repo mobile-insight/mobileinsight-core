@@ -153,7 +153,7 @@ class MobilityMngt(Analyzer):
                     #Reset handoff sample
                     self.__handoff_sample = HandoffSample()
 
-                    self.logger.info(str(string2timestamp(msg.timestamp))+" Handoff to "+str(target_cell))
+                    self.log_info(str(string2timestamp(msg.timestamp))+" Handoff to "+str(target_cell))
                     return
 
             if field.get('name')=="lte-rrc.mobilityFromEUTRACommand_element":
@@ -172,7 +172,7 @@ class MobilityMngt(Analyzer):
                     #Reset handoff sample
                     self.__handoff_sample = HandoffSample()
 
-                    self.logger.info(str(string2timestamp(msg.timestamp))+" Handoff to "+str(target_rat))
+                    self.log_info(str(string2timestamp(msg.timestamp))+" Handoff to "+str(target_rat))
                     return
 
             if field.get('name')=="lte-rrc.handoverFromEUTRAPreparationRequest_element":
@@ -195,7 +195,7 @@ class MobilityMngt(Analyzer):
                     #Reset handoff sample
                     self.__handoff_sample = HandoffSample()
 
-                    self.logger.info(str(string2timestamp(msg.timestamp))+" Handoff to CDMA2000")
+                    self.log_info(str(string2timestamp(msg.timestamp))+" Handoff to CDMA2000")
                     return
 
 
@@ -214,7 +214,7 @@ class MobilityMngt(Analyzer):
                         #Reset handoff sample
                         self.__handoff_sample = HandoffSample()
 
-                        self.logger.info(str(string2timestamp(msg.timestamp))+" Redirect to "+str(target_cell))
+                        self.log_info(str(string2timestamp(msg.timestamp))+" Redirect to "+str(target_cell))
                         break
 
             if field.get('name')=="lte-rrc.measurementReport_element":
@@ -230,7 +230,7 @@ class MobilityMngt(Analyzer):
                     meas_report =  self.__handoff_sample.cur_state.get_meas_report_obj(meas_id)
                     self.__handoff_sample.add_meas_report(meas_report)
                     if meas_report[1]: #report config is known
-                        self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement report "+str(meas_report[1].event_list[0].type)+" "+str(rss))
+                        self.log_info(str(string2timestamp(msg.timestamp))+" Measurement report "+str(meas_report[1].event_list[0].type)+" "+str(rss))
 
             if field.get('name')=="lte-rrc.measResultsCDMA2000_element":
 
@@ -245,12 +245,12 @@ class MobilityMngt(Analyzer):
                 meas_report = (LteMeasObjectCDMA2000(None,0),tmp)   #fake an empty report
                 
                 self.__handoff_sample.add_meas_report(meas_report)
-                self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement report cdma2000 "+str(rss))
+                self.log_info(str(string2timestamp(msg.timestamp))+" Measurement report cdma2000 "+str(rss))
 
 
             if field.get('name')=="lte-rrc.measConfig_element":
 
-                self.logger.info(str(string2timestamp(msg.timestamp))+" Measurement control")
+                self.log_info(str(string2timestamp(msg.timestamp))+" Measurement control")
 
                 #A Measurement control reconfiguration
                 meas_state = None
@@ -315,7 +315,7 @@ class MobilityMngt(Analyzer):
                 # self.__mobility_state_machine.update_state_machine(self.__handoff_sample)
                 # #Reset handoff sample
                 # self.__handoff_sample = HandoffSample()
-                # # self.logger.info("Meas State: \n"+meas_state.dump())
+                # # self.log_info("Meas State: \n"+meas_state.dump())
 
     def __get_meas_obj(self,msg):
         """

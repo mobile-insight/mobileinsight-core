@@ -177,7 +177,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         log_item = msg.data.decode()
         log_item_dict = dict(log_item)
         toc = time.clock()
-        # self.logger.info(str(time.time()) + " "\
+        # self.log_info(str(time.time()) + " "\
         #             + "CALLBK_LTE_RRC_DECODE "\
         #             + str((toc - tic)*1000)) #processing latency (in ms)
 
@@ -186,7 +186,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         tic = time.clock()
         self.__callback_serv_cell(raw_msg)
         toc = time.clock()
-        # self.logger.info(str(time.time()) + " "\
+        # self.log_info(str(time.time()) + " "\
         #             + "CALLBK_LTE_RRC_SERV_CELL "\
         #             + str((toc - tic)*1000)) #processing latency (in ms)
 
@@ -206,7 +206,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             self.__callback_rrc_conn(xml_msg)
             toc = time.clock()
 
-            # self.logger.info(str(time.time()) + " "\
+            # self.log_info(str(time.time()) + " "\
             #             + "CALLBK_LTE_RRC_CONN "\
             #             + str((toc - tic)*1000)) #processing latency (in ms)
 
@@ -214,7 +214,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             self.__callback_sib_config(xml_msg)
             toc = time.clock()
 
-            # self.logger.info(str(time.time()) + " "\
+            # self.log_info(str(time.time()) + " "\
             #             + "CALLBK_LTE_RRC_SIB_CONFG "\
             #             + str((toc - tic)*1000)) #processing latency (in ms)
 
@@ -222,7 +222,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             self.__callback_rrc_reconfig(xml_msg)
             toc = time.clock()
 
-            # self.logger.info(str(time.time()) + " "\
+            # self.log_info(str(time.time()) + " "\
             #             + "CALLBK_LTE_RRC_RECONFIG "\
             #             + str((toc - tic)*1000)) #processing latency (in ms)
 
@@ -275,7 +275,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 self.__history[msg.timestamp] = self.__status
         
         if status_updated:
-            # self.logger.info(self.__status.dump())
+            # self.log_info(self.__status.dump())
             pass
 
     def __callback_sib_config(self,msg):
@@ -802,13 +802,13 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         for field in msg.data.iter('field'):
             if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
                 self.__status.conn = True
-                # self.logger.info(self.__status.dump())
-                # self.logger.info("FSM test: "+self.get_protocol_state())
+                # self.log_info(self.__status.dump())
+                # self.log_info("FSM test: "+self.get_protocol_state())
 
             if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
                 self.__status.conn = False
-                # self.logger.info(self.__status.dump())
-                # self.logger.info("FSM test: "+self.get_protocol_state())
+                # self.log_info(self.__status.dump())
+                # self.log_info("FSM test: "+self.get_protocol_state())
 
     def set_source(self,source):
         """

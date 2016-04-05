@@ -39,13 +39,13 @@ class LtePhyAnalyzer(Analyzer):
 
             if not self.init_timestamp:
                 self.init_timestamp = log_item['timestamp']
-                self.logger.info("0 "
+                self.log_info("0 "
                 + str(log_item["MCS 0"])+" "
                 + str(log_item["MCS 1"])+" "
                 + str(log_item["TBS 0"])+" "
                 + str(log_item["TBS 1"]))
             else:
-                self.logger.info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+" "
+                self.log_info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+" "
                 + str(log_item["MCS 0"])+" "
                 + str(log_item["MCS 1"])+" "
                 + str(log_item["TBS 0"])+" "

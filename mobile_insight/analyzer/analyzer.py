@@ -37,7 +37,7 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
 
     l = logging.getLogger(logger_name)
     if len(l.handlers)<2:
-        formatter = logging.Formatter('%(message)s')
+        formatter = logging.Formatter('%(asctime)s %(message)s')
         streamHandler = logging.StreamHandler()
         streamHandler.setFormatter(formatter)
 
@@ -71,11 +71,27 @@ class Analyzer(Element):
         if not self.__class__.__name__ in Analyzer.__analyzer_array:
             Analyzer.__analyzer_array[self.__class__.__name__]=self
         else:
-            self.logger.info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
+            self.log_info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
 
         self.__parent_analyzer=[] #a list of analyzers it depends on
 
         #TODO: For Profile, each specific analyzer should declare it on demand
+
+    #logging functions: please use this one
+    def log_info(self, msg):
+        self.logger.info(self.__class__.__name__+': '+msg)
+
+    def log_debug(self, msg):
+        self.logger.debug(self.__class__.__name__+': '+msg)
+
+    def log_warning(self, msg):
+        self.logger.warning(self.__class__.__name__+': '+msg)
+
+    def log_error(self, msg):
+        self.logger.error(self.__class__.__name__+': '+msg)
+
+    def log_critical(self, msg):
+        self.logger.critical(self.__class__.__name__+': '+msg)
 
     @staticmethod
     def reset():

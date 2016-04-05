@@ -146,7 +146,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         self.__emm_status.guti.mme_group_id = msg.data["GUTI MME Group ID"] 
         self.__emm_status.guti.mme_code = msg.data["GUTI MME Code"] 
         self.__emm_status.guti.m_tmsi = msg.data["GUTI M-TMSI"] 
-        self.logger.info(self.__emm_status.dump())
+        self.log_info(self.__emm_status.dump())
 
     def __callback_esm_state(self,msg):
         """
@@ -170,7 +170,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext=msg.data["UL GBR ext"]
         self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=msg.data["DL MBR ext"]
 
-        self.logger.info(self.__esm_status[self.__cur_eps_id].dump())
+        self.log_info(self.__esm_status[self.__cur_eps_id].dump())
 
         # self.profile.update("LteNasProfile:"+self.__emm_status.profile_id()+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
         #             {'qci':self.__esm_status[self.__cur_eps_id].qos.qci,
@@ -265,7 +265,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                 self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl_ext']))
                 self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
-                self.logger.info(self.__esm_status[self.__cur_eps_id].dump())
+                self.log_info(self.__esm_status[self.__cur_eps_id].dump())
 
                 # profile update for esm qos
                 self.profile.update("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],

@@ -45,8 +45,8 @@ class HandoffLoopAnalyzer(Analyzer):
         # # print cell_list
         # for cell in cell_list:
         #     # self.__rrc_analyzer.get_cell_config(cell).dump()
-        #     # self.logger.info(self.__rrc_analyzer.get_cell_config(cell).dump())
-        #     self.logger.info(self.get_analyzer("RrcAnalyzer").get_cell_config(cell).dump())
+        #     # self.log_info(self.__rrc_analyzer.get_cell_config(cell).dump())
+        #     self.log_info(self.get_analyzer("RrcAnalyzer").get_cell_config(cell).dump())
 
         # each cell's configuration
         cell_config = {}
@@ -89,7 +89,7 @@ class HandoffLoopAnalyzer(Analyzer):
                 val_stack=[0]
 
                 while dfs_stack:
-                    self.logger.debug("dfs_stack:"+str(dfs_stack))
+                    self.log_debug("dfs_stack:"+str(dfs_stack))
                     src_cell = dfs_stack.pop()
                     src_neighbor = neighbor_stack.pop()
                     src_clear = cell_clear_stack.pop()
@@ -110,7 +110,7 @@ class HandoffLoopAnalyzer(Analyzer):
                         continue
 
                     src_neighbor[dst_cell]+=1
-                    self.logger.debug("dst_cell:"+str(dst_cell)\
+                    self.log_debug("dst_cell:"+str(dst_cell)\
                         +" state:"+str(src_neighbor[dst_cell]))
 
                     src_freq=cell_config[src_cell].status.freq
@@ -204,7 +204,7 @@ class HandoffLoopAnalyzer(Analyzer):
                             elif src_neighbor[dst_cell]==2:
                                 loop_report+="(active)->"+str(dst_cell)
 
-                            self.logger.warning(loop_report)
+                            self.log_warning(loop_report)
                             continue
 
                     dfs_stack.append(dst_cell)

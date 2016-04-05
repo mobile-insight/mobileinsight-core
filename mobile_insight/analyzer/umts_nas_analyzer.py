@@ -115,7 +115,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         self.__mm_status.substate = msg.data["MM Substate"]
         self.__mm_status.update_status = msg.data["MM Update Status"]
 
-        self.logger.info(self.__mm_status.dump())
+        self.log_info(self.__mm_status.dump())
 
     def __callback_mm_reg_state(self,msg):
         """
@@ -129,7 +129,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         self.__mm_status.operation_mode = msg.data["Network operation mode"]
         self.__mm_status.service_type = msg.data["CS/PS service type"]
 
-        self.logger.info(self.__mm_status.dump())
+        self.log_info(self.__mm_status.dump())
 
     def __callback_gmm_state(self,msg):
         """
@@ -238,7 +238,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                 # self.__mm_nas_status.qos_negotiated.signalling_ind = field_val["gsm_a.gm.sm.qos.signalling_ind"]
                 # self.__mm_nas_status.qos_negotiated.source_stat_desc = field_val["gsm_a.gm.sm.qos.source_stat_desc"]
 
-                self.logger.info(self.__mm_nas_status.dump())
+                self.log_info(self.__mm_nas_status.dump())
                 # profile update for esm qos
                 self.profile.update("UmtsNasProfile:"+xstr(self.__mm_status.profile_id())+".pdp.qos",
                     {

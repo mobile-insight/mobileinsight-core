@@ -58,7 +58,7 @@ class LteMeasurementAnalyzer(Analyzer):
                 + ' RSRQ=' + str(msg_dict['RSRQ(dB)'])+'dB'
                 + ' # of neighbors=' + str(msg_dict['Number of Neighbor Cells']))
 
-            self.logger.info(rsrp_log)
+            self.log_info(rsrp_log)
             
             self.serv_cell_rsrp.append(msg_dict['RSRP(dBm)'])
             self.serv_cell_rsrq.append(msg_dict['RSRP(dBm)'])
