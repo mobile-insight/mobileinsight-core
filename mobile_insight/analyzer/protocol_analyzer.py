@@ -47,7 +47,7 @@ class ProtocolAnalyzer(Analyzer):
         self.state_machine = StateMachine(self.create_state_machine(),self.init_protocol_state)
 
         # update state dynamics
-        # self.add_source_callback(self.__update_state)  # Zengwen: temp disable
+        self.add_source_callback(self.__update_state)
       
 
     def create_profile_hierarchy(self):
