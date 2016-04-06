@@ -338,10 +338,12 @@ class AndroidDevDiagMonitor(Monitor):
                             # print "Start of %s" % ret_filename
                     elif ret_msg_type == ChronicleProcessor.TYPE_END_LOG_FILE:
                         if ret_filename:
+                            res = {'filename':ret_filename}
                             # print "End of %s" % ret_filename
                             event = Event(  timeit.default_timer(),
                                             "new_diag_log",
-                                            ret_filename)
+                                            res)
+                                            # ret_filename)
                             self.send(event)
                     elif ret_msg_type is not None:
                         raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
