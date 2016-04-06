@@ -46,8 +46,8 @@ class ProtocolAnalyzer(Analyzer):
         self.profile = Profile(self.create_profile_hierarchy())
         self.state_machine = StateMachine(self.create_state_machine(),self.init_protocol_state)
 
-        #Update state dynamics
-        self.add_source_callback(self.__update_state)
+        # update state dynamics
+        # self.add_source_callback(self.__update_state)  # Zengwen: temp disable
       
 
     def create_profile_hierarchy(self):
@@ -117,4 +117,3 @@ class ProtocolAnalyzer(Analyzer):
         :returns: current state_machine
         """
         return self.state_machine.get_current_state()
-
