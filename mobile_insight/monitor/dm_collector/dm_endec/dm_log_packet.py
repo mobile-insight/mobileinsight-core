@@ -174,6 +174,7 @@ class DMLogPacket:
         # for field_name, val, type_str in decoded_list:
         i = 0
         while i < len(decoded_list):
+            print "debug decoded_list: ",str(decoded_list[i])
             field_name, val, type_str = decoded_list[i]
 
             if not type_str:    # default type
