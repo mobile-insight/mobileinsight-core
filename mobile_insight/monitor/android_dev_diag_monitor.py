@@ -338,8 +338,9 @@ class AndroidDevDiagMonitor(Monitor):
                             # print "Start of %s" % ret_filename
                     elif ret_msg_type == ChronicleProcessor.TYPE_END_LOG_FILE:
                         if ret_filename:
-                            res_dict = {'filename':ret_filename}
-                            msg = ("new_diag_log",res_dict,"dict")
+                            # res_dict = {'filename':ret_filename}
+                            # msg = ("new_diag_log",res_dict,"dict")
+                            msg = ('filename', ret_filename, "")
                             # print "End of %s" % ret_filename
                             event = Event(  timeit.default_timer(),
                                             "new_diag_log",
