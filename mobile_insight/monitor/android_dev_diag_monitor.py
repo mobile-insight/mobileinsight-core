@@ -221,6 +221,7 @@ class AndroidDevDiagMonitor(Monitor):
         """
         Enable all supported logs
         """
+        cls = self.__class__
         self.enable_log(cls.SUPPORTED_TYPES)
 
     def set_block_size(self, n):
