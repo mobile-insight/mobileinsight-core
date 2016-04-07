@@ -290,6 +290,7 @@ class AndroidDevDiagMonitor(Monitor):
                 if not os.path.exists(self.DIAG_CFG_DIR):
                     os.makedirs(self.DIAG_CFG_DIR)
                 fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "w+b")
+                print "diag monitor debug: "+str(self._type_names)
                 dm_collector_c.generate_diag_cfg(fd, self._type_names)
                 fd.close()
 
