@@ -16,20 +16,14 @@ __all__ = ["OnlineMonitor"]
 #Test the OS version
 is_android=False
 try:
-    print "test 1"
     from jnius import autoclass #For Android
-    print "test 2"
     from android_dev_diag_monitor import AndroidDevDiagMonitor
-    print "test 3"
 
     is_android=True
-
-    print "test 4"
 
     class OnlineMonitor(AndroidDevDiagMonitor):
         def __init__(self):
             AndroidDevDiagMonitor.__init__(self)
-            print "As AndroidDevDiagMonitor"
 
         def set_serial_port(self, phy_ser_name):
             """
@@ -51,9 +45,6 @@ try:
 
 except Exception, e:
 
-    import traceback
-    print "Yuanjie:" + str(traceback.format_exc())
-
     #not used, but bugs may exist on laptop
     from dm_collector.dm_collector import DMCollector
     is_android=False
@@ -61,4 +52,3 @@ except Exception, e:
     class OnlineMonitor(DMCollector):
         def __init__(self):
             DMCollector.__init__(self)
-            print "As DMCollector"
