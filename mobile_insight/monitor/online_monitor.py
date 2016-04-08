@@ -52,7 +52,7 @@ try:
 except Exception, e:
 
     import traceback
-    print str(traceback.format_exc())
+    print "Yuanjie:" + str(traceback.format_exc())
 
     #not used, but bugs may exist on laptop
     from dm_collector.dm_collector import DMCollector
