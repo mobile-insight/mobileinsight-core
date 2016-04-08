@@ -383,7 +383,8 @@ class AndroidDevDiagMonitor(Monitor):
                             "sys_shutdown",
                             "Mayday")
             self.send(event)
-            self._save_file.close()
+            if self._save_file:
+                self._save_file.close()
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
