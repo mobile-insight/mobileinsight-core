@@ -16,10 +16,15 @@ __all__ = ["OnlineMonitor"]
 #Test the OS version
 is_android=False
 try:
+    print "test 1"
     from jnius import autoclass #For Android
+    print "test 2"
     from android_dev_diag_monitor import AndroidDevDiagMonitor
+    print "test 3"
 
     is_android=True
+
+    print "test 4"
 
     class OnlineMonitor(AndroidDevDiagMonitor):
         def __init__(self):
@@ -45,6 +50,10 @@ try:
             print "WARNING: Android version does not need to configure baudrate"
 
 except Exception, e:
+
+    import traceback
+    print str(traceback.format_exc())
+
     #not used, but bugs may exist on laptop
     from dm_collector.dm_collector import DMCollector
     is_android=False
