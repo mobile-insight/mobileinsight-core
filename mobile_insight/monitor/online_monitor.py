@@ -24,6 +24,7 @@ try:
     class OnlineMonitor(AndroidDevDiagMonitor):
         def __init__(self):
             AndroidDevDiagMonitor.__init__(self)
+            print "As AndroidDevDiagMonitor"
 
         def set_serial_port(self, phy_ser_name):
             """
@@ -51,3 +52,4 @@ except Exception, e:
     class OnlineMonitor(DMCollector):
         def __init__(self):
             DMCollector.__init__(self)
+            print "As DMCollector"
