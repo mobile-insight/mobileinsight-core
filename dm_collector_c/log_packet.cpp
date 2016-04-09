@@ -299,6 +299,15 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 break;
             }
 
+        case WCDMA_MEAS:
+            {   // (x-256) dBm
+                assert(fmt[i].len == 1);
+                unsigned int ii = *((unsigned char *) p);
+                decoded = Py_BuildValue("i", (int)ii-256);
+                n_consumed += fmt[i].len;
+                break;
+            }
+
         case SKIP:
             n_consumed += fmt[i].len;
             break;
@@ -896,6 +905,94 @@ _decode_lte_ml1_subpkt(const char *b, int offset, int length,
 }
 
 static int
+_decode_lte_ml1_irat_subpkt(const char *b, int offset, int length,
+                        PyObject *result) {
+
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+    int n_subpkt = _search_result_int(result, "Subpacket count");
+
+    switch(pkt_ver){
+        case 1:
+            for(int i=0; i< n_subpkt; i++)
+            {
+
+                PyObject *result_subpkt = PyList_New(0);
+                // Decode subpacket header
+                offset += _decode_by_fmt(LteMl1IratSubPktFmt,
+                                            ARRAY_SIZE(LteMl1IratSubPktFmt, Fmt),
+                                            b, offset, length, result_subpkt);
+                // Decode payload
+                int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
+                int subpkt_ver = _search_result_int(result_subpkt, "Version");
+                int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
+                switch(subpkt_id){
+                    case LteMl1IratType_WCDMA:
+                    {
+                        PyObject *result_subpkt_wcdma = PyList_New(0);
+                        offset += _decode_by_fmt(LteMl1IratWCDMAFmt,
+                                            ARRAY_SIZE(LteMl1IratWCDMAFmt, Fmt),
+                                            b, offset, length, result_subpkt_wcdma);
+                        int n_freq = _search_result_int(result_subpkt_wcdma, "Number of frequencies");
+                        for(int j=0; j<n_freq; j++){
+                            PyObject *result_subpkt_wcdma_freq = PyList_New(0);
+                            offset += _decode_by_fmt(LteMl1IratWCDMACellMetaFmt,
+                                            ARRAY_SIZE(LteMl1IratWCDMACellMetaFmt, Fmt),
+                                            b, offset, length, result_subpkt_wcdma_freq);
+                            int freq = _search_result_int(result_subpkt_wcdma_freq, "Frequency");
+                            int n_cell = _search_result_int(result_subpkt_wcdma_freq, "Number of cells");
+                            for(int k=0; k<n_cell; k++){
+                                PyObject *result_subpkt_wcdma_cell = PyList_New(0);
+                                offset += _decode_by_fmt(LteMl1IratWCDMACellFmt,
+                                            ARRAY_SIZE(LteMl1IratWCDMACellFmt, Fmt),
+                                            b, offset, length, result_subpkt_wcdma_cell);
+
+                                char name[64];
+                                sprintf(name,"CellPacket_%d",k);
+                                PyObject *t = Py_BuildValue("(sOs)",
+                                                    name, result_subpkt_wcdma_cell, "dict");
+                                PyList_Append(result_subpkt_wcdma_freq, t);
+                                Py_DECREF(result_subpkt_wcdma_cell);
+                            }
+                            char name[64];
+                            sprintf(name,"FrqeuencyPacket_%d",j);
+                            PyObject *t = Py_BuildValue("(sOs)",
+                                                    name, result_subpkt_wcdma_freq, "dict");
+                            PyList_Append(result_subpkt_wcdma, t);
+                            Py_DECREF(result_subpkt_wcdma_freq);
+                        }
+
+                        PyObject *t = Py_BuildValue("(sOs)",
+                                                    "WCDMA", result_subpkt_wcdma, "dict");
+                        PyList_Append(result_subpkt, t);
+                        Py_DECREF(result_subpkt_wcdma);
+                        break;
+                    }
+
+                    default:
+                    {
+                        offset += subpkt_size - 4;
+                        break;
+                    }
+                }
+
+                char name[64];
+                sprintf(name,"Subpacket_%d",i);
+                PyObject *t = Py_BuildValue("(sOs)",
+                                            name, result_subpkt, "dict");
+                PyList_Append(result, t);
+                Py_DECREF(result_subpkt);
+
+            }
+
+        default:
+            break;
+    }
+
+    return offset - start;
+}
+
+static int
 _decode_lte_pdcp_dl_srb_integrity_data_pdu(const char *b, int offset, int length,
                                             PyObject *result) {
     int start = offset;
@@ -1436,81 +1533,6 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
     int argc = _search_result_int(result, "Number of parameters");
     char version = _search_result_int(result, "Version");
 
-
-    // if(version=='\x79'){
-    //     //Yuanjie: these logs can be directly decoded
-    //     PyObject *argv = PyList_New(0);
-
-    //     int *tmp_argv = new int[argc];
-
-    //     //Get parameters
-    //     for(int i=0; i!=argc; i++)
-    //     {
-    //         const char *p = b + offset;
-
-    //         int ii = *((int *) p);    //a new parameter
-    //         PyObject *decoded = Py_BuildValue("I", ii);
-    //         tmp_argv[i] = ii;
-
-    //         PyList_Append(argv,decoded);
-    //         offset += 4;    //one parameter
-    //     }
-
-    //     char* s = new char[length - offset];
-    //     memcpy(s,b+offset,length - offset);
-    //     std::string res = s;
-
-    //     //Replace printf parameters with numbers
-    //     for(int i=0; i!=argc; i++)
-    //     {
-    //         std::size_t found = res.find("%");
-    //         if (found==std::string::npos)
-    //             break;
-    //         // std::string tmp = std::to_string(tmp_argv[i]);
-    //         std::string tmp = patch::to_string(tmp_argv[i]);
-    //         std::stringstream ss;
-    //         switch(res[found+1]){
-    //             case 'd':
-    //                 res.replace(found,2,tmp);
-    //                 break;
-    //             case 'x': case 'X':
-    //                 ss << std::hex << tmp_argv[i];
-    //                 tmp = ss.str();
-    //                 res.replace(found,2,tmp); //for simplicity, we don't convert to hex
-    //                 break;
-    //             case 'l':
-    //                 switch(res[found+2]){
-    //                     case 'd': case 'u':
-    //                         // tmp = std::to_string(tmp_argv[i]);
-    //                         tmp = patch::to_string(tmp_argv[i]);
-    //                         res.replace(found,3,tmp); //%lu or %ld
-    //                         break;
-    //                     case 'x': case 'X':
-    //                         ss << std::hex << tmp_argv[i];
-    //                         tmp = ss.str();
-    //                         res.replace(found,3,tmp); //for simplicity, we don't convert to hex
-    //                         break;
-    //                     default:
-    //                         res.replace(found,2,""); 
-    //                         break;
-    //                 }
-    //                 break;
-                    
-    //             default:
-    //                 res.replace(found,1,""); 
-    //                 break;
-
-    //         }
-    //     }
-
-    //     //Get the debug string
-    //     // PyObject *t = Py_BuildValue("(ss#s)", "Msg", b + offset, length - offset, "");
-    //     PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
-
-    //     PyList_Append(result, t);
-    //     Py_DECREF(t);
-    //     return length-start;
-    // }
     if(version=='\x79'){
         //Yuanjie: optimization for iCellular. Don't show unnecessary logs
         return length-start;
@@ -1757,6 +1779,13 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                                     ARRAY_SIZE(LteMl1SubpktFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_ml1_subpkt(b, offset, length, result);
+        break;
+
+    case LTE_ML1_IRAT_MDB:
+        offset += _decode_by_fmt(LteMl1IratFmt,
+                                    ARRAY_SIZE(LteMl1IratFmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_lte_ml1_irat_subpkt(b, offset, length, result);
         break;
 
     case LTE_PDCP_DL_SRB_Integrity_Data_PDU:

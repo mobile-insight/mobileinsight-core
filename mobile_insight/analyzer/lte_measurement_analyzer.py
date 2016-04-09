@@ -37,6 +37,7 @@ class LteMeasurementAnalyzer(Analyzer):
         source.enable_log("LTE_PHY_Connected_Mode_Intra_Freq_Meas")
         source.enable_log("LTE_PHY_Serv_Cell_Measurement")
         source.enable_log("LTE_PHY_Connected_Mode_Neighbor_Measurement")
+        source.enable_log("LTE_PHY_Inter_RAT_Measurement")
 
     def ue_event_filter(self,msg):
         """
@@ -58,10 +59,14 @@ class LteMeasurementAnalyzer(Analyzer):
                 + ' RSRQ=' + str(msg_dict['RSRQ(dB)'])+'dB'
                 + ' # of neighbors=' + str(msg_dict['Number of Neighbor Cells']))
 
-            self.log_info(rsrp_log)
+            # self.log_info(rsrp_log)
             
             self.serv_cell_rsrp.append(msg_dict['RSRP(dBm)'])
             self.serv_cell_rsrq.append(msg_dict['RSRP(dBm)'])
+
+        if msg.type_id == "LTE_PHY_Inter_RAT_Measurement":
+            msg_dict=dict(msg.data.decode())
+            self.log_info(str(msg_dict)) 
 
     def get_rsrp_list(self):
     	"""

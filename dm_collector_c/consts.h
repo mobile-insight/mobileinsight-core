@@ -34,6 +34,7 @@ enum LogPacketType {
     LTE_ML1_IRAT_Measurement_Request = 0xB187,
     LTE_ML1_Serving_Cell_Measurement_Result = 0xB193,
     LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp = 0xB195,
+    LTE_ML1_IRAT_MDB = 0xB188,
     LTE_PDCP_DL_SRB_Integrity_Data_PDU = 0xB0A5,
     LTE_PDCP_UL_SRB_Integrity_Data_PDU = 0xB0B5,
     LTE_MAC_Configuration = 0xB060,
@@ -104,7 +105,9 @@ const ValueName LogPacketTypeID_To_Name [] = {
     // {LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp, // LTE neighbor measurement request (connected mode)
     //     "LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp",false}
     {LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp, // LTE neighbor measurement request (connected mode)
-        "LTE_PHY_Connected_Mode_Neighbor_Measurement",true},            
+        "LTE_PHY_Connected_Mode_Neighbor_Measurement",true},         
+    {LTE_ML1_IRAT_MDB,  // Inter-RAT measurement result
+        "LTE_PHY_Inter_RAT_Measurement", true},   
     {LTE_PDCP_DL_SRB_Integrity_Data_PDU,
         "LTE_PDCP_DL_SRB_Integrity_Data_PDU",false},
     {LTE_PDCP_UL_SRB_Integrity_Data_PDU,

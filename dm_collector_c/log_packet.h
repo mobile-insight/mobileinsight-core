@@ -22,7 +22,8 @@ enum FmtType {
     RSRP,
     RSRQ,
     SKIP,   // This field is ignored (but bytes are consumed)
-    PLACEHOLDER // This field is created with a dummy value (no byte is consumed)
+    PLACEHOLDER, // This field is created with a dummy value (no byte is consumed)
+    WCDMA_MEAS, // Used for RSCP/RSSI/ECN0 in LTE_ML1_IRAT_MDB
 };
 
 struct Fmt {
@@ -476,6 +477,58 @@ const Fmt LteMl1SubpktFmt_v1_Scmr_v19 [] = {
     {SKIP, NULL, 9},    //Cell timing [1]
     {RSRP, "RSRP", 2}
 };
+
+// ------------------------------------------------------------
+// LTE ML1 IRAT MDB
+
+enum LteMl1IratType {
+    LteMl1IratType_HRPD=14,
+    LteMl1IratType_WCDMA=35,
+    LteMl1IratType_1x=41,
+    LteMl1IratType_GSM=42,
+};
+
+
+const Fmt LteMl1IratFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Subpacket count", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LteMl1IratSubPktFmt [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Version", 1},
+    {UINT, "Subpacket size", 2},
+};
+
+const Fmt LteMl1IratWCDMAFmt [] = {
+    {UINT, "Current DRX cycle", 4},
+    {UINT, "Number of frequencies", 1},
+    {SKIP, NULL, 3},
+};
+
+const Fmt LteMl1IratWCDMACellMetaFmt [] = {
+    {UINT, "Frequency", 2},
+    {UINT, "Number of cells", 1},
+    {SKIP, NULL, 1},
+};
+
+const Fmt LteMl1IratWCDMACellFmt [] = {
+    {UINT, "PSC+Energy", 2},
+    {UINT, "CSG", 1},
+    {SKIP, NULL, 1},
+    {UINT, "Pn Pos", 4},
+    {WCDMA_MEAS, "RSCP",1},
+    {WCDMA_MEAS, "RSSI",1},
+    {WCDMA_MEAS, "EcNo",1},
+    {UINT,"SrxLev",1},
+    {UINT,"DRX cycle count since last measurement",2},
+    {UINT,"Treselection",1},
+    {UINT,"Squal",1}
+
+};
+
+
 
 // ------------------------------------------------------------
 // LTE RRC Serving Cell Info Log Pkt
