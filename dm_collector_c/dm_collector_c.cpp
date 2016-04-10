@@ -59,7 +59,13 @@ static PyMethodDef DmCollectorCMethods[] = {
     {"generate_diag_cfg", dm_collector_c_generate_diag_cfg, METH_VARARGS,
         "Generate a Diag.cfg file.\n"
         "\n"
-        "This file can be loaded by diag_mdlog program on Android phones.\n"
+        "This file can be loaded by diag_mdlog program on Android phones. It\n"
+        "disables all previous log messages, then enables logs specified in\n"
+        "type_names.\n"
+        "\n"
+        "Args:\n"
+        "    file: output Python file object\n"
+        "    type_names: the type of logs you wish to enable.\n"
     },
     {"receive_log_packet", dm_collector_c_receive_log_packet, METH_VARARGS,
         "Extract a log packet from feeded data.\n"
@@ -306,6 +312,7 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
         goto raise_exception;
     }
 
+    // Disable previous logs
     buf = encode_log_config(DISABLE, empty);
     if (buf.first != NULL && buf.second != 0) {
         (void) send_msg(file, buf.first, buf.second);
