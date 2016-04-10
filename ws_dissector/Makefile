@@ -1,6 +1,6 @@
-WS_SRC_PATH=/Users/yuanjieli/Documents/wireshark-1.12.4
+WS_SRC_PATH=/home/mobileinsight-dev/wireshark-2.0.2
 WS_LIB_PATH=/usr/local/lib
-WS_ANDROID_LIB_PATH=/Users/yuanjieli/Documents/wireshark-1.12.4/lib
+WS_ANDROID_LIB_PATH=/home/mobileinsight-dev/wireshark-2.0.2/lib
 
 GLIB_SRC_PATH=$(HOME)/Code/glib
 GLIB_ANDROID_LIB_PATH=$(HOME)/Code/glib/libs/armeabi

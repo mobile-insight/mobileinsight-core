@@ -835,6 +835,144 @@ const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt [] = {
     {UINT, "Ctrl bytes", 2},
 };
 
+// ----------------------------------------------------------------------------
+// LTE_RLC_UL_Config_Log_Packet
+
+const Fmt LteRlcUlConfigLogPacketFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num SubPkt", 1},
+    {SKIP, NULL, 2}, // reserved
+};
+
+const Fmt LteRlcUlConfigLogPacket_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LteRlcUlConfigLogPacket_SubpktPayload [] = {
+    {UINT, "Reason", 1},
+    {UINT, "Max Size RBs", 1},
+};
+
+const ValueName LteRlcUlConfigLogPacket_Subpkt_Reason [] = {
+    {1, "Configuration"},
+    {4, "RB Release"},
+};
+
+const Fmt LteRlcUlConfigLogPacket_Subpkt_ReleasedRB_Header [] = {
+    {UINT, "Number of Released RBs", 1},
+};
+const Fmt LteRlcUlConfigLogPacket_Subpkt_ReleasedRB_Fmt [] = {
+    {UINT, "Released RB Cfg Index", 1},
+};
+
+const Fmt LteRlcUlConfigLogPacket_Subpkt_AddedModifiedRB_Header [] = {
+    {UINT, "Number of Added/Modified RBs", 1},
+};
+const Fmt LteRlcUlConfigLogPacket_Subpkt_AddedModifiedRB_Fmt [] = {
+    {UINT, "Added/Modified RB Cfg Index", 1},
+    {UINT, "Action", 1},
+};
+const ValueName LteRlcUlConfigLogPacket_Subpkt_AddedModifiedRB_Action [] = {
+    {1, "Add"},
+    {2, "Modify"},
+};
+
+const Fmt LteRlcUlConfigLogPacket_Subpkt_ActiveRB_Header [] = {
+    {UINT, "Number of Active RBs", 1},
+};
+const Fmt LteRlcUlConfigLogPacket_Subpkt_ActiveRB_Fmt [] = {
+    {PLACEHOLDER, "RLCUL CFG", 0},
+    {UINT, "RB Mode", 1},
+    {UINT, "LC ID", 1},
+    {UINT, "RB ID", 1},
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "RB Type", 1},
+    {PLACEHOLDER, "SN Length", 0},
+    {UINT, "Poll Byte", 4},
+    {UINT, "Poll PDU", 2},
+    {UINT, "T Poll Retx (ms)", 2},
+    {UINT, "Max Retx Threshold", 1},
+};
+const ValueName LteRlcUlConfigLogPacket_Subpkt_ActiveRB_RBMode [] = {
+    {1, "AM"},
+};
+const ValueName LteRlcUlConfigLogPacket_Subpkt_ActiveRB_RBType [] = {
+    {1, "SRB"},
+    {2, "DRB"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE_RLC_DL_Config_Log_Packet
+
+const Fmt LteRlcDlConfigLogPacketFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num SubPkt", 1},
+    {SKIP, NULL, 2}, // reserved
+};
+
+const Fmt LteRlcDlConfigLogPacket_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LteRlcDlConfigLogPacket_SubpktPayload [] = {
+    {UINT, "Reason", 1},
+    {UINT, "Max Size RBs", 1},
+};
+
+const ValueName LteRlcDlConfigLogPacket_Subpkt_Reason [] = {
+    {1, "Configuration"},
+    {4, "RB Release"},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Header [] = {
+    {UINT, "Number of Released RBs", 1},
+};
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Fmt [] = {
+    {UINT, "Released RB Cfg Index", 1},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Header [] = {
+    {UINT, "Number of Added/Modified RBs", 1},
+};
+const Fmt LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Fmt [] = {
+    {UINT, "Added/Modified RB Cfg Index", 1},
+    {UINT, "Action", 1},
+};
+const ValueName LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Action [] = {
+    {1, "Add"},
+    {2, "Modify"},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Header [] = {
+    {UINT, "Number of Active RBs", 1},
+};
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Fmt [] = {
+    {PLACEHOLDER, "RLCDL CFG", 0},
+    {UINT, "RB Mode", 1},
+    {UINT, "LC ID", 1},
+    {UINT, "RB ID", 1},
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "RB Type", 1},
+    {PLACEHOLDER, "SN Length", 0},
+    {UINT, "Poll Byte", 4},
+    {UINT, "Poll PDU", 2},
+    {UINT, "T Poll Retx (ms)", 2},
+    {UINT, "Max Retx Threshold", 1},
+};
+const ValueName LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBMode [] = {
+    {1, "AM"},
+};
+const ValueName LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBType [] = {
+    {1, "SRB"},
+    {2, "DRB"},
+};
+// ----------------------------------------------------------------------------
+
+
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
     {SKIP, NULL, 1},

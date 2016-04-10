@@ -43,6 +43,8 @@ enum LogPacketType {
     LTE_MAC_UL_Buffer_Status_Internal = 0xB066,
     LTE_MAC_UL_Tx_Statistics = 0xB067,
     Modem_debug_message = 0x1FEB,
+    LTE_RLC_UL_Config_Log_Packet = 0xB091,
+    LTE_RLC_DL_Config_Log_Packet = 0xB081,
 };
 
 // Mapping type IDs to names
@@ -101,13 +103,13 @@ const ValueName LogPacketTypeID_To_Name [] = {
     // {LTE_ML1_Serving_Cell_Measurement_Result,   // LTE serving cell measurement result
     //     "LTE_ML1_Serving_Cell_Measurement_Result",false},
     {LTE_ML1_Serving_Cell_Measurement_Result,   // LTE serving cell measurement result
-        "LTE_PHY_Serv_Cell_Measurement",true},           
+        "LTE_PHY_Serv_Cell_Measurement",true},
     // {LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp, // LTE neighbor measurement request (connected mode)
     //     "LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp",false}
     {LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp, // LTE neighbor measurement request (connected mode)
-        "LTE_PHY_Connected_Mode_Neighbor_Measurement",true},         
+        "LTE_PHY_Connected_Mode_Neighbor_Measurement",true},
     {LTE_ML1_IRAT_MDB,  // Inter-RAT measurement result
-        "LTE_PHY_Inter_RAT_Measurement", true},   
+        "LTE_PHY_Inter_RAT_Measurement", true},
     {LTE_PDCP_DL_SRB_Integrity_Data_PDU,
         "LTE_PDCP_DL_SRB_Integrity_Data_PDU",false},
     {LTE_PDCP_UL_SRB_Integrity_Data_PDU,
@@ -124,6 +126,10 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_MAC_UL_Tx_Statistics",false},
     {Modem_debug_message,
         "Modem_debug_message",false},
+    {LTE_RLC_UL_Config_Log_Packet,
+        "LTE_RLC_UL_Config_Log_Packet", true},
+    {LTE_RLC_DL_Config_Log_Packet,
+        "LTE_RLC_DL_Config_Log_Packet", true},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__
