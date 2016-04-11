@@ -15,10 +15,13 @@
 
 #include <fstream>
 
+#define SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
+
 // #ifdef __ANDROID__
 // #include <android/log.h>
 // #define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "TAG", __VA_ARGS__);
-// #endif 
+// #endif
 
 //Yuanjie: In-phone version cannot locate std::to_string
 namespace patch
@@ -1053,7 +1056,7 @@ _decode_lte_pdcp_ul_srb_integrity_data_pdu(const char *b, int offset, int length
 }
 
 //------------------------------------------------------
-// TODO: Jie
+// Jie
 static int
 _decode_lte_mac_configuration_subpkt(const char *b, int offset, int length,
                         PyObject *result) {
@@ -1266,7 +1269,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, int length,
 }
 
 //------------------------------------------------------
-// TODO: Jie
+// Jie
 static int
 _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, int length,
                         PyObject *result) {
@@ -1353,7 +1356,7 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, int length,
 }
 
 //------------------------------------------------------
-// TODO: Jie
+// Jie
 static int
 _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, int length,
                         PyObject *result) {
@@ -1444,7 +1447,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, int le
 }
 
 //------------------------------------------------------
-// TODO: Jie
+// Jie
 static int
 _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, int length,
                         PyObject *result) {
@@ -1873,6 +1876,519 @@ static int _decode_lte_rlc_dl_config_log_packet_subpkt (const char *b,
 }
 
 // ----------------------------------------------------------------------------
+static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
+        int length, PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+    int n_subpkt = _search_result_int(result, "Number of Subpackets");
+
+    switch (pkt_ver) {
+    case 1:
+        {
+            PyObject *result_allpkts = PyList_New(0);
+            for (int i = 0; i < n_subpkt; i++) {
+                PyObject *result_subpkt = PyList_New(0);
+                int start_subpkt = offset;
+                offset += _decode_by_fmt(LteRlcUlAmAllPdu_SubpktHeader,
+                        ARRAY_SIZE(LteRlcUlAmAllPdu_SubpktHeader, Fmt),
+                        b, offset, length, result_subpkt);
+                int subpkt_id = _search_result_int(result_subpkt,
+                        "Subpacket ID");
+                int subpkt_ver = _search_result_int(result_subpkt,
+                        "Subpacket Version");
+                int subpkt_size = _search_result_int(result_subpkt,
+                        "Subpacket Size");
+                if (subpkt_id == 70 && subpkt_ver == 3) {
+                    // 70 means LTE RLC UL AM All PDU
+                    offset += _decode_by_fmt(LteRlcUlAmAllPdu_SubpktPayload,
+                            ARRAY_SIZE(LteRlcUlAmAllPdu_SubpktPayload, Fmt),
+                            b, offset, length, result_subpkt);
+                    int rb_cfg_idx = _search_result_int(result_subpkt,
+                            "RB Cfg Idx");
+                    (void) _map_result_field_to_name(result_subpkt, "RB Mode",
+                            LteRlcUlAmAllPdu_Subpkt_RBMode,
+                            ARRAY_SIZE(LteRlcUlAmAllPdu_Subpkt_RBMode,
+                            ValueName), "Unknown");
+                    int enabled_pdu = _search_result_int(result_subpkt,
+                            "Enabled PDU Log Packets");
+                    // Need to check bit by bit
+                    std::string strEnabledPDU = "";
+                    if ((enabled_pdu) & (1 << (1)))
+                        strEnabledPDU += "RLCUL Config (0xB091), ";
+                    if ((enabled_pdu) & (1 << (2)))
+                        strEnabledPDU += "RLCUL AM ALL PDU (0xB092), ";
+                    if ((enabled_pdu) & (1 << (3)))
+                        strEnabledPDU += "RLCUL AM CONTROL PDU (0xB093), ";
+                    if ((enabled_pdu) & (1 << (4)))
+                        strEnabledPDU += "RLCUL AM POLLING PDU (0xB094), ";
+                    if ((enabled_pdu) & (1 << (5)))
+                        strEnabledPDU += "RLCUL AM SIGNALING PDU (0xB095), ";
+                    if ((enabled_pdu) & (1 << (6)))
+                        strEnabledPDU += "RLCUL UM DATA PDU (0xB096), ";
+                    if ((enabled_pdu) & (1 << (7)))
+                        strEnabledPDU += "RLCUL STATISTICS (0xB097), ";
+                    if ((enabled_pdu) & (1 << (8)))
+                        strEnabledPDU += "RLCUL AM STATE (0xB098), ";
+                    if ((enabled_pdu) & (1 << (9)))
+                        strEnabledPDU += "RLCUL UM STATE (0xB099), ";
+                    if (strEnabledPDU.length() > 0) {
+                        strEnabledPDU = strEnabledPDU.substr(0,
+                                strEnabledPDU.length() - 2);
+                        strEnabledPDU += ".";
+                    }
+                    PyObject *pystr = Py_BuildValue("s",
+                            strEnabledPDU.c_str());
+                    PyObject *old_object = _replace_result(result_subpkt,
+                            "Enabled PDU Log Packets", pystr);
+                    Py_DECREF(old_object);
+                    Py_DECREF(pystr);
+
+                    int n_pdu = _search_result_int(result_subpkt,
+                            "Number of PDUs");
+                    PyObject *result_pdu = PyList_New(0);
+                    for (int j = 0; j < n_pdu; j++) {
+                        PyObject *result_pdu_item = PyList_New(0);
+                        offset += _decode_by_fmt(
+                                LteRlcUlAmAllPdu_Subpkt_PDU_Basic, ARRAY_SIZE(
+                                    LteRlcUlAmAllPdu_Subpkt_PDU_Basic, Fmt),
+                                b, offset, length, result_pdu_item);
+                        // Update rb_cfg_idx from previous content
+                        old_object = _replace_result_int(result_pdu_item,
+                                "rb_cfg_idx", rb_cfg_idx);
+                        Py_DECREF(old_object);
+                        int DCLookAhead = _search_result_int(result_pdu_item,
+                                "D/C LookAhead");
+                        int iNonDecodeFN = _search_result_int(result_pdu_item,
+                                "sys_fn");
+                        // Handle fn
+                        const unsigned int SFN_RSHIFT = 4,
+                              SFN_MASK = (1 << 12) - 1;
+                        const unsigned int SUBFRAME_RSHIFT = 0,
+                              SUBFRAME_MASK = (1 << 4) - 1;
+                        int sys_fn = (iNonDecodeFN >> SFN_RSHIFT) & SFN_MASK;
+                        int sub_fn =
+                            (iNonDecodeFN >> SUBFRAME_RSHIFT) & SUBFRAME_MASK;
+                        old_object = _replace_result_int(result_pdu_item,
+                                "sys_fn", sys_fn);
+                        Py_DECREF(old_object);
+                        old_object = _replace_result_int(result_pdu_item,
+                                "sub_fn", sub_fn);
+                        Py_DECREF(old_object);
+                        // Decide PDU type
+                        int iNonDecodeSN = _search_result_int(result_pdu_item, "SN");
+                        if (DCLookAhead < 16) {
+                            // Type = Control
+                            pystr = Py_BuildValue("s", "RLCUL CTRL");
+                            old_object = _replace_result(result_pdu_item,
+                                    "PDU TYPE", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            // Modify ACK_SN
+                            std::string strAckSN = "ACK_SN = ";
+                            int iAckSN = DCLookAhead * 64 + iNonDecodeSN/4;
+                            strAckSN += SSTR(iAckSN);
+                            pystr = Py_BuildValue("s", strAckSN.c_str());
+                            old_object = _replace_result(result_pdu_item,
+                                    "SN", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            // Update other info
+                            offset += _decode_by_fmt(
+                                    LteRlcUlAmAllPdu_Subpkt_PDU_Control,
+                                    ARRAY_SIZE(
+                                        LteRlcUlAmAllPdu_Subpkt_PDU_Control,
+                                        Fmt),
+                                    b, offset, length, result_pdu_item);
+                            pystr = Py_BuildValue("s", "STATUS(0)");
+                            old_object = _replace_result(result_pdu_item,
+                                    "cpt", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                        } else {
+                            // Type = DATA
+                            pystr = Py_BuildValue("s", "RLCUL DATA");
+                            old_object = _replace_result(result_pdu_item,
+                                    "PDU TYPE", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            // SN is correct, no need to modify
+                            // Update other info
+                            std::string strRF = "", strP = "", strFI = "",
+                                strE = "";
+                            if ((DCLookAhead) & (1 << (6))) {
+                                strRF += "1";
+                            } else {
+                                strRF += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (5))) {
+                                strP += "1";
+                            } else {
+                                strP += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (4))) {
+                                strFI += "1";
+                            } else {
+                                strFI += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (3))) {
+                                strFI += "1";
+                            } else {
+                                strFI += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (2))) {
+                                strE += "1";
+                            } else {
+                                strE += "0";
+                            }
+                            offset += _decode_by_fmt(
+                                    LteRlcUlAmAllPdu_Subpkt_PDU_DATA,
+                                    ARRAY_SIZE(
+                                        LteRlcUlAmAllPdu_Subpkt_PDU_DATA, Fmt),
+                                    b, offset, length, result_pdu_item);
+                            pystr = Py_BuildValue("s", (strRF.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "RF", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", (strP.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "P", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", (strFI.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "FI", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", (strE.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "E", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+
+                            if (strE == "1") {
+                                // Decode extra two bytes
+                                offset += _decode_by_fmt(
+                                        LteRlcUlAmAllPdu_Subpkt_PDU_Extra,
+                                        ARRAY_SIZE(
+                                            LteRlcUlAmAllPdu_Subpkt_PDU_Extra,
+                                        Fmt),
+                                        b, offset, length, result_pdu_item);
+                                int iNonDecodeLI = _search_result_int(
+                                        result_pdu_item, "RLC DATA LI");
+                                int iLeft1 = iNonDecodeLI / 4096;
+                                iNonDecodeLI -= iLeft1 * 4096;
+                                int iLeft2 = iNonDecodeLI / 256;
+                                iNonDecodeLI -= iLeft2 * 256;
+                                int iLeft3 = iNonDecodeLI / 16;
+                                iNonDecodeLI -= iLeft3 * 16;
+                                int iLeft4 = iNonDecodeLI;
+                                int iLI =
+                                    iLeft1 * 1 + iLeft3 * 256 + iLeft4 * 16;
+                                old_object = _replace_result_int(
+                                        result_pdu_item, "RLC DATA LI", iLI);
+                                Py_DECREF(old_object);
+                            }
+                        }
+                        PyObject *t1 = Py_BuildValue("(sOs)", ("RLCUL PDU["
+                                + SSTR(i) + "]").c_str(), result_pdu_item,
+                                "dict");
+                        PyList_Append(result_pdu, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_pdu_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "RLCUL PDUs",
+                            result_pdu, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_pdu);
+                } else {
+                    printf("Unkown LTE RLC UL AM ALL PDU subpkt id and version"
+                            ": 0x%x - %d\n", subpkt_id, subpkt_ver);
+                }
+                PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
+                        "dict");
+                PyList_Append(result_allpkts, t);
+                Py_DECREF(t);
+                Py_DECREF(result_subpkt);
+                offset += subpkt_size - (offset - start_subpkt);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Subpackets", result_allpkts,
+                    "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_allpkts);
+            return offset - start;
+        }
+    default:
+        printf("Unkown LTE RLC UL AM ALL PDU version: 0x%x\n", pkt_ver);
+        return 0;
+    }
+}
+
+// ----------------------------------------------------------------------------
+static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
+        int length, PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+    int n_subpkt = _search_result_int(result, "Number of Subpackets");
+
+    switch (pkt_ver) {
+    case 1:
+        {
+            PyObject *result_allpkts = PyList_New(0);
+            for (int i = 0; i < n_subpkt; i++) {
+                PyObject *result_subpkt = PyList_New(0);
+                int start_subpkt = offset;
+                offset += _decode_by_fmt(LteRlcDlAmAllPdu_SubpktHeader,
+                        ARRAY_SIZE(LteRlcDlAmAllPdu_SubpktHeader, Fmt),
+                        b, offset, length, result_subpkt);
+                int subpkt_id = _search_result_int(result_subpkt,
+                        "Subpacket ID");
+                int subpkt_ver = _search_result_int(result_subpkt,
+                        "Subpacket Version");
+                int subpkt_size = _search_result_int(result_subpkt,
+                        "Subpacket Size");
+                if (subpkt_id == 65 && subpkt_ver == 3) {
+                    // 65 means LTE RLC DL AM All PDU
+                    offset += _decode_by_fmt(LteRlcDlAmAllPdu_SubpktPayload,
+                            ARRAY_SIZE(LteRlcDlAmAllPdu_SubpktPayload, Fmt),
+                            b, offset, length, result_subpkt);
+                    int rb_cfg_idx = _search_result_int(result_subpkt,
+                            "RB Cfg Idx");
+                    (void) _map_result_field_to_name(result_subpkt, "RB Mode",
+                            LteRlcDlAmAllPdu_Subpkt_RBMode,
+                            ARRAY_SIZE(LteRlcDlAmAllPdu_Subpkt_RBMode,
+                            ValueName), "Unknown");
+                    int enabled_pdu = _search_result_int(result_subpkt,
+                            "Enabled PDU Log Packets");
+                    // Need to check bit by bit
+                    std::string strEnabledPDU = "";
+                    if ((enabled_pdu) & (1 << (1)))
+                        strEnabledPDU += "RLCDL Config (0xB081), ";
+                    if ((enabled_pdu) & (1 << (2)))
+                        strEnabledPDU += "RLCDL AM ALL PDU (0xB082), ";
+                    if ((enabled_pdu) & (1 << (3)))
+                        strEnabledPDU += "RLCDL AM CONTROL PDU (0xB083), ";
+                    if ((enabled_pdu) & (1 << (4)))
+                        strEnabledPDU += "RLCDL AM POLLING PDU (0xB084), ";
+                    if ((enabled_pdu) & (1 << (5)))
+                        strEnabledPDU += "RLCDL AM SIGNALING PDU (0xB085), ";
+                    if ((enabled_pdu) & (1 << (6)))
+                        strEnabledPDU += "RLCDL UM DATA PDU (0xB086), ";
+                    if ((enabled_pdu) & (1 << (7)))
+                        strEnabledPDU += "RLCDL STATISTICS (0xB087), ";
+                    if ((enabled_pdu) & (1 << (8)))
+                        strEnabledPDU += "RLCDL AM STATE (0xB088), ";
+                    if ((enabled_pdu) & (1 << (9)))
+                        strEnabledPDU += "RLCDL UM STATE (0xB089), ";
+                    if (strEnabledPDU.length() > 0) {
+                        strEnabledPDU = strEnabledPDU.substr(0,
+                                strEnabledPDU.length() - 2);
+                        strEnabledPDU += ".";
+                    }
+                    PyObject *pystr = Py_BuildValue("s",
+                            strEnabledPDU.c_str());
+                    PyObject *old_object = _replace_result(result_subpkt,
+                            "Enabled PDU Log Packets", pystr);
+                    Py_DECREF(old_object);
+                    Py_DECREF(pystr);
+
+                    int n_pdu = _search_result_int(result_subpkt,
+                            "Number of PDUs");
+                    PyObject *result_pdu = PyList_New(0);
+                    for (int j = 0; j < n_pdu; j++) {
+                        PyObject *result_pdu_item = PyList_New(0);
+                        offset += _decode_by_fmt(
+                                LteRlcDlAmAllPdu_Subpkt_PDU_Basic, ARRAY_SIZE(
+                                    LteRlcDlAmAllPdu_Subpkt_PDU_Basic, Fmt),
+                                b, offset, length, result_pdu_item);
+                        // Update rb_cfg_idx from previous content
+                        old_object = _replace_result_int(result_pdu_item,
+                                "rb_cfg_idx", rb_cfg_idx);
+                        Py_DECREF(old_object);
+                        int DCLookAhead = _search_result_int(result_pdu_item,
+                                "D/C LookAhead");
+                        int iNonDecodeFN = _search_result_int(result_pdu_item,
+                                "sys_fn");
+                        // Handle fn
+                        const unsigned int SFN_RSHIFT = 4,
+                              SFN_MASK = (1 << 12) - 1;
+                        const unsigned int SUBFRAME_RSHIFT = 0,
+                              SUBFRAME_MASK = (1 << 4) - 1;
+                        int sys_fn = (iNonDecodeFN >> SFN_RSHIFT) & SFN_MASK;
+                        int sub_fn =
+                            (iNonDecodeFN >> SUBFRAME_RSHIFT) & SUBFRAME_MASK;
+                        old_object = _replace_result_int(result_pdu_item,
+                                "sys_fn", sys_fn);
+                        Py_DECREF(old_object);
+                        old_object = _replace_result_int(result_pdu_item,
+                                "sub_fn", sub_fn);
+                        Py_DECREF(old_object);
+                        // Decide PDU type
+                        int iNonDecodeSN = _search_result_int(result_pdu_item, "SN");
+                        if (DCLookAhead < 16) {
+                            // Type = Control
+                            pystr = Py_BuildValue("s", "RLCDL CTRL");
+                            old_object = _replace_result(result_pdu_item,
+                                    "PDU TYPE", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", "PDU CTRL");
+                            old_object = _replace_result(result_pdu_item,
+                                    "Status", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            // Modify ACK_SN
+                            std::string strAckSN = "ACK_SN = ";
+                            int iAckSN = DCLookAhead * 64 + iNonDecodeSN/4;
+                            strAckSN += SSTR(iAckSN);
+                            pystr = Py_BuildValue("s", strAckSN.c_str());
+                            old_object = _replace_result(result_pdu_item,
+                                    "SN", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            // Update other info
+                            offset += _decode_by_fmt(
+                                    LteRlcDlAmAllPdu_Subpkt_PDU_Control,
+                                    ARRAY_SIZE(
+                                        LteRlcDlAmAllPdu_Subpkt_PDU_Control,
+                                        Fmt),
+                                    b, offset, length, result_pdu_item);
+                            pystr = Py_BuildValue("s", "STATUS(0)");
+                            old_object = _replace_result(result_pdu_item,
+                                    "cpt", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                        } else {
+                            // Type = DATA
+                            pystr = Py_BuildValue("s", "RLCDL DATA");
+                            old_object = _replace_result(result_pdu_item,
+                                    "PDU TYPE", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", "PDU DATA");
+                            old_object = _replace_result(result_pdu_item,
+                                    "Status", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            // SN is correct, no need to modify
+                            // Update other info
+                            std::string strRF = "", strP = "", strFI = "",
+                                strE = "";
+                            if ((DCLookAhead) & (1 << (6))) {
+                                strRF += "1";
+                            } else {
+                                strRF += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (5))) {
+                                strP += "1";
+                            } else {
+                                strP += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (4))) {
+                                strFI += "1";
+                            } else {
+                                strFI += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (3))) {
+                                strFI += "1";
+                            } else {
+                                strFI += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (2))) {
+                                strE += "1";
+                            } else {
+                                strE += "0";
+                            }
+                            offset += _decode_by_fmt(
+                                    LteRlcDlAmAllPdu_Subpkt_PDU_DATA,
+                                    ARRAY_SIZE(
+                                        LteRlcDlAmAllPdu_Subpkt_PDU_DATA, Fmt),
+                                    b, offset, length, result_pdu_item);
+                            pystr = Py_BuildValue("s", (strRF.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "RF", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", (strP.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "P", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", (strFI.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "FI", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", (strE.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "E", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+
+                            if (strE == "1") {
+                                // Decode extra two bytes
+                                offset += _decode_by_fmt(
+                                        LteRlcDlAmAllPdu_Subpkt_PDU_Extra,
+                                        ARRAY_SIZE(
+                                            LteRlcDlAmAllPdu_Subpkt_PDU_Extra,
+                                        Fmt),
+                                        b, offset, length, result_pdu_item);
+                                int iNonDecodeLI = _search_result_int(
+                                        result_pdu_item, "RLC DATA LI");
+                                int iLeft1 = iNonDecodeLI / 4096;
+                                iNonDecodeLI -= iLeft1 * 4096;
+                                int iLeft2 = iNonDecodeLI / 256;
+                                iNonDecodeLI -= iLeft2 * 256;
+                                int iLeft3 = iNonDecodeLI / 16;
+                                iNonDecodeLI -= iLeft3 * 16;
+                                int iLeft4 = iNonDecodeLI;
+                                int iLI =
+                                    iLeft1 * 1 + iLeft3 * 256 + iLeft4 * 16;
+                                old_object = _replace_result_int(
+                                        result_pdu_item, "RLC DATA LI", iLI);
+                                Py_DECREF(old_object);
+                            }
+                        }
+                        PyObject *t1 = Py_BuildValue("(sOs)", ("RLCDL PDU["
+                                + SSTR(i) + "]").c_str(), result_pdu_item,
+                                "dict");
+                        PyList_Append(result_pdu, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_pdu_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "RLCDL PDUs",
+                            result_pdu, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_pdu);
+                } else {
+                    printf("Unkown LTE RLC DL AM ALL PDU subpkt id and version"
+                            ": 0x%x - %d\n", subpkt_id, subpkt_ver);
+                }
+                PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
+                        "dict");
+                PyList_Append(result_allpkts, t);
+                Py_DECREF(t);
+                Py_DECREF(result_subpkt);
+                offset += subpkt_size - (offset - start_subpkt);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Subpackets", result_allpkts,
+                    "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_allpkts);
+            return offset - start;
+        }
+    default:
+        printf("Unkown LTE RLC DL AM ALL PDU version: 0x%x\n", pkt_ver);
+        return 0;
+    }
+}
+
+
+// ----------------------------------------------------------------------------
 
 //Yuanjie: decode modem's internal debugging message
 
@@ -2153,32 +2669,32 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
         offset += _decode_lte_pdcp_ul_srb_integrity_data_pdu(b, offset, length, result);
         break;
 
-    case LTE_MAC_Configuration:// TODO: Jie
+    case LTE_MAC_Configuration:// Jie
         offset += _decode_by_fmt(LteMacConfigurationFmt, ARRAY_SIZE(LteMacConfigurationFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_mac_configuration_subpkt(b, offset, length, result);
         break;
 
-    case LTE_MAC_UL_Transport_Block:// TODO: Jie
+    case LTE_MAC_UL_Transport_Block:// Jie
         offset += _decode_by_fmt(LteMacULTransportBlockFmt, ARRAY_SIZE(LteMacULTransportBlockFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_mac_ul_transportblock_subpkt(b, offset, length, result);
         break;
 
-    case LTE_MAC_DL_Transport_Block:// TODO: Jie
+    case LTE_MAC_DL_Transport_Block:// Jie
         offset += _decode_by_fmt(LteMacDLTransportBlockFmt,
                                     ARRAY_SIZE(LteMacDLTransportBlockFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_mac_dl_transportblock_subpkt(b, offset, length, result);
         break;
 
-    case LTE_MAC_UL_Buffer_Status_Internal:// TODO: Jie
+    case LTE_MAC_UL_Buffer_Status_Internal:// Jie
         offset += _decode_by_fmt(LteMacULBufferStatusInternalFmt,
                                     ARRAY_SIZE(LteMacULBufferStatusInternalFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_mac_ul_bufferstatusinternal_subpkt(b, offset, length, result);
         break;
-    case LTE_MAC_UL_Tx_Statistics:// TODO: Jie
+    case LTE_MAC_UL_Tx_Statistics:// Jie
         offset += _decode_by_fmt(LteMacULTxStatisticsFmt,
                                     ARRAY_SIZE(LteMacULTxStatisticsFmt, Fmt),
                                     b, offset, length, result);
@@ -2189,20 +2705,39 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
         offset += _decode_by_fmt(ModemDebug_Fmt,
                                     ARRAY_SIZE(ModemDebug_Fmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_modem_debug_msg(b, offset, length, result); 
-        break;       
+        offset += _decode_modem_debug_msg(b, offset, length, result);
+        break;
 
     case LTE_RLC_UL_Config_Log_Packet:
         offset += _decode_by_fmt(LteRlcUlConfigLogPacketFmt,
                 ARRAY_SIZE(LteRlcUlConfigLogPacketFmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_rlc_ul_config_log_packet_subpkt(b, offset, length, result);
+        offset += _decode_lte_rlc_ul_config_log_packet_subpkt(b, offset,
+                length, result);
         break;
+
     case LTE_RLC_DL_Config_Log_Packet:
         offset += _decode_by_fmt(LteRlcDlConfigLogPacketFmt,
                 ARRAY_SIZE(LteRlcDlConfigLogPacketFmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_rlc_dl_config_log_packet_subpkt(b, offset, length, result);
+        offset += _decode_lte_rlc_dl_config_log_packet_subpkt(b, offset,
+                length, result);
+        break;
+
+    case LTE_RLC_UL_AM_All_PDU:
+        offset += _decode_by_fmt(LteRlcUlAmAllPduFmt,
+                ARRAY_SIZE(LteRlcUlAmAllPduFmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_rlc_ul_am_all_pdu_subpkt(b, offset,
+                length, result);
+        break;
+
+    case LTE_RLC_DL_AM_All_PDU:
+        offset += _decode_by_fmt(LteRlcDlAmAllPduFmt,
+                ARRAY_SIZE(LteRlcDlAmAllPduFmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_rlc_dl_am_all_pdu_subpkt(b, offset,
+                length, result);
         break;
 
     default:

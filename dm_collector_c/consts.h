@@ -45,6 +45,8 @@ enum LogPacketType {
     Modem_debug_message = 0x1FEB,
     LTE_RLC_UL_Config_Log_Packet = 0xB091,
     LTE_RLC_DL_Config_Log_Packet = 0xB081,
+    LTE_RLC_UL_AM_All_PDU = 0xB092,
+    LTE_RLC_DL_AM_All_PDU = 0xB082,
 };
 
 // Mapping type IDs to names
@@ -130,6 +132,10 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_RLC_UL_Config_Log_Packet", true},
     {LTE_RLC_DL_Config_Log_Packet,
         "LTE_RLC_DL_Config_Log_Packet", true},
+    {LTE_RLC_UL_AM_All_PDU,
+        "LTE_RLC_UL_AM_All_PDU", true},
+    {LTE_RLC_DL_AM_All_PDU,
+        "LTE_RLC_DL_AM_All_PDU", true},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

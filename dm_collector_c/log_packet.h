@@ -590,7 +590,7 @@ const Fmt LteRrcMibMessageLogPacketFmt_v2 []  = {
 };
 
 // ----------------------------------------------------------------------------
-// TODO: Haotian
+// Haotian
 const Fmt LtePdcpDlSrbIntegrityDataPduFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Num SubPkt", 1},
@@ -600,7 +600,7 @@ const Fmt LtePdcpDlSrbIntegrityDataPduFmt [] = {
 };
 
 // ----------------------------------------------------------------------------
-// TODO: Haotian
+// Haotian
 const Fmt LtePdcpUlSrbIntegrityDataPduFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Num SubPkt", 1},
@@ -611,7 +611,7 @@ const Fmt LtePdcpUlSrbIntegrityDataPduFmt [] = {
 
 // ----------------------------------------------------------------------------
 // MAC_Configuration
-// TODO: Jie
+// Jie
 const ValueName LteMacConfigurationSubpkt_SubpktType [] = {
     {0, "Config Type Subpacket"},
     {1, "DL Config SubPacket"},
@@ -699,7 +699,7 @@ const Fmt LteMacConfigurationSubpkt_eMBMSConfig [] = {
 
 // ----------------------------------------------------------
 // MAC UL Transport Block
-// TODO: Jie
+// Jie
 const ValueName BSREvent [] = {
     {2, "High Data Arrival"},
     {1, "Periodic"},
@@ -740,7 +740,7 @@ const Fmt LteMacULTransportBlock_SubpktV1_SampleFmt [] = {
 
 // ----------------------------------------------------------
 // MAC DL Transport Block
-// TODO: Jie
+// Jie
 const ValueName RNTIType [] = {
     {0, "C-RNTI"},
     {2, "P-RNTI"},
@@ -779,7 +779,7 @@ const Fmt LteMacDLTransportBlock_SubpktV2_SampleFmt [] = {
 
 // ----------------------------------------------------------
 // LTE Mac UL Tx Statistics
-// TODO: Jie
+// Jie
 const Fmt LteMacULTxStatisticsFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Num SubPkt", 1},
@@ -805,7 +805,7 @@ const Fmt LteMacULTxStatistics_ULTxStatsSubPacketFmt [] = {
 
 // ----------------------------------------------------------
 // LTE MAC UL Buffer Status Internal
-// TODO: Jie
+// Jie
 const Fmt LteMacULBufferStatusInternalFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Num SubPkt", 1},
@@ -970,6 +970,127 @@ const ValueName LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBType [] = {
     {1, "SRB"},
     {2, "DRB"},
 };
+
+// ----------------------------------------------------------------------------
+// LTE_RLC_UL_AM_All_PDU
+
+const Fmt LteRlcUlAmAllPduFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Number of Subpackets", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LteRlcUlAmAllPdu_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LteRlcUlAmAllPdu_SubpktPayload [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "RB Mode", 1},
+    {UINT, "SN Length", 1},
+    {SKIP, NULL, 1},
+    {UINT, "Enabled PDU Log Packets", 2}, // need to check bit by bit
+    // this part is different from DL
+    {UINT, "VT(A)", 2},
+    {UINT, "VT(S)", 2},
+    {UINT, "PDU Without Poll", 2},
+    {UINT, "Byte Without Poll", 4},
+    {UINT, "Poll SN", 2},
+    {UINT, "Number of PDUs", 2},
+};
+const ValueName LteRlcUlAmAllPdu_Subpkt_RBMode [] = {
+    {1, "AM"},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Basic [] = {
+    {PLACEHOLDER, "PDU TYPE", 0},
+    {PLACEHOLDER, "rb_cfg_idx", 0},
+    {UINT, "sys_fn", 2},
+    {PLACEHOLDER, "sub_fn", 0},
+    {UINT, "pdu_bytes", 2},
+    {UINT, "logged_bytes", 2},
+    {SKIP, NULL, 1},
+    {UINT, "D/C LookAhead", 1},
+    {UINT, "SN", 1},
+    // for control: cpt = STATUS(0)
+    // for data: RF, P, FI, E
+};
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Control [] = {
+    {PLACEHOLDER, "cpt", 0},
+};
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_DATA [] = {
+    {PLACEHOLDER, "RF", 0},
+    {PLACEHOLDER, "P", 0},
+    {PLACEHOLDER, "FI", 0},
+    {PLACEHOLDER, "E", 0},
+};
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Extra [] = {
+    {UINT, "RLC DATA LI", 2},
+};
+
+// ----------------------------------------------------------------------------
+// LTE_RLC_DL_AM_All_PDU
+
+const Fmt LteRlcDlAmAllPduFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Number of Subpackets", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LteRlcDlAmAllPdu_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LteRlcDlAmAllPdu_SubpktPayload [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "RB Mode", 1},
+    {UINT, "SN Length", 1},
+    {SKIP, NULL, 1},
+    {UINT, "Enabled PDU Log Packets", 2}, // need to check bit by bit
+    // this part is different from DL
+    {UINT, "VR(R)", 2},
+    {UINT, "VR(X)", 2},
+    {UINT, "VR(MS)", 2},
+    {UINT, "VR(H)", 2},
+    {UINT, "Number of PDUs", 2},
+};
+const ValueName LteRlcDlAmAllPdu_Subpkt_RBMode [] = {
+    {1, "AM"},
+};
+
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Basic [] = {
+    {PLACEHOLDER, "PDU TYPE", 0},
+    {PLACEHOLDER, "rb_cfg_idx", 0},
+    {PLACEHOLDER, "Status", 0},
+    {UINT, "sys_fn", 2},
+    {PLACEHOLDER, "sub_fn", 0},
+    {UINT, "pdu_bytes", 2},
+    {UINT, "logged_bytes", 2},
+    {SKIP, NULL, 1},
+    {UINT, "D/C LookAhead", 1},
+    {UINT, "SN", 1},
+    // for control: cpt = STATUS(0)
+    // for data: RF, P, FI, E
+};
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Control [] = {
+    {PLACEHOLDER, "cpt", 0},
+};
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_DATA [] = {
+    {PLACEHOLDER, "RF", 0},
+    {PLACEHOLDER, "P", 0},
+    {PLACEHOLDER, "FI", 0},
+    {PLACEHOLDER, "E", 0},
+};
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Extra [] = {
+    {UINT, "RLC DATA LI", 2},
+};
+
+
+
 // ----------------------------------------------------------------------------
 
 
