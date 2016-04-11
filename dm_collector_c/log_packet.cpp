@@ -958,7 +958,7 @@ _decode_lte_ml1_irat_subpkt(const char *b, int offset, int length,
                                 Py_DECREF(result_subpkt_wcdma_cell);
                             }
                             char name[64];
-                            sprintf(name,"FrqeuencyPacket_%d",j);
+                            sprintf(name,"FrequencyPacket_%d",j);
                             PyObject *t = Py_BuildValue("(sOs)",
                                                     name, result_subpkt_wcdma_freq, "dict");
                             PyList_Append(result_subpkt_wcdma, t);
