@@ -23,6 +23,12 @@ class Monitor(Element):
         self._save_log_path = None
         self._save_file = None
 
+    def available_log_types(self):
+        """
+        Return available log types
+        """
+        return None
+
 
     def save_log_as(self,path):
         """
@@ -30,6 +36,8 @@ class Monitor(Element):
 
         :param path: the file name to be saved
         :type path: string
+        :param log_types: a filter of message types to be saved
+        :type log_types: list of string
         """
         self._save_log_path = path
         try:

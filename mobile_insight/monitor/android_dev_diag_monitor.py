@@ -161,6 +161,14 @@ class AndroidDevDiagMonitor(Monitor):
 
         self.__check_security_policy()
 
+    def available_log_types(self):
+        """
+        Return available log types
+
+        :returns: a list of supported message types
+        """
+        return self.__class__.SUPPORTED_TYPES
+
 
     def __check_security_policy(self):
         """

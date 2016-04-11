@@ -48,6 +48,14 @@ class DMCollector(Monitor):
         # Initialize Wireshark dissector
         DMLogPacket.init(self._prefs)
 
+    def available_log_types(self):
+        """
+        Return available log types
+
+        :returns: a list of supported message types
+        """
+        return self.__class__.SUPPORTED_TYPES
+
     def set_serial_port(self, phy_ser_name):
         """
         Configure the serial port that dumps messages

@@ -48,6 +48,14 @@ class OfflineReplayer(Monitor):
 
         self._type_names=[]
 
+    def available_log_types(self):
+        """
+        Return available log types
+
+        :returns: a list of supported message types
+        """
+        return self.__class__.SUPPORTED_TYPES
+
     def enable_log(self, type_name):
         """
         Enable the messages to be monitored. Refer to cls.SUPPORTED_TYPES for supported types.
@@ -99,11 +107,13 @@ class OfflineReplayer(Monitor):
                 s = self._input_file.read(64)
                 if not s:   # EOF encountered
                     break
+
                 dm_collector_c.feed_binary(s)
                 # decoded = dm_collector_c.receive_log_packet()
                 decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
                                                             True,   # include_timestamp
                                                             )
+
                 if decoded:
                     try:
                         # packet = DMLogPacket(decoded)
@@ -120,6 +130,7 @@ class OfflineReplayer(Monitor):
                                             d["type_id"],
                                             packet)
                             self.send(event)
+
                     except FormatError, e:
                         # skip this packet
                         print "FormatError: ", e
