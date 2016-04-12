@@ -528,6 +528,21 @@ const Fmt LteMl1IratWCDMACellFmt [] = {
 
 };
 
+const Fmt LteMl1IratCDMACellFmt [] = {
+    {UINT, "Number of Pilots", 1},
+    {UINT, "Band", 1},
+    {UINT, "Channel", 2},
+};
+
+const Fmt LteMl1IratCDMACellPilotFmt [] = {
+    {UINT, "Pilot ID", 2},
+    {UINT, "RSS (dB)", 2},
+    {SKIP, NULL, 4},
+    {UINT, "EcNo", 2},
+    {SKIP, NULL, 6},
+};
+
+
 
 
 // ------------------------------------------------------------

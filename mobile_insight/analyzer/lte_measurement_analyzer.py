@@ -38,6 +38,7 @@ class LteMeasurementAnalyzer(Analyzer):
         source.enable_log("LTE_PHY_Serv_Cell_Measurement")
         source.enable_log("LTE_PHY_Connected_Mode_Neighbor_Measurement")
         source.enable_log("LTE_PHY_Inter_RAT_Measurement")
+        source.enable_log("LTE_PHY_Inter_RAT_CDMA_Measurement")
 
     def ue_event_filter(self,msg):
         """
@@ -65,6 +66,10 @@ class LteMeasurementAnalyzer(Analyzer):
             self.serv_cell_rsrq.append(msg_dict['RSRP(dBm)'])
 
         if msg.type_id == "LTE_PHY_Inter_RAT_Measurement":
+            msg_dict=dict(msg.data.decode())
+            self.log_info(str(msg_dict)) 
+
+        if msg.type_id == "LTE_PHY_Inter_RAT_CDMA_Measurement":
             msg_dict=dict(msg.data.decode())
             self.log_info(str(msg_dict)) 
 

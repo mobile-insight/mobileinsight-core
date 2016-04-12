@@ -908,6 +908,71 @@ _decode_lte_ml1_subpkt(const char *b, int offset, int length,
 }
 
 static int
+_decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, int length,
+                        PyObject *result) {
+
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+    int n_subpkt = _search_result_int(result, "Subpacket count");
+
+    switch(pkt_ver){
+        case 1:
+            for(int i=0; i< n_subpkt; i++)
+            {
+
+                PyObject *result_subpkt = PyList_New(0);
+                // Decode subpacket header
+                offset += _decode_by_fmt(LteMl1IratSubPktFmt,
+                                            ARRAY_SIZE(LteMl1IratSubPktFmt, Fmt),
+                                            b, offset, length, result_subpkt);
+                // Decode payload
+                int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
+                int subpkt_ver = _search_result_int(result_subpkt, "Version");
+                int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
+
+                PyObject *result_subpkt_cdma = PyList_New(0);
+                offset += _decode_by_fmt(LteMl1IratCDMACellFmt,
+                                            ARRAY_SIZE(bandLteMl1IratCDMACellFmt, Fmt),
+                                            b, offset, length, result_subpkt_cdma);
+                int n_pilot = _search_result_int(result_subpkt_cdma, "Number of Pilots");
+                int band = _search_result_int(result_subpkt_cdma, "Band");
+                for(int j=0; j<n_pilot; j++){
+                    PyObject *result_subpkt_cdma_pilot = PyList_New(0);
+                    offset += _decode_by_fmt(LteMl1IratCDMACellPilotFmt,
+                                            ARRAY_SIZE(LteMl1IratCDMACellPilotFmt, Fmt),
+                                            b, offset, length, result_subpkt_cdma_pilot);
+                    char name[64];
+                    sprintf(name,"Pilot_%d",j);
+                    PyObject *t = Py_BuildValue("(sOs)",
+                                            name, result_subpkt_cdma_pilot, "dict");
+                    PyList_Append(result_subpkt_cdma, t);
+                    Py_DECREF(result_subpkt_cdma_pilot);
+                }
+                char name[64];
+                sprintf(name,"Band_%d",band);
+                PyObject *t = Py_BuildValue("(sOs)",
+                                            "CDMA", result_subpkt_cdma, "dict");
+                PyList_Append(result_subpkt, t);
+                Py_DECREF(result_subpkt_cdma);
+
+                char name2[64];
+                sprintf(name2,"Subpacket_%d",i);
+                PyObject *t2 = Py_BuildValue("(sOs)",
+                                            name2, result_subpkt, "dict");
+                PyList_Append(result, t2);
+                Py_DECREF(result_subpkt);
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    return offset - start;
+}
+
+
+static int
 _decode_lte_ml1_irat_subpkt(const char *b, int offset, int length,
                         PyObject *result) {
 
@@ -2653,6 +2718,14 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                                     ARRAY_SIZE(LteMl1IratFmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_lte_ml1_irat_subpkt(b, offset, length, result);
+        break;
+
+    case LTE_ML1_CDMA_MEAS:
+        //It shares similar packet format as LTE_ML1_IRAT_MDB
+        offset += _decode_by_fmt(LteMl1IratFmt,
+                                    ARRAY_SIZE(LteMl1IratFmt, Fmt),
+                                    b, offset, length, result);
+        offset += _decode_lte_ml1_irat_cdma_subpkt(b, offset, length, result);
         break;
 
     case LTE_PDCP_DL_SRB_Integrity_Data_PDU:
