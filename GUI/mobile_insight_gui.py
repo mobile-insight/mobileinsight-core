@@ -158,6 +158,7 @@ class WindowClass(wx.Frame):
 
         self.min_time = datetime.strptime("3000 Jan 1" ,'%Y %b %d')
         self.max_time = datetime.strptime("1900 Jan 1", '%Y %b %d')
+        self.selectedTypes = None # Message Filters
         self.basicGUI()
 
     def basicGUI(self):
@@ -275,7 +276,7 @@ class WindowClass(wx.Frame):
 
 
                 #thread.start_new_thread(openFile,(openFileDialog.GetPath(),))
-                t = Thread(target = self.openFile, args=(openFileDialog.GetPath(),))
+                t = Thread(target = self.openFile, args=(openFileDialog.GetPath(),self.selectedTypes))
                 self.progressDialog = ProgressDialog(self)
                 t.start()
                 self.progressDialog.ShowModal()
@@ -293,9 +294,10 @@ class WindowClass(wx.Frame):
         types = list(self._log_analyzer.supported_types)
         checkboxDialog = MyMCD(self, "Filter", "", types)
         if (checkboxDialog.ShowModal()==wx.ID_OK):
-            selectedTypes = [types[x] for x in checkboxDialog.GetSelections()]
-            self.data_view = [x for x in self.data if x["TypeID"] in selectedTypes]
-            self.SetupGrid()
+            self.selectedTypes = [types[x] for x in checkboxDialog.GetSelections()]
+            if self.data:
+                self.data_view = [x for x in self.data if x["TypeID"] in self.selectedTypes]
+                self.SetupGrid()
 
     def OnTime(self, e):
         timewindowDialog = TimeWindowDialog(self, self.min_time, self.max_time)
@@ -310,8 +312,8 @@ class WindowClass(wx.Frame):
             self.data_view = self.data
             self.SetupGrid()
 
-    def openFile(self, filePath):
-        self._log_analyzer.AnalyzeFile(filePath)
+    def openFile(self, filePath,selectedTypes):
+        self._log_analyzer.AnalyzeFile(filePath,selectedTypes)
 
     def OnSearch(self, e):
         search_dlg = wx.TextEntryDialog(self, "Search for", "", "", style=wx.OK | wx.CANCEL)

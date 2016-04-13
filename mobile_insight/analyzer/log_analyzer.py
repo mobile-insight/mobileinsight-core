@@ -34,12 +34,13 @@ class LogAnalyzer(Analyzer):
         self.set_source(self.src)
         self.add_source_callback(self.__dump_message)
         self.listener_callback = listener_callback
-
         self.supported_types = set(dm_collector_c.log_packet_types)
         for st in self.supported_types:
             self.src.enable_log(st)
 
-    def AnalyzeFile(self, fileName):
+    def AnalyzeFile(self, fileName,selectedTypes):
+        self.selectedTypes = selectedTypes
+        print str(self.selectedTypes)
         self.msg_logs = []
         self.src.set_input_path(fileName)
         self.src.run()
@@ -54,6 +55,9 @@ class LogAnalyzer(Analyzer):
 
         :param msg: the received message
         """
+        if self.selectedTypes \
+        and msg.type_id not in self.selectedTypes:
+            return
         payload = msg.data.decode_xml()
         timestamp_beg = payload.find("timestamp\">") + 11
         timestamp_end = payload.find("</", timestamp_beg)
