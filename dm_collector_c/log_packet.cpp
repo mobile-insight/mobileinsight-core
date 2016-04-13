@@ -932,7 +932,7 @@ _decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, int length,
 
                 PyObject *result_subpkt_cdma = PyList_New(0);
                 offset += _decode_by_fmt(LteMl1IratCDMACellFmt,
-                                            ARRAY_SIZE(bandLteMl1IratCDMACellFmt, Fmt),
+                                            ARRAY_SIZE(LteMl1IratCDMACellFmt, Fmt),
                                             b, offset, length, result_subpkt_cdma);
                 int n_pilot = _search_result_int(result_subpkt_cdma, "Number of Pilots");
                 int band = _search_result_int(result_subpkt_cdma, "Band");
