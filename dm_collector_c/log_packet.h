@@ -972,11 +972,9 @@ const Fmt LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Fmt [] = {
     {UINT, "RB ID", 1},
     {UINT, "RB Cfg Idx", 1},
     {UINT, "RB Type", 1},
+    {UINT, "T Reordering (ms)", 2},
     {PLACEHOLDER, "SN Length", 0},
-    {UINT, "Poll Byte", 4},
-    {UINT, "Poll PDU", 2},
-    {UINT, "T Poll Retx (ms)", 2},
-    {UINT, "Max Retx Threshold", 1},
+    {UINT, "T Status Prohibit (ms)", 2},
 };
 const ValueName LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBMode [] = {
     {1, "AM"},

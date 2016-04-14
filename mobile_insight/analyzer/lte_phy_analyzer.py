@@ -51,12 +51,3 @@ class LtePhyAnalyzer(Analyzer):
                 + str(log_item["TBS 0"])+" "
                 + str(log_item["TBS 1"])) 
         	
-
-
-
-
-
-
-
-
-

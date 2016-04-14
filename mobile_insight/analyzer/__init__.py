@@ -5,7 +5,7 @@ __all__=["Analyzer",
     "MsgLogger","MsgSerializer","MsgStatistics",
     "LteRrcAnalyzer","LteNasAnalyzer","LteMeasurementAnalyzer","LtePhyAnalyzer",
 	"WcdmaRrcAnalyzer","UmtsNasAnalyzer","RrcAnalyzer",
-	"MobilityMngt",
+	"MobilityMngt", "LteRlcAnalyzer"
     "ModemDebugAnalyzer",
     "LogAnalyzer",	### P4A: THIS LINE WILL BE DELETED ###
     ]
@@ -24,6 +24,7 @@ from lte_rrc_analyzer import LteRrcAnalyzer
 from lte_nas_analyzer import LteNasAnalyzer
 from lte_measurement_analyzer import LteMeasurementAnalyzer
 from lte_phy_analyzer import LtePhyAnalyzer
+from lte_rlc_analyzer import LteRlcAnalyzer
 
 # WCDMA (3G)
 from wcdma_rrc_analyzer import WcdmaRrcAnalyzer

@@ -2495,10 +2495,10 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
 
         // if(argc>=2)
         //     printf("argc=%d argv[0]=%x argv[1]=%d\n", argc, tmp_argv[0], tmp_argv[1]);
-        
+
         if(argc==2 && tmp_argv[0]==0x2e3bbbed)
         {
-        
+
              // Yuanjie: for icellular only, 4G RSRP result in manual network search
              // get log "BPLMN LOG: Saved measurement results. rsrp=-121"
              // The fingerprint is tmp_argv[0]==0xedbb3b2e, tmp_argv[1]=rsrp value
@@ -2513,7 +2513,7 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
         }
         else if(argc==10 && tmp_argv[0]==0x81700a47)
         {
-            
+
              // Yuanjie: for icellular only, 3G RSRP result in manual network search
              // The fingerprint is tmp_argv[0]==0x81700a47, tmp_argv[1]=rscp value
              //
@@ -2882,14 +2882,14 @@ _decode_by_fmt_modem (const Fmt fmt [], int n_fmt,
                 PyObject *delta = PyDelta_FromDSU(0, seconds, useconds);
                 decoded = PyNumber_Add(epoch, delta);
                 n_consumed += fmt[i].len;
-                Py_DECREF(epoch); 
+                Py_DECREF(epoch);
                 Py_DECREF(delta);
                 break;
             }
 
         case SKIP:
             n_consumed += fmt[i].len;
-            break; 
+            break;
 
         default:
             assert(false);
@@ -2921,7 +2921,7 @@ decode_log_packet_modem (const char *b, int length, bool skip_decoding) {
 
     // Parse Header
     result = PyList_New(0);
-    offset = 0;  
+    offset = 0;
     offset += _decode_by_fmt_modem(LogPacketHeaderFmt, ARRAY_SIZE(LogPacketHeaderFmt, Fmt),
                                 b, offset, length, result);
 
@@ -2930,7 +2930,7 @@ decode_log_packet_modem (const char *b, int length, bool skip_decoding) {
     Py_DECREF(old_result);
     old_result = NULL;
 
-    
+
     // Differentiate using type ID
     LogPacketType type_id = (LogPacketType) _map_result_field_to_name(
                                 result,
@@ -2950,13 +2950,13 @@ decode_log_packet_modem (const char *b, int length, bool skip_decoding) {
                                     ARRAY_SIZE(ModemDebug_Fmt, Fmt),
                                     b, offset, length, result);
         offset += _decode_modem_debug_msg(b, offset, length, result); 
-        break;       
+        break;
 
 
     default:
         break;
     };
 
-    
+
     return result;
 }
