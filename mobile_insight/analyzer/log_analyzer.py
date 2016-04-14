@@ -40,7 +40,6 @@ class LogAnalyzer(Analyzer):
 
     def AnalyzeFile(self, fileName,selectedTypes):
         self.selectedTypes = selectedTypes
-        print str(self.selectedTypes)
         self.msg_logs = []
         self.src.set_input_path(fileName)
         self.src.run()
