@@ -21,14 +21,14 @@
     #include <winsock2.h>   // for ntohl()
     #include <io.h>
     #define SET_BINARY_MODE(handle) setmode(handle, O_BINARY)
+    // Define missing types
+    typedef __int32 int32_t;
+    typedef unsigned __int32 uint32_t;
 #elif __GNUC__
     #include <arpa/inet.h>  // for ntohl()
 #else
     #error Your compiler is not either MS Visual C compiler or GNU gcc.
 #endif
-
-//typedef __int32 int32_t;
-//typedef unsigned __int32 uint32_t;
 
 #define WS_DISSECTOR_VERSION "2.0.1"
 
