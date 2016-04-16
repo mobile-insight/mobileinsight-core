@@ -1,6 +1,6 @@
 # WiresharkCMakeTarget.txt
-# Configure how to compile ws_dissector.
-# This file should be placed under the WireShark 2.0.1 src folder.
+# Configure Wireshark's CMake build system to compile ws_dissector.
+# This file should be include()-ed by the main CMakeLists.txt
 
 set(ws_dissector_LIBS
 	wiretap
