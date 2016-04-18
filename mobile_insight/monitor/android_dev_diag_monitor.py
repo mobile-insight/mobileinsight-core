@@ -182,6 +182,8 @@ class AndroidDevDiagMonitor(Monitor):
         self._run_shell_cmd("supolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
         self._run_shell_cmd("supolicy --live \"allow system_server diag_device chr_file {read write}\"")
         self._run_shell_cmd("supolicy --live \"allow untrusted_app app_data_file file {rename}\"")
+        self._run_shell_cmd("supolicy --live \"allow init app_data_file fifo_file {write, open}\"")
+        self._run_shell_cmd("supolicy --live \"allow init app_data_file fifo_file {write, open}\"")
 
     def _run_shell_cmd(self, cmd, wait = False):
         p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -300,7 +302,6 @@ class AndroidDevDiagMonitor(Monitor):
                 if not os.path.exists(self.DIAG_CFG_DIR):
                     os.makedirs(self.DIAG_CFG_DIR)
                 fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "w+b")
-                print "diag monitor debug: "+str(self._type_names)
                 dm_collector_c.generate_diag_cfg(fd, self._type_names)
                 fd.close()
 
