@@ -1,0 +1,17 @@
+# WiresharkCMakeTarget.txt
+# Configure Wireshark's CMake build system to compile ws_dissector.
+# This file should be include()-ed by the main CMakeLists.txt
+
+set(ws_dissector_LIBS
+	wiretap
+	wsutil
+	${LIBEPAN_LIBS}
+)
+set(ws_dissector_FILES
+	ws_dissector/ws_dissector.cpp
+	ws_dissector/packet-aww.cpp
+)
+add_executable(ws_dissector ${ws_dissector_FILES})
+set_extra_executable_properties(ws_dissector "Executables")
+target_link_libraries(ws_dissector ${ws_dissector_LIBS})
+install(TARGETS ws_dissector RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
