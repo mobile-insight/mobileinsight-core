@@ -2025,6 +2025,8 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                                 "D/C LookAhead");
                         int iNonDecodeFN = _search_result_int(result_pdu_item,
                                 "sys_fn");
+                        int iLoggedBytes = _search_result_int(result_pdu_item,
+                                "logged_bytes");
                         // Handle fn
                         const unsigned int SFN_RSHIFT = 4,
                               SFN_MASK = (1 << 12) - 1;
@@ -2153,6 +2155,7 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                                 old_object = _replace_result_int(
                                         result_pdu_item, "RLC DATA LI", iLI);
                                 Py_DECREF(old_object);
+                                iLoggedBytes = iLoggedBytes - 2;
                             }
                         }
                         PyObject *t1 = Py_BuildValue("(sOs)", ("RLCUL PDU["
@@ -2161,6 +2164,7 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                         PyList_Append(result_pdu, t1);
                         Py_DECREF(t1);
                         Py_DECREF(result_pdu_item);
+                        offset += iLoggedBytes - 2;
                     }
                     PyObject *t1 = Py_BuildValue("(sOs)", "RLCUL PDUs",
                             result_pdu, "list");
@@ -2276,6 +2280,8 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                                 "D/C LookAhead");
                         int iNonDecodeFN = _search_result_int(result_pdu_item,
                                 "sys_fn");
+                        int iLoggedBytes = _search_result_int(result_pdu_item,
+                                "logged_bytes");
                         // Handle fn
                         const unsigned int SFN_RSHIFT = 4,
                               SFN_MASK = (1 << 12) - 1;
@@ -2414,8 +2420,10 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                                 old_object = _replace_result_int(
                                         result_pdu_item, "RLC DATA LI", iLI);
                                 Py_DECREF(old_object);
+                                iLoggedBytes = iLoggedBytes - 2;
                             }
                         }
+                        offset += iLoggedBytes - 2;
                         PyObject *t1 = Py_BuildValue("(sOs)", ("RLCDL PDU["
                                 + SSTR(i) + "]").c_str(), result_pdu_item,
                                 "dict");

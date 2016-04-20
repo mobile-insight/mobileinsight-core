@@ -1040,7 +1040,7 @@ const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_DATA [] = {
     {PLACEHOLDER, "E", 0},
 };
 const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Extra [] = {
-    {UINT, "RLC DATA LI", 2},
+    {UINT, "RLC DATA LI", 2}, // Only LI[0] is decoded
 };
 
 // ----------------------------------------------------------------------------
@@ -1099,7 +1099,7 @@ const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_DATA [] = {
     {PLACEHOLDER, "E", 0},
 };
 const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Extra [] = {
-    {UINT, "RLC DATA LI", 2},
+    {UINT, "RLC DATA LI", 2}, // Only LI[0] is decoded
 };
 
 
