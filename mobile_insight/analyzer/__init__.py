@@ -5,7 +5,7 @@ __all__=["Analyzer",
     "MsgLogger","MsgSerializer","MsgStatistics",
     "LteRrcAnalyzer","LteNasAnalyzer","LteMeasurementAnalyzer","LtePhyAnalyzer",
 	"WcdmaRrcAnalyzer","UmtsNasAnalyzer","RrcAnalyzer",
-	"MobilityMngt", "LteRlcAnalyzer"
+	"MobilityMngt", "LteRlcAnalyzer",
     "ModemDebugAnalyzer",
     "LogAnalyzer",	### P4A: THIS LINE WILL BE DELETED ###
     ]

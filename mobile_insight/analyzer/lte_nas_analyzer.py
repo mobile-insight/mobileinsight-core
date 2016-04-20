@@ -328,6 +328,16 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         else:
             return None
 
+    def get_profiled_qos(self):
+        """
+        Get QoS from the profile (if any)
+        """
+        if self.__cur_eps_id:
+            tmp = self.profile.query("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type])
+            print tmp
+        else:
+            return None    
+
 class EmmStatus:
     """
     An abstraction to maintain the EMM status, including the registeration states, 
