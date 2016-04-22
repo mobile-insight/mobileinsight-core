@@ -313,7 +313,7 @@ class AndroidDevDiagMonitor(Monitor):
             if self._input_dir:
                 cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
                 self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
-                self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
+                self._run_shell_cmd("chmod -R 755 \"%s\"" % self._input_dir, wait=True)
             # proc = subprocess.Popen(cmd, shell=True, executable=ANDROID_SHELL)
             proc = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             proc.stdin.write(cmd+'\n')
