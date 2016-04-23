@@ -6,7 +6,8 @@ import platform
 import sys
 import platform
 import stat
-from distutils.core import setup
+# from distutils.core import setup
+from setuptools import setup
 try:
     import py2exe
     use_py2exe = True
@@ -144,6 +145,12 @@ setup(
                 'mobile_insight.monitor.dm_collector',
                 'mobile_insight.monitor.dm_collector.dm_endec',
                 ],
+    install_requires=[
+          'pyserial',
+          'crcmod',
+          'xmltodict',
+          'wxpython',
+      ],
     package_data = PACKAGE_DATA,
     data_files = DATA_FILES,
     options = { 'py2exe' : PY2EXE_OPTIONS },
