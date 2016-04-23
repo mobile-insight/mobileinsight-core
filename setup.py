@@ -49,8 +49,8 @@ def download_unix(url):
         urllib.urlretrieve (url+"ws_dissector", "./ws_dissector/ws_dissector")
     if not os.path.isfile("./mobile_insight/monitor/dm_collector/dm_collector_c.so"):
         urllib.urlretrieve (url+"dm_collector_c.so", "./mobile_insight/monitor/dm_collector/dm_collector_c.so")
-    #os.chmod("./ws_dissector/ws_dissector",0o755 | stat.S_IEXEC)
-    #os.chmod("./mobile_insight/monitor/dm_collector/dm_collector_c.so",0o755 | stat.S_IEXEC)
+    os.chmod("./ws_dissector/ws_dissector",0o755 | stat.S_IEXEC)
+    os.chmod("./mobile_insight/monitor/dm_collector/dm_collector_c.so",0o755 | stat.S_IEXEC)
 
 def download_win(url):
     if not os.path.isfile("./ws_dissector/ws_dissector.exe"):
@@ -80,8 +80,8 @@ if platform.system()=="Darwin":
 
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
-    DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector']),]
-                 # ('/usr/lib/',lib_list)]
+    DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector']),
+                 ('/usr/lib/',lib_list)]
 
 elif platform.system()=="Linux":
 
@@ -95,8 +95,8 @@ elif platform.system()=="Linux":
         sys.exit()
 
     libs = parse_libs(url,"so")
-    #download_libs(url,libs)
-    #download_unix(url)
+    download_libs(url,libs)
+    download_unix(url)
 
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
