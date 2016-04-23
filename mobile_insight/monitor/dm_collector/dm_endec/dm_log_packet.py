@@ -274,6 +274,13 @@ class DMLogPacket:
         cls = self.__class__
 
         d = self.decode()
+
+        try:
+            import xmltodict
+            if "Msg" in d:
+                d["Msg"] = xmltodict.parse(d["Msg"])
+        except ImportError: 
+            pass
         return json.dumps(d, cls=SuperEncoder)
 
     @classmethod
