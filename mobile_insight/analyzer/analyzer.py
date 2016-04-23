@@ -170,7 +170,7 @@ class Analyzer(Element):
                 res=res+i
         return res
 
-    def include_analyzer(self,analyzer_name,callback_list):
+    def include_analyzer(self,analyzer_name,callback_list,*args):
         """
         Declares the dependency from other analyzers.
         Once declared, the current analyzer will receive events 
@@ -179,6 +179,7 @@ class Analyzer(Element):
         :param analyzer_name: the name of analyzer to depend on
         :type analyzer_name: string
         :param callback_list: a list of callback functions. They will be triggered when an event from analyzer arrives
+        :param args: optional parameters for the analyzer to be included
 
         """
         if analyzer_name in Analyzer.__analyzer_array:
@@ -192,7 +193,7 @@ class Analyzer(Element):
                 #If it's built-in analyzer, import from mobile_insight.analyzer
                 module_tmp = __import__("mobile_insight.analyzer")
                 analyzer_tmp = getattr(module_tmp.analyzer,analyzer_name)
-                Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp() 
+                Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp(*args) 
                 self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
                 if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                     Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
@@ -203,7 +204,7 @@ class Analyzer(Element):
                     module_name = self.__get_module_name(analyzer_name)
                     module_tmp = __import__(module_name)
                     analyzer_tmp = getattr(module_tmp,analyzer_name)
-                    Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp() 
+                    Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp(*args) 
                     self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
                     if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                         Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
