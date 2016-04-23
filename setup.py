@@ -149,7 +149,6 @@ setup(
           'pyserial',
           'crcmod',
           'xmltodict',
-          'wxpython',
       ],
     package_data = PACKAGE_DATA,
     data_files = DATA_FILES,
