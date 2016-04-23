@@ -6,8 +6,8 @@ import platform
 import sys
 import platform
 import stat
-# from distutils.core import setup
-from setuptools import setup
+from distutils.core import setup
+# from setuptools import setup
 try:
     import py2exe
     use_py2exe = True
@@ -95,13 +95,13 @@ elif platform.system()=="Linux":
         sys.exit()
 
     libs = parse_libs(url,"so")
-    download_libs(url,libs)
-    download_unix(url)
+    #download_libs(url,libs)
+    #download_unix(url)
 
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
-    DATA_FILES = [("/usr/local/bin/",['ws_dissector/ws_dissector']),
-                  ('/usr/lib/',lib_list)]
+    DATA_FILES = [("/usr/local/bin/",['ws_dissector/ws_dissector']),]
+#                  ('/usr/lib/',lib_list)]
 
 elif platform.system() == "Windows":
     arch=platform.architecture()
