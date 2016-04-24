@@ -32,33 +32,42 @@ class LteRlcAnalyzer(Analyzer):
         Analyzer.set_source(self,source)
 
         #Phy-layer logs
-        # source.enable_log("LTE_RLC_UL_Config_Log_Packet")
-        # source.enable_log("LTE_RLC_DL_Config_Log_Packet")
+        source.enable_log("LTE_RLC_UL_Config_Log_Packet")
+        source.enable_log("LTE_RLC_DL_Config_Log_Packet")
         source.enable_log("LTE_RLC_UL_AM_All_PDU")
         source.enable_log("LTE_RLC_DL_AM_All_PDU")
 
     def __msg_callback(self,msg):
 
+        if msg.type_id == "LTE_RLC_UL_Config_Log_Packet" or msg.type_id == "LTE_RLC_DL_Config_Log_Packet":
+            log_item = msg.data.decode()
+            subPkt = log_item['Subpackets'][0]
+            if 'Released RBs' in subPkt:
+                for releasedRBItem in subPkt['Released RBs']:
+                    rbConfigIdx = releasedRBItem['Released RB Cfg Index']
+                    if rbConfigIdx in self.rbInfo:
+                        self.rbInfo.pop(rbConfigIdx)
+
         if msg.type_id == "LTE_RLC_UL_AM_All_PDU":
             log_item = msg.data.decode()
-            if not self.startThrw:
-                self.startThrw = log_item['timestamp']
-            timeWindow = (log_item['timestamp'] \
-                    - self.startThrw).total_seconds()
-            if timeWindow > 5:
-                # Update throughput information
-                self.log_info("Downlink received throughput")
-                for k, v in self.rbInfo.iteritems():
-                    self.log_info("RB Cfg Idx: " + str(k) + ", " + str(v['cumulativeDLData'] / timeWindow) + " bytes/s")
-                    self.rbInfo[k]['cumulativeDLData'] = 0.0
-                self.log_info("-------------------------------------------------------")
-                self.log_info("Uplink sent throughput")
-                for k, v in self.rbInfo.iteritems():
-                    self.log_info("RB Cfg Idx: " + str(k) + ", " + str(v['cumulativeULData'] / timeWindow) + " bytes/s")
-                    self.rbInfo[k]['cumulativeULData'] = 0.0
-                self.log_info("-------------------------------------------------------")
+            # if not self.startThrw:
+            #     self.startThrw = log_item['timestamp']
+            # timeWindow = (log_item['timestamp'] \
+            #         - self.startThrw).total_seconds()
+            # if timeWindow > 1:
+            #     # Update throughput information
+            #     print "-------------------------------------------------------"
+            #     print "Downlink received throughput"
+            #     for k, v in self.rbInfo.iteritems():
+            #         print "RB Cfg Idx: " + str(k) + ", " + str(v['cumulativeDLData'] / timeWindow) + " bytes/s"
+            #         self.rbInfo[k]['cumulativeDLData'] = 0.0
+            #     print "Uplink sent throughput"
+            #     for k, v in self.rbInfo.iteritems():
+            #         print "RB Cfg Idx: " + str(k) + ", " + str(v['cumulativeULData'] / timeWindow) + " bytes/s"
+            #         self.rbInfo[k]['cumulativeULData'] = 0.0
+            #     print "-------------------------------------------------------"
 
-                self.startThrw = log_item['timestamp']
+            #     self.startThrw = log_item['timestamp']
 
             subPkt = log_item['Subpackets'][0]
             rbConfigIdx = subPkt['RB Cfg Idx']
@@ -66,24 +75,90 @@ class LteRlcAnalyzer(Analyzer):
                 self.rbInfo[rbConfigIdx] = {}
                 self.rbInfo[rbConfigIdx]['cumulativeULData'] = 0
                 self.rbInfo[rbConfigIdx]['cumulativeDLData'] = 0
-                self.rbInfo[rbConfigIdx]['waitingForSN'] = -1
-                self.rbInfo[rbConfigIdx]['waitingForSNSince'] = None
+                self.rbInfo[rbConfigIdx]['UL'] = {}
+                self.rbInfo[rbConfigIdx]['DL'] = {}
+                self.rbInfo[rbConfigIdx]['UL']['listSN'] = []
+                self.rbInfo[rbConfigIdx]['UL']['listAck'] = []
+                self.rbInfo[rbConfigIdx]['DL']['listSN'] = []
+                self.rbInfo[rbConfigIdx]['DL']['listAck'] = []
 
             listPDU = subPkt['RLCUL PDUs']
+            maxSys_fn = 0
+            maxSub_fn = 0
+            minSys_fn = 1024
+            minSub_fn = 9
+
             for pduItem in listPDU:
                 if pduItem['PDU TYPE'] == 'RLCUL DATA':
                     self.rbInfo[rbConfigIdx]['cumulativeULData'] += \
                             int(pduItem['pdu_bytes'])
                     SN = int(pduItem['SN'])
-                    if SN + 1 > self.rbInfo[rbConfigIdx]['waitingForSN']:
-                        self.rbInfo[rbConfigIdx]['waitingForSN'] = SN + 1
-                        self.rbInfo[rbConfigIdx]['waitingForSNSince'] = \
-                                log_item['timestamp']
-                    elif SN + 1 == self.rbInfo[rbConfigIdx]['waitingForSN']:
-                        self.log_debug("Retransmission happened")
-                        self.rbInfo[rbConfigIdx]['waitingForSNSince'] = \
-                                log_item['timestamp']
+                    sys_fn = int(pduItem['sys_fn'])
+                    sub_fn = int(pduItem['sub_fn'])
+                    if sys_fn > maxSys_fn or (sys_fn == maxSys_fn and sub_fn > maxSub_fn):
+                        maxSys_fn = sys_fn
+                        maxSub_fn = sub_fn
+                    if sys_fn < minSys_fn or (sys_fn == minSys_fn and sub_fn < minSub_fn):
+                        minSys_fn = sys_fn
+                        minSub_fn = sub_fn
+                    alreadyAcked = False
+                    for i, ackItem in enumerate(self.rbInfo[rbConfigIdx]['UL']['listAck']):
+                        if SN + 1 == ackItem['ack_sn']:
+                            if sys_fn == ackItem['sys_fn']:
+                                diff_ms = (ackItem['sub_fn'] - sub_fn) * 1
+                            else:
+                                diff_ms = (ackItem['sys_fn'] - sys_fn - 1) * 10 + (10 - sub_fn) + (ackItem['sub_fn'])
+                            if diff_ms > 0:
+                                self.log_info("[Frame cost]\tUL Data PDU Ack (frame): " + str(diff_ms) + " ms\tRB Config Index: " + str(rbConfigIdx) + "\tAckSN: " + str(ackItem['ack_sn']) + "\tTime cost: " + str((ackItem['time_stamp'] - log_item['timestamp']).total_seconds()) + "s\tData TimeStamp: " + str(log_item['timestamp']) + "\tAck TimeStamp: " + str(ackItem['time_stamp']))
+                            alreadyAcked = True
+                            self.rbInfo[rbConfigIdx]['UL']['listAck'].pop(i)
+                            break;
+                    if alreadyAcked:
+                        self.rbInfo[rbConfigIdx]['UL']['listSN'] = []
+                    else:
+                        self.rbInfo[rbConfigIdx]['UL']['listSN'].append({'sn':SN, 'sys_fn':pduItem['sys_fn'], 'sub_fn':pduItem['sub_fn'], 'time_stamp':log_item['timestamp']})
+                elif pduItem['PDU TYPE'] == 'RLCUL CTRL':
+                    self.rbInfo[rbConfigIdx]['cumulativeULData'] += \
+                            int(pduItem['pdu_bytes'])
+                    AckSN = pduItem['SN']
+                    AckSN = int(AckSN.split(" = ")[1])
+                    sys_fn = int(pduItem['sys_fn'])
+                    sub_fn = int(pduItem['sub_fn'])
+                    if sys_fn > maxSys_fn or (sys_fn == maxSys_fn and sub_fn > maxSub_fn):
+                        maxSys_fn = sys_fn
+                        maxSub_fn = sub_fn
+                    if sys_fn < minSys_fn or (sys_fn == minSys_fn and sub_fn < minSub_fn):
+                        minSys_fn = sys_fn
+                        minSub_fn = sub_fn
+                    alreadyAcked = False
+                    indexAcked = -1
+                    for i, snItem in enumerate(self.rbInfo[rbConfigIdx]['DL']['listSN']):
+                        if AckSN == snItem['sn'] + 1:
+                            if sys_fn == snItem['sys_fn']:
+                                diff_ms = (sub_fn - snItem['sub_fn']) * 1
+                            else:
+                                diff_ms = (sys_fn - snItem['sys_fn'] - 1) * 10 + (10 - snItem['sub_fn']) + (sub_fn)
+                            if diff_ms > 0:
+                                self.log_info("[Frame cost]\tDL Data PDU Ack (frame): " + str(diff_ms) + " ms\tRB Config Index: " + str(rbConfigIdx) + "\tAckSN: " + str(AckSN) + "\tTime cost: " + str((log_item['timestamp'] - snItem['time_stamp']).total_seconds()) + "s\tData TimeStamp: " + str(snItem['time_stamp']) + "\tAck TimeStamp: " + str(log_item['timestamp']))
 
+                            alreadyAcked = True
+                            indexAcked = i
+                            break;
+                    if alreadyAcked:
+                        if indexAcked + 1 < len(self.rbInfo[rbConfigIdx]['DL']['listSN']):
+                            self.rbInfo[rbConfigIdx]['DL']['listSN'] = self.rbInfo[rbConfigIdx]['DL']['listSN'][indexAcked+1:]
+                        else:
+                            self.rbInfo[rbConfigIdx]['DL']['listSN'] = []
+                    else:
+                        self.rbInfo[rbConfigIdx]['DL']['listAck'].append({'ack_sn':AckSN, 'sys_fn':pduItem['sys_fn'], 'sub_fn':pduItem['sub_fn'], 'time_stamp':log_item['timestamp']})
+
+            if minSys_fn == maxSys_fn:
+                diff_ms = (maxSub_fn - minSub_fn) * 1
+            else:
+                diff_ms = (maxSys_fn - minSys_fn - 1) * 10 + (10 - minSub_fn) + (maxSub_fn)
+            if diff_ms < 100 and diff_ms > 0:
+                self.log_info("[Intantaneous UL Throughput]\t" + str(self.rbInfo[rbConfigIdx]['cumulativeULData'] / (diff_ms * 1.0)) + " Bytes/ms\tRB Config Index: " + str(rbConfigIdx) + "\tTime Stamp: " + str(log_item['timestamp']))
+            self.rbInfo[rbConfigIdx]['cumulativeULData'] = 0
 
             # s = msg.data.decode_xml().replace("\n", "")
             # print minidom.parseString(s).toprettyxml(" ")
@@ -92,24 +167,24 @@ class LteRlcAnalyzer(Analyzer):
 
         if msg.type_id == "LTE_RLC_DL_AM_All_PDU":
             log_item = msg.data.decode()
-            if not self.startThrw:
-                self.startThrw = log_item['timestamp']
-            timeWindow = (log_item['timestamp'] \
-                    - self.startThrw).total_seconds()
-            if timeWindow > 5:
-                # Update throughput information
-                self.log_info("Downlink received throughput")
-                for k, v in self.rbInfo.iteritems():
-                    self.log_info("RB Cfg Idx: " + str(k) + ", " + str(v['cumulativeDLData'] / timeWindow) + " bytes/s")
-                    self.rbInfo[k]['cumulativeDLData'] = 0.0
-                self.log_info("-------------------------------------------------------")
-                self.log_info("Uplink sent throughput")
-                for k, v in self.rbInfo.iteritems():
-                    self.log_info("RB Cfg Idx: " + str(k) + ", " + str(v['cumulativeULData'] / timeWindow) + " bytes/s")
-                    self.rbInfo[k]['cumulativeULData'] = 0.0
-                self.log_info("-------------------------------------------------------")
+            # if not self.startThrw:
+            #     self.startThrw = log_item['timestamp']
+            # timeWindow = (log_item['timestamp'] \
+            #         - self.startThrw).total_seconds()
+            # if timeWindow > 1:
+            #     # Update throughput information
+            #     print "-------------------------------------------------------"
+            #     print "Downlink received throughput"
+            #     for k, v in self.rbInfo.iteritems():
+            #         print "RB Cfg Idx: " + str(k) + ", " + str(v['cumulativeDLData'] / timeWindow) + " bytes/s"
+            #         self.rbInfo[k]['cumulativeDLData'] = 0.0
+            #     print "Uplink sent throughput"
+            #     for k, v in self.rbInfo.iteritems():
+            #         print "RB Cfg Idx: " + str(k) + ", " + str(v['cumulativeULData'] / timeWindow) + " bytes/s"
+            #         self.rbInfo[k]['cumulativeULData'] = 0.0
+            #     print "-------------------------------------------------------"
 
-                self.startThrw = log_item['timestamp']
+            #     self.startThrw = log_item['timestamp']
 
             subPkt = log_item['Subpackets'][0]
             rbConfigIdx = subPkt['RB Cfg Idx']
@@ -117,26 +192,90 @@ class LteRlcAnalyzer(Analyzer):
                 self.rbInfo[rbConfigIdx] = {}
                 self.rbInfo[rbConfigIdx]['cumulativeULData'] = 0
                 self.rbInfo[rbConfigIdx]['cumulativeDLData'] = 0
-                self.rbInfo[rbConfigIdx]['waitingForSN'] = -1
-                self.rbInfo[rbConfigIdx]['waitingForSNSince'] = None
+                self.rbInfo[rbConfigIdx]['UL'] = {}
+                self.rbInfo[rbConfigIdx]['DL'] = {}
+                self.rbInfo[rbConfigIdx]['UL']['listSN'] = []
+                self.rbInfo[rbConfigIdx]['UL']['listAck'] = []
+                self.rbInfo[rbConfigIdx]['DL']['listSN'] = []
+                self.rbInfo[rbConfigIdx]['DL']['listAck'] = []
 
             listPDU = subPkt['RLCDL PDUs']
+            maxSys_fn = 0
+            maxSub_fn = 0
+            minSys_fn = 1024
+            minSub_fn = 9
+
             for pduItem in listPDU:
                 if pduItem['PDU TYPE'] == 'RLCDL DATA':
                     self.rbInfo[rbConfigIdx]['cumulativeDLData'] += \
-                            pduItem['pdu_bytes']
+                            int(pduItem['pdu_bytes'])
+                    SN = int(pduItem['SN'])
+                    sys_fn = int(pduItem['sys_fn'])
+                    sub_fn = int(pduItem['sub_fn'])
+                    if sys_fn > maxSys_fn or (sys_fn == maxSys_fn and sub_fn > maxSub_fn):
+                        maxSys_fn = sys_fn
+                        maxSub_fn = sub_fn
+                    if sys_fn < minSys_fn or (sys_fn == minSys_fn and sub_fn < minSub_fn):
+                        minSys_fn = sys_fn
+                        minSub_fn = sub_fn
+                    alreadyAcked = False
+                    for i, ackItem in enumerate(self.rbInfo[rbConfigIdx]['DL']['listAck']):
+                        if SN + 1 == ackItem['ack_sn']:
+                            if sys_fn == ackItem['sys_fn']:
+                                diff_ms = (ackItem['sub_fn'] - sub_fn) * 1
+                            else:
+                                diff_ms = (ackItem['sys_fn'] - sys_fn - 1) * 10 + (10 - sub_fn) + (ackItem['sub_fn'])
+                            if diff_ms > 0:
+                                self.log_info("[Frame cost]\tDL Data PDU Ack (frame): " + str(diff_ms) + " ms\tRB Config Index: " + str(rbConfigIdx) + "\tAckSN: " + str(ackItem['ack_sn']) + "\tTime cost: " + str((ackItem['time_stamp'] - log_item['timestamp']).total_seconds()) + "s\tData TimeStamp: " + str(log_item['timestamp']) + "\tAck TimeStamp: " + str(ackItem['time_stamp']))
+                            alreadyAcked = True
+                            self.rbInfo[rbConfigIdx]['DL']['listAck'].pop(i)
+                            break;
+                    if alreadyAcked:
+                        self.rbInfo[rbConfigIdx]['DL']['listSN'] = []
+                    else:
+                        self.rbInfo[rbConfigIdx]['DL']['listSN'].append({'sn':SN, 'sys_fn':pduItem['sys_fn'], 'sub_fn':pduItem['sub_fn'], 'time_stamp':log_item['timestamp']})
+
                 elif pduItem['PDU TYPE'] == 'RLCDL CTRL':
+                    self.rbInfo[rbConfigIdx]['cumulativeDLData'] += int(pduItem['pdu_bytes'])
                     AckSN = pduItem['SN']
                     AckSN = int(AckSN.split(" = ")[1])
-                    if AckSN == self.rbInfo[rbConfigIdx]['waitingForSN']:
-                        self.log_info("RB Config Idx: " + str(rbConfigIdx) + ", RTT: " +  str((log_item['timestamp'] - self.rbInfo[rbConfigIdx]['waitingForSNSince']).total_seconds()) + " seconds")
-                        self.rbInfo[rbConfigIdx]['waitingForSN'] = -1
-                        self.rbInfo[rbConfigIdx]['waitingForSNSince'] = None
+                    sys_fn = int(pduItem['sys_fn'])
+                    sub_fn = int(pduItem['sub_fn'])
+                    if sys_fn > maxSys_fn or (sys_fn == maxSys_fn and sub_fn > maxSub_fn):
+                        maxSys_fn = sys_fn
+                        maxSub_fn = sub_fn
+                    if sys_fn < minSys_fn or (sys_fn == minSys_fn and sub_fn < minSub_fn):
+                        minSys_fn = sys_fn
+                        minSub_fn = sub_fn
+                    alreadyAcked = False
+                    indexAcked = -1
+                    for i, snItem in enumerate(self.rbInfo[rbConfigIdx]['UL']['listSN']):
+                        if AckSN == snItem['sn'] + 1:
+                            if sys_fn == snItem['sys_fn']:
+                                diff_ms = (sub_fn - snItem['sub_fn']) * 1
+                            else:
+                                diff_ms = (sys_fn - snItem['sys_fn'] - 1) * 10 + (10 - snItem['sub_fn']) + (sub_fn)
+                            if diff_ms > 0:
+                                self.log_info("[Frame cost]\tUL Data PDU Ack (frame): " + str(diff_ms) + " ms\tRB Config Index: " + str(rbConfigIdx) + "\tAckSN: " + str(AckSN) + "\tTime cost: " + str((log_item['timestamp'] - snItem['time_stamp']).total_seconds()) + "s\tData TimeStamp: " + str(snItem['time_stamp']) + "\tAck TimeStamp: " + str(log_item['timestamp']))
+                            alreadyAcked = True
+                            indexAcked = i
+                            break;
+                    if alreadyAcked:
+                        if indexAcked + 1 < len(self.rbInfo[rbConfigIdx]['UL']['listSN']):
+                            self.rbInfo[rbConfigIdx]['UL']['listSN'] = self.rbInfo[rbConfigIdx]['UL']['listSN'][indexAcked+1:]
+                        else:
+                            self.rbInfo[rbConfigIdx]['UL']['listSN'] = []
                     else:
-                        self.log_debug("[Debug] RB Config Idx: " + str(rbConfigIdx) + " Expected Ack SN: " + str(self.rbInfo[rbConfigIdx]['waitingForSN']) + " Received Ack SN: " + str(AckSN) + ", timestamp: " + str(log_item['timestamp']))
-                        if AckSN > self.rbInfo[rbConfigIdx]['waitingForSN']:
-                            self.rbInfo[rbConfigIdx]['waitingForSN'] = -1
-                            self.rbInfo[rbConfigIdx]['waitingForSNSince'] = None
+                        self.rbInfo[rbConfigIdx]['UL']['listAck'].append({'ack_sn':AckSN, 'sys_fn':pduItem['sys_fn'], 'sub_fn':pduItem['sub_fn'], 'time_stamp':log_item['timestamp']})
+            if minSys_fn == maxSys_fn:
+                diff_ms = (maxSub_fn - minSub_fn) * 1
+            else:
+                diff_ms = (maxSys_fn - minSys_fn - 1) * 10 + (10 - minSub_fn) + (maxSub_fn)
+            if diff_ms < 100 and diff_ms > 0:
+                self.log_info("[Intantaneous DL Throughput]\t" + str(self.rbInfo[rbConfigIdx]['cumulativeDLData'] / (diff_ms * 1.0)) + " Bytes/ms\tRB Config Index: " + str(rbConfigIdx) + "\tTime Stamp: " + str(log_item['timestamp']))
+            self.rbInfo[rbConfigIdx]['cumulativeDLData'] = 0
+
+
             # s = msg.data.decode_xml().replace("\n", "")
             # print minidom.parseString(s).toprettyxml(" ")
             # log_item = msg.data.decode()
