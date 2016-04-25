@@ -83,7 +83,8 @@ class WSDissector:
         if executable_path:
             real_executable_path = executable_path
         else:
-            real_executable_path = sys.exec_prefix + "/local/bin/ws_dissector"
+            real_executable_path = sys.exec_prefix + "/mobile_insight/ws_dissector/ws_dissector"
+            # real_executable_path = sys.exec_prefix + "/local/bin/ws_dissector"
         env = dict(os.environ)
         if platform.system() == "Windows":
             real_executable_path += ".exe"
