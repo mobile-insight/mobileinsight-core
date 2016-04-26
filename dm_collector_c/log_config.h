@@ -24,8 +24,9 @@ enum LogConfigOp {
     GET_RANGE = 1,
     SET_MASK = 3,
     GET_MASK = 4,
-    DEBUG_LTE_ML1 = 5, //Yuanjie: enable debugging messages (currently for iCellular only)
-    DEBUG_WCDMA_L1 = 6, //Yuanjie: enable debugging messages (currently for iCellular only)
+    DEBUG_LTE_ML1 = 105, //Yuanjie: enable debugging messages (currently for iCellular only)
+    DEBUG_WCDMA_L1 = 106, //Yuanjie: enable debugging messages (currently for iCellular only)
+    DISABLE_DEBUG = 107,	// Disable all dbg msg
 };
 
 // Encode a log config message.

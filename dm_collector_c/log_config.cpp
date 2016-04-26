@@ -121,6 +121,19 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
 
         break;
 
+    case DISABLE_DEBUG:
+        buf.second = 8;
+        buf.first = new char[buf.second];
+        buf.first[0] = 0x7D;
+        buf.first[1] = 0x05;
+        buf.first[2] = 0x00;
+        buf.first[3] = 0x00;
+        buf.first[4] = 0x00;
+        buf.first[5] = 0x00;
+        buf.first[6] = 0x00;
+        buf.first[7] = 0x00;
+        break;
+
     case GET_RANGE:
     case GET_MASK:
         // not implemented
