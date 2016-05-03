@@ -2078,7 +2078,6 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                                     "PDU TYPE", pystr);
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
-                            // SN is correct, no need to modify
                             // Update other info
                             std::string strRF = "", strP = "", strFI = "",
                                 strE = "";
@@ -2107,6 +2106,18 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                             } else {
                                 strE += "0";
                             }
+                            // update SN (need to check last two bits in
+                            // DCLookAhead)
+                            if ((DCLookAhead) & (1 << (1))) {
+                                iNonDecodeSN += 512;
+                            }
+                            if ((DCLookAhead) & (1)) {
+                                iNonDecodeSN += 256;
+                            }
+                            old_object = _replace_result_int(result_pdu_item,
+                                    "SN", iNonDecodeSN);
+                            Py_DECREF(old_object);
+
                             offset += _decode_by_fmt(
                                     LteRlcUlAmAllPdu_Subpkt_PDU_DATA,
                                     ARRAY_SIZE(
@@ -2343,7 +2354,6 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                                     "Status", pystr);
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
-                            // SN is correct, no need to modify
                             // Update other info
                             std::string strRF = "", strP = "", strFI = "",
                                 strE = "";
@@ -2372,6 +2382,17 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                             } else {
                                 strE += "0";
                             }
+                            // update SN (need to check last two bits in
+                            // DCLookAhead)
+                            if ((DCLookAhead) & (1 << (1))) {
+                                iNonDecodeSN += 512;
+                            }
+                            if ((DCLookAhead) & (1)) {
+                                iNonDecodeSN += 256;
+                            }
+                            old_object = _replace_result_int(result_pdu_item,
+                                    "SN", iNonDecodeSN);
+                            Py_DECREF(old_object);
                             offset += _decode_by_fmt(
                                     LteRlcDlAmAllPdu_Subpkt_PDU_DATA,
                                     ARRAY_SIZE(
