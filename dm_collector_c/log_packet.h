@@ -1105,8 +1105,116 @@ const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Extra [] = {
 
 
 // ----------------------------------------------------------------------------
+// LTE_MAC_Rach_Trigger
+const Fmt LteMacRachTriggerFmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Number of Subpackets", 1},
+    {SKIP, NULL, 2},
+};
 
+const Fmt LteMacRachTrigger_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
 
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload [] = {
+    // Version 2
+    {WCDMA_MEAS, "Preamble initial power (dB)", 1}, // Note sure if it is correct
+    {SKIP, NULL, 1},
+    {UINT, "Power ramping step (dB)", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer (ms)", 2},
+    {UINT, "Message size Group_A", 2},
+    {UINT, "Power offset Group_B", 1},
+    {UINT, "PMax (dBm)", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 3},
+    {PLACEHOLDER, "Preamble Format", 0},
+    {UINT, "High speed flag", 1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+};
+
+const Fmt LteMacRachTrigger_RachReasonSubpktPayload [] = {
+    // Version 1
+    {UINT, "Rach reason", 1},
+    {PLACEHOLDER, "RACH Contention", 0},
+    {BYTE_STREAM, "Maching ID", 6},
+    {SKIP, NULL, 1},
+    {UINT, "Preamble", 1},
+    {BYTE_STREAM, "Preamble RA mask", 1},
+    {UINT, "Msg3 size", 1},
+    {UINT, "Group chosen", 1},
+    {UINT, "Radio condn (dB)", 1},
+    {BYTE_STREAM, "CRNTI", 2},
+};
+const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason [] = {
+    {0, "CONNECTION_REQ"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE MAC Rach Attempt
+
+const Fmt LteMacRachAttempt_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Number of Subpackets", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LteMacRachAttempt_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LteMacRachAttempt_SubpktPayload[] = {
+    // Version 2
+    {UINT, "Retx counter", 1},
+    {UINT, "Rach result", 1},
+    {UINT, "Contention procedure", 1},
+    {UINT, "Rach msg bmasks", 1},
+};
+const ValueName LteMacRachAttempt_Subpkt_RachResult [] = {
+    {0, "Success"},
+};
+const ValueName LteMacRachAttempt_Subpkt_ContentionProcedure [] = {
+    {1, "Contention Based RACH procedure"},
+};
+
+const Fmt LteMacRachAttempt_Subpkt_Msg1 [] = {
+    {UINT, "Preamble Index", 1},
+    {BYTE_STREAM, "Preamble index mask", 1},
+    {WCDMA_MEAS, "Preamble power offset", 1},
+    {SKIP, NULL, 1},
+};
+
+const Fmt LteMacRachAttempt_Subpkt_Msg2 [] = {
+    {UINT, "Backoff Value (ms)", 2},
+    {UINT, "Result", 1},
+    {UINT, "TCRNTI", 2},
+    {UINT, "TA value", 2},
+};
+const ValueName LteMacRachAttempt_Subpkt_Msg2_Result [] = {
+    {1, "True"},
+};
+
+const Fmt LteMacRachAttempt_Subpkt_Msg3 [] = {
+    {SKIP, NULL, 1},
+    {BYTE_STREAM, "Grant Raw", 3},
+    {UINT, "Grant", 2},
+    {UINT, "Harq ID", 1},
+};
+const Fmt LteMacRachAttempt_Subpkt_Msg3_MACPDU [] = {
+    {BYTE_STREAM, "MAC PDU", 1},
+};
+
+// ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
     {SKIP, NULL, 1},
