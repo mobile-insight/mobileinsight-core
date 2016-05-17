@@ -183,7 +183,8 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
     IdVector type_ids;
     std::vector<IdVector> type_id_vectors;
     BinaryBuffer buf;
-    int n = PySequence_Length(type_names);
+    // int n = PySequence_Length(type_names);
+    long n = PySequence_Length(type_names);
 
     for (int i = 0; i < n; i++) {
         PyObject *item = PySequence_GetItem(type_names, i);
@@ -390,7 +391,7 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
             // printf("%x %x %x %x\n",s[0],s[1],s[2],s[3]);
             PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
                                                     frame.size() - 2,
-                                                    skip_decoding);
+                                                    skip_decoding); 
             if (include_timestamp) {
                 PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
                 Py_DECREF(decoded);

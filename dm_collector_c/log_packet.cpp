@@ -46,7 +46,7 @@ namespace patch
  *      "type".
  * - "dict": The "value" is another result list, and each element can be of
  *      different "types".
- * - "raw_msg/*": The value is a binary string that contains raw messages.
+ * - "raw_msg/TYPE": The value is a binary string that contains raw messages.
  */
 
 // TODO: split this .cpp to multiple files.
@@ -59,7 +59,8 @@ _find_result_index(PyObject *result, const char *target) {
     int ret = -1;   // return -1 if fails
 
     Py_INCREF(result);
-    int n = PySequence_Length(result);
+    // int n = PySequence_Length(result);
+    long n = PySequence_Length(result);
     for (int i = 0; i < n; i++) {
         PyObject *t = PySequence_GetItem(result, i);
         PyObject *field_name = PySequence_GetItem(t, 0);
@@ -926,9 +927,9 @@ _decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, int length,
                                             ARRAY_SIZE(LteMl1IratSubPktFmt, Fmt),
                                             b, offset, length, result_subpkt);
                 // Decode payload
-                int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
-                int subpkt_ver = _search_result_int(result_subpkt, "Version");
-                int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
+                // int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
+                // int subpkt_ver = _search_result_int(result_subpkt, "Version");
+                // int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
 
                 PyObject *result_subpkt_cdma = PyList_New(0);
                 offset += _decode_by_fmt(LteMl1IratCDMACellFmt,
@@ -992,7 +993,7 @@ _decode_lte_ml1_irat_subpkt(const char *b, int offset, int length,
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
-                int subpkt_ver = _search_result_int(result_subpkt, "Version");
+                // int subpkt_ver = _search_result_int(result_subpkt, "Version");
                 int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
                 switch(subpkt_id){
                     case LteMl1IratType_WCDMA:
@@ -1007,7 +1008,7 @@ _decode_lte_ml1_irat_subpkt(const char *b, int offset, int length,
                             offset += _decode_by_fmt(LteMl1IratWCDMACellMetaFmt,
                                             ARRAY_SIZE(LteMl1IratWCDMACellMetaFmt, Fmt),
                                             b, offset, length, result_subpkt_wcdma_freq);
-                            int freq = _search_result_int(result_subpkt_wcdma_freq, "Frequency");
+                            // int freq = _search_result_int(result_subpkt_wcdma_freq, "Frequency");
                             int n_cell = _search_result_int(result_subpkt_wcdma_freq, "Number of cells");
                             for(int k=0; k<n_cell; k++){
                                 PyObject *result_subpkt_wcdma_cell = PyList_New(0);
@@ -2975,12 +2976,12 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
 
 
 bool
-is_log_packet (const char *b, int length) {
+is_log_packet (const char *b, size_t length) {
     return length >= 2 && b[0] == '\x10';
 }
 
 bool
-is_debug_packet (const char *b, int length) {
+is_debug_packet (const char *b, size_t length) {
     return length >=2 && (b[0] ==  '\x79' || b[0] == '\x92');
     // return length >=2 && (b[0] == '\x92');  //Yuanjie: optimization for iCellular, avoid unuseful debug msg
     // return length >=2 && (b[0] ==  '\x79');
