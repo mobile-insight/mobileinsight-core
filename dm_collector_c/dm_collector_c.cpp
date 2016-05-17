@@ -313,13 +313,20 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
     }
 
     // Disable previous logs
-    buf = encode_log_config(DISABLE, empty);
-    if (buf.first != NULL && buf.second != 0) {
-        (void) send_msg(file, buf.first, buf.second);
-        delete [] buf.first;
-    } else {
-        PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
-        goto raise_exception;
+    for (int k = 0; k < 2; k++) {
+        if (k == 0) {   // Disable normal log msgs
+            buf = encode_log_config(DISABLE, empty);
+        } else {        // Disable debug msgs
+            buf = encode_log_config(DISABLE_DEBUG, empty);
+        }
+        if (buf.first != NULL && buf.second != 0) {
+            (void) send_msg(file, buf.first, buf.second);
+            delete [] buf.first;
+            buf.first = NULL;
+        } else {
+            PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
+            goto raise_exception;
+        }
     }
 
     success = generate_log_config_msgs(file, sequence);
