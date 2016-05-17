@@ -3157,6 +3157,86 @@ static int _decode_lte_pdcp_ul_data_pdu_subpkt (const char *b, int offset,
     }
 }
 
+// ----------------------------------------------------------------------------
+static int _decode_lte_pdcp_dl_stats_subpkt (const char *b, int offset,
+        int length, PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+    int n_subpkt = _search_result_int(result, "Num Subpkt");
+
+    switch (pkt_ver) {
+    case 1:
+        {
+            PyObject *result_allpkts = PyList_New(0);
+            for (int i = 0; i < n_subpkt; i++) {
+                PyObject *result_subpkt = PyList_New(0);
+                int start_subpkt = offset;
+                // decode subpacket header
+                offset += _decode_by_fmt(LtePdcpDlStats_SubpktHeader,
+                        ARRAY_SIZE(LtePdcpDlStats_SubpktHeader, Fmt),
+                        b, offset, length, result_subpkt);
+                int subpkt_id = _search_result_int(result_subpkt,
+                        "Subpacket ID");
+                int subpkt_ver = _search_result_int(result_subpkt,
+                        "Subpacket Version");
+                int subpkt_size = _search_result_int(result_subpkt,
+                        "Subpacket Size");
+                if (subpkt_id == 196 && subpkt_ver == 2) {
+                    // PDCP DL Stats: 0xC2
+                    offset += _decode_by_fmt(
+                            LtePdcpDlStats_SubpktPayload,
+                            ARRAY_SIZE(LtePdcpDlStats_SubpktPayload, Fmt),
+                            b, offset, length, result_subpkt);
+                    // RBs
+                    int num_RB = _search_result_int(result_subpkt,
+                            "Num RBs");
+                    PyObject *result_RB = PyList_New(0);
+                    for (int j = 0; j < num_RB; j++) {
+                        PyObject *result_RB_item = PyList_New(0);
+                        offset += _decode_by_fmt(LtePdcpDlStats_Subpkt_RB_Fmt,
+                                ARRAY_SIZE(LtePdcpDlStats_Subpkt_RB_Fmt, Fmt),
+                                b, offset, length, result_RB_item);
+                        (void) _map_result_field_to_name(result_RB_item,
+                                "Mode",
+                                LtePdcpDlStats_Subpkt_RB_Mode,
+                                ARRAY_SIZE(LtePdcpDlStats_Subpkt_RB_Mode, ValueName),
+                                "Unknown");
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                                result_RB_item, "dict");
+                        PyList_Append(result_RB, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_RB_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "RBs",
+                            result_RB, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_RB);
+                } else {
+                    printf("Unknown LTE PDCP UL Data PDU subpkt id and version:"
+                            " 0x%x - %d\n", subpkt_id, subpkt_ver);
+                }
+                PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
+                        "dict");
+                PyList_Append(result_allpkts, t);
+                Py_DECREF(t);
+                Py_DECREF(result_subpkt);
+                offset += subpkt_size - (offset - start_subpkt);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Subpackets", result_allpkts,
+                    "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_allpkts);
+            return offset - start;
+        }
+    default:
+        printf("Unknown LTE PDCP UL Data PDU version: 0x%x\n",
+                pkt_ver);
+        return 0;
+    }
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -3549,6 +3629,12 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                 ARRAY_SIZE(LtePdcpUlDataPdu_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_lte_pdcp_ul_data_pdu_subpkt(b, offset, length, result);
+        break;
+    case LTE_PDCP_DL_Stats:
+        offset += _decode_by_fmt(LtePdcpDlStats_Fmt,
+                ARRAY_SIZE(LtePdcpDlStats_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_pdcp_dl_stats_subpkt(b, offset, length, result);
         break;
 
     default:

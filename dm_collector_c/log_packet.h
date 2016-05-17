@@ -1423,6 +1423,78 @@ const Fmt LtePdcpUlDataPdu_Subpkt_PDU_Fmt [] = {
 };
 
 // ----------------------------------------------------------------------------
+// LTE PDCP DL Stats
+
+const Fmt LtePdcpDlStats_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpDlStats_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpDlStats_SubpktPayload [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "Num Errors", 4},
+    {UINT, "Num Offload Q Full Count", 4},
+    {UINT, "Num Packet Dropped Offload Q Full", 4},
+};
+
+const Fmt LtePdcpDlStats_Subpkt_RB_Fmt [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "PDCP Hdr Len", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Flow Ctrl Trigger", 4},
+    {UINT, "Num Data PDU Rx", 4},
+    {UINT, "Num Data PDU Rx Bytes", 4},
+    {UINT, "Control PDU Bytes Tx", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Control PDU Gen", 4},
+    {UINT, "Num Control PDU Gen Bytes", 4},
+    {UINT, "Num Stat Rprt Ctrl PDU Rx", 4},
+    {UINT, "Num ROHC Ctrl PDU Rx", 4},
+    {UINT, "Num PDU ROHC Fail", 4},
+    {UINT, "Num PDU Integrity Fail", 4},
+    {UINT, "Num Missing SDU To UL", 4},
+    {UINT, "Num Missing SDU From UL", 4},
+    {UINT, "Num PDU Dups", 4},
+    {UINT, "Num PDU Dups Bytes", 4},
+    {UINT, "Num PDU Out of Win", 4},
+    {UINT, "Num PDU Out of Win Bytes", 4},
+    {UINT, "Num PDU Invalid", 4},
+    {UINT, "Num PDU Invalid Bytes", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Flow Ctrl Trigger Rst", 4},
+    {UINT, "Num Data PDU Rx Rst", 4},
+    {UINT, "Num Data PDU Rx Bytes Rst", 4},
+    {UINT, "Control PDU Bytes Tx Rst", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Control PDU Gen Rst", 4},
+    {UINT, "Num Control PDU Gen Bytes Rst", 4},
+    {UINT, "Num Stat Rprt Ctrl PDU Rx Rst", 4},
+    {UINT, "Num ROHC Ctrl PDU Rx Rst", 4},
+    {UINT, "Num PDU ROHC Fail Rst", 4},
+    {UINT, "Num PDU Integrity Fail Rst", 4},
+    {UINT, "Num Missing SDU To UL Rst", 4},
+    {UINT, "Num Missing SDU From UL Rst", 4},
+    {UINT, "Num PDU Dups Rst", 4},
+    {UINT, "Num PDU Dups Bytes Rst", 4},
+    {UINT, "Num PDU Out of Win Rst", 4},
+    {UINT, "Num PDU Out of Win Bytes Rst", 4},
+    {UINT, "Num PDU Invalid Rst", 4},
+    {UINT, "Num PDU Invalid Bytes Rst", 4},
+    {SKIP, NULL, 4},
+};
+const ValueName LtePdcpDlStats_Subpkt_RB_Mode [] = {
+    {1, "AM"},
+};
+
+// ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
     {SKIP, NULL, 1},
