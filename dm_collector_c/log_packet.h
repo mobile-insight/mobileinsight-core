@@ -1445,7 +1445,7 @@ const Fmt LtePdcpDlStats_SubpktPayload [] = {
 };
 
 const Fmt LtePdcpDlStats_Subpkt_RB_Fmt [] = {
-    {UINT, "RB Cfg Idx", 1},
+    {UINT, "Rb Cfg Idx", 1},
     {UINT, "Mode", 1},
     {UINT, "PDCP Hdr Len", 1},
     {UINT, "Num RST", 4},
@@ -1491,6 +1491,65 @@ const Fmt LtePdcpDlStats_Subpkt_RB_Fmt [] = {
     {SKIP, NULL, 4},
 };
 const ValueName LtePdcpDlStats_Subpkt_RB_Mode [] = {
+    {1, "AM"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE RLC UL Statistics
+
+const Fmt LteRlcUlStats_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LteRlcUlStats_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LteRlcUlStats_SubpktPayload [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "RLCUL Error Count", 4},
+};
+
+const Fmt LteRlcUlStats_Subpkt_RB_Fmt [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num New Data PDU", 4},
+    {UINT, "Num New Data PDU Bytes", 4},
+    {UINT, "Num SDU", 4},
+    {UINT, "Num SDU Bytes", 4},
+    {UINT, "Num Ctrl PDU Tx", 4},
+    {UINT, "Num Ctrl PDU Bytes Tx", 4},
+    {UINT, "Num Retx PDU", 4},
+    {UINT, "Num Retx PDU Bytes", 4},
+    {UINT, "Num Ctrl PDU Rx", 4},
+    {UINT, "Num Complete NACK", 4},
+    {UINT, "Num Segm NACK", 4},
+    {UINT, "Num Invalid Ctrl PDU Rx", 4},
+    {UINT, "Num Poll", 4},
+    {UINT, "Num T Poll Retx Expiry", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num New Data PDU Rst", 4},
+    {UINT, "Num New Data PDU Bytes Rst", 4},
+    {UINT, "Num SDU Rst", 4},
+    {UINT, "Num SDU Bytes Rst", 4},
+    {UINT, "Num Ctrl PDU Tx Rst", 4},
+    {UINT, "Num Ctrl PDU Bytes Tx Rst", 4},
+    {UINT, "Num Retx PDU Rst", 4},
+    {UINT, "Num Retx PDU Bytes Rst", 4},
+    {UINT, "Num Ctrl PDU Rx Rst", 4},
+    {UINT, "Num Complete NACK Rst", 4},
+    {UINT, "Num Segm NACK Rst", 4},
+    {UINT, "Num Invalid Ctrl PDU Rx Rst", 4},
+    {UINT, "Num Poll Rst", 4},
+    {UINT, "Num T Poll Retx Expiry Rst", 4},
+    {SKIP, NULL, 4},
+};
+const ValueName LteRlcUlStats_Subpkt_RB_Mode [] = {
     {1, "AM"},
 };
 
