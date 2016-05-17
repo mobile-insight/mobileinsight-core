@@ -1215,6 +1215,7 @@ const Fmt LteMacRachAttempt_Subpkt_Msg3_MACPDU [] = {
 };
 
 // ----------------------------------------------------------------------------
+// LTE PDCP DL Config
 
 const Fmt LtePdcpDlConfig_Fmt [] = {
     {UINT, "Version", 1},
@@ -1298,6 +1299,93 @@ const ValueName LtePdcpDlConfig_Subpkt_ActiveRB_StatusReport [] = {
 const ValueName LtePdcpDlConfig_Subpkt_ActiveRB_RoHCEnabled [] = {
     {0, "false"},
 };
+
+// ----------------------------------------------------------------------------
+// LTE PDCP UL Config
+
+const Fmt LtePdcpUlConfig_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpUlConfig_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpUlConfig_SubpktPayload [] = {
+    {UINT, "Reason", 1},
+    {UINT, "SRB Cipher Algorithm", 1},
+    {UINT, "SRB Cipher Key Idx", 1},
+    {UINT, "SRB Integrity Algorithm", 1},
+    {UINT, "SRB Integrity Key Idx", 1},
+    {UINT, "DRB Cipher Algorithm", 1},
+    {UINT, "DRB Cipher Key Idx", 1},
+    {UINT, "Array size", 1},
+};
+const ValueName LtePdcpUlConfig_Subpkt_Reason [] = {
+    {1, "Configuration"},
+    {4, "RB Release"},
+};
+const ValueName LtePdcpUlConfig_Subpkt_CipherAlgo [] = {
+    {2, "Snow3G"},
+    {7, "None"},
+};
+const ValueName LtePdcpUlConfig_Subpkt_IntegAlgo [] = {
+    {2, "AES"},
+    {7, "None"},
+};
+
+const Fmt LtePdcpUlConfig_Subpkt_ReleaseRB_Header [] = {
+    {UINT, "Number of Released RBs", 1},
+};
+const Fmt LtePdcpUlConfig_Subpkt_ReleaseRB_Fmt [] = {
+    {UINT, "Released RB Cfg Index", 1},
+};
+
+const Fmt LtePdcpUlConfig_Subpkt_AddedModifiedRB_Header [] = {
+    {UINT, "Number of Added/Modified RBs", 1},
+};
+const Fmt LtePdcpUlConfig_Subpkt_AddedModifiedRB_Fmt [] = {
+    {UINT, "Added/Modified RB Cfg Index", 1},
+    {UINT, "Action", 1},
+};
+const ValueName LtePdcpUlConfig_Subpkt_AddedModifiedRB_Action [] = {
+    {1, "Add"},
+    {2, "Modify"},
+};
+
+const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Header [] = {
+    {UINT, "Number of active RBs", 1},
+};
+const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Fmt [] = {
+    {UINT, "RB ID", 1},
+    {UINT, "RB-Cfg Idx", 1},
+    {UINT, "EPS ID", 1},
+    {UINT, "RB mode", 1},
+    {UINT, "RB type", 1},
+    {UINT, "SN length", 1},
+    {UINT, "Discard timer", 2},
+    {UINT, "RoHC Max CID", 1},
+    {UINT, "RoHC Enabled", 1},
+    {BYTE_STREAM, "RoHC Mask", 4},
+};
+const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_RBmode [] = {
+    {1, "AM"},
+};
+const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_RBtype [] = {
+    {1, "SRB"},
+    {2, "DRB"},
+};
+const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_StatusReport [] = {
+    {0, "NO"},
+};
+const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_RoHCEnabled [] = {
+    {0, "false"},
+};
+
 
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
