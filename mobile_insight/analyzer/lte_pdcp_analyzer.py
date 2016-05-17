@@ -33,7 +33,8 @@ class LtePdcpAnalyzer(Analyzer):
 
         #Phy-layer logs
         # source.enable_log("LTE_PDCP_DL_Config")
-        source.enable_log("LTE_PDCP_UL_Config")
+        # source.enable_log("LTE_PDCP_UL_Config")
+        source.enable_log("LTE_PDCP_UL_Data_PDU")
         # source.enable_log("LTE_PDCP_DL_SRB_Integrity_Data_PDU")
         # source.enable_log("LTE_PDCP_UL_SRB_Integrity_Data_PDU")
 

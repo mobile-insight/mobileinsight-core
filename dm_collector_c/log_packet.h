@@ -1386,6 +1386,41 @@ const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_RoHCEnabled [] = {
     {0, "false"},
 };
 
+// ----------------------------------------------------------------------------
+// LTE PDCP UL Data PDU
+
+const Fmt LtePdcpUlDataPdu_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpUlDataPdu_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpUlDataPdu_SubpktPayload [] = {
+    {UINT, "RB Cfg Index", 1},
+    {UINT, "Mode", 1},
+    {UINT, "SN Length (bit)", 1},
+};
+const ValueName LtePdcpUlDataPdu_Subpkt_Mode [] = {
+    {1, "AM"},
+};
+
+const Fmt LtePdcpUlDataPdu_Subpkt_PDU_Header [] = {
+    {UINT, "Num PDUs", 2},
+};
+const Fmt LtePdcpUlDataPdu_Subpkt_PDU_Fmt [] = {
+    {UINT, "PDU Size", 2},
+    {UINT, "Logged Bytes", 2},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {UINT, "SN", 1},
+    {SKIP, NULL, 2},
+};
 
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {

@@ -3055,6 +3055,110 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
 }
 
 // ----------------------------------------------------------------------------
+static int _decode_lte_pdcp_ul_data_pdu_subpkt (const char *b, int offset,
+        int length, PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+    int n_subpkt = _search_result_int(result, "Num Subpkt");
+
+    switch (pkt_ver) {
+    case 1:
+        {
+            PyObject *result_allpkts = PyList_New(0);
+            for (int i = 0; i < n_subpkt; i++) {
+                PyObject *result_subpkt = PyList_New(0);
+                int start_subpkt = offset;
+                // decode subpacket header
+                offset += _decode_by_fmt(LtePdcpUlDataPdu_SubpktHeader,
+                        ARRAY_SIZE(LtePdcpUlDataPdu_SubpktHeader, Fmt),
+                        b, offset, length, result_subpkt);
+                int subpkt_id = _search_result_int(result_subpkt,
+                        "Subpacket ID");
+                int subpkt_ver = _search_result_int(result_subpkt,
+                        "Subpacket Version");
+                int subpkt_size = _search_result_int(result_subpkt,
+                        "Subpacket Size");
+                if (subpkt_id == 194 && subpkt_ver == 1) {
+                    // PDCP UL Data PDU 0xC2
+                    offset += _decode_by_fmt(
+                            LtePdcpUlDataPdu_SubpktPayload,
+                            ARRAY_SIZE(LtePdcpUlDataPdu_SubpktPayload, Fmt),
+                            b, offset, length, result_subpkt);
+                    (void) _map_result_field_to_name(result_subpkt, "Mode",
+                            LtePdcpUlDataPdu_Subpkt_Mode,
+                            ARRAY_SIZE(LtePdcpUlDataPdu_Subpkt_Mode, ValueName),
+                            "Unknown");
+
+                    // PDU
+                    int start_PDU = offset;
+                    offset += _decode_by_fmt(
+                            LtePdcpUlDataPdu_Subpkt_PDU_Header,
+                            ARRAY_SIZE(LtePdcpUlDataPdu_Subpkt_PDU_Header,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    int num_PDU = _search_result_int(result_subpkt,
+                            "Num PDUs");
+                    PyObject *result_PDU = PyList_New(0);
+                    for (int j = 0; j < num_PDU; j++) {
+                        PyObject *result_PDU_item = PyList_New(0);
+                        offset += _decode_by_fmt(LtePdcpUlDataPdu_Subpkt_PDU_Fmt,
+                                ARRAY_SIZE(LtePdcpUlDataPdu_Subpkt_PDU_Fmt, Fmt),
+                                b, offset, length, result_PDU_item);
+                        int iNonDecodeFN = _search_result_int(result_PDU_item,
+                                "System Frame Number");
+                        // Handle fn
+                        const unsigned int SFN_RSHIFT = 4,
+                              SFN_MASK = (1 << 12) - 1;
+                        const unsigned int SUBFRAME_RSHIFT = 0,
+                              SUBFRAME_MASK = (1 << 4) - 1;
+                        int sys_fn = (iNonDecodeFN >> SFN_RSHIFT) & SFN_MASK;
+                        int sub_fn =
+                            (iNonDecodeFN >> SUBFRAME_RSHIFT) & SUBFRAME_MASK;
+                        PyObject *old_object = _replace_result_int(result_PDU_item,
+                                "System Frame Number", sys_fn);
+                        Py_DECREF(old_object);
+                        old_object = _replace_result_int(result_PDU_item,
+                                "Subframe Number", sub_fn);
+                        Py_DECREF(old_object);
+
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                                result_PDU_item, "dict");
+                        PyList_Append(result_PDU, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_PDU_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "PDCP UL Data PDU",
+                            result_PDU, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_PDU);
+                } else {
+                    printf("Unknown LTE PDCP UL Data PDU subpkt id and version:"
+                            " 0x%x - %d\n", subpkt_id, subpkt_ver);
+                }
+                PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
+                        "dict");
+                PyList_Append(result_allpkts, t);
+                Py_DECREF(t);
+                Py_DECREF(result_subpkt);
+                offset += subpkt_size - (offset - start_subpkt);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Subpackets", result_allpkts,
+                    "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_allpkts);
+            return offset - start;
+        }
+    default:
+        printf("Unknown LTE PDCP UL Data PDU version: 0x%x\n",
+                pkt_ver);
+        return 0;
+    }
+}
+
+
+// ----------------------------------------------------------------------------
 
 //Yuanjie: decode modem's internal debugging message
 
@@ -3439,6 +3543,12 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                 ARRAY_SIZE(LtePdcpUlConfig_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_lte_pdcp_ul_config_subpkt(b, offset, length, result);
+        break;
+    case LTE_PDCP_UL_Data_PDU:
+        offset += _decode_by_fmt(LtePdcpUlDataPdu_Fmt,
+                ARRAY_SIZE(LtePdcpUlDataPdu_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_pdcp_ul_data_pdu_subpkt(b, offset, length, result);
         break;
 
     default:
