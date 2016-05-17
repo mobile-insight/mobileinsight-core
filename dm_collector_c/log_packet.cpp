@@ -1136,12 +1136,14 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, int length,
             for (int i = 0; i < n_subpkt; i++) {
                 PyObject *result_subpkt = PyList_New(0);
                 // Decode subpacket header
+                int start_subpkt = offset;
                 offset += _decode_by_fmt(LteMacConfiguration_SubpktHeader,
                                             ARRAY_SIZE(LteMacConfiguration_SubpktHeader, Fmt),
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 int subpkt_id = _search_result_int(result_subpkt, "SubPacket ID");
                 int subpkt_ver = _search_result_int(result_subpkt, "Version");
+                int subpkt_size = _search_result_int(result_subpkt, "SubPacket Size");
                 const char *type_name = search_name(LteMacConfigurationSubpkt_SubpktType,
                                                     ARRAY_SIZE(LteMacConfigurationSubpkt_SubpktType, ValueName),
                                                     subpkt_id);
@@ -1229,6 +1231,8 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, int length,
                         printf("Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
+                // TODO
+                offset += subpkt_size - (offset - start_subpkt);
             }
             PyObject *t = Py_BuildValue("(sOs)",
                                         "Subpackets", result_allpkts, "list");
