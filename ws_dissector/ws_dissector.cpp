@@ -149,7 +149,6 @@ int main(int argc, char** argv)
         size_t data_len = ntohl(*((uint32_t *)(buffer + 4)));
         size_t offset = 8;
         size_t framingHeader_len = 0;
-        printf("data_len=%x type=%x\n", data_len, type);
         if (type == 300 || type == 301) {
             /* If type is pdcp-lte signaling message, we need to add framing
              * header before read pdcp PDU. */
