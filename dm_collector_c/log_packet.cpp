@@ -1748,6 +1748,7 @@ static int _decode_lte_rlc_ul_config_log_packet_subpkt (const char *b,
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
                         "dict");
                 PyList_Append(result_allpkts, t);
+                Py_DECREF(t);
                 Py_DECREF(result_subpkt);
                 offset += subpkt_size - (offset - start_subpkt);
             }
@@ -1923,6 +1924,7 @@ static int _decode_lte_rlc_dl_config_log_packet_subpkt (const char *b,
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
                         "dict");
                 PyList_Append(result_allpkts, t);
+                Py_DECREF(t);
                 Py_DECREF(result_subpkt);
                 offset += subpkt_size - (offset - start_subpkt);
             }
@@ -2078,7 +2080,6 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                                     "PDU TYPE", pystr);
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
-                            // SN is correct, no need to modify
                             // Update other info
                             std::string strRF = "", strP = "", strFI = "",
                                 strE = "";
@@ -2107,6 +2108,18 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                             } else {
                                 strE += "0";
                             }
+                            // update SN (need to check last two bits in
+                            // DCLookAhead)
+                            if ((DCLookAhead) & (1 << (1))) {
+                                iNonDecodeSN += 512;
+                            }
+                            if ((DCLookAhead) & (1)) {
+                                iNonDecodeSN += 256;
+                            }
+                            old_object = _replace_result_int(result_pdu_item,
+                                    "SN", iNonDecodeSN);
+                            Py_DECREF(old_object);
+
                             offset += _decode_by_fmt(
                                     LteRlcUlAmAllPdu_Subpkt_PDU_DATA,
                                     ARRAY_SIZE(
@@ -2343,7 +2356,6 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                                     "Status", pystr);
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
-                            // SN is correct, no need to modify
                             // Update other info
                             std::string strRF = "", strP = "", strFI = "",
                                 strE = "";
@@ -2372,6 +2384,17 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                             } else {
                                 strE += "0";
                             }
+                            // update SN (need to check last two bits in
+                            // DCLookAhead)
+                            if ((DCLookAhead) & (1 << (1))) {
+                                iNonDecodeSN += 512;
+                            }
+                            if ((DCLookAhead) & (1)) {
+                                iNonDecodeSN += 256;
+                            }
+                            old_object = _replace_result_int(result_pdu_item,
+                                    "SN", iNonDecodeSN);
+                            Py_DECREF(old_object);
                             offset += _decode_by_fmt(
                                     LteRlcDlAmAllPdu_Subpkt_PDU_DATA,
                                     ARRAY_SIZE(
@@ -2460,6 +2483,212 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
     }
 }
 
+// ----------------------------------------------------------------------------
+
+static int _decode_lte_mac_rach_trigger_subpkt (const char *b, int offset,
+        int length, PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+    int n_subpkt = _search_result_int(result, "Number of Subpackets");
+
+    switch (pkt_ver) {
+    case 1:
+        {
+            PyObject *result_allpkts = PyList_New(0);
+            for (int i = 0; i < n_subpkt; i++) {
+                PyObject *result_subpkt = PyList_New(0);
+                int start_subpkt = offset;
+                offset += _decode_by_fmt(LteMacRachTrigger_SubpktHeader,
+                        ARRAY_SIZE(LteMacRachTrigger_SubpktHeader, Fmt), b,
+                        offset, length, result_subpkt);
+                int subpkt_id = _search_result_int(result_subpkt,
+                        "Subpacket ID");
+                int subpkt_ver = _search_result_int(result_subpkt,
+                        "Subpacket Version");
+                int subpkt_size = _search_result_int(result_subpkt,
+                        "Subpacket Size");
+                if (subpkt_id == 3 && subpkt_ver == 2) {
+                    // RACH Config Subpacket
+                    offset += _decode_by_fmt(
+                            LteMacRachTrigger_RachConfigSubpktPayload,
+                            ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    PyObject *old_object = _replace_result_int(result_subpkt,
+                            "Preamble Format", 0);
+                    Py_DECREF(old_object);
+                } else if (subpkt_id == 5 && subpkt_ver == 1) {
+                    offset += _decode_by_fmt(
+                            LteMacRachTrigger_RachReasonSubpktPayload,
+                            ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpktPayload,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    (void) _map_result_field_to_name(result_subpkt, "Rach reason",
+                            LteMacRachTrigger_RachReasonSubpkt_RachReason,
+                            ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpkt_RachReason,
+                                ValueName),
+                            "Unknown");
+                    std::string strRachContention = "Contention Based RACH procedure";
+                    PyObject *pystr = Py_BuildValue("s", strRachContention.c_str());
+                    PyObject *old_object = _replace_result(result_subpkt,
+                            "RACH Contention", pystr);
+                    Py_DECREF(old_object);
+                    Py_DECREF(pystr);
+                } else {
+                    printf("Unknown LTE MAC RACH Trigger subpkt id and "
+                            "version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                }
+                PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
+                        "dict");
+                PyList_Append(result_allpkts, t);
+                Py_DECREF(t);
+                Py_DECREF(result_subpkt);
+                offset += subpkt_size - (offset - start_subpkt);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Subpackets", result_allpkts,
+                    "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_allpkts);
+            return offset - start;
+        }
+    default:
+        printf("Unknown LTE MAC RACH Trigger Packet Version: 0x%x\n", pkt_ver);
+        return 0;
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+static int _decode_lte_mac_rach_attempt_subpkt (const char *b, int offset,
+        int length, PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+    int n_subpkt = _search_result_int(result, "Number of Subpackets");
+
+    switch (pkt_ver) {
+    case 1:
+        {
+            PyObject *result_allpkts = PyList_New(0);
+            for (int i = 0; i < n_subpkt; i++) {
+                PyObject *result_subpkt = PyList_New(0);
+                int start_subpkt = offset;
+                offset += _decode_by_fmt(LteMacRachAttempt_SubpktHeader,
+                        ARRAY_SIZE(LteMacRachAttempt_SubpktHeader, Fmt),
+                        b, offset, length, result_subpkt);
+                int subpkt_id = _search_result_int(result_subpkt,
+                        "Subpacket ID");
+                int subpkt_ver = _search_result_int(result_subpkt,
+                        "Subpacket Version");
+                int subpkt_size = _search_result_int(result_subpkt,
+                        "Subpacket Size");
+                if (subpkt_id == 6 && subpkt_ver == 2) {
+                    offset += _decode_by_fmt(LteMacRachAttempt_SubpktPayload,
+                            ARRAY_SIZE(LteMacRachAttempt_SubpktPayload, Fmt),
+                            b, offset, length, result_subpkt);
+                    int iRachMsgBMasks = _search_result_int(result_subpkt,
+                            "Rach msg bmasks");
+                    (void) _map_result_field_to_name(result_subpkt,
+                            "Rach result",
+                            LteMacRachAttempt_Subpkt_RachResult,
+                            ARRAY_SIZE(LteMacRachAttempt_Subpkt_RachResult,
+                                ValueName),
+                            "Unsuccess");
+                    (void) _map_result_field_to_name(result_subpkt,
+                            "Contention procedure",
+                            LteMacRachAttempt_Subpkt_ContentionProcedure,
+                            ARRAY_SIZE(LteMacRachAttempt_Subpkt_ContentionProcedure,
+                                ValueName),
+                            "Unknown");
+                    if ((iRachMsgBMasks) & (1 << 2)) {
+                        // Msg1
+                        PyObject *result_subpkt_msg1 = PyList_New(0);
+                        offset += _decode_by_fmt(LteMacRachAttempt_Subpkt_Msg1,
+                                ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg1, Fmt),
+                                b, offset, length, result_subpkt_msg1);
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Msg1",
+                                result_subpkt_msg1, "dict");
+                        PyList_Append(result_subpkt, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_subpkt_msg1);
+                    }
+                    if ((iRachMsgBMasks) & (1 << 1)) {
+                        // Msg2
+                        PyObject *result_subpkt_msg2 = PyList_New(0);
+                        offset += _decode_by_fmt(LteMacRachAttempt_Subpkt_Msg2,
+                                ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg2, Fmt),
+                                b, offset, length, result_subpkt_msg2);
+                        (void) _map_result_field_to_name(result_subpkt_msg2,
+                                "Result",
+                                LteMacRachAttempt_Subpkt_Msg2_Result,
+                                ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg2_Result,
+                                    ValueName),
+                                "False");
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Msg2",
+                                result_subpkt_msg2, "dict");
+                        PyList_Append(result_subpkt, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_subpkt_msg2);
+                    }
+                    if ((iRachMsgBMasks) & (1)) {
+                        // Msg3
+                        PyObject *result_subpkt_msg3 = PyList_New(0);
+                        offset += _decode_by_fmt(LteMacRachAttempt_Subpkt_Msg3,
+                                ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg3, Fmt),
+                                b, offset, length, result_subpkt_msg3);
+                        int iGrantBytes = _search_result_int(result_subpkt_msg3,
+                                "Grant");
+                        PyObject *result_MACPDUs = PyList_New(0);
+                        for (int j = 0; j < iGrantBytes + 1; j++) {
+                            PyObject *result_MACPDU_item = PyList_New(0);
+                            offset += _decode_by_fmt(
+                                    LteMacRachAttempt_Subpkt_Msg3_MACPDU,
+                                    ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg3_MACPDU,
+                                        Fmt),
+                                    b, offset, length, result_MACPDU_item);
+                            PyObject *t2 = Py_BuildValue("(sOs)", "Ignored",
+                                    result_MACPDU_item, "dict");
+                            PyList_Append(result_MACPDUs, t2);
+                            Py_DECREF(t2);
+                            Py_DECREF(result_MACPDU_item);
+                        }
+                        // add pdu list
+                        PyObject *t2 = Py_BuildValue("(sOs)", "MAC PDUs",
+                                result_MACPDUs, "list");
+                        PyList_Append(result_subpkt_msg3, t2);
+                        Py_DECREF(t2);
+                        Py_DECREF(result_MACPDUs);
+                        // add Msg3 dict
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Msg3",
+                                result_subpkt_msg3, "dict");
+                        PyList_Append(result_subpkt, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_subpkt_msg3);
+                    }
+
+                } else {
+                    printf("Unknown LTE MAC RACH Attempt Subpkt id and Version"
+                            ": 0x%x - %d\n", subpkt_id, subpkt_ver);
+                }
+                PyObject *t = Py_BuildValue("(sOs)", "Ignored",
+                        result_subpkt, "dict");
+                PyList_Append(result_allpkts, t);
+                Py_DECREF(t);
+                Py_DECREF(result_subpkt);
+                offset += subpkt_size - (offset - start_subpkt);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Subpackets", result_allpkts,
+                    "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_allpkts);
+            return offset - start;
+        }
+    default:
+        printf("Unknown LTE MAC RACH Attempt Packet Version: 0x%x\n", pkt_ver);
+        return 0;
+    }
+}
 
 // ----------------------------------------------------------------------------
 
@@ -2819,6 +3048,21 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                 b, offset, length, result);
         offset += _decode_lte_rlc_dl_am_all_pdu_subpkt(b, offset,
                 length, result);
+        break;
+
+    case LTE_MAC_Rach_Trigger:
+        offset += _decode_by_fmt(LteMacRachTriggerFmt,
+                ARRAY_SIZE(LteMacRachTriggerFmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_mac_rach_trigger_subpkt(b, offset, length,
+                result);
+        break;
+    case LTE_MAC_Rach_Attempt:
+        offset += _decode_by_fmt(LteMacRachAttempt_Fmt,
+                ARRAY_SIZE(LteMacRachAttempt_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_mac_rach_attempt_subpkt(b, offset, length,
+                result);
         break;
 
     default:

@@ -48,6 +48,8 @@ enum LogPacketType {
     LTE_RLC_DL_Config_Log_Packet = 0xB081,
     LTE_RLC_UL_AM_All_PDU = 0xB092,
     LTE_RLC_DL_AM_All_PDU = 0xB082,
+    LTE_MAC_Rach_Trigger = 0xB061,
+    LTE_MAC_Rach_Attempt = 0xB062,
 };
 
 // Mapping type IDs to names
@@ -139,6 +141,10 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_RLC_UL_AM_All_PDU", true},
     {LTE_RLC_DL_AM_All_PDU,
         "LTE_RLC_DL_AM_All_PDU", true},
+    {LTE_MAC_Rach_Trigger,
+        "LTE_MAC_Rach_Trigger", true},
+    {LTE_MAC_Rach_Attempt,
+        "LTE_MAC_Rach_Attempt", true},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

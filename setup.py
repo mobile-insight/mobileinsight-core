@@ -70,7 +70,7 @@ if platform.system()=="Darwin":
     
     arch=platform.architecture()
     if arch[0]!='64bit':
-        print "Unsupported operating system: "+str(arch)
+        print "Unsupported operating system: " + str(arch)
         sys.exit()
 
     url = "http://metro.cs.ucla.edu/mobile_insight/libs/osx/libs/"
@@ -80,7 +80,7 @@ if platform.system()=="Darwin":
 
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
-    DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector/',['ws_dissector/ws_dissector']),
+    DATA_FILES = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ['ws_dissector/ws_dissector']),
                  ('/usr/lib/',lib_list)]
 
 elif platform.system()=="Linux":
@@ -91,17 +91,17 @@ elif platform.system()=="Linux":
     elif arch[0]=='64bit':
         url="http://metro.cs.ucla.edu/mobile_insight/libs/linux-64/libs/"
     else:
-        print "Unsupported operating system: "+str(arch)
+        print "Unsupported operating system: " + str(arch)
         sys.exit()
 
     libs = parse_libs(url,"so")
-    #download_libs(url,libs)
-    #download_unix(url)
+    download_libs(url,libs)
+    download_unix(url)
 
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
-    DATA_FILES = [("/usr/local/bin/",['ws_dissector/ws_dissector']),]
-#                  ('/usr/lib/',lib_list)]
+    DATA_FILES = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ['ws_dissector/ws_dissector']),
+                  ('/usr/lib/', lib_list)]
 
 elif platform.system() == "Windows":
     arch=platform.architecture()
@@ -125,8 +125,8 @@ elif platform.system() == "Windows":
         ws_files.extend(['ws_dissector/' + name for name in files if name.endswith('.dll')])
 
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
-    DATA_FILES = [(sys.exec_prefix+'/mobile_insight/ws_dissector',ws_files),
-                  (sys.exec_prefix+'/mobile_insight/ws_dissector',lib_list)]
+    DATA_FILES = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ws_files),
+                  (sys.exec_prefix + '/mobile_insight/ws_dissector/', lib_list)]
 else:
     print "Unsupported operating system: "+str(arch)
     sys.exit()

@@ -36,7 +36,7 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     '''
 
     l = logging.getLogger(logger_name)
-    if len(l.handlers)<2:
+    if len(l.handlers)<1:
         formatter = logging.Formatter('%(asctime)s %(message)s')
         streamHandler = logging.StreamHandler()
         streamHandler.setFormatter(formatter)
