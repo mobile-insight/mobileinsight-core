@@ -1,5 +1,5 @@
 WS_LIB_PATH=/usr/local/lib
-WS_SRC_PATH=$(HOME)/wireshark-2.0.1-androidcc
+WS_SRC_PATH=$(HOME)/Documents/wireshark-2.0.2
 WS_ANDROID_LIB_PATH=$(HOME)/android/prefix/lib
 GLIB_SRC_PATH=$(HOME)/android-glib/glib
 GLIB_ANDROID_LIB_PATH=$(HOME)/android-glib/lib

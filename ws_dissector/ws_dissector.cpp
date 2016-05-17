@@ -149,6 +149,7 @@ int main(int argc, char** argv)
         size_t data_len = ntohl(*((uint32_t *)(buffer + 4)));
         size_t offset = 8;
         size_t framingHeader_len = 0;
+        printf("data_len=%x type=%x\n", data_len, type);
         if (type == 300 || type == 301) {
             /* If type is pdcp-lte signaling message, we need to add framing
              * header before read pdcp PDU. */
@@ -195,6 +196,7 @@ int main(int argc, char** argv)
         }
         fread(buffer + offset, 1, data_len, stdin);
         // fprintf(stderr, "type = %u, size = %u\n", type, (unsigned int) data_len);
+
         try_dissect(session, data_len + 2 * 4 + framingHeader_len, buffer);
         printf("===___===\n");  // this line CANNOT be deleted. used to seperate msgs
     }
