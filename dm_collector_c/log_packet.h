@@ -1554,6 +1554,81 @@ const ValueName LteRlcUlStats_Subpkt_RB_Mode [] = {
 };
 
 // ----------------------------------------------------------------------------
+// LTE PDCP DL Ctrl PDU
+
+const Fmt LtePdcpDlCtrlPdu_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpDlCtrlPdu_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpDlCtrlPdu_SubpktPayload [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "SN Length (bit)", 1},
+};
+const ValueName LtePdcpDlCtrlPdu_Subpkt_Mode [] = {
+    {1, "AM"},
+};
+
+const Fmt LtePdcpDlCtrlPdu_Subpkt_PDU_Header [] = {
+    {UINT, "Num PDUs", 1},
+};
+
+const Fmt LtePdcpDlCtrlPdu_Subpkt_PDU_Fmt [] = {
+    {UINT, "PDU Size", 2},
+    {UINT, "Logged Bytes", 2},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {PLACEHOLDER, "type", 0},
+    {UINT, "fms", 2},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PDCP UL Ctrl PDU
+
+const Fmt LtePdcpUlCtrlPdu_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpUlCtrlPdu_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpUlCtrlPdu_SubpktPayload [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "SN Length (bit)", 1},
+};
+const ValueName LtePdcpUlCtrlPdu_Subpkt_Mode [] = {
+    {1, "AM"},
+};
+
+const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Header [] = {
+    {UINT, "Num PDUs", 1},
+};
+
+const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Fmt [] = {
+    {UINT, "PDU Size", 2},
+    {UINT, "Logged Bytes", 2},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {PLACEHOLDER, "type", 0},
+    {UINT, "fms", 2},
+};
+
+
+// ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
     {SKIP, NULL, 1},

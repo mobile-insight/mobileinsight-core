@@ -19,10 +19,6 @@ class LtePdcpAnalyzer(Analyzer):
 
         self.add_source_callback(self.__msg_callback)
 
-        self.startThrw = None
-        self.rbInfo = {}
-
-
     def set_source(self,source):
         """
         Set the trace source. Enable the cellular signaling messages
@@ -31,10 +27,12 @@ class LtePdcpAnalyzer(Analyzer):
         """
         Analyzer.set_source(self,source)
 
-        #Phy-layer logs
+        # Phy-layer logs
         # source.enable_log("LTE_PDCP_DL_Config")
         # source.enable_log("LTE_PDCP_UL_Config")
         # source.enable_log("LTE_PDCP_UL_Data_PDU")
+        source.enable_log("LTE_PDCP_DL_Ctrl_PDU")
+        source.enable_log("LTE_PDCP_UL_Ctrl_PDU")
         # source.enable_log("LTE_PDCP_DL_Stats")
         # source.enable_log("LTE_PDCP_DL_SRB_Integrity_Data_PDU")
         # source.enable_log("LTE_PDCP_UL_SRB_Integrity_Data_PDU")
