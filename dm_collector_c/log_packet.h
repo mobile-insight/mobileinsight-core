@@ -1303,7 +1303,8 @@ const ValueName LtePdcpDlConfig_Subpkt_ActiveRB_RoHCEnabled [] = {
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
     {SKIP, NULL, 1},
-    {UINT, "Number of parameters", 2},
+    {UINT, "Number of parameters", 1},
+    {SKIP, NULL, 1},
     {QCDM_TIMESTAMP, "Timestamp", 8},
     {UINT, "Line of code", 2},
     {SKIP, NULL, 6},

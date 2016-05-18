@@ -2903,14 +2903,19 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
         // The message is pre-stored (thus not transferred) as a database.
         //
         argc++;
-        int *tmp_argv = new int[argc];
+        long *tmp_argv = new long[argc];
+
+        // printf("%d\n",argc); 
 
         //Get parameters
         for(int i=0; i!=argc; i++)
         {
-            const char *p = b + offset;
+            // const char *p = b + offset;
 
-            int ii = *((int *) p);    //a new parameter
+            // int ii = *((int *) p);    //a new parameter
+
+            long ii = *((long *) (b + offset));
+
             tmp_argv[i] = ii;
 
             offset += 4;    //one parameter
@@ -2933,6 +2938,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
             PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
             PyList_Append(result, t);
             Py_DECREF(t);
+
+            delete [] tmp_argv;
             return length-start;
         }
         else if(argc==10 && tmp_argv[0]==0x81700a47)
@@ -2953,6 +2960,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
             PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
             PyList_Append(result, t);
             Py_DECREF(t);
+
+            delete [] tmp_argv;
             return length-start;
 
         }
@@ -2963,6 +2972,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
             // PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
             // PyList_Append(result, t);
             // Py_DECREF(t);
+
+            delete [] tmp_argv;
             return length-start;
 
         }
@@ -2987,13 +2998,10 @@ is_debug_packet (const char *b, size_t length) {
     // return length >=2 && (b[0] ==  '\x79');
 }
 
-
-
 PyObject *
 decode_log_packet (const char *b, size_t length, bool skip_decoding) {
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
-
 
     PyObject *result = NULL;
     int offset = 0;
