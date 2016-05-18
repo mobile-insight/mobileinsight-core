@@ -2990,7 +2990,7 @@ is_debug_packet (const char *b, size_t length) {
 
 
 PyObject *
-decode_log_packet (const char *b, int length, bool skip_decoding) {
+decode_log_packet (const char *b, size_t length, bool skip_decoding) {
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
 
@@ -3356,7 +3356,7 @@ _decode_by_fmt_modem (const Fmt fmt [], int n_fmt,
 
 
 PyObject *
-decode_log_packet_modem (const char *b, int length, bool skip_decoding) {
+decode_log_packet_modem (const char *b, size_t length, bool skip_decoding) {
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
 
