@@ -1495,6 +1495,110 @@ const ValueName LtePdcpDlStats_Subpkt_RB_Mode [] = {
 };
 
 // ----------------------------------------------------------------------------
+// LTE PDCP UL Stats
+
+const Fmt LtePdcpUlStats_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpUlStats_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpUlStats_SubpktPayload_v1 [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "PDCPUL Errors", 4},
+};
+
+const Fmt LtePdcpUlStats_SubpktPayload_v2 [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "PDCPUL Errors", 4},
+};
+
+const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v1 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "PDCP Hdr Len", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Flow Ctrl Trigger", 4},
+    {UINT, "Num Data PDU Tx", 4},
+    {UINT, "Num Data PDU Tx Bytes", 4},
+    {UINT, "Num Control PDU Tx", 4},
+    {UINT, "Num Control PDU Tx Bytes", 4},
+    {UINT, "Num Status Report", 4},
+    {UINT, "Num ROHC Fail", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx", 4},
+    {UINT, "Num Discard SDU", 4},
+    {UINT, "Num Discard SDU Bytes", 4},
+    {UINT, "Num PDU HO ReTx", 4},
+    {UINT, "Num PDU HO ReTx Bytes", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Flow Ctrl Trigger Rst", 4},
+    {UINT, "Num Data PDU Tx Rst", 4},
+    {UINT, "Num Data PDU Tx Bytes Rst", 4},
+    {UINT, "Num Control PDU Tx Rst", 4},
+    {UINT, "Num Control PDU Tx Bytes Rst", 4},
+    {UINT, "Num Status Report Rst", 4},
+    {UINT, "Num ROHC Fail Rst", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx Rst", 4},
+    {UINT, "Num Discard SDU Rst", 4},
+    {UINT, "Num Discard SDU Bytes Rst", 4},
+    {UINT, "Num PDU HO ReTx Rst", 4},
+    {UINT, "Num PDU HO ReTx Bytes Rst", 4},
+    {SKIP, NULL, 4},
+};
+
+const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v2 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "PDCP Hdr Len", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Pdcp Ul Buffer Pkt", 2},
+    {UINT, "Num Pdcp Ul Buffer Pkt Bytes", 4},
+    {UINT, "Num Flow Ctrl Trigger", 4},
+    {UINT, "Num Data PDU Tx", 4},
+    {UINT, "Num Data PDU Tx Bytes", 4},
+    {UINT, "Num Control PDU Tx", 4},
+    {UINT, "Num Control PDU Tx Bytes", 4},
+    {UINT, "Num Status Report", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx", 4},
+    {UINT, "Num ROHC Fail", 4},
+    {UINT, "Num Discard SDU", 4},
+    {UINT, "Num Discard SDU Bytes", 4},
+    {UINT, "Num PDU HO ReTx", 4},
+    {UINT, "Num PDU HO ReTx Bytes", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd", 4},
+    {UINT, "Num Rohc Pdu Drop Ho", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Flow Ctrl Trigger Rst", 4},
+    {UINT, "Num Data PDU Tx Rst", 4},
+    {UINT, "Num Data PDU Tx Bytes Rst", 4},
+    {UINT, "Num Control PDU Tx Rst", 4},
+    {UINT, "Num Control PDU Tx Bytes Rst", 4},
+    {UINT, "Num Status Report Rst", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx Rst", 4},
+    {UINT, "Num ROHC Fail Rst", 4},
+    {UINT, "Num Discard SDU Rst", 4},
+    {UINT, "Num Discard SDU Bytes Rst", 4},
+    {UINT, "Num PDU HO ReTx Rst", 4},
+    {UINT, "Num PDU HO ReTx Bytes Rst", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes Rst", 4},
+    {SKIP, NULL, 4},
+
+};
+
+const ValueName LtePdcpUlStats_Subpkt_RB_Mode [] = {
+    {1, "AM"},
+};
+
+// ----------------------------------------------------------------------------
 // LTE RLC UL Statistics
 
 const Fmt LteRlcUlStats_Fmt [] = {
@@ -1632,7 +1736,8 @@ const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Fmt [] = {
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
     {SKIP, NULL, 1},
-    {UINT, "Number of parameters", 2},
+    {UINT, "Number of parameters", 1},
+    {SKIP, NULL, 1},
     {QCDM_TIMESTAMP, "Timestamp", 8},
     {UINT, "Line of code", 2},
     {SKIP, NULL, 6},

@@ -31,9 +31,10 @@ class LtePdcpAnalyzer(Analyzer):
         # source.enable_log("LTE_PDCP_DL_Config")
         # source.enable_log("LTE_PDCP_UL_Config")
         # source.enable_log("LTE_PDCP_UL_Data_PDU")
-        source.enable_log("LTE_PDCP_DL_Ctrl_PDU")
-        source.enable_log("LTE_PDCP_UL_Ctrl_PDU")
+        # source.enable_log("LTE_PDCP_DL_Ctrl_PDU")
+        # source.enable_log("LTE_PDCP_UL_Ctrl_PDU")
         # source.enable_log("LTE_PDCP_DL_Stats")
+        source.enable_log("LTE_PDCP_UL_Stats")
         # source.enable_log("LTE_PDCP_DL_SRB_Integrity_Data_PDU")
         # source.enable_log("LTE_PDCP_UL_SRB_Integrity_Data_PDU")
 
