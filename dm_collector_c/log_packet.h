@@ -1658,6 +1658,140 @@ const ValueName LteRlcUlStats_Subpkt_RB_Mode [] = {
 };
 
 // ----------------------------------------------------------------------------
+// LTE RLC DL Statistics
+
+const Fmt LteRlcDlStats_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LteRlcDlStats_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LteRlcDlStats_SubpktPayload_v2 [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "RLC PDCP Q Full Count", 4},
+    {UINT, "RLCDL Error Count", 4},
+};
+
+const Fmt LteRlcDlStats_SubpktPayload_v3 [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "RLC PDCP Q Full Count", 4},
+    {UINT, "RLCDL Error Count", 4},
+};
+
+const Fmt LteRlcDlStats_Subpkt_RB_Fmt_v2 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Data PDU", 4},
+    {UINT, "Data PDU Bytes", 4},
+    {UINT, "Num Status Rxed", 4},
+    {UINT, "Status Rxed Bytes", 4},
+    {UINT, "Num Invalid PDU", 4},
+    {UINT, "Invalid PDU Bytes", 4},
+    {UINT, "Num Retx PDU", 4},
+    {UINT, "Retx PDU Bytes", 4},
+    {UINT, "Num Dup PDU", 4},
+    {UINT, "Dup PDU Bytes", 4},
+    {UINT, "Num Dropped PDU", 4},
+    {UINT, "Dropped PDU Bytes", 4},
+    {UINT, "Num Dropped PDU FC", 4},
+    {UINT, "Dropped PDU Bytes FC", 4},
+    {UINT, "Num SDU", 4},
+    {UINT, "Num SDU Bytes", 4},
+    {UINT, "Num NonSeq SDU", 4},
+    {UINT, "Num Ctrl PDU", 4},
+    {UINT, "Num Complete NACK", 4},
+    {UINT, "Num Segments NACK", 4},
+    {UINT, "Num t_reorder Expired", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Data PDU Rst", 4},
+    {UINT, "Data PDU Bytes Rst", 4},
+    {UINT, "Num Status Rxed Rst", 4},
+    {UINT, "Status Rxed Bytes Rst", 4},
+    {UINT, "Num Invalid PDU Rst", 4},
+    {UINT, "Invalid PDU Bytes Rst", 4},
+    {UINT, "Num Retx PDU Rst", 4},
+    {UINT, "Retx PDU Bytes Rst", 4},
+    {UINT, "Num Dup PDU Rst", 4},
+    {UINT, "Dup PDU Bytes Rst", 4},
+    {UINT, "Num Dropped PDU Rst", 4},
+    {UINT, "Dropped PDU Bytes Rst", 4},
+    {UINT, "Num Dropped PDU FC Rst", 4},
+    {UINT, "Dropped PDU Bytes FC Rst", 4},
+    {UINT, "Num SDU Rst", 4},
+    {UINT, "Num SDU Bytes Rst", 4},
+    {UINT, "Num NonSeq SDU Rst", 4},
+    {UINT, "Num Ctrl PDU Rst", 4},
+    {UINT, "Num Complete NACK Rst", 4},
+    {UINT, "Num Segments NACK Rst", 4},
+    {UINT, "Num t_reorder Expired Rst", 4},
+    {SKIP, NULL, 4},
+};
+
+const Fmt LteRlcDlStats_Subpkt_RB_Fmt_v3 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Data PDU", 4},
+    {UINT, "Data PDU Bytes", 8},
+    {UINT, "Num Status Rxed", 4},
+    {UINT, "Status Rxed Bytes", 8},
+    {UINT, "Num Invalid PDU", 4},
+    {UINT, "Invalid PDU Bytes", 8},
+    {UINT, "Num Retx PDU", 4},
+    {UINT, "Retx PDU Bytes", 8},
+    {UINT, "Num Dup PDU", 4},
+    {UINT, "Dup PDU Bytes", 8},
+    {UINT, "Num Dropped PDU", 4},
+    {UINT, "Dropped PDU Bytes", 8},
+    {UINT, "Num Dropped PDU FC", 4},
+    {UINT, "Dropped PDU Bytes FC", 8},
+    {UINT, "Num SDU", 4},
+    {UINT, "Num SDU Bytes", 8},
+    {UINT, "Num NonSeq SDU", 4},
+    {UINT, "Num Ctrl PDU", 4},
+    {UINT, "Num Complete NACK", 4},
+    {UINT, "Num Segments NACK", 4},
+    {UINT, "Num t_reorder Expired", 4},
+    {UINT, "Num t_reorder Start", 4},
+    {UINT, "Num Missed UM PDU", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Data PDU Rst", 4},
+    {UINT, "Data PDU Bytes Rst", 8},
+    {UINT, "Num Status Rxed Rst", 4},
+    {UINT, "Status Rxed Bytes Rst", 8},
+    {UINT, "Num Invalid PDU Rst", 4},
+    {UINT, "Invalid PDU Bytes Rst", 8},
+    {UINT, "Num Retx PDU Rst", 4},
+    {UINT, "Retx PDU Bytes Rst", 8},
+    {UINT, "Num Dup PDU Rst", 4},
+    {UINT, "Dup PDU Bytes Rst", 8},
+    {UINT, "Num Dropped PDU Rst", 4},
+    {UINT, "Dropped PDU Bytes Rst", 8},
+    {UINT, "Num Dropped PDU FC Rst", 4},
+    {UINT, "Dropped PDU Bytes FC Rst", 8},
+    {UINT, "Num SDU Rst", 4},
+    {UINT, "Num SDU Bytes Rst", 8},
+    {UINT, "Num NonSeq SDU Rst", 4},
+    {UINT, "Num Ctrl PDU Rst", 4},
+    {UINT, "Num Complete NACK Rst", 4},
+    {UINT, "Num Segments NACK Rst", 4},
+    {UINT, "Num t_reorder Expired Rst", 4},
+    {UINT, "Num t_reorder Start Rst", 4},
+    {UINT, "Num Missed UM PDU Rst", 4},
+    {SKIP, NULL, 4},
+};
+const ValueName LteRlcDlStats_Subpkt_RB_Mode [] = {
+    {1, "AM"},
+};
+
+// ----------------------------------------------------------------------------
 // LTE PDCP DL Ctrl PDU
 
 const Fmt LtePdcpDlCtrlPdu_Fmt [] = {
