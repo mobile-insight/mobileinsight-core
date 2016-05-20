@@ -10,6 +10,7 @@
 #include "hdlc.h"
 #include "log_config.h"
 #include "log_packet.h"
+#include "export_manager.h"
 
 #include <string>
 #include <vector>
@@ -22,11 +23,14 @@
 #endif
 
 // NOTE: the following number should be updated every time.
-#define DM_COLLECTOR_C_VERSION "1.0.11"
+#define DM_COLLECTOR_C_VERSION "1.0.12"
 
+// Global variable to control exportation of raw log
+static ExportManagerState g_emanager;
 
 static PyObject *dm_collector_c_disable_logs (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_enable_logs (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_set_filtered_export (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_feed_binary (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_receive_log_packet (PyObject *self, PyObject *args);
@@ -46,6 +50,18 @@ static PyMethodDef DmCollectorCMethods[] = {
         "\n"
         "Args:\n"
         "    port: a diagnositic serial port.\n"
+        "    type_names: a sequence of type names.\n"
+        "\n"
+        "Returns:\n"
+        "    Successful or not.\n"
+        "\n"
+        "Raises\n"
+        "    ValueError: when an unrecognized type name is passed in.\n"
+    },
+    {"set_filtered_export", dm_collector_c_set_filtered_export, METH_VARARGS,
+        "Configure this moduel to output a filtered log file.\n"
+        "\n"
+        "Args:\n"
         "    type_names: a sequence of type names.\n"
         "\n"
         "Returns:\n"
@@ -175,36 +191,50 @@ dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
         return NULL;
 }
 
+// Converts type names to a vector of IDs.
+// Returns true if all string are successfully converted, or false if wrong name
+// is found.
+static bool
+map_typenames_to_ids (PyObject *type_names, IdVector &type_ids) {
+    Py_ssize_t n = PySequence_Length(type_names);
+
+    bool name_error = false;
+    for (Py_ssize_t i = 0; i < n; i++) {
+        PyObject *item = PySequence_GetItem(type_names, i);
+        if (!PyString_Check(item)) {
+            // ignore non-strings
+        } else {
+            const char *name = PyString_AsString(item);
+            int cnt = find_ids(LogPacketTypeID_To_Name,
+                                ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
+                                name, type_ids);
+            if (cnt == 0) {
+                name_error = true;
+            }
+        }
+        if (item != NULL) {
+            Py_DECREF(item);    // Discard reference ownership
+        }
+        if (name_error) {
+            break;
+        }
+    }
+    return !name_error;
+}
+
 // A helper function that generated binary code to enable the specified types
 // of messages.
 // If error occurs, false is returned and PyErr_SetString() will be called.
 static bool
 generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
     IdVector type_ids;
-    std::vector<IdVector> type_id_vectors;
-    BinaryBuffer buf;
-    // int n = PySequence_Length(type_names);
-    long n = PySequence_Length(type_names);
-
-    for (int i = 0; i < n; i++) {
-        PyObject *item = PySequence_GetItem(type_names, i);
-        if (PyString_Check(item)) {
-            const char *name = PyString_AsString(item);
-            int cnt = find_ids(LogPacketTypeID_To_Name,
-                                ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
-                                name, type_ids);
-            if (cnt == 0) {
-                PyErr_SetString(PyExc_ValueError, "Wrong type name.");
-                Py_DECREF(item);
-                return false;
-            }
-        } else {
-            // ignore non-strings
-        }
-        if (item != NULL)
-            Py_DECREF(item);    // Discard reference ownership
+    bool success = map_typenames_to_ids(type_names, type_ids);
+    if (!success) {
+        PyErr_SetString(PyExc_ValueError, "Wrong type name.");
+        return false;
     }
 
+    BinaryBuffer buf;
     // Yuanjie: check if Modem_debug_message exists. If so, enable it in slightly different way
     IdVector::iterator debug_ind = type_ids.begin();
     for(; debug_ind != type_ids.end(); debug_ind++) {
@@ -235,6 +265,7 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
     }
 
     // send log config messages
+    std::vector<IdVector> type_id_vectors;
     sort_type_ids(type_ids, type_id_vectors);
     for (size_t i = 0; i < type_id_vectors.size(); i++) {
         const IdVector& v = type_id_vectors[i];
@@ -285,6 +316,40 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
     raise_exception:
         Py_DECREF(sequence);
         Py_DECREF(serial_port);
+        return NULL;
+}
+
+// Return: successful or not
+static PyObject *
+dm_collector_c_set_filtered_export (PyObject *self, PyObject *args) {
+    const char *path;
+    PyObject *sequence = NULL;
+    IdVector type_ids;
+    bool success = false;
+
+    if (!PyArg_ParseTuple(args, "sO", &path, &sequence)) {
+        return NULL;
+    }
+    Py_INCREF(sequence);
+
+    // Check arguments
+    if (!PySequence_Check(sequence)) {
+        PyErr_SetString(PyExc_TypeError, "\'type_names\' is not a sequence.");
+        goto raise_exception;
+    }
+
+    success = map_typenames_to_ids(sequence, type_ids);
+    if (!success) {
+        PyErr_SetString(PyExc_ValueError, "Wrong type name.");
+        goto raise_exception;
+    }
+    Py_DECREF(sequence);
+
+    manager_change_config(&g_emanager, path, type_ids);
+    Py_RETURN_TRUE;
+
+    raise_exception:
+        Py_DECREF(sequence);
         return NULL;
 }
 
@@ -385,6 +450,7 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
     // if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
     if (success && crc_correct) {
+        manager_export_binary(&g_emanager, frame.c_str(), frame.size());
 
         if(is_log_packet(frame.c_str(), frame.size())){
             const char *s = frame.c_str();
@@ -514,4 +580,6 @@ initdm_collector_c(void)
     PyObject *pystr = PyString_FromString(DM_COLLECTOR_C_VERSION);
     PyObject_SetAttrString(dm_collector_c, "version", pystr);
     Py_DECREF(pystr);
+
+    manager_init_state(&g_emanager);
 }
