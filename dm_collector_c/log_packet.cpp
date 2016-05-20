@@ -2805,7 +2805,7 @@ static int _decode_lte_pdcp_dl_config_subpkt (const char *b, int offset,
                     offset += 1 + iArraySize * 2 - (offset - start_AddedModifiedRBStruct);
 
                     // Active RB
-                    int start_ActiveRBStruct = offset;
+                    // int start_ActiveRBStruct = offset;
                     offset += _decode_by_fmt(LtePdcpDlConfig_Subpkt_ActiveRB_Header,
                             ARRAY_SIZE(LtePdcpDlConfig_Subpkt_ActiveRB_Header,
                                 Fmt),
@@ -3579,7 +3579,7 @@ static int _decode_lte_pdcp_dl_ctrl_pdu_subpkt (const char *b, int offset,
                             "Unknown");
 
                     // PDU
-                    int start_PDU = offset;
+                    // int start_PDU = offset;
                     offset += _decode_by_fmt(
                             LtePdcpDlCtrlPdu_Subpkt_PDU_Header,
                             ARRAY_SIZE(LtePdcpDlCtrlPdu_Subpkt_PDU_Header,
@@ -3689,7 +3689,7 @@ static int _decode_lte_pdcp_ul_ctrl_pdu_subpkt (const char *b, int offset,
                             "Unknown");
 
                     // PDU
-                    int start_PDU = offset;
+                    // int start_PDU = offset;
                     offset += _decode_by_fmt(
                             LtePdcpUlCtrlPdu_Subpkt_PDU_Header,
                             ARRAY_SIZE(LtePdcpUlCtrlPdu_Subpkt_PDU_Header,
@@ -3772,108 +3772,300 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
     switch (pkt_ver) {
     case 4:
         {
-           PyObject *result_payload = PyList_New(0);
-           offset += _decode_by_fmt(LtePucchPowerControl_Payload_v4,
-                   ARRAY_SIZE(LtePucchPowerControl_Payload_v4, Fmt),
-                   b, offset, length, result_payload);
-           int num_record = _search_result_int(result_payload,
-                   "Number of Records");
-           PyObject *result_record = PyList_New(0);
-           for (int i = 0; i < num_record; i++) {
-               PyObject *result_record_item = PyList_New(0);
-               offset += _decode_by_fmt(LtePucchPowerControl_Record_Fmt_v4,
-                       ARRAY_SIZE(LtePucchPowerControl_Record_Fmt_v4, Fmt),
-                       b, offset, length, result_record_item);
-               int iNonDecodeSFN = _search_result_int(result_record_item,
-                       "SFN");
-               int iSFN = iNonDecodeSFN & 1023; // last 10 bits
-               int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
-               int iPower = (iNonDecodeSFN >> 14) & 255; // next 8 bits
-               int iDCI = (iNonDecodeSFN >> 22) & 15; // next 4 bits
-               int iPUCCH = (iNonDecodeSFN >> 26) && 7; // next 3 bits
-               int iN_HARQ = (iNonDecodeSFN >> 29) && 1; // next 1 bit
-               PyObject *old_object = _replace_result_int(result_record_item,
-                       "SFN", iSFN);
-               Py_DECREF(old_object);
-               old_object = _replace_result_int(result_record_item, "Sub-FN",
-                       iSubFN);
-               Py_DECREF(old_object);
-               old_object = _replace_result_int(result_record_item,
-                       "PUCCH Tx Power (dBm)", iPower);
-               Py_DECREF(old_object);
-               old_object = _replace_result_int(result_record_item,
-                       "DCI Format", iDCI);
-               Py_DECREF(old_object);
-               (void) _map_result_field_to_name(result_record_item,
-                       "DCI Format",
-                       LtePucchPowerControl_Record_Fmt_v4_DCI_Format,
-                       ARRAY_SIZE(LtePucchPowerControl_Record_Fmt_v4_DCI_Format,
-                           ValueName),
-                       "Invalid");
-               old_object = _replace_result_int(result_record_item,
-                       "PUCCH Format", iPUCCH);
-               Py_DECREF(old_object);
-               (void) _map_result_field_to_name(result_record_item,
-                       "PUCCH Format",
-                       LtePucchPowerControl_Record_Fmt_v4_PUCCH_Format,
-                       ARRAY_SIZE(LtePucchPowerControl_Record_Fmt_v4_PUCCH_Format,
-                           ValueName),
-                       "Invalid");
-               old_object = _replace_result_int(result_record_item,
-                       "N_HARQ", iN_HARQ);
-               Py_DECREF(old_object);
+            int num_record = _search_result_int(result, "Number of Records");
+            PyObject *result_record = PyList_New(0);
+            for (int i = 0; i < num_record; i++) {
+                PyObject *result_record_item = PyList_New(0);
+                offset += _decode_by_fmt(LtePucchPowerControl_Record_Fmt_v4,
+                        ARRAY_SIZE(LtePucchPowerControl_Record_Fmt_v4, Fmt),
+                        b, offset, length, result_record_item);
+                int iNonDecodeSFN = _search_result_int(result_record_item,
+                        "SFN");
+                int iSFN = iNonDecodeSFN & 1023; // last 10 bits
+                int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
+                int iPower = (iNonDecodeSFN >> 14) & 255; // next 8 bits
+                int iDCI = (iNonDecodeSFN >> 22) & 15; // next 4 bits
+                int iPUCCH = (iNonDecodeSFN >> 26) && 7; // next 3 bits
+                int iN_HARQ = (iNonDecodeSFN >> 29) && 1; // next 1 bit
+                PyObject *old_object = _replace_result_int(result_record_item,
+                        "SFN", iSFN);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item, "Sub-FN",
+                        iSubFN);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "PUCCH Tx Power (dBm)", iPower);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "DCI Format", iDCI);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "DCI Format",
+                        LtePucchPowerControl_Record_v4_DCI_Format,
+                        ARRAY_SIZE(LtePucchPowerControl_Record_v4_DCI_Format,
+                            ValueName),
+                        "Invalid");
+                old_object = _replace_result_int(result_record_item,
+                        "PUCCH Format", iPUCCH);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "PUCCH Format",
+                        LtePucchPowerControl_Record_v4_PUCCH_Format,
+                        ARRAY_SIZE(LtePucchPowerControl_Record_v4_PUCCH_Format,
+                            ValueName),
+                        "Invalid");
+                old_object = _replace_result_int(result_record_item,
+                        "N_HARQ", iN_HARQ);
+                Py_DECREF(old_object);
 
-               int iNonDecodeTPC = _search_result_int(result_record_item,
-                       "TPC Command");
-               int iTPC = iNonDecodeTPC & 63; // last 6 bits
-               int iN_CQI = (iNonDecodeTPC >> 6) & 31; // next 5 bits
-               int iLoss = (iNonDecodeTPC >> 11) & 127; // next 8 bits
-               old_object = _replace_result_int(result_record_item,
-                       "TPC Command", iTPC);
-               Py_DECREF(old_object);
-               if (iTPC == 31 || iTPC == 63) {
-                   (void) _map_result_field_to_name(result_record_item,
-                           "TPC Command",
-                           LtePucchPowerControl_Record_Fmt_v4_TPC,
-                           ARRAY_SIZE(LtePucchPowerControl_Record_Fmt_v4_TPC,
-                               ValueName),
-                           "Unknown");
-               }
-               old_object = _replace_result_int(result_record_item,
-                       "N_CQI", iN_CQI);
-               Py_DECREF(old_object);
-               old_object = _replace_result_int(result_record_item,
-                       "DL Pass Loss", iLoss);
-               Py_DECREF(old_object);
+                int iNonDecodeTPC = _search_result_int(result_record_item,
+                        "TPC Command");
+                int iTPC = iNonDecodeTPC & 63; // last 6 bits
+                int iN_CQI = (iNonDecodeTPC >> 6) & 31; // next 5 bits
+                int iLoss = (iNonDecodeTPC >> 11) & 127; // next 8 bits
+                old_object = _replace_result_int(result_record_item,
+                        "TPC Command", iTPC);
+                Py_DECREF(old_object);
+                if (iTPC == 31 || iTPC == 63) {
+                    (void) _map_result_field_to_name(result_record_item,
+                            "TPC Command",
+                            LtePucchPowerControl_Record_v4_TPC,
+                            ARRAY_SIZE(LtePucchPowerControl_Record_v4_TPC,
+                                ValueName),
+                            "Unknown");
+                }
+                old_object = _replace_result_int(result_record_item,
+                        "N_CQI", iN_CQI);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "DL Pass Loss", iLoss);
+                Py_DECREF(old_object);
 
-               int iNonDecodeGi = _search_result_int(result_record_item,
-                       "g(i)");
-               int iGi = iNonDecodeGi - 65535;
-               old_object = _replace_result_int(result_record_item,
-                       "g(i)", iGi);
-               Py_DECREF(old_object);
+                int iNonDecodeGi = _search_result_int(result_record_item,
+                        "g(i)");
+                int iGi = iNonDecodeGi - 65535;
+                old_object = _replace_result_int(result_record_item,
+                        "g(i)", iGi);
+                Py_DECREF(old_object);
 
-               PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
-                       result_record_item, "dict");
-               PyList_Append(result_record, t1);
-               Py_DECREF(t1);
-               Py_DECREF(result_record_item);
-           }
-           PyObject *t1 = Py_BuildValue("(sOs)", "Records",
-                   result_record, "list");
-           PyList_Append(result_payload, t1);
-           Py_DECREF(t1);
-           Py_DECREF(result_record);
-
-           PyObject *t = Py_BuildValue("(sOs)", "Payload", result_payload,
-                   "dict");
-           PyList_Append(result, t);
-           Py_DECREF(t);
-           Py_DECREF(result_payload);
-           return offset - start;
+                PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                        result_record_item, "dict");
+                PyList_Append(result_record, t1);
+                Py_DECREF(t1);
+                Py_DECREF(result_record_item);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Records",
+                    result_record, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_record);
+            return offset - start;
         }
     default:
         printf("Unknown LTE PUCCH Power Control version: 0x%x\n", pkt_ver);
+        return 0;
+    }
+}
+
+// ----------------------------------------------------------------------------
+static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
+        int length, PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+
+    switch (pkt_ver) {
+    case 5:
+        {
+            int num_record = _search_result_int(result, "Number of Records");
+            PyObject *result_record = PyList_New(0);
+            for (int i = 0; i < num_record; i++) {
+                PyObject *result_record_item = PyList_New(0);
+                offset += _decode_by_fmt(LtePuschPowerControl_Record_Fmt_v5,
+                        ARRAY_SIZE(LtePuschPowerControl_Record_Fmt_v5, Fmt),
+                        b, offset, length, result_record_item);
+                int iNonDecodeSFN = _search_result_int(result_record_item,
+                        "SFN");
+                int iSFN = iNonDecodeSFN & 1023; // last 10 bits
+                int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
+                int iPower = (iNonDecodeSFN >> 14) & 255; // next 8 bits
+                int iDCI = (iNonDecodeSFN >> 22) & 15; // next 4 bits
+                int iTxType = (iNonDecodeSFN >> 26) && 3; // next 3 bits
+                PyObject *old_object = _replace_result_int(result_record_item,
+                        "SFN", iSFN);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item, "Sub-FN",
+                        iSubFN);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "PUSCH Tx Power (dBm)", iPower);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "DCI Format", iDCI);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "DCI Format",
+                        LtePuschPowerControl_Record_v5_DCI_Format,
+                        ARRAY_SIZE(LtePuschPowerControl_Record_v5_DCI_Format,
+                            ValueName),
+                        "Invalid");
+                old_object = _replace_result_int(result_record_item,
+                        "Tx Type", iTxType);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "Tx Type",
+                        LtePuschPowerControl_Record_v5_TxType,
+                        ARRAY_SIZE(LtePuschPowerControl_Record_v5_TxType,
+                            ValueName),
+                        "Unknown");
+
+                int iNonDecodeNRB = _search_result_int(result_record_item,
+                        "Num RBs");
+                int iNRB = iNonDecodeNRB & 255; // last 8 bits
+                int iTBS = (iNonDecodeNRB >> 8) & 16383; // next 14 bits
+                int iLoss = (iNonDecodeNRB >> 22) & 255; // next 8 bits
+                old_object = _replace_result_int(result_record_item,
+                        "Num RBs", iNRB);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "Transport Block Size", iTBS);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "DL Path Loss", iLoss);
+                Py_DECREF(old_object);
+
+                int iNonDecodeFi = _search_result_int(result_record_item,
+                        "F(i)");
+                int iFi = iNonDecodeFi & 1023; // last 10 bits
+                if (iFi >= 512) {
+                    iFi -= 1024;
+                }
+                int iTPC = (iNonDecodeFi >> 10) & 31; // next 5 bits
+                int iActualPower = (iNonDecodeFi >> 15) & 255;
+                old_object = _replace_result_int(result_record_item,
+                        "F(i)", iFi);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "TPC", iTPC);
+                if (iTPC == 15 || iTPC == 31) {
+                    (void) _map_result_field_to_name(result_record_item,
+                            "TPC",
+                            LtePuschPowerControl_Record_v5_TPC,
+                            ARRAY_SIZE(LtePuschPowerControl_Record_v5_TPC,
+                                ValueName),
+                            "Unknown");
+                }
+                old_object = _replace_result_int(result_record_item,
+                        "PUSCH Actual Tx Power", iActualPower);
+                Py_DECREF(old_object);
+
+                PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                        result_record_item, "dict");
+                PyList_Append(result_record, t1);
+                Py_DECREF(t1);
+                Py_DECREF(result_record_item);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Records",
+                    result_record, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_record);
+            return offset - start;
+        }
+    case 4:
+        {
+            int num_record = _search_result_int(result, "Number of Records");
+            PyObject *result_record = PyList_New(0);
+            for (int i = 0; i < num_record; i++) {
+                PyObject *result_record_item = PyList_New(0);
+                offset += _decode_by_fmt(LtePuschPowerControl_Record_Fmt_v4,
+                        ARRAY_SIZE(LtePuschPowerControl_Record_Fmt_v4, Fmt),
+                        b, offset, length, result_record_item);
+                int iNonDecodeSFN = _search_result_int(result_record_item,
+                        "SFN");
+                int iSFN = iNonDecodeSFN & 1023; // last 10 bits
+                int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
+                int iPower = (iNonDecodeSFN >> 14) & 255; // next 8 bits
+                int iDCI = (iNonDecodeSFN >> 22) & 15; // next 4 bits
+                int iTxType = (iNonDecodeSFN >> 26) && 3; // next 3 bits
+                PyObject *old_object = _replace_result_int(result_record_item,
+                        "SFN", iSFN);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item, "Sub-FN",
+                        iSubFN);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "PUSCH Tx Power (dBm)", iPower);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "DCI Format", iDCI);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "DCI Format",
+                        LtePuschPowerControl_Record_v5_DCI_Format,
+                        ARRAY_SIZE(LtePuschPowerControl_Record_v5_DCI_Format,
+                            ValueName),
+                        "Invalid");
+                old_object = _replace_result_int(result_record_item,
+                        "Tx Type", iTxType);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "Tx Type",
+                        LtePuschPowerControl_Record_v5_TxType,
+                        ARRAY_SIZE(LtePuschPowerControl_Record_v5_TxType,
+                            ValueName),
+                        "Unknown");
+
+                int iNonDecodeTBS = _search_result_int(result_record_item,
+                        "Transport Block Size");
+                int iTBS = iNonDecodeTBS & 16383; // last 14 bits
+                int iLoss = (iNonDecodeTBS >> 14) & 255; // next 8 bits
+                int iFi = (iNonDecodeTBS >> 22) & 1023; // next 10 bits
+                if (iFi >= 512) {
+                    iFi -= 1024;
+                }
+                old_object = _replace_result_int(result_record_item,
+                        "Transport Block Size", iTBS);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "DL Path Loss", iLoss);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "F(i)", iFi);
+                Py_DECREF(old_object);
+
+                int iNonDecodeTPC = _search_result_int(result_record_item,
+                        "TPC");
+                int iTPC = (iNonDecodeTPC) & 31; // last 5 bits
+                int iActualPower = (iNonDecodeTPC >> 5) & 255; // next 8 bits
+                old_object = _replace_result_int(result_record_item,
+                        "TPC", iTPC);
+                if (iTPC == 15 || iTPC == 31) {
+                    (void) _map_result_field_to_name(result_record_item,
+                            "TPC",
+                            LtePuschPowerControl_Record_v5_TPC,
+                            ARRAY_SIZE(LtePuschPowerControl_Record_v5_TPC,
+                                ValueName),
+                            "Unknown");
+                }
+                old_object = _replace_result_int(result_record_item,
+                        "PUSCH Actual Tx Power", iActualPower);
+                Py_DECREF(old_object);
+
+                PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                        result_record_item, "dict");
+                PyList_Append(result_record, t1);
+                Py_DECREF(t1);
+                Py_DECREF(result_record_item);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Records",
+                    result_record, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_record);
+            return offset - start;
+        }
+    default:
+        printf("Unknown LTE PUSCH Power Control version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -3913,7 +4105,7 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
 
             int ii = *((int *) p);    //a new parameter
 
-            tmp_argv[i] = 0;
+            tmp_argv[i] = ii;
 
             offset += 4;    //one parameter
         }
@@ -3974,8 +4166,6 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
     return length-start;
 
 }
-
-
 
 bool
 is_log_packet (const char *b, int length) {
@@ -4309,6 +4499,12 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                 ARRAY_SIZE(LtePucchPowerControl_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_lte_pucch_power_control_payload(b, offset, length, result);
+        break;
+    case LTE_PUSCH_Power_Control:
+        offset += _decode_by_fmt(LtePuschPowerControl_Fmt,
+                ARRAY_SIZE(LtePuschPowerControl_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_pusch_power_control_payload(b, offset, length, result);
         break;
 
     default:

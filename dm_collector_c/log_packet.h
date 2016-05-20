@@ -1870,9 +1870,6 @@ const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Fmt [] = {
 
 const Fmt LtePucchPowerControl_Fmt [] = {
     {UINT, "Version", 1},
-};
-
-const Fmt LtePucchPowerControl_Payload_v4 [] = {
     {SKIP, NULL, 2},
     {UINT, "Number of Records", 1},
 };
@@ -1895,7 +1892,7 @@ const Fmt LtePucchPowerControl_Record_Fmt_v4 [] = {
     {UINT, "PUCCH Actual Tx Power", 1},
     {SKIP, NULL, 1},
 };
-const ValueName LtePucchPowerControl_Record_Fmt_v4_DCI_Format [] = {
+const ValueName LtePucchPowerControl_Record_v4_DCI_Format [] = {
     // Release 8
     // http://www.sharetechnote.com/html/LTE_Advanced_DCI.html
     {0, "Format 0"},
@@ -1912,7 +1909,7 @@ const ValueName LtePucchPowerControl_Record_Fmt_v4_DCI_Format [] = {
     {11, "Format 3A"},
     // {12, "Format 4"},
 };
-const ValueName LtePucchPowerControl_Record_Fmt_v4_PUCCH_Format [] = {
+const ValueName LtePucchPowerControl_Record_v4_PUCCH_Format [] = {
     {0, "Format 1"},
     {1, "Format 1A"},
     {2, "Format 1B"},
@@ -1921,9 +1918,69 @@ const ValueName LtePucchPowerControl_Record_Fmt_v4_PUCCH_Format [] = {
     {5, "Format 2B"},
     {6, "Format 3"},
 };
-const ValueName LtePucchPowerControl_Record_Fmt_v4_TPC [] = {
+const ValueName LtePucchPowerControl_Record_v4_TPC [] = {
     {31, "Not present"},
     {63, "-1"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PUSCH Power Control
+
+const Fmt LtePuschPowerControl_Fmt [] = {
+    {UINT, "Version", 1},
+    {SKIP, NULL, 2},
+    {UINT, "Number of Records", 1},
+};
+
+const Fmt LtePuschPowerControl_Record_Fmt_v4 [] = {
+    {UINT, "SFN", 4},
+    {PLACEHOLDER, "Sub-FN", 0},
+    {PLACEHOLDER, "PUSCH Tx Power (dBm)", 0},
+    {PLACEHOLDER, "DCI Format", 0},
+    {PLACEHOLDER, "Tx Type", 0},
+    {UINT, "Transport Block Size", 4},
+    {PLACEHOLDER, "DL Path Loss", 0},
+    {PLACEHOLDER, "F(i)", 0},
+    {UINT, "TPC", 4},
+    {PLACEHOLDER, "PUSCH Actual Tx Power", 0},
+};
+const Fmt LtePuschPowerControl_Record_Fmt_v5 [] = {
+    {UINT, "SFN", 4},
+    {PLACEHOLDER, "Sub-FN", 0},
+    {PLACEHOLDER, "PUSCH Tx Power (dBm)", 0},
+    {PLACEHOLDER, "DCI Format", 0},
+    {PLACEHOLDER, "Tx Type", 0},
+    {UINT, "Num RBs", 4},
+    {PLACEHOLDER, "Transport Block Size", 0},
+    {PLACEHOLDER, "DL Path Loss", 0},
+    {UINT, "F(i)", 4},
+    {PLACEHOLDER, "TPC", 0},
+    {PLACEHOLDER, "PUSCH Actual Tx Power", 0},
+};
+const ValueName LtePuschPowerControl_Record_v5_TxType [] = {
+    {1, "Dynamic"},
+    {2, "RACH MSG3"},
+};
+const ValueName LtePuschPowerControl_Record_v5_DCI_Format [] = {
+    // Release 8
+    // http://www.sharetechnote.com/html/LTE_Advanced_DCI.html
+    {0, "Format 0"},
+    {1, "Format 1"},
+    {2, "Format 1A"},
+    {3, "Format 1B"},
+    {4, "Format 1C"},
+    {5, "Format 1D"},
+    {6, "Format 2"},
+    {7, "Format 2A"},
+    // {8, "Format 2B"},
+    // {9, "Format 2C"},
+    {10, "Format 3"},
+    {11, "Format 3A"},
+    // {12, "Format 4"},
+};
+const ValueName LtePuschPowerControl_Record_v5_TPC [] = {
+    {15, "N/A"},
+    {31, "-1"},
 };
 
 // ----------------------------------------------------------------------------
