@@ -30,12 +30,6 @@ class OfflineReplayer(Monitor):
 
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
 
-    # def __init__(self, prefs={}):
-    #     Monitor.__init__(self)
-    #     DMLogPacket.init(prefs)
-
-    #     self._type_names=[]
-
     def __init__(self):
         Monitor.__init__(self)
 
@@ -93,6 +87,17 @@ class OfflineReplayer(Monitor):
         self._input_path = path
         self._input_file = open(path, "rb")
 
+    def save_log_as(self,path):
+        """
+        Save the log as a mi2log file (for offline analysis)
+
+        :param path: the file name to be saved
+        :type path: string
+        :param log_types: a filter of message types to be saved
+        :type log_types: list of string
+        """
+        dm_collector_c.set_filtered_export(path,self._type_names)
+
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
@@ -103,6 +108,7 @@ class OfflineReplayer(Monitor):
         # fd.close()
 
         try:
+
             while True:
                 s = self._input_file.read(64)
                 if not s:   # EOF encountered

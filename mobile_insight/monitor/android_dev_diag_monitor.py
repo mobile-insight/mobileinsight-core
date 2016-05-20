@@ -235,6 +235,17 @@ class AndroidDevDiagMonitor(Monitor):
         cls = self.__class__
         self.enable_log(cls.SUPPORTED_TYPES)
 
+    def save_log_as(self,path):
+        """
+        Save the log as a mi2log file (for offline analysis)
+
+        :param path: the file name to be saved
+        :type path: string
+        :param log_types: a filter of message types to be saved
+        :type log_types: list of string
+        """
+        dm_collector_c.set_filtered_export(path,self._type_names)
+
     def set_block_size(self, n):
         self.BLOCK_SIZE = n
 
@@ -343,8 +354,6 @@ class AndroidDevDiagMonitor(Monitor):
                             self._last_diag_revealer_ts = ret_ts
                         if ret_payload:
                             dm_collector_c.feed_binary(ret_payload)
-                            if self._save_file:
-                                self._save_file.write(ret_payload)
                     elif ret_msg_type == ChronicleProcessor.TYPE_START_LOG_FILE:
                         if ret_filename:
                             pass
@@ -393,15 +402,11 @@ class AndroidDevDiagMonitor(Monitor):
                             "sys_shutdown",
                             "Mayday")
             self.send(event)
-            if self._save_file:
-                self._save_file.close()
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
         except Exception, e:
             self._stop_collection()
-            if self._save_file:
-                self._save_file.close()
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
                             "Mayday")
