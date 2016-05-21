@@ -61,6 +61,7 @@ enum LogPacketType {
     LTE_MAC_Rach_Attempt = 0xB062,
     LTE_PUCCH_Power_Control = 0xB16F,
     LTE_PUSCH_Power_Control = 0xB16E,
+    LTE_PDCCH_PHICH_Indication_Report = 0xB16B,
 };
 
 // Mapping type IDs to names
@@ -178,6 +179,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_PUCCH_Power_Control", true},
     {LTE_PUSCH_Power_Control,
         "LTE_PUSCH_Power_Control", true},
+    {LTE_PDCCH_PHICH_Indication_Report,
+        "LTE_PDCCH_PHICH_Indication_Report", true},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

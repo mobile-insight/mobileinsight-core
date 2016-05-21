@@ -760,7 +760,7 @@ const ValueName RNTIType [] = {
     {0, "C-RNTI"},
     {2, "P-RNTI"},
     {3, "RA-RNTI"},
-    {4, "T-C-RNTI"},
+    {4, "Temporary-C-RNTI"},
     {5, "SI-RNTI"}
 };
 
@@ -1201,6 +1201,7 @@ const Fmt LteMacRachAttempt_Subpkt_Msg2 [] = {
     {UINT, "TA value", 2},
 };
 const ValueName LteMacRachAttempt_Subpkt_Msg2_Result [] = {
+    {0, "No"},
     {1, "True"},
 };
 
@@ -1295,9 +1296,11 @@ const ValueName LtePdcpDlConfig_Subpkt_ActiveRB_RBtype [] = {
 };
 const ValueName LtePdcpDlConfig_Subpkt_ActiveRB_StatusReport [] = {
     {0, "NO"},
+    {1, "YES"},
 };
 const ValueName LtePdcpDlConfig_Subpkt_ActiveRB_RoHCEnabled [] = {
     {0, "false"},
+    {1, "true"},
 };
 
 // ----------------------------------------------------------------------------
@@ -1870,6 +1873,8 @@ const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Fmt [] = {
 
 const Fmt LtePucchPowerControl_Fmt [] = {
     {UINT, "Version", 1},
+};
+const Fmt LtePucchPowerControl_Fmt_v4 [] = {
     {SKIP, NULL, 2},
     {UINT, "Number of Records", 1},
 };
@@ -1928,6 +1933,14 @@ const ValueName LtePucchPowerControl_Record_v4_TPC [] = {
 
 const Fmt LtePuschPowerControl_Fmt [] = {
     {UINT, "Version", 1},
+};
+
+const Fmt LtePuschPowerControl_Fmt_v4 [] = {
+    {SKIP, NULL, 2},
+    {UINT, "Number of Records", 1},
+};
+
+const Fmt LtePuschPowerControl_Fmt_v5 [] = {
     {SKIP, NULL, 2},
     {UINT, "Number of Records", 1},
 };
@@ -1981,6 +1994,70 @@ const ValueName LtePuschPowerControl_Record_v5_DCI_Format [] = {
 const ValueName LtePuschPowerControl_Record_v5_TPC [] = {
     {15, "N/A"},
     {31, "-1"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PDCCH-PHICH Indication Report
+
+const Fmt LtePdcchPhichIndicationReport_Fmt [] = {
+    {UINT, "Version", 1},
+};
+
+const Fmt LtePdcchPhichIndicationReport_Fmt_v5 [] = {
+    {UINT, "Duplex Mode", 2},
+    {UINT, "Number of Records", 1},
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v5_p1 [] = {
+    {UINT, "Num PDCCH Results", 4},
+    {PLACEHOLDER, "PDCCH Timing SFN", 0},
+    {PLACEHOLDER, "PDCCH Timing Sub-FN", 0},
+    {PLACEHOLDER, "PHICH Included", 0},
+    {PLACEHOLDER, "PHICH 1 Included", 0},
+    {PLACEHOLDER, "PHICH Timing SFN", 0},
+    {UINT, "PHICH Timing Sub-FN", 4},
+    {PLACEHOLDER, "PHICH Value", 0},
+    {PLACEHOLDER, "PHICH 1 Value", 0},
+};
+
+// totally number of pdcch info + number of pdcch hidden info = 8
+const Fmt LtePdcchPhichIndicationReport_Record_v5_p2 [] = {
+    // PDCCH Info
+    {UINT, "Serv Cell Idx", 2},
+    {PLACEHOLDER, "RNTI Type", 0},
+    {PLACEHOLDER, "Payload Size", 0},
+    {PLACEHOLDER, "Aggregation Level", 0},
+    {UINT, "Search Space", 2},
+    {PLACEHOLDER, "SPS Grant Type", 0},
+    {PLACEHOLDER, "New DL Tx", 0},
+    {PLACEHOLDER, "Num DL Trblks", 0},
+};
+const Fmt LtePdcchPhichIndicationReport_Record_v5_p3 [] = {
+    // PDCCH Hidden Info
+    {SKIP, NULL, 4},
+};
+
+const ValueName LtePdcchPhichIndicationReport_Record_v5_Included [] = {
+    {0, "No"},
+    {1, "Yes"},
+};
+const ValueName LtePdcchPhichIndicationReport_Record_v5_Value [] = {
+    {0, "NACK"},
+    {1, "ACK"},
+};
+const ValueName LtePdcchPhichIndicationReport_Record_v5_NewDLTx [] = {
+    {0, "false"},
+    {1, "true"},
+};
+const ValueName LtePdcchPhichIndicationReport_Record_v5_AggLv [] = {
+    {0, "Agg1"},
+    {1, "Agg2"},
+    {2, "Agg3"},
+    {3, "Agg4"},
+};
+const ValueName LtePdcchPhichIndicationReport_Record_v5_SS [] = {
+    {0, "Common"},
+    {1, "UE-specific"},
 };
 
 // ----------------------------------------------------------------------------
