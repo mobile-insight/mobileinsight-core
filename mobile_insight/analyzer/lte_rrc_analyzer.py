@@ -232,15 +232,11 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         """
         status_updated = False
         if not self.__status.inited():
-            if 'Downlink frequency' in msg.data:
-                status_updated = True
-                self.__status.freq = msg.data['Downlink frequency']
-            if 'Cell ID' in msg.data:
-                status_updated = True
-                self.__status.id = msg.data['Cell ID']
-            if 'TAC' in msg.data:
-                status_updated = True
-                self.__status.tac = msg.data['TAC']
+            status_updated = True
+            self.__status.freq = msg.data['Downlink frequency']
+            self.__status.id = msg.data['Cell ID']
+            self.__status.tac = msg.data['TAC']
+
         else:
             if self.__status.freq != msg.data['Downlink frequency'] \
             or self.__status.id != msg.data['Cell ID'] \
@@ -251,8 +247,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 self.__status.conn = curr_conn
                 self.__status.freq = msg.data['Downlink frequency']
                 self.__status.id = msg.data['Cell ID']
-                self.__history[msg.timestamp] = self.__status
                 self.__status.tac = msg.data['TAC']
+                self.__history[msg.timestamp] = self.__status
+
         
         if status_updated:
             self.log_info(self.__status.dump())

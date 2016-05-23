@@ -100,37 +100,31 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
 
         :param msg: the RRC messages with cell status
         """
+        status_updated = False
         if not self.__status.inited():
             #old yet incomplete config would be discarded
-            if 'Download RF channel number' in msg.data:
-                self.__status.freq = msg.data['Download RF channel number']
-                # self.log_info(self.__status.dump())
-            if 'Cell ID' in msg.data:
-                self.__status.id = msg.data['Cell ID']
-                # self.log_info(self.__status.dump())
-            if 'LAC' in msg.data:
-                self.__status.lac = msg.data['LAC']
-                # self.log_info(self.__status.dump())
-            if 'RAC' in msg.data:
-                self.__status.rac = msg.data['RAC']
-                # self.log_info(self.__status.dump())
+            self.__status.freq=msg.data['Download RF channel number']
+            self.__status.id=msg.data['Cell ID']
+            self.__status.lac=msg.data['LAC']
+            self.__status.rac=msg.data['RAC']
+            status_updated = True
 
-            if self.__status.inited():
-                #push the config to the library
-                cur_pair=(self.__status.id,self.__status.freq)
-                # if not self.__config.has_key(cur_pair):
-                if cur_pair not in self.__config:
-                    self.__config[cur_pair] = self.__config_tmp
-                    self.__config[cur_pair].status = self.__status
-                    # self.log_info(self.__status.dump())
-                else:
-                    #FIXME: merge two config? Critical for itner-freq
-                    for item in self.__config_tmp.sib.inter_freq_config:
-                        # if not self.__config[cur_pair].sib.inter_freq_config.has_key(item):
-                        if item not in self.__config[cur_pair].sib.inter_freq_config:
-                            self.__config[cur_pair].sib.inter_freq_config[item]\
-                            =self.__config_tmp.sib.inter_freq_config[item]
-                            # self.log_info(self.__status.dump())
+            # if self.__status.inited():
+            #     #push the config to the library
+            #     cur_pair=(self.__status.id,self.__status.freq)
+            #     # if not self.__config.has_key(cur_pair):
+            #     if cur_pair not in self.__config:
+            #         self.__config[cur_pair] = self.__config_tmp
+            #         self.__config[cur_pair].status = self.__status
+            #         # self.log_info(self.__status.dump())
+            #     else:
+            #         #FIXME: merge two config? Critical for itner-freq
+            #         for item in self.__config_tmp.sib.inter_freq_config:
+            #             # if not self.__config[cur_pair].sib.inter_freq_config.has_key(item):
+            #             if item not in self.__config[cur_pair].sib.inter_freq_config:
+            #                 self.__config[cur_pair].sib.inter_freq_config[item]\
+            #                 =self.__config_tmp.sib.inter_freq_config[item]
+            #                 # self.log_info(self.__status.dump())
         else:
             #if new config arrives, push new one to the history
 
@@ -147,7 +141,10 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                 #Initialize a new config
                 self.__config_tmp=WcdmaRrcConfig()
 
-        self.log_info(self.__status.dump())
+                status_updated = True
+
+        if status_updated:
+            self.log_info(self.__status.dump())
 
     def __callback_sib_config(self,msg):
         """
