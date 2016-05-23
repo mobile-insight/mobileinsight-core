@@ -133,37 +133,51 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                             # self.log_info(self.__status.dump())
         else:
             #if new config arrives, push new one to the history
-            if ('Download RF channel number' in msg.data
-            and self.__status.freq!=msg.data['Download RF channel number']):
+
+            if self.__status.freq!=msg.data['Download RF channel number'] \
+            or self.__status.id!=msg.data['Cell ID'] \
+            or self.__status.lac!=msg.data['LAC'] \
+            or self.__status.rac!=msg.data['RAC']:
                 self.__status=WcdmaRrcStatus()
                 self.__status.freq=msg.data['Download RF channel number']
-                self.__history[msg.timestamp]=self.__status
-                #Initialize a new config
-                self.__config_tmp=WcdmaRrcConfig()
-
-            if ('Cell ID' in msg.data
-            and self.__status.id!=msg.data['Cell ID']):
-                self.__status=WcdmaRrcStatus()
                 self.__status.id=msg.data['Cell ID']
-                self.__history[msg.timestamp]=self.__status
-                #Initialize a new config
-                self.__config_tmp=WcdmaRrcConfig()
-        
-            if ('LAC' in msg.data
-            and self.__status.lac!=msg.data['LAC']):
-                self.__status=WcdmaRrcStatus()
                 self.__status.lac=msg.data['LAC']
-                self.__history[msg.timestamp]=self.__status
-                #Initialize a new config
-                self.__config_tmp=WcdmaRrcConfig()
-        
-            if ('RAC id' in msg.data
-            and self.__status.rac!=msg.data['RAC']):
-                self.__status=WcdmaRrcStatus()
                 self.__status.rac=msg.data['RAC']
                 self.__history[msg.timestamp]=self.__status
                 #Initialize a new config
                 self.__config_tmp=WcdmaRrcConfig()
+
+            # if ('Download RF channel number' in msg.data
+            # and self.__status.freq!=msg.data['Download RF channel number']):
+            #     self.__status=WcdmaRrcStatus()
+            #     self.__status.freq=msg.data['Download RF channel number']
+            #     self.__history[msg.timestamp]=self.__status
+            #     #Initialize a new config
+            #     self.__config_tmp=WcdmaRrcConfig()
+
+            # if ('Cell ID' in msg.data
+            # and self.__status.id!=msg.data['Cell ID']):
+            #     self.__status=WcdmaRrcStatus()
+            #     self.__status.id=msg.data['Cell ID']
+            #     self.__history[msg.timestamp]=self.__status
+            #     #Initialize a new config
+            #     self.__config_tmp=WcdmaRrcConfig()
+        
+            # if ('LAC' in msg.data
+            # and self.__status.lac!=msg.data['LAC']):
+            #     self.__status=WcdmaRrcStatus()
+            #     self.__status.lac=msg.data['LAC']
+            #     self.__history[msg.timestamp]=self.__status
+            #     #Initialize a new config
+            #     self.__config_tmp=WcdmaRrcConfig()
+        
+            # if ('RAC id' in msg.data
+            # and self.__status.rac!=msg.data['RAC']):
+            #     self.__status=WcdmaRrcStatus()
+            #     self.__status.rac=msg.data['RAC']
+            #     self.__history[msg.timestamp]=self.__status
+            #     #Initialize a new config
+            #     self.__config_tmp=WcdmaRrcConfig()
 
         self.log_info(self.__status.dump())
 
@@ -228,12 +242,13 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
 
                     self.__config[cur_pair].sib.serv_config = serv_config
 
-                self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.serv_config",
-                    {'priority':field_val['rrc.priority'],
-                     'threshserv_low':str(int(field_val['rrc.threshServingLow'])*2),
-                     's_priority_search1':str(int(field_val['rrc.s_PrioritySearch1'])*2),
-                     's_priority_search2':field_val['rrc.s_PrioritySearch2']
-                     })
+                if self.__status.inited():
+                    self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.serv_config",
+                        {'priority':field_val['rrc.priority'],
+                         'threshserv_low':str(int(field_val['rrc.threshServingLow'])*2),
+                         's_priority_search1':str(int(field_val['rrc.s_PrioritySearch1'])*2),
+                         's_priority_search2':field_val['rrc.s_PrioritySearch2']
+                         })
 
 
             #intra-freq info
@@ -278,14 +293,15 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                         self.__config[cur_pair].status=self.__status
                     self.__config[cur_pair].sib.intra_freq_config = intra_freq_config
 
-                self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
-                    {'tReselection':field_val['rrc.t_Reselection_S'],
-                     'q_RxLevMin':str(int(field_val['rrc.q_RxlevMin'])*2),
-                     's_InterSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
-                     's_IntraSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
-                     'q_Hyst1':str(int(field_val['rrc.q_Hyst_l_S'])*2),
-                     'q_Hyst2':str(int(field_val['rrc.q_HYST_2_S'])*2)
-                     })
+                if self.__status.inited():
+                    self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
+                        {'tReselection':field_val['rrc.t_Reselection_S'],
+                         'q_RxLevMin':str(int(field_val['rrc.q_RxlevMin'])*2),
+                         's_InterSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
+                         's_IntraSearch':str(int(field_val['rrc.s_Intrasearch'])*2),
+                         'q_Hyst1':str(int(field_val['rrc.q_Hyst_l_S'])*2),
+                         'q_Hyst2':str(int(field_val['rrc.q_HYST_2_S'])*2)
+                         })
 
 
             #inter-RAT cell info (LTE)
@@ -326,18 +342,19 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                         self.__config[cur_pair].status=self.__status
                     self.__config[cur_pair].sib.inter_freq_config[neighbor_freq] = inter_freq_config
 
-                self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
-                    {'rat':'LTE',
-                     'freq':str(neighbor_freq),
-                     #'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
-                     'tReselection':'null',
-                     'q_RxLevMin':str(int(field_val['rrc.qRxLevMinEUTRA'])*2),
-                     #'p_Max':field_val['lte-rrc.p_Max'],
-                     'p_Max':'null',
-                     'priority':field_val['rrc.priority'],
-                     'threshx_high':str(int(field_val['rrc.threshXhigh'])*2),
-                     'threshx_low':str(int(field_val['rrc.threshXlow'])*2)
-                     })
+                if self.__status.inited():
+                    self.profile.update("WcdmaRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
+                        {'rat':'LTE',
+                         'freq':str(neighbor_freq),
+                         #'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
+                         'tReselection':'null',
+                         'q_RxLevMin':str(int(field_val['rrc.qRxLevMinEUTRA'])*2),
+                         #'p_Max':field_val['lte-rrc.p_Max'],
+                         'p_Max':'null',
+                         'priority':field_val['rrc.priority'],
+                         'threshx_high':str(int(field_val['rrc.threshXhigh'])*2),
+                         'threshx_low':str(int(field_val['rrc.threshXlow'])*2)
+                         })
 
             #TODO: RRC connection status update
 
@@ -509,7 +526,7 @@ class WcdmaRrcStatus:
             + ' LAC=' + str(self.lac)+'\n')
 
     def inited(self):
-        return (not self.id and not self.freq)
+        return (self.id and self.freq)
 
 
 class WcdmaRrcConfig:
