@@ -147,38 +147,6 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                 #Initialize a new config
                 self.__config_tmp=WcdmaRrcConfig()
 
-            # if ('Download RF channel number' in msg.data
-            # and self.__status.freq!=msg.data['Download RF channel number']):
-            #     self.__status=WcdmaRrcStatus()
-            #     self.__status.freq=msg.data['Download RF channel number']
-            #     self.__history[msg.timestamp]=self.__status
-            #     #Initialize a new config
-            #     self.__config_tmp=WcdmaRrcConfig()
-
-            # if ('Cell ID' in msg.data
-            # and self.__status.id!=msg.data['Cell ID']):
-            #     self.__status=WcdmaRrcStatus()
-            #     self.__status.id=msg.data['Cell ID']
-            #     self.__history[msg.timestamp]=self.__status
-            #     #Initialize a new config
-            #     self.__config_tmp=WcdmaRrcConfig()
-        
-            # if ('LAC' in msg.data
-            # and self.__status.lac!=msg.data['LAC']):
-            #     self.__status=WcdmaRrcStatus()
-            #     self.__status.lac=msg.data['LAC']
-            #     self.__history[msg.timestamp]=self.__status
-            #     #Initialize a new config
-            #     self.__config_tmp=WcdmaRrcConfig()
-        
-            # if ('RAC id' in msg.data
-            # and self.__status.rac!=msg.data['RAC']):
-            #     self.__status=WcdmaRrcStatus()
-            #     self.__status.rac=msg.data['RAC']
-            #     self.__history[msg.timestamp]=self.__status
-            #     #Initialize a new config
-            #     self.__config_tmp=WcdmaRrcConfig()
-
         self.log_info(self.__status.dump())
 
     def __callback_sib_config(self,msg):
