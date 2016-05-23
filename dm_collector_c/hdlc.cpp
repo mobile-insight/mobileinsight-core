@@ -93,6 +93,11 @@ feed_binary (const char *b, int length) {
     buffer.append(b, length);
 }
 
+void
+reset_binary() {
+    buffer.clear();
+}
+
 static void
 unescape (std::string& frame) {
     bool esc = false;

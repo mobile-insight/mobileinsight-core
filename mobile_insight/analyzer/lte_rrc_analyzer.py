@@ -172,29 +172,16 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
         :param msg: the event (message) from the trace collector.
         """
-        tic = time.clock()
         # log_item = msg.data
         log_item = msg.data.decode()
         log_item_dict = dict(log_item)
-        toc = time.clock()
-        # self.log_info(str(time.time()) + " "\
-        #             + "CALLBK_LTE_RRC_DECODE "\
-        #             + str((toc - tic)*1000)) #processing latency (in ms)
-
-        #Convert msg to dictionary format
-        raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
-        tic = time.clock()
-        self.__callback_serv_cell(raw_msg)
-        toc = time.clock()
-        # self.log_info(str(time.time()) + " "\
-        #             + "CALLBK_LTE_RRC_SERV_CELL "\
-        #             + str((toc - tic)*1000)) #processing latency (in ms)
-
-        if 'Msg' not in log_item_dict:
-            return
+        
         
         # Calllbacks triggering
         if msg.type_id == "LTE_RRC_OTA_Packet":   
+
+            if 'Msg' not in log_item_dict:
+                return
 
             #Convert msg to xml format
             # log_xml = ET.fromstring(log_item_dict['Msg'])
@@ -232,6 +219,10 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             # e = Event(timeit.default_timer(),self.__class__.__name__,"")
             # self.send(e)
             self.send(xml_msg) #deliver LTE RRC signaling messages (decoded)
+        elif msg.type_id == "LTE_RRC_Serv_Cell_Info":
+            print msg
+            raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
+            self.__callback_serv_cell(raw_msg)
 
     def __callback_serv_cell(self,msg):
 
@@ -275,8 +266,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 self.__history[msg.timestamp] = self.__status
         
         if status_updated:
-            # self.log_info(self.__status.dump())
-            pass
+            self.log_info(self.__status.dump())
 
     def __callback_sib_config(self,msg):
         """

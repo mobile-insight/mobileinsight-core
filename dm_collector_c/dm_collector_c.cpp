@@ -33,6 +33,7 @@ static PyObject *dm_collector_c_enable_logs (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_set_filtered_export (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_feed_binary (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_reset (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_receive_log_packet (PyObject *self, PyObject *args);
 
 static PyMethodDef DmCollectorCMethods[] = {
@@ -72,6 +73,8 @@ static PyMethodDef DmCollectorCMethods[] = {
     },
     {"feed_binary", dm_collector_c_feed_binary, METH_VARARGS,
         "Feed raw packets."},
+    {"reset", dm_collector_c_reset, METH_VARARGS,
+        "Reset dm_collector."},
     {"generate_diag_cfg", dm_collector_c_generate_diag_cfg, METH_VARARGS,
         "Generate a Diag.cfg file.\n"
         "\n"
@@ -421,6 +424,13 @@ dm_collector_c_feed_binary (PyObject *self, PyObject *args) {
     feed_binary(b, length);
     Py_RETURN_NONE;
 }
+
+static PyObject *
+dm_collector_c_reset (PyObject *self, PyObject *args) {
+    reset_binary();
+    Py_RETURN_NONE;
+}
+
 
 // Return: decoded_list or None
 static PyObject *

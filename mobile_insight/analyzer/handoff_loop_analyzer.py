@@ -43,7 +43,7 @@ class HandoffLoopAnalyzer(Analyzer):
 
     	if msg.type_id!="RrcAnalyzer":
             return
-
+            
         pass #TODO: periodically find loops
 
 
