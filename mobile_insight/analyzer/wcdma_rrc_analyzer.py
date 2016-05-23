@@ -104,16 +104,16 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
             #old yet incomplete config would be discarded
             if 'Download RF channel number' in msg.data:
                 self.__status.freq = msg.data['Download RF channel number']
-                self.log_info(self.__status.dump())
+                # self.log_info(self.__status.dump())
             if 'Cell ID' in msg.data:
                 self.__status.id = msg.data['Cell ID']
-                self.log_info(self.__status.dump())
+                # self.log_info(self.__status.dump())
             if 'LAC' in msg.data:
                 self.__status.lac = msg.data['LAC']
-                self.log_info(self.__status.dump())
+                # self.log_info(self.__status.dump())
             if 'RAC' in msg.data:
                 self.__status.rac = msg.data['RAC']
-                self.log_info(self.__status.dump())
+                # self.log_info(self.__status.dump())
 
             if self.__status.inited():
                 #push the config to the library
@@ -164,6 +164,8 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                 self.__history[msg.timestamp]=self.__status
                 #Initialize a new config
                 self.__config_tmp=WcdmaRrcConfig()
+
+        self.log_info(self.__status.dump())
 
     def __callback_sib_config(self,msg):
         """

@@ -23,18 +23,31 @@ class HandoffLoopAnalyzer(Analyzer):
         Initialization of the analyzer.
         """
         Analyzer.__init__(self)
-        self.include_analyzer("RrcAnalyzer",[self.__loop_detection])
+        # self.include_analyzer("RrcAnalyzer",[self.__loop_detection])
+        self.include_analyzer("RrcAnalyzer",[self.callback_loop_detection])
 
-    def __loop_detection(self,msg):
-        """
+    def find_loops(self):
+    	"""
+    	Detection persistent loops caused by handoff policy conflicts.
+        The results would be written into the log. 
+    	"""
+    	self.__loop_detection()
+
+    def callback_loop_detection(self,msg):
+    	"""
         Detection persistent loops caused by handoff policy conflicts.
         The results would be written into the log. 
 
         :param msg: the event from RrcAnalyzer
         """
 
-        if msg.type_id!="RrcAnalyzer":
+    	if msg.type_id!="RrcAnalyzer":
             return
+
+        pass #TODO: periodically find loops
+
+
+    def __loop_detection(self):
 
         #Get cell list and configurations
         # cell_list = self.__rrc_analyzer.get_cell_list()

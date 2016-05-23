@@ -56,6 +56,7 @@ class Analyzer(Element):
 
     #Guanratee global uniqueness of analyzer
     __analyzer_array={}    #Analyzer name --> object address
+    logger=None
 
     def __init__(self):
         Element.__init__(self)
@@ -79,19 +80,24 @@ class Analyzer(Element):
 
     #logging functions: please use this one
     def log_info(self, msg):
-        self.logger.info(self.__class__.__name__+': '+msg)
+        # self.logger.info(self.__class__.__name__+': '+msg)
+        Analyzer.logger.info(self.__class__.__name__+': '+msg)
 
     def log_debug(self, msg):
-        self.logger.debug(self.__class__.__name__+': '+msg)
+        # self.logger.debug(self.__class__.__name__+': '+msg)
+        Analyzer.logger.debug(self.__class__.__name__+': '+msg)
 
     def log_warning(self, msg):
-        self.logger.warning(self.__class__.__name__+': '+msg)
+        # self.logger.warning(self.__class__.__name__+': '+msg)
+        Analyzer.logger.warning(self.__class__.__name__+': '+msg)
 
     def log_error(self, msg):
-        self.logger.error(self.__class__.__name__+': '+msg)
+        # self.logger.error(self.__class__.__name__+': '+msg)
+        Analyzer.logger.error(self.__class__.__name__+': '+msg)
 
     def log_critical(self, msg):
-        self.logger.critical(self.__class__.__name__+': '+msg)
+        # self.logger.critical(self.__class__.__name__+': '+msg)
+        Analyzer.logger.critical(self.__class__.__name__+': '+msg)
 
     @staticmethod
     def reset():
@@ -111,7 +117,8 @@ class Analyzer(Element):
         self.__logpath=logpath
         self.__loglevel=loglevel
         setup_logger('mobileinsight_logger',self.__logpath,self.__loglevel)
-        self.logger=logging.getLogger('mobileinsight_logger')
+        # self.logger=logging.getLogger('mobileinsight_logger')
+        Analyzer.logger=logging.getLogger('mobileinsight_logger')
   
     def set_source(self,source):
         """
