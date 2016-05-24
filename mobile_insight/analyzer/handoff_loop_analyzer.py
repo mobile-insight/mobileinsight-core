@@ -52,39 +52,39 @@ class HandoffLoopAnalyzer(Analyzer):
         #Get cell list and configurations
         # cell_list = self.__rrc_analyzer.get_cell_list()
         cell_list = self.get_analyzer("RrcAnalyzer").get_cell_list()
-        # mark if a cell has been visited
+        # ignore unknown cells
+        cell_list = [x for x in cell_list if (x[0] and x[1])]
+        # mark if a cell has been visited:
         cell_visited = {x:False for x in cell_list} 
         
-        # # print cell_list
+        # print cell_list
         # for cell in cell_list:
         #     # self.__rrc_analyzer.get_cell_config(cell).dump()
         #     # self.log_info(self.__rrc_analyzer.get_cell_config(cell).dump())
         #     self.log_info(self.get_analyzer("RrcAnalyzer").get_cell_config(cell).dump())
 
         # each cell's configuration
-        cell_config = {}
-        for cell in cell_list:
-            # cell_config[cell]=self.__rrc_analyzer.get_cell_config(cell)
-            cell_config[cell]=self.get_analyzer("RrcAnalyzer").get_cell_config(cell)
+        cell_config = {x:self.get_analyzer("RrcAnalyzer").get_cell_config(x) for x in cell_list}
+        # print cell_config
         
         if cell_list:
 
             # We implement the loop detection algorithm in Proposition 3,
             # because preferences are observed to be inconsistent
 
-            while False in cell_visited.itervalues():    
+            # while False in cell_visited.itervalues():    
+            while False in cell_visited.values():
                 # some cells have not been explored yet    
 
-                # In each round, we report loops with *unvisited_cell* involved            
-                unvisited_cell=None
-                #find an unvisited cell
-                for cell in cell_list:
-                    if not cell_visited[cell]:
-                        unvisited_cell=cell
-                        break
+                # In each round, we report loops with *unvisited_cell* involved     
+                unvisited_list = [x for x in cell_visited if not cell_visited[x]]
+                unvisited_cell = unvisited_list[0]
+                print "unvisited_cell", unvisited_cell
 
                 # neighbor_cells = self.__rrc_analyzer.get_cell_neighbor(unvisited_cell)
                 neighbor_cells = self.get_analyzer("RrcAnalyzer").get_cell_neighbor(unvisited_cell)
+
+                print "neighbor_cells",str(neighbor_cells)
                 #For each cell: 0 for unvisited, 1 for idle-only visited, 2 for idle-active visited
                 neighbor_visited = {x: 0 for x in neighbor_cells}
 
@@ -111,6 +111,9 @@ class HandoffLoopAnalyzer(Analyzer):
                     dst_clear = None
                     dst_val = None
 
+                    # print src_cell
+                    # person = input('Press any key to continue ')
+                    
                     #Find a next cell to handoff
                     for cell in src_neighbor:
                         if src_neighbor[cell]<2 \
@@ -118,7 +121,7 @@ class HandoffLoopAnalyzer(Analyzer):
                             dst_cell = cell
                             break
 
-                    if dst_cell==None:
+                    if not dst_cell:
                         #src_cell's all neighbors have been visited
                         continue
 
@@ -136,7 +139,7 @@ class HandoffLoopAnalyzer(Analyzer):
                         #active-state handoff
                         dst_config=cell_config[src_cell].get_meas_config(cell_config[dst_cell].status)
 
-                    if dst_config==None:
+                    if not dst_config:
                         dfs_stack.append(src_cell)
                         neighbor_stack.append(src_neighbor)
                         cell_clear_stack.append(src_clear)
@@ -146,9 +149,10 @@ class HandoffLoopAnalyzer(Analyzer):
                     src_pref=cell_config[src_cell].sib.serv_config.priority
                     dst_pref=dst_config.priority
 
-                    if src_pref==None or dst_pref==None:    #happens in 3G
+                    if not src_pref or not dst_pref:    #happens in 3G
                         #25.331: without pref, treat as equal pref
-                        src_pref = dst_pref = None
+                        src_pref = None
+                        dst_pref = None
 
                     
                     # dst_neighbor_cells=self.__rrc_analyzer.get_cell_neighbor(dst_cell)
@@ -225,6 +229,7 @@ class HandoffLoopAnalyzer(Analyzer):
                     cell_clear_stack.append(dst_clear)
                     val_stack.append(dst_val)
 
+                print"Here?"
                 cell_visited[unvisited_cell]=True
 
 

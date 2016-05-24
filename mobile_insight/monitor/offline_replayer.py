@@ -3,7 +3,8 @@
 """
 An offline log replayer
 
-Author: Jiayao Li
+Author: Jiayao Li,
+        Yuanjie Li
 """
 
 __all__ = ["OfflineReplayer"]
