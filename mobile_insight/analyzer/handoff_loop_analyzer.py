@@ -54,6 +54,7 @@ class HandoffLoopAnalyzer(Analyzer):
         cell_list = self.get_analyzer("RrcAnalyzer").get_cell_list()
         # ignore unknown cells
         cell_list = [x for x in cell_list if (x[0] and x[1])]
+        print len(cell_list)
         # mark if a cell has been visited:
         cell_visited = {x:False for x in cell_list} 
         
@@ -83,26 +84,28 @@ class HandoffLoopAnalyzer(Analyzer):
 
                 # neighbor_cells = self.__rrc_analyzer.get_cell_neighbor(unvisited_cell)
                 neighbor_cells = self.get_analyzer("RrcAnalyzer").get_cell_neighbor(unvisited_cell)
+                # Rule out visited cells
+                neighbor_cells=[x for x in neighbor_cells if not cell_visited[x]]
 
-                print "neighbor_cells",str(neighbor_cells)
-                #For each cell: 0 for unvisited, 1 for idle-only visited, 2 for idle-active visited
-                neighbor_visited = {x: 0 for x in neighbor_cells}
+                # Neighboring cell vistied list
+                # For each cell: 0 for unvisited, 1 for idle-only visited, 2 for idle-active visited
+                neighbor_visited = {x: False for x in neighbor_cells}
 
-                #visited cells are ruled out
-                for item in neighbor_cells:
-                    # if cell_visited.has_key(item) and cell_visited[item]:
-                    if item in cell_visited and cell_visited[item]:
-                        neighbor_visited[item]=2
                 
-                #stacks
-                dfs_stack=[unvisited_cell]    
-                neighbor_stack=[neighbor_visited]
-                #dcell_clear_stack[i]=false if ci-1->ci is "high-pref" handoff, true otherwise
+                # DFS stacks for loop detection
+                dfs_stack=[unvisited_cell]    #cells involved in handoff chain
+                neighbor_stack=[neighbor_visited] #each cell in the handoff chain has a {neighbor->visited} dict
+                #dcell_clear_stack[i]=False if ci-1->ci is "high-pref" handoff, true otherwise
                 cell_clear_stack=[True]
-                val_stack=[0]
+                val_stack=[0]   #latent variable to detect loop
 
                 while dfs_stack:
                     self.log_debug("dfs_stack:"+str(dfs_stack))
+                    # print "unvisited_cell",neighbor_stack[0]
+                    # print "dfs_stack",dfs_stack
+                    if len(neighbor_stack)>=1:
+                        print "dfs_stack",dfs_stack
+                        print "\033[91m\033[1mneighbor_stack[-1]\033[0m\033[0m",dfs_stack[-1],neighbor_stack[-1]
                     src_cell = dfs_stack.pop()
                     src_neighbor = neighbor_stack.pop()
                     src_clear = cell_clear_stack.pop()
@@ -110,94 +113,99 @@ class HandoffLoopAnalyzer(Analyzer):
                     dst_cell = None
                     dst_clear = None
                     dst_val = None
-
-                    # print src_cell
-                    # person = input('Press any key to continue ')
                     
                     #Find a next cell to handoff
                     for cell in src_neighbor:
-                        if src_neighbor[cell]<2 \
-                        and (not dfs_stack or cell not in dfs_stack[1:]):
-                            dst_cell = cell
-                            break
-
+                        if not src_neighbor[cell]:
+                            #Unvisited neighbor
+                            if not dfs_stack or cell not in dfs_stack[1:]:
+                                dst_cell = cell
+                                #Now dst_cell has been visited by src_cell
+                                src_neighbor[cell] = True
+                                break
+                            else:
+                                #intermediate cells duplicate
+                                #ignore it, and mark it as visited
+                                src_neighbor[cell] = True
+        
                     if not dst_cell:
-                        #src_cell's all neighbors have been visited
+                        # src_cell's all neighbors have been visited
                         continue
 
-                    src_neighbor[dst_cell]+=1
+                    # src_neighbor[dst_cell]=True #Now dst_cell has been visited by src_cell
                     self.log_debug("dst_cell:"+str(dst_cell)\
                         +" state:"+str(src_neighbor[dst_cell]))
 
+                    # Step 1: IDLE-STATE HANDOFF, src_cell->dst_cell
                     src_freq=cell_config[src_cell].status.freq
                     dst_freq=cell_config[dst_cell].status.freq
-                    dst_config=None
-                    if src_neighbor[dst_cell]==1:
-                        #idle-state handoff
-                        dst_config=cell_config[src_cell].get_cell_reselection_config(cell_config[dst_cell].status)
-                    else:
-                        #active-state handoff
-                        dst_config=cell_config[src_cell].get_meas_config(cell_config[dst_cell].status)
-
+                    dst_config=cell_config[src_cell].get_cell_reselection_config(cell_config[dst_cell].status)
+                    
                     if not dst_config:
+                        # src_cell cannot reach dst_cell: no handoff config available
+                        print "no dst_config",src_cell,dst_cell
                         dfs_stack.append(src_cell)
                         neighbor_stack.append(src_neighbor)
                         cell_clear_stack.append(src_clear)
                         val_stack.append(src_val)
                         continue
-
-                    src_pref=cell_config[src_cell].sib.serv_config.priority
-                    dst_pref=dst_config.priority
-
-                    if not src_pref or not dst_pref:    #happens in 3G
-                        #25.331: without pref, treat as equal pref
-                        src_pref = None
-                        dst_pref = None
-
                     
-                    # dst_neighbor_cells=self.__rrc_analyzer.get_cell_neighbor(dst_cell)
                     dst_neighbor_cells=self.get_analyzer("RrcAnalyzer").get_cell_neighbor(dst_cell)
-                    dst_neighbor={x: 0 for x in dst_neighbor_cells}
-                    for item in dst_neighbor:
-                        # if cell_visited.has_key(item) and cell_visited[item]:
-                        if item in cell_visited and cell_visited[item]:
-                            dst_neighbor[item]=2
+                    # Rule out visited cells
+                    dst_neighbor_cells=[x for x in dst_neighbor_cells if not cell_visited[x]]
+                    # Rule out cells that have been in the stack (except first one)
+                    # Otherwise subloops without cell_visited may be triggered
+                    if dfs_stack:
+                        dst_neighbor_cells=[x for x in dst_neighbor_cells if x not in dfs_stack[1:]]
+
+                    # Neighboring cell vistied list
+                    # For each cell: 0 for unvisited, 1 for idle-only visited, 2 for idle-active visited
+                    dst_neighbor={x: False for x in dst_neighbor_cells}
 
                     dfs_stack.append(src_cell)
                     neighbor_stack.append(src_neighbor)
                     cell_clear_stack.append(src_clear)
                     val_stack.append(src_val)
 
+                    # Extract src_cell and dst_cell's preference relation
+                    src_pref=cell_config[src_cell].sib.serv_config.priority
+                    dst_pref=dst_config.priority
+                    if not src_pref or not dst_pref:    #happens in 3G
+                        #25.331: without pref, treat as equal pref
+                        src_pref = None
+                        dst_pref = None
+
                     if src_freq==dst_freq or src_pref==dst_pref:
-                        if dst_config.offset!=None:
-                            dst_clear = True
+                        dst_clear = True
+                        if dst_config.offset:
                             dst_val = src_val+dst_config.offset
                         else: #trace not ready
-                            continue
+                            # continue
+                            dst_val = src_val
+
                     elif src_pref<dst_pref:
                         dst_clear = False
                         dst_val = dst_config.threshx_high
                     elif src_pref>dst_pref:
                         if src_val>dst_config.threshserv_low:
+                            # Pruning happens: no loop can be triggered
                             continue
                         dst_clear = True
                         dst_val = src_val+dst_config.threshx_low-dst_config.threshserv_low
+                        # dst_val = dst_config.threshx_low
                         
                     if dst_cell == dfs_stack[0]:
                         #Loop may occur
                         #Special check: if dfs_stack[0] performs low-pref handoff
                         dst_dst_cell = dfs_stack[1]
-                        if neighbor_stack[0][dst_dst_cell]==1:
-                            #idle-state handoff
-                            dst_dst_config=cell_config[dst_cell].get_cell_reselection_config(cell_config[dst_dst_cell].status)
-                        else:
-                            #active-state handoff
-                            dst_dst_config=cell_config[dst_cell].get_meas_config(cell_config[dst_dst_cell].status)
+                        
+                        dst_dst_config=cell_config[dst_cell].get_cell_reselection_config(cell_config[dst_dst_cell].status)
+                        
 
                         dst_serv_pref = cell_config[dst_cell].sib.serv_config.priority
                         dst_dst_pref = dst_dst_config.priority
 
-                        if dst_serv_pref==None or dst_dst_pref==None:    #happens in 3G
+                        if not dst_serv_pref or not dst_dst_pref:    #happens in 3G
                             #25.331: without pref, treat as equal pref
                             dst_serv_pref = dst_dst_pref = None
 
@@ -206,7 +214,7 @@ class HandoffLoopAnalyzer(Analyzer):
                             continue
 
                         if False in cell_clear_stack or dst_val<0:
-                            loop_report="\033[91m\033[1mPersistent loop: \033[0m\033[0m"
+                            # loop_report="\033[31m\033[1mPersistent loop: \033[0m\033[0m"
                             loop_report+=str(dfs_stack[0])
                             prev_item=dfs_stack[0]
                             for item in range(1,len(dfs_stack)):
@@ -222,6 +230,7 @@ class HandoffLoopAnalyzer(Analyzer):
                                 loop_report+="(active)->"+str(dst_cell)
 
                             self.log_warning(loop_report)
+                            raw_input("Debugging...")
                             continue
 
                     dfs_stack.append(dst_cell)
@@ -229,7 +238,7 @@ class HandoffLoopAnalyzer(Analyzer):
                     cell_clear_stack.append(dst_clear)
                     val_stack.append(dst_val)
 
-                print"Here?"
+                print "here?"
                 cell_visited[unvisited_cell]=True
 
 

@@ -80,24 +80,31 @@ class Analyzer(Element):
 
     #logging functions: please use this one
     def log_info(self, msg):
-        # self.logger.info(self.__class__.__name__+': '+msg)
-        Analyzer.logger.info(self.__class__.__name__+': '+msg)
+        Analyzer.logger.info(
+            "\033[32m\033[1m[INFO]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg
+            )
 
     def log_debug(self, msg):
-        # self.logger.debug(self.__class__.__name__+': '+msg)
-        Analyzer.logger.debug(self.__class__.__name__+': '+msg)
+    
+        Analyzer.logger.debug(
+            "\033[33m\033[1m[DEBUG]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_warning(self, msg):
-        # self.logger.warning(self.__class__.__name__+': '+msg)
-        Analyzer.logger.warning(self.__class__.__name__+': '+msg)
+        Analyzer.logger.warning(
+            "\033[1;34m\033[1m[WARNING]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+': '+msg)
 
     def log_error(self, msg):
-        # self.logger.error(self.__class__.__name__+': '+msg)
-        Analyzer.logger.error(self.__class__.__name__+': '+msg)
+        Analyzer.logger.error(
+            "\033[31m\033[1m[ERROR]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+': '+msg)
 
     def log_critical(self, msg):
-        # self.logger.critical(self.__class__.__name__+': '+msg)
-        Analyzer.logger.critical(self.__class__.__name__+': '+msg)
+        Analyzer.logger.critical(
+            "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+': '+msg)
 
     @staticmethod
     def reset():
