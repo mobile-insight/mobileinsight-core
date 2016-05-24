@@ -80,7 +80,7 @@ class HandoffLoopAnalyzer(Analyzer):
                 # In each round, we report loops with *unvisited_cell* involved     
                 unvisited_list = [x for x in cell_visited if not cell_visited[x]]
                 unvisited_cell = unvisited_list[0]
-                print "unvisited_cell", unvisited_cell
+                self.log_debug("unvisited_cell "+str(unvisited_cell))
 
                 # neighbor_cells = self.__rrc_analyzer.get_cell_neighbor(unvisited_cell)
                 neighbor_cells = self.get_analyzer("RrcAnalyzer").get_cell_neighbor(unvisited_cell)
@@ -214,7 +214,7 @@ class HandoffLoopAnalyzer(Analyzer):
                             continue
 
                         if False in cell_clear_stack or dst_val<0:
-                            # loop_report="\033[31m\033[1mPersistent loop: \033[0m\033[0m"
+                            loop_report="\033[31m\033[1mPersistent loop: \033[0m\033[0m"
                             loop_report+=str(dfs_stack[0])
                             prev_item=dfs_stack[0]
                             for item in range(1,len(dfs_stack)):
