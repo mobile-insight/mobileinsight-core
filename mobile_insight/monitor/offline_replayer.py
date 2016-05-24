@@ -82,9 +82,10 @@ class OfflineReplayer(Monitor):
         """
         Set the replay trace path
 
-        :param path: the replay file path. If it is a directory, the OfflineReplayer will read all logs under this directory
+        :param path: the replay file path. If it is a directory, the OfflineReplayer will read all logs under this directory (logs in subdirectories are ignored)
         :type path: string
         """
+        dm_collector_c.reset()
         self._input_path = path
         # self._input_file = open(path, "rb")
 
