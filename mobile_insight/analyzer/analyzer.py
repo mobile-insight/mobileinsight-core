@@ -24,6 +24,18 @@ from ..element import Element, Event
 #from profile import *
 import logging
 import time
+import datetime as dt
+
+class MyFormatter(logging.Formatter):
+    converter=dt.datetime.fromtimestamp
+    def formatTime(self, record, datefmt=None):
+        ct = self.converter(record.created)
+        if datefmt:
+            s = ct.strftime(datefmt)
+        else:
+            t = ct.strftime("%Y-%m-%d %H:%M:%S")
+            s = "%s,%03d" % (t, record.msecs)
+        return s
 
 def setup_logger(logger_name, log_file, level=logging.INFO):
     '''Setup the analyzer logger.
@@ -37,7 +49,7 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
 
     l = logging.getLogger(logger_name)
     if len(l.handlers)<1:
-        formatter = logging.Formatter('%(asctime)s %(message)s')
+        formatter = MyFormatter('%(asctime)s %(message)s',datefmt='%Y-%m-%d,%H:%M:%S.%f')
         streamHandler = logging.StreamHandler()
         streamHandler.setFormatter(formatter)
 
@@ -95,17 +107,17 @@ class Analyzer(Element):
     def log_warning(self, msg):
         Analyzer.logger.warning(
             "\033[1;34m\033[1m[WARNING]\033[0m\033[0m\033[1m["
-            + self.__class__.__name__+': '+msg)
+            + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_error(self, msg):
         Analyzer.logger.error(
             "\033[31m\033[1m[ERROR]\033[0m\033[0m\033[1m["
-            + self.__class__.__name__+': '+msg)
+            + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_critical(self, msg):
         Analyzer.logger.critical(
             "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m["
-            + self.__class__.__name__+': '+msg)
+            + self.__class__.__name__+']\033[0m: '+msg)
 
     @staticmethod
     def reset():
