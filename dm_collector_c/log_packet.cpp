@@ -8,12 +8,15 @@
 
 #include "consts.h"
 #include "log_packet.h"
+#include "log_packet_helper.h"
 
 #include <map>
 #include <string>
 #include <sstream>
 
 #include <fstream>
+#include "1xev_rx_partial_multirlp_packet.h"
+#include "1xev_connected_state_search_info.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -39,8 +42,8 @@ namespace patch
  * list in the source code).
  * All elements in a result list is a 3-element tuple: (name, value, type).
  * "name" is a C string, and "value" is a reference to a Python object.
- * "type" is a C string that can be one of the following values: 
- * - "" (empty string): an ordinary field. The "value" could be a Python 
+ * "type" is a C string that can be one of the following values:
+ * - "" (empty string): an ordinary field. The "value" could be a Python
  *      integer, str, etc.
  * - "list": The "value" is another result list, and each element is of the same
  *      "type".
@@ -50,294 +53,6 @@ namespace patch
  */
 
 // TODO: split this .cpp to multiple files.
-
-// Find a field by its name in a result list.
-// Return: i or -1
-static int
-_find_result_index(PyObject *result, const char *target) {
-    assert(PySequence_Check(result));
-    int ret = -1;   // return -1 if fails
-
-    Py_INCREF(result);
-    int n = PySequence_Length(result);
-    for (int i = 0; i < n; i++) {
-        PyObject *t = PySequence_GetItem(result, i);
-        PyObject *field_name = PySequence_GetItem(t, 0);
-        const char *name = PyString_AsString(field_name);
-        if (strcmp(name, target) == 0) {
-            ret = i;
-            Py_DECREF(t);
-            Py_DECREF(field_name);
-            break;
-        } else {
-            Py_DECREF(t);
-            Py_DECREF(field_name);
-        }
-    }
-    Py_DECREF(result);
-    return ret;
-}
-
-// Find a field by its name in a result list.
-// Return: A new reference to the field or NULL
-static PyObject *
-_search_result(PyObject *result, const char *target) {
-    int i = _find_result_index(result, target);
-    if (i >= 0) {
-        PyObject *t = PySequence_GetItem(result, i);
-        PyObject *ret = PySequence_GetItem(t, 1); // return new reference
-        Py_DECREF(t);
-        return ret;
-    } else {
-        return NULL;
-    }
-}
-
-// Find an integer field by its name in a result list, and return a C int with
-// the same value (overflow is ignored).
-// Return: int
-static int
-_search_result_int(PyObject *result, const char *target) {
-    PyObject *item = _search_result(result, target);
-    assert(PyInt_Check(item));
-    int val = (int) PyInt_AsLong(item);
-    Py_DECREF(item);
-
-    return val;
-}
-
-// Find a field in a result list and replace it with a new Python object.
-// Return: New reference to the old object
-static PyObject *
-_replace_result(PyObject *result, const char *target, PyObject *new_object) {
-    int i = _find_result_index(result, target);
-    if (i >= 0) {
-        PyObject *t = PySequence_GetItem(result, i);
-        PyObject *ret = PySequence_GetItem(t, 1); // return new reference
-        Py_DECREF(t);
-
-        PyList_SetItem(result, i, Py_BuildValue("(sOs)", target, new_object, ""));
-        return ret;
-    } else {
-        return NULL;
-    }
-}
-
-// Find a field in a result list and replace it with an integer.
-// Return: New reference to the old object
-static PyObject *
-_replace_result_int(PyObject *result, const char *target, int new_int) {
-    PyObject *pyint = Py_BuildValue("i", new_int);
-    PyObject *old_object = _replace_result(result, target, pyint);
-    Py_DECREF(pyint);
-    return old_object;
-}
-
-// Search a field that has a value of integer type, and map this integer to 
-// a string, which replace the original integer.
-// If there is no correponding string, or if the mapping is NULL, map this 
-// integer to *not_found*.
-// Return: old number
-static int
-_map_result_field_to_name(PyObject *result, const char *target,
-                            const ValueName mapping [], int n,
-                            const char *not_found) {
-    int i = _find_result_index(result, target);
-    if (i >= 0) {
-        PyObject *t = PySequence_GetItem(result, i);
-        PyObject *item = PySequence_GetItem(t, 1); // return new reference
-        Py_DECREF(t);
-        assert(PyInt_Check(item));
-        int val = (int) PyInt_AsLong(item);
-        Py_DECREF(item);
-
-        const char* name = search_name(mapping, n, val);
-        if (name == NULL)  // not found
-            name = not_found;
-        PyObject *pystr = Py_BuildValue("s", name);
-        PyList_SetItem(result, i, Py_BuildValue("(sOs)", target, pystr, ""));
-        Py_DECREF(pystr);
-        return val;
-    } else {
-        return -1;
-    }
-}
-
-// Decode a binary string according to an array of field description (fmt[]).
-// Decoded fields are appended to result
-static int
-_decode_by_fmt (const Fmt fmt [], int n_fmt,
-                const char *b, int offset, int length,
-                PyObject *result) {
-    assert(PyList_Check(result));
-    int n_consumed = 0;
-
-    Py_INCREF(result);
-    for (int i = 0; i < n_fmt; i++) {
-        PyObject *decoded = NULL;
-        const char *p = b + offset + n_consumed;
-        switch (fmt[i].type) {
-        case UINT:
-            {
-                unsigned int ii = 0;
-                unsigned long long iiii = 0;
-                switch (fmt[i].len) {
-                case 1:
-                    ii = *((unsigned char *) p);
-                    break;
-                case 2:
-                    ii = *((unsigned short *) p);
-                    break;
-                case 4:
-                    ii = *((unsigned int *) p);
-                    break;
-                case 8:
-                    iiii = *((unsigned long long *) p);
-                    break;
-                default:
-                    assert(false);
-                    break;
-                }
-                // Convert to a Python integer object or a Python long integer object
-                // TODO: make it little endian
-                if (fmt[i].len <= 4)
-                    decoded = Py_BuildValue("I", ii);
-                else
-                    decoded = Py_BuildValue("K", iiii);
-                n_consumed += fmt[i].len;
-                break;
-            }
-
-        case BYTE_STREAM:
-            {
-                assert(fmt[i].len > 0);
-                char hex[10] = {};
-                std::string ascii_data = "0x";
-                for (int k = 0; k < fmt[i].len; k++) {
-                    sprintf(hex, "%02x", p[k] & 0xFF);
-                    ascii_data += hex;
-                }
-                decoded = Py_BuildValue("s", ascii_data.c_str());
-                n_consumed += fmt[i].len;
-                break;
-            }
-
-        case PLMN_MK1:
-            {
-                assert(fmt[i].len == 6);
-                const char *plmn = p;
-                decoded = PyString_FromFormat("%d%d%d-%d%d%d",
-                                                plmn[0],
-                                                plmn[1],
-                                                plmn[2],
-                                                plmn[3],
-                                                plmn[4],
-                                                plmn[5]);
-                n_consumed += fmt[i].len;
-                break;
-            }
-
-        case PLMN_MK2:
-            {
-                assert(fmt[i].len == 3);
-                const char *plmn = p;
-                decoded = PyString_FromFormat("%d%d%d-%d%d",
-                                                plmn[0] & 0x0F,
-                                                (plmn[0] >> 4) & 0x0F,
-                                                plmn[1] & 0x0F,
-                                                plmn[2] & 0x0F,
-                                                (plmn[2] >> 4) & 0x0F);
-                // MNC can have two or three digits
-                int last_digit = (plmn[1] >> 4) & 0x0F;
-                if (last_digit < 10)    // last digit exists
-                    PyString_ConcatAndDel(&decoded, PyString_FromFormat("%d", last_digit));
-                n_consumed += fmt[i].len;
-                break;
-            }
-
-        case QCDM_TIMESTAMP:
-            {
-                const double PER_SECOND = 52428800.0;
-                const double PER_USECOND = 52428800.0 / 1.0e6;
-                assert(fmt[i].len == 8);
-                // Convert to a Python long integer object
-                unsigned long long iiii = *((unsigned long long *) p);
-                int seconds = int(double(iiii) / PER_SECOND);
-                int useconds = (double(iiii) / PER_USECOND) - double(seconds) * 1.0e6;
-                PyObject *epoch = PyDateTime_FromDateAndTime(1980, 1, 6, 0, 0, 0, 0);
-                PyObject *delta = PyDelta_FromDSU(0, seconds, useconds);
-                decoded = PyNumber_Add(epoch, delta);
-                n_consumed += fmt[i].len;
-                Py_DECREF(epoch); 
-                Py_DECREF(delta);
-                break;
-            }
-
-        case BANDWIDTH:
-            {
-                assert(fmt[i].len == 1);
-                unsigned int ii = *((unsigned char *) p);
-                decoded = PyString_FromFormat("%d MHz", ii / 5);
-                n_consumed += fmt[i].len;
-                break;
-            }
-
-        case RSRP:
-            {
-                // (0.0625 * x - 180) dBm
-                assert(fmt[i].len == 2);
-                short val = *((short *) p);
-                decoded = Py_BuildValue("f", val * 0.0625 - 180);
-                n_consumed += fmt[i].len;
-                break;
-            }
-
-        case RSRQ:
-            {
-                // (0.0625 * x - 30) dB
-                assert(fmt[i].len == 2);
-                short val = *((short *) p);
-                decoded = Py_BuildValue("f", val * 0.0625 - 30);
-                n_consumed += fmt[i].len;
-                break;
-            }
-
-        case WCDMA_MEAS:
-            {   // (x-256) dBm
-                assert(fmt[i].len == 1);
-                unsigned int ii = *((unsigned char *) p);
-                decoded = Py_BuildValue("i", (int)ii-256);
-                n_consumed += fmt[i].len;
-                break;
-            }
-
-        case SKIP:
-            n_consumed += fmt[i].len;
-            break;
-
-        case PLACEHOLDER:
-            {
-                assert(fmt[i].len == 0);
-                decoded = Py_BuildValue("I", 0);
-                break;
-            }
-
-        default:
-            assert(false);
-            break;
-        }
-
-        if (decoded != NULL) {
-            PyObject *t = Py_BuildValue("(sOs)",
-                                        fmt[i].field_name, decoded, "");
-            PyList_Append(result, t);
-            Py_DECREF(t);
-            Py_DECREF(decoded);
-        }
-    }
-    Py_DECREF(result);
-    return n_consumed;
-}
 
 static int
 _decode_wcdma_signaling_messages(const char *b, int offset, int length,
@@ -354,7 +69,7 @@ _decode_wcdma_signaling_messages(const char *b, int offset, int length,
 
     int pdu_length = _search_result_int(result, "Message Length");
 
-    std::string type_str = "raw_msg/"; 
+    std::string type_str = "raw_msg/";
     type_str += ch_name;
     PyObject *t = Py_BuildValue("(ss#s)",
                                 "Msg", b + offset, pdu_length, type_str.c_str());
@@ -4716,7 +4431,18 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
                 b, offset, length, result);
         offset += _decode_lte_pdcch_phich_indication_report_payload(b, offset, length, result);
         break;
-
+    case _1xEV_Rx_Partial_MultiRLP_Packet:
+        offset += _decode_by_fmt(_1xEVRxPartialMultiRLPPacket_Fmt,
+                ARRAY_SIZE(_1xEVRxPartialMultiRLPPacket_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_1xev_rx_partial_multirlp_packet_payload(b, offset, length, result);
+        break;
+    case _1xEV_Connected_State_Search_Info:
+        offset += _decode_by_fmt(_1xEVConnectedStateSearchInfo_Fmt,
+                ARRAY_SIZE(_1xEVConnectedStateSearchInfo_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_1xev_connected_state_search_info_payload(b, offset, length, result);
+        break;
     default:
         break;
     };
