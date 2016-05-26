@@ -462,6 +462,11 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     if (success && crc_correct) {
         manager_export_binary(&g_emanager, frame.c_str(), frame.size());
 
+        // if(!manager_export_binary(&g_emanager, frame.c_str(), frame.size())){
+        //     // Log not required by the user
+        //     Py_RETURN_NONE;
+        // }
+
         if(is_log_packet(frame.c_str(), frame.size())){
             const char *s = frame.c_str();
             // printf("%x %x %x %x\n",s[0],s[1],s[2],s[3]);
