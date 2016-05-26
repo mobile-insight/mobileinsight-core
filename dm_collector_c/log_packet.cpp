@@ -2595,7 +2595,7 @@ static int _decode_lte_pdcp_dl_config_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num Subpkt");
@@ -2773,7 +2773,7 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_pdcp_ul_data_pdu_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num Subpkt");
@@ -2876,7 +2876,7 @@ static int _decode_lte_pdcp_ul_data_pdu_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_pdcp_dl_stats_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num Subpkt");
@@ -2956,7 +2956,7 @@ static int _decode_lte_pdcp_dl_stats_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_pdcp_ul_stats_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num Subpkt");
@@ -3068,7 +3068,7 @@ static int _decode_lte_pdcp_ul_stats_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_rlc_ul_stats_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num Subpkt");
@@ -3148,7 +3148,7 @@ static int _decode_lte_rlc_ul_stats_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_rlc_dl_stats_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num Subpkt");
@@ -3259,7 +3259,7 @@ static int _decode_lte_rlc_dl_stats_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_pdcp_dl_ctrl_pdu_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num Subpkt");
@@ -3369,7 +3369,7 @@ static int _decode_lte_pdcp_dl_ctrl_pdu_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_pdcp_ul_ctrl_pdu_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num Subpkt");
@@ -3479,7 +3479,7 @@ static int _decode_lte_pdcp_ul_ctrl_pdu_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 
@@ -3586,7 +3586,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 
@@ -3795,7 +3795,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
-        int offset, int length, PyObject *result) {
+        int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 

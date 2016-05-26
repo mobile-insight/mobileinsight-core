@@ -46,7 +46,7 @@ const Fmt _1xEVConnectedStateSearchInfo_Payload_v0 [] = {
 };
 
 static int _decode_1xev_connected_state_search_info_payload (const char *b,
-        int offset, int length, PyObject *result) {
+        int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 
