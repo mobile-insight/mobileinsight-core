@@ -35,15 +35,21 @@ manager_init_state (struct ExportManagerState *pstate) {
     return;
 }
 
-void
+bool
 manager_export_binary (struct ExportManagerState *pstate, const char *b, size_t length) {
-    if (pstate->log_fp != NULL) {
-        int type_id = get_log_type(b, length);
-        if (pstate->whitelist.count(type_id) > 0) { // filter
+
+    int type_id = get_log_type(b, length);
+    if (pstate->whitelist.count(type_id) > 0) { // filter
+
+        if (pstate->log_fp != NULL) {
             std::string frame = encode_hdlc_frame(b, (int) length);
             size_t cnt = fwrite(frame.c_str(), sizeof(char), frame.size(), pstate->log_fp);
         }
+
+        return true;
     }
+    else
+        return false;
 }
 
 void

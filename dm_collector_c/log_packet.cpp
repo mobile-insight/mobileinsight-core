@@ -4315,13 +4315,6 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
         offset += _decode_lte_mac_ul_txstatistics_subpkt(b, offset, length, result);
         break;
 
-    case Modem_debug_message: //Yuanjie: modem debugging message
-        offset += _decode_by_fmt(ModemDebug_Fmt,
-                                    ARRAY_SIZE(ModemDebug_Fmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_modem_debug_msg(b, offset, length, result);
-        break;
-
     case LTE_RLC_UL_Config_Log_Packet:
         offset += _decode_by_fmt(LteRlcUlConfigLogPacketFmt,
                 ARRAY_SIZE(LteRlcUlConfigLogPacketFmt, Fmt),
@@ -4552,7 +4545,6 @@ PyObject *
 decode_log_packet_modem (const char *b, size_t length, bool skip_decoding) {
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
-
 
     PyObject *result = NULL;
     int offset = 0;

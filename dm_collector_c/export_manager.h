@@ -20,6 +20,6 @@ void manager_change_config (struct ExportManagerState *pstate,
                             const char *new_path, const IdVector &whitelist);
 
 // Export raw msgs that are in the whitelist
-void manager_export_binary (struct ExportManagerState *pstate, const char *b, size_t length);
+bool manager_export_binary (struct ExportManagerState *pstate, const char *b, size_t length);
 
 #endif // __DM_COLLECTOR_C_EXPORT_MANAGER_H__
