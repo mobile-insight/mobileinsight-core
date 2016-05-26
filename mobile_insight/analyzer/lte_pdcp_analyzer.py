@@ -19,10 +19,6 @@ class LtePdcpAnalyzer(Analyzer):
 
         self.add_source_callback(self.__msg_callback)
 
-        self.startThrw = None
-        self.rbInfo = {}
-
-
     def set_source(self,source):
         """
         Set the trace source. Enable the cellular signaling messages
@@ -31,16 +27,22 @@ class LtePdcpAnalyzer(Analyzer):
         """
         Analyzer.set_source(self,source)
 
-        #Phy-layer logs
-        source.enable_log("LTE_PDCP_DL_Config")
+        # Phy-layer logs
+        # source.enable_log("LTE_PDCP_DL_Config")
         # source.enable_log("LTE_PDCP_UL_Config")
-        source.enable_log("LTE_PDCP_DL_SRB_Integrity_Data_PDU")
-        source.enable_log("LTE_PDCP_UL_SRB_Integrity_Data_PDU")
+        # source.enable_log("LTE_PDCP_UL_Data_PDU")
+        # source.enable_log("LTE_PDCP_DL_Ctrl_PDU")
+        # source.enable_log("LTE_PDCP_UL_Ctrl_PDU")
+        # source.enable_log("LTE_PDCP_DL_Stats")
+        # source.enable_log("LTE_PDCP_UL_Stats")
+        # source.enable_log("LTE_PDCP_DL_SRB_Integrity_Data_PDU")
+        # source.enable_log("LTE_PDCP_UL_SRB_Integrity_Data_PDU")
+        # source.enable_log("LTE_PDSCH_Stat_Indication")
+        source.enable_log("1xEV_Connected_State_Search_Info")
+
 
     def __msg_callback(self,msg):
         s = msg.data.decode_xml().replace("\n", "")
         print minidom.parseString(s).toprettyxml(" ")
-        log_item = msg.data.decode()
-        print log_item
 
 
