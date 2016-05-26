@@ -760,7 +760,7 @@ const ValueName RNTIType [] = {
     {0, "C-RNTI"},
     {2, "P-RNTI"},
     {3, "RA-RNTI"},
-    {4, "T-C-RNTI"},
+    {4, "Temporary-C-RNTI"},
     {5, "SI-RNTI"}
 };
 
@@ -1201,6 +1201,7 @@ const Fmt LteMacRachAttempt_Subpkt_Msg2 [] = {
     {UINT, "TA value", 2},
 };
 const ValueName LteMacRachAttempt_Subpkt_Msg2_Result [] = {
+    {0, "No"},
     {1, "True"},
 };
 
@@ -1215,6 +1216,7 @@ const Fmt LteMacRachAttempt_Subpkt_Msg3_MACPDU [] = {
 };
 
 // ----------------------------------------------------------------------------
+// LTE PDCP DL Config
 
 const Fmt LtePdcpDlConfig_Fmt [] = {
     {UINT, "Version", 1},
@@ -1294,9 +1296,768 @@ const ValueName LtePdcpDlConfig_Subpkt_ActiveRB_RBtype [] = {
 };
 const ValueName LtePdcpDlConfig_Subpkt_ActiveRB_StatusReport [] = {
     {0, "NO"},
+    {1, "YES"},
 };
 const ValueName LtePdcpDlConfig_Subpkt_ActiveRB_RoHCEnabled [] = {
     {0, "false"},
+    {1, "true"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PDCP UL Config
+
+const Fmt LtePdcpUlConfig_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpUlConfig_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpUlConfig_SubpktPayload [] = {
+    {UINT, "Reason", 1},
+    {UINT, "SRB Cipher Algorithm", 1},
+    {UINT, "SRB Cipher Key Idx", 1},
+    {UINT, "SRB Integrity Algorithm", 1},
+    {UINT, "SRB Integrity Key Idx", 1},
+    {UINT, "DRB Cipher Algorithm", 1},
+    {UINT, "DRB Cipher Key Idx", 1},
+    {UINT, "Array size", 1},
+};
+const ValueName LtePdcpUlConfig_Subpkt_Reason [] = {
+    {1, "Configuration"},
+    {4, "RB Release"},
+};
+const ValueName LtePdcpUlConfig_Subpkt_CipherAlgo [] = {
+    {2, "Snow3G"},
+    {7, "None"},
+};
+const ValueName LtePdcpUlConfig_Subpkt_IntegAlgo [] = {
+    {2, "AES"},
+    {7, "None"},
+};
+
+const Fmt LtePdcpUlConfig_Subpkt_ReleaseRB_Header [] = {
+    {UINT, "Number of Released RBs", 1},
+};
+const Fmt LtePdcpUlConfig_Subpkt_ReleaseRB_Fmt [] = {
+    {UINT, "Released RB Cfg Index", 1},
+};
+
+const Fmt LtePdcpUlConfig_Subpkt_AddedModifiedRB_Header [] = {
+    {UINT, "Number of Added/Modified RBs", 1},
+};
+const Fmt LtePdcpUlConfig_Subpkt_AddedModifiedRB_Fmt [] = {
+    {UINT, "Added/Modified RB Cfg Index", 1},
+    {UINT, "Action", 1},
+};
+const ValueName LtePdcpUlConfig_Subpkt_AddedModifiedRB_Action [] = {
+    {1, "Add"},
+    {2, "Modify"},
+};
+
+const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Header [] = {
+    {UINT, "Number of active RBs", 1},
+};
+const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Fmt [] = {
+    {UINT, "RB ID", 1},
+    {UINT, "RB-Cfg Idx", 1},
+    {UINT, "EPS ID", 1},
+    {UINT, "RB mode", 1},
+    {UINT, "RB type", 1},
+    {UINT, "SN length", 1},
+    {UINT, "Discard timer", 2},
+    {UINT, "RoHC Max CID", 1},
+    {UINT, "RoHC Enabled", 1},
+    {BYTE_STREAM, "RoHC Mask", 4},
+};
+const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_RBmode [] = {
+    {1, "AM"},
+};
+const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_RBtype [] = {
+    {1, "SRB"},
+    {2, "DRB"},
+};
+const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_StatusReport [] = {
+    {0, "NO"},
+};
+const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_RoHCEnabled [] = {
+    {0, "false"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PDCP UL Data PDU
+
+const Fmt LtePdcpUlDataPdu_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpUlDataPdu_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpUlDataPdu_SubpktPayload [] = {
+    {UINT, "RB Cfg Index", 1},
+    {UINT, "Mode", 1},
+    {UINT, "SN Length (bit)", 1},
+};
+const ValueName LtePdcpUlDataPdu_Subpkt_Mode [] = {
+    {1, "AM"},
+};
+
+const Fmt LtePdcpUlDataPdu_Subpkt_PDU_Header [] = {
+    {UINT, "Num PDUs", 2},
+};
+const Fmt LtePdcpUlDataPdu_Subpkt_PDU_Fmt [] = {
+    {UINT, "PDU Size", 2},
+    {UINT, "Logged Bytes", 2},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {UINT, "SN", 1},
+    {SKIP, NULL, 2},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PDCP DL Stats
+
+const Fmt LtePdcpDlStats_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpDlStats_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpDlStats_SubpktPayload [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "Num Errors", 4},
+    {UINT, "Num Offload Q Full Count", 4},
+    {UINT, "Num Packet Dropped Offload Q Full", 4},
+};
+
+const Fmt LtePdcpDlStats_Subpkt_RB_Fmt [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "PDCP Hdr Len", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Flow Ctrl Trigger", 4},
+    {UINT, "Num Data PDU Rx", 4},
+    {UINT, "Num Data PDU Rx Bytes", 4},
+    {UINT, "Control PDU Bytes Rx", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Control PDU Gen", 4},
+    {UINT, "Num Control PDU Gen Bytes", 4},
+    {UINT, "Num Stat Rprt Ctrl PDU Rx", 4},
+    {UINT, "Num ROHC Ctrl PDU Rx", 4},
+    {UINT, "Num PDU ROHC Fail", 4},
+    {UINT, "Num PDU Integrity Fail", 4},
+    {UINT, "Num Missing SDU To UL", 4},
+    {UINT, "Num Missing SDU From UL", 4},
+    {UINT, "Num PDU Dups", 4},
+    {UINT, "Num PDU Dups Bytes", 4},
+    {UINT, "Num PDU Out of Win", 4},
+    {UINT, "Num PDU Out of Win Bytes", 4},
+    {UINT, "Num PDU Invalid", 4},
+    {UINT, "Num PDU Invalid Bytes", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Flow Ctrl Trigger Rst", 4},
+    {UINT, "Num Data PDU Rx Rst", 4},
+    {UINT, "Num Data PDU Rx Bytes Rst", 4},
+    {UINT, "Control PDU Bytes Rx Rst", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Control PDU Gen Rst", 4},
+    {UINT, "Num Control PDU Gen Bytes Rst", 4},
+    {UINT, "Num Stat Rprt Ctrl PDU Rx Rst", 4},
+    {UINT, "Num ROHC Ctrl PDU Rx Rst", 4},
+    {UINT, "Num PDU ROHC Fail Rst", 4},
+    {UINT, "Num PDU Integrity Fail Rst", 4},
+    {UINT, "Num Missing SDU To UL Rst", 4},
+    {UINT, "Num Missing SDU From UL Rst", 4},
+    {UINT, "Num PDU Dups Rst", 4},
+    {UINT, "Num PDU Dups Bytes Rst", 4},
+    {UINT, "Num PDU Out of Win Rst", 4},
+    {UINT, "Num PDU Out of Win Bytes Rst", 4},
+    {UINT, "Num PDU Invalid Rst", 4},
+    {UINT, "Num PDU Invalid Bytes Rst", 4},
+    {SKIP, NULL, 4},
+};
+const ValueName LtePdcpDlStats_Subpkt_RB_Mode [] = {
+    {1, "AM"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PDCP UL Stats
+
+const Fmt LtePdcpUlStats_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpUlStats_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpUlStats_SubpktPayload_v1 [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "PDCPUL Errors", 4},
+};
+
+const Fmt LtePdcpUlStats_SubpktPayload_v2 [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "PDCPUL Errors", 4},
+};
+
+const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v1 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "PDCP Hdr Len", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Flow Ctrl Trigger", 4},
+    {UINT, "Num Data PDU Tx", 4},
+    {UINT, "Num Data PDU Tx Bytes", 4},
+    {UINT, "Num Control PDU Tx", 4},
+    {UINT, "Num Control PDU Tx Bytes", 4},
+    {UINT, "Num Status Report", 4},
+    {UINT, "Num ROHC Fail", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx", 4},
+    {UINT, "Num Discard SDU", 4},
+    {UINT, "Num Discard SDU Bytes", 4},
+    {UINT, "Num PDU HO ReTx", 4},
+    {UINT, "Num PDU HO ReTx Bytes", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Flow Ctrl Trigger Rst", 4},
+    {UINT, "Num Data PDU Tx Rst", 4},
+    {UINT, "Num Data PDU Tx Bytes Rst", 4},
+    {UINT, "Num Control PDU Tx Rst", 4},
+    {UINT, "Num Control PDU Tx Bytes Rst", 4},
+    {UINT, "Num Status Report Rst", 4},
+    {UINT, "Num ROHC Fail Rst", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx Rst", 4},
+    {UINT, "Num Discard SDU Rst", 4},
+    {UINT, "Num Discard SDU Bytes Rst", 4},
+    {UINT, "Num PDU HO ReTx Rst", 4},
+    {UINT, "Num PDU HO ReTx Bytes Rst", 4},
+    {SKIP, NULL, 4},
+};
+
+const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v2 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "PDCP Hdr Len", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Pdcp Ul Buffer Pkt", 2},
+    {UINT, "Num Pdcp Ul Buffer Pkt Bytes", 4},
+    {UINT, "Num Flow Ctrl Trigger", 4},
+    {UINT, "Num Data PDU Tx", 4},
+    {UINT, "Num Data PDU Tx Bytes", 4},
+    {UINT, "Num Control PDU Tx", 4},
+    {UINT, "Num Control PDU Tx Bytes", 4},
+    {UINT, "Num Status Report", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx", 4},
+    {UINT, "Num ROHC Fail", 4},
+    {UINT, "Num Discard SDU", 4},
+    {UINT, "Num Discard SDU Bytes", 4},
+    {UINT, "Num PDU HO ReTx", 4},
+    {UINT, "Num PDU HO ReTx Bytes", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd", 4},
+    {UINT, "Num Rohc Pdu Drop Ho", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Flow Ctrl Trigger Rst", 4},
+    {UINT, "Num Data PDU Tx Rst", 4},
+    {UINT, "Num Data PDU Tx Bytes Rst", 4},
+    {UINT, "Num Control PDU Tx Rst", 4},
+    {UINT, "Num Control PDU Tx Bytes Rst", 4},
+    {UINT, "Num Status Report Rst", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx Rst", 4},
+    {UINT, "Num ROHC Fail Rst", 4},
+    {UINT, "Num Discard SDU Rst", 4},
+    {UINT, "Num Discard SDU Bytes Rst", 4},
+    {UINT, "Num PDU HO ReTx Rst", 4},
+    {UINT, "Num PDU HO ReTx Bytes Rst", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes Rst", 4},
+    {SKIP, NULL, 4},
+
+};
+
+const ValueName LtePdcpUlStats_Subpkt_RB_Mode [] = {
+    {1, "AM"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE RLC UL Statistics
+
+const Fmt LteRlcUlStats_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LteRlcUlStats_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LteRlcUlStats_SubpktPayload [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "RLCUL Error Count", 4},
+};
+
+const Fmt LteRlcUlStats_Subpkt_RB_Fmt [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num New Data PDU", 4},
+    {UINT, "Num New Data PDU Bytes", 4},
+    {UINT, "Num SDU", 4},
+    {UINT, "Num SDU Bytes", 4},
+    {UINT, "Num Ctrl PDU Tx", 4},
+    {UINT, "Num Ctrl PDU Bytes Tx", 4},
+    {UINT, "Num Retx PDU", 4},
+    {UINT, "Num Retx PDU Bytes", 4},
+    {UINT, "Num Ctrl PDU Rx", 4},
+    {UINT, "Num Complete NACK", 4},
+    {UINT, "Num Segm NACK", 4},
+    {UINT, "Num Invalid Ctrl PDU Rx", 4},
+    {UINT, "Num Poll", 4},
+    {UINT, "Num T Poll Retx Expiry", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num New Data PDU Rst", 4},
+    {UINT, "Num New Data PDU Bytes Rst", 4},
+    {UINT, "Num SDU Rst", 4},
+    {UINT, "Num SDU Bytes Rst", 4},
+    {UINT, "Num Ctrl PDU Tx Rst", 4},
+    {UINT, "Num Ctrl PDU Bytes Tx Rst", 4},
+    {UINT, "Num Retx PDU Rst", 4},
+    {UINT, "Num Retx PDU Bytes Rst", 4},
+    {UINT, "Num Ctrl PDU Rx Rst", 4},
+    {UINT, "Num Complete NACK Rst", 4},
+    {UINT, "Num Segm NACK Rst", 4},
+    {UINT, "Num Invalid Ctrl PDU Rx Rst", 4},
+    {UINT, "Num Poll Rst", 4},
+    {UINT, "Num T Poll Retx Expiry Rst", 4},
+    {SKIP, NULL, 4},
+};
+const ValueName LteRlcUlStats_Subpkt_RB_Mode [] = {
+    {1, "AM"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE RLC DL Statistics
+
+const Fmt LteRlcDlStats_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LteRlcDlStats_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LteRlcDlStats_SubpktPayload_v2 [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "RLC PDCP Q Full Count", 4},
+    {UINT, "RLCDL Error Count", 4},
+};
+
+const Fmt LteRlcDlStats_SubpktPayload_v3 [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "RLC PDCP Q Full Count", 4},
+    {UINT, "RLCDL Error Count", 4},
+};
+
+const Fmt LteRlcDlStats_Subpkt_RB_Fmt_v2 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Data PDU", 4},
+    {UINT, "Data PDU Bytes", 4},
+    {UINT, "Num Status Rxed", 4},
+    {UINT, "Status Rxed Bytes", 4},
+    {UINT, "Num Invalid PDU", 4},
+    {UINT, "Invalid PDU Bytes", 4},
+    {UINT, "Num Retx PDU", 4},
+    {UINT, "Retx PDU Bytes", 4},
+    {UINT, "Num Dup PDU", 4},
+    {UINT, "Dup PDU Bytes", 4},
+    {UINT, "Num Dropped PDU", 4},
+    {UINT, "Dropped PDU Bytes", 4},
+    {UINT, "Num Dropped PDU FC", 4},
+    {UINT, "Dropped PDU Bytes FC", 4},
+    {UINT, "Num SDU", 4},
+    {UINT, "Num SDU Bytes", 4},
+    {UINT, "Num NonSeq SDU", 4},
+    {UINT, "Num Ctrl PDU", 4},
+    {UINT, "Num Complete NACK", 4},
+    {UINT, "Num Segments NACK", 4},
+    {UINT, "Num t_reorder Expired", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Data PDU Rst", 4},
+    {UINT, "Data PDU Bytes Rst", 4},
+    {UINT, "Num Status Rxed Rst", 4},
+    {UINT, "Status Rxed Bytes Rst", 4},
+    {UINT, "Num Invalid PDU Rst", 4},
+    {UINT, "Invalid PDU Bytes Rst", 4},
+    {UINT, "Num Retx PDU Rst", 4},
+    {UINT, "Retx PDU Bytes Rst", 4},
+    {UINT, "Num Dup PDU Rst", 4},
+    {UINT, "Dup PDU Bytes Rst", 4},
+    {UINT, "Num Dropped PDU Rst", 4},
+    {UINT, "Dropped PDU Bytes Rst", 4},
+    {UINT, "Num Dropped PDU FC Rst", 4},
+    {UINT, "Dropped PDU Bytes FC Rst", 4},
+    {UINT, "Num SDU Rst", 4},
+    {UINT, "Num SDU Bytes Rst", 4},
+    {UINT, "Num NonSeq SDU Rst", 4},
+    {UINT, "Num Ctrl PDU Rst", 4},
+    {UINT, "Num Complete NACK Rst", 4},
+    {UINT, "Num Segments NACK Rst", 4},
+    {UINT, "Num t_reorder Expired Rst", 4},
+    {SKIP, NULL, 4},
+};
+
+const Fmt LteRlcDlStats_Subpkt_RB_Fmt_v3 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Data PDU", 4},
+    {UINT, "Data PDU Bytes", 8},
+    {UINT, "Num Status Rxed", 4},
+    {UINT, "Status Rxed Bytes", 8},
+    {UINT, "Num Invalid PDU", 4},
+    {UINT, "Invalid PDU Bytes", 8},
+    {UINT, "Num Retx PDU", 4},
+    {UINT, "Retx PDU Bytes", 8},
+    {UINT, "Num Dup PDU", 4},
+    {UINT, "Dup PDU Bytes", 8},
+    {UINT, "Num Dropped PDU", 4},
+    {UINT, "Dropped PDU Bytes", 8},
+    {UINT, "Num Dropped PDU FC", 4},
+    {UINT, "Dropped PDU Bytes FC", 8},
+    {UINT, "Num SDU", 4},
+    {UINT, "Num SDU Bytes", 8},
+    {UINT, "Num NonSeq SDU", 4},
+    {UINT, "Num Ctrl PDU", 4},
+    {UINT, "Num Complete NACK", 4},
+    {UINT, "Num Segments NACK", 4},
+    {UINT, "Num t_reorder Expired", 4},
+    {UINT, "Num t_reorder Start", 4},
+    {UINT, "Num Missed UM PDU", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Data PDU Rst", 4},
+    {UINT, "Data PDU Bytes Rst", 8},
+    {UINT, "Num Status Rxed Rst", 4},
+    {UINT, "Status Rxed Bytes Rst", 8},
+    {UINT, "Num Invalid PDU Rst", 4},
+    {UINT, "Invalid PDU Bytes Rst", 8},
+    {UINT, "Num Retx PDU Rst", 4},
+    {UINT, "Retx PDU Bytes Rst", 8},
+    {UINT, "Num Dup PDU Rst", 4},
+    {UINT, "Dup PDU Bytes Rst", 8},
+    {UINT, "Num Dropped PDU Rst", 4},
+    {UINT, "Dropped PDU Bytes Rst", 8},
+    {UINT, "Num Dropped PDU FC Rst", 4},
+    {UINT, "Dropped PDU Bytes FC Rst", 8},
+    {UINT, "Num SDU Rst", 4},
+    {UINT, "Num SDU Bytes Rst", 8},
+    {UINT, "Num NonSeq SDU Rst", 4},
+    {UINT, "Num Ctrl PDU Rst", 4},
+    {UINT, "Num Complete NACK Rst", 4},
+    {UINT, "Num Segments NACK Rst", 4},
+    {UINT, "Num t_reorder Expired Rst", 4},
+    {UINT, "Num t_reorder Start Rst", 4},
+    {UINT, "Num Missed UM PDU Rst", 4},
+    {SKIP, NULL, 4},
+};
+const ValueName LteRlcDlStats_Subpkt_RB_Mode [] = {
+    {1, "AM"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PDCP DL Ctrl PDU
+
+const Fmt LtePdcpDlCtrlPdu_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpDlCtrlPdu_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpDlCtrlPdu_SubpktPayload [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "SN Length (bit)", 1},
+};
+const ValueName LtePdcpDlCtrlPdu_Subpkt_Mode [] = {
+    {1, "AM"},
+};
+
+const Fmt LtePdcpDlCtrlPdu_Subpkt_PDU_Header [] = {
+    {UINT, "Num PDUs", 1},
+};
+
+const Fmt LtePdcpDlCtrlPdu_Subpkt_PDU_Fmt [] = {
+    {UINT, "PDU Size", 2},
+    {UINT, "Logged Bytes", 2},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {PLACEHOLDER, "type", 0},
+    {UINT, "fms", 2},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PDCP UL Ctrl PDU
+
+const Fmt LtePdcpUlCtrlPdu_Fmt [] = {
+    {UINT, "Version", 1},
+    {UINT, "Num Subpkt", 1},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePdcpUlCtrlPdu_SubpktHeader [] = {
+    {UINT, "Subpacket ID", 1},
+    {UINT, "Subpacket Version", 1},
+    {UINT, "Subpacket Size", 2},
+};
+
+const Fmt LtePdcpUlCtrlPdu_SubpktPayload [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "SN Length (bit)", 1},
+};
+const ValueName LtePdcpUlCtrlPdu_Subpkt_Mode [] = {
+    {1, "AM"},
+};
+
+const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Header [] = {
+    {UINT, "Num PDUs", 1},
+};
+
+const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Fmt [] = {
+    {UINT, "PDU Size", 2},
+    {UINT, "Logged Bytes", 2},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {PLACEHOLDER, "type", 0},
+    {UINT, "fms", 2},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PUCCH Power Control
+
+const Fmt LtePucchPowerControl_Fmt [] = {
+    {UINT, "Version", 1},
+};
+const Fmt LtePucchPowerControl_Fmt_v4 [] = {
+    {SKIP, NULL, 2},
+    {UINT, "Number of Records", 1},
+};
+
+const Fmt LtePucchPowerControl_Record_Fmt_v4 [] = {
+    {UINT, "SFN", 4},
+    // include Sub-FN,  Tx Power, DCI Format, PUCCH Format, N_HARQ
+    {PLACEHOLDER, "Sub-FN", 0},
+    {PLACEHOLDER, "PUCCH Tx Power (dBm)", 0},
+    {PLACEHOLDER, "DCI Format", 0},
+    {PLACEHOLDER, "PUCCH Format", 0},
+    {PLACEHOLDER, "N_HARQ", 0},
+
+    {UINT, "TPC Command", 4},
+    // include N_CQI, DL Pass Loss,
+    {PLACEHOLDER, "N_CQI", 0},
+    {PLACEHOLDER, "DL Pass Loss", 0},
+
+    {UINT, "g(i)", 2},
+    {UINT, "PUCCH Actual Tx Power", 1},
+    {SKIP, NULL, 1},
+};
+const ValueName LtePucchPowerControl_Record_v4_DCI_Format [] = {
+    // Release 8
+    // http://www.sharetechnote.com/html/LTE_Advanced_DCI.html
+    {0, "Format 0"},
+    {1, "Format 1"},
+    {2, "Format 1A"},
+    {3, "Format 1B"},
+    {4, "Format 1C"},
+    {5, "Format 1D"},
+    {6, "Format 2"},
+    {7, "Format 2A"},
+    // {8, "Format 2B"},
+    // {9, "Format 2C"},
+    {10, "Format 3"},
+    {11, "Format 3A"},
+    // {12, "Format 4"},
+};
+const ValueName LtePucchPowerControl_Record_v4_PUCCH_Format [] = {
+    {0, "Format 1"},
+    {1, "Format 1A"},
+    {2, "Format 1B"},
+    {3, "Format 2"},
+    {4, "Format 2A"},
+    {5, "Format 2B"},
+    {6, "Format 3"},
+};
+const ValueName LtePucchPowerControl_Record_v4_TPC [] = {
+    {31, "Not present"},
+    {63, "-1"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PUSCH Power Control
+
+const Fmt LtePuschPowerControl_Fmt [] = {
+    {UINT, "Version", 1},
+};
+
+const Fmt LtePuschPowerControl_Fmt_v4 [] = {
+    {SKIP, NULL, 2},
+    {UINT, "Number of Records", 1},
+};
+
+const Fmt LtePuschPowerControl_Fmt_v5 [] = {
+    {SKIP, NULL, 2},
+    {UINT, "Number of Records", 1},
+};
+
+const Fmt LtePuschPowerControl_Record_Fmt_v4 [] = {
+    {UINT, "SFN", 4},
+    {PLACEHOLDER, "Sub-FN", 0},
+    {PLACEHOLDER, "PUSCH Tx Power (dBm)", 0},
+    {PLACEHOLDER, "DCI Format", 0},
+    {PLACEHOLDER, "Tx Type", 0},
+    {UINT, "Transport Block Size", 4},
+    {PLACEHOLDER, "DL Path Loss", 0},
+    {PLACEHOLDER, "F(i)", 0},
+    {UINT, "TPC", 4},
+    {PLACEHOLDER, "PUSCH Actual Tx Power", 0},
+};
+const Fmt LtePuschPowerControl_Record_Fmt_v5 [] = {
+    {UINT, "SFN", 4},
+    {PLACEHOLDER, "Sub-FN", 0},
+    {PLACEHOLDER, "PUSCH Tx Power (dBm)", 0},
+    {PLACEHOLDER, "DCI Format", 0},
+    {PLACEHOLDER, "Tx Type", 0},
+    {UINT, "Num RBs", 4},
+    {PLACEHOLDER, "Transport Block Size", 0},
+    {PLACEHOLDER, "DL Path Loss", 0},
+    {UINT, "F(i)", 4},
+    {PLACEHOLDER, "TPC", 0},
+    {PLACEHOLDER, "PUSCH Actual Tx Power", 0},
+};
+const ValueName LtePuschPowerControl_Record_v5_TxType [] = {
+    {1, "Dynamic"},
+    {2, "RACH MSG3"},
+};
+const ValueName LtePuschPowerControl_Record_v5_DCI_Format [] = {
+    // Release 8
+    // http://www.sharetechnote.com/html/LTE_Advanced_DCI.html
+    {0, "Format 0"},
+    {1, "Format 1"},
+    {2, "Format 1A"},
+    {3, "Format 1B"},
+    {4, "Format 1C"},
+    {5, "Format 1D"},
+    {6, "Format 2"},
+    {7, "Format 2A"},
+    // {8, "Format 2B"},
+    // {9, "Format 2C"},
+    {10, "Format 3"},
+    {11, "Format 3A"},
+    // {12, "Format 4"},
+};
+const ValueName LtePuschPowerControl_Record_v5_TPC [] = {
+    {15, "N/A"},
+    {31, "-1"},
+};
+
+// ----------------------------------------------------------------------------
+// LTE PDCCH-PHICH Indication Report
+
+const Fmt LtePdcchPhichIndicationReport_Fmt [] = {
+    {UINT, "Version", 1},
+};
+
+const Fmt LtePdcchPhichIndicationReport_Fmt_v5 [] = {
+    {UINT, "Duplex Mode", 2},
+    {UINT, "Number of Records", 1},
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v5_p1 [] = {
+    {UINT, "Num PDCCH Results", 4},
+    {PLACEHOLDER, "PDCCH Timing SFN", 0},
+    {PLACEHOLDER, "PDCCH Timing Sub-FN", 0},
+    {PLACEHOLDER, "PHICH Included", 0},
+    {PLACEHOLDER, "PHICH 1 Included", 0},
+    {PLACEHOLDER, "PHICH Timing SFN", 0},
+    {UINT, "PHICH Timing Sub-FN", 4},
+    {PLACEHOLDER, "PHICH Value", 0},
+    {PLACEHOLDER, "PHICH 1 Value", 0},
+};
+
+// totally number of pdcch info + number of pdcch hidden info = 8
+const Fmt LtePdcchPhichIndicationReport_Record_v5_p2 [] = {
+    // PDCCH Info
+    {UINT, "Serv Cell Idx", 2},
+    {PLACEHOLDER, "RNTI Type", 0},
+    {PLACEHOLDER, "Payload Size", 0},
+    {PLACEHOLDER, "Aggregation Level", 0},
+    {UINT, "Search Space", 2},
+    {PLACEHOLDER, "SPS Grant Type", 0},
+    {PLACEHOLDER, "New DL Tx", 0},
+    {PLACEHOLDER, "Num DL Trblks", 0},
+};
+const Fmt LtePdcchPhichIndicationReport_Record_v5_p3 [] = {
+    // PDCCH Hidden Info
+    {SKIP, NULL, 4},
+};
+
+const ValueName LtePdcchPhichIndicationReport_Record_v5_Included [] = {
+    {0, "No"},
+    {1, "Yes"},
+};
+const ValueName LtePdcchPhichIndicationReport_Record_v5_Value [] = {
+    {0, "NACK"},
+    {1, "ACK"},
+};
+const ValueName LtePdcchPhichIndicationReport_Record_v5_NewDLTx [] = {
+    {0, "false"},
+    {1, "true"},
+};
+const ValueName LtePdcchPhichIndicationReport_Record_v5_AggLv [] = {
+    {0, "Agg1"},
+    {1, "Agg2"},
+    {2, "Agg3"},
+    {3, "Agg4"},
+};
+const ValueName LtePdcchPhichIndicationReport_Record_v5_SS [] = {
+    {0, "Common"},
+    {1, "UE-specific"},
 };
 
 // ----------------------------------------------------------------------------
