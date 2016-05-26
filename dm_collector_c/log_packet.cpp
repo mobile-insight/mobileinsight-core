@@ -49,13 +49,13 @@ namespace patch
  *      "type".
  * - "dict": The "value" is another result list, and each element can be of
  *      different "types".
- * - "raw_msg/*": The value is a binary string that contains raw messages.
+ * - "raw_msg/TYPE": The value is a binary string that contains raw messages.
  */
 
 // TODO: split this .cpp to multiple files.
 
 static int
-_decode_wcdma_signaling_messages(const char *b, int offset, int length,
+_decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
                                     PyObject *result) {
     int ch_num = _search_result_int(result, "Channel Type");
     const char *ch_name = search_name(WcdmaSignalingMsgChannelType,
@@ -79,7 +79,7 @@ _decode_wcdma_signaling_messages(const char *b, int offset, int length,
 }
 
 static int
-_decode_umts_nas_gmm_state(const char *b, int offset, int length,
+_decode_umts_nas_gmm_state(const char *b, int offset, size_t length,
                             PyObject *result) {
     (void) _map_result_field_to_name(result,
                                         "GMM State",
@@ -100,7 +100,7 @@ _decode_umts_nas_gmm_state(const char *b, int offset, int length,
 }
 
 static int
-_decode_umts_nas_mm_state(const char *b, int offset, int length,
+_decode_umts_nas_mm_state(const char *b, int offset, size_t length,
                             PyObject *result) {
     (void) _map_result_field_to_name(result,
                                         "MM State",
@@ -121,7 +121,7 @@ _decode_umts_nas_mm_state(const char *b, int offset, int length,
 }
 
 static int
-_decode_umts_nas_ota(const char *b, int offset, int length,
+_decode_umts_nas_ota(const char *b, int offset, size_t length,
                         PyObject *result) {
     //int start = offset;
     (void) _map_result_field_to_name(result,
@@ -140,7 +140,7 @@ _decode_umts_nas_ota(const char *b, int offset, int length,
 }
 
 static int
-_decode_lte_rrc_ota(const char *b, int offset, int length,
+_decode_lte_rrc_ota(const char *b, int offset, size_t length,
                     PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Pkt Version");
@@ -195,7 +195,7 @@ _decode_lte_rrc_ota(const char *b, int offset, int length,
 }
 
 static int
-_decode_lte_rrc_mib(const char *b, int offset, int length,
+_decode_lte_rrc_mib(const char *b, int offset, size_t length,
                     PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -220,7 +220,7 @@ _decode_lte_rrc_mib(const char *b, int offset, int length,
 }
 
 static int
-_decode_lte_rrc_serv_cell_info(const char *b, int offset, int length,
+_decode_lte_rrc_serv_cell_info(const char *b, int offset, size_t length,
                                 PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -244,8 +244,8 @@ _decode_lte_rrc_serv_cell_info(const char *b, int offset, int length,
     return offset - start;
 }
 
-static int
-_decode_lte_nas_plain(const char *b, int offset, int length,
+static size_t
+_decode_lte_nas_plain(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Pkt Version");
@@ -261,7 +261,7 @@ _decode_lte_nas_plain(const char *b, int offset, int length,
         return 0;
     }
 
-    int pdu_length = length - offset;
+    size_t pdu_length = length - offset;
     PyObject *t = Py_BuildValue("(ss#s)",
                                 "Msg", b + offset, pdu_length,
                                 "raw_msg/LTE-NAS_EPS_PLAIN");
@@ -271,7 +271,7 @@ _decode_lte_nas_plain(const char *b, int offset, int length,
 }
 
 static int
-_decode_lte_nas_esm_state(const char *b, int offset, int length,
+_decode_lte_nas_esm_state(const char *b, int offset, size_t length,
                             PyObject *result) {
 
     int start = offset;
@@ -297,7 +297,7 @@ _decode_lte_nas_esm_state(const char *b, int offset, int length,
 }
 
 static int
-_decode_lte_nas_emm_state(const char *b, int offset, int length,
+_decode_lte_nas_emm_state(const char *b, int offset, size_t length,
                             PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -361,7 +361,7 @@ _decode_lte_nas_emm_state(const char *b, int offset, int length,
 }
 
 static int
-_decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, int length,
+_decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
                                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -450,7 +450,7 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, int length,
 }
 
 static int
-_decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
+_decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -555,7 +555,7 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, int length,
 }
 
 static int
-_decode_lte_ml1_subpkt(const char *b, int offset, int length,
+_decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -623,7 +623,7 @@ _decode_lte_ml1_subpkt(const char *b, int offset, int length,
 }
 
 static int
-_decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, int length,
+_decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
 
     int start = offset;
@@ -641,9 +641,9 @@ _decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, int length,
                                             ARRAY_SIZE(LteMl1IratSubPktFmt, Fmt),
                                             b, offset, length, result_subpkt);
                 // Decode payload
-                int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
-                int subpkt_ver = _search_result_int(result_subpkt, "Version");
-                int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
+                // int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
+                // int subpkt_ver = _search_result_int(result_subpkt, "Version");
+                // int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
 
                 PyObject *result_subpkt_cdma = PyList_New(0);
                 offset += _decode_by_fmt(LteMl1IratCDMACellFmt,
@@ -688,7 +688,7 @@ _decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, int length,
 
 
 static int
-_decode_lte_ml1_irat_subpkt(const char *b, int offset, int length,
+_decode_lte_ml1_irat_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
 
     int start = offset;
@@ -707,7 +707,7 @@ _decode_lte_ml1_irat_subpkt(const char *b, int offset, int length,
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
-                int subpkt_ver = _search_result_int(result_subpkt, "Version");
+                // int subpkt_ver = _search_result_int(result_subpkt, "Version");
                 int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
                 switch(subpkt_id){
                     case LteMl1IratType_WCDMA:
@@ -722,7 +722,7 @@ _decode_lte_ml1_irat_subpkt(const char *b, int offset, int length,
                             offset += _decode_by_fmt(LteMl1IratWCDMACellMetaFmt,
                                             ARRAY_SIZE(LteMl1IratWCDMACellMetaFmt, Fmt),
                                             b, offset, length, result_subpkt_wcdma_freq);
-                            int freq = _search_result_int(result_subpkt_wcdma_freq, "Frequency");
+                            // int freq = _search_result_int(result_subpkt_wcdma_freq, "Frequency");
                             int n_cell = _search_result_int(result_subpkt_wcdma_freq, "Number of cells");
                             for(int k=0; k<n_cell; k++){
                                 PyObject *result_subpkt_wcdma_cell = PyList_New(0);
@@ -776,7 +776,7 @@ _decode_lte_ml1_irat_subpkt(const char *b, int offset, int length,
 }
 
 static int
-_decode_lte_pdcp_dl_srb_integrity_data_pdu(const char *b, int offset, int length,
+_decode_lte_pdcp_dl_srb_integrity_data_pdu(const char *b, int offset, size_t length,
                                             PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -807,7 +807,7 @@ _decode_lte_pdcp_dl_srb_integrity_data_pdu(const char *b, int offset, int length
 }
 
 static int
-_decode_lte_pdcp_ul_srb_integrity_data_pdu(const char *b, int offset, int length,
+_decode_lte_pdcp_ul_srb_integrity_data_pdu(const char *b, int offset, size_t length,
                                             PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -838,7 +838,7 @@ _decode_lte_pdcp_ul_srb_integrity_data_pdu(const char *b, int offset, int length
 //------------------------------------------------------
 // Jie
 static int
-_decode_lte_mac_configuration_subpkt(const char *b, int offset, int length,
+_decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -964,7 +964,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, int length,
 //------------------------------------------------------
 // TODO: Jie
 static int
-_decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, int length,
+_decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -1054,7 +1054,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, int length,
 //------------------------------------------------------
 // Jie
 static int
-_decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, int length,
+_decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -1141,7 +1141,7 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, int length,
 //------------------------------------------------------
 // Jie
 static int
-_decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, int length,
+_decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -1232,7 +1232,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, int le
 //------------------------------------------------------
 // Jie
 static int
-_decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, int length,
+_decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -1310,7 +1310,7 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, int length,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_rlc_ul_config_log_packet_subpkt (const char *b,
-        int offset, int length, PyObject *result) {
+        int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num SubPkt");
@@ -1486,7 +1486,7 @@ static int _decode_lte_rlc_ul_config_log_packet_subpkt (const char *b,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_rlc_dl_config_log_packet_subpkt (const char *b,
-        int offset, int length, PyObject *result) {
+        int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num SubPkt");
@@ -1662,7 +1662,7 @@ static int _decode_lte_rlc_dl_config_log_packet_subpkt (const char *b,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Number of Subpackets");
@@ -1928,7 +1928,7 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Number of Subpackets");
@@ -2204,7 +2204,7 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
 // ----------------------------------------------------------------------------
 
 static int _decode_lte_mac_rach_trigger_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Number of Subpackets");
@@ -2279,7 +2279,7 @@ static int _decode_lte_mac_rach_trigger_subpkt (const char *b, int offset,
 // ----------------------------------------------------------------------------
 
 static int _decode_lte_mac_rach_attempt_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Number of Subpackets");
@@ -2410,7 +2410,7 @@ static int _decode_lte_mac_rach_attempt_subpkt (const char *b, int offset,
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_pdcp_dl_config_subpkt (const char *b, int offset,
-        int length, PyObject *result) {
+        size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num Subpkt");
@@ -2599,7 +2599,6 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num Subpkt");
-
     switch (pkt_ver) {
     case 1:
         {
@@ -3993,8 +3992,8 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
 
 //Yuanjie: decode modem's internal debugging message
 
-static int
-_decode_modem_debug_msg(const char *b, int offset, int length,
+static size_t
+_decode_modem_debug_msg(const char *b, int offset, size_t length,
                                 PyObject *result) {
 
     int start = offset;
@@ -4015,14 +4014,18 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
         // The message is pre-stored (thus not transferred) as a database.
         //
         argc++;
-        int *tmp_argv = new int[argc];
+        long *tmp_argv = new long[argc];
+
+        // printf("%d\n",argc); 
 
         //Get parameters
-        for(int i = 0; i < argc; i++)
+        for(int i=0; i!=argc; i++)
         {
-            const char *p = b + offset;
+            // const char *p = b + offset;
 
-            int ii = *((int *) p);    //a new parameter
+            // int ii = *((int *) p);    //a new parameter
+
+            long ii = *((long *) (b + offset));
 
             tmp_argv[i] = ii;
 
@@ -4046,6 +4049,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
             PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
             PyList_Append(result, t);
             Py_DECREF(t);
+
+            delete [] tmp_argv;
             return length-start;
         }
         else if(argc==10 && tmp_argv[0]==0x81700a47)
@@ -4066,6 +4071,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
             PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
             PyList_Append(result, t);
             Py_DECREF(t);
+
+            delete [] tmp_argv;
             return length-start;
 
         }
@@ -4076,6 +4083,8 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
             // PyObject *t = Py_BuildValue("(ss#s)", "Msg", res.c_str(), res.size(), "");
             // PyList_Append(result, t);
             // Py_DECREF(t);
+
+            delete [] tmp_argv;
             return length-start;
 
         }
@@ -4087,19 +4096,19 @@ _decode_modem_debug_msg(const char *b, int offset, int length,
 }
 
 bool
-is_log_packet (const char *b, int length) {
+is_log_packet (const char *b, size_t length) {
     return length >= 2 && b[0] == '\x10';
 }
 
 bool
-is_debug_packet (const char *b, int length) {
+is_debug_packet (const char *b, size_t length) {
     return length >=2 && (b[0] ==  '\x79' || b[0] == '\x92');
     // return length >=2 && (b[0] == '\x92');  //Yuanjie: optimization for iCellular, avoid unuseful debug msg
     // return length >=2 && (b[0] ==  '\x79');
 }
 
 PyObject *
-decode_log_packet (const char *b, int length, bool skip_decoding) {
+decode_log_packet (const char *b, size_t length, bool skip_decoding) {
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
 
@@ -4455,7 +4464,7 @@ decode_log_packet (const char *b, int length, bool skip_decoding) {
 
 static int
 _decode_by_fmt_modem (const Fmt fmt [], int n_fmt,
-                const char *b, int offset, int length,
+                const char *b, int offset, size_t length,
                 PyObject *result) {
     assert(PyList_Check(result));
     int n_consumed = 0;
@@ -4540,7 +4549,7 @@ _decode_by_fmt_modem (const Fmt fmt [], int n_fmt,
 
 
 PyObject *
-decode_log_packet_modem (const char *b, int length, bool skip_decoding) {
+decode_log_packet_modem (const char *b, size_t length, bool skip_decoding) {
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
 

@@ -101,6 +101,17 @@ class DMCollector(Monitor):
         cls = self.__class__
         self.enable_log(cls.SUPPORTED_TYPES)
 
+    def save_log_as(self,path):
+        """
+        Save the log as a mi2log file (for offline analysis)
+
+        :param path: the file name to be saved
+        :type path: string
+        :param log_types: a filter of message types to be saved
+        :type log_types: list of string
+        """
+        dm_collector_c.set_filtered_export(path,self._type_names)
+
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
@@ -131,9 +142,7 @@ class DMCollector(Monitor):
             while True:
                 s = phy_ser.read(64)
                 dm_collector_c.feed_binary(s)
-                if self._save_file:
-                    self._save_file.write(s)
-                # decoded = dm_collector_c.receive_log_packet()
+
                 decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
                                                             True,   # include_timestamp
                                                             )
@@ -161,9 +170,6 @@ class DMCollector(Monitor):
             # Disable logs
             dm_collector_c.disable_logs(phy_ser)
             phy_ser.close()
-            if self._save_file:
-                self._save_file.close()
             sys.exit(e)
         except Exception, e:
-            self._save_file.close()
             sys.exit(e)

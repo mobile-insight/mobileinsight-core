@@ -24,6 +24,18 @@ from ..element import Element, Event
 #from profile import *
 import logging
 import time
+import datetime as dt
+
+class MyFormatter(logging.Formatter):
+    converter=dt.datetime.fromtimestamp
+    def formatTime(self, record, datefmt=None):
+        ct = self.converter(record.created)
+        if datefmt:
+            s = ct.strftime(datefmt)
+        else:
+            t = ct.strftime("%Y-%m-%d %H:%M:%S")
+            s = "%s,%03d" % (t, record.msecs)
+        return s
 
 def setup_logger(logger_name, log_file, level=logging.INFO):
     '''Setup the analyzer logger.
@@ -37,12 +49,13 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
 
     l = logging.getLogger(logger_name)
     if len(l.handlers)<1:
-        formatter = logging.Formatter('%(asctime)s %(message)s')
+        formatter = MyFormatter('%(asctime)s %(message)s',datefmt='%Y-%m-%d,%H:%M:%S.%f')
         streamHandler = logging.StreamHandler()
         streamHandler.setFormatter(formatter)
 
         l.setLevel(level)
         l.addHandler(streamHandler)
+        l.propagate = False
 
         if log_file!="":
             fileHandler = logging.FileHandler(log_file, mode='w')
@@ -56,6 +69,7 @@ class Analyzer(Element):
 
     #Guanratee global uniqueness of analyzer
     __analyzer_array={}    #Analyzer name --> object address
+    logger=None
 
     def __init__(self):
         Element.__init__(self)
@@ -79,19 +93,31 @@ class Analyzer(Element):
 
     #logging functions: please use this one
     def log_info(self, msg):
-        self.logger.info(self.__class__.__name__+': '+msg)
+        Analyzer.logger.info(
+            "\033[32m\033[1m[INFO]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg
+            )
 
     def log_debug(self, msg):
-        self.logger.debug(self.__class__.__name__+': '+msg)
+    
+        Analyzer.logger.debug(
+            "\033[33m\033[1m[DEBUG]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_warning(self, msg):
-        self.logger.warning(self.__class__.__name__+': '+msg)
+        Analyzer.logger.warning(
+            "\033[1;34m\033[1m[WARNING]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_error(self, msg):
-        self.logger.error(self.__class__.__name__+': '+msg)
+        Analyzer.logger.error(
+            "\033[31m\033[1m[ERROR]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_critical(self, msg):
-        self.logger.critical(self.__class__.__name__+': '+msg)
+        Analyzer.logger.critical(
+            "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg)
 
     @staticmethod
     def reset():
@@ -111,7 +137,8 @@ class Analyzer(Element):
         self.__logpath=logpath
         self.__loglevel=loglevel
         setup_logger('mobileinsight_logger',self.__logpath,self.__loglevel)
-        self.logger=logging.getLogger('mobileinsight_logger')
+        # self.logger=logging.getLogger('mobileinsight_logger')
+        Analyzer.logger=logging.getLogger('mobileinsight_logger')
   
     def set_source(self,source):
         """

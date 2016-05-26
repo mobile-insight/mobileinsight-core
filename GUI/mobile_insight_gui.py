@@ -268,20 +268,25 @@ class WindowClass(wx.Frame):
 
     def Open(self, e):
         openFileDialog = wx.FileDialog(self, "Open Log file","", "",
-            "log files (*.mi2log) |*.mi2log| All files |*.*", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+            "log files (*.mi2log) |*.mi2log| All files |*.*", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
         if (openFileDialog.ShowModal() == wx.ID_OK):
-            print 'Selected %s' %openFileDialog.GetPath()
+            # print 'Selected %s' %openFileDialog.GetPath()
+            print 'Selected %s' %openFileDialog.Paths
             try:
                 self.grid.ClearGrid()
 
 
                 #thread.start_new_thread(openFile,(openFileDialog.GetPath(),))
-                t = Thread(target = self.openFile, args=(openFileDialog.GetPath(),self.selectedTypes))
+                # t = Thread(target = self.openFile, args=(openFileDialog.GetPath(),self.selectedTypes))
+                t = Thread(target = self.openFile, args=(openFileDialog.Paths,self.selectedTypes))
                 self.progressDialog = ProgressDialog(self)
                 t.start()
                 self.progressDialog.ShowModal()
 
-                self.SetTitle(openFileDialog.GetPath())
+                if len(openFileDialog.Paths)==1:
+                    self.SetTitle(openFileDialog.GetPath())
+                else:
+                	self.SetTitle("Multiple files in "+openFileDialog.Directory)
 
             except e:
                 print "Error while opening file.", e
@@ -312,8 +317,11 @@ class WindowClass(wx.Frame):
             self.data_view = self.data
             self.SetupGrid()
 
-    def openFile(self, filePath,selectedTypes):
-        self._log_analyzer.AnalyzeFile(filePath,selectedTypes)
+    # def openFile(self, filePath,selectedTypes):
+    #     self._log_analyzer.AnalyzeFile(filePath,selectedTypes)
+
+    def openFile(self, Paths,selectedTypes):
+        self._log_analyzer.AnalyzeFile(Paths,selectedTypes)
 
     def OnSearch(self, e):
         search_dlg = wx.TextEntryDialog(self, "Search for", "", "", style=wx.OK | wx.CANCEL)

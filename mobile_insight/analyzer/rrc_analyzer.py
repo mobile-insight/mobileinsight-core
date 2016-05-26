@@ -82,7 +82,7 @@ class RrcAnalyzer(Analyzer):
         """
         # res=self.__lte_rrc_analyzer.get_cell_config(cell)
         res=self.get_analyzer("LteRrcAnalyzer").get_cell_config(cell)
-        if res != None:
+        if res:
             return res
         else:
             # return self.__wcdma_rrc_analyzer.get_cell_config(cell)
@@ -148,6 +148,7 @@ class RrcAnalyzer(Analyzer):
 
         #add intra-freq neighbors
         neighbor_cells+=self.get_cell_on_freq(cell[1])
+        neighbor_cells.remove(cell) #remove the cell itself
         
         #add inter-freq/RAT neighbors    
         for freq in inter_freq_dict:

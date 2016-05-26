@@ -3,12 +3,14 @@
 """
 An offline log replayer
 
-Author: Jiayao Li
+Author: Jiayao Li,
+        Yuanjie Li
 """
 
 __all__ = ["OfflineReplayer"]
 
 import sys
+import os
 import timeit
 
 from monitor import Monitor, Event
@@ -29,12 +31,6 @@ class OfflineReplayer(Monitor):
     """
 
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
-
-    # def __init__(self, prefs={}):
-    #     Monitor.__init__(self)
-    #     DMLogPacket.init(prefs)
-
-    #     self._type_names=[]
 
     def __init__(self):
         Monitor.__init__(self)
@@ -87,11 +83,23 @@ class OfflineReplayer(Monitor):
         """
         Set the replay trace path
 
-        :param path: the replay file path
+        :param path: the replay file path. If it is a directory, the OfflineReplayer will read all logs under this directory (logs in subdirectories are ignored)
         :type path: string
         """
+        dm_collector_c.reset()
         self._input_path = path
-        self._input_file = open(path, "rb")
+        # self._input_file = open(path, "rb")
+
+    def save_log_as(self,path):
+        """
+        Save the log as a mi2log file (for offline analysis)
+
+        :param path: the file name to be saved
+        :type path: string
+        :param log_types: a filter of message types to be saved
+        :type log_types: list of string
+        """
+        dm_collector_c.set_filtered_export(path,self._type_names)
 
     def run(self):
         """
@@ -103,39 +111,58 @@ class OfflineReplayer(Monitor):
         # fd.close()
 
         try:
-            while True:
-                s = self._input_file.read(64)
-                if not s:   # EOF encountered
-                    break
 
-                dm_collector_c.feed_binary(s)
-                # decoded = dm_collector_c.receive_log_packet()
-                decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
-                                                            True,   # include_timestamp
-                                                            )
+            log_list=[]
+            if os.path.isfile(self._input_path):
+                log_list = [self._input_path]
+            elif os.path.isdir(self._input_path):
+                for file in os.listdir(self._input_path):
+                    if file.endswith(".mi2log") or file.endswith(".qmdl"):
+                        # log_list.append(self._input_path+"/"+file)
+                        log_list.append(os.path.join(self._input_path,file))
+            else:
+                return
 
-                if decoded:
-                    try:
-                        # packet = DMLogPacket(decoded)
-                        packet = DMLogPacket(decoded[0])
-                        d = packet.decode()
-                        # print d["type_id"], d["timestamp"]
-                        # xml = packet.decode_xml()
-                        # print xml
-                        # print ""
-                        # Send event to analyzers
+            log_list.sort() #Hidden assumption: logs follow the diag_log_TIMSTAMP_XXX format
 
-                        if d["type_id"] in self._type_names:
-                            event = Event(  timeit.default_timer(),
-                                            d["type_id"],
-                                            packet)
-                            self.send(event)
 
-                    except FormatError, e:
-                        # skip this packet
-                        print "FormatError: ", e
-            
-            self._input_file.close()
+            for file in log_list:
+            	print "Loading "+file
+                self._input_file = open(file, "rb")
+                dm_collector_c.reset()
+                while True:
+                    s = self._input_file.read(64)
+                    if not s:   # EOF encountered
+                        break
+
+                    dm_collector_c.feed_binary(s)
+                    # decoded = dm_collector_c.receive_log_packet()
+                    decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
+                                                                True,   # include_timestamp
+                                                                )
+
+                    if decoded:
+                        try:
+                            # packet = DMLogPacket(decoded)
+                            packet = DMLogPacket(decoded[0])
+                            d = packet.decode()
+                            # print d["type_id"], d["timestamp"]
+                            # xml = packet.decode_xml()
+                            # print xml
+                            # print ""
+                            # Send event to analyzers
+
+                            if d["type_id"] in self._type_names:
+                                event = Event(  timeit.default_timer(),
+                                                d["type_id"],
+                                                packet)
+                                self.send(event)
+
+                        except FormatError, e:
+                            # skip this packet
+                            print "FormatError: ", e
+                
+                self._input_file.close()
 
         except Exception, e:
             import traceback

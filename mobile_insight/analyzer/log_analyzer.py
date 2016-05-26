@@ -38,11 +38,24 @@ class LogAnalyzer(Analyzer):
         for st in self.supported_types:
             self.src.enable_log(st)
 
-    def AnalyzeFile(self, fileName,selectedTypes):
+    # def AnalyzeFile(self, fileName,selectedTypes):
+    #     self.selectedTypes = selectedTypes
+    #     self.msg_logs = []
+    #     self.src.set_input_path(fileName)
+    #     self.src.run()
+    #     if self.listener_callback:
+    #         self.listener_callback()
+
+    def AnalyzeFile(self, Paths, selectedTypes):
+
+        if Paths.__class__.__name__ != 'list':
+            Paths = [Paths]
+
         self.selectedTypes = selectedTypes
         self.msg_logs = []
-        self.src.set_input_path(fileName)
-        self.src.run()
+        for fileName in Paths:
+            self.src.set_input_path(fileName)
+            self.src.run()
         if self.listener_callback:
             self.listener_callback()
 

@@ -9,6 +9,7 @@ Author: Yuanjie Li
 
 from ..element import Element, Event
 
+
 class Monitor(Element):
     """
     An abstraction for mobile network monitors
@@ -29,7 +30,6 @@ class Monitor(Element):
         """
         return None
 
-
     def save_log_as(self,path):
         """
         Save the log as a mi2log file (for offline analysis)
@@ -39,12 +39,8 @@ class Monitor(Element):
         :param log_types: a filter of message types to be saved
         :type log_types: list of string
         """
-        self._save_log_path = path
-        try:
-            self._save_file = open(self._save_log_path, "wb")
-        except Exception, e:
-            print "Failed to save log to %s" % path
-            sys.exit(e)    
+        pass
+
 
 
     def set_skip_decoding(self, decoding):

@@ -15,7 +15,7 @@ typedef unsigned long long UINT64;
 // Automatically generated CRC function
 // polynomial: 0x11021, bit reverse algorithm
 static UINT16
-calc_crc (UINT8 *data, int len, UINT16 crc)
+calc_crc (UINT8 *data, size_t len, UINT16 crc)
 {
     static const UINT16 table[256] = {
     0x0000U,0x1189U,0x2312U,0x329BU,0x4624U,0x57ADU,0x6536U,0x74BFU,
@@ -91,6 +91,11 @@ static std::string buffer;
 void
 feed_binary (const char *b, int length) {
     buffer.append(b, length);
+}
+
+void
+reset_binary() {
+    buffer.clear();
 }
 
 static void
