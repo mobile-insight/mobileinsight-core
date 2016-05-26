@@ -567,11 +567,11 @@ const Fmt LteRrcServCellInfoLogPacketFmt_v2 [] = {
 };
 
 const Fmt LteRrcServCellInfoLogPacketFmt_v3 [] = {
-    {UINT, "Physical Cell ID", 2},  //Physical cell ID
-    {UINT, "DL FREQ", 4},   //Downlink frequency
-    {UINT, "UL FREQ", 4},   //Uplink frequency
-    {BANDWIDTH, "DL BW", 1},    //Downlink bandwidth
-    {BANDWIDTH, "UL BW", 1},    //Uplink bandwidth
+    {UINT, "Cell ID", 2},  //Physical cell ID
+    {UINT, "Downlink frequency", 4},   //Downlink frequency
+    {UINT, "Uplink frequency", 4},   //Uplink frequency
+    {BANDWIDTH, "Downlink bandwidth", 1},    //Downlink bandwidth
+    {BANDWIDTH, "Uplink bandwidth", 1},    //Uplink bandwidth
     {UINT, "Cell Identity", 4}, //cell ID
     {UINT, "TAC", 2},   //Tracking area code
     {UINT, "Band Indicator", 4},    //Band indicator
@@ -580,6 +580,21 @@ const Fmt LteRrcServCellInfoLogPacketFmt_v3 [] = {
     {UINT, "MNC", 2},   //MNC
     {UINT, "Allowed Access", 1} //Allowed access
 };
+
+// const Fmt LteRrcServCellInfoLogPacketFmt_v3 [] = {
+//     {UINT, "Physical Cell ID", 2},  //Physical cell ID
+//     {UINT, "DL FREQ", 4},   //Downlink frequency
+//     {UINT, "UL FREQ", 4},   //Uplink frequency
+//     {BANDWIDTH, "DL BW", 1},    //Downlink bandwidth
+//     {BANDWIDTH, "UL BW", 1},    //Uplink bandwidth
+//     {UINT, "Cell Identity", 4}, //cell ID
+//     {UINT, "TAC", 2},   //Tracking area code
+//     {UINT, "Band Indicator", 4},    //Band indicator
+//     {UINT, "MCC", 2},   //MCC
+//     {UINT, "MNC Digit", 1}, //MNC digit
+//     {UINT, "MNC", 2},   //MNC
+//     {UINT, "Allowed Access", 1} //Allowed access
+// };
 
 // TODO: interpret the value of "Allowed Access"
 
