@@ -17,6 +17,7 @@
 #include <fstream>
 #include "1xev_rx_partial_multirlp_packet.h"
 #include "1xev_connected_state_search_info.h"
+#include "1xev_connection_attempt.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -4445,6 +4446,13 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 b, offset, length, result);
         offset += _decode_1xev_connected_state_search_info_payload(b, offset, length, result);
         break;
+    case _1xEV_Connection_Attempt:
+        offset += _decode_by_fmt(_1xEVConnectionAttempt_Fmt,
+                ARRAY_SIZE(_1xEVConnectionAttempt_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_1xev_connection_attempt_payload(b, offset, length, result);
+        break;
+
     default:
         break;
     };

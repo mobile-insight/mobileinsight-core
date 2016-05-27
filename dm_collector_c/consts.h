@@ -16,6 +16,7 @@ enum LogPacketType {
     _1xEV_Signaling_Control_Channel_Broadcast = 0x107C,
     _1xEV_Rx_Partial_MultiRLP_Packet = 0x1277,
     _1xEV_Connected_State_Search_Info = 0x118A,
+    _1xEV_Connection_Attempt = 0x106E,
     WCDMA_CELL_ID = 0x4127,
     WCDMA_Signaling_Messages = 0x412F,
     UMTS_NAS_GMM_State = 0x7130,
@@ -76,6 +77,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "1xEV_Rx_Partial_MultiRLP_Packet", true},
     {_1xEV_Connected_State_Search_Info,
         "1xEV_Connected_State_Search_Info", true},
+    {_1xEV_Connection_Attempt,
+        "1xEV_Connection_Attempt", true},
     // {WCDMA_CELL_ID, // WCDMA cell status
     //     "WCDMA_CELL_ID",false},
     {WCDMA_CELL_ID, // WCDMA cell status
