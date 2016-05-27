@@ -71,6 +71,7 @@ class OfflineReplayer(Monitor):
                 print "WARNING: Unsupported log message type: %s" % n
             if n not in self._type_names:
                 self._type_names.append(n)  
+        dm_collector_c.set_filtered(self._type_names)
 
     def enable_log_all(self):
         """
