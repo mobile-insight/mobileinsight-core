@@ -38,7 +38,7 @@ class LtePdcpAnalyzer(Analyzer):
         # source.enable_log("LTE_PDCP_DL_SRB_Integrity_Data_PDU")
         # source.enable_log("LTE_PDCP_UL_SRB_Integrity_Data_PDU")
         # source.enable_log("LTE_PDSCH_Stat_Indication")
-        source.enable_log("1xEV_Connected_State_Search_Info")
+        source.enable_log("LTE_ML1_BPLMN_Cell_Confirm")
 
 
     def __msg_callback(self,msg):

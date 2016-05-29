@@ -15,8 +15,15 @@
 #include <sstream>
 
 #include <fstream>
+
 #include "1xev_rx_partial_multirlp_packet.h"
 #include "1xev_connected_state_search_info.h"
+#include "1xev_connection_attempt.h"
+#include "1xev_connection_release.h"
+#include "lte_pdsch_stat_indication.h"
+#include "lte_ml1_system_scan_results.h"
+#include "lte_ml1_bplmn_cell_request.h"
+#include "lte_ml1_bplmn_cell_confirm.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -4445,6 +4452,43 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 b, offset, length, result);
         offset += _decode_1xev_connected_state_search_info_payload(b, offset, length, result);
         break;
+    case _1xEV_Connection_Attempt:
+        offset += _decode_by_fmt(_1xEVConnectionAttempt_Fmt,
+                ARRAY_SIZE(_1xEVConnectionAttempt_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_1xev_connection_attempt_payload(b, offset, length, result);
+        break;
+    case _1xEV_Connection_Release:
+        offset += _decode_by_fmt(_1xEVConnectionRelease_Fmt,
+                ARRAY_SIZE(_1xEVConnectionRelease_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_1xev_connection_release_payload(b, offset, length, result);
+        break;
+    case LTE_PDSCH_Stat_Indication:
+        offset += _decode_by_fmt(LtePdschStatIndication_Fmt,
+                ARRAY_SIZE(LtePdschStatIndication_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_pdsch_stat_indication_payload(b, offset, length, result);
+        break;
+    case LTE_ML1_System_Scan_Results:
+        offset += _decode_by_fmt(LteMl1SystemScanResults_Fmt,
+                ARRAY_SIZE(LteMl1SystemScanResults_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_ml1_system_scan_results_payload(b, offset, length, result);
+        break;
+    case LTE_ML1_BPLMN_Cell_Request:
+        offset += _decode_by_fmt(LteMl1BplmnCellRequest_Fmt,
+                ARRAY_SIZE(LteMl1BplmnCellRequest_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_ml1_bplmn_cell_request_payload(b, offset, length, result);
+        break;
+    case LTE_ML1_BPLMN_Cell_Confirm:
+        offset += _decode_by_fmt(LteMl1BplmnCellConfirm_Fmt,
+                ARRAY_SIZE(LteMl1BplmnCellConfirm_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_ml1_bplmn_cell_confirm_payload(b, offset, length, result);
+        break;
+
     default:
         break;
     };
