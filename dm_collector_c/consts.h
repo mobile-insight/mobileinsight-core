@@ -67,6 +67,10 @@ enum LogPacketType {
     LTE_PUSCH_Power_Control = 0xB16E,
     LTE_PDCCH_PHICH_Indication_Report = 0xB16B,
     LTE_PDSCH_Stat_Indication = 0xB173,
+    LTE_ML1_System_Scan_Results = 0xB18E,
+    LTE_ML1_BPLMN_Cell_Request = 0xB1A1,
+    LTE_ML1_BPLMN_Cell_Confirm = 0xB1A2,
+    LTE_LL1_PCFICH_Decoding_Results = 0xB12A,
 };
 
 // Mapping type IDs to names
@@ -196,6 +200,14 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_PDCCH_PHICH_Indication_Report", true},
     {LTE_PDSCH_Stat_Indication,
         "LTE_PDSCH_Stat_Indication", true},
+    {LTE_ML1_System_Scan_Results,
+        "LTE_ML1_System_Scan_Results", true},
+    {LTE_ML1_BPLMN_Cell_Request,
+        "LTE_ML1_BPLMN_Cell_Request", true},
+    {LTE_ML1_BPLMN_Cell_Confirm,
+        "LTE_ML1_BPLMN_Cell_Confirm", true},
+    {LTE_LL1_PCFICH_Decoding_Results,
+        "LTE_LL1_PCFICH_Decoding_Results", true},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__
