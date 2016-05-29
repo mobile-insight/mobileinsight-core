@@ -261,14 +261,18 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
     if(debug_ind!=type_ids.end()){
         //Modem_debug_message should be enabled
         type_ids.erase(debug_ind);
-        buf = encode_log_config(DEBUG_LTE_ML1, type_ids);
-        if (buf.first != NULL && buf.second != 0) {
-            (void) send_msg(file_or_serial, buf.first, buf.second);
-            delete [] buf.first;
-        } else {
-            PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
-            return false;
-        }
+
+        // Enable LTE ML1 debug
+        // buf = encode_log_config(DEBUG_LTE_ML1, type_ids);
+        // if (buf.first != NULL && buf.second != 0) {
+        //     (void) send_msg(file_or_serial, buf.first, buf.second);
+        //     delete [] buf.first;
+        // } else {
+        //     PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
+        //     return false;
+        // }
+
+        // Enable WCDMA debug
         buf = encode_log_config(DEBUG_WCDMA_L1, type_ids);
         if (buf.first != NULL && buf.second != 0) {
             (void) send_msg(file_or_serial, buf.first, buf.second);
