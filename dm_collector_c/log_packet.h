@@ -2067,12 +2067,132 @@ const ValueName LtePdcchPhichIndicationReport_Record_v5_NewDLTx [] = {
 const ValueName LtePdcchPhichIndicationReport_Record_v5_AggLv [] = {
     {0, "Agg1"},
     {1, "Agg2"},
-    {2, "Agg3"},
-    {3, "Agg4"},
+    {2, "Agg4"},
+    {3, "Agg8"},
 };
 const ValueName LtePdcchPhichIndicationReport_Record_v5_SS [] = {
     {0, "Common"},
     {1, "UE-specific"},
+};
+
+// ----------------------------------------------------------------------------
+// Common ValueName
+
+const ValueName ValueNameCarrierIndex [] = {
+    // 4 bits
+    {0, "PCC"},
+    {1, "SCC"},
+};
+const ValueName ValueNameAggregationLevel [] = {
+    // 2 bits
+    {0, "Agg1"},
+    {1, "Agg2"},
+    {2, "Agg4"},
+    {3, "Agg8"},
+};
+
+const ValueName ValueNameSearchSpaceType [] = {
+    // 1 bit
+    {0, "Common"},
+    {1, "UE-specific"},
+};
+
+const ValueName ValueNameRNTIType [] = {
+    // 4 bits
+    {0, "C-RNTI"},
+    {2, "P-RNTI"},
+    {3, "RA-RNTI"},
+    {4, "Temporary-C-RNTI"},
+    {5, "SI-RNTI"}
+};
+const ValueName ValueNameDCIFormat [] = {
+    // 4 bits
+    // Release 8
+    // http://www.sharetechnote.com/html/LTE_Advanced_DCI.html
+    {0, "Format 0"},
+    {1, "Format 1"},
+    {2, "Format 1A"},
+    {3, "Format 1B"},
+    {4, "Format 1C"},
+    {5, "Format 1D"},
+    {6, "Format 2"},
+    {7, "Format 2A"},
+    // {8, "Format 2B"},
+    // {9, "Format 2C"},
+    {10, "Format 3"},
+    {11, "Format 3A"},
+    // {12, "Format 4"},
+};
+
+const ValueName ValueNameMatchOrNot [] = {
+    // 1 bit
+    {0, "Mismatch"},
+    {1, "Match"},
+};
+
+const ValueName ValueNamePruneStatus [] = {
+    // 11 bits
+    //
+    {1, "SUCCESS_DCI0"},
+    {3, "SUCCESS_DCI1A"},
+    {4, "SUCCESS_DCI1C"},
+    {6, "SUCCESS_DCI2_2A_2B"},
+    {8, "TAIL_MISMATCH"},
+    {9, "FAIL_SURVIVOR_SELECT"},
+    {10, "PADDING_ERROR"},
+    {17, "DUPLICATE_HARQ_ID_ERROR"},
+    {24, "BAD_RIV_DCI0"},
+    {26, "INVALID_RB_NUM_DCI0"},
+    {50, "NUM_LAYERS_ERROR_DCI2_2A_TB1"},
+};
+
+const ValueName ValueNameFrameStructure [] = {
+    {0, "FDD"},
+};
+
+const ValueName ValueNameNumeNBAntennas [] = {
+    {0, "1 or 2"},
+};
+
+const ValueName ValueNameTrueOrFalse [] = {
+    {0, "False"},
+    {1, "True"},
+};
+
+const ValueName ValueNameHARQLogStatus [] = {
+    {0, "Normal"},
+};
+
+const ValueName ValueNamePassOrFail [] = {
+    {0, "Fail"},
+    {1, "Pass"},
+};
+
+const ValueName ValueNameNumber [] = {
+    {0, "First"},
+    {1, "Second"},
+    {2, "Third"},
+    {3, "Fourth"},
+    {4, "Fifth"},
+    {5, "Sixth"},
+    {6, "Seventh"},
+    {7, "Eighth"},
+};
+
+const ValueName ValueNameCompandingStats [] = {
+    {0, "3 bit LLR"},
+    {1, "4 bit LLR"},
+    {2, "6 bit LLR"},
+};
+
+const ValueName ValueNameEnableOrDisable [] = {
+    {0, "Disabled"},
+    {1, "Enabled"},
+};
+
+const ValueName ValueNameYesOrNo [] = {
+    {0, "No"},
+    {1, "Yes"},
 };
 
 // ----------------------------------------------------------------------------

@@ -133,6 +133,7 @@ static int _decode_lte_pdsch_stat_indication_payload (const char *b,
                 Py_DECREF(old_object);
                 old_object = _replace_result_int(result_record_item,
                         "Frame Num", iFN);
+                Py_DECREF(old_object);
                 int iNonDecodeP1_2 = _search_result_int(result_record_item,
                         "Serving Cell Index");
                 int iServCellIdx = iNonDecodeP1_2 & 7; // last 3 bits
@@ -278,6 +279,7 @@ static int _decode_lte_pdsch_stat_indication_payload (const char *b,
                 Py_DECREF(old_object);
                 old_object = _replace_result_int(result_record_item,
                         "Frame Num", iFN);
+                Py_DECREF(old_object);
                 int iNonDecodeP1_2 = _search_result_int(result_record_item,
                         "Serving Cell Index");
                 int iServCellIdx = iNonDecodeP1_2 & 7; // last 3 bits
