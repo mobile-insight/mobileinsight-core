@@ -292,22 +292,3 @@ class Analyzer(Element):
             map(G,self.source_callback)
         else:
             map(G,self.from_list[module])
-
-
-    # def recv(self,module,event):
-    #     """
-    #     Handle the received events.
-    #     This is an overload member from Element
-
-    #     :param module: the analyzer/trace collector who raise the event
-    #     :param event: the event to be raised
-    #     """
-
-    #     #Add evaluation code for analyzer per-message processing latency
-    #     # msg_start=time.clock()
-    #     if module==self.source:
-    #         for f in self.source_callback:
-    #             f(event)
-    #     else:
-    #         for f in self.from_list[module]:
-    #             f(event)

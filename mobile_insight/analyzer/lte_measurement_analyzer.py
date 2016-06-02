@@ -58,20 +58,29 @@ class LteMeasurementAnalyzer(Analyzer):
                 + self.__class__.__name__
                 + ' RSRP=' + str(msg_dict['RSRP(dBm)'])+'dBm'
                 + ' RSRQ=' + str(msg_dict['RSRQ(dB)'])+'dB'
-                + ' # of neighbors=' + str(msg_dict['Number of Neighbor Cells']))
+                + ' # of neighbors=' + str(msg_dict['Number of Neighbor Cells'])
+                + '\n')
+                
 
-            # self.log_info(rsrp_log)
+            for item in msg_dict["Neighbor Cells"]:
+                rsrp_log = (rsrp_log
+                    +'    Cell_ID='+ str(item["Physical Cell ID"])
+                    +' RSRP='+ str(item["RSRP(dBm)"])+'dBm'
+                    +' RSRQ='+ str(item["RSRQ(dB)"])+'dB'
+                    +'\n')
+
+            self.log_info(rsrp_log)
             
             self.serv_cell_rsrp.append(msg_dict['RSRP(dBm)'])
             self.serv_cell_rsrq.append(msg_dict['RSRP(dBm)'])
 
-        if msg.type_id == "LTE_PHY_Inter_RAT_Measurement":
-            msg_dict=dict(msg.data.decode())
-            self.log_info(str(msg_dict)) 
+        # if msg.type_id == "LTE_PHY_Inter_RAT_Measurement":
+        #     msg_dict=dict(msg.data.decode())
+        #     self.log_info(str(msg_dict)) 
 
-        if msg.type_id == "LTE_PHY_Inter_RAT_CDMA_Measurement":
-            msg_dict=dict(msg.data.decode())
-            self.log_info(str(msg_dict)) 
+        # if msg.type_id == "LTE_PHY_Inter_RAT_CDMA_Measurement":
+        #     msg_dict=dict(msg.data.decode())
+        #     self.log_info(str(msg_dict)) 
 
     def get_rsrp_list(self):
     	"""
