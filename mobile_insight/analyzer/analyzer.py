@@ -283,23 +283,31 @@ class Analyzer(Element):
         :param module: the analyzer/trace collector who raise the event
         :param event: the event to be raised
         """
+        
+        # A lambda function: input as a callback, output as passing event to this callback
+        G = lambda f: f(event) 
 
-        #Add evaluation code for analyzer per-message processing latency
-        msg_start=time.clock()
         if module==self.source:
-            for f in self.source_callback:
-                f(event)
+            #Apply the event to all source callbacks
+            map(G,self.source_callback)
         else:
-            for f in self.from_list[module]:
-                f(event)
-        msg_end=time.clock()
-        # if event.type_id!="Unsupported":
-        #     invert_op = getattr(event.data, "decode", None)
-        #     if not callable(invert_op):
-        #         return
-        #     tmp = dict(event.data.decode())
-        #     self.logger.info(str(time.time()) + " "\
-        #                 + self.__class__.__name__ + " "\
-        #                 + event.type_id + " "\
-        #                 + str((msg_end-msg_start)*1000)) #processing latency (in ms)
+            map(G,self.from_list[module])
 
+
+    # def recv(self,module,event):
+    #     """
+    #     Handle the received events.
+    #     This is an overload member from Element
+
+    #     :param module: the analyzer/trace collector who raise the event
+    #     :param event: the event to be raised
+    #     """
+
+    #     #Add evaluation code for analyzer per-message processing latency
+    #     # msg_start=time.clock()
+    #     if module==self.source:
+    #         for f in self.source_callback:
+    #             f(event)
+    #     else:
+    #         for f in self.from_list[module]:
+    #             f(event)

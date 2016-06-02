@@ -34,8 +34,18 @@ class Element(object):
 
         :param event: the event to be sent
         """
-        for module in self.to_list:
-            module.recv(self,event)
+        # A lambda function: input as a callback, output as passing event to this callback
+        G = lambda module: module.recv(self,event)
+        map(G, self.to_list)
+
+    # def send(self,event):
+    #     """
+    #     Raise an event to all Analyzers in from_analyzer_list
+
+    #     :param event: the event to be sent
+    #     """
+    #     for module in self.to_list:
+    #         module.recv(self,event)
 
     def recv(self,module,event):
         """
