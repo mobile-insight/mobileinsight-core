@@ -24,8 +24,6 @@ class Element(object):
     '''The parent class to derive trace collectors and analyzers.
     '''
 
-    total_count=0
-
     def __init__(self):
         self.from_list={}   #module that it depends, module->callback
         self.to_list=[] #list of other module that call for this module
@@ -38,8 +36,6 @@ class Element(object):
         """
         # A lambda function: input as a callback, output as passing event to this callback
         G = lambda module: module.recv(self,event)
-        self.total_count = self.total_count+1
-        print event.type_id, str(len(self.to_list)), str(self.total_count)
         map(G, self.to_list)
 
     def recv(self,module,event):
