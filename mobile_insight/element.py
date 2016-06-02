@@ -36,6 +36,7 @@ class Element(object):
         """
         # A lambda function: input as a callback, output as passing event to this callback
         G = lambda module: module.recv(self,event)
+        print event.type_id
         map(G, self.to_list)
 
     # def send(self,event):
