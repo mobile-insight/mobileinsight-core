@@ -244,7 +244,6 @@ map_typenames_to_ids (PyObject *type_names, IdVector &type_ids) {
 static bool
 generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
 
-    printf("Testing dm_collector_c\n");
     IdVector type_ids;
     bool success = map_typenames_to_ids(type_names, type_ids);
     if (!success) {

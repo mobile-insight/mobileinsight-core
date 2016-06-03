@@ -4116,6 +4116,9 @@ is_debug_packet (const char *b, size_t length) {
 
 PyObject *
 decode_log_packet (const char *b, size_t length, bool skip_decoding) {
+
+    printf("Testing dm_collector_c\n");
+    
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
 
