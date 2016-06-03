@@ -35,6 +35,7 @@ class Element(object):
         :param event: the event to be sent
         """
         # A lambda function: input as a callback, output as passing event to this callback
+        print "Hello?"
         G = lambda module: module.recv(self,event)
         map(G, self.to_list)
 
