@@ -128,7 +128,7 @@ class OfflineReplayer(Monitor):
 
 
             for file in log_list:
-            	print "Loading "+file
+            	self.log_info("Loading "+file) 
                 self._input_file = open(file, "rb")
                 dm_collector_c.reset()
                 while True:
