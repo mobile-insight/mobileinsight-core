@@ -70,7 +70,9 @@ enum LogPacketType {
     LTE_ML1_System_Scan_Results = 0xB18E,
     LTE_ML1_BPLMN_Cell_Request = 0xB1A1,
     LTE_ML1_BPLMN_Cell_Confirm = 0xB1A2,
-    LTE_LL1_PCFICH_Decoding_Results = 0xB12A,
+    LTE_LL1_Serving_Cell_COM_Loop = 0xB121,
+    LTE_LL1_PDCCH_Decoding_Result = 0xB130,
+    LTE_LL1_PDSCH_Decoding_Result = 0xB132,
 };
 
 // Mapping type IDs to names
@@ -195,8 +197,12 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_ML1_BPLMN_Cell_Request", true},
     {LTE_ML1_BPLMN_Cell_Confirm,
         "LTE_ML1_BPLMN_Cell_Confirm", true},
-    {LTE_LL1_PCFICH_Decoding_Results,
-        "LTE_LL1_PCFICH_Decoding_Results", true},
+    {LTE_LL1_Serving_Cell_COM_Loop,
+        "LTE_LL1_Serving_Cell_COM_Loop", true},
+    {LTE_LL1_PDCCH_Decoding_Result,
+        "LTE_LL1_PDCCH_Decoding_Result", true},
+    {LTE_LL1_PDSCH_Decoding_Result,
+        "LTE_LL1_PDSCH_Decoding_Result", true},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

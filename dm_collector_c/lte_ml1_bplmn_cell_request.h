@@ -93,6 +93,7 @@ static int _decode_lte_ml1_bplmn_cell_request_payload (const char *b,
                 Py_DECREF(old_object);
             }
 
+            return offset - start;
         }
     default:
         printf("Unknown LTE PDSCH Stat Indication version: 0x%x\n", pkt_ver);

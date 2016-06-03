@@ -24,6 +24,9 @@
 #include "lte_ml1_system_scan_results.h"
 #include "lte_ml1_bplmn_cell_request.h"
 #include "lte_ml1_bplmn_cell_confirm.h"
+#include "lte_ll1_serving_cell_com_loop.h"
+#include "lte_ll1_pdcch_decoding_result.h"
+#include "lte_ll1_pdsch_decoding_result.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -4492,7 +4495,24 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 b, offset, length, result);
         offset += _decode_lte_ml1_bplmn_cell_confirm_payload(b, offset, length, result);
         break;
-
+    case LTE_LL1_Serving_Cell_COM_Loop:
+        offset += _decode_by_fmt(LteLl1ServingCellComLoop_Fmt,
+                ARRAY_SIZE(LteLl1ServingCellComLoop_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_ll1_serving_cell_com_loop_payload(b, offset, length, result);
+        break;
+    case LTE_LL1_PDCCH_Decoding_Result:
+        offset += _decode_by_fmt(LteLl1PdcchDecodingResult_Fmt,
+                ARRAY_SIZE(LteLl1PdcchDecodingResult_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_ll1_pdcch_decoding_result_payload(b, offset, length, result);
+        break;
+    case LTE_LL1_PDSCH_Decoding_Result:
+        offset += _decode_by_fmt(LteLl1PdschDecodingResult_Fmt,
+                ARRAY_SIZE(LteLl1PdschDecodingResult_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_ll1_pdsch_decoding_result_payload(b, offset, length, result);
+        break;
     default:
         break;
     };

@@ -18,6 +18,11 @@
 #include <iostream>
 #include <sstream>
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define printf(fmt,args...) __android_log_print(ANDROID_LOG_INFO, "python [dm_collector_c]", fmt, ##args);
+#endif
+
 #ifndef _WIN32
 #include <sys/time.h>
 #endif
@@ -486,6 +491,7 @@ dm_collector_c_reset (PyObject *self, PyObject *args) {
 // Return: decoded_list or None
 static PyObject *
 dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
+    // printf("Haotian: debug message from dm_collector_c\n");
     std::string frame;
     bool crc_correct = false;
     bool skip_decoding = false, include_timestamp = false;  // default values
