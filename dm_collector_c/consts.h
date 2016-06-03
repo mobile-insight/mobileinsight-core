@@ -205,4 +205,13 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_LL1_PDSCH_Decoding_Result", true},
 };
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define printf(fmt,args...) __android_log_print(ANDROID_LOG_INFO, "python [dm_collector_c]", fmt, ##args);
+#endif
+
+#ifndef _WIN32
+#include <sys/time.h>
+#endif
+
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

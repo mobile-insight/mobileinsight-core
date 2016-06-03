@@ -18,15 +18,6 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef __ANDROID__
-#include <android/log.h>
-#define printf(fmt,args...) __android_log_print(ANDROID_LOG_INFO, "python [dm_collector_c]", fmt, ##args);
-#endif
-
-#ifndef _WIN32
-#include <sys/time.h>
-#endif
-
 // NOTE: the following number should be updated every time.
 #define DM_COLLECTOR_C_VERSION "1.0.12"
 
