@@ -22,46 +22,7 @@ Author: Yuanjie Li
 
 from ..element import Element, Event
 #from profile import *
-import logging
-import time
-import datetime as dt
 
-class MyFormatter(logging.Formatter):
-    converter=dt.datetime.fromtimestamp
-    def formatTime(self, record, datefmt=None):
-        ct = self.converter(record.created)
-        if datefmt:
-            s = ct.strftime(datefmt)
-        else:
-            t = ct.strftime("%Y-%m-%d %H:%M:%S")
-            s = "%s,%03d" % (t, record.msecs)
-        return s
-
-def setup_logger(logger_name, log_file, level=logging.INFO):
-    '''Setup the analyzer logger.
-
-    NOTE: All analyzers share the same logger.
-
-    :param logger_name: logger to be setup.
-    :param log_file: the file to save the log.
-    :param level: the loggoing level. The default value is logging.INFO.
-    '''
-
-    l = logging.getLogger(logger_name)
-    if len(l.handlers)<1:
-        formatter = MyFormatter('%(asctime)s %(message)s',datefmt='%Y-%m-%d,%H:%M:%S.%f')
-        streamHandler = logging.StreamHandler()
-        streamHandler.setFormatter(formatter)
-
-        l.setLevel(level)
-        l.addHandler(streamHandler)
-        l.propagate = False
-
-        if log_file!="":
-            fileHandler = logging.FileHandler(log_file, mode='w')
-            fileHandler.setFormatter(formatter)
-            l.addHandler(fileHandler)  
-        l.disabled = False    
 
 class Analyzer(Element):
     """A base class for all the analyzers
@@ -69,7 +30,7 @@ class Analyzer(Element):
 
     #Guanratee global uniqueness of analyzer
     __analyzer_array={}    #Analyzer name --> object address
-    logger=None
+    # logger=None
 
     def __init__(self):
         Element.__init__(self)
@@ -78,8 +39,8 @@ class Analyzer(Element):
         #FIXME: looks redundant with the from_list
         self.source_callback=[]    
 
-        #setup the logs
-        self.set_log("",logging.INFO)
+        # #setup the logs
+        # self.set_log("",logging.INFO)
 
         #Include itself into the global list
         if not self.__class__.__name__ in Analyzer.__analyzer_array:
@@ -91,54 +52,12 @@ class Analyzer(Element):
 
         #TODO: For Profile, each specific analyzer should declare it on demand
 
-    #logging functions: please use this one
-    def log_info(self, msg):
-        Analyzer.logger.info(
-            "\033[32m\033[1m[INFO]\033[0m\033[0m\033[1m["
-            + self.__class__.__name__+']\033[0m: '+msg
-            )
-
-    def log_debug(self, msg):
-    
-        Analyzer.logger.debug(
-            "\033[33m\033[1m[DEBUG]\033[0m\033[0m\033[1m["
-            + self.__class__.__name__+']\033[0m: '+msg)
-
-    def log_warning(self, msg):
-        Analyzer.logger.warning(
-            "\033[1;34m\033[1m[WARNING]\033[0m\033[0m\033[1m["
-            + self.__class__.__name__+']\033[0m: '+msg)
-
-    def log_error(self, msg):
-        Analyzer.logger.error(
-            "\033[31m\033[1m[ERROR]\033[0m\033[0m\033[1m["
-            + self.__class__.__name__+']\033[0m: '+msg)
-
-    def log_critical(self, msg):
-        Analyzer.logger.critical(
-            "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m["
-            + self.__class__.__name__+']\033[0m: '+msg)
-
     @staticmethod
     def reset():
         """
         Clean up all the analyzers
         """
         Analyzer.__analyzer_array={}
-
-    def set_log(self,logpath,loglevel=logging.INFO):
-        """
-        Set the logging in analyzers.
-        All the analyzers share the same logger.
-
-        :param logpath: the file path to save the log
-        :param loglevel: the level of the log. The default value is logging.INFO.
-        """
-        self.__logpath=logpath
-        self.__loglevel=loglevel
-        setup_logger('mobileinsight_logger',self.__logpath,self.__loglevel)
-        # self.logger=logging.getLogger('mobileinsight_logger')
-        Analyzer.logger=logging.getLogger('mobileinsight_logger')
   
     def set_source(self,source):
         """
@@ -283,23 +202,12 @@ class Analyzer(Element):
         :param module: the analyzer/trace collector who raise the event
         :param event: the event to be raised
         """
+        
+        # A lambda function: input as a callback, output as passing event to this callback
+        G = lambda f: f(event) 
 
-        #Add evaluation code for analyzer per-message processing latency
-        msg_start=time.clock()
         if module==self.source:
-            for f in self.source_callback:
-                f(event)
+            #Apply the event to all source callbacks
+            map(G,self.source_callback)
         else:
-            for f in self.from_list[module]:
-                f(event)
-        msg_end=time.clock()
-        # if event.type_id!="Unsupported":
-        #     invert_op = getattr(event.data, "decode", None)
-        #     if not callable(invert_op):
-        #         return
-        #     tmp = dict(event.data.decode())
-        #     self.logger.info(str(time.time()) + " "\
-        #                 + self.__class__.__name__ + " "\
-        #                 + event.type_id + " "\
-        #                 + str((msg_end-msg_start)*1000)) #processing latency (in ms)
-
+            map(G,self.from_list[module])
