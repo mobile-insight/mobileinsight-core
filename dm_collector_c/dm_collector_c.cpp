@@ -18,6 +18,10 @@
 #include <iostream>
 #include <sstream>
 
+#ifndef _WIN32
+#include <sys/time.h>
+#endif
+
 // NOTE: the following number should be updated every time.
 #define DM_COLLECTOR_C_VERSION "1.0.12"
 
