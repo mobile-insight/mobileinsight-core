@@ -47,7 +47,7 @@ const ValueName _1xEVRxPartialMultiRLPPacket_Packet_Channel [] = {
 };
 
 static int _decode_1xev_rx_partial_multirlp_packet_payload (const char *b,
-        int offset, int length, PyObject *result) {
+        int offset, size_t length, PyObject *result) {
     int start = offset;
     int iNonDecodeP1 = _search_result_int(result, "RLP Flow");
     int iRlpFlow = iNonDecodeP1 & 15; // last 4 bits

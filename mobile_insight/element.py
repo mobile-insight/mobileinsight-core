@@ -8,6 +8,48 @@ Author: Yuanjie Li
 
 __all__ = ["Event", "Element"]
 
+import logging
+import time
+import datetime as dt
+
+class MyFormatter(logging.Formatter):
+    converter=dt.datetime.fromtimestamp
+    def formatTime(self, record, datefmt=None):
+        ct = self.converter(record.created)
+        if datefmt:
+            s = ct.strftime(datefmt)
+        else:
+            t = ct.strftime("%Y-%m-%d %H:%M:%S")
+            s = "%s,%03d" % (t, record.msecs)
+        return s
+
+def setup_logger(logger_name, log_file, level=logging.INFO):
+    '''Setup the analyzer logger.
+
+    NOTE: All analyzers share the same logger.
+
+    :param logger_name: logger to be setup.
+    :param log_file: the file to save the log.
+    :param level: the loggoing level. The default value is logging.INFO.
+    '''
+
+    l = logging.getLogger(logger_name)
+    if len(l.handlers)<1:
+        # formatter = MyFormatter('%(asctime)s %(message)s',datefmt='%Y-%m-%d,%H:%M:%S.%f')
+        formatter = MyFormatter('%(message)s')
+        streamHandler = logging.StreamHandler()
+        streamHandler.setFormatter(formatter)
+
+        l.setLevel(level)
+        l.addHandler(streamHandler)
+        l.propagate = False
+
+        if log_file!="":
+            fileHandler = logging.FileHandler(log_file, mode='w')
+            fileHandler.setFormatter(formatter)
+            l.addHandler(fileHandler)  
+        l.disabled = False 
+
 
 class Event(object):
     '''The event is used to trigger the analyzer and perform some actions.
@@ -24,9 +66,14 @@ class Element(object):
     '''The parent class to derive trace collectors and analyzers.
     '''
 
+    logger=None
+
     def __init__(self):
         self.from_list={}   #module that it depends, module->callback
         self.to_list=[] #list of other module that call for this module
+
+        #setup the logs
+        self.set_log("",logging.INFO)
 
     def send(self,event):
         """
@@ -34,8 +81,10 @@ class Element(object):
 
         :param event: the event to be sent
         """
-        for module in self.to_list:
-            module.recv(self,event)
+        # A lambda function: input as a callback, output as passing event to this callback
+        G = lambda module: module.recv(self,event)
+        self.log_info(event.type_id)
+        map(G, self.to_list)
 
     def recv(self,module,event):
         """
@@ -47,3 +96,47 @@ class Element(object):
         :param event: the event to be received
         """
         pass
+
+    #logging functions: please use this one
+
+    def set_log(self,logpath,loglevel=logging.INFO):
+        """
+        Set the logging in analyzers.
+        All the analyzers share the same logger.
+
+        :param logpath: the file path to save the log
+        :param loglevel: the level of the log. The default value is logging.INFO.
+        """
+        self.__logpath=logpath
+        self.__loglevel=loglevel
+        setup_logger('mobileinsight_logger',self.__logpath,self.__loglevel)
+        # self.logger=logging.getLogger('mobileinsight_logger')
+        Element.logger=logging.getLogger('mobileinsight_logger')
+
+
+    def log_info(self, msg):
+        Element.logger.info(
+            "\033[32m\033[1m[INFO]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg
+            )
+
+    def log_debug(self, msg):
+    
+        Element.logger.debug(
+            "\033[33m\033[1m[DEBUG]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg)
+
+    def log_warning(self, msg):
+        Element.logger.warning(
+            "\033[1;34m\033[1m[WARNING]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg)
+
+    def log_error(self, msg):
+        Element.logger.error(
+            "\033[31m\033[1m[ERROR]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg)
+
+    def log_critical(self, msg):
+        Element.logger.critical(
+            "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m["
+            + self.__class__.__name__+']\033[0m: '+msg)

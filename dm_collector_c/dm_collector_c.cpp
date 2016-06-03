@@ -31,6 +31,7 @@ static ExportManagerState g_emanager;
 static PyObject *dm_collector_c_disable_logs (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_enable_logs (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_set_filtered_export (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_set_filtered (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_feed_binary (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_reset (PyObject *self, PyObject *args);
@@ -61,6 +62,18 @@ static PyMethodDef DmCollectorCMethods[] = {
     },
     {"set_filtered_export", dm_collector_c_set_filtered_export, METH_VARARGS,
         "Configure this moduel to output a filtered log file.\n"
+        "\n"
+        "Args:\n"
+        "    type_names: a sequence of type names.\n"
+        "\n"
+        "Returns:\n"
+        "    Successful or not.\n"
+        "\n"
+        "Raises\n"
+        "    ValueError: when an unrecognized type name is passed in.\n"
+    },
+    {"set_filtered", dm_collector_c_set_filtered, METH_VARARGS,
+        "Configure this moduel to only decode filtered logs.\n"
         "\n"
         "Args:\n"
         "    type_names: a sequence of type names.\n"
@@ -230,6 +243,7 @@ map_typenames_to_ids (PyObject *type_names, IdVector &type_ids) {
 // If error occurs, false is returned and PyErr_SetString() will be called.
 static bool
 generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
+
     IdVector type_ids;
     bool success = map_typenames_to_ids(type_names, type_ids);
     if (!success) {
@@ -248,14 +262,18 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
     if(debug_ind!=type_ids.end()){
         //Modem_debug_message should be enabled
         type_ids.erase(debug_ind);
-        buf = encode_log_config(DEBUG_LTE_ML1, type_ids);
-        if (buf.first != NULL && buf.second != 0) {
-            (void) send_msg(file_or_serial, buf.first, buf.second);
-            delete [] buf.first;
-        } else {
-            PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
-            return false;
-        }
+
+        // Enable LTE ML1 debug
+        // buf = encode_log_config(DEBUG_LTE_ML1, type_ids);
+        // if (buf.first != NULL && buf.second != 0) {
+        //     (void) send_msg(file_or_serial, buf.first, buf.second);
+        //     delete [] buf.first;
+        // } else {
+        //     PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
+        //     return false;
+        // }
+
+        // Enable WCDMA debug
         buf = encode_log_config(DEBUG_WCDMA_L1, type_ids);
         if (buf.first != NULL && buf.second != 0) {
             (void) send_msg(file_or_serial, buf.first, buf.second);
@@ -349,6 +367,39 @@ dm_collector_c_set_filtered_export (PyObject *self, PyObject *args) {
     Py_DECREF(sequence);
 
     manager_change_config(&g_emanager, path, type_ids);
+    Py_RETURN_TRUE;
+
+    raise_exception:
+        Py_DECREF(sequence);
+        return NULL;
+}
+
+// Return: successful or not
+static PyObject *
+dm_collector_c_set_filtered (PyObject *self, PyObject *args) {
+    PyObject *sequence = NULL;
+    IdVector type_ids;
+    bool success = false;
+
+    if (!PyArg_ParseTuple(args, "O", &sequence)) {
+        return NULL;
+    }
+    Py_INCREF(sequence);
+
+    // Check arguments
+    if (!PySequence_Check(sequence)) {
+        PyErr_SetString(PyExc_TypeError, "\'type_names\' is not a sequence.");
+        goto raise_exception;
+    }
+
+    success = map_typenames_to_ids(sequence, type_ids);
+    if (!success) {
+        PyErr_SetString(PyExc_ValueError, "Wrong type name.");
+        goto raise_exception;
+    }
+    Py_DECREF(sequence);
+
+    manager_change_config(&g_emanager, NULL, type_ids);
     Py_RETURN_TRUE;
 
     raise_exception:
@@ -460,19 +511,16 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
     // if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
     if (success && crc_correct) {
-        manager_export_binary(&g_emanager, frame.c_str(), frame.size());
-
-        // if(!manager_export_binary(&g_emanager, frame.c_str(), frame.size())){
-        //     // Log not required by the user
-        //     Py_RETURN_NONE;
-        // }
-
-        if(is_log_packet(frame.c_str(), frame.size())){
+        // manager_export_binary(&g_emanager, frame.c_str(), frame.size());
+        if (!manager_export_binary(&g_emanager, frame.c_str(), frame.size())) {
+            Py_RETURN_NONE;
+        }
+        else if(is_log_packet(frame.c_str(), frame.size())){
             const char *s = frame.c_str();
             // printf("%x %x %x %x\n",s[0],s[1],s[2],s[3]);
             PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
                                                     frame.size() - 2,
-                                                    skip_decoding); 
+                                                    skip_decoding);
             if (include_timestamp) {
                 PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
                 Py_DECREF(decoded);

@@ -93,6 +93,7 @@ class DMCollector(Monitor):
                 # print "Unsupported log message type: %s" % n
             else:
                 self._type_names.append(n)
+        dm_collector_c.set_filtered(self._type_names)
 
     def enable_log_all(self):
         """

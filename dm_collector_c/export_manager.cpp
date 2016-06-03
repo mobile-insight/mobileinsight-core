@@ -60,7 +60,7 @@ manager_change_config (struct ExportManagerState *pstate,
         pstate->log_fp = NULL;
         pstate->filename = "";
     }
-    if (pstate->log_fp == NULL) {   // open new file if necessary
+    if (pstate->log_fp == NULL && new_path != NULL) {   // open new file if necessary
         pstate->log_fp = fopen(new_path, "wb");
         pstate->filename = new_path;
     }

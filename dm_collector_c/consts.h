@@ -13,9 +13,11 @@
 // All supported type IDs
 enum LogPacketType {
     CDMA_Paging_Channel_Message = 0x1007,
-    _1xEV_Signaling_Control_Channel_Broadcast = 0x107C,
+    // _1xEV_Signaling_Control_Channel_Broadcast = 0x107C,
     _1xEV_Rx_Partial_MultiRLP_Packet = 0x1277,
     _1xEV_Connected_State_Search_Info = 0x118A,
+    _1xEV_Connection_Attempt = 0x106E,
+    _1xEV_Connection_Release = 0x1071,
     WCDMA_CELL_ID = 0x4127,
     WCDMA_Signaling_Messages = 0x412F,
     UMTS_NAS_GMM_State = 0x7130,
@@ -64,20 +66,28 @@ enum LogPacketType {
     LTE_PUCCH_Power_Control = 0xB16F,
     LTE_PUSCH_Power_Control = 0xB16E,
     LTE_PDCCH_PHICH_Indication_Report = 0xB16B,
+    LTE_PDSCH_Stat_Indication = 0xB173,
+    LTE_ML1_System_Scan_Results = 0xB18E,
+    LTE_ML1_BPLMN_Cell_Request = 0xB1A1,
+    LTE_ML1_BPLMN_Cell_Confirm = 0xB1A2,
+    LTE_LL1_PCFICH_Decoding_Results = 0xB12A,
 };
 
 // Mapping type IDs to names
 const ValueName LogPacketTypeID_To_Name [] = {
     {CDMA_Paging_Channel_Message,
         "CDMA_Paging_Channel_Message",false},
-    {_1xEV_Signaling_Control_Channel_Broadcast,
-        "1xEV_Signaling_Control_Channel_Broadcast",false},
+    // Yuanjie: Buggy parsing!!! Disable _1xEV_Signaling_Control_Channel_Broadcast temporarily
+    // {_1xEV_Signaling_Control_Channel_Broadcast,
+    //     "1xEV_Signaling_Control_Channel_Broadcast",false},
     {_1xEV_Rx_Partial_MultiRLP_Packet,
         "1xEV_Rx_Partial_MultiRLP_Packet", true},
     {_1xEV_Connected_State_Search_Info,
         "1xEV_Connected_State_Search_Info", true},
-    // {WCDMA_CELL_ID, // WCDMA cell status
-    //     "WCDMA_CELL_ID",false},
+    {_1xEV_Connection_Attempt,
+        "1xEV_Connection_Attempt", true},
+    {_1xEV_Connection_Release,
+        "1xEV_Connection_Release", true},
     {WCDMA_CELL_ID, // WCDMA cell status
         "WCDMA_RRC_Serv_Cell_Info",true},
     {WCDMA_Signaling_Messages,  // WCDMA signaling messages
@@ -96,8 +106,6 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_RRC_MIB_Packet",true},
     {LTE_RRC_MIB_Message_Log_Packet,    // LTE RRC MIB packet
         "LTE_RRC_MIB_Message_Log_Packet",true},
-    // {LTE_RRC_Serv_Cell_Info_Log_Packet, // LTE RRC cell status
-    //     "LTE_RRC_Serv_Cell_Info_Log_Packet",false},
     {LTE_RRC_Serv_Cell_Info_Log_Packet, // LTE RRC cell status
         "LTE_RRC_Serv_Cell_Info",true},
 
@@ -115,20 +123,12 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_NAS_ESM_State",true},
     {LTE_LL1_PDSCH_Demapper_Configuration,
         "LTE_PHY_PDSCH_Packet",true},
-    // {LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results,    // LTE infra-frequency measurements (connected mode)
-    //     "LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results",false},
     {LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results,    // LTE infra-frequency measurements (connected mode)
         "LTE_PHY_Connected_Mode_Intra_Freq_Meas",true},
-    // {LTE_ML1_IRAT_Measurement_Request,  // LTE inter-RAT measurement request
-    //     "LTE_ML1_IRAT_Measurement_Request",false},
     {LTE_ML1_IRAT_Measurement_Request,  // LTE inter-RAT measurement request
         "LTE_PHY_Inter_RAT_Measurement",false},
-    // {LTE_ML1_Serving_Cell_Measurement_Result,   // LTE serving cell measurement result
-    //     "LTE_ML1_Serving_Cell_Measurement_Result",false},
     {LTE_ML1_Serving_Cell_Measurement_Result,   // LTE serving cell measurement result
         "LTE_PHY_Serv_Cell_Measurement",true},
-    // {LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp, // LTE neighbor measurement request (connected mode)
-    //     "LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp",false}
     {LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp, // LTE neighbor measurement request (connected mode)
         "LTE_PHY_Connected_Mode_Neighbor_Measurement",true},
     {LTE_ML1_IRAT_MDB,  // Inter-RAT measurement result
@@ -187,6 +187,16 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_PUSCH_Power_Control", true},
     {LTE_PDCCH_PHICH_Indication_Report,
         "LTE_PDCCH_PHICH_Indication_Report", true},
+    {LTE_PDSCH_Stat_Indication,
+        "LTE_PDSCH_Stat_Indication", true},
+    {LTE_ML1_System_Scan_Results,
+        "LTE_ML1_System_Scan_Results", true},
+    {LTE_ML1_BPLMN_Cell_Request,
+        "LTE_ML1_BPLMN_Cell_Request", true},
+    {LTE_ML1_BPLMN_Cell_Confirm,
+        "LTE_ML1_BPLMN_Cell_Confirm", true},
+    {LTE_LL1_PCFICH_Decoding_Results,
+        "LTE_LL1_PCFICH_Decoding_Results", true},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

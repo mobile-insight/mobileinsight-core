@@ -71,6 +71,8 @@ class OfflineReplayer(Monitor):
                 print "WARNING: Unsupported log message type: %s" % n
             if n not in self._type_names:
                 self._type_names.append(n)  
+                self.log_info("Enable "+n)
+        dm_collector_c.set_filtered(self._type_names)
 
     def enable_log_all(self):
         """
@@ -127,7 +129,7 @@ class OfflineReplayer(Monitor):
 
 
             for file in log_list:
-            	print "Loading "+file
+            	self.log_info("Loading "+file) 
                 self._input_file = open(file, "rb")
                 dm_collector_c.reset()
                 while True:
