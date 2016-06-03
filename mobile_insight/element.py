@@ -35,7 +35,8 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
 
     l = logging.getLogger(logger_name)
     if len(l.handlers)<1:
-        formatter = MyFormatter('%(asctime)s %(message)s',datefmt='%Y-%m-%d,%H:%M:%S.%f')
+        # formatter = MyFormatter('%(asctime)s %(message)s',datefmt='%Y-%m-%d,%H:%M:%S.%f')
+        formatter = MyFormatter('%(message)s')
         streamHandler = logging.StreamHandler()
         streamHandler.setFormatter(formatter)
 
