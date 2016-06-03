@@ -82,11 +82,11 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
             break;
         }
 
-    case DEBUG_LTE_ML1:
+    case DEBUG_WCDMA_L1:
         //Yuanjie: enable debugging messages (currently for iCellular only)
         buf.second = 12;
         buf.first = new char[buf.second];
-        //Enable LTE ML1 debug message (for RSRP)
+        //Enable WCDMA L1 debug message (for RSCP)
         buf.first[0] = 0x7d;
         buf.first[1] = 0x04;
         buf.first[2] = 0xb9;
@@ -101,11 +101,11 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
         buf.first[11] = 0x00;
         break;
 
-    case DEBUG_WCDMA_L1:
+    case DEBUG_LTE_ML1:
         //Yuanjie: enable debugging messages (currently for iCellular only)
         buf.second = 12;
         buf.first = new char[buf.second];
-        //Enable WCDMA L1 debug message (for RSCP)
+        //Enable LTE ML1 debug message (for RSRP)
         buf.first[0] = 0x7d;
         buf.first[1] = 0x04;
         buf.first[2] = 0x25;
