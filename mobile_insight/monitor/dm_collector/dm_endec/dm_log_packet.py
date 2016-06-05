@@ -52,8 +52,8 @@ class DMLogPacket:
     """
     DM log packet decoder.
 
-    A log packet contains a header that specifies the packet type and 
-    timestamp, and a payload field that store useful information of a 
+    A log packet contains a header that specifies the packet type and
+    timestamp, and a payload field that store useful information of a
     phone. This class will decode both the header and payload fields.
 
     This class depends on Wireshark to decode some 3GPP standardized
@@ -70,6 +70,7 @@ class DMLogPacket:
         :type decoded_list: list
         """
         cls = self.__class__
+
         self._decoded_list = cls._preparse_internal_list(decoded_list)
 
 
@@ -229,7 +230,7 @@ class DMLogPacket:
         Decode a DM log packet.
 
         :returns: a Python dict object that looks like::
-        
+
             {
                 "type_id": "LTE_RRC_OTA_Packet",
                 "timestamp": datetime.datetime(......),

@@ -65,7 +65,7 @@ static int _decode_1xev_rx_partial_multirlp_packet_payload (const char *b,
         offset += _decode_by_fmt(_1xEVRxPartialMultiRLPPacket_Packet,
                 ARRAY_SIZE(_1xEVRxPartialMultiRLPPacket_Packet, Fmt),
                 b, offset, length, result_packet_item);
-        int iNonDecodeP2 = _search_result_int(result_packet_item,
+        unsigned int iNonDecodeP2 = _search_result_uint(result_packet_item,
                 "Physical Channel Rate");
         int iDataRate = iNonDecodeP2 & 15; // last 4 bits
         int iChannel = (iNonDecodeP2 >> 4) & 1; // next 1 bit

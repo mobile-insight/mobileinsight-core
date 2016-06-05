@@ -41,7 +41,8 @@ class LtePdcpAnalyzer(Analyzer):
         # source.enable_log("LTE_ML1_BPLMN_Cell_Confirm")
         # source.enable_log("LTE_LL1_Serving_Cell_COM_Loop")
         # source.enable_log("LTE_LL1_PDCCH_Decoding_Result")
-        source.enable_log("LTE_LL1_PDSCH_Decoding_Result")
+        # source.enable_log("LTE_LL1_PDSCH_Decoding_Result")
+        source.enable_log("1xEV_Rx_Partial_MultiRLP_Packet")
 
 
     def __msg_callback(self,msg):

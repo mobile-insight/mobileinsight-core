@@ -11,6 +11,7 @@
 #include "export_manager.h"
 #include "hdlc.h"
 #include "log_packet.h"
+#include "log_packet_helper.h"
 
 // A simple but dirty function to retrieve type ID.
 // Return -1 if the packet is not recognized
@@ -45,7 +46,6 @@ manager_export_binary (struct ExportManagerState *pstate, const char *b, size_t 
             std::string frame = encode_hdlc_frame(b, (int) length);
             size_t cnt = fwrite(frame.c_str(), sizeof(char), frame.size(), pstate->log_fp);
         }
-
         return true;
     }
     else
