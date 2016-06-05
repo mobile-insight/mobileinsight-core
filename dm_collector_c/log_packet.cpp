@@ -4120,8 +4120,6 @@ is_debug_packet (const char *b, size_t length) {
 PyObject *
 decode_log_packet (const char *b, size_t length, bool skip_decoding) {
 
-    printf("Testing dm_collector_c\n");
-    
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
 
@@ -4448,12 +4446,10 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
         offset += _decode_lte_pdcch_phich_indication_report_payload(b, offset, length, result);
         break;
     case _1xEV_Rx_Partial_MultiRLP_Packet:
-        printf("Bingo!\n");
         offset += _decode_by_fmt(_1xEVRxPartialMultiRLPPacket_Fmt,
                 ARRAY_SIZE(_1xEVRxPartialMultiRLPPacket_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_1xev_rx_partial_multirlp_packet_payload(b, offset, length, result);
-        printf("Before break\n");
         break;
     case _1xEV_Connected_State_Search_Info:
         offset += _decode_by_fmt(_1xEVConnectedStateSearchInfo_Fmt,

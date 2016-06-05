@@ -13,6 +13,11 @@
 #include <sstream>
 #include <fstream>
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define printf(fmt,args...) __android_log_print(ANDROID_LOG_INFO, "python", fmt, ##args);
+#endif
+
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
@@ -66,6 +71,16 @@ _search_result_int(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
     assert(PyInt_Check(item));
     int val = (int) PyInt_AsLong(item);
+    Py_DECREF(item);
+
+    return val;
+}
+
+static unsigned int
+_search_result_uint(PyObject *result, const char *target) {
+    PyObject *item = _search_result(result, target);
+    assert(PyInt_Check(item));
+    unsigned int val = (unsigned int) PyInt_AsUnsignedLongMask(item);
     Py_DECREF(item);
 
     return val;

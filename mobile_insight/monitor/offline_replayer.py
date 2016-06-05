@@ -57,7 +57,7 @@ class OfflineReplayer(Monitor):
         Enable the messages to be monitored. Refer to cls.SUPPORTED_TYPES for supported types.
 
         If this method is never called, the config file existing on the SD card will be used.
-        
+
         :param type_name: the message type(s) to be monitored
         :type type_name: string or list
 
@@ -70,7 +70,7 @@ class OfflineReplayer(Monitor):
             if n not in cls.SUPPORTED_TYPES:
                 print "WARNING: Unsupported log message type: %s" % n
             if n not in self._type_names:
-                self._type_names.append(n)  
+                self._type_names.append(n)
                 self.log_info("Enable "+n)
         dm_collector_c.set_filtered(self._type_names)
 
@@ -79,7 +79,7 @@ class OfflineReplayer(Monitor):
         Enable all supported logs
         """
         cls = self.__class__
-        self.enable_log(cls.SUPPORTED_TYPES) 
+        self.enable_log(cls.SUPPORTED_TYPES)
 
     def set_input_path(self, path):
         """
@@ -129,7 +129,7 @@ class OfflineReplayer(Monitor):
 
 
             for file in log_list:
-            	self.log_info("Loading "+file) 
+            	self.log_info("Loading "+file)
                 self._input_file = open(file, "rb")
                 dm_collector_c.reset()
                 while True:
@@ -142,7 +142,6 @@ class OfflineReplayer(Monitor):
                     decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
                                                                 True,   # include_timestamp
                                                                 )
-
                     if decoded:
                         try:
                             # packet = DMLogPacket(decoded)
@@ -163,7 +162,7 @@ class OfflineReplayer(Monitor):
                         except FormatError, e:
                             # skip this packet
                             print "FormatError: ", e
-                
+
                 self._input_file.close()
 
         except Exception, e:

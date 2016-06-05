@@ -1,4 +1,4 @@
-/* dn_collector_c.cpp
+/* dm_collector_c.cpp
  * Author: Jiayao Li
  * This file defines dm_collector_c, a Python extension module that collects
  * and decodes diagnositic logs from Qualcomm chipsets.
@@ -17,6 +17,11 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+
+#ifdef __ANDROID__
+#include <android/log.h>
+#define printf(fmt,args...) __android_log_print(ANDROID_LOG_INFO, "python [dm_collector_c]", fmt, ##args);
+#endif
 
 #ifndef _WIN32
 #include <sys/time.h>
@@ -127,14 +132,14 @@ sort_type_ids(IdVector& type_ids, std::vector<IdVector>& out_vectors) {
     size_t i = 0, j = 0;
     for (j = 0; j < type_ids.size(); j++) {
         if (j != 0 && last_equip_id != get_equip_id(type_ids[j])) {
-            out_vectors.push_back(IdVector(type_ids.begin() + i, 
+            out_vectors.push_back(IdVector(type_ids.begin() + i,
                                             type_ids.begin() + j));
             i = j;
         }
         last_equip_id = get_equip_id(type_ids[j]);
     }
     if (i != j) {
-        out_vectors.push_back(IdVector(type_ids.begin() + i, 
+        out_vectors.push_back(IdVector(type_ids.begin() + i,
                                         type_ids.begin() + j));
     }
     return;
@@ -460,7 +465,7 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
     raise_exception:
         Py_DECREF(sequence);
         Py_DECREF(file);
-        return NULL;   
+        return NULL;
 }
 
 // Return: None
@@ -486,7 +491,6 @@ dm_collector_c_reset (PyObject *self, PyObject *args) {
 // Return: decoded_list or None
 static PyObject *
 dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
-    // printf("Haotian: debug message from dm_collector_c\n");
     std::string frame;
     bool crc_correct = false;
     bool skip_decoding = false, include_timestamp = false;  // default values
@@ -581,7 +585,7 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
         else {
             Py_RETURN_NONE;
         }
-        
+
     } else {
         Py_RETURN_NONE;
     }
@@ -603,14 +607,14 @@ initdm_collector_c(void)
         log_packet_types = PyTuple_New(n_types);
         for (int i = 0; i < n_types; i++) {
             // There is no leak here, because PyTuple_SetItem steals reference
-            
+
 
             // Yuanjie: only expose public logs to py module
             // Refer to consts.h
             // printf("%s\n",LogPacketTypeID_To_Name[i].name);
             PyTuple_SetItem(log_packet_types,
                         i,
-                        Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));            
+                        Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));
         }
 
     }
@@ -630,13 +634,13 @@ initdm_collector_c(void)
                 // printf("%s\n",LogPacketTypeID_To_Name[i].name);
                 PyTuple_SetItem(log_packet_types,
                         count,
-                        Py_BuildValue("s", LogPacketTypeID_To_Name[i].name)); 
+                        Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));
                 count++;
             }
 
         }
     }
-    
+
     PyObject_SetAttrString(dm_collector_c, "log_packet_types", log_packet_types);
     Py_DECREF(log_packet_types);
 
