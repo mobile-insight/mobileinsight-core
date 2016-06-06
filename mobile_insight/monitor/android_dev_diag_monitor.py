@@ -225,7 +225,7 @@ class AndroidDevDiagMonitor(Monitor):
         for n in type_name:
             if n not in cls.SUPPORTED_TYPES:
                 print "WARNING: Unsupported log message type: %s" % n
-            if n not in self._type_names:
+            elif n not in self._type_names:
                 self._type_names.append(n)
         dm_collector_c.set_filtered(self._type_names)
 

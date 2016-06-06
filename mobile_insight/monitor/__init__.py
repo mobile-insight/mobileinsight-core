@@ -4,7 +4,6 @@ __all__ = [
             "AndroidDevDiagMonitor",
             "Monitor",
             "DMCollector",  ### P4A: THIS LINE WILL BE DELETED ###
-            "Replayer",
             "OfflineReplayer",
             "OnlineMonitor"
             ]
@@ -22,6 +21,5 @@ if is_android:
     from android_dev_diag_monitor import AndroidDevDiagMonitor
 from monitor import Monitor
 from dm_collector import * ### P4A: THIS LINE WILL BE DELETED ###
-from replayer import Replayer
 from offline_replayer import OfflineReplayer
 from online_monitor import OnlineMonitor
