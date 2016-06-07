@@ -399,18 +399,20 @@ class AndroidDevDiagMonitor(Monitor):
             os.close(fifo)
             proc.terminate()
             self._stop_collection()
+            packet = DMLogPacket([])
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
-                            {})
+                            packet)
             self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
         except Exception, e:
             self._stop_collection()
+            packet = DMLogPacket([])
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
-                            {})
+                            packet)
             self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))
