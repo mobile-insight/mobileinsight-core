@@ -401,7 +401,7 @@ class AndroidDevDiagMonitor(Monitor):
             self._stop_collection()
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
-                            "Mayday")
+                            {})
             self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))
@@ -410,7 +410,7 @@ class AndroidDevDiagMonitor(Monitor):
             self._stop_collection()
             event = Event(  timeit.default_timer(),
                             "sys_shutdown",
-                            "Mayday")
+                            {})
             self.send(event)
             import traceback
             sys.exit(str(traceback.format_exc()))
