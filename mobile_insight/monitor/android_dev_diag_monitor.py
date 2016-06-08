@@ -224,9 +224,10 @@ class AndroidDevDiagMonitor(Monitor):
             type_name = [type_name]
         for n in type_name:
             if n not in cls.SUPPORTED_TYPES:
-                print "WARNING: Unsupported log message type: %s" % n
+                self.log_info("WARNING: Unsupported log message type: %s" % n) 
             elif n not in self._type_names:
                 self._type_names.append(n)
+                self.log_info("Enable collection: "+n)
         dm_collector_c.set_filtered(self._type_names)
 
     def enable_log_all(self):
