@@ -115,27 +115,27 @@ class Element(object):
 
     def log_info(self, msg):
         Element.logger.info(
-            "\033[32m\033[1m[INFO]\033[0m\033[0m\033[1m["
+            "\033[32m\033[1m[INFO]\033[0m\033[0m\033[1m ["
             + self.__class__.__name__+']\033[0m: '+msg
             )
 
     def log_debug(self, msg):
     
         Element.logger.debug(
-            "\033[33m\033[1m[DEBUG]\033[0m\033[0m\033[1m["
+            "\033[33m\033[1m[DEBUG]\033[0m\033[0m\033[1m ["
             + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_warning(self, msg):
         Element.logger.warning(
-            "\033[1;34m\033[1m[WARNING]\033[0m\033[0m\033[1m["
+            "\033[1;34m\033[1m[WARNING]\033[0m\033[0m\033[1m ["
             + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_error(self, msg):
         Element.logger.error(
-            "\033[31m\033[1m[ERROR]\033[0m\033[0m\033[1m["
+            "\033[31m\033[1m[ERROR]\033[0m\033[0m\033[1m ["
             + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_critical(self, msg):
         Element.logger.critical(
-            "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m["
+            "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m ["
             + self.__class__.__name__+']\033[0m: '+msg)
