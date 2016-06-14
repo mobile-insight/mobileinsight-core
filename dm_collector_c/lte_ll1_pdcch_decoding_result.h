@@ -115,7 +115,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                 offset += _decode_by_fmt(LteLl1PdcchDecodingResult_Hypothesis_v21,
                         ARRAY_SIZE(LteLl1PdcchDecodingResult_Hypothesis_v21, Fmt),
                         b, offset, length, result_record_item);
-                int iNonDecodeP3 = _search_result_int(result_record_item,
+                unsigned int iNonDecodeP3 = _search_result_uint(result_record_item,
                         "Aggregation Level");
                 int iAggLv = iNonDecodeP3 & 3;  // 2 bits
                 int iCandidate = (iNonDecodeP3 >> 2) & 7;   // 3 bits
@@ -180,7 +180,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                         ValueNamePruneStatus,
                         ARRAY_SIZE(ValueNamePruneStatus, ValueName),
                         "Unknown");
-                int iNonDecode = _search_result_int(result_record_item,
+                unsigned int iNonDecode = _search_result_uint(result_record_item,
                         "Norm Energy Metric");
                 float fNEM = iNonDecode / 65535.0;
                 pyfloat = Py_BuildValue("f", fNEM);
@@ -188,7 +188,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                         "Norm Energy Metric", pyfloat);
                 Py_DECREF(old_object);
                 Py_DECREF(pyfloat);
-                iNonDecode = _search_result_int(result_record_item,
+                iNonDecode = _search_result_uint(result_record_item,
                         "Symbol Error Rate");
                 float fSER = iNonDecode / 2147483648.0;
                 pyfloat = Py_BuildValue("f", fSER);
@@ -215,7 +215,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
             offset += _decode_by_fmt(LteLl1PdcchDecodingResult_Payload_v43,
                     ARRAY_SIZE(LteLl1PdcchDecodingResult_Payload_v43, Fmt),
                     b, offset, length, result);
-            int temp = _search_result_int(result, "Num Records");
+            unsigned int temp = _search_result_uint(result, "Num Records");
             int num_record = temp & 15; // 4 bits
             int iSubFN = (temp >> 4) & 15; // 4 bits
             int iSysFN = (temp >> 8) & 1023; // 10 bits
@@ -302,7 +302,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                             ARRAY_SIZE(LteLl1PdcchDecodingResult_Hypothesis_v43, Fmt),
                             b, offset, length, result_record_hypothesis_item);
 
-                    temp = _search_result_int(result_record_hypothesis_item,
+                    temp = _search_result_uint(result_record_hypothesis_item,
                             "Aggregation Level");
                     int iAggLv = temp & 3;  // 2 bits
                     int iCandidate = (temp >> 2) & 7;   // 3 bits
@@ -312,12 +312,12 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                     int iPayloadSize = (temp >> 14) & 255; // 8 bits
                     int iTailMatch = (temp >> 22) & 1; // 1 bit
                     int iNZSMC = (temp >> 23) & 511;   // 9 bits
-                    temp = _search_result_int(result_record_hypothesis_item,
+                    temp = _search_result_uint(result_record_hypothesis_item,
                             "Start CCE");
                     int iStartCCE = (temp >> 1) & 127; // 1 + 7 bits
                     int iNZLC = (temp >> 8) & 511;  // 9 bits
                     int iNormal = (temp >> 17) & 32767; // 15 bits
-                    temp = _search_result_int(result_record_hypothesis_item,
+                    temp = _search_result_uint(result_record_hypothesis_item,
                             "Prune Status");
                     int iPruneStatus = temp & 2047; // 11 bits
                     int iEnergyMetric = temp >> 11; // the rest 21 bits
@@ -391,7 +391,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                     old_object = _replace_result_int(result_record_hypothesis_item,
                             "Energy Metric", iEnergyMetric);
                     Py_DECREF(old_object);
-                    int iNonDecode = _search_result_int(result_record_hypothesis_item,
+                    unsigned int iNonDecode = _search_result_uint(result_record_hypothesis_item,
                             "Norm Energy Metric");
                     float fNEM = iNonDecode / 65535.0;
                     pyfloat = Py_BuildValue("f", fNEM);
@@ -399,7 +399,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                             "Norm Energy Metric", pyfloat);
                     Py_DECREF(old_object);
                     Py_DECREF(pyfloat);
-                    iNonDecode = _search_result_int(result_record_hypothesis_item,
+                    iNonDecode = _search_result_uint(result_record_hypothesis_item,
                             "Symbol Error Rate");
                     float fSER = iNonDecode / 2147483648.0;
                     pyfloat = Py_BuildValue("f", fSER);

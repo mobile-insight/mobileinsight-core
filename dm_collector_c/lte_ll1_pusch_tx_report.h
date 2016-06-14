@@ -1,118 +1,51 @@
 /*
- * LTE LL1 PDSCH Decoding Result
+ * LTE LL1 PUSCH Tx Report
  */
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt LteLl1PdschDecodingResult_Fmt [] = {
+const Fmt LteLl1PuschTxReport_Fmt [] = {
     {UINT, "Version", 1},
 };
 
-const Fmt LteLl1PdschDecodingResult_Payload_v24 [] = {
-    {UINT, "Serving Cell ID", 4},   // 9 btis
-    {PLACEHOLDER, "Starting Subframe Number", 0},   // 4 bits
-    {PLACEHOLDER, "Starting System Frame Number", 0},   // 10 bits
-    {PLACEHOLDER, "UE Category", 0},    // right shift 1 bit, 4 bits
-    {PLACEHOLDER, "Num DL HARQ", 0},    // 4 bits
-    {UINT, "TM Mode", 1},   // right shift 4 bits, 4 bits
+const Fmt LteLl1PuschTxReport_Payload_v23 [] = {
+};
+
+const Fmt LteLl1PuschTxReport_Payload_v43 [] = {
+    {UINT, "Serving Cell ID", 2},    // 9 bits
+    {PLACEHOLDER, "Number of Records", 0},  // 5 bits
     {SKIP, NULL, 1},
-    {UINT, "Carrier Index", 1}, // 3 bits
-    {PLACEHOLDER, "Number of Records", 0},  // 5 bits
-};
-
-const Fmt LteLl1PdschDecodingResult_Payload_v44 [] = {
-    {UINT, "Serving Cell ID", 4},   // 9 btis
-    {PLACEHOLDER, "Starting Subframe Number", 0},   // 4 bits
-    {PLACEHOLDER, "Starting System Frame Number", 0},   // 10 bits
-    {PLACEHOLDER, "UE Category", 0},    // right shift 1 bit, 4 bits
-    {PLACEHOLDER, "Num DL HARQ", 0},    // 4 bits
-    {UINT, "TM Mode", 1},   // right shift 4 bits, 4 bits
-    {SKIP, NULL, 4},
-    {UINT, "Carrier Index", 2}, //  right shift 7 bits, 4 bits
-    {PLACEHOLDER, "Number of Records", 0},  // 5 bits
-};
-
-const Fmt LteLl1PdschDecodingResult_Record_v24 [] = {
-    {UINT, "Subframe Offset", 2},
-    {UINT, "PDSCH Channel ID", 2},
-    {UINT, "HARQ ID", 1},   // 4 bits
-    {PLACEHOLDER, "RNTI Type", 0},  // 4 bits
-    {UINT, "System Information Msg Number", 2}, // 4 bits
-    {PLACEHOLDER, "System Information Mask", 0},    // 12 bits
-    {UINT, "HARQ Log Status", 1},   // right shift 3 bit, 2 bits
-    {PLACEHOLDER, "Codeword Swap", 0},  // 1 bit
-    {PLACEHOLDER, "Number of Streams", 0},  // 2 bits
-};
-
-const Fmt LteLl1PdschDecodingResult_Record_v44 [] = {
-    {UINT, "Subframe Offset", 2},
-    {UINT, "PDSCH Channel ID", 2},
-    {UINT, "HARQ ID", 1},   // 4 bits
-    {PLACEHOLDER, "RNTI Type", 0},  // 4 bits
-    {UINT, "System Information Msg Number", 2}, // 4 bits
-    {PLACEHOLDER, "System Information Mask", 0},    // 12 bits
-    {UINT, "HARQ Log Status", 1},   // right shift 3 bit, 2 bits
-    {PLACEHOLDER, "Codeword Swap", 0},  // 1 bit
-    {PLACEHOLDER, "Number of Streams", 0},  // 2 bits
-    {BYTE_STREAM, "Demap Sic Status", 2},
+    {UINT, "Dispatch SFN SF", 2},
     {SKIP, NULL, 2},
 };
 
-const Fmt LteLl1PdschDecodingResult_Stream_v24 [] = {
-    {UINT, "Transport Block CRC", 4},   // 1 bit
-    {PLACEHOLDER, "NDI", 0},    // 1 bit
-    {PLACEHOLDER, "Code Block Size Plus", 0},   // 13 bits
-    {PLACEHOLDER, "Num Code Block Plus", 0},    // 4 bits
-    {PLACEHOLDER, "Max TDEC Iter", 0},  // 4 bits
-    {PLACEHOLDER, "Retransmission Number", 0},  // 3 bits
-    {PLACEHOLDER, "RVID", 0},   // 2 bits
-    {PLACEHOLDER, "Companding Stats", 0},   // 2 bits
-    {PLACEHOLDER, "HARQ Combining", 0}, // 1 bit
-    {PLACEHOLDER, "Decob TB CRC", 0},   // 1 bit
-    {UINT, "Num RE", 4},    // right shift 10 bits, 16 bits
-    {PLACEHOLDER, "Codeword Index", 0}, // right shift 27 bits, 4 bits
+const Fmt LteLl1PuschTxReport_Record_v23 [] = {
 };
 
-const Fmt LteLl1PdschDecodingResult_Stream_v44 [] = {
-    {UINT, "Transport Block CRC", 4},   // 1 bit
-    {PLACEHOLDER, "NDI", 0},    // 1 bit
-    {PLACEHOLDER, "Code Block Size Plus", 0},   // 13 bits
-    {PLACEHOLDER, "Num Code Block Plus", 0},    // 4 bits
-    {PLACEHOLDER, "Max TDEC Iter", 0},  // 4 bits
-    {PLACEHOLDER, "Retransmission Number", 0},  // 3 bits
-    {PLACEHOLDER, "RVID", 0},   // 2 bits
-    {PLACEHOLDER, "Companding Stats", 0},   // 2 bits
-    {PLACEHOLDER, "HARQ Combining", 0}, // 1 bit
-    {PLACEHOLDER, "Decob TB CRC", 0},   // 1 bit
-    {UINT, "Num RE", 4},    // right shift 10 bits, 16 bits
-    {PLACEHOLDER, "Codeword Index", 0}, // right shift 27 bits, 4 bits
-    {UINT, "LLR Scale", 1}, // 4 bits
-    {SKIP, NULL, 3},
+const Fmt LteLl1PuschTxReport_Record_v43 [] = {
+    {UINT, "Current SFN SF", 2},
+    {UINT, "Coding Rate Data", 2},  // x/1024.0
+    {UINT, "ACK", 4},   // 1 bit
+    {PLACEHOLDER, "CQI", 0},    // 1 bit
+    {PLACEHOLDER, "RI", 0}, // 1 bit
+    {PLACEHOLDER, "Frequency Hopping", 0},  // 2 bits
+    {PLACEHOLDER, "Redund Ver", 0}, // 2 bits
+    {PLACEHOLDER, "Mirror Hopping", 0}, // 2 bits
+    {PLACEHOLDER, "Cyclic Shift of DMRS Symbols Slot 0 (Samples)", 0},  // 4 bits
+    {PLACEHOLDER, "Cyclic Shift of DMRS Symbols Slot 1 (Samples)", 0},  // 4 bits
+    {PLACEHOLDER, "DMRS Root Slot 0", 0},   // 11 bits
+    {PLACEHOLDER, "UE SRS", 0}, // 1 bit
+    {UINT, "DMRS Root Slot 1", 4},  // 11 bits
+    {PLACEHOLDER, "Start RB Slot 0", 0},    // 7 bits
+    {PLACEHOLDER, "Start RB Slot 1", 0},    // 7 bits
+    {PLACEHOLDER, "Num of RB", 0},  // 7 bits
+    {UINT, "PUSCH TB Size", 2},
+    {UINT, "Rate Matched ACK Bits", 2},
 };
 
-const Fmt LteLl1PdschDecodingResult_EnergyMetric_v24 [] = {
-    // totally 13
-    {UINT, "Energy Metric", 4}, // 21 bits
-    {PLACEHOLDER, "Iteration Number", 0},   // 4 bits
-    {PLACEHOLDER, "Code Block CRC Pass", 0},    // 1 bit
-    {PLACEHOLDER, "Early Termination", 0},  // 1 bit
-    {PLACEHOLDER, "HARQ Combine Enable", 0},    // 1 bit
-    {PLACEHOLDER, "Deint Decode Bypass", 0},    // 1 bit
-};
-
-const Fmt LteLl1PdschDecodingResult_EnergyMetric_v44 [] = {
-    // totally 13
-    {UINT, "Energy Metric", 4}, // 21 bits
-    {PLACEHOLDER, "Iteration Number", 0},   // 4 bits
-    {PLACEHOLDER, "Code Block CRC Pass", 0},    // 1 bit
-    {PLACEHOLDER, "Early Termination", 0},  // 1 bit
-    {PLACEHOLDER, "HARQ Combine Enable", 0},    // 1 bit
-    {PLACEHOLDER, "Deint Decode Bypass", 0},    // 1 bit
-};
-
-static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
+static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");

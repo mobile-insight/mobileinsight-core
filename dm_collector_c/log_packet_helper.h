@@ -160,7 +160,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
         case UINT:
             {
                 unsigned int ii = 0;
-                unsigned long long iiii = 0;
+                unsigned long long iiii = -1LL;
                 switch (fmt[i].len) {
                 case 1:
                     ii = *((unsigned char *) p);
@@ -172,8 +172,13 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                     ii = *((unsigned int *) p);
                     break;
                 case 8:
-                    iiii = *((unsigned long long *) p);
+                {
+                    // iiii = *((unsigned long long *) p);
+                    unsigned char buffer64[256] = {0};
+                    memcpy(buffer64, p, sizeof(unsigned long long));
+                    iiii = *reinterpret_cast<unsigned long long *>(buffer64);
                     break;
+                }
                 default:
                     assert(false);
                     break;

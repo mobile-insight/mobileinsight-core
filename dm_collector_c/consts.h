@@ -73,6 +73,7 @@ enum LogPacketType {
     LTE_LL1_Serving_Cell_COM_Loop = 0xB121,
     LTE_LL1_PDCCH_Decoding_Result = 0xB130,
     LTE_LL1_PDSCH_Decoding_Result = 0xB132,
+    LTE_LL1_PUSCH_Tx_Report = 0xB139,
 };
 
 // Mapping type IDs to names
@@ -203,6 +204,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_PHY_PDCCH_Decoding_Result", true},
     {LTE_LL1_PDSCH_Decoding_Result,
         "LTE_PHY_PDSCH_Decoding_Result", true},
+    {LTE_LL1_PUSCH_Tx_Report,
+        "LTE_PHY_PUSCH_Tx_Report", true},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

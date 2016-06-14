@@ -27,6 +27,7 @@
 #include "lte_ll1_serving_cell_com_loop.h"
 #include "lte_ll1_pdcch_decoding_result.h"
 #include "lte_ll1_pdsch_decoding_result.h"
+#include "lte_ll1_pusch_tx_report.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -1008,6 +1009,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                     printf("Unknown LTE MAC Uplink Transport Block Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
+                    PyObject *result_sample_list = PyList_New(0);
                     switch (subpkt_ver) {
                     case 1: // UL Transport Block Subpacket V1
                         for (int j = 0; j < subpkt_nsample; j++) {
@@ -1027,11 +1029,14 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                     BSRTrig,
                                     ARRAY_SIZE(BSRTrig, ValueName),
                                     "Unsupported");
-                            offset += (_search_result_int(result_subpkt_sample, "HDR LEN") + 2);
+                            offset += (_search_result_int(result_subpkt_sample,
+                                        "HDR LEN") + 2);
+
                             PyObject *t = Py_BuildValue("(sOs)",
-                                    "Sample", result_subpkt_sample, "dict");
-                            PyList_Append(result_subpkt, t);
+                                    "Ignored", result_subpkt_sample, "dict");
+                            PyList_Append(result_sample_list, t);
                             Py_DECREF(result_subpkt_sample);
+                            Py_DECREF(t);
                         }
                         success = true;
                         break;
@@ -1040,12 +1045,18 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                     }
                     if (success) {
                         PyObject *t = Py_BuildValue("(sOs)",
-                                                    "MAC Subpacket", result_subpkt, "dict");
-                        PyList_Append(result_allpkts, t);
-                        Py_DECREF(result_subpkt);
+                                "Samples", result_sample_list, "list");
+                        PyList_Append(result_subpkt, t);
+                        Py_DECREF(result_sample_list);
+                        Py_DECREF(t);
                     } else {
                         printf("Unknown LTE MAC Uplink Transport Block Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
+                    PyObject *t = Py_BuildValue("(sOs)",
+                            "Ignored", result_subpkt, "dict");
+                    PyList_Append(result_allpkts, t);
+                    Py_DECREF(result_subpkt);
+                    Py_DECREF(t);
                 }
             }
             PyObject *t = Py_BuildValue("(sOs)",
@@ -1098,6 +1109,7 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                     printf("Unknown LTE MAC Downlink Transport Block Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
+                    PyObject *result_sample_list = PyList_New(0);
                     switch (subpkt_ver) {
                     case 2: // DL Transport Block Subpacket
                         for (int j = 0; j < subpkt_nsample; j++) {
@@ -1114,9 +1126,11 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                             offset += _search_result_int(result_subpkt_sample, "HDR LEN");
 
                             PyObject *t = Py_BuildValue("(sOs)",
-                                                        "Sample", result_subpkt_sample, "dict");
-                            PyList_Append(result_subpkt, t);
+                                    "Ignored",
+                                    result_subpkt_sample, "dict");
+                            PyList_Append(result_sample_list, t);
                             Py_DECREF(result_subpkt_sample);
+                            Py_DECREF(t);
                         }
                         success = true;
                         break;
@@ -1125,14 +1139,18 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                     }
                     if (success) {
                         PyObject *t = Py_BuildValue("(sOs)",
-                                                    "MAC Subpacket", result_subpkt, "dict");
-                        PyList_Append(result_allpkts, t);
-                        Py_DECREF(result_subpkt);
+                                "Samples", result_sample_list, "list");
+                        PyList_Append(result_subpkt, t);
+                        Py_DECREF(result_sample_list);
+                        Py_DECREF(t);
                     } else {
                         printf("Unknown LTE MAC Downlink Transport Block Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
-
-
+                    PyObject *t = Py_BuildValue("(sOs)",
+                            "Ignored", result_subpkt, "dict");
+                    PyList_Append(result_allpkts, t);
+                    Py_DECREF(result_subpkt);
+                    Py_DECREF(t);
                 }
             }
             PyObject *t = Py_BuildValue("(sOs)",
@@ -3506,7 +3524,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                 offset += _decode_by_fmt(LtePucchPowerControl_Record_Fmt_v4,
                         ARRAY_SIZE(LtePucchPowerControl_Record_Fmt_v4, Fmt),
                         b, offset, length, result_record_item);
-                int iNonDecodeSFN = _search_result_int(result_record_item,
+                unsigned int iNonDecodeSFN = _search_result_uint(result_record_item,
                         "SFN");
                 int iSFN = iNonDecodeSFN & 1023; // last 10 bits
                 int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
@@ -3545,7 +3563,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                         "N_HARQ", iN_HARQ);
                 Py_DECREF(old_object);
 
-                int iNonDecodeTPC = _search_result_int(result_record_item,
+                unsigned int iNonDecodeTPC = _search_result_uint(result_record_item,
                         "TPC Command");
                 int iTPC = iNonDecodeTPC & 63; // last 6 bits
                 int iN_CQI = (iNonDecodeTPC >> 6) & 31; // next 5 bits
@@ -3613,7 +3631,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                 offset += _decode_by_fmt(LtePuschPowerControl_Record_Fmt_v5,
                         ARRAY_SIZE(LtePuschPowerControl_Record_Fmt_v5, Fmt),
                         b, offset, length, result_record_item);
-                int iNonDecodeSFN = _search_result_int(result_record_item,
+                unsigned int iNonDecodeSFN = _search_result_uint(result_record_item,
                         "SFN");
                 int iSFN = iNonDecodeSFN & 1023; // last 10 bits
                 int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
@@ -3648,7 +3666,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                             ValueName),
                         "Unknown");
 
-                int iNonDecodeNRB = _search_result_int(result_record_item,
+                unsigned int iNonDecodeNRB = _search_result_uint(result_record_item,
                         "Num RBs");
                 int iNRB = iNonDecodeNRB & 255; // last 8 bits
                 int iTBS = (iNonDecodeNRB >> 8) & 16383; // next 14 bits
@@ -3663,7 +3681,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                         "DL Path Loss", iLoss);
                 Py_DECREF(old_object);
 
-                int iNonDecodeFi = _search_result_int(result_record_item,
+                unsigned int iNonDecodeFi = _search_result_uint(result_record_item,
                         "F(i)");
                 int iFi = iNonDecodeFi & 1023; // last 10 bits
                 if (iFi >= 512) {
@@ -3713,7 +3731,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                 offset += _decode_by_fmt(LtePuschPowerControl_Record_Fmt_v4,
                         ARRAY_SIZE(LtePuschPowerControl_Record_Fmt_v4, Fmt),
                         b, offset, length, result_record_item);
-                int iNonDecodeSFN = _search_result_int(result_record_item,
+                unsigned int iNonDecodeSFN = _search_result_uint(result_record_item,
                         "SFN");
                 int iSFN = iNonDecodeSFN & 1023; // last 10 bits
                 int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
@@ -3748,7 +3766,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                             ValueName),
                         "Unknown");
 
-                int iNonDecodeTBS = _search_result_int(result_record_item,
+                unsigned int iNonDecodeTBS = _search_result_uint(result_record_item,
                         "Transport Block Size");
                 int iTBS = iNonDecodeTBS & 16383; // last 14 bits
                 int iLoss = (iNonDecodeTBS >> 14) & 255; // next 8 bits
@@ -3766,7 +3784,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                         "F(i)", iFi);
                 Py_DECREF(old_object);
 
-                int iNonDecodeTPC = _search_result_int(result_record_item,
+                unsigned int iNonDecodeTPC = _search_result_uint(result_record_item,
                         "TPC");
                 int iTPC = (iNonDecodeTPC) & 31; // last 5 bits
                 int iActualPower = (iNonDecodeTPC >> 5) & 255; // next 8 bits
@@ -3829,7 +3847,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
                 offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Record_v5_p1,
                         ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v5_p1, Fmt),
                         b, offset, length, result_record_item);
-                int iNonDecodeP1_1 = _search_result_int(result_record_item,
+                unsigned int iNonDecodeP1_1 = _search_result_uint(result_record_item,
                         "Num PDCCH Results");
                 int iNumPdcch = iNonDecodeP1_1 & 7; // last 3 bits
                 int iPdcchSFN = (iNonDecodeP1_1 >> 3) & 1023; // next 10 bits
@@ -3838,7 +3856,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
                 int iPhich1Included = (iNonDecodeP1_1 >> 18) & 1; // next 1 bit
                 int iPhichSFN = (iNonDecodeP1_1 >> 19) & 1023; // next 10 bits
                 // reserved 3 bits
-                int iNonDecodeP1_2 = _search_result_int(result_record_item,
+                unsigned int iNonDecodeP1_2 = _search_result_uint(result_record_item,
                         "PHICH Timing Sub-FN");
                 int iPhichSubFN = iNonDecodeP1_2 & 15; // next 4 bits
                 int iPhichValue = (iNonDecodeP1_2 >> 4) & 1; // next 1 bit
@@ -4510,6 +4528,12 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 ARRAY_SIZE(LteLl1PdschDecodingResult_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_lte_ll1_pdsch_decoding_result_payload(b, offset, length, result);
+        break;
+    case LTE_LL1_PUSCH_Tx_Report:
+        offset += _decode_by_fmt(LteLl1PuschTxReport_Fmt,
+                ARRAY_SIZE(LteLl1PuschTxReport_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_ll1_pusch_tx_report_payload(b, offset, length, result);
         break;
     default:
         break;
