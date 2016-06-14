@@ -101,29 +101,27 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
                 old_object = _replace_result(result_record_item, "COM IIR Alpha", pyfloat);
                 Py_DECREF(old_object);
 
-                int iCA0 = _search_result_int(result_record_item, "COM Adjustment[0]");
-                if (iCA0 > 2147483648)
-                    iCA0 -= 4294967295;
-                float fCA0 = iCA0 / 64.0;
+                int iCA0 = _search_result_uint(result_record_item, "COM Adjustment[0]");
+                float ratio = 64.0;
+                float fCA0 = iCA0 / ratio;
                 pyfloat = Py_BuildValue("f", fCA0);
                 old_object = _replace_result(result_record_item, "COM Adjustment[0]", pyfloat);
                 Py_DECREF(old_object);
 
-                int iCA1 = _search_result_int(result_record_item, "COM Adjustment[1]");
-                if (iCA1 > 2147483648)
-                    iCA1 -= 4294967295;
-                float fCA1 = iCA1 / 64.0;
+                int iCA1 = _search_result_uint(result_record_item, "COM Adjustment[1]");
+                ratio = 64.0;
+                float fCA1 = iCA1 / ratio;
                 pyfloat = Py_BuildValue("f", fCA1);
                 old_object = _replace_result(result_record_item, "COM Adjustment[1]", pyfloat);
                 Py_DECREF(old_object);
 
-                int iCNB0 = _search_result_int(result_record_item, "COM Unwrap Base[0]");
+                unsigned int iCNB0 = _search_result_uint(result_record_item, "COM Unwrap Base[0]");
                 float fCNB0 = iCNB0 / 64.0;
                 pyfloat = Py_BuildValue("f", fCNB0);
                 old_object = _replace_result(result_record_item, "COM Unwrap Base[0]", pyfloat);
                 Py_DECREF(old_object);
 
-                int iCNB1 = _search_result_int(result_record_item, "COM Unwrap Base[1]");
+                unsigned int iCNB1 = _search_result_uint(result_record_item, "COM Unwrap Base[1]");
                 float fCNB1 = iCNB1 / 64.0;
                 pyfloat = Py_BuildValue("f", fCNB1);
                 old_object = _replace_result(result_record_item, "COM Unwrap Base[1]", pyfloat);
@@ -191,35 +189,33 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
                         ARRAY_SIZE(LteLl1ServingCellComLoop_Record_Enabled,
                             ValueName),
                         "Unknown");
-                int iCIA = _search_result_int(result_record_item, "COM IIR Alpha");
+                unsigned int iCIA = _search_result_uint(result_record_item, "COM IIR Alpha");
                 float fCIA = iCIA / 32765.0;
                 PyObject *pyfloat = Py_BuildValue("f", fCIA);
                 old_object = _replace_result(result_record_item, "COM IIR Alpha", pyfloat);
                 Py_DECREF(old_object);
 
-                int iCA0 = _search_result_int(result_record_item, "COM Adjustment[0]");
-                if (iCA0 > 2147483648)
-                    iCA0 -= 4294967295;
-                float fCA0 = iCA0 / 64.0;
+                int iCA0 = _search_result_uint(result_record_item, "COM Adjustment[0]");
+                float ratio = 64.0;
+                float fCA0 = iCA0 / ratio;
                 pyfloat = Py_BuildValue("f", fCA0);
                 old_object = _replace_result(result_record_item, "COM Adjustment[0]", pyfloat);
                 Py_DECREF(old_object);
 
-                int iCA1 = _search_result_int(result_record_item, "COM Adjustment[1]");
-                if (iCA1 > 2147483648)
-                    iCA1 -= 4294967295;
-                float fCA1 = iCA1 / 64.0;
+                int iCA1 = _search_result_uint(result_record_item, "COM Adjustment[1]");
+                ratio = 64.0;
+                float fCA1 = iCA1 / ratio;
                 pyfloat = Py_BuildValue("f", fCA1);
                 old_object = _replace_result(result_record_item, "COM Adjustment[1]", pyfloat);
                 Py_DECREF(old_object);
 
-                int iCNB0 = _search_result_int(result_record_item, "COM Unwrap Base[0]");
+                unsigned int iCNB0 = _search_result_uint(result_record_item, "COM Unwrap Base[0]");
                 float fCNB0 = iCNB0 / 64.0;
                 pyfloat = Py_BuildValue("f", fCNB0);
                 old_object = _replace_result(result_record_item, "COM Unwrap Base[0]", pyfloat);
                 Py_DECREF(old_object);
 
-                int iCNB1 = _search_result_int(result_record_item, "COM Unwrap Base[1]");
+                unsigned int iCNB1 = _search_result_uint(result_record_item, "COM Unwrap Base[1]");
                 float fCNB1 = iCNB1 / 64.0;
                 pyfloat = Py_BuildValue("f", fCNB1);
                 old_object = _replace_result(result_record_item, "COM Unwrap Base[1]", pyfloat);

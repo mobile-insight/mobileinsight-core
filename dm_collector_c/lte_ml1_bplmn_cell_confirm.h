@@ -61,7 +61,7 @@ static int _decode_lte_ml1_bplmn_cell_confirm_payload (const char *b,
             iRSRP -= 65535;
             PyObject *old_object = _replace_result_int(result, "RSRP", iRSRP);
             Py_DECREF(old_object);
-            int iNonDecodeP1 = _search_result_int(result, "SRX Lev Calculated");
+            unsigned int iNonDecodeP1 = _search_result_uint(result, "SRX Lev Calculated");
             int iSRXLevCalculated = iNonDecodeP1 & 1; // last 1 bits
             int iSRXLev = (iNonDecodeP1 >> 1) & 65535; // next 16 bits
             old_object = _replace_result_int(result, "SRX Lev Calculated",
@@ -80,7 +80,7 @@ static int _decode_lte_ml1_bplmn_cell_confirm_payload (const char *b,
                 offset += _decode_by_fmt(LteMl1BplmnCellConfirm_Rel9Info,
                         ARRAY_SIZE(LteMl1BplmnCellConfirm_Rel9Info, Fmt),
                         b, offset, length, result);
-                int iNonDecodeP2 = _search_result_int(result,
+                unsigned int iNonDecodeP2 = _search_result_uint(result,
                         "Rel 9 Info S Qual Calculated");
                 int iR9SQCalculated = iNonDecodeP2 & 1; // last 1 bit
                 int iR9SQual = (iNonDecodeP2 >> 1) & 65535; // next 16 bits

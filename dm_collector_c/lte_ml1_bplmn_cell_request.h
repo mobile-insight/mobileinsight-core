@@ -66,7 +66,7 @@ static int _decode_lte_ml1_bplmn_cell_request_payload (const char *b,
                     LteMl1BplmnCellRequest_BarredStatus,
                     ARRAY_SIZE(LteMl1BplmnCellRequest_BarredStatus, ValueName),
                     "Unknown");
-            int iNonDecodeP2 = _search_result_int(result, "Q Rx Lev Min");
+            unsigned int iNonDecodeP2 = _search_result_uint(result, "Q Rx Lev Min");
             int iQRxLevMin = iNonDecodeP2 & 255; // last 8 bits
             int iQRxLevMinOffset = (iNonDecodeP2 >> 8) & 15; // next 4 bits
             int iPMax = (iNonDecodeP2 >> 12) & 255; // next 8 bits
