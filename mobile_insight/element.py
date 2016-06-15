@@ -82,11 +82,10 @@ class Element(object):
         :param event: the event to be sent
         """
         # A lambda function: input as a callback, output as passing event to this callback
-        if event.__class__.__name__=='str':
-            self.log_info("BUG HERE!!!"+event)
-        self.log_info(event.type_id)
-        G = lambda module: module.recv(self,event)
-        map(G, self.to_list)
+        if isinstance(event,Event):
+            self.log_info(event.type_id)
+            G = lambda module: module.recv(self,event)
+            map(G, self.to_list)
 
     def recv(self,module,event):
         """
