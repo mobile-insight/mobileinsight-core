@@ -117,21 +117,23 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             self.__callback_emm(xml_msg)
             self.__callback_esm(xml_msg)
 
-
-            # e = Event(timeit.default_timer(),self.__class__.__name__,"")
-            # self.send(e)
-            # self.send(xml_msg)
             self.send(msg)
+
         if msg.type_id == "LTE_NAS_EMM_State":
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_emm_state(raw_msg)
+
+            self.send(msg)
+
         if msg.type_id == "LTE_NAS_ESM_State":
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_esm_state(raw_msg)
+
+            self.send(msg)
 
     def __callback_emm_state(self,msg):
         """
@@ -171,7 +173,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext=msg.data["UL GBR ext"]
         self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=msg.data["DL MBR ext"]
 
-        self.log_info(self.__esm_status[self.__cur_eps_id].dump())
+        self.log_info("__callback_esm_state"+self.__esm_status[self.__cur_eps_id].dump())
 
         self.profile.update("LteNasProfile:"+self.__emm_status.profile_id()+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
                     {'qci':self.__esm_status[self.__cur_eps_id].qos.qci,
@@ -293,7 +295,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                 if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_downl_ext'):    
                     self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
-                self.log_info("EPS_Id="+str(self.__cur_eps_id)+self.__esm_status[self.__cur_eps_id].dump())
+                self.log_info("__callback_esm EPS_Id="+str(self.__cur_eps_id)+self.__esm_status[self.__cur_eps_id].dump())
 
                 # profile update for esm qos
                 self.profile.update("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
@@ -321,7 +323,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
     def get_qos(self):
         # return self.__esm_status.qos
         if self.__cur_eps_id in self.__esm_status:
-            self.log_info("Yuanjie: "+self.__esm_status[self.__cur_eps_id].dump())
+            self.log_info("get_qos "+self.__esm_status[self.__cur_eps_id].dump())
             return self.__esm_status[self.__cur_eps_id].qos
         else:
             #Check if QoS profile exists in data base
