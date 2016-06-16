@@ -173,17 +173,17 @@ class LteNasAnalyzer(ProtocolAnalyzer):
 
         self.log_info(self.__esm_status[self.__cur_eps_id].dump())
 
-        # self.profile.update("LteNasProfile:"+self.__emm_status.profile_id()+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
-        #             {'qci':self.__esm_status[self.__cur_eps_id].qos.qci,
-        #              'max_bitrate_ulink':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink,
-        #              'max_bitrate_dlink':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink,
-        #              'guaranteed_bitrate_ulink':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink,
-        #              'guaranteed_bitrate_dlink':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink,
-        #              'max_bitrate_ulink_ext':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink_ext,
-        #              'max_bitrate_dlink_ext':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink_ext,
-        #              'guaranteed_bitrate_ulink_ext':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext,
-        #              'guaranteed_bitrate_dlink_ext':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext,
-        #              })
+        self.profile.update("LteNasProfile:"+self.__emm_status.profile_id()+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
+                    {'qci':self.__esm_status[self.__cur_eps_id].qos.qci,
+                     'max_bitrate_ulink':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink,
+                     'max_bitrate_dlink':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink,
+                     'guaranteed_bitrate_ulink':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink,
+                     'guaranteed_bitrate_dlink':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink,
+                     'max_bitrate_ulink_ext':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink_ext,
+                     'max_bitrate_dlink_ext':self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink_ext,
+                     'guaranteed_bitrate_ulink_ext':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext,
+                     'guaranteed_bitrate_dlink_ext':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext,
+                     })
 
     def __callback_emm(self,msg):
         """
@@ -326,6 +326,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         if self.__cur_eps_id in self.__esm_status:
             return self.__esm_status[self.__cur_eps_id].qos
         else:
+            #Check if QoS profile exists in data base
             return None
 
     def get_profiled_qos(self):
