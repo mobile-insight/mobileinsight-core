@@ -208,6 +208,10 @@ class Analyzer(Element):
 
         if module==self.source:
             #Apply the event to all source callbacks
-            map(G,self.source_callback)
+            # map(G,self.source_callback)
+            for f in self.source_callback:
+                f(event)
         else:
-            map(G,self.from_list[module])
+            # map(G,self.from_list[module])
+            for f in self.from_list[module]:
+                f(event)
