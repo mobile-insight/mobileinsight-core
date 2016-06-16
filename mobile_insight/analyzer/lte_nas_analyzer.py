@@ -323,7 +323,6 @@ class LteNasAnalyzer(ProtocolAnalyzer):
     def get_qos(self):
         # return self.__esm_status.qos
         if self.__cur_eps_id in self.__esm_status:
-            self.log_info("get_qos "+self.__esm_status[self.__cur_eps_id].dump())
             return self.__esm_status[self.__cur_eps_id].qos
         else:
             #Check if QoS profile exists in data base
