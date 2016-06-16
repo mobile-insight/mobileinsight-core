@@ -20,8 +20,6 @@ import sys
 import timeit
 
 
-from time import sleep
-
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
@@ -137,7 +135,8 @@ class AndroidDevDiagMonitor(Monitor):
     # TMP_FIFO_FILE = "/sdcard/diag_revealer_fifo"
     TMP_FIFO_FILE = os.path.join(get_cache_dir(), "diag_revealer_fifo") 
     # BLOCK_SIZE = 128
-    BLOCK_SIZE = 1024
+    # BLOCK_SIZE = 1024
+    BLOCK_SIZE = 8192
 
     def __init__(self):
         """
@@ -341,7 +340,6 @@ class AndroidDevDiagMonitor(Monitor):
             chproc = ChronicleProcessor()
             while True:
                 try:
-                    # sleep(0.1)
                     s = os.read(fifo, self.BLOCK_SIZE)
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
