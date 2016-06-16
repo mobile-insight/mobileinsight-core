@@ -83,10 +83,9 @@ class Element(object):
         """
         # A lambda function: input as a callback, output as passing event to this callback
         if isinstance(event,Event):
-            # G = lambda module: module.recv(self,event)
-            # map(G, self.to_list)
-            for module in self.to_list:
-                module.recv(self,event)
+            # self.log_info(event.type_id)
+            G = lambda module: module.recv(self,event)
+            map(G, self.to_list)
 
     def recv(self,module,event):
         """
