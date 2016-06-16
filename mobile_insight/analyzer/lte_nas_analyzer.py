@@ -363,8 +363,8 @@ class EmmStatus:
         else:
             return (str(self.guti.mcc)
                 + '-' + str(self.guti.mnc)
-                + '-' + str(int(self.guti.mme_group_id,0))
-                + '-' + str(int(self.guti.mme_code,0)))
+                # + '-' + str(int(self.guti.mme_group_id,0))
+                # + '-' + str(int(self.guti.mme_code,0)))
 
     def dump(self):
         """
