@@ -340,7 +340,9 @@ class AndroidDevDiagMonitor(Monitor):
             chproc = ChronicleProcessor()
             while True:
                 try:
+                    self.log_info("Before os.read(fifo, self.BLOCK_SIZE)")
                     s = os.read(fifo, self.BLOCK_SIZE)
+                    self.log_info("After os.read(fifo, self.BLOCK_SIZE)")
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
                         s = None
