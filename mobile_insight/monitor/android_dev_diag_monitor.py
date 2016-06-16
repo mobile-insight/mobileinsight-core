@@ -134,7 +134,7 @@ class AndroidDevDiagMonitor(Monitor):
     DIAG_CFG_DIR = get_cache_dir()
     # TMP_FIFO_FILE = "/sdcard/diag_revealer_fifo"
     TMP_FIFO_FILE = os.path.join(get_cache_dir(), "diag_revealer_fifo") 
-    BLOCK_SIZE = 64
+    BLOCK_SIZE = 32
     # BLOCK_SIZE = 128
     # BLOCK_SIZE = 1024
     # BLOCK_SIZE = 8192
@@ -341,9 +341,9 @@ class AndroidDevDiagMonitor(Monitor):
             chproc = ChronicleProcessor()
             while True:
                 try:
-                    self.log_info("Before os.read(fifo, self.BLOCK_SIZE)")
+                    # self.log_info("Before os.read(fifo, self.BLOCK_SIZE)")
                     s = os.read(fifo, self.BLOCK_SIZE)
-                    self.log_info("After os.read(fifo, self.BLOCK_SIZE)")
+                    # self.log_info("After os.read(fifo, self.BLOCK_SIZE)")
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
                         # self.log_info("err.errno="+str(err.errno))
@@ -352,9 +352,9 @@ class AndroidDevDiagMonitor(Monitor):
                         raise err # something else has happened -- better reraise
 
                 while s:   # preprocess metadata
-                    self.log_info("Before chproc.process(s)")
+                    # self.log_info("Before chproc.process(s)")
                     ret_msg_type, ret_ts, ret_payload, ret_filename, remain = chproc.process(s)
-                    self.log_info("After chproc.process(s)")
+                    # self.log_info("After chproc.process(s)")
                     if ret_msg_type == ChronicleProcessor.TYPE_LOG:
                         if ret_ts:
                             self._last_diag_revealer_ts = ret_ts
