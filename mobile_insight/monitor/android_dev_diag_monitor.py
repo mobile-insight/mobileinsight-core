@@ -134,9 +134,10 @@ class AndroidDevDiagMonitor(Monitor):
     DIAG_CFG_DIR = get_cache_dir()
     # TMP_FIFO_FILE = "/sdcard/diag_revealer_fifo"
     TMP_FIFO_FILE = os.path.join(get_cache_dir(), "diag_revealer_fifo") 
+    BLOCK_SIZE = 64
     # BLOCK_SIZE = 128
     # BLOCK_SIZE = 1024
-    BLOCK_SIZE = 8192
+    # BLOCK_SIZE = 8192
 
     def __init__(self):
         """
@@ -345,7 +346,7 @@ class AndroidDevDiagMonitor(Monitor):
                     self.log_info("After os.read(fifo, self.BLOCK_SIZE)")
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
-                        self.log_info("err.errno="+str(err.errno))
+                        # self.log_info("err.errno="+str(err.errno))
                         s = None
                     else:
                         raise err # something else has happened -- better reraise
