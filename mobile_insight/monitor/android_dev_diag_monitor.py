@@ -345,12 +345,15 @@ class AndroidDevDiagMonitor(Monitor):
                     self.log_info("After os.read(fifo, self.BLOCK_SIZE)")
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
+                        self.log_info("err.errno="+str(err.errno))
                         s = None
                     else:
                         raise err # something else has happened -- better reraise
 
                 while s:   # preprocess metadata
+                    self.log_info("Before chproc.process(s)")
                     ret_msg_type, ret_ts, ret_payload, ret_filename, remain = chproc.process(s)
+                    self.log_info("After chproc.process(s)")
                     if ret_msg_type == ChronicleProcessor.TYPE_LOG:
                         if ret_ts:
                             self._last_diag_revealer_ts = ret_ts
