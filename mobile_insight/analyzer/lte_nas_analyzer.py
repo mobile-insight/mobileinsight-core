@@ -357,6 +357,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             res.guaranteed_bitrate_ulink_ext=int(tmp['guaranteed_bitrate_ulink_ext'])
             res.guaranteed_bitrate_dlink_ext=int(tmp['guaranteed_bitrate_dlink_ext'])
             res.residual_ber=float(tmp['residual_ber'])
+            self.log_info(res.dump_delivery())
             return res
         else:
             return None
