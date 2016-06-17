@@ -338,25 +338,25 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             if not tmp:
                 return None
             res = EsmQos()
-            self.qci=int(tmp['qci'])
-            self.delay_class=int(tmp['delay_class'])
-            self.reliability_class=int(tmp['reliability_class'])
-            self.precedence_class=int(tmp['precedence_class'])
-            self.peak_tput=int(tmp['peak_tput'])
-            self.mean_tput=tmp['mean_tput']
-            self.traffic_class=int(tmp['traffic_class'])
-            self.delivery_order=int(tmp['delivery_order'])
-            self.transfer_delay=int(tmp['transfer_delay'])
-            self.traffic_handling_priority=int(tmp['traffic_handling_priority'])
-            self.max_bitrate_ulink=int(tmp['max_bitrate_ulink'])
-            self.max_bitrate_dlink=int(tmp['max_bitrate_dlink'])
-            self.guaranteed_bitrate_ulink=int(tmp['guaranteed_bitrate_ulink'])
-            self.guaranteed_bitrate_dlink=int(tmp['guaranteed_bitrate_dlink'])
-            self.max_bitrate_ulink_ext=int(tmp['max_bitrate_ulink_ext'])
-            self.max_bitrate_dlink_ext=int(tmp['max_bitrate_dlink_ext'])
-            self.guaranteed_bitrate_ulink_ext=int(tmp['guaranteed_bitrate_ulink_ext'])
-            self.guaranteed_bitrate_dlink_ext=int(tmp['guaranteed_bitrate_dlink_ext'])
-            self.residual_ber=float(tmp['residual_ber'])
+            res.qci=int(tmp['qci'])
+            res.delay_class=int(tmp['delay_class'])
+            res.reliability_class=int(tmp['reliability_class'])
+            res.precedence_class=int(tmp['precedence_class'])
+            res.peak_tput=int(tmp['peak_tput'])
+            res.mean_tput=tmp['mean_tput']
+            res.traffic_class=int(tmp['traffic_class'])
+            res.delivery_order=int(tmp['delivery_order'])
+            res.transfer_delay=int(tmp['transfer_delay'])
+            res.traffic_handling_priority=int(tmp['traffic_handling_priority'])
+            res.max_bitrate_ulink=int(tmp['max_bitrate_ulink'])
+            res.max_bitrate_dlink=int(tmp['max_bitrate_dlink'])
+            res.guaranteed_bitrate_ulink=int(tmp['guaranteed_bitrate_ulink'])
+            res.guaranteed_bitrate_dlink=int(tmp['guaranteed_bitrate_dlink'])
+            res.max_bitrate_ulink_ext=int(tmp['max_bitrate_ulink_ext'])
+            res.max_bitrate_dlink_ext=int(tmp['max_bitrate_dlink_ext'])
+            res.guaranteed_bitrate_ulink_ext=int(tmp['guaranteed_bitrate_ulink_ext'])
+            res.guaranteed_bitrate_dlink_ext=int(tmp['guaranteed_bitrate_dlink_ext'])
+            res.residual_ber=float(tmp['residual_ber'])
             return res
         else:
             return None
@@ -493,8 +493,6 @@ class EsmQos:
         :returns: a string that encodes all the data rate, or None if not ready 
         :rtype: string
         """
-        self.log_info("self.delivery_order="+str(self.delivery_order)
-            +" self.traffic_class="+str(self.traffic_class))
 
         if self.delivery_order:
             order = delivery_order[self.delivery_order]
