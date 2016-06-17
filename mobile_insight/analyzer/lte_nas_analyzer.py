@@ -493,6 +493,9 @@ class EsmQos:
         :returns: a string that encodes all the data rate, or None if not ready 
         :rtype: string
         """
+        self.log_info("self.delivery_order="+str(self.delivery_order)
+            +" self.traffic_class="+str(self.traffic_class))
+
         if self.delivery_order:
             order = delivery_order[self.delivery_order]
         else:
