@@ -343,7 +343,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             self.reliability_class=int(tmp['reliability_class'])
             self.precedence_class=int(tmp['precedence_class'])
             self.peak_tput=int(tmp['peak_tput'])
-            self.mean_tput=int(tmp['mean_tput'])
+            self.mean_tput=tmp['mean_tput']
             self.traffic_class=int(tmp['traffic_class'])
             self.delivery_order=int(tmp['delivery_order'])
             self.transfer_delay=int(tmp['transfer_delay'])
