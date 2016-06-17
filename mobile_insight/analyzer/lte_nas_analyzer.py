@@ -333,10 +333,10 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         Get QoS from the profile (if any)
         """
         if plmn:
-            tmp = self.profile.query("LteNasProfile:"+xstr(plmn)+".eps.qos:default")
+            res = self.profile.query("LteNasProfile:"+xstr(plmn)+".eps.qos:default")
             #     tmp = self.profile.query("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type])
-            print tmp
-            return tmp
+            self.log_info("plmn="+plmn)
+            return res
         else:
             return None
 
