@@ -333,9 +333,29 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         Get QoS from the profile (if any)
         """
         if plmn:
-            res = self.profile.query("LteNasProfile:"+xstr(plmn)+".eps.qos:default")
+            tmp = self.profile.query("LteNasProfile:"+xstr(plmn)+".eps.qos:default")
             #     tmp = self.profile.query("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type])
-            self.log_info("plmn="+plmn)
+            self.log_info(tmp)
+            res = EsmQos()
+            self.qci=tmp['qci']
+            self.delay_class=tmp['delay_class']
+            self.reliability_class=tmp['reliability_class']
+            self.precedence_class=tmp['precedence_class']
+            self.peak_tput=tmp['peak_tput']
+            self.mean_tput=tmp['mean_tput']
+            self.traffic_class=tmp['traffic_class']
+            self.delivery_order=tmp['delivery_order']
+            self.transfer_delay=tmp['transfer_delay']
+            self.traffic_handling_priority=tmp['traffic_handling_priority']
+            self.max_bitrate_ulink=tmp['max_bitrate_ulink']
+            self.max_bitrate_dlink=tmp['max_bitrate_dlink']
+            self.guaranteed_bitrate_ulink=tmp['guaranteed_bitrate_ulink']
+            self.guaranteed_bitrate_dlink=tmp['guaranteed_bitrate_dlink']
+            self.max_bitrate_ulink_ext=tmp['max_bitrate_ulink_ext']
+            self.max_bitrate_dlink_ext=tmp['max_bitrate_dlink_ext']
+            self.guaranteed_bitrate_ulink_ext=tmp['guaranteed_bitrate_ulink_ext']
+            self.guaranteed_bitrate_dlink_ext=tmp['guaranteed_bitrate_dlink_ext']
+            self.residual_ber=tmp['residual_ber']
             return res
         else:
             return None
