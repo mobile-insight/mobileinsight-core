@@ -328,15 +328,23 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             #Check if QoS profile exists in data base
             return None
 
-    def get_profiled_qos(self):
+    def get_profiled_qos(self,plmn):
         """
         Get QoS from the profile (if any)
         """
-        if self.__cur_eps_id:
-            tmp = self.profile.query("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type])
+        if plmn:
+            tmp = self.profile.query("LteNasProfile:"+xstr(plmn)+".eps.qos:default")
+            #     tmp = self.profile.query("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type])
             print tmp
+            return tmp
         else:
-            return None    
+            return None
+
+        # if self.__cur_eps_id:
+        #     tmp = self.profile.query("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type])
+        #     print tmp
+        # else:
+        #     return None    
 
 class EmmStatus:
     """
