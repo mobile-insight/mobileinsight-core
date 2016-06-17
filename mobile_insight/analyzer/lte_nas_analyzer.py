@@ -335,7 +335,6 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         if plmn:
             tmp = self.profile.query("LteNasProfile:"+xstr(plmn)+".eps.qos:default")
             #     tmp = self.profile.query("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type])
-            self.log_info(tmp)
             res = EsmQos()
             self.qci=tmp['qci']
             self.delay_class=tmp['delay_class']
