@@ -337,26 +337,28 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             #     tmp = self.profile.query("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type])
             if not tmp:
                 return None
+            f_qos_int = lambda x: int(x) if x else None
+            f_qos_float = lambda x: float(x) if x else None
             res = EsmQos()
-            res.qci=int(tmp['qci'])
-            res.delay_class=int(tmp['delay_class'])
-            res.reliability_class=int(tmp['reliability_class'])
-            res.precedence_class=int(tmp['precedence_class'])
-            res.peak_tput=int(tmp['peak_tput'])
+            res.qci=f_qos_int(tmp['qci'])
+            res.delay_class=f_qos_int(tmp['delay_class'])
+            res.reliability_class=f_qos_int(tmp['reliability_class'])
+            res.precedence_class=f_qos_int(tmp['precedence_class'])
+            res.peak_tput=f_qos_int(tmp['peak_tput'])
             res.mean_tput=tmp['mean_tput']
-            res.traffic_class=int(tmp['traffic_class'])
-            res.delivery_order=int(tmp['delivery_order'])
-            res.transfer_delay=int(tmp['transfer_delay'])
-            res.traffic_handling_priority=int(tmp['traffic_handling_priority'])
-            res.max_bitrate_ulink=int(tmp['max_bitrate_ulink'])
-            res.max_bitrate_dlink=int(tmp['max_bitrate_dlink'])
-            res.guaranteed_bitrate_ulink=int(tmp['guaranteed_bitrate_ulink'])
-            res.guaranteed_bitrate_dlink=int(tmp['guaranteed_bitrate_dlink'])
-            res.max_bitrate_ulink_ext=int(tmp['max_bitrate_ulink_ext'])
-            res.max_bitrate_dlink_ext=int(tmp['max_bitrate_dlink_ext'])
-            res.guaranteed_bitrate_ulink_ext=int(tmp['guaranteed_bitrate_ulink_ext'])
-            res.guaranteed_bitrate_dlink_ext=int(tmp['guaranteed_bitrate_dlink_ext'])
-            res.residual_ber=float(tmp['residual_ber'])
+            res.traffic_class=f_qos_int(tmp['traffic_class'])
+            res.delivery_order=f_qos_int(tmp['delivery_order'])
+            res.transfer_delay=f_qos_int(tmp['transfer_delay'])
+            res.traffic_handling_priority=f_qos_int(tmp['traffic_handling_priority'])
+            res.max_bitrate_ulink=f_qos_int(tmp['max_bitrate_ulink'])
+            res.max_bitrate_dlink=f_qos_int(tmp['max_bitrate_dlink'])
+            res.guaranteed_bitrate_ulink=f_qos_int(tmp['guaranteed_bitrate_ulink'])
+            res.guaranteed_bitrate_dlink=f_qos_int(tmp['guaranteed_bitrate_dlink'])
+            res.max_bitrate_ulink_ext=f_qos_int(tmp['max_bitrate_ulink_ext'])
+            res.max_bitrate_dlink_ext=f_qos_int(tmp['max_bitrate_dlink_ext'])
+            res.guaranteed_bitrate_ulink_ext=f_qos_int(tmp['guaranteed_bitrate_ulink_ext'])
+            res.guaranteed_bitrate_dlink_ext=f_qos_int(tmp['guaranteed_bitrate_dlink_ext'])
+            res.residual_ber=f_qos_float(tmp['residual_ber'])
             return res
         else:
             return None
