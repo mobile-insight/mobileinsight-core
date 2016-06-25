@@ -227,10 +227,10 @@ class Profile(object):
                 DB_PATH = os.path.join(sdcard_path,"mobile_insight/dbs")
                 activity = autoclass('org.renpy.android.PythonActivity')
                 if activity.mActivity:
-                    self.__db = activity.mActivity.openOrCreateDatabase(os.path.join(DB_PATH,root.name,'.db'),0,None)
+                    self.__db = activity.mActivity.openOrCreateDatabase(os.path.join(DB_PATH,root.name+'.db'),0,None)
                 else:
                     service = autoclass('org.renpy.android.PythonService')
-                    self.__db = service.mService.openOrCreateDatabase(os.path.join(DB_PATH,root.name,'.db'),0,None)
+                    self.__db = service.mService.openOrCreateDatabase(os.path.join(DB_PATH,root.name+'.db'),0,None)
             else:
                 self.__conn = sqlite3.connect(root.name+'.db')
                 self.__db = self.__conn.cursor()
