@@ -337,8 +337,8 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             #     tmp = self.profile.query("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type])
             if not tmp:
                 return None
-            f_qos_int = lambda x: int(x) if x else None
-            f_qos_float = lambda x: float(x) if x else None
+            f_qos_int = lambda x: int(x) if x and x!="unknown" else None
+            f_qos_float = lambda x: float(x) if x and x!="unknown" else None
             res = EsmQos()
             res.qci=f_qos_int(tmp['qci'])
             res.delay_class=f_qos_int(tmp['delay_class'])
