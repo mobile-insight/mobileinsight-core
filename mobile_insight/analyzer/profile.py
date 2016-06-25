@@ -15,6 +15,7 @@ except Exception, e:
     is_android=False
 
 import ast
+import os
 
 
 
@@ -216,13 +217,20 @@ class Profile(object):
             #setup internal database
             root = self.__profile_hierarchy.get_root()
             if is_android:
-                DB_PATH = "/sdcard/mobile_insight/dbs/"
+                Environment = autoclass("android.os.Environment")
+                state = Environment.getExternalStorageState()
+                if not Environment.MEDIA_MOUNTED==state:
+                    self.__db = None
+                    return
+
+                sdcard_path = Environment.getExternalStorageDirectory().toString()
+                DB_PATH = os.path.join(sdcard_path,"mobile_insight/dbs")
                 activity = autoclass('org.renpy.android.PythonActivity')
                 if activity.mActivity:
-                    self.__db = activity.mActivity.openOrCreateDatabase(DB_PATH+root.name+'.db',0,None)
+                    self.__db = activity.mActivity.openOrCreateDatabase(os.path.join(DB_PATH,root.name,'.db'),0,None)
                 else:
                     service = autoclass('org.renpy.android.PythonService')
-                    self.__db = service.mService.openOrCreateDatabase(DB_PATH+root.name+'.db',0,None)
+                    self.__db = service.mService.openOrCreateDatabase(os.path.join(DB_PATH,root.name,'.db'),0,None)
             else:
                 self.__conn = sqlite3.connect(root.name+'.db')
                 self.__db = self.__conn.cursor()
