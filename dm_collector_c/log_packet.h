@@ -2196,6 +2196,23 @@ const ValueName ValueNameYesOrNo [] = {
     {1, "Yes"},
 };
 
+const ValueName ValueNameModulation [] = {
+    {0, "BPSK"},
+    {1, "QPSK"},
+    {2, "16-QAM"},
+    {3, "64-QAM"},
+};
+
+const ValueName ValueNameExistsOrNone [] = {
+    {0, "None"},
+    {1, "Exists"},
+};
+
+const ValueName ValueNameOnOrOff [] = {
+    {0, "Off"},
+    {1, "On"},
+};
+
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
