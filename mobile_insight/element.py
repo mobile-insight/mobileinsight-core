@@ -8,6 +8,14 @@ Author: Yuanjie Li
 
 __all__ = ["Event", "Element"]
 
+# Detect if Android is used (for logging format)
+is_android=False
+try:
+    from jnius import autoclass #For Android
+    is_android=True
+except Exception, e:
+    is_android=False
+
 import logging
 import time
 import datetime as dt
@@ -116,28 +124,62 @@ class Element(object):
 
 
     def log_info(self, msg):
-        Element.logger.info(
-            "\033[32m\033[1m[INFO]\033[0m\033[0m\033[1m ["
-            + self.__class__.__name__+']\033[0m: '+msg
-            )
+
+        if is_android:
+            Element.logger.info(
+                "[b][color=ff0000][INFO][/color] ["
+                + self.__class__.__name__+'][/b]: '+msg
+                )
+        else:
+            Element.logger.info(
+                "\033[32m\033[1m[INFO]\033[0m\033[0m\033[1m ["
+                + self.__class__.__name__+']\033[0m: '+msg
+                )
+
 
     def log_debug(self, msg):
     
-        Element.logger.debug(
-            "\033[33m\033[1m[DEBUG]\033[0m\033[0m\033[1m ["
-            + self.__class__.__name__+']\033[0m: '+msg)
+        if is_android:
+            Element.logger.debug(
+                "[b][color=ff0000][DEBUG][/color] ["
+                + self.__class__.__name__+'][/b]: '+msg
+                )
+        else:
+            Element.logger.debug(
+                "\033[33m\033[1m[DEBUG]\033[0m\033[0m\033[1m ["
+                + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_warning(self, msg):
-        Element.logger.warning(
-            "\033[1;34m\033[1m[WARNING]\033[0m\033[0m\033[1m ["
-            + self.__class__.__name__+']\033[0m: '+msg)
+
+        if is_android:
+            Element.logger.warning(
+                "[b][color=ff0000][WARNING][/color] ["
+                + self.__class__.__name__+'][/b]: '+msg
+                )
+        else:
+            Element.logger.warning(
+                "\033[1;34m\033[1m[WARNING]\033[0m\033[0m\033[1m ["
+                + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_error(self, msg):
-        Element.logger.error(
-            "\033[31m\033[1m[ERROR]\033[0m\033[0m\033[1m ["
-            + self.__class__.__name__+']\033[0m: '+msg)
+
+        if is_android:
+            Element.logger.error(
+                "[b][color=ff0000][ERROR][/color] ["
+                + self.__class__.__name__+'][/b]: '+msg
+                )
+        else:
+            Element.logger.error(
+                "\033[31m\033[1m[ERROR]\033[0m\033[0m\033[1m ["
+                + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_critical(self, msg):
-        Element.logger.critical(
-            "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m ["
-            + self.__class__.__name__+']\033[0m: '+msg)
+        if is_android:
+            Element.logger.critical(
+                "[b][color=ff0000][CRITICAL][/color] ["
+                + self.__class__.__name__+'][/b]: '+msg
+                )
+        else:
+            Element.logger.critical(
+                "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m ["
+                + self.__class__.__name__+']\033[0m: '+msg)
