@@ -135,7 +135,8 @@ class AndroidDevDiagMonitor(Monitor):
     # TMP_FIFO_FILE = "/sdcard/diag_revealer_fifo"
     TMP_FIFO_FILE = os.path.join(get_cache_dir(), "diag_revealer_fifo") 
     # Yuanjie: the smaller the lower latency, but maybe higher CPU
-    BLOCK_SIZE = 8  
+    # BLOCK_SIZE = 8  
+    BLOCK_SIZE = 1
 
     def __init__(self):
         """
