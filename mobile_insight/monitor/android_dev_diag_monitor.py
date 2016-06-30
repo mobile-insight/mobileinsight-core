@@ -329,7 +329,7 @@ class AndroidDevDiagMonitor(Monitor):
         """
 
         #Stop running loggers
-        self._stop_collection()
+        # self._stop_collection()
 
         generate_diag_cfg = True
         if not self._type_names:
