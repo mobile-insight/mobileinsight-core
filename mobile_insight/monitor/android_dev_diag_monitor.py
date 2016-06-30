@@ -313,7 +313,7 @@ class AndroidDevDiagMonitor(Monitor):
         while True:
             time.sleep(5)
             proc = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            if not proce.stdout.read():
+            if not proc.stdout.read():
                 # diag_revealer is not alive
                 self.log_warning("diag_revealer is terminated. Restart diag_revealer ...")
                 self._start_diag_revealer()
