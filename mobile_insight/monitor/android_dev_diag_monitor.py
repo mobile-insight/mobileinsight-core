@@ -160,7 +160,7 @@ class AndroidDevDiagMonitor(Monitor):
             "libwireshark_path": "/system/lib"}
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
-        self.__check_security_policy()
+        # self.__check_security_policy()
 
     def available_log_types(self):
         """
