@@ -160,8 +160,6 @@ class AndroidDevDiagMonitor(Monitor):
             "libwireshark_path": "/system/lib"}
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
-        # self.__check_security_policy()
-
     def available_log_types(self):
         """
         Return available log types
@@ -169,22 +167,6 @@ class AndroidDevDiagMonitor(Monitor):
         :returns: a list of supported message types
         """
         return self.__class__.SUPPORTED_TYPES
-
-
-    def __check_security_policy(self):
-        """
-        Update SELinux policy.
-        For Nexus 6/6P, the SELinux policy may forbids the log collection.
-        """
-        self._run_shell_cmd("setenforce 0")
-        self._run_shell_cmd("supolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
-        self._run_shell_cmd("supolicy --live \"allow init init process execmem\"")
-        self._run_shell_cmd("supolicy --live \"allow init properties_device file execute\"")
-        self._run_shell_cmd("supolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
-        self._run_shell_cmd("supolicy --live \"allow system_server diag_device chr_file {read write}\"")
-        self._run_shell_cmd("supolicy --live \"allow untrusted_app app_data_file file {rename}\"")
-        self._run_shell_cmd("supolicy --live \"allow init app_data_file fifo_file {write, open}\"")
-        self._run_shell_cmd("supolicy --live \"allow init app_data_file fifo_file {write, open}\"")
 
     def _run_shell_cmd(self, cmd, wait = False):
         p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
