@@ -732,13 +732,15 @@ const Fmt LteMacConfigurationSubpkt_eMBMSConfig [] = {
 // MAC UL Transport Block
 // Jie
 const ValueName BSREvent [] = {
-    {2, "High Data Arrival"},
+    {0, "None"},
     {1, "Periodic"},
+    {2, "High Data Arrival"},
 };
 
 const ValueName BSRTrig [] = {
+    {0, "No BSR"},
+    {3, "Pad L-BSR"},
     {4, "S-BSR"},
-    {3, "Pad L-BSR"}
 };
 
 const Fmt LteMacULTransportBlockFmt [] = {

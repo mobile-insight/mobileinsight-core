@@ -107,7 +107,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
             (void) _map_result_field_to_name(result, "Carrier Index",
                     ValueNameCarrierIndex,
                     ARRAY_SIZE(ValueNameCarrierIndex, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
             int num_record = _search_result_int(result, "Number of Hypothesis");
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
@@ -133,7 +133,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                         "Aggregation Level",
                         ValueNameAggregationLevel,
                         ARRAY_SIZE(ValueNameAggregationLevel, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Candidate", iCandidate);
                 Py_DECREF(old_object);
@@ -144,7 +144,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                         "Search Space Type",
                         ValueNameSearchSpaceType,
                         ARRAY_SIZE(ValueNameSearchSpaceType, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "DCI Format", iDCIFormat);
                 Py_DECREF(old_object);
@@ -152,7 +152,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                         "DCI Format",
                         ValueNameDCIFormat,
                         ARRAY_SIZE(ValueNameDCIFormat, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Decode Status", iDecodeStatus);
                 Py_DECREF(old_object);
@@ -160,7 +160,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                         "Decode Status",
                         ValueNameRNTIType,
                         ARRAY_SIZE(ValueNameRNTIType, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Start CCE", iStartCCE);
                 Py_DECREF(old_object);
@@ -174,12 +174,12 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                         "Tail Match",
                         ValueNameMatchOrNot,
                         ARRAY_SIZE(ValueNameMatchOrNot, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 (void) _map_result_field_to_name(result_record_item,
                         "Prune Status",
                         ValueNamePruneStatus,
                         ARRAY_SIZE(ValueNamePruneStatus, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 unsigned int iNonDecode = _search_result_uint(result_record_item,
                         "Norm Energy Metric");
                 float fNEM = iNonDecode / 65535.0;
@@ -240,13 +240,13 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
             (void) _map_result_field_to_name(result, "Frame Structure",
                     ValueNameFrameStructure,
                     ARRAY_SIZE(ValueNameFrameStructure, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
             old_object = _replace_result_int(result, "Num eNB Antennas", iNumAntennas);
             Py_DECREF(old_object);
             (void) _map_result_field_to_name(result, "Num eNB Antennas",
                     ValueNameNumeNBAntennas,
                     ARRAY_SIZE(ValueNameNumeNBAntennas, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
             old_object = _replace_result_int(result, "Demback Mode Select", iDMS);
             Py_DECREF(old_object);
             old_object = _replace_result_int(result, "Carrier Index", iCarrierIndex);
@@ -254,7 +254,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
             (void) _map_result_field_to_name(result, "Carrier Index",
                     ValueNameCarrierIndex,
                     ARRAY_SIZE(ValueNameCarrierIndex, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
 
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
@@ -274,7 +274,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                         "CIF Configured",
                         ValueNameTrueOrFalse,
                         ARRAY_SIZE(ValueNameTrueOrFalse, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Two bits CSI Configured", iTBCC);
                 Py_DECREF(old_object);
@@ -282,7 +282,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                         "Two bits CSI Configured",
                         ValueNameTrueOrFalse,
                         ARRAY_SIZE(ValueNameTrueOrFalse, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Aperiodic SRS Configured", iASC);
                 Py_DECREF(old_object);
@@ -290,7 +290,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                         "Aperiodic SRS Configured",
                         ValueNameTrueOrFalse,
                         ARRAY_SIZE(ValueNameTrueOrFalse, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Number of Hypothesis", num_hypothesis);
                 Py_DECREF(old_object);
@@ -329,7 +329,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                             "Aggregation Level",
                             ValueNameAggregationLevel,
                             ARRAY_SIZE(ValueNameAggregationLevel, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_hypothesis_item,
                             "Candidate", iCandidate);
                     Py_DECREF(old_object);
@@ -340,7 +340,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                             "Search Space Type",
                             ValueNameSearchSpaceType,
                             ARRAY_SIZE(ValueNameSearchSpaceType, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_hypothesis_item,
                             "DCI Format", iDCIFormat);
                     Py_DECREF(old_object);
@@ -348,7 +348,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                             "DCI Format",
                             ValueNameDCIFormat,
                             ARRAY_SIZE(ValueNameDCIFormat, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_hypothesis_item,
                             "DCI Format", iDecodeStatus);
                     Py_DECREF(old_object);
@@ -356,7 +356,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                             "DCI Format",
                             ValueNameRNTIType,
                             ARRAY_SIZE(ValueNameRNTIType, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_hypothesis_item,
                             "Payload Size", iPayloadSize);
                     Py_DECREF(old_object);
@@ -367,7 +367,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                             "Tail Match",
                             ValueNameMatchOrNot,
                             ARRAY_SIZE(ValueNameMatchOrNot, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_hypothesis_item,
                             "Non Zero Symbol Mismatch Count", iNZSMC);
                     Py_DECREF(old_object);
@@ -387,7 +387,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                             "Prune Status",
                             ValueNamePruneStatus,
                             ARRAY_SIZE(ValueNamePruneStatus, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_hypothesis_item,
                             "Energy Metric", iEnergyMetric);
                     Py_DECREF(old_object);
@@ -437,7 +437,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
         }
 
     default:
-        printf("Unknown LTE LL1 PDCCH Decoding Result version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE LL1 PDCCH Decoding Result version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

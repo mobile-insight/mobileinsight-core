@@ -74,7 +74,7 @@ _decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
                                         ch_num);
 
     if (ch_name == NULL) {  // not found
-        printf("Unknown WCDMA Signalling Messages Channel Type: 0x%x\n", ch_num);
+        printf("(MI)Unknown WCDMA Signalling Messages Channel Type: 0x%x\n", ch_num);
         return 0;
     }
 
@@ -96,17 +96,17 @@ _decode_umts_nas_gmm_state(const char *b, int offset, size_t length,
                                         "GMM State",
                                         UmtsNasGmmState_GmmState,
                                         ARRAY_SIZE(UmtsNasGmmState_GmmState, ValueName),
-                                        "Unknown");
+                                        "(MI)Unknown");
     (void) _map_result_field_to_name(result,
                                         "GMM Substate",
                                         UmtsNasGmmState_GmmSubstate,
                                         ARRAY_SIZE(UmtsNasGmmState_GmmSubstate, ValueName),
-                                        "Unknown");
+                                        "(MI)Unknown");
     (void) _map_result_field_to_name(result,
                                         "GMM Update Status",
                                         UmtsNasGmmState_GmmUpdateStatus,
                                         ARRAY_SIZE(UmtsNasGmmState_GmmUpdateStatus, ValueName),
-                                        "Unknown");
+                                        "(MI)Unknown");
     return 0;
 }
 
@@ -117,17 +117,17 @@ _decode_umts_nas_mm_state(const char *b, int offset, size_t length,
                                         "MM State",
                                         UmtsNasMmState_MmState,
                                         ARRAY_SIZE(UmtsNasMmState_MmState, ValueName),
-                                        "Unknown");
+                                        "(MI)Unknown");
     (void) _map_result_field_to_name(result,
                                         "MM Substate",
                                         UmtsNasMmState_MmSubstate,
                                         ARRAY_SIZE(UmtsNasMmState_MmSubstate, ValueName),
-                                        "Unknown");
+                                        "(MI)Unknown");
     (void) _map_result_field_to_name(result,
                                         "MM Update Status",
                                         UmtsNasMmState_MmUpdateStatus,
                                         ARRAY_SIZE(UmtsNasMmState_MmUpdateStatus, ValueName),
-                                        "Unknown");
+                                        "(MI)Unknown");
     return 0;
 }
 
@@ -139,7 +139,7 @@ _decode_umts_nas_ota(const char *b, int offset, size_t length,
                                     "Message Direction",
                                     UmtsNasOtaFmt_MessageDirection,
                                     ARRAY_SIZE(UmtsNasOtaFmt_MessageDirection, ValueName),
-                                    "Unknown");
+                                    "(MI)Unknown");
 
     int pdu_length = _search_result_int(result, "Message Length");
     PyObject *t = Py_BuildValue("(ss#s)",
@@ -178,7 +178,7 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
                                     b, offset, length, result);
         break;
     default:
-        printf("Unknown LTE RRC OTA packet version: %d\n", pkt_ver);
+        printf("(MI)Unknown LTE RRC OTA packet version: %d\n", pkt_ver);
         return 0;
     }
 
@@ -192,7 +192,7 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
                                         pdu_number);
 
     if (type_name == NULL) {    // not found
-        printf("Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
+        printf("(MI)Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
         return 0;
     } else {
         std::string type_str = "raw_msg/";
@@ -223,7 +223,7 @@ _decode_lte_rrc_mib(const char *b, int offset, size_t length,
                                     b, offset, length, result);
         break;
     default:
-        printf("Unknown LTE RRC MIB version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE RRC MIB version: 0x%x\n", pkt_ver);
         return 0;
     }
 
@@ -248,7 +248,7 @@ _decode_lte_rrc_serv_cell_info(const char *b, int offset, size_t length,
                                     b, offset, length, result);
         break;
     default:
-        printf("Unknown LTE RRC Serving Cell Info packet version: %d\n", pkt_ver);
+        printf("(MI)Unknown LTE RRC Serving Cell Info packet version: %d\n", pkt_ver);
         return 0;
     }
 
@@ -268,7 +268,7 @@ _decode_lte_nas_plain(const char *b, int offset, size_t length,
                                     b, offset, length, result);
         break;
     default:
-        printf("Unknown LTE NAS version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE NAS version: 0x%x\n", pkt_ver);
         return 0;
     }
 
@@ -299,7 +299,7 @@ _decode_lte_nas_esm_state(const char *b, int offset, size_t length,
         }
 
         default:
-            printf("Unknown LTE NAS ESM State version: 0x%x\n", pkt_ver);
+            printf("(MI)Unknown LTE NAS ESM State version: 0x%x\n", pkt_ver);
             return 0;
 
     }
@@ -324,7 +324,7 @@ _decode_lte_nas_emm_state(const char *b, int offset, size_t length,
                                         "EMM State",
                                         LteNasEmmState_v2_EmmState,
                                         ARRAY_SIZE(LteNasEmmState_v2_EmmState, ValueName),
-                                        "Unknown");
+                                        "(MI)Unknown");
             // Replace the value of "EMM Substate"
             const ValueName *table = NULL;
             int table_size = 0;
@@ -353,7 +353,7 @@ _decode_lte_nas_emm_state(const char *b, int offset, size_t length,
                 break;
             }
             if (table != NULL && table_size > 0) {
-                (void) _map_result_field_to_name(result, "EMM Substate", table, table_size, "Unknown");
+                (void) _map_result_field_to_name(result, "EMM Substate", table, table_size, "(MI)Unknown");
             } else {
                 PyObject *pystr = Py_BuildValue("s", "Undefined");
                 PyObject *old_object = _replace_result(result, "EMM Substate", pystr);
@@ -364,7 +364,7 @@ _decode_lte_nas_emm_state(const char *b, int offset, size_t length,
         } // End of v2
 
     default:
-        printf("Unknown LTE NAS EMM State version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE NAS EMM State version: 0x%x\n", pkt_ver);
         return 0;
     }
 
@@ -426,7 +426,7 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "MCS 0",
                                             LteLl1PdschDemapperConfig_v23_Modulation,
                                             ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Modulation, ValueName),
-                                            "Unknown");
+                                            "(MI)Unknown");
 
             PyObject *pyfloat = Py_BuildValue("f", ratio);
             old_object = _replace_result(result, "Traffic to Pilot Ratio", pyfloat);
@@ -439,7 +439,7 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "MCS 1",
                                             LteLl1PdschDemapperConfig_v23_Modulation,
                                             ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Modulation, ValueName),
-                                            "Unknown");
+                                            "(MI)Unknown");
 
             // carrier index
             old_object = _replace_result_int(result, "Carrier Index", carrier_index);
@@ -448,12 +448,12 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "Carrier Index",
                                             LteLl1PdschDemapperConfig_v23_Carrier_Index,
                                             ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Carrier_Index, ValueName),
-                                            "Unknown");
+                                            "(MI)Unknown");
             break;
         }
 
     default:
-        printf("Unknown LTE LL1 PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE LL1 PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
         return 0;
     }
 
@@ -560,7 +560,7 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             return offset - start;
         }
     default:
-        printf("Unknown LTE ML1 CMLIFMR version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE ML1 CMLIFMR version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -589,7 +589,7 @@ _decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
                                                     ARRAY_SIZE(LteMl1Subpkt_SubpktType, ValueName),
                                                     subpkt_id);
                 if (type_name == NULL) {    // not found
-                    printf("Unknown LTE ML1 Subpacket ID: 0x%x\n", subpkt_id);
+                    printf("(MI)Unknown LTE ML1 Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
                     if (strcmp(type_name, "Serving_Cell_Measurement_Result") == 0) {
@@ -616,7 +616,7 @@ _decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        // printf("Unknown LTE ML1 Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        // printf("(MI)Unknown LTE ML1 Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
             }
@@ -628,7 +628,7 @@ _decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
             return offset - start;
         }
     default:
-        printf("Unknown LTE ML1 packet version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE ML1 packet version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -796,12 +796,12 @@ _decode_lte_pdcp_dl_srb_integrity_data_pdu(const char *b, int offset, size_t len
     case 1:
         break;
     default:
-        printf("Unknown LTE PDCP DL SRB Integrity Data PDU version: %d\n", pkt_ver);
+        printf("(MI)Unknown LTE PDCP DL SRB Integrity Data PDU version: %d\n", pkt_ver);
         return 0;
     }
     int pktCount = _search_result_int(result, "Num SubPkt");
     if (pktCount != 1) {
-        printf ("Unsupported LTE PDCP DL SRB Integrity Data PDU Num SubPkt: %d\n", pktCount);
+        printf ("(MI)Unknown LTE PDCP DL SRB Integrity Data PDU Num SubPkt: %d\n", pktCount);
         return 0;
     }
 
@@ -827,12 +827,12 @@ _decode_lte_pdcp_ul_srb_integrity_data_pdu(const char *b, int offset, size_t len
     case 1:
         break;
     default:
-        printf("Unknown LTE PDCP UL SRB Integrity Data PDU version: %d\n", pkt_ver);
+        printf("(MI)Unknown LTE PDCP UL SRB Integrity Data PDU version: %d\n", pkt_ver);
         return 0;
     }
     int pktCount = _search_result_int(result, "Num SubPkt");
     if (pktCount != 1) {
-        printf ("Unsupported LTE PDCP UL SRB Integrity Data PDU Num SubPkt: %d\n", pktCount);
+        printf ("(MI)Unknown LTE PDCP UL SRB Integrity Data PDU Num SubPkt: %d\n", pktCount);
         return 0;
     }
 
@@ -878,10 +878,10 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 "SubPacket ID",
                                 LteMacConfigurationSubpkt_SubpktType,
                                 ARRAY_SIZE(LteMacConfigurationSubpkt_SubpktType, ValueName),
-                                "Unsupported");
+                                "(MI)Unknown");
 
                 if (type_name == NULL) {    // not found
-                    printf("Unknown LTE MAC Configuration Subpacket ID: 0x%x\n", subpkt_id);
+                    printf("(MI)Unknown LTE MAC Configuration Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
                     switch (subpkt_id) {
@@ -954,7 +954,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        printf("Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
                 offset += subpkt_size - (offset - start_subpkt);
@@ -967,7 +967,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
             return offset - start;
         }
     default:
-        printf("Unknown LTE MAC Configuration packet version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE MAC Configuration packet version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -1003,10 +1003,10 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                 "SubPacket ID",
                                 LteMacConfigurationSubpkt_SubpktType,
                                 ARRAY_SIZE(LteMacConfigurationSubpkt_SubpktType, ValueName),
-                                "Unsupported");
+                                "(MI)Unknown");
 
                 if (type_name == NULL) {    // not found
-                    printf("Unknown LTE MAC Uplink Transport Block Subpacket ID: 0x%x\n", subpkt_id);
+                    printf("(MI)Unknown LTE MAC Uplink Transport Block Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
                     PyObject *result_sample_list = PyList_New(0);
@@ -1022,13 +1022,13 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                     "BSR event",
                                     BSREvent,
                                     ARRAY_SIZE(BSREvent, ValueName),
-                                    "Unsupported");
+                                    "(MI)Unknown");
                             (void) _map_result_field_to_name(
                                     result_subpkt_sample,
                                     "BSR trig",
                                     BSRTrig,
                                     ARRAY_SIZE(BSRTrig, ValueName),
-                                    "Unsupported");
+                                    "(MI)Unknown");
                             offset += (_search_result_int(result_subpkt_sample,
                                         "HDR LEN") + 2);
 
@@ -1050,7 +1050,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                         Py_DECREF(result_sample_list);
                         Py_DECREF(t);
                     } else {
-                        printf("Unknown LTE MAC Uplink Transport Block Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        printf("(MI)Unknown LTE MAC Uplink Transport Block Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                     PyObject *t = Py_BuildValue("(sOs)",
                             "Ignored", result_subpkt, "dict");
@@ -1067,7 +1067,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
             return offset - start;
         }
     default:
-        printf("Unknown LTE MAC Uplink Transport Block packet version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE MAC Uplink Transport Block packet version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -1103,10 +1103,10 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                 "SubPacket ID",
                                 LteMacConfigurationSubpkt_SubpktType,
                                 ARRAY_SIZE(LteMacConfigurationSubpkt_SubpktType, ValueName),
-                                "Unsupported");
+                                "(MI)Unknown");
 
                 if (type_name == NULL) {    // not found
-                    printf("Unknown LTE MAC Downlink Transport Block Subpacket ID: 0x%x\n", subpkt_id);
+                    printf("(MI)Unknown LTE MAC Downlink Transport Block Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
                     PyObject *result_sample_list = PyList_New(0);
@@ -1122,7 +1122,7 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                     "RNTI Type",
                                     RNTIType,
                                     ARRAY_SIZE(RNTIType, ValueName),
-                                    "Unsupported");
+                                    "(MI)Unknown");
                             offset += _search_result_int(result_subpkt_sample, "HDR LEN");
 
                             PyObject *t = Py_BuildValue("(sOs)",
@@ -1144,7 +1144,7 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                         Py_DECREF(result_sample_list);
                         Py_DECREF(t);
                     } else {
-                        printf("Unknown LTE MAC Downlink Transport Block Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        printf("(MI)Unknown LTE MAC Downlink Transport Block Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                     PyObject *t = Py_BuildValue("(sOs)",
                             "Ignored", result_subpkt, "dict");
@@ -1161,7 +1161,7 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
             return offset - start;
         }
     default:
-        printf("Unknown LTE MAC Downlink Transport Block packet version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE MAC Downlink Transport Block packet version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -1197,10 +1197,10 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                                 "SubPacket ID",
                                 LteMacConfigurationSubpkt_SubpktType,
                                 ARRAY_SIZE(LteMacConfigurationSubpkt_SubpktType, ValueName),
-                                "Unsupported");
+                                "(MI)Unknown Subpkt Type");
 
                 if (type_name == NULL) {    // not found
-                    printf("Unknown LTE MAC Uplink Buffer Status Internel Subpacket ID: 0x%x\n", subpkt_id);
+                    printf("(MI)Unknown LTE MAC Uplink Buffer Status Internel Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
                     switch (subpkt_ver) {
@@ -1238,7 +1238,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        printf("Unknown LTE MAC Uplink Buffer Status Internel Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        printf("(MI)Unknown LTE MAC Uplink Buffer Status Internel Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
 
 
@@ -1252,7 +1252,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
             return offset - start;
         }
     default:
-        printf("Unknown LTE MAC Uplink Buffer Status Internal packet version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE MAC Uplink Buffer Status Internal packet version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -1287,10 +1287,10 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, size_t length,
                                 "SubPacket ID",
                                 LteMacConfigurationSubpkt_SubpktType,
                                 ARRAY_SIZE(LteMacConfigurationSubpkt_SubpktType, ValueName),
-                                "Unsupported");
+                                "(MI)Unknown Subpkt Type");
 
                 if (type_name == NULL) {    // not found
-                    printf("Unknown LTE MAC Uplink Tx Statistics Subpacket ID: 0x%x\n", subpkt_id);
+                    printf("(MI)Unknown LTE MAC Uplink Tx Statistics Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
                     switch (subpkt_ver) {
@@ -1317,7 +1317,7 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, size_t length,
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        printf("Unknown LTE MAC Uplink Tx Statistics Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        printf("(MI)Unknown LTE MAC Uplink Tx Statistics Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
 
 
@@ -1331,7 +1331,7 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, size_t length,
             return offset - start;
         }
     default:
-        printf("Unknown LTE MAC Uplink Tx Statistics packet version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE MAC Uplink Tx Statistics packet version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -1371,7 +1371,7 @@ static int _decode_lte_rlc_ul_config_log_packet_subpkt (const char *b,
                             LteRlcUlConfigLogPacket_Subpkt_Reason,
                             ARRAY_SIZE(LteRlcUlConfigLogPacket_Subpkt_Reason,
                                 ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     int maxSizeRbs = _search_result_int(result_subpkt,
                             "Max Size RBs");
 
@@ -1425,7 +1425,7 @@ static int _decode_lte_rlc_ul_config_log_packet_subpkt (const char *b,
                                 LteRlcUlConfigLogPacket_Subpkt_AddedModifiedRB_Action,
                                 ARRAY_SIZE(LteRlcUlConfigLogPacket_Subpkt_AddedModifiedRB_Action,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *t2 = Py_BuildValue("(sOs)", "Ignored",
                                 result_AddedModifiedRB_item, "dict");
                         PyList_Append(result_AddedModifiedRB, t2);
@@ -1459,13 +1459,13 @@ static int _decode_lte_rlc_ul_config_log_packet_subpkt (const char *b,
                                 LteRlcUlConfigLogPacket_Subpkt_ActiveRB_RBMode,
                                 ARRAY_SIZE(LteRlcUlConfigLogPacket_Subpkt_ActiveRB_RBMode,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         (void) _map_result_field_to_name(result_ActiveRB_item,
                                 "RB Type",
                                 LteRlcUlConfigLogPacket_Subpkt_ActiveRB_RBType,
                                 ARRAY_SIZE(LteRlcUlConfigLogPacket_Subpkt_ActiveRB_RBType,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *pystr = Py_BuildValue("s", "RLCUL CFG");
                         PyObject *old_object = _replace_result(result_ActiveRB_item,
                                 "RLCUL CFG", pystr);
@@ -1488,7 +1488,7 @@ static int _decode_lte_rlc_ul_config_log_packet_subpkt (const char *b,
                     Py_DECREF(t3);
                     Py_DECREF(result_ActiveRB);
                 } else {
-                    printf("Unknown LTE RLC UL Config Log Packet subpkt id"
+                    printf("(MI)Unknown LTE RLC UL Config Log Packet subpkt id"
                             "and version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -1506,7 +1506,7 @@ static int _decode_lte_rlc_ul_config_log_packet_subpkt (const char *b,
             return offset - start;
         }
     default:
-        printf("Unknown LTE RLC UL Config Log Packet version: 0x%x\n",
+        printf("(MI)Unknown LTE RLC UL Config Log Packet version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -1547,7 +1547,7 @@ static int _decode_lte_rlc_dl_config_log_packet_subpkt (const char *b,
                             LteRlcDlConfigLogPacket_Subpkt_Reason,
                             ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_Reason,
                                 ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     int maxSizeRbs = _search_result_int(result_subpkt,
                             "Max Size RBs");
 
@@ -1601,7 +1601,7 @@ static int _decode_lte_rlc_dl_config_log_packet_subpkt (const char *b,
                                 LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Action,
                                 ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Action,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *t2 = Py_BuildValue("(sOs)", "Ignored",
                                 result_AddedModifiedRB_item, "dict");
                         PyList_Append(result_AddedModifiedRB, t2);
@@ -1635,13 +1635,13 @@ static int _decode_lte_rlc_dl_config_log_packet_subpkt (const char *b,
                                 LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBMode,
                                 ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBMode,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         (void) _map_result_field_to_name(result_ActiveRB_item,
                                 "RB Type",
                                 LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBType,
                                 ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBType,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *pystr = Py_BuildValue("s", "RLCDL CFG");
                         PyObject *old_object = _replace_result(result_ActiveRB_item,
                                 "RLCDL CFG", pystr);
@@ -1664,7 +1664,7 @@ static int _decode_lte_rlc_dl_config_log_packet_subpkt (const char *b,
                     Py_DECREF(t3);
                     Py_DECREF(result_ActiveRB);
                 } else {
-                    printf("Unknown LTE RLC DL Config Log Packet subpkt id"
+                    printf("(MI)Unknown LTE RLC DL Config Log Packet subpkt id"
                             "and version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -1682,7 +1682,7 @@ static int _decode_lte_rlc_dl_config_log_packet_subpkt (const char *b,
             return offset - start;
         }
     default:
-        printf("Unknown LTE RLC DL Config Log Packet version: 0x%x\n",
+        printf("(MI)Unknown LTE RLC DL Config Log Packet version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -1721,7 +1721,7 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                     (void) _map_result_field_to_name(result_subpkt, "RB Mode",
                             LteRlcUlAmAllPdu_Subpkt_RBMode,
                             ARRAY_SIZE(LteRlcUlAmAllPdu_Subpkt_RBMode,
-                            ValueName), "Unknown");
+                            ValueName), "(MI)Unknown");
                     int enabled_pdu = _search_result_int(result_subpkt,
                             "Enabled PDU Log Packets");
                     // Need to check bit by bit
@@ -1987,7 +1987,7 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                     (void) _map_result_field_to_name(result_subpkt, "RB Mode",
                             LteRlcDlAmAllPdu_Subpkt_RBMode,
                             ARRAY_SIZE(LteRlcDlAmAllPdu_Subpkt_RBMode,
-                            ValueName), "Unknown");
+                            ValueName), "(MI)Unknown");
                     int enabled_pdu = _search_result_int(result_subpkt,
                             "Enabled PDU Log Packets");
                     // Need to check bit by bit
@@ -2273,7 +2273,7 @@ static int _decode_lte_mac_rach_trigger_subpkt (const char *b, int offset,
                             LteMacRachTrigger_RachReasonSubpkt_RachReason,
                             ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpkt_RachReason,
                                 ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     std::string strRachContention = "Contention Based RACH procedure";
                     PyObject *pystr = Py_BuildValue("s", strRachContention.c_str());
                     PyObject *old_object = _replace_result(result_subpkt,
@@ -2281,7 +2281,7 @@ static int _decode_lte_mac_rach_trigger_subpkt (const char *b, int offset,
                     Py_DECREF(old_object);
                     Py_DECREF(pystr);
                 } else {
-                    printf("Unknown LTE MAC RACH Trigger subpkt id and "
+                    printf("(MI)Unknown LTE MAC RACH Trigger subpkt id and "
                             "version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -2299,7 +2299,7 @@ static int _decode_lte_mac_rach_trigger_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE MAC RACH Trigger Packet Version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE MAC RACH Trigger Packet Version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -2345,7 +2345,7 @@ static int _decode_lte_mac_rach_attempt_subpkt (const char *b, int offset,
                             LteMacRachAttempt_Subpkt_ContentionProcedure,
                             ARRAY_SIZE(LteMacRachAttempt_Subpkt_ContentionProcedure,
                                 ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     if ((iRachMsgBMasks) & (1 << 2)) {
                         // Msg1
                         PyObject *result_subpkt_msg1 = PyList_New(0);
@@ -2413,7 +2413,7 @@ static int _decode_lte_mac_rach_attempt_subpkt (const char *b, int offset,
                     }
 
                 } else {
-                    printf("Unknown LTE MAC RACH Attempt Subpkt id and Version"
+                    printf("(MI)Unknown LTE MAC RACH Attempt Subpkt id and Version"
                             ": 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored",
@@ -2431,7 +2431,7 @@ static int _decode_lte_mac_rach_attempt_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE MAC RACH Attempt Packet Version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE MAC RACH Attempt Packet Version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -2469,19 +2469,19 @@ static int _decode_lte_pdcp_dl_config_subpkt (const char *b, int offset,
                     (void) _map_result_field_to_name(result_subpkt, "Reason",
                             LtePdcpDlConfig_Subpkt_Reason,
                             ARRAY_SIZE(LtePdcpDlConfig_Subpkt_Reason, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     (void) _map_result_field_to_name(result_subpkt, "SRB Cipher Algorithm",
                             LtePdcpDlConfig_Subpkt_CipherAlgo,
                             ARRAY_SIZE(LtePdcpDlConfig_Subpkt_CipherAlgo, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     (void) _map_result_field_to_name(result_subpkt, "DRB Cipher Algorithm",
                             LtePdcpDlConfig_Subpkt_CipherAlgo,
                             ARRAY_SIZE(LtePdcpDlConfig_Subpkt_CipherAlgo, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     (void) _map_result_field_to_name(result_subpkt, "SRB Integrity Algorithm",
                             LtePdcpDlConfig_Subpkt_IntegAlgo,
                             ARRAY_SIZE(LtePdcpDlConfig_Subpkt_IntegAlgo, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     int iArraySize = _search_result_int(result_subpkt,
                             "Array size");
 
@@ -2533,7 +2533,7 @@ static int _decode_lte_pdcp_dl_config_subpkt (const char *b, int offset,
                                 LtePdcpDlConfig_Subpkt_AddedModifiedRB_Action,
                                 ARRAY_SIZE(LtePdcpDlConfig_Subpkt_AddedModifiedRB_Action,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *t2 = Py_BuildValue("(sOs)", "Ignored",
                                 result_AddedModifiedRB_item, "dict");
                         PyList_Append(result_AddedModifiedRB, t2);
@@ -2566,13 +2566,13 @@ static int _decode_lte_pdcp_dl_config_subpkt (const char *b, int offset,
                                 LtePdcpDlConfig_Subpkt_ActiveRB_RBmode,
                                 ARRAY_SIZE(LtePdcpDlConfig_Subpkt_ActiveRB_RBmode,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         (void) _map_result_field_to_name(result_ActiveRB_item,
                                 "RB type",
                                 LtePdcpDlConfig_Subpkt_ActiveRB_RBtype,
                                 ARRAY_SIZE(LtePdcpDlConfig_Subpkt_ActiveRB_RBtype,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         (void) _map_result_field_to_name(result_ActiveRB_item,
                                 "Status report",
                                 LtePdcpDlConfig_Subpkt_ActiveRB_StatusReport,
@@ -2597,7 +2597,7 @@ static int _decode_lte_pdcp_dl_config_subpkt (const char *b, int offset,
                     Py_DECREF(t3);
                     Py_DECREF(result_ActiveRB);
                 } else {
-                    printf("Unknown LTE PDCP DL Config subpkt id and version:"
+                    printf("(MI)Unknown LTE PDCP DL Config subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -2615,7 +2615,7 @@ static int _decode_lte_pdcp_dl_config_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDCP DL Config Log Packet version: 0x%x\n",
+        printf("(MI)Unknown LTE PDCP DL Config Log Packet version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -2653,19 +2653,19 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
                     (void) _map_result_field_to_name(result_subpkt, "Reason",
                             LtePdcpUlConfig_Subpkt_Reason,
                             ARRAY_SIZE(LtePdcpUlConfig_Subpkt_Reason, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     (void) _map_result_field_to_name(result_subpkt, "SRB Cipher Algorithm",
                             LtePdcpUlConfig_Subpkt_CipherAlgo,
                             ARRAY_SIZE(LtePdcpUlConfig_Subpkt_CipherAlgo, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     (void) _map_result_field_to_name(result_subpkt, "DRB Cipher Algorithm",
                             LtePdcpUlConfig_Subpkt_CipherAlgo,
                             ARRAY_SIZE(LtePdcpUlConfig_Subpkt_CipherAlgo, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     (void) _map_result_field_to_name(result_subpkt, "SRB Integrity Algorithm",
                             LtePdcpUlConfig_Subpkt_IntegAlgo,
                             ARRAY_SIZE(LtePdcpUlConfig_Subpkt_IntegAlgo, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     int iArraySize = _search_result_int(result_subpkt,
                             "Array size");
 
@@ -2717,7 +2717,7 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
                                 LtePdcpUlConfig_Subpkt_AddedModifiedRB_Action,
                                 ARRAY_SIZE(LtePdcpUlConfig_Subpkt_AddedModifiedRB_Action,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *t2 = Py_BuildValue("(sOs)", "Ignored",
                                 result_AddedModifiedRB_item, "dict");
                         PyList_Append(result_AddedModifiedRB, t2);
@@ -2750,13 +2750,13 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
                                 LtePdcpUlConfig_Subpkt_ActiveRB_RBmode,
                                 ARRAY_SIZE(LtePdcpUlConfig_Subpkt_ActiveRB_RBmode,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         (void) _map_result_field_to_name(result_ActiveRB_item,
                                 "RB type",
                                 LtePdcpUlConfig_Subpkt_ActiveRB_RBtype,
                                 ARRAY_SIZE(LtePdcpUlConfig_Subpkt_ActiveRB_RBtype,
                                     ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         (void) _map_result_field_to_name(result_ActiveRB_item,
                                 "RoHC Enabled",
                                 LtePdcpUlConfig_Subpkt_ActiveRB_RoHCEnabled,
@@ -2775,7 +2775,7 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
                     Py_DECREF(t3);
                     Py_DECREF(result_ActiveRB);
                 } else {
-                    printf("Unknown LTE PDCP UL Config subpkt id and version:"
+                    printf("(MI)Unknown LTE PDCP UL Config subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -2793,7 +2793,7 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDCP UL Config Log Packet version: 0x%x\n",
+        printf("(MI)Unknown LTE PDCP UL Config Log Packet version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -2832,7 +2832,7 @@ static int _decode_lte_pdcp_ul_data_pdu_subpkt (const char *b, int offset,
                     (void) _map_result_field_to_name(result_subpkt, "Mode",
                             LtePdcpUlDataPdu_Subpkt_Mode,
                             ARRAY_SIZE(LtePdcpUlDataPdu_Subpkt_Mode, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
 
                     // PDU
                     // int start_PDU = offset;
@@ -2878,7 +2878,7 @@ static int _decode_lte_pdcp_ul_data_pdu_subpkt (const char *b, int offset,
                     Py_DECREF(t1);
                     Py_DECREF(result_PDU);
                 } else {
-                    printf("Unknown LTE PDCP UL Data PDU subpkt id and version:"
+                    printf("(MI)Unknown LTE PDCP UL Data PDU subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -2896,7 +2896,7 @@ static int _decode_lte_pdcp_ul_data_pdu_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDCP UL Data PDU version: 0x%x\n",
+        printf("(MI)Unknown LTE PDCP UL Data PDU version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -2945,7 +2945,7 @@ static int _decode_lte_pdcp_dl_stats_subpkt (const char *b, int offset,
                                 "Mode",
                                 LtePdcpDlStats_Subpkt_RB_Mode,
                                 ARRAY_SIZE(LtePdcpDlStats_Subpkt_RB_Mode, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
                                 result_RB_item, "dict");
                         PyList_Append(result_RB, t1);
@@ -2958,7 +2958,7 @@ static int _decode_lte_pdcp_dl_stats_subpkt (const char *b, int offset,
                     Py_DECREF(t1);
                     Py_DECREF(result_RB);
                 } else {
-                    printf("Unknown LTE PDCP DL Stats subpkt id and version:"
+                    printf("(MI)Unknown LTE PDCP DL Stats subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -2976,7 +2976,7 @@ static int _decode_lte_pdcp_dl_stats_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDCP DL Stats version: 0x%x\n",
+        printf("(MI)Unknown LTE PDCP DL Stats version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -3025,7 +3025,7 @@ static int _decode_lte_pdcp_ul_stats_subpkt (const char *b, int offset,
                                 "Mode",
                                 LtePdcpUlStats_Subpkt_RB_Mode,
                                 ARRAY_SIZE(LtePdcpUlStats_Subpkt_RB_Mode, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
                                 result_RB_item, "dict");
                         PyList_Append(result_RB, t1);
@@ -3056,7 +3056,7 @@ static int _decode_lte_pdcp_ul_stats_subpkt (const char *b, int offset,
                                 "Mode",
                                 LtePdcpUlStats_Subpkt_RB_Mode,
                                 ARRAY_SIZE(LtePdcpUlStats_Subpkt_RB_Mode, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
                                 result_RB_item, "dict");
                         PyList_Append(result_RB, t1);
@@ -3069,7 +3069,7 @@ static int _decode_lte_pdcp_ul_stats_subpkt (const char *b, int offset,
                     Py_DECREF(t1);
                     Py_DECREF(result_RB);
                 } else {
-                    printf("Unknown LTE PDCP UL Stats subpkt id and version:"
+                    printf("(MI)Unknown LTE PDCP UL Stats subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -3087,7 +3087,7 @@ static int _decode_lte_pdcp_ul_stats_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDCP UL Stats version: 0x%x\n",
+        printf("(MI)Unknown LTE PDCP UL Stats version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -3137,7 +3137,7 @@ static int _decode_lte_rlc_ul_stats_subpkt (const char *b, int offset,
                                 "Mode",
                                 LteRlcUlStats_Subpkt_RB_Mode,
                                 ARRAY_SIZE(LteRlcUlStats_Subpkt_RB_Mode, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
                                 result_RB_item, "dict");
                         PyList_Append(result_RB, t1);
@@ -3150,7 +3150,7 @@ static int _decode_lte_rlc_ul_stats_subpkt (const char *b, int offset,
                     Py_DECREF(t1);
                     Py_DECREF(result_RB);
                 } else {
-                    printf("Unknown LTE RLC UL Stats subpkt id and version:"
+                    printf("(MI)Unknown LTE RLC UL Stats subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -3168,7 +3168,7 @@ static int _decode_lte_rlc_ul_stats_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE RLC UL Stats version: 0x%x\n",
+        printf("(MI)Unknown LTE RLC UL Stats version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -3217,7 +3217,7 @@ static int _decode_lte_rlc_dl_stats_subpkt (const char *b, int offset,
                                 "Mode",
                                 LteRlcDlStats_Subpkt_RB_Mode,
                                 ARRAY_SIZE(LteRlcDlStats_Subpkt_RB_Mode, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
                                 result_RB_item, "dict");
                         PyList_Append(result_RB, t1);
@@ -3248,7 +3248,7 @@ static int _decode_lte_rlc_dl_stats_subpkt (const char *b, int offset,
                                 "Mode",
                                 LteRlcDlStats_Subpkt_RB_Mode,
                                 ARRAY_SIZE(LteRlcDlStats_Subpkt_RB_Mode, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
                                 result_RB_item, "dict");
                         PyList_Append(result_RB, t1);
@@ -3261,7 +3261,7 @@ static int _decode_lte_rlc_dl_stats_subpkt (const char *b, int offset,
                     Py_DECREF(t1);
                     Py_DECREF(result_RB);
                 } else {
-                    printf("Unknown LTE RLC DL Stats subpkt id and version:"
+                    printf("(MI)Unknown LTE RLC DL Stats subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -3279,7 +3279,7 @@ static int _decode_lte_rlc_dl_stats_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE RLC DL Stats version: 0x%x\n",
+        printf("(MI)Unknown LTE RLC DL Stats version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -3318,7 +3318,7 @@ static int _decode_lte_pdcp_dl_ctrl_pdu_subpkt (const char *b, int offset,
                     (void) _map_result_field_to_name(result_subpkt, "Mode",
                             LtePdcpDlCtrlPdu_Subpkt_Mode,
                             ARRAY_SIZE(LtePdcpDlCtrlPdu_Subpkt_Mode, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
 
                     // PDU
                     // int start_PDU = offset;
@@ -3371,7 +3371,7 @@ static int _decode_lte_pdcp_dl_ctrl_pdu_subpkt (const char *b, int offset,
                     Py_DECREF(t1);
                     Py_DECREF(result_PDU);
                 } else {
-                    printf("Unknown LTE PDCP DL Ctrl PDU subpkt id and version:"
+                    printf("(MI)Unknown LTE PDCP DL Ctrl PDU subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -3389,7 +3389,7 @@ static int _decode_lte_pdcp_dl_ctrl_pdu_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDCP DL Ctrl PDU version: 0x%x\n",
+        printf("(MI)Unknown LTE PDCP DL Ctrl PDU version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -3428,7 +3428,7 @@ static int _decode_lte_pdcp_ul_ctrl_pdu_subpkt (const char *b, int offset,
                     (void) _map_result_field_to_name(result_subpkt, "Mode",
                             LtePdcpUlCtrlPdu_Subpkt_Mode,
                             ARRAY_SIZE(LtePdcpUlCtrlPdu_Subpkt_Mode, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
 
                     // PDU
                     // int start_PDU = offset;
@@ -3481,7 +3481,7 @@ static int _decode_lte_pdcp_ul_ctrl_pdu_subpkt (const char *b, int offset,
                     Py_DECREF(t1);
                     Py_DECREF(result_PDU);
                 } else {
-                    printf("Unknown LTE PDCP UL Ctrl PDU subpkt id and version:"
+                    printf("(MI)Unknown LTE PDCP UL Ctrl PDU subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
                 PyObject *t = Py_BuildValue("(sOs)", "Ignored", result_subpkt,
@@ -3499,7 +3499,7 @@ static int _decode_lte_pdcp_ul_ctrl_pdu_subpkt (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDCP UL Ctrl PDU version: 0x%x\n",
+        printf("(MI)Unknown LTE PDCP UL Ctrl PDU version: 0x%x\n",
                 pkt_ver);
         return 0;
     }
@@ -3577,7 +3577,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                             LtePucchPowerControl_Record_v4_TPC,
                             ARRAY_SIZE(LtePucchPowerControl_Record_v4_TPC,
                                 ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                 }
                 old_object = _replace_result_int(result_record_item,
                         "N_CQI", iN_CQI);
@@ -3607,7 +3607,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PUCCH Power Control version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PUCCH Power Control version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -3664,7 +3664,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                         LtePuschPowerControl_Record_v5_TxType,
                         ARRAY_SIZE(LtePuschPowerControl_Record_v5_TxType,
                             ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
 
                 unsigned int iNonDecodeNRB = _search_result_uint(result_record_item,
                         "Num RBs");
@@ -3700,7 +3700,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                             LtePuschPowerControl_Record_v5_TPC,
                             ARRAY_SIZE(LtePuschPowerControl_Record_v5_TPC,
                                 ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                 }
                 old_object = _replace_result_int(result_record_item,
                         "PUSCH Actual Tx Power", iActualPower);
@@ -3764,7 +3764,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                         LtePuschPowerControl_Record_v5_TxType,
                         ARRAY_SIZE(LtePuschPowerControl_Record_v5_TxType,
                             ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
 
                 unsigned int iNonDecodeTBS = _search_result_uint(result_record_item,
                         "Transport Block Size");
@@ -3796,7 +3796,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                             LtePuschPowerControl_Record_v5_TPC,
                             ARRAY_SIZE(LtePuschPowerControl_Record_v5_TPC,
                                 ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                 }
                 old_object = _replace_result_int(result_record_item,
                         "PUSCH Actual Tx Power", iActualPower);
@@ -3816,7 +3816,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PUSCH Power Control version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PUSCH Power Control version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
@@ -3877,7 +3877,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
                         "PHICH Included",
                         LtePdcchPhichIndicationReport_Record_v5_Included,
                         ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v5_Included,
-                            ValueName), "Unknown");
+                            ValueName), "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "PHICH 1 Included", iPhich1Included);
                 Py_DECREF(old_object);
@@ -3885,7 +3885,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
                         "PHICH 1 Included",
                         LtePdcchPhichIndicationReport_Record_v5_Included,
                         ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v5_Included,
-                            ValueName), "Unknown");
+                            ValueName), "(MI)Unknown");
                 if (iPhichIncluded == 1) {
                     old_object = _replace_result_int(result_record_item,
                             "PHICH Timing SFN", iPhichSFN);
@@ -3900,7 +3900,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
                             "PHICH Value",
                             LtePdcchPhichIndicationReport_Record_v5_Value,
                             ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v5_Value,
-                                ValueName), "Unknown");
+                                ValueName), "(MI)Unknown");
                 }
                 if (iPhich1Included == 1) {
                     old_object = _replace_result_int(result_record_item,
@@ -3910,7 +3910,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
                             "PHICH 1 Value",
                             LtePdcchPhichIndicationReport_Record_v5_Value,
                             ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v5_Value,
-                                ValueName), "Unknown");
+                                ValueName), "(MI)Unknown");
                 }
 
                 PyObject *result_pdcch = PyList_New(0);
@@ -3936,7 +3936,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
                             "RNTI Type",
                             RNTIType,
                             ARRAY_SIZE(RNTIType, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_pdcch_item,
                             "Payload Size", iPayloadSize);
                     Py_DECREF(old_object);
@@ -3948,7 +3948,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
                             LtePdcchPhichIndicationReport_Record_v5_AggLv,
                             ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v5_AggLv,
                                 ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
 
                     int iNonDecodeP2_2 = _search_result_int(result_pdcch_item,
                             "Search Space");
@@ -3964,7 +3964,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
                             LtePdcchPhichIndicationReport_Record_v5_SS,
                             ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v5_SS,
                                 ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_pdcch_item,
                             "New DL Tx", iNewDLTx);
                     Py_DECREF(old_object);
@@ -3973,7 +3973,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
                             LtePdcchPhichIndicationReport_Record_v5_NewDLTx,
                             ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v5_NewDLTx,
                                 ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_pdcch_item,
                             "Num DL Trblks", iNumDLTrblks);
                     Py_DECREF(old_object);
@@ -4011,7 +4011,7 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDCCH-PHICH Indication Report version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PDCCH-PHICH Indication Report version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

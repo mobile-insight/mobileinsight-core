@@ -70,7 +70,7 @@ static int _decode_lte_ml1_system_scan_results_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDSCH Stat Indication version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PDSCH Stat Indication version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
