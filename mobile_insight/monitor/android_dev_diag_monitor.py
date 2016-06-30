@@ -273,24 +273,6 @@ class AndroidDevDiagMonitor(Monitor):
         """
         return self._last_diag_revealer_ts
 
-    def _stop_collection(self):
-        ANDROID_SHELL = "/system/bin/sh"
-        self.collecting = False
-
-        # Find diag_mdlog process
-        diag_procs = []
-        pids = [pid for pid in os.listdir("/proc") if pid.isdigit()]
-        for pid in pids:
-            try:
-                cmdline = open(os.path.join("/proc", pid, "cmdline"), "rb").read()
-                if cmdline.startswith("/system/bin/diag_revealer"):
-                    diag_procs.append(int(pid))
-            except IOError:     # proc has been terminated
-                continue
-
-        if len(diag_procs) > 0:
-            cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
-            self._run_shell_cmd(cmd2)
 
     def _start_diag_revealer(self):
         """
@@ -317,6 +299,25 @@ class AndroidDevDiagMonitor(Monitor):
                 # diag_revealer is not alive
                 self.log_warning("diag_revealer is terminated. Restart diag_revealer ...")
                 self._start_diag_revealer()
+
+    def _stop_collection(self):
+        ANDROID_SHELL = "/system/bin/sh"
+        self.collecting = False
+
+        # Find diag_mdlog process
+        diag_procs = []
+        pids = [pid for pid in os.listdir("/proc") if pid.isdigit()]
+        for pid in pids:
+            try:
+                cmdline = open(os.path.join("/proc", pid, "cmdline"), "rb").read()
+                if cmdline.startswith("/system/bin/diag_revealer"):
+                    diag_procs.append(int(pid))
+            except IOError:     # proc has been terminated
+                continue
+
+        if len(diag_procs) > 0:
+            cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
+            self._run_shell_cmd(cmd2)
 
 
 
