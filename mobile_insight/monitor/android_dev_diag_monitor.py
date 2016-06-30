@@ -260,6 +260,7 @@ class AndroidDevDiagMonitor(Monitor):
         """
         Initialize diag_revealer with correct parameters
         """
+        # TODO(likayo): need to protect aganist user input
         cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
         if self._input_dir:
             cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
@@ -330,15 +331,6 @@ class AndroidDevDiagMonitor(Monitor):
                 fd.close()
 
             self._mkfifo(self._fifo_path)
-
-            # TODO(likayo): need to protect aganist user input
-            # cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
-            # if self._input_dir:
-            #     cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
-            #     self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
-            #     self._run_shell_cmd("chmod -R 755 \"%s\"" % self._input_dir, wait=True)
-            # proc = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            # proc.stdin.write(cmd+'\n')
 
             # Launch diag_revealer, and protection daemon
             self._start_diag_revealer()
