@@ -81,7 +81,7 @@ class Element(object):
         self.to_list=[] #list of other module that call for this module
 
         #setup the logs
-        self.set_log("",logging.INFO)
+        self.set_log("")
 
     def send(self,event):
         """
@@ -141,7 +141,7 @@ class Element(object):
     
         if is_android:
             Element.logger.debug(
-                "[b][color=ffffff][DEBUG][/color] ["
+                "[b][color=00ffff][DEBUG][/color] ["
                 + self.__class__.__name__+'][/b]: '+msg
                 )
         else:
@@ -153,7 +153,7 @@ class Element(object):
 
         if is_android:
             Element.logger.warning(
-                "[b][color=00ffff][WARNING][/color] ["
+                "[b][color=ffff00][WARNING][/color] ["
                 + self.__class__.__name__+'][/b]: '+msg
                 )
         else:
