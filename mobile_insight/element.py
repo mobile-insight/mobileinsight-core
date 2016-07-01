@@ -127,7 +127,7 @@ class Element(object):
 
         if is_android:
             Element.logger.info(
-                "[b][color=ff0000][INFO][/color] ["
+                "[b][color=00ff00][INFO][/color] ["
                 + self.__class__.__name__+'][/b]: '+msg
                 )
         else:
@@ -141,7 +141,7 @@ class Element(object):
     
         if is_android:
             Element.logger.debug(
-                "[b][color=ff0000][DEBUG][/color] ["
+                "[b][color=ffffff][DEBUG][/color] ["
                 + self.__class__.__name__+'][/b]: '+msg
                 )
         else:
@@ -153,7 +153,7 @@ class Element(object):
 
         if is_android:
             Element.logger.warning(
-                "[b][color=ff0000][WARNING][/color] ["
+                "[b][color=00ffff][WARNING][/color] ["
                 + self.__class__.__name__+'][/b]: '+msg
                 )
         else:
