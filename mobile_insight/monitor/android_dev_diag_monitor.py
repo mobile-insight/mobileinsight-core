@@ -409,7 +409,7 @@ class AndroidDevDiagMonitor(Monitor):
 
         except (KeyboardInterrupt, RuntimeError), e:
             os.close(fifo)
-            proc.terminate()
+            # proc.terminate()
             self._stop_collection()
             packet = DMLogPacket([])
             event = Event(  timeit.default_timer(),
@@ -421,7 +421,7 @@ class AndroidDevDiagMonitor(Monitor):
             # sys.exit(e)
         except Exception, e:
             os.close(fifo)
-            proc.terminate()
+            # proc.terminate()
             self._stop_collection()
             packet = DMLogPacket([])
             event = Event(  timeit.default_timer(),
