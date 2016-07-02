@@ -438,7 +438,7 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
     }
 
     // Disable previous logs
-    for (int k = 0; k < 2; k++) {
+    for (int k = 0; k < 1; k++) {
         if (k == 0) {   // Disable normal log msgs
             buf = encode_log_config(DISABLE, empty);
         } else {        // Disable debug msgs
