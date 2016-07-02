@@ -735,12 +735,16 @@ const ValueName BSREvent [] = {
     {0, "None"},
     {1, "Periodic"},
     {2, "High Data Arrival"},
+    {3, "Robustness BSR"},
 };
 
 const ValueName BSRTrig [] = {
     {0, "No BSR"},
-    {3, "Pad L-BSR"},
-    {4, "S-BSR"},
+    {1, "Cancelled"},
+    {2, "L-BSR"},
+    {3, "S-BSR"},
+    {4, "Pad L-BSR"},
+    {5, "Pad S-BSR"},
 };
 
 const Fmt LteMacULTransportBlockFmt [] = {
