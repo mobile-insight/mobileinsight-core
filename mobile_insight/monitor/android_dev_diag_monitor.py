@@ -316,17 +316,21 @@ class AndroidDevDiagMonitor(Monitor):
 
         generate_diag_cfg = True
         if not self._type_names:
-            if os.path.exists(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg")):
-                generate_diag_cfg = False
-                # print "AndroidDevDiagMonitor: existing Diag.cfg file will be used."
-            else:
-                raise RuntimeError("Log type not specified. Please call enable_log() first.")
+            raise RuntimeError("Log type not specified. Please specify the log types with enable_log().")
+            # if os.path.exists(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg")):
+            #     generate_diag_cfg = False
+            #     # print "AndroidDevDiagMonitor: existing Diag.cfg file will be used."
+            # else:
+            #     raise RuntimeError("Log type not specified. Please call enable_log() first.")
 
         try:
             if generate_diag_cfg:
                 if not os.path.exists(self.DIAG_CFG_DIR):
                     os.makedirs(self.DIAG_CFG_DIR)
-                fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "w+b")
+
+                # fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "w+b")
+                # Overwrite Diag.cfg, not append it
+                fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "wb")
                 dm_collector_c.generate_diag_cfg(fd, self._type_names)
                 fd.close()
 
