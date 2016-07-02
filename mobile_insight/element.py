@@ -81,7 +81,7 @@ class Element(object):
         self.to_list=[] #list of other module that call for this module
 
         #setup the logs
-        self.set_log("",logging.INFO)
+        self.set_log("")
 
     def send(self,event):
         """
@@ -91,7 +91,7 @@ class Element(object):
         """
         # A lambda function: input as a callback, output as passing event to this callback
         if isinstance(event,Event):
-            # self.log_info(event.type_id)
+            self.log_debug(event.type_id)
             G = lambda module: module.recv(self,event)
             map(G, self.to_list)
 
@@ -127,7 +127,7 @@ class Element(object):
 
         if is_android:
             Element.logger.info(
-                "[b][color=ff0000][INFO][/color] ["
+                "[b][color=00ff00][INFO][/color] ["
                 + self.__class__.__name__+'][/b]: '+msg
                 )
         else:
@@ -141,7 +141,7 @@ class Element(object):
     
         if is_android:
             Element.logger.debug(
-                "[b][color=ff0000][DEBUG][/color] ["
+                "[b][color=00ffff][DEBUG][/color] ["
                 + self.__class__.__name__+'][/b]: '+msg
                 )
         else:
@@ -153,7 +153,7 @@ class Element(object):
 
         if is_android:
             Element.logger.warning(
-                "[b][color=ff0000][WARNING][/color] ["
+                "[b][color=ffff00][WARNING][/color] ["
                 + self.__class__.__name__+'][/b]: '+msg
                 )
         else:

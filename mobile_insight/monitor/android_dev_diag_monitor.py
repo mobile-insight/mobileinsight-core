@@ -14,10 +14,12 @@ import errno
 import os
 import re
 import subprocess
+import threading
 import struct
 import stat
 import sys
 import timeit
+import time
 
 
 from monitor import Monitor, Event
@@ -157,8 +159,6 @@ class AndroidDevDiagMonitor(Monitor):
             "libwireshark_path": "/system/lib"}
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
-        self.__check_security_policy()
-
     def available_log_types(self):
         """
         Return available log types
@@ -166,22 +166,6 @@ class AndroidDevDiagMonitor(Monitor):
         :returns: a list of supported message types
         """
         return self.__class__.SUPPORTED_TYPES
-
-
-    def __check_security_policy(self):
-        """
-        Update SELinux policy.
-        For Nexus 6/6P, the SELinux policy may forbids the log collection.
-        """
-        self._run_shell_cmd("setenforce 0")
-        self._run_shell_cmd("supolicy --live \"allow init diag_device chr_file {getattr write ioctl}\"")
-        self._run_shell_cmd("supolicy --live \"allow init init process execmem\"")
-        self._run_shell_cmd("supolicy --live \"allow init properties_device file execute\"")
-        self._run_shell_cmd("supolicy --live \"allow atfwd diag_device chr_file {read write open ioctl}\"")
-        self._run_shell_cmd("supolicy --live \"allow system_server diag_device chr_file {read write}\"")
-        self._run_shell_cmd("supolicy --live \"allow untrusted_app app_data_file file {rename}\"")
-        self._run_shell_cmd("supolicy --live \"allow init app_data_file fifo_file {write, open}\"")
-        self._run_shell_cmd("supolicy --live \"allow init app_data_file fifo_file {write, open}\"")
 
     def _run_shell_cmd(self, cmd, wait = False):
         p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -270,6 +254,34 @@ class AndroidDevDiagMonitor(Monitor):
         """
         return self._last_diag_revealer_ts
 
+
+    def _start_diag_revealer(self):
+        """
+        Initialize diag_revealer with correct parameters
+        """
+        # TODO(likayo): need to protect aganist user input
+        cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
+        if self._input_dir:
+            cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
+            self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
+            self._run_shell_cmd("chmod -R 755 \"%s\"" % self._input_dir, wait=True)
+        proc = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        proc.stdin.write(cmd+'\n')
+
+    def _protect_diag_revealer(self):
+        """
+        A daemon to monitor the liveness of diag_revealer, 
+        and restart if diag_revealer crashes
+        """
+        cmd = "ps | grep diag_revealer\n"
+        while True:
+            time.sleep(5)
+            proc = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            if not proc.stdout.read():
+                # diag_revealer is not alive
+                self.log_warning("diag_revealer is terminated. Restart diag_revealer ...")
+                self._start_diag_revealer()
+
     def _stop_collection(self):
         ANDROID_SHELL = "/system/bin/sh"
         self.collecting = False
@@ -289,6 +301,8 @@ class AndroidDevDiagMonitor(Monitor):
             cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
             self._run_shell_cmd(cmd2)
 
+
+
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
@@ -297,41 +311,35 @@ class AndroidDevDiagMonitor(Monitor):
         """
 
         #Stop running loggers
-        self._stop_collection()
+        # self._stop_collection()
 
         generate_diag_cfg = True
         if not self._type_names:
-            if os.path.exists(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg")):
-                generate_diag_cfg = False
-                # print "AndroidDevDiagMonitor: existing Diag.cfg file will be used."
-            else:
-                raise RuntimeError("Log type not specified. Please call enable_log() first.")
+            raise RuntimeError("Log type not specified. Please specify the log types with enable_log().")
+            # if os.path.exists(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg")):
+            #     generate_diag_cfg = False
+            #     # print "AndroidDevDiagMonitor: existing Diag.cfg file will be used."
+            # else:
+            #     raise RuntimeError("Log type not specified. Please call enable_log() first.")
 
         try:
             if generate_diag_cfg:
-                print "generate_diag_cfg"
                 if not os.path.exists(self.DIAG_CFG_DIR):
                     os.makedirs(self.DIAG_CFG_DIR)
-                fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "w+b")
+
+                # fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "w+b")
+                # Overwrite Diag.cfg, not append it
+                fd = open(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), "wb")
                 dm_collector_c.generate_diag_cfg(fd, self._type_names)
                 fd.close()
 
             self._mkfifo(self._fifo_path)
 
-            # TODO(likayo): need to protect aganist user input
-            # cmd = "su -c %s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
-            cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
-            if self._input_dir:
-                cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
-                self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
-                self._run_shell_cmd("chmod -R 755 \"%s\"" % self._input_dir, wait=True)
-            # proc = subprocess.Popen(cmd, shell=True, executable=ANDROID_SHELL)
-            proc = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            proc.stdin.write(cmd+'\n')
+            # Launch diag_revealer, and protection daemon
+            self._start_diag_revealer()
+            self.diag_revealer_daemon = threading.Thread(target=self._protect_diag_revealer)
+            self.diag_revealer_daemon.start()
 
-
-
-            # self._run_shell_cmd(cmd)
             # fifo = os.open(self._fifo_path, os.O_RDONLY | os.O_NONBLOCK)
             fifo = os.open(self._fifo_path, os.O_RDONLY)    #Blocking mode: save CPU
 
@@ -411,6 +419,8 @@ class AndroidDevDiagMonitor(Monitor):
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
         except Exception, e:
+            os.close(fifo)
+            proc.terminate()
             self._stop_collection()
             packet = DMLogPacket([])
             event = Event(  timeit.default_timer(),
