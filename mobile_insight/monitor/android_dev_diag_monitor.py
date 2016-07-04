@@ -264,10 +264,10 @@ class AndroidDevDiagMonitor(Monitor):
         cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
         if not os.path.exists(self._input_dir):
             cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
-            # self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
-            # self._run_shell_cmd("chmod -R 755 \"%s\"" % self._input_dir, wait=True)
-            os.mkdir(self._input_dir)
-            os.chmod(self._input_dir,755)
+            self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
+            self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
+            # os.mkdir(self._input_dir)
+            # os.chmod(self._input_dir,755)
         proc = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         proc.stdin.write(cmd+'\n')
 
