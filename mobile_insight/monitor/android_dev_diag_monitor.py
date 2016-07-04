@@ -170,13 +170,15 @@ class AndroidDevDiagMonitor(Monitor):
 
     def _run_shell_cmd(self, cmd, wait = False):
         p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        p.communicate(cmd+'\n')
+        res,err = p.communicate(cmd+'\n')
         # p.stdin.write(cmd+'\n')
         if wait:
             p.wait()
-            return p.returncode
+            # return p.returncode
+            return res
         else:
-            return None
+            # return None
+            return res
 
     def set_log_directory(self, directory):
         """
@@ -279,7 +281,10 @@ class AndroidDevDiagMonitor(Monitor):
         cmd = "ps | grep diag_revealer\n"
         while True:
             time.sleep(5)
-            proc = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            res = self._run_shell_cmd(cmd)
+            print "res=",res
+            
+            # proc = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             if not proc.stdout.read():
                 # diag_revealer is not alive
                 self.log_warning("diag_revealer is terminated. Restart diag_revealer ...")
