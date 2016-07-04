@@ -284,7 +284,6 @@ class AndroidDevDiagMonitor(Monitor):
         while True:
             time.sleep(5)
             res = self._run_shell_cmd(cmd)
-            print "res=",res
 
             # proc = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             # if not proc.stdout.read():
