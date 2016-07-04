@@ -12,6 +12,7 @@ __all__ = ["AndroidDevDiagMonitor"]
 import binascii
 import errno
 import os
+import stat
 import re
 import subprocess
 import threading
@@ -170,13 +171,15 @@ class AndroidDevDiagMonitor(Monitor):
 
     def _run_shell_cmd(self, cmd, wait = False):
         p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        p.communicate(cmd+'\n')
+        res,err = p.communicate(cmd+'\n')
         # p.stdin.write(cmd+'\n')
         if wait:
             p.wait()
-            return p.returncode
+            # return p.returncode
+            return res
         else:
-            return None
+            # return None
+            return res
 
     def set_log_directory(self, directory):
         """
@@ -249,6 +252,7 @@ class AndroidDevDiagMonitor(Monitor):
             else:
                 raise err
 
+
     def get_last_diag_revealer_ts(self):
         """
         Return the timestamp when the lastest msg is sent by diag_revealer
@@ -262,10 +266,14 @@ class AndroidDevDiagMonitor(Monitor):
         """
         # TODO(likayo): need to protect aganist user input
         cmd = "%s %s %s" % (self._executable_path, os.path.join(self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
-        if self._input_dir:
+        if not os.path.exists(self._input_dir):
             cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
             self._run_shell_cmd("mkdir \"%s\"" % self._input_dir)
-            self._run_shell_cmd("chmod -R 755 \"%s\"" % self._input_dir, wait=True)
+            self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
+            # os.mkdir(self._input_dir)
+            # os.chmod(self._input_dir,777)
+        else:
+            self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
         proc = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         proc.stdin.write(cmd+'\n')
 
@@ -277,8 +285,11 @@ class AndroidDevDiagMonitor(Monitor):
         cmd = "ps | grep diag_revealer\n"
         while True:
             time.sleep(5)
-            proc = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            if not proc.stdout.read():
+            res = self._run_shell_cmd(cmd)
+
+            # proc = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            # if not proc.stdout.read():
+            if not res:
                 # diag_revealer is not alive
                 self.log_warning("diag_revealer is terminated. Restart diag_revealer ...")
                 self._start_diag_revealer()
