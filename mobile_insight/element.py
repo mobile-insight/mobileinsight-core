@@ -1,4 +1,4 @@
-!/usr/bin/python
+# !/usr/bin/python
 # Filename: element.py
 """
 Basic abstractions for the trace collector and analyzer.
