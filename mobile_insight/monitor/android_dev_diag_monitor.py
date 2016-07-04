@@ -12,6 +12,7 @@ __all__ = ["AndroidDevDiagMonitor"]
 import binascii
 import errno
 import os
+import stat
 import re
 import subprocess
 import threading
@@ -251,6 +252,7 @@ class AndroidDevDiagMonitor(Monitor):
             else:
                 raise err
 
+
     def get_last_diag_revealer_ts(self):
         """
         Return the timestamp when the lastest msg is sent by diag_revealer
@@ -346,8 +348,8 @@ class AndroidDevDiagMonitor(Monitor):
 
             # Launch diag_revealer, and protection daemon
             self._start_diag_revealer()
-            # self.diag_revealer_daemon = threading.Thread(target=self._protect_diag_revealer)
-            # self.diag_revealer_daemon.start()
+            self.diag_revealer_daemon = threading.Thread(target=self._protect_diag_revealer)
+            self.diag_revealer_daemon.start()
 
             # fifo = os.open(self._fifo_path, os.O_RDONLY | os.O_NONBLOCK)
             fifo = os.open(self._fifo_path, os.O_RDONLY)    #Blocking mode: save CPU
