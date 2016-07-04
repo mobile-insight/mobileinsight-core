@@ -1,4 +1,4 @@
-#!/usr/bin/python
+!/usr/bin/python
 # Filename: element.py
 """
 Basic abstractions for the trace collector and analyzer.
@@ -91,7 +91,7 @@ class Element(object):
         """
         # A lambda function: input as a callback, output as passing event to this callback
         if isinstance(event,Event):
-            # self.log_debug(event.type_id)
+            self.log_debug(event.type_id)
             G = lambda module: module.recv(self,event)
             map(G, self.to_list)
 
