@@ -272,6 +272,8 @@ class AndroidDevDiagMonitor(Monitor):
             self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
             # os.mkdir(self._input_dir)
             # os.chmod(self._input_dir,777)
+        else:
+            self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
         proc = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         proc.stdin.write(cmd+'\n')
 
