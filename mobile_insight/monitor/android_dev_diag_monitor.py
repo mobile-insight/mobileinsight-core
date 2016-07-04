@@ -33,7 +33,7 @@ try:
         service_context = autoclass('org.renpy.android.PythonService').mService
     except Exception, e:
     	service_context = cast("android.app.Activity",
-                            autoclass("org.renpy.android.PythonActivity").mActivity)f
+                            autoclass("org.renpy.android.PythonActivity").mActivity)
 
     is_android=True
 except Exception, e:
