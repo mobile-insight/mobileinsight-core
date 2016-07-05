@@ -122,11 +122,11 @@ elif platform.system() == "Windows":
     ws_files = ['ws_dissector/ws_dissector.exe']
     # include all dlls
     for root, dirs, files in os.walk('ws_dissector'):
-        ws_files.extend(['ws_dissector/' + name for name in files if name.endswith('.dll')])
+        ws_files.extend(['ws_dissector\\' + name for name in files if name.endswith('.dll')])
 
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
-    DATA_FILES = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ws_files),
-                  (sys.exec_prefix + '/mobile_insight/ws_dissector/', lib_list)]
+    DATA_FILES = [(sys.exec_prefix + '\\mobile_insight\\ws_dissector\\', ws_files),
+                  (sys.exec_prefix + '\\mobile_insight\\ws_dissector\\', lib_list)]
 else:
     print "Unsupported operating system: "+str(arch)
     sys.exit()
