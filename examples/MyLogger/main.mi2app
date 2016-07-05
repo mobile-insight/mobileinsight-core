@@ -1,15 +1,41 @@
+#main.mi2app
 import os
 import sys
 
 from mobile_insight.monitor import OnlineMonitor
-from mobile_insight.analyzer import MsgLogger
 
+# A helper utilities for mobile_insight
+import mi2app_utils
+
+
+# options of enabling logs
+
+lte_control = [
+        'LTE_RRC_OTA_Packet',
+        'LTE_NAS_ESM_OTA_Incoming_Packet',
+        'LTE_NAS_ESM_OTA_Outgoing_Packet',
+        'LTE_NAS_EMM_OTA_Incoming_Packet',
+        'LTE_NAS_EMM_OTA_Outgoing_Packet',
+        ]
+lte_data = [    
+        'LTE_MAC_UL_Transport_Block',
+        'LTE_MAC_DL_Transport_Block',
+            ]
 
 # Initialize a 3G/4G monitor
 src = OnlineMonitor()
 
-# Save the monitoring results as an offline log
-src.save_log_as("/sdcard/mobile_insight/log/monitor-example.mi2log")
+# Configure the path of saving logs
+cache_directory  = mi2app_utils.get_cache_dir()
+log_directory    = os.path.join(cache_directory, "mi2log")
+src.set_log_directory(log_directory)
+
+
+# Select logging type based on settings
+if plugin_config["log_type"] == "LTE Control Plane":
+    src.enable_log(lte_control)
+elif plugin_config["log_type"] == "LTE Control/Data Plane":
+    src.enable_log(lte_control + lte_data)
 
 #Enable 3G/4G messages to be monitored. Here we enable RRC (radio resource control) monitoring
 src.enable_log("LTE_RRC_OTA_Packet")

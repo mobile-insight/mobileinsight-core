@@ -3,7 +3,7 @@ include LICENSE
 include setup.py
 exclude setup-internal.py
 recursive-include GUI * 
-recursive-include examples *.py *.mi2log *.mi2app *.txt
+recursive-include examples *.json *.py *.mi2log *.mi2app *.txt
 recursive-include mobile_insight *.py  *.m *.pyd README
 recursive-exclude examples *.db
 recursive-exclude mobile_insight *.db
