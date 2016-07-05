@@ -133,7 +133,7 @@ else:
 
 setup(
     name = 'MobileInsight',
-    version = '2.0',
+    version = '2.1.0',
     description = 'Mobile network monitoring and analysis',
     author = 'UCLA WiNG Group and OSU MSSN lab',
     author_email = 'yuanjie.li@cs.ucla.edu, zyuan@cs.ucla.edu',
@@ -145,11 +145,6 @@ setup(
                 'mobile_insight.monitor.dm_collector',
                 'mobile_insight.monitor.dm_collector.dm_endec',
                 ],
-    install_requires=[
-          'pyserial',
-          'crcmod',
-          'xmltodict',
-      ],
     package_data = PACKAGE_DATA,
     data_files = DATA_FILES,
     options = { 'py2exe' : PY2EXE_OPTIONS },
