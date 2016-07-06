@@ -1,0 +1,21 @@
+[
+    {
+        "type"   : "title",
+        "title"  : ""
+    },
+    {
+        "type"   : "options",
+        "title"  : "Log Type",
+        "desc"   : "Set the log type to collect",
+        "key"    : "log_type",
+        "default": "LTE Control Plane",
+        "options": ["LTE Control Plane", "LTE Control/Data Plane"]
+    },
+    {
+        "type"   : "numeric",
+        "title"  : "Log Size (KB)",
+        "desc"   : "The size of each log",
+        "key"    : "mi_log_size",
+        "default": "500"
+    },
+]

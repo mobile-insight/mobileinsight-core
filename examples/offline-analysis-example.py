@@ -16,7 +16,7 @@ if __name__ == "__main__":
     # Initialize a 3G/4G monitor
     src = OfflineReplayer()
     src.set_input_path("./offline_log_example.mi2log")
-
+    
     #RRC analyzer
     lte_rrc_analyzer = LteRrcAnalyzer()
     lte_rrc_analyzer.set_source(src) #bind with the monitor

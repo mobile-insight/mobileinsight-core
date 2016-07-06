@@ -173,7 +173,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext=msg.data["UL GBR ext"]
         self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=msg.data["DL MBR ext"]
 
-        self.log_info("__callback_esm_state"+self.__esm_status[self.__cur_eps_id].dump())
+        self.log_info(self.__esm_status[self.__cur_eps_id].dump())
 
         self.profile.update("LteNasProfile:"+self.__emm_status.profile_id()+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
                     {'qci':self.__esm_status[self.__cur_eps_id].qos.qci,
@@ -295,7 +295,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                 if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_downl_ext'):    
                     self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
-                self.log_info("__callback_esm EPS_Id="+str(self.__cur_eps_id)+self.__esm_status[self.__cur_eps_id].dump())
+                self.log_info("EPS_Id="+str(self.__cur_eps_id)+self.__esm_status[self.__cur_eps_id].dump())
 
                 # profile update for esm qos
                 self.profile.update("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
@@ -443,8 +443,7 @@ class EsmStatus:
         self.qos=EsmQos()
 
     def dump(self):
-        return (self.__class__.__name__
-            + ' EPS_ID=' + xstr(self.eps_id) + ' type=' + xstr(bearer_type[self.type])
+        return (' EPS_ID=' + xstr(self.eps_id) + ' type=' + xstr(bearer_type[self.type])
             + ":\n\t"+self.qos.dump_rate()+'\n\t'+self.qos.dump_delivery())
 
 class EsmQos:

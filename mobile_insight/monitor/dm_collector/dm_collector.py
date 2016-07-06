@@ -89,8 +89,8 @@ class DMCollector(Monitor):
             type_name = [type_name]
         for n in type_name:
             if n not in cls.SUPPORTED_TYPES:
-                self.log_info("WARNING: Unsupported log message type: %s" % n) 
-            elif n not in self._type_names:
+                self.log_warning("Unsupported log message type: %s" % n) 
+            if n not in self._type_names:
                 self._type_names.append(n)
                 self.log_info("Enable collection: "+n)
         dm_collector_c.set_filtered(self._type_names)

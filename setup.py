@@ -122,18 +122,18 @@ elif platform.system() == "Windows":
     ws_files = ['ws_dissector/ws_dissector.exe']
     # include all dlls
     for root, dirs, files in os.walk('ws_dissector'):
-        ws_files.extend(['ws_dissector/' + name for name in files if name.endswith('.dll')])
+        ws_files.extend(['ws_dissector\\' + name for name in files if name.endswith('.dll')])
 
     lib_list = ["./libs/"+x for x in os.listdir("./libs/")]
-    DATA_FILES = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ws_files),
-                  (sys.exec_prefix + '/mobile_insight/ws_dissector/', lib_list)]
+    DATA_FILES = [(sys.exec_prefix + '\\mobile_insight\\ws_dissector\\', ws_files),
+                  (sys.exec_prefix + '\\mobile_insight\\ws_dissector\\', lib_list)]
 else:
     print "Unsupported operating system: "+str(arch)
     sys.exit()
 
 setup(
     name = 'MobileInsight',
-    version = '2.0',
+    version = '2.1.0',
     description = 'Mobile network monitoring and analysis',
     author = 'UCLA WiNG Group and OSU MSSN lab',
     author_email = 'yuanjie.li@cs.ucla.edu, zyuan@cs.ucla.edu',
@@ -145,11 +145,6 @@ setup(
                 'mobile_insight.monitor.dm_collector',
                 'mobile_insight.monitor.dm_collector.dm_endec',
                 ],
-    install_requires=[
-          'pyserial',
-          'crcmod',
-          'xmltodict',
-      ],
     package_data = PACKAGE_DATA,
     data_files = DATA_FILES,
     options = { 'py2exe' : PY2EXE_OPTIONS },
