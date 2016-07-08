@@ -7,7 +7,7 @@ __all__=["Analyzer",
 	"WcdmaRrcAnalyzer","UmtsNasAnalyzer","RrcAnalyzer",
 	"MobilityMngt", "LteRlcAnalyzer", "LtePdcpAnalyzer",
     "ModemDebugAnalyzer",
-    "HandoffLoopAnalyzer",
+    # "HandoffLoopAnalyzer",
     "LogAnalyzer",	### P4A: THIS LINE WILL BE DELETED ###
     ]
 
@@ -38,7 +38,7 @@ from umts_nas_analyzer import UmtsNasAnalyzer
 # Higher-level analyzer
 from mobility_mngt import MobilityMngt
 from rrc_analyzer import RrcAnalyzer
-from handoff_loop_analyzer import HandoffLoopAnalyzer
+# from handoff_loop_analyzer import HandoffLoopAnalyzer
 
 
 from modem_debug_analyzer import ModemDebugAnalyzer

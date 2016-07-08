@@ -186,7 +186,7 @@ class WindowClass(wx.Frame):
         self.toolbar.AddSeparator()
         toolbar_filter = self.toolbar.AddLabelTool(ID_TB_FILTER, "Filter", wx.Bitmap("icons/filter.png"))
         self.toolbar.AddSeparator()
-        toolbar_search = self.toolbar.AddLabelTool(ID_TB_SEARCH, "Search", wx.Bitmap("icons/search.png"))
+        toolbar_search = self.toolbar.AddLabelTool(ID_TB_SEARCH, "Search", wx.Bitmap("icons/Search.png"))
         self.toolbar.AddSeparator()
         toolbar_time = self.toolbar.AddLabelTool(ID_TB_TIME, "Time Window", wx.Bitmap("icons/time.png"))
         self.toolbar.AddSeparator()
@@ -198,7 +198,7 @@ class WindowClass(wx.Frame):
 
         self.Bind(wx.EVT_TOOL, self.Open, toolbar_open)
         self.Bind(wx.EVT_TOOL, self.OnFilter, toolbar_filter)
-        self.Bind(wx.EVT_TOOL, self.OnSearch, toolbar_search);
+        self.Bind(wx.EVT_TOOL, self.OnSearch, toolbar_search)
         self.Bind(wx.EVT_TOOL, self.OnTime, toolbar_time)
         self.Bind(wx.EVT_TOOL, self.OnReset, toolbar_reset)
         # self.Bind(wx.EVT_TOOL, self.OnGraph, toolbar_graph)

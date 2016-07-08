@@ -88,6 +88,8 @@ elif platform.system()=="Linux":
     arch=platform.architecture()
     if arch[0]=='32bit':
         url="http://metro.cs.ucla.edu/mobile_insight/libs/linux-32/libs/"
+        print "Unsupported operating system: Linux-32bit. Please use Linux-64bit."
+        sys.exit()
     elif arch[0]=='64bit':
         url="http://metro.cs.ucla.edu/mobile_insight/libs/linux-64/libs/"
     else:
