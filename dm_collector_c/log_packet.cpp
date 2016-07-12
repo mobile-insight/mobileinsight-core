@@ -401,11 +401,19 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
 
             // # antennas
             tmp = _search_result_int(result, "Number of Tx Antennas(M)");
+            int iRNTIType = tmp & 15;
             tmp = (tmp >> 8) & 0x0f;
             int M = tmp & 0x3;
             M = (M != 3? (1 << M): -1);
             int N = (tmp >> 2) & 0x1;
             N = (1 << N);
+
+            old_object = _replace_result_int(result, "PDSCH RNTI Type", iRNTIType);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "PDSCH RNTI Type",
+                    ValueNameRNTIType,
+                    ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                    "(MI)Unknown");
 
             old_object = _replace_result_int(result, "Number of Tx Antennas(M)", M);
             Py_DECREF(old_object);

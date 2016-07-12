@@ -346,6 +346,7 @@ const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
     {UINT, "System Frame Number", 2},
     {PLACEHOLDER, "Subframe Number", 0},
     {UINT, "PDSCH RNTIl ID", 2},
+    {PLACEHOLDER, "PDSCH RNTI Type", 0},
     {UINT, "Number of Tx Antennas(M)", 2},
     {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
     {UINT, "RB Allocation Slot 0[0]", 8},
