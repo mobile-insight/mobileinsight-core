@@ -1,7 +1,7 @@
 /* log_packet.h
  * Author: Jiayao Li
  * Defines constants and functions related to log packet messages.
- * The most important thing is a struct called Fmt, which defines a message 
+ * The most important thing is a struct called Fmt, which defines a message
  * field. With this struct and other helper functions, message decoding can be
  * greatly simplified.
  */
@@ -15,6 +15,7 @@
 enum FmtType {
     UINT,       // Little endian. len = 1, 2, 4, 8
     BYTE_STREAM,    // A stream of bytes.
+    BYTE_STREAM_LITTLE_ENDIAN,  // a stream of bytes in little endian
     QCDM_TIMESTAMP, // Timestamp in all messages. len = 8
     PLMN_MK1,   // in WCDMA Cell ID
     PLMN_MK2,   // in LTE NAS EMM State
@@ -349,10 +350,10 @@ const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
     {PLACEHOLDER, "PDSCH RNTI Type", 0},
     {UINT, "Number of Tx Antennas(M)", 2},
     {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
-    {BYTE_STREAM, "RB Allocation Slot 0[0]", 8},
-    {BYTE_STREAM, "RB Allocation Slot 0[1]", 8},
-    {BYTE_STREAM, "RB Allocation Slot 1[0]", 8},
-    {BYTE_STREAM, "RB Allocation Slot 1[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
     {SKIP, NULL, 4},
     // {UINT, "Transport Block Size Stream 0", 2},
     {UINT, "TBS 0", 2},
