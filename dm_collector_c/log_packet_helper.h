@@ -207,6 +207,20 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 break;
             }
 
+        case BYTE_STREAM_LITTLE_ENDIAN:
+            {
+                assert(fmt[i].len > 0);
+                char hex[10] = {};
+                std::string ascii_data = "0x";
+                for (int k = fmt[i].len - 1; k >= 0; k--) {
+                    sprintf(hex, "%02x", p[k] & 0xFF);
+                    ascii_data += hex;
+                }
+                decoded = Py_BuildValue("s", ascii_data.c_str());
+                n_consumed += fmt[i].len;
+                break;
+            }
+
         case PLMN_MK1:
             {
                 assert(fmt[i].len == 6);

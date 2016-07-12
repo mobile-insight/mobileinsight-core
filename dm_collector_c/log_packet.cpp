@@ -5,17 +5,14 @@
 
 #include <Python.h>
 #include <datetime.h>
+#include <map>
+#include <string>
+#include <sstream>
+#include <fstream>
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
-
-#include <map>
-#include <string>
-#include <sstream>
-
-#include <fstream>
-
 #include "1xev_rx_partial_multirlp_packet.h"
 #include "1xev_connected_state_search_info.h"
 #include "1xev_connection_attempt.h"
