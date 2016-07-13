@@ -25,6 +25,7 @@
 #include "lte_ll1_pdcch_decoding_result.h"
 #include "lte_ll1_pdsch_decoding_result.h"
 #include "lte_ll1_pusch_tx_report.h"
+#include "lte_ml1_rlm_report.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -4539,6 +4540,12 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 ARRAY_SIZE(LteLl1PuschTxReport_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_lte_ll1_pusch_tx_report_payload(b, offset, length, result);
+        break;
+    case LTE_ML1_RLM_Report:
+        offset += _decode_by_fmt(LteMl1RlmReport_Fmt,
+                ARRAY_SIZE(LteMl1RlmReport_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_ml1_rlm_report_payload(b, offset, length, result);
         break;
     default:
         break;

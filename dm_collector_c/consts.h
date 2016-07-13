@@ -74,6 +74,7 @@ enum LogPacketType {
     LTE_LL1_PDCCH_Decoding_Result = 0xB130,
     LTE_LL1_PDSCH_Decoding_Result = 0xB132,
     LTE_LL1_PUSCH_Tx_Report = 0xB139,
+    LTE_ML1_RLM_Report = 0xB18A,
 };
 
 // Mapping type IDs to names
@@ -206,6 +207,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_PHY_PDSCH_Decoding_Result", false},
     {LTE_LL1_PUSCH_Tx_Report,
         "LTE_PHY_PUSCH_Tx_Report", false},
+    {LTE_ML1_RLM_Report,
+        "LTE_PHY_RLM_Report", false},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

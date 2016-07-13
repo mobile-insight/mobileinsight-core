@@ -206,7 +206,7 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
                 Py_DECREF(old_object);
 
                 u_temp = _search_result_uint(result_record_item, "RI Payload");
-                int iRiPayload = u_temp & 15;   // 4 bits
+                // int iRiPayload = u_temp & 15;   // 4 bits
                 int iRateMatchedRiBits = (u_temp >> 4) & 2047;  // 11 bits
                 int iPuschModOrder = (u_temp >> 15) & 3;    // 2 bits
                 int iPuschDigitalGain = (u_temp >> 17) & 255;   // 8 bits
