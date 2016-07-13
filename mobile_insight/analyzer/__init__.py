@@ -26,6 +26,7 @@ from lte_nas_analyzer import LteNasAnalyzer
 from lte_measurement_analyzer import LteMeasurementAnalyzer
 from lte_phy_analyzer import LtePhyAnalyzer
 from lte_rlc_analyzer import LteRlcAnalyzer
+from lte_mac_analyzer import LteMacAnalyzer
 from lte_pdcp_analyzer import LtePdcpAnalyzer
 
 # WCDMA (3G)

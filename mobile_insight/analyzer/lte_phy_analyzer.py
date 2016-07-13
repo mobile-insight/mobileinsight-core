@@ -32,10 +32,30 @@ class LtePhyAnalyzer(Analyzer):
         #Phy-layer logs
         source.enable_log("LTE_PHY_PDSCH_Packet")
 
+    def rnti_conversion(self,rnti):
+        """
+        Convert RNTI to corresponding category
+
+        :param rnti: RNTI from the message
+        :type rnti: int
+        """
+        if rnti == 0:
+            return "unknown"
+        elif rnti ==  0xFFFD:
+            return "M-RNTI"
+        elif rnti == 0xFFFE:
+            return "P-RNTI"
+        elif rnti == 0xFFFF:
+            return "SI-RNTI"
+        elif rnti >= 0xFFF4 and rnti <=0xFFFC:
+            return "reserved"    
+
     def __msg_callback(self,msg):
 
         if msg.type_id=="LTE_PHY_PDSCH_Packet":
             log_item = msg.data.decode()
+
+            # self.log_info(str(hex(log_item["PDSCH RNTIl ID"])))
 
             if not self.init_timestamp:
                 self.init_timestamp = log_item['timestamp']
