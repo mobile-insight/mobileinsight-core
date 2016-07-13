@@ -2221,6 +2221,25 @@ const ValueName ValueNameOnOrOff [] = {
     {1, "On"},
 };
 
+const ValueName ValueNameCSFTxMode [] = {
+    {3, "TM_OL_SM"},
+    {4, "TM_CL_SM"},
+};
+
+const ValueName ValueNameRankIndex [] = {
+    {0, "Rank 1"},
+    {1, "Rank 2"},
+};
+
+const ValueName ValueNameCsiMeasSetIndex [] = {
+    {0, "CSI0"},
+};
+
+const ValueName ValueNamePuschReportingMode [] = {
+    {3, "MODE_APERIODIC_RM30"},
+    {4, "MODE_APERIODIC_RM31"},
+};
+
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
