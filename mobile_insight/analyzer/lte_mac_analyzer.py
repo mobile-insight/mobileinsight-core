@@ -1,7 +1,11 @@
 #!/usr/bin/python
 # Filename: lte_mac_analyzer.py
 """
-A 4G MAC-layer analyzer to get Modulation and coding Scheme (MCS)
+A 4G MAC-layer analyzer with the following functions
+
+  - UL grant utilization analysis
+  
+  - TBA
 
 Author: Yuanjie Li
 """
@@ -30,6 +34,7 @@ class LteMacAnalyzer(Analyzer):
 
         #Phy-layer logs
         source.enable_log("LTE_MAC_UL_Tx_Statistics")
+        # source.enable_log("LTE_PHY_PUSCH_Tx_Report")
 
     def __msg_callback(self,msg):
 
@@ -55,4 +60,8 @@ class LteMacAnalyzer(Analyzer):
             # self.log_info(str(grant_received)
             #              +" "+str(grant_utilized)
             #              +" "+str(grant_utilization))
+
+        # elif msg.type_id=="LTE_PHY_PUSCH_Tx_Report":
+        #     log_item = msg.data.decode()
+        #     self.log_warning(str(log_item))
         	
