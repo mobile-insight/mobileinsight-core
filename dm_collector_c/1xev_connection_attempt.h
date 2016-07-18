@@ -42,14 +42,14 @@ static int _decode_1xev_connection_attempt_payload (const char *b,
     (void) _map_result_field_to_name(result, "Conn Attempt Outcome",
             _1xEVConnectionAttempt_Outcome,
             ARRAY_SIZE(_1xEVConnectionAttempt_Outcome, ValueName),
-            "Unknown");
+            "(MI)Unknown");
     old_object = _replace_result_int(result, "Stat of TCA/RTCACK Msgs",
             iStat);
     Py_DECREF(old_object);
     (void) _map_result_field_to_name(result, "Stat of TCA?RTCACK Msgs",
             _1xEVConnectionAttempt_Stat,
             ARRAY_SIZE(_1xEVConnectionAttempt_Stat, ValueName),
-            "Unknown");
+            "(MI)Unknown");
     return 0;
 
 }

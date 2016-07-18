@@ -51,7 +51,7 @@ static int _decode_lte_ml1_bplmn_cell_request_payload (const char *b,
                     "Standards Version",
                     LteMl1BplmnCellRequest_StandardsVersion,
                     ARRAY_SIZE(LteMl1BplmnCellRequest_StandardsVersion, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
             int iNonDecodeP1 = _search_result_int(result, "Cell ID");
             int iCellID = iNonDecodeP1 & 1023; // last 10 bits
             int iBarredStatus = (iNonDecodeP1 >> 10) & 15; // next 4 bits
@@ -65,7 +65,7 @@ static int _decode_lte_ml1_bplmn_cell_request_payload (const char *b,
                     "Barred Status",
                     LteMl1BplmnCellRequest_BarredStatus,
                     ARRAY_SIZE(LteMl1BplmnCellRequest_BarredStatus, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
             unsigned int iNonDecodeP2 = _search_result_uint(result, "Q Rx Lev Min");
             int iQRxLevMin = iNonDecodeP2 & 255; // last 8 bits
             int iQRxLevMinOffset = (iNonDecodeP2 >> 8) & 15; // next 4 bits
@@ -96,7 +96,7 @@ static int _decode_lte_ml1_bplmn_cell_request_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDSCH Stat Indication version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PDSCH Stat Indication version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

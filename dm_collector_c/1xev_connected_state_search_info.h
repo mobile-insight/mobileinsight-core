@@ -64,7 +64,7 @@ static int _decode_1xev_connected_state_search_info_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("unknown 1xEV Connected State Search Info version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown 1xEV Connected State Search Info version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

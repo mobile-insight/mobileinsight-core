@@ -113,28 +113,28 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
                 (void) _map_result_field_to_name(result_record_item,
                         "ACK", ValueNameExistsOrNone,
                         ARRAY_SIZE(ValueNameExistsOrNone, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item, "CQI",
                         iCQI);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item,
                         "CQI", ValueNameExistsOrNone,
                         ARRAY_SIZE(ValueNameExistsOrNone, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item, "RI",
                         iRI);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item,
                         "RI", ValueNameExistsOrNone,
                         ARRAY_SIZE(ValueNameExistsOrNone, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Frequency Hopping", iFrequencyHopping);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item,
                         "Frequency Hopping", ValueNameEnableOrDisable,
                         ARRAY_SIZE(ValueNameEnableOrDisable, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Redund Ver", iRedundVer);
                 Py_DECREF(old_object);
@@ -159,7 +159,7 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
                         "UE SRS",
                         ValueNameOnOrOff,
                         ARRAY_SIZE(ValueNameOnOrOff, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
 
                 u_temp = _search_result_uint(result_record_item, "DMRS Root Slot 1");
                 int iDMRSRootSlot1 = u_temp & 2047; // 11 bits
@@ -206,7 +206,7 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
                 Py_DECREF(old_object);
 
                 u_temp = _search_result_uint(result_record_item, "RI Payload");
-                int iRiPayload = u_temp & 15;   // 4 bits
+                // int iRiPayload = u_temp & 15;   // 4 bits
                 int iRateMatchedRiBits = (u_temp >> 4) & 2047;  // 11 bits
                 int iPuschModOrder = (u_temp >> 15) & 3;    // 2 bits
                 int iPuschDigitalGain = (u_temp >> 17) & 255;   // 8 bits
@@ -229,7 +229,7 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
                         "PUSCH Mod Order",
                         ValueNameModulation,
                         ARRAY_SIZE(ValueNameModulation, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "PUSCH Digital Gain (dB)", iPuschDigitalGain);
                 Py_DECREF(old_object);
@@ -240,7 +240,7 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
                         "SRS Occasion",
                         ValueNameOnOrOff,
                         ARRAY_SIZE(ValueNameOnOrOff, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Re-tx Index", iRetxIndex);
                 Py_DECREF(old_object);
@@ -248,7 +248,7 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
                         "Re-tx Index",
                         ValueNameNumber,
                         ARRAY_SIZE(ValueNameNumber, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
 
                 u_temp = _search_result_uint(result_record_item,
                         "PUSCH Tx Power (dBm)");
@@ -279,7 +279,7 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("Unknown LTE LL1 PDCCH Decoding Result version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE LL1 PDCCH Decoding Result version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

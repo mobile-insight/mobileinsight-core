@@ -163,7 +163,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
             (void) _map_result_field_to_name(result, "Carrier Index",
                     ValueNameCarrierIndex,
                     ARRAY_SIZE(ValueNameCarrierIndex, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
 
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
@@ -193,7 +193,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                         "RNTI Type",
                         ValueNameRNTIType,
                         ARRAY_SIZE(ValueNameRNTIType, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "System Information Msg Number", iSystemInformationMsgNumber);
                 Py_DECREF(old_object);
@@ -207,7 +207,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                         "HARQ Log Status",
                         ValueNameHARQLogStatus,
                         ARRAY_SIZE(ValueNameHARQLogStatus, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Codeword Swap", iCodewordSwap);
                 Py_DECREF(old_object);
@@ -246,7 +246,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                             "Transport Block CRC",
                             ValueNamePassOrFail,
                             ARRAY_SIZE(ValueNamePassOrFail, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_stream_item,
                             "NDI", iNDI);
                     Py_DECREF(old_object);
@@ -266,7 +266,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                             "Retransmission Number",
                             ValueNameNumber,
                             ARRAY_SIZE(ValueNameNumber, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_stream_item,
                             "RVID", iRVID);
                     Py_DECREF(old_object);
@@ -277,7 +277,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                             "Companding Stats",
                             ValueNameCompandingStats,
                             ARRAY_SIZE(ValueNameCompandingStats, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_stream_item,
                             "HARQ Combining", iHarqCombining);
                     Py_DECREF(old_object);
@@ -285,7 +285,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                             "HARQ Combining",
                             ValueNameEnableOrDisable,
                             ARRAY_SIZE(ValueNameEnableOrDisable, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_stream_item,
                             "Decob TB CRC", iDecobTbCRC);
                     Py_DECREF(old_object);
@@ -324,7 +324,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                                 "Code Block CRC Pass",
                                 ValueNamePassOrFail,
                                 ARRAY_SIZE(ValueNamePassOrFail, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         old_object = _replace_result_int(result_energy_metric_item,
                                 "Early Termination", iEarlyTermination);
                         Py_DECREF(old_object);
@@ -332,7 +332,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                                 "Early Termination",
                                 ValueNameYesOrNo,
                                 ARRAY_SIZE(ValueNameYesOrNo, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         old_object = _replace_result_int(result_energy_metric_item,
                                 "HARQ Combine Enable", iHarqCombineEnable);
                         Py_DECREF(old_object);
@@ -340,7 +340,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                                 "HARQ Combine Enable",
                                 ValueNameEnableOrDisable,
                                 ARRAY_SIZE(ValueNameEnableOrDisable, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         old_object = _replace_result_int(result_energy_metric_item,
                                 "Deint Decode Bypass", iDeintDecodeBypass);
                         Py_DECREF(old_object);
@@ -427,7 +427,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
             (void) _map_result_field_to_name(result, "Carrier Index",
                     ValueNameCarrierIndex,
                     ARRAY_SIZE(ValueNameCarrierIndex, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
 
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
@@ -457,7 +457,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                         "RNTI Type",
                         ValueNameRNTIType,
                         ARRAY_SIZE(ValueNameRNTIType, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "System Information Msg Number", iSystemInformationMsgNumber);
                 Py_DECREF(old_object);
@@ -471,7 +471,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                         "HARQ Log Status",
                         ValueNameHARQLogStatus,
                         ARRAY_SIZE(ValueNameHARQLogStatus, ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Codeword Swap", iCodewordSwap);
                 Py_DECREF(old_object);
@@ -513,7 +513,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                             "Transport Block CRC",
                             ValueNamePassOrFail,
                             ARRAY_SIZE(ValueNamePassOrFail, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_stream_item,
                             "NDI", iNDI);
                     Py_DECREF(old_object);
@@ -533,7 +533,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                             "Retransmission Number",
                             ValueNameNumber,
                             ARRAY_SIZE(ValueNameNumber, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_stream_item,
                             "RVID", iRVID);
                     Py_DECREF(old_object);
@@ -544,7 +544,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                             "Companding Stats",
                             ValueNameCompandingStats,
                             ARRAY_SIZE(ValueNameCompandingStats, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_stream_item,
                             "HARQ Combining", iHarqCombining);
                     Py_DECREF(old_object);
@@ -552,7 +552,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                             "HARQ Combining",
                             ValueNameEnableOrDisable,
                             ARRAY_SIZE(ValueNameEnableOrDisable, ValueName),
-                            "Unknown");
+                            "(MI)Unknown");
                     old_object = _replace_result_int(result_record_stream_item,
                             "Decob TB CRC", iDecobTbCRC);
                     Py_DECREF(old_object);
@@ -594,7 +594,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                                 "Code Block CRC Pass",
                                 ValueNamePassOrFail,
                                 ARRAY_SIZE(ValueNamePassOrFail, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         old_object = _replace_result_int(result_energy_metric_item,
                                 "Early Termination", iEarlyTermination);
                         Py_DECREF(old_object);
@@ -602,7 +602,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                                 "Early Termination",
                                 ValueNameYesOrNo,
                                 ARRAY_SIZE(ValueNameYesOrNo, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         old_object = _replace_result_int(result_energy_metric_item,
                                 "HARQ Combine Enable", iHarqCombineEnable);
                         Py_DECREF(old_object);
@@ -610,7 +610,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                                 "HARQ Combine Enable",
                                 ValueNameEnableOrDisable,
                                 ARRAY_SIZE(ValueNameEnableOrDisable, ValueName),
-                                "Unknown");
+                                "(MI)Unknown");
                         old_object = _replace_result_int(result_energy_metric_item,
                                 "Deint Decode Bypass", iDeintDecodeBypass);
                         Py_DECREF(old_object);
@@ -656,7 +656,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("Unknown LTE LL1 PDCCH Decoding Result version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE LL1 PDCCH Decoding Result version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

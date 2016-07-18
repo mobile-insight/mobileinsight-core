@@ -65,7 +65,7 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
             (void) _map_result_field_to_name(result, "Carrier Index",
                     LteLl1ServingCellComLoop_CarrierIndex,
                     ARRAY_SIZE(LteLl1ServingCellComLoop_CarrierIndex, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
             old_object = _replace_result_int(result, "Number of Records",
                     num_record);
             Py_DECREF(old_object);
@@ -94,7 +94,7 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
                         LteLl1ServingCellComLoop_Record_Enabled,
                         ARRAY_SIZE(LteLl1ServingCellComLoop_Record_Enabled,
                             ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 int iCIA = _search_result_int(result_record_item, "COM IIR Alpha");
                 float fCIA = iCIA / 32765.0;
                 PyObject *pyfloat = Py_BuildValue("f", fCIA);
@@ -155,7 +155,7 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
             (void) _map_result_field_to_name(result, "Carrier Index",
                     LteLl1ServingCellComLoop_CarrierIndex,
                     ARRAY_SIZE(LteLl1ServingCellComLoop_CarrierIndex, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
             old_object = _replace_result_int(result, "Cell ID", iCellId);
             Py_DECREF(old_object);
             int iNonDecodeP2 = _search_result_int(result, "Number of Records");
@@ -188,7 +188,7 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
                         LteLl1ServingCellComLoop_Record_Enabled,
                         ARRAY_SIZE(LteLl1ServingCellComLoop_Record_Enabled,
                             ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
                 unsigned int iCIA = _search_result_uint(result_record_item, "COM IIR Alpha");
                 float fCIA = iCIA / 32765.0;
                 PyObject *pyfloat = Py_BuildValue("f", fCIA);
@@ -235,7 +235,7 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("Unknown LTE LL1 Serving Cell COM Loop version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE LL1 Serving Cell COM Loop version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
