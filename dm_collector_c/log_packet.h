@@ -350,11 +350,15 @@ const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
     {PLACEHOLDER, "PDSCH RNTI Type", 0},
     {UINT, "Number of Tx Antennas(M)", 2},
     {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
+    {PLACEHOLDER, "Spatial Rank", 0},
     {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
     {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
     {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
     {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
-    {SKIP, NULL, 4},
+    {UINT, "Frequency Selective PMI", 1},   // right shift 1 bit, 2 bits
+    {PLACEHOLDER, "PMI Index", 0},  // 4 bits
+    {UINT, "Transmission Scheme", 1},   // 4 bits
+    {SKIP, NULL, 2},
     // {UINT, "Transport Block Size Stream 0", 2},
     {UINT, "TBS 0", 2},
     // {UINT, "Modulation Stream 0", 2},
@@ -2238,6 +2242,22 @@ const ValueName ValueNameCsiMeasSetIndex [] = {
 const ValueName ValueNamePuschReportingMode [] = {
     {3, "MODE_APERIODIC_RM30"},
     {4, "MODE_APERIODIC_RM31"},
+};
+
+const ValueName ValueNameTransmissionScheme [] = {
+    // 4 bits
+    {1, "Single Antenna Port (SISO or SIMO)"},
+    {2, "Transmit diversity"},
+    {3, "Open-loop spatial multiplexing"},
+    {4, "Closed-loop spatial multiplexing"},
+    {5, "Multi-User MIMO"},
+    {6, "Closed-loop rank-1 spatial multiplexing"},
+    {7, "Single Antenna Port Beamforming"},
+    {8, "Dual-Layer Beamforming"},
+};
+
+const ValueName ValueNameFrequencySelectivePMI [] = {
+    {0, "WideBand"},
 };
 
 // ----------------------------------------------------------------------------

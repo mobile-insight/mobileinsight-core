@@ -401,6 +401,7 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
             // # antennas
             tmp = _search_result_int(result, "Number of Tx Antennas(M)");
             int iRNTIType = tmp & 15;
+            int iSpatialRank = (tmp >> 14) & 3;
             tmp = (tmp >> 8) & 0x0f;
             int M = tmp & 0x3;
             M = (M != 3? (1 << M): -1);
@@ -418,6 +419,35 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
             Py_DECREF(old_object);
             old_object = _replace_result_int(result, "Number of Rx Antennas(N)", N);
             Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Spatial Rank", iSpatialRank);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Spatial Rank",
+                    ValueNameRankIndex,
+                    ARRAY_SIZE(ValueNameRankIndex, ValueName),
+                    "(MI)Unknown");
+
+            tmp = _search_result_int(result, "Frequency Selective PMI");
+            int iFrequencySelectivePMI = (tmp >> 1) & 3;
+            int iPMIIndex = (tmp >> 4) & 15;
+            tmp = _search_result_int(result, "Transmission Scheme");
+            int iTransmissionScheme = tmp & 15;
+
+            old_object = _replace_result_int(result, "Frequency Selective PMI",
+                    iFrequencySelectivePMI);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Frequency Selective PMI",
+                    ValueNameFrequencySelectivePMI,
+                    ARRAY_SIZE(ValueNameFrequencySelectivePMI, ValueName),
+                    "(MI)Unknown");
+            old_object = _replace_result_int(result, "PMI Index", iPMIIndex);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Transmission Scheme",
+                    iTransmissionScheme);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Transmission Scheme",
+                    ValueNameTransmissionScheme,
+                    ARRAY_SIZE(ValueNameTransmissionScheme, ValueName),
+                    "(MI)Unknown");
 
             // modulation & ratio
             tmp = _search_result_int(result, "MCS 0");
