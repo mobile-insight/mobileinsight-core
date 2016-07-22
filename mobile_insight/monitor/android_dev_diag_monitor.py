@@ -31,6 +31,9 @@ try:
     from jnius import autoclass #For Android
     try:
         service_context = autoclass('org.renpy.android.PythonService').mService
+        if not service_context:
+            service_context = cast("android.app.Activity",
+                            autoclass("org.renpy.android.PythonActivity").mActivity)
     except Exception, e:
     	service_context = cast("android.app.Activity",
                             autoclass("org.renpy.android.PythonActivity").mActivity)
