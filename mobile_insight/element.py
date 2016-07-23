@@ -234,12 +234,10 @@ class Element(object):
         """
         if not is_android:
             # Currently only support Android mobile version
-            self.log_info("not android?")
             return
 
         if not isinstance(method,str) \
         or not isinstance(msg_dict,dict):
-            self.log_info("method or msg_dict is wrong")
             return
 
         # Create broadcast intent
@@ -252,8 +250,11 @@ class Element(object):
             intent.putExtra(str(item),str(msg_dict[item]))   
 
         # Broadcast message
-        self.log_info("sendBroadcast:"+action)
-        mi2app_utils.pyService.sendBroadcast(intent) 
+        try:
+            mi2app_utils.pyService.sendBroadcast(intent) 
+        except Exception, e:
+            import traceback
+            self.log_error(str(traceback.format_exc()))
 
 
 
