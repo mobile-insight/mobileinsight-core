@@ -215,7 +215,7 @@ class Element(object):
                 "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m ["
                 + self.__class__.__name__+']\033[0m: '+msg)
 
-    def broadcast_info(self,msg_dict,method):
+    def broadcast_info(self, method, msg_dict):
         """
         (Mobile-version only) Broadcast monitor/analyzer information to other Android apps.
         This method is the interface between MobileInsight and Android apps requiring cellular info.
@@ -227,10 +227,10 @@ class Element(object):
         where ANALYZER/MONITOR-NAME is the class name of the monitor/analyzer, 
         and method is analyzer/monitor-specific method to notify the Android apps
 
-        :param msg_dict: A dictionary that lists the information to be broadcasted.
-        :type msg_dict: string->string dictionary
         :param method: analyzer/monitor-specific methods for broadcast action
         :type method: string
+        :param msg_dict: A dictionary that lists the information to be broadcasted.
+        :type msg_dict: string->string dictionary
         """
         if not is_android:
             # Currently only support Android mobile version
