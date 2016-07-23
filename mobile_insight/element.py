@@ -15,6 +15,7 @@ is_android=False
 try:
     from jnius import autoclass #For Android
     IntentClass = autoclass("android.content.Intent")
+    JavaString = autoclass("java.lang.String")
     import mi2app_utils
     is_android=True
 except Exception, e:
@@ -248,7 +249,7 @@ class Element(object):
         # Put extras into intent
         for item in msg_dict:
             # self.log_info('key='+item+' value='+msg_dict[item])
-            intent.putExtra(item,msg_dict[item])   
+            intent.putExtra(JavaString(item),JavaString(msg_dict[item]))   
 
         # Broadcast message
         try:
