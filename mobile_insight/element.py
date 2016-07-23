@@ -247,8 +247,8 @@ class Element(object):
 
         # Put extras into intent
         for item in msg_dict:
-            self.log_info('key='+item+' value='+msg_dict[item])
-            intent.putExtra(str(item),str(msg_dict[item]))   
+            # self.log_info('key='+item+' value='+msg_dict[item])
+            intent.putExtra(item,msg_dict[item])   
 
         # Broadcast message
         try:
