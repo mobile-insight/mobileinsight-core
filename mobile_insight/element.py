@@ -238,6 +238,7 @@ class Element(object):
 
         if not isinstance(method,str) \
         or not isinstance(msg_dict,dict):
+            self.log_info("method or msg_dict is wrong")
             return
 
         # Create broadcast intent
@@ -250,7 +251,7 @@ class Element(object):
             intent.putExtra(str(item),str(msg_dict[item]))   
 
         # Broadcast message
-        self.log_debug("sendBroadcast:"+)
+        self.log_info("sendBroadcast:"+action)
         mi2app_utils.pyService.sendBroadcast(intent) 
 
 
