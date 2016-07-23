@@ -234,6 +234,7 @@ class Element(object):
         """
         if not is_android:
             # Currently only support Android mobile version
+            self.log_info("not android?")
             return
 
         if not isinstance(method,str) \
