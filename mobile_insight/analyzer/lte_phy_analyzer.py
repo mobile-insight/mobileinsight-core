@@ -78,6 +78,7 @@ class LtePhyAnalyzer(Analyzer):
                 bcast_dict['Bandwidth (Mbps)'] = str((log_item["TBS 0"]+log_item["TBS 1"])/1000.0)
                 bcast_dict['Modulation 0'] = str(log_item["MCS 0"])
                 bcast_dict['Modulation 1'] = str(log_item["MCS 1"])
+
                 self.broadcast_info('LTE_BW',bcast_dict)
 
 
