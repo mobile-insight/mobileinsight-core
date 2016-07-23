@@ -242,13 +242,15 @@ class Element(object):
 
         # Create broadcast intent
         intent = IntentClass()
-        intent.setAction('MobileInsight.'+self.__class__.__name__+'.'+method)
+        action = 'MobileInsight.'+self.__class__.__name__+'.'+method
+        intent.setAction(action)
 
         # Put extras into intent
         for item in msg_dict:
             intent.putExtra(str(item),str(msg_dict[item]))   
 
         # Broadcast message
+        self.log_debug("sendBroadcast:"+)
         mi2app_utils.pyService.sendBroadcast(intent) 
 
 
