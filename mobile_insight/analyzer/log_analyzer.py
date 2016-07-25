@@ -56,6 +56,7 @@ class LogAnalyzer(Analyzer):
         self.selectedTypes = selectedTypes
         self.msg_logs = []
         for fileName in Paths:
+            print "fileName=",fileName
             self.src.set_input_path(fileName)
             self.log_info("Running ...")
             self.src.run()
@@ -73,7 +74,6 @@ class LogAnalyzer(Analyzer):
 
         :param msg: the received message
         """
-        self.log_info("__dump_message")
         if self.selectedTypes \
         and msg.type_id not in self.selectedTypes:
             return
