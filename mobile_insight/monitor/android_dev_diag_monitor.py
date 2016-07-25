@@ -243,7 +243,8 @@ class AndroidDevDiagMonitor(Monitor):
     def _mkfifo(self, fifo_path):
         try:
             if os.path.exists(fifo_path):
-                self._run_shell_cmd("rm %s " % fifo_path, wait=True)
+                # self._run_shell_cmd("rm %s " % fifo_path, wait=True)
+                os.remove(fifo_path)
             os.mknod(fifo_path, 0666 | stat.S_IFIFO)
         except OSError as err:
             if err.errno == errno.EEXIST:   # if already exists, skip this step
