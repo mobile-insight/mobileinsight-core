@@ -48,6 +48,8 @@ class LogAnalyzer(Analyzer):
 
     def AnalyzeFile(self, Paths, selectedTypes):
 
+        self.log_info("AnalyzeFile ...")
+
         if Paths.__class__.__name__ != 'list':
             Paths = [Paths]
 
@@ -55,8 +57,10 @@ class LogAnalyzer(Analyzer):
         self.msg_logs = []
         for fileName in Paths:
             self.src.set_input_path(fileName)
+            self.log_info("Running ...")
             self.src.run()
         if self.listener_callback:
+            self.log_info("listener_callback ...")
             self.listener_callback()
 
 
