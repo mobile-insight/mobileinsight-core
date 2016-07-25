@@ -62,6 +62,8 @@ class LogAnalyzer(Analyzer):
         if self.listener_callback:
             self.log_info("listener_callback ...")
             self.listener_callback()
+        else:
+            self.log_info("no listener_callback ...")
 
 
 
