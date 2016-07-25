@@ -24,6 +24,7 @@ class LtePhyAnalyzer(Analyzer):
         # Record per-second bandwidth
         self.lte_bw = 0
         self.prev_timestamp = None
+        self.avg_window = 1.0 # Average link BW time window (1.0 is no average by default)
 
 
     def set_source(self,source):
@@ -83,11 +84,13 @@ class LtePhyAnalyzer(Analyzer):
 
 
                 self.lte_bw += (log_item["TBS 0"]+log_item["TBS 1"])/1000.0
-                if (log_item['timestamp']-self.prev_timestamp).total_seconds() >= 1.0:
+                if (log_item['timestamp']-self.prev_timestamp).total_seconds() >= self.avg_window:
                     bcast_dict = {}
-                    bcast_dict['Bandwidth (Mbps)'] = str(self.lte_bw)
+                    bcast_dict['Bandwidth (Mbps)'] = str(self.lte_bw/self.avg_window)
                     self.broadcast_info('LTE_BW',bcast_dict)
+                    # Reset bandwidth
                     self.prev_timestamp = log_item['timestamp']
+                    self.lte_bw = 0
 
 
             # if not self.init_timestamp:
