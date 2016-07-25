@@ -38,24 +38,6 @@ class LtePhyAnalyzer(Analyzer):
         #Phy-layer logs
         source.enable_log("LTE_PHY_PDSCH_Packet")
 
-    def rnti_conversion(self,rnti):
-        """
-        Convert RNTI to corresponding category
-
-        :param rnti: RNTI from the message
-        :type rnti: int
-        """
-        if rnti == 0:
-            return "unknown"
-        elif rnti ==  0xFFFD:
-            return "M-RNTI"
-        elif rnti == 0xFFFE:
-            return "P-RNTI"
-        elif rnti == 0xFFFF:
-            return "SI-RNTI"
-        elif rnti >= 0xFFF4 and rnti <=0xFFFC:
-            return "reserved"    
-
     def __msg_callback(self,msg):
 
         if msg.type_id=="LTE_PHY_PDSCH_Packet":
@@ -73,6 +55,13 @@ class LtePhyAnalyzer(Analyzer):
             + str(log_item["TBS 1"])+" "
             + str(log_item["PDSCH RNTI Type"])) 
 
+            # self.log_info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+"s "
+            # + "MCS0=" + str(log_item["MCS 0"])+" "
+            # + "MCS1=" + str(log_item["MCS 1"])+" "
+            # + "TBS0=" + str(log_item["TBS 0"])+" "
+            # + "TBS1=" + str(log_item["TBS 1"])+" "
+            # + "C-RNTI=" + str(log_item["PDSCH RNTI Type"])) 
+
             # Broadcast bandwidth to other apps
             if log_item["PDSCH RNTI Type"] == "C-RNTI":
                 # bcast_dict={}
@@ -88,24 +77,7 @@ class LtePhyAnalyzer(Analyzer):
                     bcast_dict = {}
                     bcast_dict['Bandwidth (Mbps)'] = str(self.lte_bw/(log_item['timestamp']-self.prev_timestamp).total_seconds())
                     self.broadcast_info('LTE_BW',bcast_dict)
-                    # Reset bandwidth
+                    # Reset bandwidth statistics
                     self.prev_timestamp = log_item['timestamp']
                     self.lte_bw = 0
-
-
-            # if not self.init_timestamp:
-            #     self.init_timestamp = log_item['timestamp']
-            #     self.log_info("0s "
-            #     + "MCS0=" + str(log_item["MCS 0"])+" "
-            #     + "MCS1=" + str(log_item["MCS 1"])+" "
-            #     + "TBS0=" + str(log_item["TBS 0"])+" "
-            #     + "TBS1=" + str(log_item["TBS 1"])+" "
-            #     + "C-RNTI=" + str(log_item["PDSCH RNTI Type"]))
-            # else:
-            #     self.log_info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+"s "
-            #     + "MCS0=" + str(log_item["MCS 0"])+" "
-            #     + "MCS1=" + str(log_item["MCS 1"])+" "
-            #     + "TBS0=" + str(log_item["TBS 0"])+" "
-            #     + "TBS1=" + str(log_item["TBS 1"])+" "
-            #     + "C-RNTI=" + str(log_item["PDSCH RNTI Type"])) 
         	
