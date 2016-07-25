@@ -21,6 +21,11 @@ class LtePhyAnalyzer(Analyzer):
         self.init_timestamp=None
 
 
+        # Record per-second bandwidth
+        self.lte_bw = 0
+        self.prev_timestamp = None
+
+
     def set_source(self,source):
         """
         Set the trace source. Enable the cellular signaling messages
@@ -57,29 +62,32 @@ class LtePhyAnalyzer(Analyzer):
 
             if not self.init_timestamp:
                 self.init_timestamp = log_item['timestamp']
-                self.log_info("0 "
-                + str(log_item["MCS 0"])+" "
-                + str(log_item["MCS 1"])+" "
-                + str(log_item["TBS 0"])+" "
-                + str(log_item["TBS 1"])+" "
-                + str(log_item["PDSCH RNTI Type"]))
-            else:
-                self.log_info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+" "
-                + str(log_item["MCS 0"])+" "
-                + str(log_item["MCS 1"])+" "
-                + str(log_item["TBS 0"])+" "
-                + str(log_item["TBS 1"])+" "
-                + str(log_item["PDSCH RNTI Type"])) 
-
+                self.prev_timestamp = log_item['timestamp']
+    
+            # Log runtime PDSCH information
+            self.log_info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+" "
+            + str(log_item["MCS 0"])+" "
+            + str(log_item["MCS 1"])+" "
+            + str(log_item["TBS 0"])+" "
+            + str(log_item["TBS 1"])+" "
+            + str(log_item["PDSCH RNTI Type"])) 
 
             # Broadcast bandwidth to other apps
             if log_item["PDSCH RNTI Type"] == "C-RNTI":
-                bcast_dict={}
-                bcast_dict['Bandwidth (Mbps)'] = str((log_item["TBS 0"]+log_item["TBS 1"])/1000.0)
-                bcast_dict['Modulation 0'] = str(log_item["MCS 0"])
-                bcast_dict['Modulation 1'] = str(log_item["MCS 1"])
+                # bcast_dict={}
+                # bcast_dict['Bandwidth (Mbps)'] = str((log_item["TBS 0"]+log_item["TBS 1"])/1000.0)
+                # bcast_dict['Modulation 0'] = str(log_item["MCS 0"])
+                # bcast_dict['Modulation 1'] = str(log_item["MCS 1"])
 
-                self.broadcast_info('LTE_BW',bcast_dict)
+                # self.broadcast_info('LTE_BW',bcast_dict)
+
+
+                self.lte_bw += (log_item["TBS 0"]+log_item["TBS 1"])/1000.0
+                if (log_item['timestamp']-self.prev_timestamp).total_seconds() >= 1.0:
+                    bcast_dict = {}
+                    bcast_dict['Bandwidth (Mbps)'] = self.lte_bw
+                    self.broadcast_info('LTE_BW',bcast_dict)
+                    self.prev_timestamp = log_item['timestamp']
 
 
             # if not self.init_timestamp:
