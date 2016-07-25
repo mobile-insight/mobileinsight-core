@@ -75,7 +75,8 @@ class LtePhyAnalyzer(Analyzer):
                 self.lte_bw += (log_item["TBS 0"]+log_item["TBS 1"])/1000.0
                 if (log_item['timestamp']-self.prev_timestamp).total_seconds() >= self.avg_window:
                     bcast_dict = {}
-                    bcast_dict['Bandwidth (Mbps)'] = str(round(self.lte_bw/(log_item['timestamp']-self.prev_timestamp).total_seconds(),2))
+                    # bcast_dict['Bandwidth (Mbps)'] = str(round(self.lte_bw/(log_item['timestamp']-self.prev_timestamp).total_seconds(),2))
+                    bcast_dict['Bandwidth (Mbps)'] = str(round(self.lte_bw,2))
                     self.broadcast_info('LTE_BW',bcast_dict)
                     # Reset bandwidth statistics
                     self.prev_timestamp = log_item['timestamp']
