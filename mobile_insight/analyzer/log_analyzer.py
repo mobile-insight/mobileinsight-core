@@ -73,6 +73,7 @@ class LogAnalyzer(Analyzer):
 
         :param msg: the received message
         """
+        self.log_info("__dump_message")
         if self.selectedTypes \
         and msg.type_id not in self.selectedTypes:
             return
