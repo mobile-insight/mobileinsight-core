@@ -1,7 +1,9 @@
 # !/usr/bin/python
 # Filename: element.py
 """
-Basic abstractions for the trace collector and analyzer.
+Basic abstractions for the trace collector and analyzer. 
+It defines send/receive abstractions of cellular messages, 
+logging functions and interface to other applications (MI-APP, mobile-version only)
 
 Author: Yuanjie Li
 """
@@ -12,6 +14,9 @@ __all__ = ["Event", "Element"]
 is_android=False
 try:
     from jnius import autoclass #For Android
+    IntentClass = autoclass("android.content.Intent")
+    JavaString = autoclass("java.lang.String")
+    import mi2app_utils
     is_android=True
 except Exception, e:
     is_android=False
@@ -106,8 +111,6 @@ class Element(object):
         """
         pass
 
-    #logging functions: please use this one
-
     def set_log(self,logpath,loglevel=logging.INFO):
         """
         Set the logging in analyzers.
@@ -122,8 +125,13 @@ class Element(object):
         # self.logger=logging.getLogger('mobileinsight_logger')
         Element.logger=logging.getLogger('mobileinsight_logger')
 
-
     def log_info(self, msg):
+
+        """
+        INFO_level log printout
+
+        :param msg: raw messages to be logged
+        """
 
         if is_android:
             Element.logger.info(
@@ -136,8 +144,13 @@ class Element(object):
                 + self.__class__.__name__+']\033[0m: '+msg
                 )
 
-
     def log_debug(self, msg):
+
+        """
+        DEBUG_level log printout
+
+        :param msg: raw messages to be logged
+        """
     
         if is_android:
             Element.logger.debug(
@@ -151,6 +164,12 @@ class Element(object):
 
     def log_warning(self, msg):
 
+        """
+        WARNING_level log printout
+
+        :param msg: raw messages to be logged
+        """
+
         if is_android:
             Element.logger.warning(
                 "[b][color=ffff00][WARNING][/color] ["
@@ -163,6 +182,12 @@ class Element(object):
 
     def log_error(self, msg):
 
+        """
+        ERROR_level log printout
+
+        :param msg: raw messages to be logged
+        """
+
         if is_android:
             Element.logger.error(
                 "[b][color=ff0000][ERROR][/color] ["
@@ -174,6 +199,13 @@ class Element(object):
                 + self.__class__.__name__+']\033[0m: '+msg)
 
     def log_critical(self, msg):
+
+        """
+        CRITICAL_level log printout
+
+        :param msg: raw messages to be logged
+        """
+
         if is_android:
             Element.logger.critical(
                 "[b][color=ff0000][CRITICAL][/color] ["
@@ -183,3 +215,48 @@ class Element(object):
             Element.logger.critical(
                 "\033[31m\033[1m[CRITICAL]\033[0m\033[0m\033[1m ["
                 + self.__class__.__name__+']\033[0m: '+msg)
+
+    def broadcast_info(self, method, msg_dict):
+        """
+        (Mobile-version only) Broadcast monitor/analyzer information to other Android apps.
+        This method is the interface between MobileInsight and Android apps requiring cellular info.
+        It leverages Android's intent-based broadcast mechanism.
+
+        The intent is per-analyzer/monitor based, and the action is named as follows:
+        `MobileInsight.ANALYZER/MONITOR-NAME.method`
+         
+        where ANALYZER/MONITOR-NAME is the class name of the monitor/analyzer, 
+        and method is analyzer/monitor-specific method to notify the Android apps
+
+        :param method: analyzer/monitor-specific methods for broadcast action
+        :type method: string
+        :param msg_dict: A dictionary that lists the information to be broadcasted.
+        :type msg_dict: string->string dictionary
+        """
+        if not is_android:
+            # Currently only support Android mobile version
+            return
+
+        if not isinstance(method,str) \
+        or not isinstance(msg_dict,dict):
+            return
+
+        # Create broadcast intent
+        intent = IntentClass()
+        action = 'MobileInsight.'+self.__class__.__name__+'.'+method
+        intent.setAction(action)
+
+        # Put extras into intent
+        for item in msg_dict:
+            # self.log_info('key='+item+' value='+msg_dict[item])
+            intent.putExtra(JavaString(item),JavaString(msg_dict[item]))   
+
+        # Broadcast message
+        try:
+            mi2app_utils.pyService.sendBroadcast(intent) 
+        except Exception, e:
+            import traceback
+            self.log_error(str(traceback.format_exc()))
+
+
+

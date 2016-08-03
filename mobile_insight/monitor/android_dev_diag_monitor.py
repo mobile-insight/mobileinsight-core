@@ -31,6 +31,9 @@ try:
     from jnius import autoclass #For Android
     try:
         service_context = autoclass('org.renpy.android.PythonService').mService
+        if not service_context:
+            service_context = cast("android.app.Activity",
+                            autoclass("org.renpy.android.PythonActivity").mActivity)
     except Exception, e:
     	service_context = cast("android.app.Activity",
                             autoclass("org.renpy.android.PythonActivity").mActivity)
@@ -239,6 +242,9 @@ class AndroidDevDiagMonitor(Monitor):
 
     def _mkfifo(self, fifo_path):
         try:
+            if os.path.exists(fifo_path):
+                # self._run_shell_cmd("rm %s " % fifo_path, wait=True)
+                os.remove(fifo_path)
             os.mknod(fifo_path, 0666 | stat.S_IFIFO)
         except OSError as err:
             if err.errno == errno.EEXIST:   # if already exists, skip this step

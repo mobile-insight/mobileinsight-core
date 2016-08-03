@@ -21,6 +21,12 @@ class LtePhyAnalyzer(Analyzer):
         self.init_timestamp=None
 
 
+        # Record per-second bandwidth
+        self.lte_bw = 0
+        self.prev_timestamp = None
+        self.avg_window = 1.0 # Average link BW time window (1.0 is no average by default)
+
+
     def set_source(self,source):
         """
         Set the trace source. Enable the cellular signaling messages
@@ -32,42 +38,48 @@ class LtePhyAnalyzer(Analyzer):
         #Phy-layer logs
         source.enable_log("LTE_PHY_PDSCH_Packet")
 
-    def rnti_conversion(self,rnti):
-        """
-        Convert RNTI to corresponding category
-
-        :param rnti: RNTI from the message
-        :type rnti: int
-        """
-        if rnti == 0:
-            return "unknown"
-        elif rnti ==  0xFFFD:
-            return "M-RNTI"
-        elif rnti == 0xFFFE:
-            return "P-RNTI"
-        elif rnti == 0xFFFF:
-            return "SI-RNTI"
-        elif rnti >= 0xFFF4 and rnti <=0xFFFC:
-            return "reserved"    
-
     def __msg_callback(self,msg):
 
         if msg.type_id=="LTE_PHY_PDSCH_Packet":
             log_item = msg.data.decode()
 
-            # self.log_info(str(hex(log_item["PDSCH RNTIl ID"])))
-
             if not self.init_timestamp:
                 self.init_timestamp = log_item['timestamp']
-                self.log_info("0 "
-                + str(log_item["MCS 0"])+" "
-                + str(log_item["MCS 1"])+" "
-                + str(log_item["TBS 0"])+" "
-                + str(log_item["TBS 1"]))
-            else:
-                self.log_info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+" "
-                + str(log_item["MCS 0"])+" "
-                + str(log_item["MCS 1"])+" "
-                + str(log_item["TBS 0"])+" "
-                + str(log_item["TBS 1"])) 
+                self.prev_timestamp = log_item['timestamp']
+    
+            # Log runtime PDSCH information
+            self.log_info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+" "
+            + str(log_item["MCS 0"])+" "
+            + str(log_item["MCS 1"])+" "
+            + str(log_item["TBS 0"])+" "
+            + str(log_item["TBS 1"])+" "
+            + str(log_item["PDSCH RNTI Type"])) 
+
+            # self.log_info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+"s "
+            # + "MCS0=" + str(log_item["MCS 0"])+" "
+            # + "MCS1=" + str(log_item["MCS 1"])+" "
+            # + "TBS0=" + str(log_item["TBS 0"])+" "
+            # + "TBS1=" + str(log_item["TBS 1"])+" "
+            # + "C-RNTI=" + str(log_item["PDSCH RNTI Type"])) 
+
+            # Broadcast bandwidth to other apps
+            if log_item["PDSCH RNTI Type"] == "C-RNTI":
+                # bcast_dict={}
+                # bcast_dict['Bandwidth (Mbps)'] = str((log_item["TBS 0"]+log_item["TBS 1"])/1000.0)
+                # bcast_dict['Modulation 0'] = str(log_item["MCS 0"])
+                # bcast_dict['Modulation 1'] = str(log_item["MCS 1"])
+
+                # self.broadcast_info('LTE_BW',bcast_dict)
+
+
+                self.lte_bw += (log_item["TBS 0"]+log_item["TBS 1"])
+                if (log_item['timestamp']-self.prev_timestamp).total_seconds() >= self.avg_window:
+                    bcast_dict = {}
+                    bandwidth = self.lte_bw/((log_item['timestamp']-self.prev_timestamp).total_seconds()*1000000.0)
+                    bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
+                    # bcast_dict['Bandwidth (Mbps)'] = str(round(self.lte_bw,2))
+                    self.broadcast_info('LTE_BW',bcast_dict)
+                    # Reset bandwidth statistics
+                    self.prev_timestamp = log_item['timestamp']
+                    self.lte_bw = 0
         	
