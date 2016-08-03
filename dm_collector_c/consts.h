@@ -214,7 +214,7 @@ const ValueName LogPacketTypeID_To_Name [] = {
     {LTE_LL1_PUSCH_CSF,
         "LTE_PHY_PUSCH_CSF", false},
     {LTE_ML1_CDRX_Events_Info,
-        "LTE_PHY_CDRX_Events_Info", false},
+        "LTE_RRC_CDRX_Events_Info", false},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__
