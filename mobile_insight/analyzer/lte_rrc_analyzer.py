@@ -231,7 +231,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         self.log_info("DRX state="+str(msg['Records'][-1]['CDRX Event']))
         # Broadcast to other apps
         drx_state = {}
-        drx_state['DRX state'] = "CONNECTED."+str(msg['Records'][-1]['CDRX Event'])
+        drx_state['Conn state'] = "CONNECTED"
+        drx_state['DRX state'] = str(msg['Records'][-1]['CDRX Event'])
         self.broadcast_info('DRX',drx_state)
 
 
@@ -808,7 +809,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 # self.log_info("FSM test: "+self.get_protocol_state())
 
                 drx_state = {}
-                drx_state['DRX state'] = "DISCONNECTED"
+                drx_state['Conn state'] = "DISCONNECTED"
+                drx_state['DRX state'] = ""
                 self.broadcast_info('DRX',drx_state)
 
     def set_source(self,source):
