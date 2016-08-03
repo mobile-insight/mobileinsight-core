@@ -222,6 +222,12 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         elif msg.type_id == "LTE_RRC_Serv_Cell_Info":
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_serv_cell(raw_msg)
+        elif msg.type_id == "LTE_RRC_CDRX_Events_Info":
+            self.__callback_drx(log_item_dict)
+
+
+    def __callback_drx(self,msg):
+        self.log_info("CDRX:"+str(msg))
 
     def __callback_serv_cell(self,msg):
 
@@ -802,6 +808,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         #enable LTE RRC log
         source.enable_log("LTE_RRC_OTA_Packet")
         source.enable_log("LTE_RRC_Serv_Cell_Info")
+        source.enable_log("LTE_RRC_CDRX_Events_Info")
 
     def get_cell_list(self):
         """

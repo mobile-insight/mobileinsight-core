@@ -77,7 +77,8 @@ class LtePhyAnalyzer(Analyzer):
                     bcast_dict = {}
                     bandwidth = self.lte_bw/((log_item['timestamp']-self.prev_timestamp).total_seconds()*1000000.0)
                     bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
-                    # bcast_dict['Bandwidth (Mbps)'] = str(round(self.lte_bw,2))
+                    bcast_dict['Modulation 0'] = str(log_item["MCS 0"])
+                    bcast_dict['Modulation 1'] = str(log_item["MCS 1"])
                     self.broadcast_info('LTE_BW',bcast_dict)
                     # Reset bandwidth statistics
                     self.prev_timestamp = log_item['timestamp']
