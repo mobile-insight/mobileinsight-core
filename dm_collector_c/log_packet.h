@@ -2271,6 +2271,23 @@ const ValueName ValueNameFrequencySelectivePMI [] = {
     {0, "WideBand"},
 };
 
+const ValueName ValueNameCDRXEvent [] = {
+    {0, "ON_DURATION_TIMER_START"},
+    {1, "ON_DURATION_TIMER_END"},
+    {2, "SHORT_CYCLE_START"},
+    {3, "SHORT_CYCLE_END"},
+    {4, "LONG_CYCLE_START"},
+    {5, "LONG_CYCLE_END"},
+    {6, "UL_RETX_TIMER_START"},
+    {7, "UL_RETX_TIMER_END"},
+    {8, "INACTIVITY_TIMER_START"},
+    {9, "INACTIVITY_TIMER_END"},
+    {10, "DL_DRX_RETX_TIMER_START"},
+    {11, "DL_DRX_RETX_TIMER_END"},
+    {12, "CDRX_ON_2_OFF"},
+    {13, "CDRX_OFF_2_ON"},
+};
+
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},

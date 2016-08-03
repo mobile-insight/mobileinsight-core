@@ -27,6 +27,7 @@
 #include "lte_ll1_pusch_tx_report.h"
 #include "lte_ml1_rlm_report.h"
 #include "lte_ll1_pusch_csf.h"
+#include "lte_ml1_cdrx_events_info.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -41,9 +42,9 @@ namespace patch
 {
     template < typename T > std::string to_string( const T& n )
     {
-        std::ostringstream stm ;
+        std::ostringstream stm;
         stm << n ;
-        return stm.str() ;
+        return stm.str();
     }
 }
 
@@ -4583,6 +4584,12 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 ARRAY_SIZE(LteLl1PuschCsf_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_lte_ll1_pusch_csf_payload(b, offset, length, result);
+        break;
+    case LTE_ML1_CDRX_Events_Info:
+        offset += _decode_by_fmt(LteMl1CdrxEventsInfo_Fmt,
+                ARRAY_SIZE(LteMl1CdrxEventsInfo_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_ml1_cdrx_events_info_payload(b, offset, length, result);
         break;
     default:
         break;
