@@ -72,7 +72,7 @@ class DumpAnalyzer(Analyzer):
         # source.enable_log("LTE_MAC_Rach_Trigger")
         # source.enable_log("LTE_MAC_Rach_Attempt")
 
-        source.enable_log("LTE_PHY_PDSCH_Packet")
+        # source.enable_log("LTE_PHY_PDSCH_Packet")
         # source.enable_log("LTE_PHY_Serv_Cell_Measurement")
         # source.enable_log("LTE_PHY_Connected_Mode_Intra_Freq_Meas")
         # source.enable_log("LTE_PHY_Inter_RAT_Measurement")
@@ -90,7 +90,7 @@ class DumpAnalyzer(Analyzer):
         # source.enable_log("LTE_PHY_PDSCH_Decoding_Result")
         # source.enable_log("LTE_PHY_PUSCH_Tx_Report")
         # source.enable_log("LTE_PHY_RLM_Report")
-        # source.enable_log("LTE_PHY_PUSCH_CSF")
+        source.enable_log("LTE_PHY_PUSCH_CSF")
 
 
         # source.enable_log("1xEV_Rx_Partial_MultiRLP_Packet")

@@ -2113,10 +2113,14 @@ const ValueName ValueNameSearchSpaceType [] = {
 const ValueName ValueNameRNTIType [] = {
     // 4 bits
     {0, "C-RNTI"},
+    {1, "SPS-RNTI"},
     {2, "P-RNTI"},
     {3, "RA-RNTI"},
     {4, "Temporary-C-RNTI"},
-    {5, "SI-RNTI"}
+    {5, "SI-RNTI"},
+    {6, "TPC-PUSCH-RNTI"},
+    {7, "TPC-PUCCH-RNTI"},
+    {8, "MBMS RNTI"},
 };
 const ValueName ValueNameDCIFormat [] = {
     // 4 bits
@@ -2130,11 +2134,8 @@ const ValueName ValueNameDCIFormat [] = {
     {5, "Format 1D"},
     {6, "Format 2"},
     {7, "Format 2A"},
-    // {8, "Format 2B"},
-    // {9, "Format 2C"},
-    {10, "Format 3"},
-    {11, "Format 3A"},
-    // {12, "Format 4"},
+    {8, "Format 3"},
+    {9, "Format 3A"},
 };
 
 const ValueName ValueNameMatchOrNot [] = {
@@ -2161,6 +2162,7 @@ const ValueName ValueNamePruneStatus [] = {
 
 const ValueName ValueNameFrameStructure [] = {
     {0, "FDD"},
+    {1, "TDD"},
 };
 
 const ValueName ValueNameNumeNBAntennas [] = {
@@ -2226,8 +2228,14 @@ const ValueName ValueNameOnOrOff [] = {
 };
 
 const ValueName ValueNameCSFTxMode [] = {
+    {0, "TM_Invalid"},
+    {1, "TM_Single_Ant_Port_0"},
+    {2, "TM_TD_Rank_1"},
     {3, "TM_OL_SM"},
     {4, "TM_CL_SM"},
+    {5, "TM_MU_MIMO"},
+    {6, "TM_CL_Rank_1_PC"},
+    {7, "TM_Single_Ant_Port_5"},
 };
 
 const ValueName ValueNameRankIndex [] = {
@@ -2240,6 +2248,9 @@ const ValueName ValueNameCsiMeasSetIndex [] = {
 };
 
 const ValueName ValueNamePuschReportingMode [] = {
+    {0, "MODE_APERIODIC_RM12"},
+    {1, "MODE_APERIODIC_RM20"},
+    {2, "MODE_APERIODIC_RM22"},
     {3, "MODE_APERIODIC_RM30"},
     {4, "MODE_APERIODIC_RM31"},
 };

@@ -88,6 +88,7 @@ static int _decode_lte_ml1_rlm_report_payload (const char *b,
                 PyList_Append(result_record, t1);
                 Py_DECREF(t1);
                 Py_DECREF(result_record_item);
+
             }
             PyObject *t = Py_BuildValue("(sOs)", "Records",
                     result_record, "list");

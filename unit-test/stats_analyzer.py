@@ -154,36 +154,52 @@ class StatsAnalyzer(Analyzer):
             data = pd.DataFrame(dict([ (k, pd.Series(v)) for k, v in self.log_pdsch.iteritems() ]))
             print "PDSCH Demapper Configuration"
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: interval"
             print data['interval'].describe()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Serving Cell ID"
             print data['servingCellId'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: RNTI Type"
             print data['rntiType'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Num Tx Antennas"
             print data['numTxAntennas'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Num Rx Antennas"
             print data['numRxAntennas'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Spatial Rank"
             print data['spatialRank'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Number of RB 0"
             print data['RB0'].describe()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Number of RB 1"
             print data['RB1'].describe()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Frequency Selective PMI"
             print data['frequencySelectivePMI'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: PMI Index"
             print data['pmiIndex'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Transmission Scheme"
             print data['transmissionScheme'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Modulation 0"
             print data['Modulation0'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Modulation 1"
             print data['Modulation1'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: TBS 0"
             print data['bitTBS0'].describe()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: TBS 1"
             print data['bitTBS1'].describe()
             print "---------------------------------------------------------------"
+            print "PDSCH Packet: Carrier Index"
             print data['carrierIndex'].value_counts()
             print "###############################################################"
 
@@ -191,46 +207,68 @@ class StatsAnalyzer(Analyzer):
             data = pd.DataFrame(dict([ (k, pd.Series(v)) for k, v in self.log_pdschStats.iteritems() ]))
             print "PDSCH Stat Indication"
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Interval"
             print data['interval'].describe()
+            print "PDSCH Stat: "
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Number of Records"
             print data['numRecords'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Number of RBs"
             print data['numRBs'].describe()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Number of Layers"
             print data['numLayers'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Number of Transport Blocks Present"
             print data['numTBPresent'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Serving Cell Index"
             print data['servingCellIndex'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: HSIC Enabled"
             print data['hsicEnabled'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: HARQ ID"
             print data['harqId'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: RV"
             print data['rv'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: NDI"
             print data['ndi'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: CRC Result"
             print data['crcResult'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: RNTI Type"
             print data['rntiType'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Transport Block Index"
             print data['tbIndex'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Discarded ReTx Present"
             print data['discardedReTxPresent'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Did Recombining"
             print data['didRecombining'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Transport Block Size"
             print data['tbSize'].describe()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: MCS"
             print data['mcs'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Number of RBs in this Transport Block"
             print data['tbNumRBs'].describe()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: ACK/NACK Decision"
             print data['ackNackDecision'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: PMCH ID"
             print data['pmchId'].value_counts()
             print "---------------------------------------------------------------"
+            print "PDSCH Stat: Area ID"
             print data['areaId'].value_counts()
             print "###############################################################"
 
@@ -239,29 +277,42 @@ class StatsAnalyzer(Analyzer):
             print "LTE ML1 Connected Mode LTE Intra-Freq Meas Results"
             print "---------------------------------------------------------------"
             print data['interval'].describe()
+            print "Connected Mode LTE Intra-Freq Meas Results: Interval"
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: E-ARFCN"
             print data['earfcn'].value_counts()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Serving Physical Cell ID"
             print data['servingPhysicalCellId'].value_counts()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Serving RSRP"
             print data['servingRsrp'].describe()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Serving RSRQ"
             print data['servingRsrq'].describe()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Number of Neighbor Cells"
             print data['numNeighborCells'].value_counts()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Number of Detected Cells"
             print data['numDetectedCells'].value_counts()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Neighbor Physical Cell ID"
             print data['neighborPhysicalCellId'].value_counts()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Neighbor Cell RSRP"
             print data['neighborRsrp'].describe()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Neighbor Cell RSRQ"
             print data['neighborRsrq'].describe()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Detected Physical Cell ID"
             print data['detectedPhysicalCellId'].value_counts()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Detected SSS Corr Value"
             print data['detectedSSSCorrValue'].describe()
             print "---------------------------------------------------------------"
+            print "Connected Mode LTE Intra-Freq Meas Results: Detected Reference Time"
             print data['detectedReferenceTime'].describe()
             print "###############################################################"
 
@@ -269,18 +320,25 @@ class StatsAnalyzer(Analyzer):
             data = pd.DataFrame(dict([ (k, pd.Series(v)) for k, v in self.log_rlm.iteritems() ]))
             print "LTE ML1 RLM Report"
             print "---------------------------------------------------------------"
+            print "RLM Report: Interval"
             print data['interval'].describe()
             print "---------------------------------------------------------------"
+            print "RLM Report: Number of Records"
             print data['numRecords'].describe()
             print "---------------------------------------------------------------"
+            print "RLM Report: Out of Sync BLER"
             print data['outofSyncBler'].describe()
             print "---------------------------------------------------------------"
+            print "RLM Report: In Sync BLER"
             print data['inSyncBler'].describe()
             print "---------------------------------------------------------------"
+            print "RLM Report: Out of Sync Count"
             print data['outofSyncCount'].describe()
             print "---------------------------------------------------------------"
+            print "RLM Report: In Sync Count"
             print data['inSyncCount'].describe()
             print "---------------------------------------------------------------"
+            print "RLM Report: T310 Timer Status (in second)"
             print data['t310TimerStatus'].value_counts()
             print "###############################################################"
 
@@ -288,30 +346,43 @@ class StatsAnalyzer(Analyzer):
             data = pd.DataFrame(dict([ (k, pd.Series(v)) for k, v in self.log_puschcsf.iteritems() ]))
             print "LTE LL1 PUSCH CSF"
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: Interval"
             print data['interval'].describe()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: PUSCH Reporting Mode"
             print data['puschReportingMode'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: Rank Index"
             print data['rankIndex'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: CSI Meas Set Index"
             print data['csiMeasSetIndex'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: Number of Sub-Bands"
             print data['numSubBands'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: Wide Band CQI CW0"
             print data['widebandCQICW0'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: Wide Band CQI CW1"
             print data['widebandCQICW1'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: Sub-Band Size"
             print data['subBandSize'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: Single WB PMI"
             print data['singleWBPMI'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: Single MB PMI"
             print data['singleMBPMI'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: CSF Tx Mode"
             print data['csfTxMode'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: Carrier Index"
             print data['carrierIndex'].value_counts()
             print "---------------------------------------------------------------"
+            print "PUSCH CSF: Num CSI-RS Ports"
             print data['numCSIrsPorts'].value_counts()
             print "###############################################################"
 
