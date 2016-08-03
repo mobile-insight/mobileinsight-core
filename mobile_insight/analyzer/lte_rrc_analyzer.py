@@ -227,7 +227,13 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
 
     def __callback_drx(self,msg):
-        self.log_info("CDRX:"+str(msg))
+
+        self.log_info("DRX state="+str(msg['Records'][-1]['CDRX Event']))
+        # Broadcast to other apps
+        drx_state = {}
+        drx_state['DRX state'] = "CONNECTED."+str(msg['Records'][-1]['CDRX Event'])
+        self.broadcast_info('DRX',drx_state)
+
 
     def __callback_serv_cell(self,msg):
 
@@ -792,10 +798,18 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 # self.log_info(self.__status.dump())
                 # self.log_info("FSM test: "+self.get_protocol_state())
 
+                drx_state = {}
+                drx_state['DRX state'] = "CONNECTED"
+                self.broadcast_info('DRX',drx_state)
+
             if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
                 self.__status.conn = False
                 # self.log_info(self.__status.dump())
                 # self.log_info("FSM test: "+self.get_protocol_state())
+
+                drx_state = {}
+                drx_state['DRX state'] = "DISCONNECTED"
+                self.broadcast_info('DRX',drx_state)
 
     def set_source(self,source):
         """
