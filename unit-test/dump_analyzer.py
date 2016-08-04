@@ -91,7 +91,8 @@ class DumpAnalyzer(Analyzer):
         # source.enable_log("LTE_PHY_PUSCH_Tx_Report")
         # source.enable_log("LTE_PHY_RLM_Report")
         # source.enable_log("LTE_PHY_PUSCH_CSF")
-        source.enable_log("LTE_PHY_CDRX_Events_Info")
+        # source.enable_log("LTE_PHY_CDRX_Events_Info")
+        source.enable_log("WCDMA_RRC_States")
 
 
         # source.enable_log("1xEV_Rx_Partial_MultiRLP_Packet")

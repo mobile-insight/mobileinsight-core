@@ -28,6 +28,7 @@
 #include "lte_ml1_rlm_report.h"
 #include "lte_ll1_pusch_csf.h"
 #include "lte_ml1_cdrx_events_info.h"
+#include "wcdma_rrc_states.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -4590,6 +4591,9 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 ARRAY_SIZE(LteMl1CdrxEventsInfo_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_lte_ml1_cdrx_events_info_payload(b, offset, length, result);
+        break;
+    case WCDMA_RRC_States:
+        offset += _decode_wcdma_rrc_states_payload(b, offset, length, result);
         break;
     default:
         break;

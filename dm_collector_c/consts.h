@@ -20,6 +20,7 @@ enum LogPacketType {
     _1xEV_Connection_Release = 0x1071,
     WCDMA_CELL_ID = 0x4127,
     WCDMA_Signaling_Messages = 0x412F,
+    WCDMA_RRC_States = 0x4125,
     UMTS_NAS_GMM_State = 0x7130,
     UMTS_NAS_MM_State = 0x7131,
     UMTS_NAS_MM_REG_State = 0x7135,
@@ -98,6 +99,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "WCDMA_RRC_Serv_Cell_Info",true},
     {WCDMA_Signaling_Messages,  // WCDMA signaling messages
         "WCDMA_RRC_OTA_Packet",true},
+    {WCDMA_RRC_States,
+        "WCDMA_RRC_States", false},
     {UMTS_NAS_GMM_State,
         "UMTS_NAS_GMM_State",true},
     {UMTS_NAS_MM_State,

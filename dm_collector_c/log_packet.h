@@ -2288,6 +2288,15 @@ const ValueName ValueNameCDRXEvent [] = {
     {13, "CDRX_OFF_2_ON"},
 };
 
+const ValueName ValueNameWcdmaRrcStates [] = {
+    {0, "DISCONNECTED"},
+    {1, "CONNECTING"},
+    {2, "CELL_FACH"},
+    {3, "CELL_DCH"},
+    {4, "CELL_PCH"},
+    {5, "URA_PCH"},
+};
+
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},

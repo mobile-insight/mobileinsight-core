@@ -120,17 +120,44 @@ static int _decode_lte_ml1_cdrx_events_info_payload (const char *b,
                         ARRAY_SIZE(ValueNameCDRXEvent, ValueName),
                         "(MI)Unknown");
                 utemp = _search_result_uint(result_record_item, "Internal Field Mask");
-                std::string strInternalFieldMask = "";
-                for (int i = 1; i <= 32; i++) {
-                    if ((utemp >> (i - 1)) & 1 == 1) {
-                        if (i == 4) {
-                            strInternalFieldMask += "INACTIVITY_TIMER";
-                        } else if (i == 8) {
-                            strInternalFieldMask += "PENDING_UL_RETX";
-                        } else {
-                            strInternalFieldMask += (":(MI)Unknown-" + SSTR(i));
-                        }
+                std::string strInternalFieldMask = "|";
+                int count = 0;
+                if (((utemp >> (1 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "CYCLE_START|";
+                    count ++;
+                }
+                if (((utemp >> (3 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "ON_DURATION_TIMER|";
+                    count ++;
+                }
+                if (((utemp >> (4 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "INACTIVITY_TIMER|";
+                    count ++;
+                }
+                if (((utemp >> (5 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "DRX_RETX_TIMER|";
+                    count ++;
+                }
+                if (((utemp >> (6 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "MISSING_CYCLE_TIMER|";
+                    count ++;
+                }
+                if (((utemp >> (7 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "PENDING_SR|";
+                    count ++;
+                }
+                if (((utemp >> (8 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "PENDING_UL_RETX|";
+                    count ++;
+                }
+                int check = 0;
+                for (int i = 0; i < 32; i++) {
+                    if (((utemp >> i) & 1) == 1) {
+                        check ++;
                     }
+                }
+                if (check != count) {
+                    strInternalFieldMask += "(MI)Unknown|";
                 }
                 PyObject *pystr = Py_BuildValue("s", strInternalFieldMask.c_str());
                 old_object = _replace_result(result_record_item, "Internal Field Mask",
