@@ -228,7 +228,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
     def __callback_drx(self,msg):
 
-        self.log_info("DRX state="+str(msg['Records'][-1]['CDRX Event']))
+        # self.log_info("DRX state="+str(msg['Records'][-1]['CDRX Event']))
         # Broadcast to other apps
         drx_state = {}
         drx_state['Conn state'] = "CONNECTED"
