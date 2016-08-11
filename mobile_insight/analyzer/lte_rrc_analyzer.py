@@ -228,12 +228,16 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
     def __callback_drx(self,msg):
 
-        # self.log_info("DRX state="+str(msg['Records'][-1]['CDRX Event']))
         # Broadcast to other apps
         drx_state = {}
         drx_state['Conn state'] = "CONNECTED"
-        drx_state['DRX state'] = str(msg['Records'][-1]['CDRX Event'])
+        drx_transition=""
+        for item in msg['Records']:
+            drx_transition=drx_transition+str(item['SFN'])+";"+str(item['Sub-FN'])+";"+item['CDRX Event']+";\n"
+        drx_state['DRX state'] = drx_transition
         self.broadcast_info('DRX',drx_state)
+
+        # self.log_info(drx_transition)
 
 
     def __callback_serv_cell(self,msg):
