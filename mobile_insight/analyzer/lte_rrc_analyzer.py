@@ -804,8 +804,6 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 # self.log_info("FSM test: "+self.get_protocol_state())
 
                 drx_state = {}
-                drx_state['DRX state'] = "CONNECTED"
-                self.broadcast_info('DRX',drx_state)
 
             if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
                 self.__status.conn = False
@@ -813,8 +811,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 # self.log_info("FSM test: "+self.get_protocol_state())
 
                 drx_state = {}
-                drx_state['Conn state'] = "DISCONNECTED"
-                drx_state['DRX state'] = ""
+                drx_state['Conn state'] = "IDLE"
+                drx_state['DRX state'] = "(None)"
                 self.broadcast_info('DRX',drx_state)
 
     def set_source(self,source):
