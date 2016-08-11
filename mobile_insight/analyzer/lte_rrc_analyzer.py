@@ -236,6 +236,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             if item['CDRX Event'] == "INACTIVITY_TIMER_START":
                 drx_state['DRX state'] = "CRX"
                 self.broadcast_info('DRX',drx_state)
+            elif item['CDRX Event'] == "INACTIVITY_TIMER_END":
+                drx_state['DRX state'] = "CRX"
+                self.broadcast_info('DRX',drx_state)
             elif item['CDRX Event'] == "LONG_CYCLE_START":
                 drx_state['DRX state'] = "LONG_DRX"
                 self.broadcast_info('DRX',drx_state)
