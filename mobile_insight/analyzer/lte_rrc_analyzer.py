@@ -816,7 +816,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 drx_state = {}
                 drx_state['Conn state'] = "IDLE"
-                drx_state['DRX state'] = "(None)"
+                drx_state['DRX state'] = "IDLE"
                 self.broadcast_info('DRX',drx_state)
 
     def set_source(self,source):
