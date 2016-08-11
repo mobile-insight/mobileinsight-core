@@ -45,12 +45,15 @@ class LtePhyAnalyzer(Analyzer):
         self.init_timestamp=None
 
 
-        # Record per-second bandwidth
-        self.lte_bw = 0
-        self.prev_timestamp = None
-        self.avg_window = 1.0 # Average link BW time window (1.0 is no average by default)
+        # Record per-second downlink bandwidth
+        self.lte_dl_bw = 0 # Downlink bandwidth (from PDSCH)
+        self.lte_ul_bw = 0 # Uplink bandwidth (from PUSCH DCI grants)
+        self.lte_ul_grant_utilized = 0 # Uplink grant utilization (in bits)
+        self.prev_timestamp_dl = None # Track timestamp to calculate avg DL bandwidth
+        self.prev_timestamp_ul = None # Track timestamp to calculate avg DL bandwidth
+        self.avg_window = 1.0 # Average link BW time window (in seconds)
 
-        # Record last observed CQI (for prediction)
+        # Record last observed CQI (for DL bandwidth prediction)
         self.cur_cqi0 = None
         self.cur_cqi1 = None
         self.cur_tbs = None
@@ -66,6 +69,7 @@ class LtePhyAnalyzer(Analyzer):
         #Phy-layer logs
         source.enable_log("LTE_PHY_PDSCH_Packet")
         source.enable_log("LTE_PHY_PUSCH_CSF")
+        source.enable_log("LTE_MAC_UL_Tx_Statistics") # includes PUSCH grant usage info (~10 msg/s)
 
     def callback_pdsch(self,msg):
         """
@@ -77,7 +81,9 @@ class LtePhyAnalyzer(Analyzer):
 
         if not self.init_timestamp:
             self.init_timestamp = log_item['timestamp']
-            self.prev_timestamp = log_item['timestamp']
+            
+        if not self.prev_timestamp_dl:
+            self.prev_timestamp_dl = log_item['timestamp']
 
         # Log runtime PDSCH information
         # self.log_info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+" "
@@ -98,11 +104,11 @@ class LtePhyAnalyzer(Analyzer):
         if log_item["PDSCH RNTI Type"] == "C-RNTI":
 
             self.cur_tbs = (log_item["TBS 0"]+log_item["TBS 1"])
-            self.lte_bw += (log_item["TBS 0"]+log_item["TBS 1"])
+            self.lte_dl_bw += (log_item["TBS 0"]+log_item["TBS 1"])
 
-            if (log_item['timestamp']-self.prev_timestamp).total_seconds() >= self.avg_window:
+            if (log_item['timestamp']-self.prev_timestamp_dl).total_seconds() >= self.avg_window:
                 bcast_dict = {}
-                bandwidth = self.lte_bw/((log_item['timestamp']-self.prev_timestamp).total_seconds()*1000000.0)
+                bandwidth = self.lte_dl_bw/((log_item['timestamp']-self.prev_timestamp_dl).total_seconds()*1000000.0)
                 pred_bandwidth = self.predict_bw()
                 bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
                 if pred_bandwidth:
@@ -110,10 +116,13 @@ class LtePhyAnalyzer(Analyzer):
                 bcast_dict['Modulation 0'] = str(log_item["MCS 0"])
                 bcast_dict['Modulation 1'] = str(log_item["MCS 1"])
 
+                # Log/notify average bandwidth
+                self.log_info(str(log_item['timestamp']) + ' LTE_DL_Bandwidth=' + bcast_dict['Bandwidth (Mbps)'] + "Mbps")
                 self.broadcast_info('LTE_BW',bcast_dict)
+
                 # Reset bandwidth statistics
-                self.prev_timestamp = log_item['timestamp']
-                self.lte_bw = 0
+                self.prev_timestamp_dl = log_item['timestamp']
+                self.lte_dl_bw = 0
 
 
 
@@ -128,6 +137,53 @@ class LtePhyAnalyzer(Analyzer):
         log_item = msg.data.decode()
         self.cur_cqi0 = log_item['WideBand CQI CW0']
         self.cur_cqi1 = log_item['WideBand CQI CW1']
+
+
+
+    def callback_pusch_grant(self,msg):
+
+        log_item = msg.data.decode()
+
+        if not self.init_timestamp:
+            self.init_timestamp = log_item['timestamp']
+
+        if not self.prev_timestamp_ul:
+           self.prev_timestamp_ul = log_item['timestamp'] 
+
+        # Calculate PUSCH uplink utilization
+        grant_received = 0
+        grant_utilized = 0
+        grant_utilization = 0
+
+        for i in range(0,log_item['Num SubPkt']):
+            grant_received += log_item['Subpackets'][i]['Sample']['Grant received']
+            grant_utilized += log_item['Subpackets'][i]['Sample']['Grant utilized']
+
+        if grant_received != 0:
+            grant_utilization = round(100.0*grant_utilized/grant_received, 2)
+
+        self.log_debug(str(log_item['timestamp'])+" PUSCH UL grant: received="+str(grant_received)+" bytes"
+                     +" used="+str(grant_utilized)+" bytes"
+                     +" utilization="+str(grant_utilization)+"%")
+
+        self.lte_ul_grant_utilized += grant_utilized
+        self.lte_ul_bw += grant_received
+
+        if (log_item['timestamp']-self.prev_timestamp_ul).total_seconds() >= self.avg_window:
+
+            bcast_dict = {}
+            bandwidth = self.lte_ul_bw/((log_item['timestamp']-self.prev_timestamp_ul).total_seconds()*1000000.0)
+            grant_utilization = self.lte_ul_grant_utilized/((log_item['timestamp']-self.prev_timestamp_ul).total_seconds()*1000000.0)
+            bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
+            bcast_dict['Utilized (Mbps)'] = str(round(grant_utilization,2))
+
+            self.log_info(str(log_item['timestamp']) + ' LTE_UL_Bandwidth=' + bcast_dict['Bandwidth (Mbps)'] + "Mbps "
+                         + "UL_utilized="+bcast_dict['Utilized (Mbps)']+"Mbps")
+            self.broadcast_info('LTE_UL_BW',bcast_dict)
+            # Reset bandwidth statistics
+            self.prev_timestamp_ul = log_item['timestamp']
+            self.lte_ul_bw = 0
+            self.lte_ul_grant_utilized = 0
 
 
 
@@ -150,4 +206,6 @@ class LtePhyAnalyzer(Analyzer):
             self.callback_pdsch(msg)
         elif msg.type_id == "LTE_PHY_PUSCH_CSF":
             self.callback_pusch(msg)
+        elif msg.type_id ==  "LTE_MAC_UL_Tx_Statistics":
+            self.callback_pusch_grant(msg)
         	
