@@ -233,11 +233,15 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         drx_state['Conn state'] = "CONNECTED"
         drx_transition=""
         for item in msg['Records']:
-            drx_transition=drx_transition+str(item['SFN'])+";"+str(item['Sub-FN'])+";"+item['CDRX Event']+";\n"
-        drx_state['DRX state'] = drx_transition
-        self.broadcast_info('DRX',drx_state)
-
-        # self.log_info(drx_transition)
+            if item['CDRX Event'] == "INACTIVITY_TIMER_START":
+                drx_state['DRX state'] = "CRX"
+                self.broadcast_info('DRX',drx_state)
+            elif item['CDRX Event'] == "LONG_CYCLE_START":
+                drx_state['DRX state'] = "LONG_DRX"
+                self.broadcast_info('DRX',drx_state)
+            elif item['CDRX Event'] == "SHORT_CYCLE_START":
+                drx_state['DRX state'] = "SHORT_DRX"
+                self.broadcast_info('DRX',drx_state)
 
 
     def __callback_serv_cell(self,msg):
