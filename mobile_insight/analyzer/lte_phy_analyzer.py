@@ -87,12 +87,12 @@ class LtePhyAnalyzer(Analyzer):
         # + str(log_item["TBS 1"])+" "
         # + str(log_item["PDSCH RNTI Type"])) 
 
-        # self.log_info(str((log_item['timestamp']-self.init_timestamp).total_seconds())+"s "
-        # + "MCS0=" + str(log_item["MCS 0"])+" "
-        # + "MCS1=" + str(log_item["MCS 1"])+" "
-        # + "TBS0=" + str(log_item["TBS 0"])+" "
-        # + "TBS1=" + str(log_item["TBS 1"])+" "
-        # + "C-RNTI=" + str(log_item["PDSCH RNTI Type"])) 
+        self.log_debug(str(log_item['timestamp']) + " "
+        + "MCS0=" + str(log_item["MCS 0"]) + " "
+        + "MCS1=" + str(log_item["MCS 1"]) + " "
+        + "TBS0=" + str(log_item["TBS 0"]) + "bits "
+        + "TBS1=" + str(log_item["TBS 1"]) + "bits "
+        + "C-RNTI=" + str(log_item["PDSCH RNTI Type"])) 
 
         # Broadcast bandwidth to other apps
         if log_item["PDSCH RNTI Type"] == "C-RNTI":
@@ -109,10 +109,12 @@ class LtePhyAnalyzer(Analyzer):
                     bcast_dict['Predicted Bandwidth (Mbps)'] = str(round(pred_bandwidth,2))
                 bcast_dict['Modulation 0'] = str(log_item["MCS 0"])
                 bcast_dict['Modulation 1'] = str(log_item["MCS 1"])
+
                 self.broadcast_info('LTE_BW',bcast_dict)
                 # Reset bandwidth statistics
                 self.prev_timestamp = log_item['timestamp']
                 self.lte_bw = 0
+
 
 
     def callback_pusch(self,msg):
@@ -136,7 +138,6 @@ class LtePhyAnalyzer(Analyzer):
 
         """
         if self.cur_cqi0 in cqi_to_bw:
-            self.log_info("Predicted BW = "+str(cqi_to_bw[self.cur_cqi0])+"Mbps")
             return cqi_to_bw[self.cur_cqi0]
         else:
             return None

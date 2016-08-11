@@ -57,7 +57,7 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
         l.addHandler(streamHandler)
         l.propagate = False
 
-        if log_file!="":
+        if log_file:
             fileHandler = logging.FileHandler(log_file, mode='w')
             fileHandler.setFormatter(formatter)
             l.addHandler(fileHandler)  

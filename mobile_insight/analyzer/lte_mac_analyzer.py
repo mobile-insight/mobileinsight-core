@@ -52,16 +52,7 @@ class LteMacAnalyzer(Analyzer):
             if grant_received != 0:
                 grant_utilization = round(100.0*grant_utilized/grant_received, 2)
 
-            timestamp = datetime.datetime.fromtimestamp(float(msg.timestamp)).strftime('%H:%M:%S.%f')
-            self.log_info(timestamp+" MAC UL grant: received="+str(grant_received)+" bytes"
+            self.log_info(str(log_item['timestamp'])+" MAC UL grant: received="+str(grant_received)+" bytes"
                          +" used="+str(grant_utilized)+" bytes"
                          +" utilization="+str(grant_utilization)+"%")
-
-            # self.log_info(str(grant_received)
-            #              +" "+str(grant_utilized)
-            #              +" "+str(grant_utilization))
-
-        # elif msg.type_id=="LTE_PHY_PUSCH_Tx_Report":
-        #     log_item = msg.data.decode()
-        #     self.log_warning(str(log_item))
         	
