@@ -166,8 +166,8 @@ class LtePhyAnalyzer(Analyzer):
                      +" used="+str(grant_utilized)+" bytes"
                      +" utilization="+str(grant_utilization)+"%")
 
-        self.lte_ul_grant_utilized += grant_utilized
-        self.lte_ul_bw += grant_received
+        self.lte_ul_grant_utilized += grant_utilized*8
+        self.lte_ul_bw += grant_received*8
 
         if (log_item['timestamp']-self.prev_timestamp_ul).total_seconds() >= self.avg_window:
 
@@ -176,9 +176,21 @@ class LtePhyAnalyzer(Analyzer):
             grant_utilization = self.lte_ul_grant_utilized/((log_item['timestamp']-self.prev_timestamp_ul).total_seconds()*1000000.0)
             bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
             bcast_dict['Utilized (Mbps)'] = str(round(grant_utilization,2))
+            if self.lte_ul_bw:
+                bcast_dict['Utilization (%)'] = str(round(self.lte_ul_grant_utilized*100.0/self.lte_ul_bw,2));
+            else:
+                bcast_dict['Utilization (%)'] = '0'
 
-            self.log_info(str(log_item['timestamp']) + ' LTE_UL_Bandwidth=' + bcast_dict['Bandwidth (Mbps)'] + "Mbps "
-                         + "UL_utilized="+bcast_dict['Utilized (Mbps)']+"Mbps")
+
+            # self.log_info(str(log_item['timestamp']) + ' LTE_UL_Bandwidth=' + bcast_dict['Bandwidth (Mbps)'] + "Kbps "
+            #              + "UL_utilized="+bcast_dict['Utilized (Mbps)']+"Kbps "
+            #              + "Utilization="+bcast_dict['Utilization (%)']+"%")
+
+            self.log_info(str(log_item['timestamp']) + ' UL ' + bcast_dict['Bandwidth (Mbps)'] + " "
+                         + bcast_dict['Utilized (Mbps)']+" "
+                         + bcast_dict['Utilization (%)']+"")
+
+
             self.broadcast_info('LTE_UL_BW',bcast_dict)
             # Reset bandwidth statistics
             self.prev_timestamp_ul = log_item['timestamp']
