@@ -110,15 +110,15 @@ class LtePhyAnalyzer(Analyzer):
                 bcast_dict = {}
                 bandwidth = self.lte_dl_bw/((log_item['timestamp']-self.prev_timestamp_dl).total_seconds()*1000000.0)
                 pred_bandwidth = self.predict_bw()
-                # bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
+                bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
 
-                """
-                TEST PURPOSE
-                """
-                if pred_bandwidth:
-                    bcast_dict['Bandwidth (Mbps)'] = str(round(pred_bandwidth,2)) #TEST
-                else:
-                    bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
+                # """
+                # TEST PURPOSE
+                # """
+                # if pred_bandwidth:
+                #     bcast_dict['Bandwidth (Mbps)'] = str(round(pred_bandwidth,2)) #TEST
+                # else:
+                #     bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
 
                 if pred_bandwidth:
                     bcast_dict['Predicted Bandwidth (Mbps)'] = str(round(pred_bandwidth,2))
