@@ -155,6 +155,12 @@ class MobilityMngt(Analyzer):
 
                     self.log_info(str(string2timestamp(msg.timestamp)) + " Handoff to " + handoff_state.dump())
 
+                    # Broadcast to apps
+                    bcast_dict = {}
+                    bcast_dict['Target Radio']=handoff_state.rat
+                    bcast_dict['Target Freq']=handoffstate.freq
+                    self.broadcast_info('HANDOFF',bcast_dict)
+
                     return
 
             if field.get('name')=="lte-rrc.mobilityFromEUTRACommand_element":
@@ -174,6 +180,13 @@ class MobilityMngt(Analyzer):
                     self.__handoff_sample = HandoffSample()
 
                     self.log_info(str(string2timestamp(msg.timestamp)) + " Handoff to " + handoff_state.dump())
+
+                    # Broadcast to apps
+                    bcast_dict = {}
+                    bcast_dict['Target Radio']=handoff_state.rat
+                    bcast_dict['Target Freq']=handoffstate.freq
+                    self.broadcast_info('HANDOFF',bcast_dict)
+
                     return
 
             if field.get('name')=="lte-rrc.handoverFromEUTRAPreparationRequest_element":
@@ -197,6 +210,13 @@ class MobilityMngt(Analyzer):
                     self.__handoff_sample = HandoffSample()
 
                     self.log_info(str(string2timestamp(msg.timestamp)) + " Handoff to " + handoff_state.dump())
+
+                    # Broadcast to apps
+                    bcast_dict = {}
+                    bcast_dict['Target Radio']=handoff_state.rat
+                    bcast_dict['Target Freq']=handoffstate.freq
+                    self.broadcast_info('HANDOFF',bcast_dict)
+
                     return
 
 
@@ -216,6 +236,12 @@ class MobilityMngt(Analyzer):
                         self.__handoff_sample = HandoffSample()
 
                         self.log_info(str(string2timestamp(msg.timestamp)) + " Redirect to " + handoff_state.dump())
+
+                        # Broadcast to apps
+                        bcast_dict = {}
+                        bcast_dict['Target Radio']=handoff_state.rat
+                        bcast_dict['Target Freq']=handoffstate.freq
+                        self.broadcast_info('HANDOFF',bcast_dict)
                         break
 
             if field.get('name')=="lte-rrc.measurementReport_element":
@@ -233,6 +259,13 @@ class MobilityMngt(Analyzer):
                     if meas_report[1]: #report config is known
                         self.log_info(str(string2timestamp(msg.timestamp))+" Measurement report "+str(meas_report[1].event_list[0].type)+" "+str(rss))
 
+                        # Broadcast to apps
+                        bcast_dict = {}
+                        bcast_dict['event'] = str(meas_report[1].event_list[0].type)
+                        bcast_dict['rss'] = str(rss)
+                        self.broadcast_info('MEAS_REPORT',bcast_dict)
+
+
             if field.get('name')=="lte-rrc.measResultsCDMA2000_element":
 
                 rss = None
@@ -247,6 +280,8 @@ class MobilityMngt(Analyzer):
                 
                 self.__handoff_sample.add_meas_report(meas_report)
                 self.log_info(str(string2timestamp(msg.timestamp))+" Measurement report cdma2000 "+str(rss))
+
+                #TODO: broadcast to apps
 
 
             if field.get('name')=="lte-rrc.measConfig_element":
@@ -316,6 +351,12 @@ class MobilityMngt(Analyzer):
                 # self.__handoff_sample = HandoffSample()
                 self.log_info(str(string2timestamp(msg.timestamp))+" Measurement control")
                 # self.log_info("Meas State: \n"+meas_state.dump())
+
+                # Broadcast to apps
+                bcast_dict = {}
+                bcast_dict['Control info'] = meas_state.dump()
+                self.broadcast_info('MEAS_CTRL',bcast_dict)
+
 
     def __get_meas_obj(self,msg):
         """
