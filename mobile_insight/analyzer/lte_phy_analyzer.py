@@ -69,7 +69,7 @@ class LtePhyAnalyzer(Analyzer):
         #Phy-layer logs
         source.enable_log("LTE_PHY_PDSCH_Packet")
         source.enable_log("LTE_PHY_PUSCH_CSF")
-        # source.enable_log("LTE_MAC_UL_Tx_Statistics") # includes PUSCH grant usage info (~10 msg/s)
+        source.enable_log("LTE_MAC_UL_Tx_Statistics") # includes PUSCH grant usage info (~10 msg/s)
 
     def callback_pdsch(self,msg):
         """
