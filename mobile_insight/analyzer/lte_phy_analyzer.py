@@ -130,7 +130,7 @@ class LtePhyAnalyzer(Analyzer):
 
                 # Log/notify average bandwidth
                 self.log_info(str(log_item['timestamp']) + ' LTE_DL_Bandwidth=' + bcast_dict['Bandwidth (Mbps)'] + "Mbps")
-                self.broadcast_info('LTE_BW',bcast_dict)
+                self.broadcast_info('LTE_DL_BW',bcast_dict)
 
                 # Reset bandwidth statistics
                 self.prev_timestamp_dl = log_item['timestamp']
