@@ -68,8 +68,8 @@ class LtePhyAnalyzer(Analyzer):
 
         #Phy-layer logs
         source.enable_log("LTE_PHY_PDSCH_Packet")
-        source.enable_log("LTE_PHY_PUSCH_CSF")
-        source.enable_log("LTE_MAC_UL_Tx_Statistics") # includes PUSCH grant usage info (~10 msg/s)
+        # source.enable_log("LTE_PHY_PUSCH_CSF")
+        # source.enable_log("LTE_MAC_UL_Tx_Statistics") # includes PUSCH grant usage info (~10 msg/s)
 
     def callback_pdsch(self,msg):
         """
@@ -202,7 +202,7 @@ class LtePhyAnalyzer(Analyzer):
             #              + "UL_utilized="+bcast_dict['Utilized (Mbps)']+"Kbps "
             #              + "Utilization="+bcast_dict['Utilization (%)']+"%")
 
-            self.log_info(str(log_item['timestamp']) + ' UL ' + bcast_dict['Bandwidth (Mbps)'] + " "
+            self.log_debug(str(log_item['timestamp']) + ' UL ' + bcast_dict['Bandwidth (Mbps)'] + " "
                          + bcast_dict['Utilized (Mbps)']+" "
                          + bcast_dict['Utilization (%)']+"")
 
