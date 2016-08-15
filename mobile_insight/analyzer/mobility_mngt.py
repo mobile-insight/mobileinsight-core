@@ -184,7 +184,7 @@ class MobilityMngt(Analyzer):
                     # Broadcast to apps
                     bcast_dict = {}
                     bcast_dict['Target Radio']=handoff_state.rat
-                    bcast_dict['Target Freq']=handoffstate.freq
+                    bcast_dict['Target Freq']=handoff_state.freq
                     self.broadcast_info('HANDOFF',bcast_dict)
 
                     return
@@ -214,7 +214,7 @@ class MobilityMngt(Analyzer):
                     # Broadcast to apps
                     bcast_dict = {}
                     bcast_dict['Target Radio']=handoff_state.rat
-                    bcast_dict['Target Freq']=handoffstate.freq
+                    bcast_dict['Target Freq']=handoff_state.freq
                     self.broadcast_info('HANDOFF',bcast_dict)
 
                     return
@@ -240,7 +240,7 @@ class MobilityMngt(Analyzer):
                         # Broadcast to apps
                         bcast_dict = {}
                         bcast_dict['Target Radio']=handoff_state.rat
-                        bcast_dict['Target Freq']=handoffstate.freq
+                        bcast_dict['Target Freq']=handoff_state.freq
                         self.broadcast_info('HANDOFF',bcast_dict)
                         break
 
