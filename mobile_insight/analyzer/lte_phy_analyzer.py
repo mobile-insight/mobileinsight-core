@@ -17,7 +17,7 @@ __all__=["LtePhyAnalyzer"]
  For each CQI, we map it to 95th of the TBS0+TBS1 (in Mbps)
 """
 cqi_to_bw={
-    0: 0,
+    0: 2.300,
     1: 2.952,
     2: 3.421,
     3: 4.362,
@@ -54,8 +54,8 @@ class LtePhyAnalyzer(Analyzer):
         self.avg_window = 1.0 # Average link BW time window (in seconds)
 
         # Record last observed CQI (for DL bandwidth prediction)
-        self.cur_cqi0 = None
-        self.cur_cqi1 = None
+        self.cur_cqi0 = 0
+        self.cur_cqi1 = 0
         self.cur_tbs = None
 
     def set_source(self,source):
@@ -119,6 +119,9 @@ class LtePhyAnalyzer(Analyzer):
                     bcast_dict['Bandwidth (Mbps)'] = str(round(pred_bandwidth,2)) #TEST
                 else:
                     bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
+                """
+                END OF TEST PURPOSE
+                """
 
                 if pred_bandwidth:
                     bcast_dict['Predicted Bandwidth (Mbps)'] = str(round(pred_bandwidth,2))
