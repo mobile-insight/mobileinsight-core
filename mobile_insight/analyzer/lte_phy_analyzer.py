@@ -18,21 +18,21 @@ __all__=["LtePhyAnalyzer"]
 """
 cqi_to_bw={
     0: 0,
-    1: 7.224,
-    2: 7.224,
-    3: 6.968,
-    4: 10.296,
-    5: 13.536,
-    6: 21.36,
-    7: 30.576,
-    8: 34.216,
-    9: 32.856,
-    10: 46.672,
-    11: 46.416,
-    12: 46.888,
-    13: 55.056,
-    14: 57.336,
-    15: 70.32,
+    1: 2.952,
+    2: 3.421,
+    3: 4.362,
+    4: 6.185,
+    5: 9.256,
+    6: 13.091,
+    7: 17.053,
+    8: 24.953,
+    9: 27.159,
+    10: 30.975,
+    11: 36.089,
+    12: 41.667,
+    13: 38.477,
+    14: 31.359,
+    15: 23.774,
 }
 
 class LtePhyAnalyzer(Analyzer):
@@ -112,13 +112,13 @@ class LtePhyAnalyzer(Analyzer):
                 pred_bandwidth = self.predict_bw()
                 bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
 
-                # """
-                # TEST PURPOSE
-                # """
-                # if pred_bandwidth:
-                #     bcast_dict['Bandwidth (Mbps)'] = str(round(pred_bandwidth,2)) #TEST
-                # else:
-                #     bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
+                """
+                TEST PURPOSE
+                """
+                if pred_bandwidth:
+                    bcast_dict['Bandwidth (Mbps)'] = str(round(pred_bandwidth,2)) #TEST
+                else:
+                    bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth,2))
 
                 if pred_bandwidth:
                     bcast_dict['Predicted Bandwidth (Mbps)'] = str(round(pred_bandwidth,2))
