@@ -17,17 +17,17 @@ __all__=["LtePhyAnalyzer"]
  For each CQI, we map it to 95th of the TBS0+TBS1 (in Mbps)
 """
 cqi_to_bw={
-    0: 2.300,
-    1: 2.952,
-    2: 3.421,
-    3: 4.362,
-    4: 6.185,
-    5: 9.256,
-    6: 13.091,
-    7: 17.053,
-    8: 24.953,
-    9: 27.159,
-    10: 30.975,
+    0: 2.22,
+    1: 1.22,
+    2: 2.66,
+    3: 2.79,
+    4: 4.14,
+    5: 5.54,
+    6: 6.97,
+    7: 9.53,
+    8: 10.30,
+    9: 11.06,
+    10: 10.29, 
     11: 36.089,
     12: 41.667,
     13: 38.477,
@@ -125,6 +125,10 @@ class LtePhyAnalyzer(Analyzer):
 
                 if pred_bandwidth:
                     bcast_dict['Predicted Bandwidth (Mbps)'] = str(round(pred_bandwidth,2))
+                else:
+                    # Use current PDSCH bandwidth as estimation
+                    bcast_dict['Predicted Bandwidth (Mbps)'] = str(round(bandwidth,2))
+
                 bcast_dict['Modulation 0'] = str(log_item["MCS 0"])
                 bcast_dict['Modulation 1'] = str(log_item["MCS 1"])
 
