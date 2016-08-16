@@ -337,7 +337,7 @@ class Profile(object):
         
         # if not query_res: 
         # if sql_res.getCount()==0:
-        if (is_android and sql_res.getCount()==0) or (not is_android and len(sql_res)==0):
+        if (is_android and sql_res and sql_res.getCount()==0) or (not is_android and len(sql_res)==0):
             #The id does not exist. Create a new record
 
             query_res = {}
