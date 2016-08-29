@@ -53,6 +53,13 @@ def get_cache_dir():
     else:
         return ""
 
+def get_files_dir():
+    if is_android:
+        return str(service_context.getFilesDir().getAbsolutePath())
+    else:
+        return ""
+
+
 
 class ChronicleProcessor(object):
     TYPE_LOG = 1
@@ -153,15 +160,26 @@ class AndroidDevDiagMonitor(Monitor):
         :type prefs: dictionary
         """
         Monitor.__init__(self)
-        self._executable_path = "/system/bin/diag_revealer"
         self._fifo_path = self.TMP_FIFO_FILE
         self._input_dir = None
         self._log_cut_size = 0.5 # change size to 1.0 M
         # self._skip_decoding = False
         self._type_names = []
         self._last_diag_revealer_ts = None
-        prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
-            "libwireshark_path": "/system/lib"}
+
+        """
+        Exec/lib initialization path
+        """
+        # self._executable_path = "/system/bin/diag_revealer"
+        # prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
+        #     "libwireshark_path": "/system/lib"}
+
+        libs_path = os.path.join(get_files_dir(),"data")
+        # libs_path = "./data"
+        self._executable_path = os.path.join(libs_path,"diag_revealer")
+        prefs={"ws_dissect_executable_path": os.path.join(libs_path,"android_pie_ws_dissector"),
+            "libwireshark_path": libs_path}
+
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
     def available_log_types(self):

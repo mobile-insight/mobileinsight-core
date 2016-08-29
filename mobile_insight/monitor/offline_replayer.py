@@ -36,8 +36,11 @@ class OfflineReplayer(Monitor):
         Monitor.__init__(self)
 
         if is_android:
-            prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
-                   "libwireshark_path": "/system/lib"}
+            # prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
+            #        "libwireshark_path": "/system/lib"}
+            libs_path = "./data"
+            prefs={"ws_dissect_executable_path": os.path.join(libs_path,"android_pie_ws_dissector"),
+                   "libwireshark_path": libs_path}
         else:
             prefs={}
         DMLogPacket.init(prefs)
