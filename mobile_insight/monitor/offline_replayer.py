@@ -20,10 +20,31 @@ from dm_collector import dm_collector_c, DMLogPacket, FormatError
 is_android=False
 try:
     from jnius import autoclass #For Android
+    try:
+        service_context = autoclass('org.renpy.android.PythonService').mService
+        if not service_context:
+            service_context = cast("android.app.Activity",
+                            autoclass("org.renpy.android.PythonActivity").mActivity)
+    except Exception, e:
+        service_context = cast("android.app.Activity",
+                            autoclass("org.renpy.android.PythonActivity").mActivity)
+
     is_android=True
 except Exception, e:
     #not used, but bugs may exist on laptop
     is_android=False
+
+def get_cache_dir():
+    if is_android:
+        return str(service_context.getCacheDir().getAbsolutePath())
+    else:
+        return ""
+
+def get_files_dir():
+    if is_android:
+        return str(service_context.getFilesDir().getAbsolutePath())
+    else:
+        return ""
 
 class OfflineReplayer(Monitor):
     """
@@ -38,7 +59,8 @@ class OfflineReplayer(Monitor):
         if is_android:
             # prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
             #        "libwireshark_path": "/system/lib"}
-            libs_path = "./data"
+            # libs_path = "./data"
+            libs_path = os.path.join(get_files_dir(),"data")
             prefs={"ws_dissect_executable_path": os.path.join(libs_path,"android_pie_ws_dissector"),
                    "libwireshark_path": libs_path}
         else:
