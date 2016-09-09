@@ -28,18 +28,22 @@ from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
 is_android=False
 try:
+    print "test1"
     from jnius import autoclass #For Android
     try:
+        print "test2"
         service_context = autoclass('org.renpy.android.PythonService').mService
         if not service_context:
             service_context = cast("android.app.Activity",
                             autoclass("org.renpy.android.PythonActivity").mActivity)
     except Exception, e:
+        print "test3"
     	service_context = cast("android.app.Activity",
                             autoclass("org.renpy.android.PythonActivity").mActivity)
 
     is_android=True
 except Exception, e:
+    print "test4"
     #not used, but bugs may exist on laptop
     is_android=False
 

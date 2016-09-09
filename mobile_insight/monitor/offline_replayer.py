@@ -17,57 +17,64 @@ from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 
 
-is_android=False
-try:
-    from jnius import autoclass #For Android
-    try:
-        service_context = autoclass('org.renpy.android.PythonService').mService
-        if not service_context:
-            service_context = cast("android.app.Activity",
-                            autoclass("org.renpy.android.PythonActivity").mActivity)
-    except Exception, e:
-        service_context = cast("android.app.Activity",
-                            autoclass("org.renpy.android.PythonActivity").mActivity)
-
-    is_android=True
-except Exception, e:
-    #not used, but bugs may exist on laptop
-    is_android=False
-
-def get_cache_dir():
-    if is_android:
-        return str(service_context.getCacheDir().getAbsolutePath())
-    else:
-        return ""
-
-def get_files_dir():
-    if is_android:
-        return str(service_context.getFilesDir().getAbsolutePath())
-    else:
-        return ""
-
 class OfflineReplayer(Monitor):
     """
     A log replayer for offline analysis.
     """
 
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
+    is_android=False
+    # service_context=None
+
+    def __test_android(self):
+        try:
+            from jnius import autoclass,cast #For Android
+            # try:
+            #     self.service_context = autoclass('org.renpy.android.PythonService').mService
+            #     if not self.service_context:
+            #         self.service_context = autoclass("org.renpy.android.PythonActivity").mActivity
+            # except Exception, e:
+            #     self.service_context = autoclass("org.renpy.android.PythonActivity").mActivity
+
+            self.is_android=True
+        except Exception, e:
+            #not used, but bugs may exist on laptop
+            self.is_android=False
+
+
 
     def __init__(self):
         Monitor.__init__(self)
 
-        if is_android:
+        self.__test_android()
+
+        if self.is_android:
             # prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
             #        "libwireshark_path": "/system/lib"}
-            # libs_path = "./data"
-            libs_path = os.path.join(get_files_dir(),"data")
+            libs_path = "./data"
+            # libs_path = os.path.join(self.__get_files_dir(),"data")
             prefs={"ws_dissect_executable_path": os.path.join(libs_path,"android_pie_ws_dissector"),
                    "libwireshark_path": libs_path}
         else:
             prefs={}
+
+        print str(prefs)    
         DMLogPacket.init(prefs)
 
         self._type_names=[]
+
+    # def __get_cache_dir(self):
+    #     if self.is_android:
+    #         return str(self.service_context.getCacheDir().getAbsolutePath())
+    #     else:
+    #         return ""
+
+    # def __get_files_dir(self):
+    #     if self.is_android:
+    #         return str(self.service_context.getFilesDir().getAbsolutePath())
+    #     else:
+    #         return ""
+
 
     def available_log_types(self):
         """
