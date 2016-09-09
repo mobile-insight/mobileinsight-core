@@ -23,9 +23,7 @@ class OfflineReplayer(Monitor):
     """
 
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
-    is_android=False
-    # service_context=None
-
+    
     def __test_android(self):
         try:
             from jnius import autoclass,cast #For Android
@@ -35,8 +33,13 @@ class OfflineReplayer(Monitor):
             #         self.service_context = autoclass("org.renpy.android.PythonActivity").mActivity
             # except Exception, e:
             #     self.service_context = autoclass("org.renpy.android.PythonActivity").mActivity
-
             self.is_android=True
+            try:
+                import mi2app_utils
+                self.service_context = autoclass('org.renpy.android.PythonService').mService
+            except Exception, e:
+                self.service_context = None
+            
         except Exception, e:
             #not used, but bugs may exist on laptop
             self.is_android=False
@@ -46,22 +49,38 @@ class OfflineReplayer(Monitor):
     def __init__(self):
         Monitor.__init__(self)
 
+        self.is_android=False
+        self.service_context=None
+
+
         self.__test_android()
 
         if self.is_android:
             # prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
             #        "libwireshark_path": "/system/lib"}
-            libs_path = "./data"
+            # if self.service_context:
+            #     libs_path = os.path.join(self.__get_files_dir(),"data")
+            # else:
+            #     libs_path = "./data"
             # libs_path = os.path.join(self.__get_files_dir(),"data")
+            libs_path = self.__get_libs_path()
             prefs={"ws_dissect_executable_path": os.path.join(libs_path,"android_pie_ws_dissector"),
                    "libwireshark_path": libs_path}
         else:
             prefs={}
 
-        print str(prefs)    
+        print prefs
+  
         DMLogPacket.init(prefs)
 
         self._type_names=[]
+
+
+    def __del__(self):
+        if self.is_android and self.service_context:
+            print "detaching..."
+            import mi2app_utils
+            mi2app_utils.detach_thread()
 
     # def __get_cache_dir(self):
     #     if self.is_android:
@@ -69,11 +88,11 @@ class OfflineReplayer(Monitor):
     #     else:
     #         return ""
 
-    # def __get_files_dir(self):
-    #     if self.is_android:
-    #         return str(self.service_context.getFilesDir().getAbsolutePath())
-    #     else:
-    #         return ""
+    def __get_libs_path(self):
+        if self.is_android and self.service_context:
+            return os.path.join(self.service_context.getFilesDir().getAbsolutePath(),"data")
+        else:
+            return "./data"
 
 
     def available_log_types(self):
