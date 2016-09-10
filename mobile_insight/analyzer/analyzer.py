@@ -157,7 +157,7 @@ class Analyzer(Element):
                     self.__parent_analyzer.append(analyzer_name)
                 except Exception, e:
                     #Either the analyzer is unavailable, or has semantic errors
-                    self.logger.info("Runtime Error: unable to import "+analyzer_name)  
+                    self.log_info("Runtime Error: unable to import "+analyzer_name)  
                     import traceback
                     import sys
                     sys.exit(str(traceback.format_exc()))

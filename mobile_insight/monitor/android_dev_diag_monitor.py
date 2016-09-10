@@ -31,6 +31,9 @@ try:
     from jnius import autoclass #For Android
     try:
         service_context = autoclass('org.renpy.android.PythonService').mService
+        if not service_context:
+            service_context = cast("android.app.Activity",
+                            autoclass("org.renpy.android.PythonActivity").mActivity)
     except Exception, e:
     	service_context = cast("android.app.Activity",
                             autoclass("org.renpy.android.PythonActivity").mActivity)
@@ -49,6 +52,13 @@ def get_cache_dir():
         return str(service_context.getCacheDir().getAbsolutePath())
     else:
         return ""
+
+def get_files_dir():
+    if is_android:
+        return str(service_context.getFilesDir().getAbsolutePath())
+    else:
+        return ""
+
 
 
 class ChronicleProcessor(object):
@@ -136,7 +146,7 @@ class AndroidDevDiagMonitor(Monitor):
     # DIAG_CFG_DIR = "/sdcard/diag_logs"
     DIAG_CFG_DIR = get_cache_dir()
     # TMP_FIFO_FILE = "/sdcard/diag_revealer_fifo"
-    TMP_FIFO_FILE = os.path.join(get_cache_dir(), "diag_revealer_fifo") 
+    TMP_FIFO_FILE = os.path.join(get_cache_dir(), "diag_revealer_fifo")
     # Yuanjie: the smaller the lower latency, but maybe higher CPU
     # DO NOT CHANGE IT! This value has been optimized
     BLOCK_SIZE = 8
@@ -150,15 +160,26 @@ class AndroidDevDiagMonitor(Monitor):
         :type prefs: dictionary
         """
         Monitor.__init__(self)
-        self._executable_path = "/system/bin/diag_revealer"
         self._fifo_path = self.TMP_FIFO_FILE
         self._input_dir = None
         self._log_cut_size = 0.5 # change size to 1.0 M
         # self._skip_decoding = False
         self._type_names = []
         self._last_diag_revealer_ts = None
-        prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
-            "libwireshark_path": "/system/lib"}
+
+        """
+        Exec/lib initialization path
+        """
+        # self._executable_path = "/system/bin/diag_revealer"
+        # prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
+        #     "libwireshark_path": "/system/lib"}
+
+        libs_path = os.path.join(get_files_dir(),"data")
+        # libs_path = "./data"
+        self._executable_path = os.path.join(libs_path,"diag_revealer")
+        prefs={"ws_dissect_executable_path": os.path.join(libs_path,"android_pie_ws_dissector"),
+            "libwireshark_path": libs_path}
+
         DMLogPacket.init(prefs)     # Initialize Wireshark dissector
 
     def available_log_types(self):
@@ -239,6 +260,9 @@ class AndroidDevDiagMonitor(Monitor):
 
     def _mkfifo(self, fifo_path):
         try:
+            if os.path.exists(fifo_path):
+                # self._run_shell_cmd("rm %s " % fifo_path, wait=True)
+                os.remove(fifo_path)
             os.mknod(fifo_path, 0666 | stat.S_IFIFO)
         except OSError as err:
             if err.errno == errno.EEXIST:   # if already exists, skip this step

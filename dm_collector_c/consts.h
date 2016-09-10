@@ -20,6 +20,7 @@ enum LogPacketType {
     _1xEV_Connection_Release = 0x1071,
     WCDMA_CELL_ID = 0x4127,
     WCDMA_Signaling_Messages = 0x412F,
+    WCDMA_RRC_States = 0x4125,
     UMTS_NAS_GMM_State = 0x7130,
     UMTS_NAS_MM_State = 0x7131,
     UMTS_NAS_MM_REG_State = 0x7135,
@@ -74,6 +75,9 @@ enum LogPacketType {
     LTE_LL1_PDCCH_Decoding_Result = 0xB130,
     LTE_LL1_PDSCH_Decoding_Result = 0xB132,
     LTE_LL1_PUSCH_Tx_Report = 0xB139,
+    LTE_ML1_RLM_Report = 0xB18A,
+    LTE_LL1_PUSCH_CSF = 0xB14E,
+    LTE_ML1_CDRX_Events_Info = 0xB198,
 };
 
 // Mapping type IDs to names
@@ -95,6 +99,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "WCDMA_RRC_Serv_Cell_Info",true},
     {WCDMA_Signaling_Messages,  // WCDMA signaling messages
         "WCDMA_RRC_OTA_Packet",true},
+    {WCDMA_RRC_States,
+        "WCDMA_RRC_States", false},
     {UMTS_NAS_GMM_State,
         "UMTS_NAS_GMM_State",true},
     {UMTS_NAS_MM_State,
@@ -185,13 +191,13 @@ const ValueName LogPacketTypeID_To_Name [] = {
     {LTE_MAC_Rach_Attempt,
         "LTE_MAC_Rach_Attempt", false},
     {LTE_PUCCH_Power_Control,
-        "LTE_PUCCH_Power_Control", false},
+        "LTE_PHY_PUCCH_Power_Control", false},
     {LTE_PUSCH_Power_Control,
-        "LTE_PUSCH_Power_Control", false},
+        "LTE_PHY_PUSCH_Power_Control", false},
     {LTE_PDCCH_PHICH_Indication_Report,
-        "LTE_PDCCH_PHICH_Indication_Report", false},
+        "LTE_PHY_PDCCH_PHICH_Indication_Report", false},
     {LTE_PDSCH_Stat_Indication,
-        "LTE_PDSCH_Stat_Indication", false},
+        "LTE_PHY_PDSCH_Stat_Indication", false},
     {LTE_ML1_System_Scan_Results,
         "LTE_PHY_System_Scan_Results", false},
     {LTE_ML1_BPLMN_Cell_Request,
@@ -206,6 +212,12 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_PHY_PDSCH_Decoding_Result", false},
     {LTE_LL1_PUSCH_Tx_Report,
         "LTE_PHY_PUSCH_Tx_Report", false},
+    {LTE_ML1_RLM_Report,
+        "LTE_PHY_RLM_Report", false},
+    {LTE_LL1_PUSCH_CSF,
+        "LTE_PHY_PUSCH_CSF", false},
+    {LTE_ML1_CDRX_Events_Info,
+        "LTE_RRC_CDRX_Events_Info", false},
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

@@ -4,7 +4,7 @@ import os
 import sys
 
 #Import MobileInsight modules
-from mobile_insight.analyzer import *
+from mobile_insight.analyzer import LteMeasurementAnalyzer
 from mobile_insight.monitor import OnlineMonitor
 
 
@@ -24,11 +24,11 @@ if __name__ == "__main__":
     src.set_serial_port(sys.argv[1]) #the serial port to collect the traces
     src.set_baudrate(int(sys.argv[2])) #the baudrate of the port
 
-    ML1_analyzer = LteMeasurementAnalyzer()
-    ML1_analyzer.set_source(src)
+    meas_analyzer = LteMeasurementAnalyzer()
+    meas_analyzer.set_source(src)
 
     #save the analysis result. All analyzers share the same output file.
-    ML1_analyzer.set_log("lte-measurement-example.txt") 
+    meas_analyzer.set_log("lte-measurement-example.txt") 
 
     #Start the monitoring
     src.run()

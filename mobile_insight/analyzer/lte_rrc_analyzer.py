@@ -46,6 +46,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         self.__history = {}    # cell history: timestamp -> LteRrcStatus()
         self.__config = {}    # (cell_id,freq) -> LteRrcConfig()
 
+    def __del__(self):
+        self.log_info("LteRrcAnalyzer __del__")
+
     def create_profile_hierarchy(self):
         '''
         Return a Lte Rrc ProfileHierarchy (configurations)
@@ -222,6 +225,30 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         elif msg.type_id == "LTE_RRC_Serv_Cell_Info":
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_serv_cell(raw_msg)
+        elif msg.type_id == "LTE_RRC_CDRX_Events_Info":
+            self.__callback_drx(log_item_dict)
+
+
+    def __callback_drx(self,msg):
+
+        # Broadcast to other apps
+        drx_state = {}
+        drx_state['Conn state'] = "CONNECTED"
+        drx_transition=""
+        for item in msg['Records']:
+            if item['CDRX Event'] == "INACTIVITY_TIMER_START":
+                drx_state['DRX state'] = "CRX"
+                self.broadcast_info('DRX',drx_state)
+            elif item['CDRX Event'] == "INACTIVITY_TIMER_END":
+                drx_state['DRX state'] = "CRX"
+                self.broadcast_info('DRX',drx_state)
+            elif item['CDRX Event'] == "LONG_CYCLE_START":
+                drx_state['DRX state'] = "LONG_DRX"
+                self.broadcast_info('DRX',drx_state)
+            elif item['CDRX Event'] == "SHORT_CYCLE_START":
+                drx_state['DRX state'] = "SHORT_DRX"
+                self.broadcast_info('DRX',drx_state)
+
 
     def __callback_serv_cell(self,msg):
 
@@ -786,10 +813,20 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 # self.log_info(self.__status.dump())
                 # self.log_info("FSM test: "+self.get_protocol_state())
 
+                drx_state = {}
+                drx_state['Conn state'] = "CONNECTED"
+                drx_state['DRX state'] = "CRX"
+                self.broadcast_info('DRX',drx_state)
+
             if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
                 self.__status.conn = False
                 # self.log_info(self.__status.dump())
                 # self.log_info("FSM test: "+self.get_protocol_state())
+
+                drx_state = {}
+                drx_state['Conn state'] = "IDLE"
+                drx_state['DRX state'] = "IDLE"
+                self.broadcast_info('DRX',drx_state)
 
     def set_source(self,source):
         """
@@ -802,6 +839,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         #enable LTE RRC log
         source.enable_log("LTE_RRC_OTA_Packet")
         source.enable_log("LTE_RRC_Serv_Cell_Info")
+        source.enable_log("LTE_RRC_CDRX_Events_Info")
 
     def get_cell_list(self):
         """

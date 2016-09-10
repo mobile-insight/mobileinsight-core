@@ -56,7 +56,7 @@ static int _decode_lte_ml1_bplmn_cell_confirm_payload (const char *b,
                     "Standards Version",
                     LteMl1BplmnCellConfirm_StandardsVersion,
                     ARRAY_SIZE(LteMl1BplmnCellConfirm_StandardsVersion, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
             int iRSRP = _search_result_int(result, "RSRP");
             iRSRP -= 65535;
             PyObject *old_object = _replace_result_int(result, "RSRP", iRSRP);
@@ -74,7 +74,7 @@ static int _decode_lte_ml1_bplmn_cell_confirm_payload (const char *b,
                     "SRX Lev Calculated",
                     LteMl1BplmnCellConfirm_SRXLevCalculated,
                     ARRAY_SIZE(LteMl1BplmnCellConfirm_SRXLevCalculated, ValueName),
-                    "Unknown");
+                    "(MI)Unknown");
 
             if (iStandrdsVersion == 1) {
                 offset += _decode_by_fmt(LteMl1BplmnCellConfirm_Rel9Info,
@@ -95,12 +95,12 @@ static int _decode_lte_ml1_bplmn_cell_confirm_payload (const char *b,
                         LteMl1BplmnCellConfirm_Rel9InfoSQualCalculated,
                         ARRAY_SIZE(LteMl1BplmnCellConfirm_Rel9InfoSQualCalculated,
                             ValueName),
-                        "Unknown");
+                        "(MI)Unknown");
             }
             return offset - start;
         }
     default:
-        printf("Unknown LTE PDSCH Stat Indication version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PDSCH Stat Indication version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

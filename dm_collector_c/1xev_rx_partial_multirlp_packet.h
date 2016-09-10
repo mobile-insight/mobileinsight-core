@@ -80,7 +80,7 @@ static int _decode_1xev_rx_partial_multirlp_packet_payload (const char *b,
                 _1xEVRxPartialMultiRLPPacket_Packet_DataRate,
                 ARRAY_SIZE(_1xEVRxPartialMultiRLPPacket_Packet_DataRate,
                     ValueName),
-                "Unknown");
+                "(MI)Unknown");
         old_object = _replace_result_int(result_packet_item,
                 "Channel", iChannel);
         Py_DECREF(old_object);
@@ -89,7 +89,7 @@ static int _decode_1xev_rx_partial_multirlp_packet_payload (const char *b,
                 _1xEVRxPartialMultiRLPPacket_Packet_Channel,
                 ARRAY_SIZE(_1xEVRxPartialMultiRLPPacket_Packet_Channel,
                     ValueName),
-                "Unknown");
+                "(MI)Unknown");
         old_object = _replace_result_int(result_packet_item,
                 "Payload Length", iPayloadLength);
         Py_DECREF(old_object);

@@ -1,7 +1,7 @@
 /* log_packet.h
  * Author: Jiayao Li
  * Defines constants and functions related to log packet messages.
- * The most important thing is a struct called Fmt, which defines a message 
+ * The most important thing is a struct called Fmt, which defines a message
  * field. With this struct and other helper functions, message decoding can be
  * greatly simplified.
  */
@@ -15,6 +15,7 @@
 enum FmtType {
     UINT,       // Little endian. len = 1, 2, 4, 8
     BYTE_STREAM,    // A stream of bytes.
+    BYTE_STREAM_LITTLE_ENDIAN,  // a stream of bytes in little endian
     QCDM_TIMESTAMP, // Timestamp in all messages. len = 8
     PLMN_MK1,   // in WCDMA Cell ID
     PLMN_MK2,   // in LTE NAS EMM State
@@ -346,13 +347,18 @@ const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
     {UINT, "System Frame Number", 2},
     {PLACEHOLDER, "Subframe Number", 0},
     {UINT, "PDSCH RNTIl ID", 2},
+    {PLACEHOLDER, "PDSCH RNTI Type", 0},
     {UINT, "Number of Tx Antennas(M)", 2},
     {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
-    {UINT, "RB Allocation Slot 0[0]", 8},
-    {UINT, "RB Allocation Slot 0[1]", 8},
-    {UINT, "RB Allocation Slot 1[0]", 8},
-    {UINT, "RB Allocation Slot 1[1]", 8},
-    {SKIP, NULL, 4},
+    {PLACEHOLDER, "Spatial Rank", 0},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
+    {UINT, "Frequency Selective PMI", 1},   // right shift 1 bit, 2 bits
+    {PLACEHOLDER, "PMI Index", 0},  // 4 bits
+    {UINT, "Transmission Scheme", 1},   // 4 bits
+    {SKIP, NULL, 2},
     // {UINT, "Transport Block Size Stream 0", 2},
     {UINT, "TBS 0", 2},
     // {UINT, "Modulation Stream 0", 2},
@@ -732,13 +738,19 @@ const Fmt LteMacConfigurationSubpkt_eMBMSConfig [] = {
 // MAC UL Transport Block
 // Jie
 const ValueName BSREvent [] = {
-    {2, "High Data Arrival"},
+    {0, "None"},
     {1, "Periodic"},
+    {2, "High Data Arrival"},
+    {3, "Robustness BSR"},
 };
 
 const ValueName BSRTrig [] = {
-    {4, "S-BSR"},
-    {3, "Pad L-BSR"}
+    {0, "No BSR"},
+    {1, "Cancelled"},
+    {2, "L-BSR"},
+    {3, "S-BSR"},
+    {4, "Pad L-BSR"},
+    {5, "Pad S-BSR"},
 };
 
 const Fmt LteMacULTransportBlockFmt [] = {
@@ -2101,10 +2113,14 @@ const ValueName ValueNameSearchSpaceType [] = {
 const ValueName ValueNameRNTIType [] = {
     // 4 bits
     {0, "C-RNTI"},
+    {1, "SPS-RNTI"},
     {2, "P-RNTI"},
     {3, "RA-RNTI"},
     {4, "Temporary-C-RNTI"},
-    {5, "SI-RNTI"}
+    {5, "SI-RNTI"},
+    {6, "TPC-PUSCH-RNTI"},
+    {7, "TPC-PUCCH-RNTI"},
+    {8, "MBMS RNTI"},
 };
 const ValueName ValueNameDCIFormat [] = {
     // 4 bits
@@ -2118,11 +2134,8 @@ const ValueName ValueNameDCIFormat [] = {
     {5, "Format 1D"},
     {6, "Format 2"},
     {7, "Format 2A"},
-    // {8, "Format 2B"},
-    // {9, "Format 2C"},
-    {10, "Format 3"},
-    {11, "Format 3A"},
-    // {12, "Format 4"},
+    {8, "Format 3"},
+    {9, "Format 3A"},
 };
 
 const ValueName ValueNameMatchOrNot [] = {
@@ -2149,6 +2162,7 @@ const ValueName ValueNamePruneStatus [] = {
 
 const ValueName ValueNameFrameStructure [] = {
     {0, "FDD"},
+    {1, "TDD"},
 };
 
 const ValueName ValueNameNumeNBAntennas [] = {
@@ -2211,6 +2225,76 @@ const ValueName ValueNameExistsOrNone [] = {
 const ValueName ValueNameOnOrOff [] = {
     {0, "Off"},
     {1, "On"},
+};
+
+const ValueName ValueNameCSFTxMode [] = {
+    {0, "TM_Invalid"},
+    {1, "TM_Single_Ant_Port_0"},
+    {2, "TM_TD_Rank_1"},
+    {3, "TM_OL_SM"},
+    {4, "TM_CL_SM"},
+    {5, "TM_MU_MIMO"},
+    {6, "TM_CL_Rank_1_PC"},
+    {7, "TM_Single_Ant_Port_5"},
+};
+
+const ValueName ValueNameRankIndex [] = {
+    {0, "Rank 1"},
+    {1, "Rank 2"},
+};
+
+const ValueName ValueNameCsiMeasSetIndex [] = {
+    {0, "CSI0"},
+};
+
+const ValueName ValueNamePuschReportingMode [] = {
+    {0, "MODE_APERIODIC_RM12"},
+    {1, "MODE_APERIODIC_RM20"},
+    {2, "MODE_APERIODIC_RM22"},
+    {3, "MODE_APERIODIC_RM30"},
+    {4, "MODE_APERIODIC_RM31"},
+};
+
+const ValueName ValueNameTransmissionScheme [] = {
+    // 4 bits
+    {1, "Single Antenna Port (SISO or SIMO)"},
+    {2, "Transmit diversity"},
+    {3, "Open-loop spatial multiplexing"},
+    {4, "Closed-loop spatial multiplexing"},
+    {5, "Multi-User MIMO"},
+    {6, "Closed-loop rank-1 spatial multiplexing"},
+    {7, "Single Antenna Port Beamforming"},
+    {8, "Dual-Layer Beamforming"},
+};
+
+const ValueName ValueNameFrequencySelectivePMI [] = {
+    {0, "WideBand"},
+};
+
+const ValueName ValueNameCDRXEvent [] = {
+    {0, "ON_DURATION_TIMER_START"},
+    {1, "ON_DURATION_TIMER_END"},
+    {2, "SHORT_CYCLE_START"},
+    {3, "SHORT_CYCLE_END"},
+    {4, "LONG_CYCLE_START"},
+    {5, "LONG_CYCLE_END"},
+    {6, "UL_RETX_TIMER_START"},
+    {7, "UL_RETX_TIMER_END"},
+    {8, "INACTIVITY_TIMER_START"},
+    {9, "INACTIVITY_TIMER_END"},
+    {10, "DL_DRX_RETX_TIMER_START"},
+    {11, "DL_DRX_RETX_TIMER_END"},
+    {12, "CDRX_ON_2_OFF"},
+    {13, "CDRX_OFF_2_ON"},
+};
+
+const ValueName ValueNameWcdmaRrcStates [] = {
+    {0, "DISCONNECTED"},
+    {1, "CONNECTING"},
+    {2, "CELL_FACH"},
+    {3, "CELL_DCH"},
+    {4, "CELL_PCH"},
+    {5, "URA_PCH"},
 };
 
 // ----------------------------------------------------------------------------

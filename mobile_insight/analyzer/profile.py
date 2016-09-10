@@ -248,44 +248,48 @@ class Profile(object):
         :returns: value list that satisfies the query, or None if no such field (id not exist, incomplete record, etc.)
         '''
 
-        #Step 1: check if the name conforms to the hierarchy
-        if self.__profile_hierarchy is None: #no profile defined
-            return None
-        #Check if the field to query is valid
-        profile_node = self.__profile_hierarchy.get_node(profile_name)
-        if profile_node is None:
-            return None
+        try:
+            #Step 1: check if the name conforms to the hierarchy
+            if self.__profile_hierarchy is None: #no profile defined
+                return None
+            #Check if the field to query is valid
+            profile_node = self.__profile_hierarchy.get_node(profile_name)
+            if profile_node is None:
+                return None
 
-        profile_nodes = profile_name.split('.')
+            profile_nodes = profile_name.split('.')
 
-        #Step 2: extract the raw profile
-        #NOTE: root profile MUST have a id
-        sql_cmd = "select profile from "+self.__get_root_name()+" where id=\""+profile_nodes[0].split(":")[1]+"\""
-        
-        if is_android:
-            sql_res = self.__db.rawQuery(sql_cmd,None)
-        else:
-            sql_res = self.__db.execute(sql_cmd).fetchall()
-        
-        # if sql_res.getCount()==0: #the id does not exist
-        if (is_android and sql_res.getCount()==0) or (not is_android and len(sql_res)==0):
-            return None
+            #Step 2: extract the raw profile
+            #NOTE: root profile MUST have a id
+            sql_cmd = "select profile from "+self.__get_root_name()+" where id=\""+profile_nodes[0].split(":")[1]+"\""
+            
+            if is_android:
+                sql_res = self.__db.rawQuery(sql_cmd,None)
+            else:
+                sql_res = self.__db.execute(sql_cmd).fetchall()
+            
+            # if sql_res.getCount()==0: #the id does not exist
+            if (is_android and sql_res.getCount()==0) or (not is_android and len(sql_res)==0):
+                return None
 
-        if is_android:
-            sql_res.moveToFirst();
-            res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
-        else:
-            res = ast.literal_eval(sql_res[0][0])
+            if is_android:
+                sql_res.moveToFirst();
+                res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
+            else:
+                res = ast.literal_eval(sql_res[0][0])
 
-        #Step 3: extract the result from raw profile
-        for i in range(1,len(profile_nodes)):
-            if res is None: #no profile
-                break
-            profile_node_split = profile_nodes[i].split(":")
-            res = res[profile_node_split[0]]   
-            if len(profile_node_split)>1:
-                res = res[profile_node_split[1]]
-        return res
+            #Step 3: extract the result from raw profile
+            for i in range(1,len(profile_nodes)):
+                if res is None: #no profile
+                    break
+                profile_node_split = profile_nodes[i].split(":")
+                res = res[profile_node_split[0]]   
+                if len(profile_node_split)>1:
+                    res = res[profile_node_split[1]]
+            return res
+        except:
+            #TODO: raise warnings
+            return False
 
     def update(self, profile_name, value_dict):
         
@@ -309,107 +313,111 @@ class Profile(object):
         :returns: True if the update succeeds, False otherwise
         '''
 
+        try:
 
-        #Step 1: check if the name conforms to the hierarchy
-        if not self.__profile_hierarchy: #no profile defined
-            raise Exception('No profile defined')
-            return False
-        #Check if the field to update is valid
-        test_node = self.__profile_hierarchy.get_node(profile_name)
-        if not test_node:
-            raise Exception('Invalid update: '+profile_name)
-            return False
-        #Check the value fileds to update are indeed included based on hierarchy
-        for field_name in value_dict:
-            if field_name not in test_node.children:
-                #Invalid node
-                raise Exception('Invalid update field: '+str(value_dict))
+            #Step 1: check if the name conforms to the hierarchy
+            if not self.__profile_hierarchy: #no profile defined
+                raise Exception('No profile defined')
                 return False
+            #Check if the field to update is valid
+            test_node = self.__profile_hierarchy.get_node(profile_name)
+            if not test_node:
+                raise Exception('Invalid update: '+profile_name)
+                return False
+            #Check the value fileds to update are indeed included based on hierarchy
+            for field_name in value_dict:
+                if field_name not in test_node.children:
+                    #Invalid node
+                    raise Exception('Invalid update field: '+str(value_dict))
+                    return False
 
-        profile_nodes = profile_name.split('.')
+            profile_nodes = profile_name.split('.')
 
-        #Step 2: check if the id exists or not
-        sql_cmd = "select profile from "+self.__get_root_name()+" where id=\""+profile_nodes[0].split(":")[1]+"\""
-        if is_android:
-            sql_res = self.__db.rawQuery(sql_cmd,None)
-        else:
-            sql_res = self.__db.execute(sql_cmd).fetchall()
-        
-        # if not query_res: 
-        # if sql_res.getCount()==0:
-        if (is_android and sql_res.getCount()==0) or (not is_android and len(sql_res)==0):
-            #The id does not exist. Create a new record
+            #Step 2: check if the id exists or not
+            sql_cmd = "select profile from "+self.__get_root_name()+" where id=\""+profile_nodes[0].split(":")[1]+"\""
+            if is_android:
+                sql_res = self.__db.rawQuery(sql_cmd,None)
+            else:
+                sql_res = self.__db.execute(sql_cmd).fetchall()
+            
+            # if not query_res: 
+            # if sql_res.getCount()==0:
+            if (is_android and sql_res and sql_res.getCount()==0) or (not is_android and len(sql_res)==0):
+                #The id does not exist. Create a new record
 
-            query_res = {}
-            res=query_res
-            profile_node = self.__profile_hierarchy.get_root()
-            #Init: all root's children are not initialized
-            for child in profile_node.children:
-                res[child]=None
-
-            #Go along hierarchy, init the remaining children    
-            for i in range(1,len(profile_nodes)):
-                profile_node_split = profile_nodes[i].split(":")
-                profile_node = profile_node.children[profile_node_split[0]]
-                res[profile_node_split[0]]={}
-                res=res[profile_node_split[0]]
-                if profile_node.id_required:
-                    res[profile_node_split[1]]={}
-                    res=res[profile_node_split[1]]
+                query_res = {}
+                res=query_res
+                profile_node = self.__profile_hierarchy.get_root()
+                #Init: all root's children are not initialized
                 for child in profile_node.children:
                     res[child]=None
 
-            for item in value_dict:
-                res[item]=value_dict[item]
- 
-            #Insert the new record into table
-            sql_cmd = "insert into "+self.__get_root_name() + "(id,profile) values(\""+profile_nodes[0].split(":")[1]+"\","+"\""+str(query_res)+"\")"
-            if is_android:
-                # print "Yuanjie: execSQL"
-                self.__db.execSQL(sql_cmd)
-            else:
-                self.__db.execute(sql_cmd)
-                self.__conn.commit()
-
-            return True
-        else:
-            if is_android:
-                sql_res.moveToFirst();
-                query_res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
-            else:
-                query_res = ast.literal_eval(sql_res[0][0])
-            #The id exists. Update the record
-            res=query_res
-            profile_node = self.__profile_hierarchy.get_root()
-            
-            for i in range(1,len(profile_nodes)):
-                profile_node_split = profile_nodes[i].split(":")
-                if res[profile_node_split[0]] is not None:
-                    res = res[profile_node_split[0]]
-                    if len(profile_node_split)>1:
-                        if not res.has_key(profile_node_split[1]):
-                            res[profile_node_split[1]]={}
-                        res = res[profile_node_split[1]]
-                else:
-                    res[profile_node_split[0]] = {}
-                    res = res[profile_node_split[0]]
-                    if len(profile_node_split)>1:
-                        if not res.has_key(profile_node_split[1]):
-                            res[profile_node_split[1]]={}
-                        res = res[profile_node_split[1]]
+                #Go along hierarchy, init the remaining children    
+                for i in range(1,len(profile_nodes)):
+                    profile_node_split = profile_nodes[i].split(":")
+                    profile_node = profile_node.children[profile_node_split[0]]
+                    res[profile_node_split[0]]={}
+                    res=res[profile_node_split[0]]
+                    if profile_node.id_required:
+                        res[profile_node_split[1]]={}
+                        res=res[profile_node_split[1]]
                     for child in profile_node.children:
                         res[child]=None
-            for item in value_dict:
-                res[item]=value_dict[item]
 
-            sql_cmd = "update " +self.__get_root_name()+" set profile=\""+str(query_res)+"\" where id=\""+profile_nodes[0].split(":")[1]+"\""
-            if is_android:
-                self.__db.execSQL(sql_cmd)
+                for item in value_dict:
+                    res[item]=value_dict[item]
+     
+                #Insert the new record into table
+                sql_cmd = "insert into "+self.__get_root_name() + "(id,profile) values(\""+profile_nodes[0].split(":")[1]+"\","+"\""+str(query_res)+"\")"
+                if is_android:
+                    # print "Yuanjie: execSQL"
+                    self.__db.execSQL(sql_cmd)
+                else:
+                    self.__db.execute(sql_cmd)
+                    self.__conn.commit()
+
+                return True
             else:
-                self.__db.execute(sql_cmd)
-                self.__conn.commit()
+                if is_android:
+                    sql_res.moveToFirst();
+                    query_res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
+                else:
+                    query_res = ast.literal_eval(sql_res[0][0])
+                #The id exists. Update the record
+                res=query_res
+                profile_node = self.__profile_hierarchy.get_root()
+                
+                for i in range(1,len(profile_nodes)):
+                    profile_node_split = profile_nodes[i].split(":")
+                    if res[profile_node_split[0]] is not None:
+                        res = res[profile_node_split[0]]
+                        if len(profile_node_split)>1:
+                            if not res.has_key(profile_node_split[1]):
+                                res[profile_node_split[1]]={}
+                            res = res[profile_node_split[1]]
+                    else:
+                        res[profile_node_split[0]] = {}
+                        res = res[profile_node_split[0]]
+                        if len(profile_node_split)>1:
+                            if not res.has_key(profile_node_split[1]):
+                                res[profile_node_split[1]]={}
+                            res = res[profile_node_split[1]]
+                        for child in profile_node.children:
+                            res[child]=None
+                for item in value_dict:
+                    res[item]=value_dict[item]
 
-            return True
+                sql_cmd = "update " +self.__get_root_name()+" set profile=\""+str(query_res)+"\" where id=\""+profile_nodes[0].split(":")[1]+"\""
+                if is_android:
+                    self.__db.execSQL(sql_cmd)
+                else:
+                    self.__db.execute(sql_cmd)
+                    self.__conn.commit()
+
+                return True
+        except:
+            #TODO: raise warnings
+            return False
 
 if __name__=="__main__":
 

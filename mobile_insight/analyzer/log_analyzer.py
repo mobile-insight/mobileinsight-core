@@ -58,6 +58,8 @@ class LogAnalyzer(Analyzer):
             self.src.run()
         if self.listener_callback:
             self.listener_callback()
+        else:
+            self.log_warning("no listener_callback ...")
 
 
 

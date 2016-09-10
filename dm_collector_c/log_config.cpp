@@ -38,13 +38,92 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
         *((int *)(buf.first + 4)) = (int) op;
         break;
 
+    case DIAG_BEGIN_1D:
+        buf.second = sizeof(char);
+        buf.first = new char[buf.second];
+        buf.first[0] = 0x1D;
+        break;
+
+    case DIAG_BEGIN_00:
+        buf.second = sizeof(char);
+        buf.first = new char[buf.second];
+        buf.first[0] = 0x00;
+        break;
+
+    case DIAG_BEGIN_7C:
+        buf.second = sizeof(char);
+        buf.first = new char[buf.second];
+        buf.first[0] = 0x7C;
+        break;
+
+    case DIAG_BEGIN_1C:
+        buf.second = sizeof(char);
+        buf.first = new char[buf.second];
+        buf.first[0] = 0x1C;
+        break;
+
+    case DIAG_BEGIN_0C:
+        buf.second = sizeof(char);
+        buf.first = new char[buf.second];
+        buf.first[0] = 0x0C;
+        break;
+
+    case DIAG_BEGIN_63:
+        buf.second = sizeof(char);
+        buf.first = new char[buf.second];
+        buf.first[0] = 0x63;
+        break;
+
+    case DIAG_BEGIN_4B0F0000:
+        buf.second = sizeof(char) * 4;
+        buf.first = new char[buf.second];
+        *((int *)(buf.first)) = 0x00000F4B;
+        break;
+
+    case DIAG_BEGIN_4B090000:
+        buf.second = sizeof(char) * 4;
+        buf.first = new char[buf.second];
+        *((int *)(buf.first)) = 0x0000094B;
+        break;
+
+    case DIAG_BEGIN_4B080000:
+        buf.second = sizeof(char) * 4;
+        buf.first = new char[buf.second];
+        *((int *)(buf.first)) = 0x0000084B;
+        break;
+
+    case DIAG_BEGIN_4B080100:
+        buf.second = sizeof(char) * 4;
+        buf.first = new char[buf.second];
+        *((int *)(buf.first)) = 0x0001084B;
+        break;
+
+    case DIAG_BEGIN_4B040000:
+        buf.second = sizeof(char) * 4;
+        buf.first = new char[buf.second];
+        *((int *)(buf.first)) = 0x0000044B;
+        break;
+
+    case DIAG_BEGIN_4B040F00:
+        buf.second = sizeof(char) * 4;
+        buf.first = new char[buf.second];
+        *((int *)(buf.first)) = 0x000F044B;
+        break;
+
+    case DIAG_END_6000:
+        buf.second = sizeof(char) * 2;
+        buf.first = new char[buf.second];
+        *((int *)(buf.first)) = 0x0060;
+        break;
+
+
     case SET_MASK:
         {
             int equip_id = -1;
             int highest = -1;
             for (size_t i = 0; i < type_ids.size(); i++) {
                 int id = type_ids[i];
-                
+                // Haotian: the highest value calculated here may not be proper
                 int e = get_equip_id(id);
                 if (equip_id == -1) {
                     equip_id = e;
@@ -55,6 +134,23 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
                     equip_id = -1;
                     break;
                 }
+            }
+            // Haotian: hardcode highest value
+            switch (equip_id) {
+                case 0x00000001:    // CDMA, _1xEV, ......
+                    highest = 0x00000FD3;
+                    break;
+                case 0x00000004:    // WCDMA, ......
+                    highest = 0x00000920;
+                    break;
+                case 0x00000007:    // UMTS, ......
+                    highest = 0x00000B56;
+                    break;
+                case 0x0000000b:    // LTE, ......
+                    highest = 0x000001C4;
+                    break;
+                default:
+                    break;
             }
             if (equip_id == -1) {
                 ;   // fail to extract an unique equid id
