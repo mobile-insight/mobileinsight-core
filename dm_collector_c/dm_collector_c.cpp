@@ -308,6 +308,85 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
     return true;
 }
 
+// A helper function that generated binary code of config headers.
+// If error occurs, false is returned and PyErr_SetString() will be called.
+static bool
+generate_log_config_headers (PyObject *file_or_serial, PyObject *type_names) {
+    BinaryBuffer buf;
+    IdVector empty;
+    for (int k = 0; k < 12; k++) {
+        switch (k) {
+            case 0:
+                buf = encode_log_config(DIAG_BEGIN_1D, empty);
+                break;
+            case 1:
+                buf = encode_log_config(DIAG_BEGIN_00, empty);
+                break;
+            case 2:
+                buf = encode_log_config(DIAG_BEGIN_7C, empty);
+                break;
+            case 3:
+                buf = encode_log_config(DIAG_BEGIN_1C, empty);
+                break;
+            case 4:
+                buf = encode_log_config(DIAG_BEGIN_0C, empty);
+                break;
+            case 5:
+                buf = encode_log_config(DIAG_BEGIN_63, empty);
+                break;
+            case 6:
+                buf = encode_log_config(DIAG_BEGIN_4B0F0000, empty);
+                break;
+            case 7:
+                buf = encode_log_config(DIAG_BEGIN_4B090000, empty);
+                break;
+            case 8:
+                buf = encode_log_config(DIAG_BEGIN_4B080000, empty);
+                break;
+            case 9:
+                buf = encode_log_config(DIAG_BEGIN_4B080100, empty);
+                break;
+            case 10:
+                buf = encode_log_config(DIAG_BEGIN_4B040000, empty);
+                break;
+            case 11:
+                buf = encode_log_config(DIAG_BEGIN_4B040F00, empty);
+                break;
+            default:
+                break;
+        }
+        if (buf.first != NULL && buf.second != 0) {
+            (void) send_msg(file_or_serial, buf.first, buf.second);
+            delete [] buf.first;
+            buf.first = NULL;
+        } else {
+            PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
+            return false;
+        }
+    }
+    return true;
+}
+
+// A helper function that generated binary code of config ends.
+// If error occurs, false is returned and PyErr_SetString() will be called.
+static bool
+generate_log_config_ends (PyObject *file_or_serial, PyObject *type_names) {
+    BinaryBuffer buf;
+    IdVector empty;
+    buf = encode_log_config(DIAG_END_6000, empty);
+    if (buf.first != NULL && buf.second != 0) {
+        (void) send_msg(file_or_serial, buf.first, buf.second);
+        delete [] buf.first;
+        buf.first = NULL;
+    } else {
+        PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
+        return false;
+    }
+    return true;
+}
+
+
+
 // Return: successful or not
 static PyObject *
 dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
@@ -420,7 +499,7 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
     bool success = false;
     BinaryBuffer buf;
     IdVector empty;
- 
+
     if (!PyArg_ParseTuple(args, "OO", &file, &sequence)) {
         return NULL;
     }
@@ -437,12 +516,20 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
         goto raise_exception;
     }
 
+    // Config Headers
+    success = generate_log_config_headers(file, sequence);
+    if (!success) {
+        goto raise_exception;
+    }
+
     // Disable previous logs
     for (int k = 0; k < 2; k++) {
         if (k == 0) {   // Disable normal log msgs
-            buf = encode_log_config(DISABLE, empty);
-        } else {        // Disable debug msgs
+            // buf = encode_log_config(DISABLE, empty);
             buf = encode_log_config(DISABLE_DEBUG, empty);
+        } else {        // Disable debug msgs
+            // buf = encode_log_config(DISABLE_DEBUG, empty);
+            buf = encode_log_config(DISABLE, empty);
         }
         if (buf.first != NULL && buf.second != 0) {
             (void) send_msg(file, buf.first, buf.second);
@@ -458,6 +545,13 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
     if (!success) {
         goto raise_exception;
     }
+
+    // Config End
+    success = generate_log_config_ends(file, sequence);
+    if (!success) {
+        goto raise_exception;
+    }
+
     Py_DECREF(sequence);
     Py_DECREF(file);
     Py_RETURN_TRUE;
@@ -599,7 +693,6 @@ initdm_collector_c(void)
         "collects and decodes diagnositic logs from Qualcomm chipsets.");
 
     PyObject *log_packet_types;
-
 
     // dm_ccllector_c.log_packet_types: stores all supported type names
     if(EXPOSE_INTERNAL_LOGS==1){
