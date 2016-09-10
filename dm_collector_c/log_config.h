@@ -29,6 +29,19 @@ enum LogConfigOp {
     DISABLE_DEBUG = 107,	// Disable all dbg msg
     DIAG_BEGIN = 108,	// Beginning of DIAG.CFG
     DIAG_END = 109,		// End of DIAG.CFG
+    DIAG_BEGIN_1D = 110,
+    DIAG_BEGIN_00 = 111,
+    DIAG_BEGIN_7C = 112,
+    DIAG_BEGIN_1C = 113,
+    DIAG_BEGIN_0C = 114,
+    DIAG_BEGIN_63 = 115,
+    DIAG_BEGIN_4B0F0000 = 116,
+    DIAG_BEGIN_4B090000 = 117,
+    DIAG_BEGIN_4B080000 = 118,
+    DIAG_BEGIN_4B080100 = 119,
+    DIAG_BEGIN_4B040000 = 120,
+    DIAG_BEGIN_4B040F00 = 121,
+    DIAG_END_6000 = 122,
 };
 
 // Encode a log config message.

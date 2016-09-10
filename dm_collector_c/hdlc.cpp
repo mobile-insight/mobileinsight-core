@@ -51,7 +51,7 @@ calc_crc (UINT8 *data, size_t len, UINT16 crc)
     0xF78FU,0xE606U,0xD49DU,0xC514U,0xB1ABU,0xA022U,0x92B9U,0x8330U,
     0x7BC7U,0x6A4EU,0x58D5U,0x495CU,0x3DE3U,0x2C6AU,0x1EF1U,0x0F78U,
     };
-    
+
     crc = crc ^ 0xFFFFU;
     while (len > 0)
     {
@@ -78,7 +78,7 @@ encode_hdlc_frame (const char *payld, int length) {
 
         if (c == '\x7d' || c == '\x7e') {
             retstr.append(1, '\x7d');
-            retstr.append(1, c ^ ESCAPE_XOR);
+            retstr.append(1, c ^ ESCAPE_XOR);   // 0x7d: 0x7d5d, 0x7e: 0x7e5e
         } else
             retstr.append(1, c);
     }
@@ -135,7 +135,7 @@ get_next_frame (std::string& output_frame, bool& crc_correct) {
     UINT16 b2 = output_frame[output_frame.size() - 2] & 0xFF;
     UINT16 frame_crc16 = (b1 << 8) + b2;
     output_frame.erase(output_frame.size() - 2);
-    
+
     UINT16 crc16 = calc_crc((UINT8 *) output_frame.c_str(), output_frame.size(), 0);
 
     crc_correct = (frame_crc16 == crc16);
