@@ -104,6 +104,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         self.log_info("RRC_State="+str(msg['RRC State']))
         rrc_state = {}
         rrc_state['RRC State'] = str(msg['RRC State'])
+        rrc_state['Timestamp'] = str(msg['timestamp'])
         self.broadcast_info('RRC_STATE',rrc_state)
 
 

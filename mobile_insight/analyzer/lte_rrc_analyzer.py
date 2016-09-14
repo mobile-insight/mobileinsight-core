@@ -234,6 +234,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         # Broadcast to other apps
         drx_state = {}
         drx_state['Conn state'] = "CONNECTED"
+        drx_state['Timestamp'] = str(msg['timestamp'])
         drx_transition=""
         for item in msg['Records']:
             if item['CDRX Event'] == "INACTIVITY_TIMER_START":
@@ -816,8 +817,10 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 drx_state = {}
                 drx_state['Conn state'] = "CONNECTED"
                 drx_state['DRX state'] = "CRX"
+                drx_state['Timestamp'] = str(msg.timestamp)
                 self.broadcast_info('DRX',drx_state)
 
+                
             if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
                 self.__status.conn = False
                 # self.log_info(self.__status.dump())
@@ -826,7 +829,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 drx_state = {}
                 drx_state['Conn state'] = "IDLE"
                 drx_state['DRX state'] = "IDLE"
+                drx_state['Timestamp'] = str(msg.timestamp)
                 self.broadcast_info('DRX',drx_state)
+
 
     def set_source(self,source):
         """
