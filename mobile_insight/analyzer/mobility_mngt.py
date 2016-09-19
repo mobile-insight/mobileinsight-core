@@ -157,6 +157,7 @@ class MobilityMngt(Analyzer):
 
                     # Broadcast to apps
                     bcast_dict = {}
+                    bcast_dict['Timestamp']=str(msg.timestamp)
                     bcast_dict['Target Radio']=handoff_state.rat
                     bcast_dict['Target Freq']=handoff_state.freq
                     self.broadcast_info('HANDOFF',bcast_dict)
@@ -183,6 +184,7 @@ class MobilityMngt(Analyzer):
 
                     # Broadcast to apps
                     bcast_dict = {}
+                    bcast_dict['Timestamp']=str(msg.timestamp)
                     bcast_dict['Target Radio']=handoff_state.rat
                     bcast_dict['Target Freq']=handoff_state.freq
                     self.broadcast_info('HANDOFF',bcast_dict)
@@ -213,6 +215,7 @@ class MobilityMngt(Analyzer):
 
                     # Broadcast to apps
                     bcast_dict = {}
+                    bcast_dict['Timestamp']=str(msg.timestamp)
                     bcast_dict['Target Radio']=handoff_state.rat
                     bcast_dict['Target Freq']=handoff_state.freq
                     self.broadcast_info('HANDOFF',bcast_dict)
@@ -239,6 +242,7 @@ class MobilityMngt(Analyzer):
 
                         # Broadcast to apps
                         bcast_dict = {}
+                        bcast_dict['Timestamp']=str(msg.timestamp)
                         bcast_dict['Target Radio']=handoff_state.rat
                         bcast_dict['Target Freq']=handoff_state.freq
                         self.broadcast_info('HANDOFF',bcast_dict)
@@ -261,6 +265,7 @@ class MobilityMngt(Analyzer):
 
                         # Broadcast to apps
                         bcast_dict = {}
+                        bcast_dict['Timestamp']=str(msg.timestamp)
                         bcast_dict['event'] = str(meas_report[1].event_list[0].type)
                         bcast_dict['rss'] = str(rss)
                         self.broadcast_info('MEAS_REPORT',bcast_dict)
@@ -354,6 +359,7 @@ class MobilityMngt(Analyzer):
 
                 # Broadcast to apps
                 bcast_dict = {}
+                bcast_dict['Timestamp']=str(msg.timestamp)
                 bcast_dict['Control info'] = meas_state.dump()
                 self.broadcast_info('MEAS_CTRL',bcast_dict)
 

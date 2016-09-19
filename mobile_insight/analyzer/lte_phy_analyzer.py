@@ -52,6 +52,11 @@ class LtePhyAnalyzer(Analyzer):
         self.prev_timestamp_dl = None # Track timestamp to calculate avg DL bandwidth
         self.prev_timestamp_ul = None # Track timestamp to calculate avg DL bandwidth
         self.avg_window = 1.0 # Average link BW time window (in seconds)
+        
+        # Statistics for PDSCH modulation
+        self.mcs_qpsk_count = 0 
+        self.mcs_16qam_count = 0
+        self.mcs_64qam_count = 0
 
         # Record last observed CQI (for DL bandwidth prediction)
         self.cur_cqi0 = 0
@@ -106,6 +111,13 @@ class LtePhyAnalyzer(Analyzer):
             self.cur_tbs = (log_item["TBS 0"]+log_item["TBS 1"])
             self.lte_dl_bw += (log_item["TBS 0"]+log_item["TBS 1"])
 
+            if log_item["MCS 0"] == "QPSK":
+                self.mcs_qpsk_count +=1
+            elif log_item["MCS 0"] == "16QAM":
+                self.mcs_16qam_count +=1
+            elif log_item["MCS 0"] == "64QAM":
+                self.mcs_64qam_count +=1
+
             if (log_item['timestamp']-self.prev_timestamp_dl).total_seconds() >= self.avg_window:
                 bcast_dict = {}
                 bandwidth = self.lte_dl_bw/((log_item['timestamp']-self.prev_timestamp_dl).total_seconds()*1000000.0)
@@ -131,6 +143,9 @@ class LtePhyAnalyzer(Analyzer):
 
                 bcast_dict['Modulation 0'] = str(log_item["MCS 0"])
                 bcast_dict['Modulation 1'] = str(log_item["MCS 1"])
+                bcast_dict['Modulation-QPSK'] = str(self.mcs_qpsk_count)
+                bcast_dict['Modulation-16QAM'] = str(self.mcs_16qam_count)
+                bcast_dict['Modulation-64QAM'] = str(self.mcs_64qam_count)
 
                 # Log/notify average bandwidth
                 self.log_info(str(log_item['timestamp']) + ' LTE_DL_Bandwidth=' + bcast_dict['Bandwidth (Mbps)'] + "Mbps")
@@ -139,6 +154,10 @@ class LtePhyAnalyzer(Analyzer):
                 # Reset bandwidth statistics
                 self.prev_timestamp_dl = log_item['timestamp']
                 self.lte_dl_bw = 0
+                self.mcs_qpsk_count = 0
+                self.mcs_16qam_count = 0
+                self.mcs_64qam_count = 0
+
 
 
 

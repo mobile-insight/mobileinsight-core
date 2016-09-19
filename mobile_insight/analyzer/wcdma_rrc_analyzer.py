@@ -101,7 +101,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
             self.send(xml_msg) #deliver WCDMA signaling messages only (decoded)
 
     def __callback_rrc_state(self,msg):
-        self.log_info("RRC_State="+str(msg['RRC State']))
+        # self.log_info("RRC_State="+str(msg['RRC State'])+" Timestamp="+str(msg['timestamp']))
         rrc_state = {}
         rrc_state['RRC State'] = str(msg['RRC State'])
         rrc_state['Timestamp'] = str(msg['timestamp'])
