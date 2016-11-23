@@ -16,7 +16,7 @@ Typical usage of MobileInsight consists of declaring a monitor to track the netw
 
 Please see [here](http://metro.cs.ucla.edu/mobile_insight/get_started.html) for more detailed instructions. The following is a quick summary of installation:
 
-First install [Python 2.7](https://www.python.org/) if you do not have them. 
+First install [Python 2.7](https://www.python.org/) if you do not have them.
 
 Second, MobileInsight builds on top of pyserial and crcmod, so please install both libraries:
 
@@ -31,7 +31,7 @@ To run MobileInsight GUI, please install the following Python libraries:
 
 Last, download MobileInsight, and unpack the code:
 
-    tar -zxvf MobileInsight-2.0.tar.gz
-    cd MobileInsight-2.0
+    tar -zxvf MobileInsight-2.1.1.tar.gz
+    cd MobileInsight-2.1.1
     python setup.py install
 
