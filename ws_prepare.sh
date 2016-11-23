@@ -8,10 +8,8 @@
 
 # Use your local library path
 LD_LIBRARY_PATH=/usr/local/lib
-# This is where this MobileInsight source is extracted
-MOBILE_INSIGHT_SRC_PATH=${HOME}/MobileInsight-2.1.0
 # A copy of Wireshark sources will be put inside the MobileInsight source folder
-WIRESHARK_SRC_PATH=${MOBILE_INSIGHT_SRC_PATH}/wireshark-2.0.8
+WIRESHARK_SRC_PATH=$(pwd)/wireshark-2.0.8
 
 # Clean up libraries installed by the old version of MobileInsight
 sudo rm /usr/lib/libglib-2.0.dylib
@@ -36,10 +34,10 @@ sudo rm /usr/lib/libwsutil.dylib
 # First let Homebrew install Wireshark 2.2.2 once, and solve dependencies
 brew install wireshark
 # Make sure compile environment and other dependencies are installed
-brew install pkg-config cmake glib gettext libffi
+brew install pkg-config cmake wget glib gettext libffi
 # Remove Wireshark 2.2.2 and install the old stable version 2.0.8 using our own formulae
 brew remove wireshark
-brew install ${MOBILE_INSIGHT_SRC_PATH}/wireshark.rb
+brew install ./wireshark.rb
 brew link --overwrite wireshark
 
 # Download necessary source files to compile ws_dissector
@@ -55,7 +53,7 @@ cd ${WIRESHARK_SRC_PATH}
 ./configure --disable-wireshark
 
 # Compile ws_dissector
-cd ${MOBILE_INSIGHT_SRC_PATH}/ws_dissector
+cd ../ws_dissector
 if [ -e "ws_dissector" ]; then
 	rm ws_dissector
 fi
@@ -64,13 +62,15 @@ g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags 
 strip ws_dissector
 
 # Install compiled MobileInsight desktop version
-cd ${MOBILE_INSIGHT_SRC_PATH}
+cd ..
 sudo python setup.py install
-rm -r ${MOBILE_INSIGHT_SRC_PATH}/libs
+rm -r ./libs
 
 # Run example
 echo "\\n\\n"
 echo "Successfully installed the newest version of MobileInsight desktop version!"
 echo "Testing the offline analysis example."
-cd ${MOBILE_INSIGHT_SRC_PATH}/examples
+cd ./examples
 python ./offline-analysis-example.py
+echo "\\n\\n"
+echo "Successfully ran the offline analysis example!"
