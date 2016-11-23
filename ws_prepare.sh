@@ -64,7 +64,6 @@ strip ws_dissector
 # Install compiled MobileInsight desktop version
 cd ..
 sudo python setup.py install
-rm -r ./libs
 
 # Run example
 echo "\\n\\n"
