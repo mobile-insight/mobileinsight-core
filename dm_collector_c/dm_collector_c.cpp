@@ -634,7 +634,7 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
 
             unsigned short n_size = frame.size()+sizeof(char)*14;
 
-            char tmp[14]={
+            unsigned char tmp[14]={
                 0xFF, 0xFF,
                 0x00, 0x00, 0xeb, 0x1f,
                 0x00, 0x00, 0x73, 0xB7,

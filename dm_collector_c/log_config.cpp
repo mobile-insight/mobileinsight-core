@@ -158,7 +158,7 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
                 int mask_len = (highest / 8) + 1;
                 buf.second = sizeof(char) * 4 + sizeof(int) * 3 + mask_len;
                 buf.first = new char[buf.second];
-                buf.first[0] = 115;
+                buf.first[0] = 115; // 0x73
                 buf.first[1] = 0;
                 buf.first[2] = 0;
                 buf.first[3] = 0;

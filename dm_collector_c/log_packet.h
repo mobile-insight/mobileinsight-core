@@ -2096,6 +2096,7 @@ const ValueName ValueNameCarrierIndex [] = {
     {0, "PCC"},
     {1, "SCC"},
 };
+
 const ValueName ValueNameAggregationLevel [] = {
     // 2 bits
     {0, "Agg1"},
@@ -2165,6 +2166,11 @@ const ValueName ValueNameFrameStructure [] = {
     {1, "TDD"},
 };
 
+const ValueName ValueNameDuplexingMode [] = {
+    {0, "FDD"},
+    {1, "TDD"},
+};
+
 const ValueName ValueNameNumeNBAntennas [] = {
     {0, "1 or 2"},
 };
@@ -2175,6 +2181,11 @@ const ValueName ValueNameTrueOrFalse [] = {
 };
 
 const ValueName ValueNameHARQLogStatus [] = {
+    {0, "Normal"},
+};
+
+const ValueName ValueNameCPType [] = {
+    // 1 bit
     {0, "Normal"},
 };
 
@@ -2295,6 +2306,12 @@ const ValueName ValueNameWcdmaRrcStates [] = {
     {3, "CELL_DCH"},
     {4, "CELL_PCH"},
     {5, "URA_PCH"},
+};
+
+const ValueName ValueNameCellIndex [] = {
+    // 4 bits
+    {0, "PCell"},
+    {1, "SCell"},
 };
 
 // ----------------------------------------------------------------------------

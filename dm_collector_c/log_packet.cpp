@@ -29,6 +29,7 @@
 #include "lte_ll1_pusch_csf.h"
 #include "lte_ml1_cdrx_events_info.h"
 #include "wcdma_rrc_states.h"
+#include "lte_ml1_idle_neighbor_cell_meas.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -4594,6 +4595,12 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
         break;
     case WCDMA_RRC_States:
         offset += _decode_wcdma_rrc_states_payload(b, offset, length, result);
+        break;
+    case LTE_ML1_Idle_Neighbor_Cell_Meas:
+        offset += _decode_by_fmt(LteMl1Incm_Fmt,
+                ARRAY_SIZE(LteMl1Incm_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_ml1_idle_neighbor_cell_meas_payload(b, offset, length, result);
         break;
     default:
         break;
