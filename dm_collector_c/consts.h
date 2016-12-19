@@ -23,7 +23,7 @@ enum LogPacketType {
     _1xEVDO_Multi_Carrier_Pilot_Sets = 0x12A1,  // TODO
     HDR_Pilot_Sets = 0x12B6,    // TODO
 
-    WCDMA_Search_Cell_Reselection_Rank = 0x4005,    // TODO
+    WCDMA_Search_Cell_Reselection_Rank = 0x4005,
     WCDMA_RRC_States = 0x4125,
     WCDMA_CELL_ID = 0x4127,
     WCDMA_Signaling_Messages = 0x412F,
