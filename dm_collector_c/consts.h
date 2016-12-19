@@ -94,9 +94,9 @@ enum LogPacketType {
     LTE_LL1_PUSCH_Tx_Report = 0xB139,
     LTE_LL1_PUSCH_CSF = 0xB14E,
 
-    GSM_Surround_Cell_BA_List = 0x5071, // TODO
+    GSM_Surround_Cell_BA_List = 0x5071,
     GSM_RR_Cell_Selection_Parameters = 0x5130,  // TODO
-    GSM_RR_Cell_Information = 0x5134,   // TODO
+    GSM_RR_Cell_Information = 0x5134,
     GSM_RR_Cell_Reselection_Meas = 0x51FC,  // TODO
 
     Modem_debug_message = 0x1FEB,

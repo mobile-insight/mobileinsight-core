@@ -2189,6 +2189,10 @@ const ValueName ValueNameCPType [] = {
     {0, "Normal"},
 };
 
+const ValueName ValueNameNormalOrNot [] = {
+    {0, "Normal"},
+};
+
 const ValueName ValueNamePassOrFail [] = {
     {0, "Fail"},
     {1, "Pass"},
@@ -2312,6 +2316,12 @@ const ValueName ValueNameCellIndex [] = {
     // 4 bits
     {0, "PCell"},
     {1, "SCell"},
+};
+
+const ValueName ValueNameBandClass [] = {
+    // 4 bits
+    {10, "1900 PCS"},
+    {11, "GSM 850"},
 };
 
 // ----------------------------------------------------------------------------

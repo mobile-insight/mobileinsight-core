@@ -31,6 +31,8 @@
 #include "wcdma_rrc_states.h"
 #include "lte_ml1_idle_neighbor_cell_meas.h"
 #include "wcdma_search_cell_reselection_rank.h"
+#include "gsm_rr_cell_information.h"
+#include "gsm_surround_cell_ba_list.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -3590,7 +3592,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                         LtePucchPowerControl_Record_v4_DCI_Format,
                         ARRAY_SIZE(LtePucchPowerControl_Record_v4_DCI_Format,
                             ValueName),
-                        "Invalid");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "PUCCH Format", iPUCCH);
                 Py_DECREF(old_object);
@@ -3599,7 +3601,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                         LtePucchPowerControl_Record_v4_PUCCH_Format,
                         ARRAY_SIZE(LtePucchPowerControl_Record_v4_PUCCH_Format,
                             ValueName),
-                        "Invalid");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "N_HARQ", iN_HARQ);
                 Py_DECREF(old_object);
@@ -3696,7 +3698,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                         LtePuschPowerControl_Record_v5_DCI_Format,
                         ARRAY_SIZE(LtePuschPowerControl_Record_v5_DCI_Format,
                             ValueName),
-                        "Invalid");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Tx Type", iTxType);
                 Py_DECREF(old_object);
@@ -3796,7 +3798,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                         LtePuschPowerControl_Record_v5_DCI_Format,
                         ARRAY_SIZE(LtePuschPowerControl_Record_v5_DCI_Format,
                             ValueName),
-                        "Invalid");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Tx Type", iTxType);
                 Py_DECREF(old_object);
@@ -4608,6 +4610,18 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 ARRAY_SIZE(WcdmaScrr_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_wcdma_scrr_payload(b, offset, length, result);
+        break;
+    case GSM_RR_Cell_Information:
+        offset += _decode_by_fmt(GsmRrCellInfo_Fmt,
+                ARRAY_SIZE(GsmRrCellInfo_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_gsm_rci_payload(b, offset, length, result);
+        break;
+    case GSM_Surround_Cell_BA_List:
+        offset += _decode_by_fmt(GsmScbl_Fmt,
+                ARRAY_SIZE(GsmScbl_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_gsm_scbl_payload(b, offset, length, result);
         break;
     default:
         break;
