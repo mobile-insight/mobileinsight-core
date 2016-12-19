@@ -80,7 +80,7 @@ enum LogPacketType {
     LTE_ML1_IRAT_MDB = 0xB188,
     LTE_ML1_RLM_Report = 0xB18A,
     LTE_ML1_System_Scan_Results = 0xB18E,
-    LTE_ML1_Idle_Neighbor_Cell_Meas = 0xB192,   // TODO
+    LTE_ML1_Idle_Neighbor_Cell_Meas = 0xB192,
     LTE_ML1_Serving_Cell_Measurement_Result = 0xB193,
     LTE_ML1_Connected_Mode_Neighbor_Meas_Req_Resp = 0xB195,
     LTE_ML1_CDRX_Events_Info = 0xB198,

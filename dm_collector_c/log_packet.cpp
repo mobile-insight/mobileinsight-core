@@ -30,6 +30,7 @@
 #include "lte_ml1_cdrx_events_info.h"
 #include "wcdma_rrc_states.h"
 #include "lte_ml1_idle_neighbor_cell_meas.h"
+#include "wcdma_search_cell_reselection_rank.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -4601,6 +4602,12 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 ARRAY_SIZE(LteMl1Incm_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_lte_ml1_idle_neighbor_cell_meas_payload(b, offset, length, result);
+        break;
+    case WCDMA_Search_Cell_Reselection_Rank:
+        offset += _decode_by_fmt(WcdmaScrr_Fmt,
+                ARRAY_SIZE(WcdmaScrr_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_wcdma_scrr_payload(b, offset, length, result);
         break;
     default:
         break;
