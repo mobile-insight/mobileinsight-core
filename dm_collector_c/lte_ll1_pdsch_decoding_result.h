@@ -118,7 +118,6 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
     int pkt_ver = _search_result_int(result, "Version");
 
     PyObject *old_object;
-    PyObject *pyfloat;
 
     switch (pkt_ver) {
     case 24:

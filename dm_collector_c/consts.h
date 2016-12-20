@@ -97,7 +97,7 @@ enum LogPacketType {
     GSM_Surround_Cell_BA_List = 0x5071,
     GSM_RR_Cell_Selection_Parameters = 0x5130,  // TODO
     GSM_RR_Cell_Information = 0x5134,
-    GSM_RR_Cell_Reselection_Meas = 0x51FC,  // TODO
+    GSM_RR_Cell_Reselection_Meas = 0x51FC,
 
     Modem_debug_message = 0x1FEB,
 };

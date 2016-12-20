@@ -39,8 +39,6 @@ static int _decode_lte_ml1_cdrx_events_info_payload (const char *b,
     int pkt_ver = _search_result_int(result, "Version");
 
     PyObject *old_object;
-    PyObject *pyfloat;
-    int temp;
 
     switch (pkt_ver) {
     case 1:

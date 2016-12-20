@@ -33,6 +33,7 @@
 #include "wcdma_search_cell_reselection_rank.h"
 #include "gsm_rr_cell_information.h"
 #include "gsm_surround_cell_ba_list.h"
+#include "gsm_rr_cell_reselection_meas.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -4622,6 +4623,12 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 ARRAY_SIZE(GsmScbl_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_gsm_scbl_payload(b, offset, length, result);
+        break;
+    case GSM_RR_Cell_Reselection_Meas:
+        offset += _decode_by_fmt(GsmRrCellResMeas_Fmt,
+                ARRAY_SIZE(GsmRrCellResMeas_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_gsm_rcrm_payload(b, offset, length, result);
         break;
     default:
         break;

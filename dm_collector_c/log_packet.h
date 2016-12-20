@@ -2320,8 +2320,16 @@ const ValueName ValueNameCellIndex [] = {
 
 const ValueName ValueNameBandClass [] = {
     // 4 bits
+    {0, "Current 900/1800 Setting"},
     {10, "1900 PCS"},
     {11, "GSM 850"},
+};
+
+const ValueName ValueNameTimerState [] = {
+    // 8 bits
+    {0, "Stopped"},
+    {1, "Running"},
+    {2, "Expired"},
 };
 
 // ----------------------------------------------------------------------------
