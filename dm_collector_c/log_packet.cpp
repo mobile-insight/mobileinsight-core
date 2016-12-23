@@ -34,6 +34,7 @@
 #include "gsm_rr_cell_information.h"
 #include "gsm_surround_cell_ba_list.h"
 #include "gsm_rr_cell_reselection_meas.h"
+#include "srch_tng_1x_searcher_dump.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -4629,6 +4630,12 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 ARRAY_SIZE(GsmRrCellResMeas_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_gsm_rcrm_payload(b, offset, length, result);
+        break;
+    case Srch_TNG_1x_Searcher_Dump:
+        offset += _decode_by_fmt(SrchTng1xsd_Fmt,
+                ARRAY_SIZE(SrchTng1xsd_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_srch_tng_1xsd_payload(b, offset, length, result);
         break;
     default:
         break;

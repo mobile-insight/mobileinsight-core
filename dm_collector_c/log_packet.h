@@ -82,7 +82,7 @@ const ValueName WcdmaSignalingMsgChannelType [] = {
     {0x03, "RRC_DL_DCCH"},
     {0x04, "RRC_DL_BCCH_BCH"},
     {0x06, "RRC_DL_PCCH"},
-    {0xfe, "RRC_COMPLETE_SIB"}, 
+    {0xfe, "RRC_COMPLETE_SIB"},
 };
 
 // ------------------------------------------------------------
@@ -2321,8 +2321,10 @@ const ValueName ValueNameCellIndex [] = {
 const ValueName ValueNameBandClass [] = {
     // 4 bits
     {0, "Current 900/1800 Setting"},
+    {1, "1.8 to 2.0 GHz PCS"},
     {10, "1900 PCS"},
     {11, "GSM 850"},
+    {255, "Disabled"},
 };
 
 const ValueName ValueNameTimerState [] = {
@@ -2332,6 +2334,22 @@ const ValueName ValueNameTimerState [] = {
     {2, "Expired"},
 };
 
+const ValueName ValueNameTechnology [] = {
+    {0, "1x CDMA"},
+};
+
+const ValueName ValueNameQueue [] = {
+    {0, "HPQ0"},
+    {2, "Reserved"},
+};
+
+const ValueName ValueNamePilotSet [] = {
+    {0, "Unknown"},
+    {1, "Active Set"},
+    {2, "Candidate Set"},
+    {4, "Neighbor Set"},
+    {8, "Remaining Set"},
+};
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
