@@ -18,9 +18,9 @@ enum LogPacketType {
     _1xEV_Connection_Release = 0x1071,
     // _1xEV_Signaling_Control_Channel_Broadcast = 0x107C,
     _1xEV_Connected_State_Search_Info = 0x118A,
-    Srch_TNG_1x_Searcher_Dump = 0x119B, // TODO
+    Srch_TNG_1x_Searcher_Dump = 0x119B,
     _1xEV_Rx_Partial_MultiRLP_Packet = 0x1277,
-    _1xEVDO_Multi_Carrier_Pilot_Sets = 0x12A1,  // TODO
+    _1xEVDO_Multi_Carrier_Pilot_Sets = 0x12A1,
     HDR_Pilot_Sets = 0x12B6,    // TODO
 
     WCDMA_Search_Cell_Reselection_Rank = 0x4005,

@@ -2350,6 +2350,12 @@ const ValueName ValueNamePilotSet [] = {
     {4, "Neighbor Set"},
     {8, "Remaining Set"},
 };
+
+const ValueName ValueNameSearcherState [] = {
+    {2, "Synchronization"},
+    {3, "Idle"},
+    {4, "Traffic"},
+};
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
