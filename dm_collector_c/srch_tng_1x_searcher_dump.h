@@ -149,8 +149,8 @@ static int _decode_srch_tng_1xsd_payload (const char *b,
 
                         (void)_map_result_field_to_name(result_chain_item,
                                 "Band Class",
-                                ValueNameBandClass,
-                                ARRAY_SIZE(ValueNameBandClass, ValueName),
+                                ValueNameBandClassCDMA,
+                                ARRAY_SIZE(ValueNameBandClassCDMA, ValueName),
                                 "(MI)Unknown");
 
                         PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
@@ -234,6 +234,7 @@ static int _decode_srch_tng_1xsd_payload (const char *b,
 
                         unsigned int utemp = _search_result_uint(
                                 result_task_item, "Pilot Set");
+
                         if (utemp & 1)
                             utemp = 1;
                         else if (utemp & 2)
@@ -242,6 +243,8 @@ static int _decode_srch_tng_1xsd_payload (const char *b,
                             utemp = 4;
                         else if (utemp & 8)
                             utemp = 8;
+                        else if (!(utemp & 15) | 0)
+                            utemp = 0;
                         old_object = _replace_result_int(result_task_item,
                                 "Pilot Set", utemp);
                         (void)_map_result_field_to_name(result_task_item,

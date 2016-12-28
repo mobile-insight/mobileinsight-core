@@ -18,18 +18,18 @@
 #include "1xev_connection_attempt.h"
 #include "1xev_connection_release.h"
 #include "lte_pdsch_stat_indication.h"
-#include "lte_ml1_system_scan_results.h"
-#include "lte_ml1_bplmn_cell_request.h"
-#include "lte_ml1_bplmn_cell_confirm.h"
-#include "lte_ll1_serving_cell_com_loop.h"
-#include "lte_ll1_pdcch_decoding_result.h"
-#include "lte_ll1_pdsch_decoding_result.h"
-#include "lte_ll1_pusch_tx_report.h"
-#include "lte_ml1_rlm_report.h"
-#include "lte_ll1_pusch_csf.h"
-#include "lte_ml1_cdrx_events_info.h"
+#include "lte_phy_system_scan_results.h"
+#include "lte_phy_bplmn_cell_request.h"
+#include "lte_phy_bplmn_cell_confirm.h"
+#include "lte_phy_serving_cell_com_loop.h"
+#include "lte_phy_pdcch_decoding_result.h"
+#include "lte_phy_pdsch_decoding_result.h"
+#include "lte_phy_pusch_tx_report.h"
+#include "lte_phy_rlm_report.h"
+#include "lte_phy_pusch_csf.h"
+#include "lte_phy_cdrx_events_info.h"
 #include "wcdma_rrc_states.h"
-#include "lte_ml1_idle_neighbor_cell_meas.h"
+#include "lte_phy_idle_neighbor_cell_meas.h"
 #include "wcdma_search_cell_reselection_rank.h"
 #include "gsm_rr_cell_information.h"
 #include "gsm_surround_cell_ba_list.h"
@@ -380,7 +380,7 @@ _decode_lte_nas_emm_state(const char *b, int offset, size_t length,
 }
 
 static int
-_decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
+_decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -388,8 +388,8 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
     switch (pkt_ver) {
     case 23:
         {
-            offset += _decode_by_fmt(LteLl1PdschDemapperConfigFmt_v23,
-                                        ARRAY_SIZE(LteLl1PdschDemapperConfigFmt_v23, Fmt),
+            offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v23,
+                                        ARRAY_SIZE(LtePhyPdschDemapperConfigFmt_v23, Fmt),
                                         b, offset, length, result);
 
             const unsigned int SFN_RSHIFT = 5, SFN_MASK = (1 << 10) - 1;
@@ -470,8 +470,8 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
             Py_DECREF(old_object);
             (void)_map_result_field_to_name(result,
                                             "MCS 0",
-                                            LteLl1PdschDemapperConfig_v23_Modulation,
-                                            ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Modulation, ValueName),
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
                                             "(MI)Unknown");
 
             PyObject *pyfloat = Py_BuildValue("f", ratio);
@@ -483,8 +483,8 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
             Py_DECREF(old_object);
             (void)_map_result_field_to_name(result,
                                             "MCS 1",
-                                            LteLl1PdschDemapperConfig_v23_Modulation,
-                                            ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Modulation, ValueName),
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
                                             "(MI)Unknown");
 
             // carrier index
@@ -492,14 +492,14 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
             Py_DECREF(old_object);
             (void)_map_result_field_to_name(result,
                                             "Carrier Index",
-                                            LteLl1PdschDemapperConfig_v23_Carrier_Index,
-                                            ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Carrier_Index, ValueName),
+                                            LtePhyPdschDemapperConfig_v23_Carrier_Index,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Carrier_Index, ValueName),
                                             "(MI)Unknown");
             break;
         }
 
     default:
-        printf("(MI)Unknown LTE LL1 PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
         return 0;
     }
 
@@ -507,7 +507,7 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
 }
 
 static int
-_decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
+_decode_lte_phy_cmlifmr(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -515,8 +515,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
     switch (pkt_ver) {
     case 3:
         {
-            offset += _decode_by_fmt(LteMl1CmlifmrFmt_v3_Header,
-                                        ARRAY_SIZE(LteMl1CmlifmrFmt_v3_Header, Fmt),
+            offset += _decode_by_fmt(LtePhyCmlifmrFmt_v3_Header,
+                                        ARRAY_SIZE(LtePhyCmlifmrFmt_v3_Header, Fmt),
                                         b, offset, length, result);
             int n_neighbor_cells = _search_result_int(result, "Number of Neighbor Cells");
             int n_detected_cells = _search_result_int(result, "Number of Detected Cells");
@@ -527,8 +527,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             result_allcells = PyList_New(0);
             for (int i = 0; i < n_neighbor_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1CmlifmrFmt_v3_Neighbor_Cell,
-                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v3_Neighbor_Cell, Fmt),
+                offset += _decode_by_fmt(LtePhyCmlifmrFmt_v3_Neighbor_Cell,
+                                            ARRAY_SIZE(LtePhyCmlifmrFmt_v3_Neighbor_Cell, Fmt),
                                             b, offset, length, result_cell);
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
@@ -544,8 +544,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             result_allcells = PyList_New(0);
             for (int i = 0; i < n_detected_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1CmlifmrFmt_v3_Detected_Cell,
-                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v3_Detected_Cell, Fmt),
+                offset += _decode_by_fmt(LtePhyCmlifmrFmt_v3_Detected_Cell,
+                                            ARRAY_SIZE(LtePhyCmlifmrFmt_v3_Detected_Cell, Fmt),
                                             b, offset, length, result_cell);
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
@@ -561,8 +561,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
         }
     case 4:
         {
-            offset += _decode_by_fmt(LteMl1CmlifmrFmt_v4_Header,
-                                        ARRAY_SIZE(LteMl1CmlifmrFmt_v4_Header, Fmt),
+            offset += _decode_by_fmt(LtePhyCmlifmrFmt_v4_Header,
+                                        ARRAY_SIZE(LtePhyCmlifmrFmt_v4_Header, Fmt),
                                         b, offset, length, result);
             int n_neighbor_cells = _search_result_int(result, "Number of Neighbor Cells");
             int n_detected_cells = _search_result_int(result, "Number of Detected Cells");
@@ -573,8 +573,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             result_allcells = PyList_New(0);
             for (int i = 0; i < n_neighbor_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1CmlifmrFmt_v4_Neighbor_Cell,
-                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v4_Neighbor_Cell, Fmt),
+                offset += _decode_by_fmt(LtePhyCmlifmrFmt_v4_Neighbor_Cell,
+                                            ARRAY_SIZE(LtePhyCmlifmrFmt_v4_Neighbor_Cell, Fmt),
                                             b, offset, length, result_cell);
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
@@ -590,8 +590,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             result_allcells = PyList_New(0);
             for (int i = 0; i < n_detected_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1CmlifmrFmt_v4_Detected_Cell,
-                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v4_Detected_Cell, Fmt),
+                offset += _decode_by_fmt(LtePhyCmlifmrFmt_v4_Detected_Cell,
+                                            ARRAY_SIZE(LtePhyCmlifmrFmt_v4_Detected_Cell, Fmt),
                                             b, offset, length, result_cell);
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
@@ -606,13 +606,13 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE ML1 CMLIFMR version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY CMLIFMR version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
 
 static int
-_decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
+_decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -625,30 +625,30 @@ _decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
             for (int i = 0; i < n_subpkt; i++) {
                 PyObject *result_subpkt = PyList_New(0);
                 // Decode subpacket header
-                offset += _decode_by_fmt(LteMl1SubpktFmt_v1_SubpktHeader,
-                                            ARRAY_SIZE(LteMl1SubpktFmt_v1_SubpktHeader, Fmt),
+                offset += _decode_by_fmt(LtePhySubpktFmt_v1_SubpktHeader,
+                                            ARRAY_SIZE(LtePhySubpktFmt_v1_SubpktHeader, Fmt),
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 int subpkt_id = _search_result_int(result_subpkt, "SubPacket ID");
                 int subpkt_ver = _search_result_int(result_subpkt, "Version");
-                const char *type_name = search_name(LteMl1Subpkt_SubpktType,
-                                                    ARRAY_SIZE(LteMl1Subpkt_SubpktType, ValueName),
+                const char *type_name = search_name(LtePhySubpkt_SubpktType,
+                                                    ARRAY_SIZE(LtePhySubpkt_SubpktType, ValueName),
                                                     subpkt_id);
                 if (type_name == NULL) {    // not found
-                    printf("(MI)Unknown LTE ML1 Subpacket ID: 0x%x\n", subpkt_id);
+                    printf("(MI)Unknown LTE PHY Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
                     if (strcmp(type_name, "Serving_Cell_Measurement_Result") == 0) {
                         switch (subpkt_ver) {
                         case 4:
-                            offset += _decode_by_fmt(LteMl1SubpktFmt_v1_Scmr_v4,
-                                                    ARRAY_SIZE(LteMl1SubpktFmt_v1_Scmr_v4, Fmt),
+                            offset += _decode_by_fmt(LtePhySubpktFmt_v1_Scmr_v4,
+                                                    ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v4, Fmt),
                                                     b, offset, length, result_subpkt);
                             success = true;
                             break;
                         // case 19:
-                        //     offset += _decode_by_fmt(LteMl1SubpktFmt_v1_Scmr_v19,
-                        //                             ARRAY_SIZE(LteMl1SubpktFmt_v1_Scmr_v19, Fmt),
+                        //     offset += _decode_by_fmt(LtePhySubpktFmt_v1_Scmr_v19,
+                        //                             ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v19, Fmt),
                         //                             b, offset, length, result_subpkt);
                         default:
                             break;
@@ -662,7 +662,7 @@ _decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        // printf("(MI)Unknown LTE ML1 Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        // printf("(MI)Unknown LTE PHY Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
             }
@@ -674,13 +674,13 @@ _decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE ML1 packet version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY packet version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
 
 static int
-_decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, size_t length,
+_decode_lte_phy_irat_cdma_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
 
     int start = offset;
@@ -694,8 +694,8 @@ _decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, size_t length,
 
                 PyObject *result_subpkt = PyList_New(0);
                 // Decode subpacket header
-                offset += _decode_by_fmt(LteMl1IratSubPktFmt,
-                                            ARRAY_SIZE(LteMl1IratSubPktFmt, Fmt),
+                offset += _decode_by_fmt(LtePhyIratSubPktFmt,
+                                            ARRAY_SIZE(LtePhyIratSubPktFmt, Fmt),
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 // int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
@@ -703,15 +703,15 @@ _decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, size_t length,
                 // int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
 
                 PyObject *result_subpkt_cdma = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1IratCDMACellFmt,
-                                            ARRAY_SIZE(LteMl1IratCDMACellFmt, Fmt),
+                offset += _decode_by_fmt(LtePhyIratCDMACellFmt,
+                                            ARRAY_SIZE(LtePhyIratCDMACellFmt, Fmt),
                                             b, offset, length, result_subpkt_cdma);
                 int n_pilot = _search_result_int(result_subpkt_cdma, "Number of Pilots");
                 int band = _search_result_int(result_subpkt_cdma, "Band");
                 for(int j=0; j<n_pilot; j++){
                     PyObject *result_subpkt_cdma_pilot = PyList_New(0);
-                    offset += _decode_by_fmt(LteMl1IratCDMACellPilotFmt,
-                                            ARRAY_SIZE(LteMl1IratCDMACellPilotFmt, Fmt),
+                    offset += _decode_by_fmt(LtePhyIratCDMACellPilotFmt,
+                                            ARRAY_SIZE(LtePhyIratCDMACellPilotFmt, Fmt),
                                             b, offset, length, result_subpkt_cdma_pilot);
                     char name[64];
                     sprintf(name,"Pilot_%d",j);
@@ -745,7 +745,7 @@ _decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, size_t length,
 
 
 static int
-_decode_lte_ml1_irat_subpkt(const char *b, int offset, size_t length,
+_decode_lte_phy_irat_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
 
     int start = offset;
@@ -759,32 +759,32 @@ _decode_lte_ml1_irat_subpkt(const char *b, int offset, size_t length,
 
                 PyObject *result_subpkt = PyList_New(0);
                 // Decode subpacket header
-                offset += _decode_by_fmt(LteMl1IratSubPktFmt,
-                                            ARRAY_SIZE(LteMl1IratSubPktFmt, Fmt),
+                offset += _decode_by_fmt(LtePhyIratSubPktFmt,
+                                            ARRAY_SIZE(LtePhyIratSubPktFmt, Fmt),
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
                 // int subpkt_ver = _search_result_int(result_subpkt, "Version");
                 int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
                 switch(subpkt_id){
-                    case LteMl1IratType_WCDMA:
+                    case LtePhyIratType_WCDMA:
                     {
                         PyObject *result_subpkt_wcdma = PyList_New(0);
-                        offset += _decode_by_fmt(LteMl1IratWCDMAFmt,
-                                            ARRAY_SIZE(LteMl1IratWCDMAFmt, Fmt),
+                        offset += _decode_by_fmt(LtePhyIratWCDMAFmt,
+                                            ARRAY_SIZE(LtePhyIratWCDMAFmt, Fmt),
                                             b, offset, length, result_subpkt_wcdma);
                         int n_freq = _search_result_int(result_subpkt_wcdma, "Number of frequencies");
                         for(int j=0; j<n_freq; j++){
                             PyObject *result_subpkt_wcdma_freq = PyList_New(0);
-                            offset += _decode_by_fmt(LteMl1IratWCDMACellMetaFmt,
-                                            ARRAY_SIZE(LteMl1IratWCDMACellMetaFmt, Fmt),
+                            offset += _decode_by_fmt(LtePhyIratWCDMACellMetaFmt,
+                                            ARRAY_SIZE(LtePhyIratWCDMACellMetaFmt, Fmt),
                                             b, offset, length, result_subpkt_wcdma_freq);
                             // int freq = _search_result_int(result_subpkt_wcdma_freq, "Frequency");
                             int n_cell = _search_result_int(result_subpkt_wcdma_freq, "Number of cells");
                             for(int k=0; k<n_cell; k++){
                                 PyObject *result_subpkt_wcdma_cell = PyList_New(0);
-                                offset += _decode_by_fmt(LteMl1IratWCDMACellFmt,
-                                            ARRAY_SIZE(LteMl1IratWCDMACellFmt, Fmt),
+                                offset += _decode_by_fmt(LtePhyIratWCDMACellFmt,
+                                            ARRAY_SIZE(LtePhyIratWCDMACellFmt, Fmt),
                                             b, offset, length, result_subpkt_wcdma_cell);
 
                                 char name[64];
@@ -4309,40 +4309,40 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
         offset += _decode_lte_nas_esm_state(b, offset, length, result);
         break;
 
-    case LTE_LL1_PDSCH_Demapper_Configuration:
-        offset += _decode_by_fmt(LteLl1PdschDemapperConfigFmt,
-                                    ARRAY_SIZE(LteLl1PdschDemapperConfigFmt, Fmt),
+    case LTE_PHY_PDSCH_Demapper_Configuration:
+        offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt,
+                                    ARRAY_SIZE(LtePhyPdschDemapperConfigFmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_lte_ll1_pdsch_demapper_config(b, offset, length, result);
+        offset += _decode_lte_phy_pdsch_demapper_config(b, offset, length, result);
         break;
 
-    case LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results:
-        offset += _decode_by_fmt(LteMl1CmlifmrFmt,
-                                    ARRAY_SIZE(LteMl1CmlifmrFmt, Fmt),
+    case LTE_PHY_Connected_Mode_LTE_Intra_Freq_Meas_Results:
+        offset += _decode_by_fmt(LtePhyCmlifmrFmt,
+                                    ARRAY_SIZE(LtePhyCmlifmrFmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_lte_ml1_cmlifmr(b, offset, length, result);
+        offset += _decode_lte_phy_cmlifmr(b, offset, length, result);
         break;
 
-    case LTE_ML1_Serving_Cell_Measurement_Result:
-        offset += _decode_by_fmt(LteMl1SubpktFmt,
-                                    ARRAY_SIZE(LteMl1SubpktFmt, Fmt),
+    case LTE_PHY_Serving_Cell_Measurement_Result:
+        offset += _decode_by_fmt(LtePhySubpktFmt,
+                                    ARRAY_SIZE(LtePhySubpktFmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_lte_ml1_subpkt(b, offset, length, result);
+        offset += _decode_lte_phy_subpkt(b, offset, length, result);
         break;
 
-    case LTE_ML1_IRAT_MDB:
-        offset += _decode_by_fmt(LteMl1IratFmt,
-                                    ARRAY_SIZE(LteMl1IratFmt, Fmt),
+    case LTE_PHY_IRAT_MDB:
+        offset += _decode_by_fmt(LtePhyIratFmt,
+                                    ARRAY_SIZE(LtePhyIratFmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_lte_ml1_irat_subpkt(b, offset, length, result);
+        offset += _decode_lte_phy_irat_subpkt(b, offset, length, result);
         break;
 
-    case LTE_ML1_CDMA_MEAS:
-        //It shares similar packet format as LTE_ML1_IRAT_MDB
-        offset += _decode_by_fmt(LteMl1IratFmt,
-                                    ARRAY_SIZE(LteMl1IratFmt, Fmt),
+    case LTE_PHY_CDMA_MEAS:
+        //It shares similar packet format as LTE_PHY_IRAT_MDB
+        offset += _decode_by_fmt(LtePhyIratFmt,
+                                    ARRAY_SIZE(LtePhyIratFmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_lte_ml1_irat_cdma_subpkt(b, offset, length, result);
+        offset += _decode_lte_phy_irat_cdma_subpkt(b, offset, length, result);
         break;
 
     case LTE_PDCP_DL_SRB_Integrity_Data_PDU:
@@ -4539,74 +4539,74 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 b, offset, length, result);
         offset += _decode_lte_pdsch_stat_indication_payload(b, offset, length, result);
         break;
-    case LTE_ML1_System_Scan_Results:
-        offset += _decode_by_fmt(LteMl1SystemScanResults_Fmt,
-                ARRAY_SIZE(LteMl1SystemScanResults_Fmt, Fmt),
+    case LTE_PHY_System_Scan_Results:
+        offset += _decode_by_fmt(LtePhySystemScanResults_Fmt,
+                ARRAY_SIZE(LtePhySystemScanResults_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_system_scan_results_payload(b, offset, length, result);
+        offset += _decode_lte_phy_system_scan_results_payload(b, offset, length, result);
         break;
-    case LTE_ML1_BPLMN_Cell_Request:
-        offset += _decode_by_fmt(LteMl1BplmnCellRequest_Fmt,
-                ARRAY_SIZE(LteMl1BplmnCellRequest_Fmt, Fmt),
+    case LTE_PHY_BPLMN_Cell_Request:
+        offset += _decode_by_fmt(LtePhyBplmnCellRequest_Fmt,
+                ARRAY_SIZE(LtePhyBplmnCellRequest_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_bplmn_cell_request_payload(b, offset, length, result);
+        offset += _decode_lte_phy_bplmn_cell_request_payload(b, offset, length, result);
         break;
-    case LTE_ML1_BPLMN_Cell_Confirm:
-        offset += _decode_by_fmt(LteMl1BplmnCellConfirm_Fmt,
-                ARRAY_SIZE(LteMl1BplmnCellConfirm_Fmt, Fmt),
+    case LTE_PHY_BPLMN_Cell_Confirm:
+        offset += _decode_by_fmt(LtePhyBplmnCellConfirm_Fmt,
+                ARRAY_SIZE(LtePhyBplmnCellConfirm_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_bplmn_cell_confirm_payload(b, offset, length, result);
+        offset += _decode_lte_phy_bplmn_cell_confirm_payload(b, offset, length, result);
         break;
-    case LTE_LL1_Serving_Cell_COM_Loop:
-        offset += _decode_by_fmt(LteLl1ServingCellComLoop_Fmt,
-                ARRAY_SIZE(LteLl1ServingCellComLoop_Fmt, Fmt),
+    case LTE_PHY_Serving_Cell_COM_Loop:
+        offset += _decode_by_fmt(LtePhyServingCellComLoop_Fmt,
+                ARRAY_SIZE(LtePhyServingCellComLoop_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ll1_serving_cell_com_loop_payload(b, offset, length, result);
+        offset += _decode_lte_phy_serving_cell_com_loop_payload(b, offset, length, result);
         break;
-    case LTE_LL1_PDCCH_Decoding_Result:
-        offset += _decode_by_fmt(LteLl1PdcchDecodingResult_Fmt,
-                ARRAY_SIZE(LteLl1PdcchDecodingResult_Fmt, Fmt),
+    case LTE_PHY_PDCCH_Decoding_Result:
+        offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Fmt,
+                ARRAY_SIZE(LtePhyPdcchDecodingResult_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ll1_pdcch_decoding_result_payload(b, offset, length, result);
+        offset += _decode_lte_phy_pdcch_decoding_result_payload(b, offset, length, result);
         break;
-    case LTE_LL1_PDSCH_Decoding_Result:
-        offset += _decode_by_fmt(LteLl1PdschDecodingResult_Fmt,
-                ARRAY_SIZE(LteLl1PdschDecodingResult_Fmt, Fmt),
+    case LTE_PHY_PDSCH_Decoding_Result:
+        offset += _decode_by_fmt(LtePhyPdschDecodingResult_Fmt,
+                ARRAY_SIZE(LtePhyPdschDecodingResult_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ll1_pdsch_decoding_result_payload(b, offset, length, result);
+        offset += _decode_lte_phy_pdsch_decoding_result_payload(b, offset, length, result);
         break;
-    case LTE_LL1_PUSCH_Tx_Report:
-        offset += _decode_by_fmt(LteLl1PuschTxReport_Fmt,
-                ARRAY_SIZE(LteLl1PuschTxReport_Fmt, Fmt),
+    case LTE_PHY_PUSCH_Tx_Report:
+        offset += _decode_by_fmt(LtePhyPuschTxReport_Fmt,
+                ARRAY_SIZE(LtePhyPuschTxReport_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ll1_pusch_tx_report_payload(b, offset, length, result);
+        offset += _decode_lte_phy_pusch_tx_report_payload(b, offset, length, result);
         break;
-    case LTE_ML1_RLM_Report:
-        offset += _decode_by_fmt(LteMl1RlmReport_Fmt,
-                ARRAY_SIZE(LteMl1RlmReport_Fmt, Fmt),
+    case LTE_PHY_RLM_Report:
+        offset += _decode_by_fmt(LtePhyRlmReport_Fmt,
+                ARRAY_SIZE(LtePhyRlmReport_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_rlm_report_payload(b, offset, length, result);
+        offset += _decode_lte_phy_rlm_report_payload(b, offset, length, result);
         break;
-    case LTE_LL1_PUSCH_CSF:
-        offset += _decode_by_fmt(LteLl1PuschCsf_Fmt,
-                ARRAY_SIZE(LteLl1PuschCsf_Fmt, Fmt),
+    case LTE_PHY_PUSCH_CSF:
+        offset += _decode_by_fmt(LtePhyPuschCsf_Fmt,
+                ARRAY_SIZE(LtePhyPuschCsf_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ll1_pusch_csf_payload(b, offset, length, result);
+        offset += _decode_lte_phy_pusch_csf_payload(b, offset, length, result);
         break;
-    case LTE_ML1_CDRX_Events_Info:
-        offset += _decode_by_fmt(LteMl1CdrxEventsInfo_Fmt,
-                ARRAY_SIZE(LteMl1CdrxEventsInfo_Fmt, Fmt),
+    case LTE_PHY_CDRX_Events_Info:
+        offset += _decode_by_fmt(LtePhyCdrxEventsInfo_Fmt,
+                ARRAY_SIZE(LtePhyCdrxEventsInfo_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_cdrx_events_info_payload(b, offset, length, result);
+        offset += _decode_lte_phy_cdrx_events_info_payload(b, offset, length, result);
         break;
     case WCDMA_RRC_States:
         offset += _decode_wcdma_rrc_states_payload(b, offset, length, result);
         break;
-    case LTE_ML1_Idle_Neighbor_Cell_Meas:
-        offset += _decode_by_fmt(LteMl1Incm_Fmt,
-                ARRAY_SIZE(LteMl1Incm_Fmt, Fmt),
+    case LTE_PHY_Idle_Neighbor_Cell_Meas:
+        offset += _decode_by_fmt(LtePhyIncm_Fmt,
+                ARRAY_SIZE(LtePhyIncm_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_idle_neighbor_cell_meas_payload(b, offset, length, result);
+        offset += _decode_lte_phy_idle_neighbor_cell_meas_payload(b, offset, length, result);
         break;
     case WCDMA_Search_Cell_Reselection_Rank:
         offset += _decode_by_fmt(WcdmaScrr_Fmt,

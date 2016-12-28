@@ -77,7 +77,7 @@ static int _decode_1xevdo_mcps_payload (const char *b,
     int pkt_ver = _search_result_int(result, "Version");
 
     PyObject *old_object;
-    PyObject *pyfloat;
+    // PyObject *pyfloat;
     int temp;
 
     switch (pkt_ver) {
@@ -111,8 +111,8 @@ static int _decode_1xevdo_mcps_payload (const char *b,
                         "Band Class", iBandClass);
                 Py_DECREF(old_object);
                 (void)_map_result_field_to_name(result_aset_item, "Band Class",
-                        ValueNameBandClass,
-                        ARRAY_SIZE(ValueNameBandClass, ValueName),
+                        ValueNameBandClassCDMA,
+                        ARRAY_SIZE(ValueNameBandClassCDMA, ValueName),
                         "(MI)Unknown");
 
                 temp = _search_result_int(result_aset_item,
@@ -215,8 +215,8 @@ static int _decode_1xevdo_mcps_payload (const char *b,
                         "Band Class", iBandClass);
                 Py_DECREF(old_object);
                 (void)_map_result_field_to_name(result_cset_item, "Band Class",
-                        ValueNameBandClass,
-                        ARRAY_SIZE(ValueNameBandClass, ValueName),
+                        ValueNameBandClassCDMA,
+                        ARRAY_SIZE(ValueNameBandClassCDMA, ValueName),
                         "(MI)Unknown");
 
                 temp = _search_result_int(result_cset_item,
@@ -259,8 +259,8 @@ static int _decode_1xevdo_mcps_payload (const char *b,
                         "Band Class", iBandClass);
                 Py_DECREF(old_object);
                 (void)_map_result_field_to_name(result_nset_item, "Band Class",
-                        ValueNameBandClass,
-                        ARRAY_SIZE(ValueNameBandClass, ValueName),
+                        ValueNameBandClassCDMA,
+                        ARRAY_SIZE(ValueNameBandClassCDMA, ValueName),
                         "(MI)Unknown");
 
                 temp = _search_result_int(result_nset_item, "Window Offset");

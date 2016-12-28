@@ -1,6 +1,5 @@
 /*
- * LTE ML1 Idle Neighbor Cell Meas Request/Response 0xB192
- * LTE_PHY_Idle_Neighbor_Cell_Meas
+ * LTE PHY Idle Neighbor Cell Meas Request/Response 0xB192
  *
  */
 
@@ -8,19 +7,19 @@
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt LteMl1Incm_Fmt [] = {
+const Fmt LtePhyIncm_Fmt [] = {
     {UINT, "Version", 1},
     {UINT, "Number of SubPackets", 1},
     {SKIP, NULL, 2},
 };
 
-const Fmt LteMl1Incm_Subpacket_Header_v1 [] = {
+const Fmt LtePhyIncm_Subpacket_Header_v1 [] = {
     {UINT, "SubPacket ID", 1},
     {UINT, "Version", 1},
     {UINT, "SubPacket Size", 2},
 };
 
-const Fmt LteMl1Incm_Subpacket_Payload_26v1 [] = {
+const Fmt LtePhyIncm_Subpacket_Payload_26v1 [] = {
     {UINT, "E-ARFCN", 2},
     {UINT, "Num Cells", 1}, // 4 bits
     {PLACEHOLDER, "Num Rx Ant", 0}, // 2 bits
@@ -28,7 +27,7 @@ const Fmt LteMl1Incm_Subpacket_Payload_26v1 [] = {
     {SKIP, NULL, 1},
 };
 
-const Fmt LteMl1Incm_Subpacket_Payload_26v2 [] = {
+const Fmt LtePhyIncm_Subpacket_Payload_26v2 [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Num Cells", 1}, // 4 bits
     {PLACEHOLDER, "Num Rx Ant", 0}, // 2 bits
@@ -37,7 +36,7 @@ const Fmt LteMl1Incm_Subpacket_Payload_26v2 [] = {
     {SKIP, NULL, 2},
 };
 
-const Fmt LteMl1Incm_Subpacket_26v1_cell [] = {
+const Fmt LtePhyIncm_Subpacket_26v1_cell [] = {
     {UINT, "Cell ID", 2},   // 10 bits
     {PLACEHOLDER, "CP Type", 0},    // 1 bit
     {PLACEHOLDER, "Enabled Tx Antennas", 0},    // 2 bits
@@ -50,14 +49,14 @@ const Fmt LteMl1Incm_Subpacket_26v1_cell [] = {
     {SKIP, NULL, 2},
 };
 
-const Fmt LteMl1Incm_Subpacket_Payload_27v2 [] = {
+const Fmt LtePhyIncm_Subpacket_Payload_27v2 [] = {
     {UINT, "E-ARFCN", 2},
     {UINT, "Num Cells", 2}, // 6 bits
     // skip 1 bit
     {PLACEHOLDER, "Deplexing Mode", 0}, // 2 bits
 };
 
-const Fmt LteMl1Incm_Subpacket_Payload_27v4 [] = {
+const Fmt LtePhyIncm_Subpacket_Payload_27v4 [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Num Cells", 2}, // 6 bits
     // skip 1 bit
@@ -66,7 +65,7 @@ const Fmt LteMl1Incm_Subpacket_Payload_27v4 [] = {
     {SKIP, NULL, 2},
 };
 
-const Fmt LteMl1Incm_Subpacket_27v2_cell [] = {
+const Fmt LtePhyIncm_Subpacket_27v2_cell [] = {
     {UINT, "Physical Cell ID", 4},   // 10 bits
     {PLACEHOLDER, "FTL Cumulative Freq Offset", 0},    // 16 bit
     {SKIP, NULL, 4},    // RSRP[0]
@@ -84,7 +83,7 @@ const Fmt LteMl1Incm_Subpacket_27v2_cell [] = {
     {SKIP, NULL, 4},
 };
 
-static int _decode_lte_ml1_idle_neighbor_cell_meas_payload (const char *b,
+static int _decode_lte_phy_idle_neighbor_cell_meas_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -102,8 +101,8 @@ static int _decode_lte_ml1_idle_neighbor_cell_meas_payload (const char *b,
                 PyObject *result_subpkt = PyList_New(0);
                 int start_subpkt = offset;
                 // decode subpacket header
-                offset += _decode_by_fmt(LteMl1Incm_Subpacket_Header_v1,
-                        ARRAY_SIZE(LteMl1Incm_Subpacket_Header_v1, Fmt),
+                offset += _decode_by_fmt(LtePhyIncm_Subpacket_Header_v1,
+                        ARRAY_SIZE(LtePhyIncm_Subpacket_Header_v1, Fmt),
                         b, offset, length, result_subpkt);
                 int subpkt_id = _search_result_int(result_subpkt,
                         "SubPacket ID");
@@ -112,11 +111,11 @@ static int _decode_lte_ml1_idle_neighbor_cell_meas_payload (const char *b,
                 int subpkt_size = _search_result_int(result_subpkt,
                         "SubPacket Size");
                 if (subpkt_id == 26 && subpkt_ver == 1) {
-                    // this is lte ml1 idle mode neighbor cell measurement
+                    // this is idle mode neighbor cell measurement
                     // request v1
                     offset += _decode_by_fmt(
-                            LteMl1Incm_Subpacket_Payload_26v1,
-                            ARRAY_SIZE(LteMl1Incm_Subpacket_Payload_26v1,
+                            LtePhyIncm_Subpacket_Payload_26v1,
+                            ARRAY_SIZE(LtePhyIncm_Subpacket_Payload_26v1,
                                 Fmt),
                             b, offset, length, result_subpkt);
                     temp = _search_result_int(result_subpkt, "Num Cells");
@@ -142,8 +141,8 @@ static int _decode_lte_ml1_idle_neighbor_cell_meas_payload (const char *b,
                     for (int j = 0; j < num_cells; j++) {
                         PyObject *result_cell_item = PyList_New(0);
 
-                        offset += _decode_by_fmt(LteMl1Incm_Subpacket_26v1_cell,
-                                ARRAY_SIZE(LteMl1Incm_Subpacket_26v1_cell,
+                        offset += _decode_by_fmt(LtePhyIncm_Subpacket_26v1_cell,
+                                ARRAY_SIZE(LtePhyIncm_Subpacket_26v1_cell,
                                     Fmt),
                                 b, offset, length, result_cell_item);
                         temp = _search_result_uint(result_cell_item, "Cell ID");
@@ -196,11 +195,11 @@ static int _decode_lte_ml1_idle_neighbor_cell_meas_payload (const char *b,
                     Py_DECREF(result_cell);
 
                 } else if (subpkt_id == 26 && subpkt_ver == 2) {
-                    // this is lte ml1 idle mode neighbor cell measurement
+                    // this is idle mode neighbor cell measurement
                     // request v2
                     offset += _decode_by_fmt(
-                            LteMl1Incm_Subpacket_Payload_26v2,
-                            ARRAY_SIZE(LteMl1Incm_Subpacket_Payload_26v2,
+                            LtePhyIncm_Subpacket_Payload_26v2,
+                            ARRAY_SIZE(LtePhyIncm_Subpacket_Payload_26v2,
                                 Fmt),
                             b, offset, length, result_subpkt);
                     temp = _search_result_int(result_subpkt, "Num Cells");
@@ -226,8 +225,8 @@ static int _decode_lte_ml1_idle_neighbor_cell_meas_payload (const char *b,
                     for (int j = 0; j < num_cells; j++) {
                         PyObject *result_cell_item = PyList_New(0);
 
-                        offset += _decode_by_fmt(LteMl1Incm_Subpacket_26v1_cell,
-                                ARRAY_SIZE(LteMl1Incm_Subpacket_26v1_cell,
+                        offset += _decode_by_fmt(LtePhyIncm_Subpacket_26v1_cell,
+                                ARRAY_SIZE(LtePhyIncm_Subpacket_26v1_cell,
                                     Fmt),
                                 b, offset, length, result_cell_item);
                         temp = _search_result_uint(result_cell_item, "Cell ID");
@@ -280,11 +279,11 @@ static int _decode_lte_ml1_idle_neighbor_cell_meas_payload (const char *b,
                     Py_DECREF(result_cell);
 
                 } else if (subpkt_id == 27 && subpkt_ver == 2) {
-                    // this is lte ml1 idle mode neighbor cell measurement
+                    // this is idle mode neighbor cell measurement
                     // result v2
                     offset += _decode_by_fmt(
-                            LteMl1Incm_Subpacket_Payload_27v2,
-                            ARRAY_SIZE(LteMl1Incm_Subpacket_Payload_27v2,
+                            LtePhyIncm_Subpacket_Payload_27v2,
+                            ARRAY_SIZE(LtePhyIncm_Subpacket_Payload_27v2,
                                 Fmt),
                             b, offset, length, result_subpkt);
                     temp = _search_result_int(result_subpkt, "Num Cells");
@@ -307,8 +306,8 @@ static int _decode_lte_ml1_idle_neighbor_cell_meas_payload (const char *b,
                     for (int j = 0; j < num_cells; j++) {
                         PyObject *result_cell_item = PyList_New(0);
 
-                        offset += _decode_by_fmt(LteMl1Incm_Subpacket_27v2_cell,
-                                ARRAY_SIZE(LteMl1Incm_Subpacket_27v2_cell,
+                        offset += _decode_by_fmt(LtePhyIncm_Subpacket_27v2_cell,
+                                ARRAY_SIZE(LtePhyIncm_Subpacket_27v2_cell,
                                     Fmt),
                                 b, offset, length, result_cell_item);
                         unsigned int utemp = _search_result_uint(
@@ -365,11 +364,11 @@ static int _decode_lte_ml1_idle_neighbor_cell_meas_payload (const char *b,
                     Py_DECREF(result_cell);
 
                 } else if (subpkt_id == 27 && subpkt_ver == 4) {
-                    // this is lte ml1 idle mode neighbor cell measurement
+                    // this is idle mode neighbor cell measurement
                     // result v4
                     offset += _decode_by_fmt(
-                            LteMl1Incm_Subpacket_Payload_27v4,
-                            ARRAY_SIZE(LteMl1Incm_Subpacket_Payload_27v4,
+                            LtePhyIncm_Subpacket_Payload_27v4,
+                            ARRAY_SIZE(LtePhyIncm_Subpacket_Payload_27v4,
                                 Fmt),
                             b, offset, length, result_subpkt);
                     temp = _search_result_int(result_subpkt, "Num Cells");
@@ -401,8 +400,8 @@ static int _decode_lte_ml1_idle_neighbor_cell_meas_payload (const char *b,
                     for (int j = 0; j < num_cells; j++) {
                         PyObject *result_cell_item = PyList_New(0);
 
-                        offset += _decode_by_fmt(LteMl1Incm_Subpacket_27v2_cell,
-                                ARRAY_SIZE(LteMl1Incm_Subpacket_27v2_cell,
+                        offset += _decode_by_fmt(LtePhyIncm_Subpacket_27v2_cell,
+                                ARRAY_SIZE(LtePhyIncm_Subpacket_27v2_cell,
                                     Fmt),
                                 b, offset, length, result_cell_item);
                         unsigned int utemp = _search_result_uint(

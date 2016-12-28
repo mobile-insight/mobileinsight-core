@@ -53,8 +53,8 @@ static int _decode_gsm_scbl_payload (const char *b,
         Py_DECREF(old_object);
         (void) _map_result_field_to_name(result_record_item,
                 "BCCH Band",
-                ValueNameBandClass,
-                ARRAY_SIZE(ValueNameBandClass, ValueName),
+                ValueNameBandClassGSM,
+                ARRAY_SIZE(ValueNameBandClassGSM, ValueName),
                 "(MI)Unknown");
 
         temp = _search_result_int(result_record_item, "RX Power");

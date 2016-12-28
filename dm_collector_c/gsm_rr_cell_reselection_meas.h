@@ -57,8 +57,8 @@ static int _decode_gsm_rcrm_payload (const char *b,
             iServingBCCHBand);
     Py_DECREF(old_object);
     (void)_map_result_field_to_name(result, "Serving BCCH Band",
-            ValueNameBandClass,
-            ARRAY_SIZE(ValueNameBandClass, ValueName),
+            ValueNameBandClassGSM,
+            ARRAY_SIZE(ValueNameBandClassGSM, ValueName),
             "(MI)Unknown");
 
     temp = _search_result_int(result, "Serving PBCCH ARFCN");
@@ -71,8 +71,8 @@ static int _decode_gsm_rcrm_payload (const char *b,
             iServingPBCCHBand);
     Py_DECREF(old_object);
     (void)_map_result_field_to_name(result, "Serving PBCCH Band",
-            ValueNameBandClass,
-            ARRAY_SIZE(ValueNameBandClass, ValueName),
+            ValueNameBandClassGSM,
+            ARRAY_SIZE(ValueNameBandClassGSM, ValueName),
             "(MI)Unknown");
 
     temp = _search_result_int(result, "Serving RX Level Average");
@@ -117,8 +117,8 @@ static int _decode_gsm_rcrm_payload (const char *b,
                 iBCCHBand);
         Py_DECREF(old_object);
         (void)_map_result_field_to_name(result_record_item, "BCCH Band",
-                ValueNameBandClass,
-                ARRAY_SIZE(ValueNameBandClass, ValueName),
+                ValueNameBandClassGSM,
+                ARRAY_SIZE(ValueNameBandClassGSM, ValueName),
                 "(MI)Unknown");
 
         temp = _search_result_int(result_record_item, "PBCCH ARFCN");
@@ -131,8 +131,8 @@ static int _decode_gsm_rcrm_payload (const char *b,
                 iPBCCHBand);
         Py_DECREF(old_object);
         (void)_map_result_field_to_name(result_record_item, "PBCCH Band",
-                ValueNameBandClass,
-                ARRAY_SIZE(ValueNameBandClass, ValueName),
+                ValueNameBandClassGSM,
+                ARRAY_SIZE(ValueNameBandClassGSM, ValueName),
                 "(MI)Unknown");
 
         temp = _search_result_int(result_record_item, "RX Level Average");

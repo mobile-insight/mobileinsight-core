@@ -1,16 +1,16 @@
 /*
- * LTE LL1 PDSCH Decoding Result
+ * LTE PHY PDSCH Decoding Result
  */
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt LteLl1PdschDecodingResult_Fmt [] = {
+const Fmt LtePhyPdschDecodingResult_Fmt [] = {
     {UINT, "Version", 1},
 };
 
-const Fmt LteLl1PdschDecodingResult_Payload_v24 [] = {
+const Fmt LtePhyPdschDecodingResult_Payload_v24 [] = {
     {UINT, "Serving Cell ID", 4},   // 9 btis
     {PLACEHOLDER, "Starting Subframe Number", 0},   // 4 bits
     {PLACEHOLDER, "Starting System Frame Number", 0},   // 10 bits
@@ -22,7 +22,7 @@ const Fmt LteLl1PdschDecodingResult_Payload_v24 [] = {
     {PLACEHOLDER, "Number of Records", 0},  // 5 bits
 };
 
-const Fmt LteLl1PdschDecodingResult_Payload_v44 [] = {
+const Fmt LtePhyPdschDecodingResult_Payload_v44 [] = {
     {UINT, "Serving Cell ID", 4},   // 9 btis
     {PLACEHOLDER, "Starting Subframe Number", 0},   // 4 bits
     {PLACEHOLDER, "Starting System Frame Number", 0},   // 10 bits
@@ -34,7 +34,7 @@ const Fmt LteLl1PdschDecodingResult_Payload_v44 [] = {
     {PLACEHOLDER, "Number of Records", 0},  // 5 bits
 };
 
-const Fmt LteLl1PdschDecodingResult_Record_v24 [] = {
+const Fmt LtePhyPdschDecodingResult_Record_v24 [] = {
     {UINT, "Subframe Offset", 2},
     {UINT, "PDSCH Channel ID", 2},
     {UINT, "HARQ ID", 1},   // 4 bits
@@ -46,7 +46,7 @@ const Fmt LteLl1PdschDecodingResult_Record_v24 [] = {
     {PLACEHOLDER, "Number of Streams", 0},  // 2 bits
 };
 
-const Fmt LteLl1PdschDecodingResult_Record_v44 [] = {
+const Fmt LtePhyPdschDecodingResult_Record_v44 [] = {
     {UINT, "Subframe Offset", 2},
     {UINT, "PDSCH Channel ID", 2},
     {UINT, "HARQ ID", 1},   // 4 bits
@@ -60,7 +60,7 @@ const Fmt LteLl1PdschDecodingResult_Record_v44 [] = {
     {SKIP, NULL, 2},
 };
 
-const Fmt LteLl1PdschDecodingResult_Stream_v24 [] = {
+const Fmt LtePhyPdschDecodingResult_Stream_v24 [] = {
     {UINT, "Transport Block CRC", 4},   // 1 bit
     {PLACEHOLDER, "NDI", 0},    // 1 bit
     {PLACEHOLDER, "Code Block Size Plus", 0},   // 13 bits
@@ -75,7 +75,7 @@ const Fmt LteLl1PdschDecodingResult_Stream_v24 [] = {
     {PLACEHOLDER, "Codeword Index", 0}, // right shift 27 bits, 4 bits
 };
 
-const Fmt LteLl1PdschDecodingResult_Stream_v44 [] = {
+const Fmt LtePhyPdschDecodingResult_Stream_v44 [] = {
     {UINT, "Transport Block CRC", 4},   // 1 bit
     {PLACEHOLDER, "NDI", 0},    // 1 bit
     {PLACEHOLDER, "Code Block Size Plus", 0},   // 13 bits
@@ -92,7 +92,7 @@ const Fmt LteLl1PdschDecodingResult_Stream_v44 [] = {
     {SKIP, NULL, 3},
 };
 
-const Fmt LteLl1PdschDecodingResult_EnergyMetric_v24 [] = {
+const Fmt LtePhyPdschDecodingResult_EnergyMetric_v24 [] = {
     // totally 13
     {UINT, "Energy Metric", 4}, // 21 bits
     {PLACEHOLDER, "Iteration Number", 0},   // 4 bits
@@ -102,7 +102,7 @@ const Fmt LteLl1PdschDecodingResult_EnergyMetric_v24 [] = {
     {PLACEHOLDER, "Deint Decode Bypass", 0},    // 1 bit
 };
 
-const Fmt LteLl1PdschDecodingResult_EnergyMetric_v44 [] = {
+const Fmt LtePhyPdschDecodingResult_EnergyMetric_v44 [] = {
     // totally 13
     {UINT, "Energy Metric", 4}, // 21 bits
     {PLACEHOLDER, "Iteration Number", 0},   // 4 bits
@@ -112,7 +112,7 @@ const Fmt LteLl1PdschDecodingResult_EnergyMetric_v44 [] = {
     {PLACEHOLDER, "Deint Decode Bypass", 0},    // 1 bit
 };
 
-static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
+static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -122,8 +122,8 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
     switch (pkt_ver) {
     case 24:
         {
-            offset += _decode_by_fmt(LteLl1PdschDecodingResult_Payload_v24,
-                    ARRAY_SIZE(LteLl1PdschDecodingResult_Payload_v24, Fmt),
+            offset += _decode_by_fmt(LtePhyPdschDecodingResult_Payload_v24,
+                    ARRAY_SIZE(LtePhyPdschDecodingResult_Payload_v24, Fmt),
                     b, offset, length, result);
             unsigned int temp = _search_result_uint(result, "Serving Cell ID");
             int iServingCellId = temp & 511;    // 9 bits
@@ -167,8 +167,8 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteLl1PdschDecodingResult_Record_v24,
-                        ARRAY_SIZE(LteLl1PdschDecodingResult_Record_v24, Fmt),
+                offset += _decode_by_fmt(LtePhyPdschDecodingResult_Record_v24,
+                        ARRAY_SIZE(LtePhyPdschDecodingResult_Record_v24, Fmt),
                         b, offset, length, result_record_item);
                 temp = _search_result_int(result_record_item, "HARQ ID");
                 int iHarqId = temp & 15;    // 4 bits
@@ -217,8 +217,8 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                 PyObject *result_record_stream = PyList_New(0);
                 for (int j = 0; j < num_stream; j++) {
                     PyObject *result_record_stream_item = PyList_New(0);
-                    offset += _decode_by_fmt(LteLl1PdschDecodingResult_Stream_v24,
-                            ARRAY_SIZE(LteLl1PdschDecodingResult_Stream_v24, Fmt),
+                    offset += _decode_by_fmt(LtePhyPdschDecodingResult_Stream_v24,
+                            ARRAY_SIZE(LtePhyPdschDecodingResult_Stream_v24, Fmt),
                             b, offset, length, result_record_stream_item);
 
                     temp = _search_result_uint(result_record_stream_item,
@@ -299,8 +299,8 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                     PyObject *result_energy_metric = PyList_New(0);
                     for (int k = 0; k < num_energy_metric; k++) {
                         PyObject *result_energy_metric_item = PyList_New(0);
-                        offset += _decode_by_fmt(LteLl1PdschDecodingResult_EnergyMetric_v24,
-                                ARRAY_SIZE(LteLl1PdschDecodingResult_EnergyMetric_v24, Fmt),
+                        offset += _decode_by_fmt(LtePhyPdschDecodingResult_EnergyMetric_v24,
+                                ARRAY_SIZE(LtePhyPdschDecodingResult_EnergyMetric_v24, Fmt),
                                 b, offset, length, result_energy_metric_item);
                         temp = _search_result_uint(result_energy_metric_item,
                                 "Energy Metric");
@@ -386,8 +386,8 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
         }
     case 44:
         {
-            offset += _decode_by_fmt(LteLl1PdschDecodingResult_Payload_v44,
-                    ARRAY_SIZE(LteLl1PdschDecodingResult_Payload_v44, Fmt),
+            offset += _decode_by_fmt(LtePhyPdschDecodingResult_Payload_v44,
+                    ARRAY_SIZE(LtePhyPdschDecodingResult_Payload_v44, Fmt),
                     b, offset, length, result);
             int temp = _search_result_uint(result, "Serving Cell ID");
             int iServingCellId = temp & 511;    // 9 bits
@@ -431,8 +431,8 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteLl1PdschDecodingResult_Record_v44,
-                        ARRAY_SIZE(LteLl1PdschDecodingResult_Record_v44, Fmt),
+                offset += _decode_by_fmt(LtePhyPdschDecodingResult_Record_v44,
+                        ARRAY_SIZE(LtePhyPdschDecodingResult_Record_v44, Fmt),
                         b, offset, length, result_record_item);
                 temp = _search_result_int(result_record_item, "HARQ ID");
                 int iHarqId = temp & 15;    // 4 bits
@@ -481,8 +481,8 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                 PyObject *result_record_stream = PyList_New(0);
                 for (int j = 0; j < num_stream; j++) {
                     PyObject *result_record_stream_item = PyList_New(0);
-                    offset += _decode_by_fmt(LteLl1PdschDecodingResult_Stream_v44,
-                            ARRAY_SIZE(LteLl1PdschDecodingResult_Stream_v44, Fmt),
+                    offset += _decode_by_fmt(LtePhyPdschDecodingResult_Stream_v44,
+                            ARRAY_SIZE(LtePhyPdschDecodingResult_Stream_v44, Fmt),
                             b, offset, length, result_record_stream_item);
 
                     temp = _search_result_uint(result_record_stream_item,
@@ -569,8 +569,8 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
                     PyObject *result_energy_metric = PyList_New(0);
                     for (int k = 0; k < num_energy_metric; k++) {
                         PyObject *result_energy_metric_item = PyList_New(0);
-                        offset += _decode_by_fmt(LteLl1PdschDecodingResult_EnergyMetric_v44,
-                                ARRAY_SIZE(LteLl1PdschDecodingResult_EnergyMetric_v44, Fmt),
+                        offset += _decode_by_fmt(LtePhyPdschDecodingResult_EnergyMetric_v44,
+                                ARRAY_SIZE(LtePhyPdschDecodingResult_EnergyMetric_v44, Fmt),
                                 b, offset, length, result_energy_metric_item);
                         temp = _search_result_uint(result_energy_metric_item,
                                 "Energy Metric");
@@ -655,7 +655,7 @@ static int _decode_lte_ll1_pdsch_decoding_result_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE LL1 PDCCH Decoding Result version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY PDCCH Decoding Result version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
