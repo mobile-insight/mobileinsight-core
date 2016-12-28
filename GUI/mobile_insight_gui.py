@@ -11,7 +11,7 @@ import wx
 import wx.grid
 import wx.animate
 from threading import Thread
-from random import random 
+from random import random
 from datetime import datetime, timedelta
 
 import matplotlib
@@ -34,7 +34,6 @@ ID_TB_SEARCH = wx.NewId()
 ID_TB_TIME = wx.NewId()
 ID_TB_RESET = wx.NewId()
 ID_TB_GRAPH = wx.NewId()
-
 EVT_RESULT_ID = wx.NewId()
 
 
@@ -53,7 +52,7 @@ class ProgressDialog(wx.Dialog):
     def __init__(self, parent):
         wx.Dialog.__init__(self, parent, -1, style = wx.NO_BORDER)
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        
+
         gif = wx.animate.GIFAnimationCtrl(self, -1, "icons/progress.gif", pos=(0, 0), size=(-1, -1))
         gif.GetPlayer().UseBackgroundColour(True)
         gif.Play()
@@ -122,9 +121,6 @@ class TimeWindowDialog(wx.Dialog):
         self.end_label.SetLabel(format("%s" %(self.cur_end)))
 
 
-
-
-
 class MyMCD(wx.Dialog):
     def __init__(self, parent, message, caption, choices=[]):
         wx.Dialog.__init__(self, parent, -1)
@@ -141,7 +137,7 @@ class MyMCD(wx.Dialog):
         sizer.Add(self.chbox, 0, wx.ALL | wx.EXPAND, 5)
         sizer.Add(self.btns, 0, wx.ALL | wx.EXPAND, 5)
         self.SetSizer(sizer)
-#        self.Fit()
+        # self.Fit()
 
     def GetSelections(self):
         return self.clb.GetChecked()
@@ -218,7 +214,6 @@ class WindowClass(wx.Frame):
         self.grid.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.OnGridSelect)
         self.grid.SetColLabelValue(0, "Timestamp")
         self.grid.SetColLabelValue(1, "Type ID")
-        
 
         hbox.Add(self.grid, 5, wx.EXPAND | wx.ALL, 10)
 
@@ -239,7 +234,6 @@ class WindowClass(wx.Frame):
 
         panel.SetSizer(hbox)
 
-        
         mainSizer.Add(panel, 1, wx.EXPAND,0)
         self.SetSizer(mainSizer)
         self.statusbar = self.CreateStatusBar()
@@ -332,13 +326,14 @@ class WindowClass(wx.Frame):
         search_dlg.Destroy()
 
     def OnAbout(self, e):
-        about_text = ('MobileInsight 2.0 GUI\n' 
-                   + 'UCLA Wing Group & OSU MSSN Lab\n\n' 
+        about_text = ('MobileInsight 2.0 GUI\n'
+                   + 'UCLA WiNG group & OSU MSSN Lab\n\n'
                    + 'Developers: \n   Moustafa Alzantot, \n    Priyanka Avinash Kachare,\n'
                    + '    Michael Ivan, \n    Yuanjie Li\n\n'
                    + 'Copyright 2014-2016')
         search_dlg = wx.MessageDialog(self, about_text, "About MobileInsight GUI", wx.OK)
         search_dlg.ShowModal()
+
 
     def OnGridSelect(self, e):
         #self.statusbar.SetStatusText("Selected %d" %e.GetRow())
@@ -351,19 +346,20 @@ class WindowClass(wx.Frame):
             self.details_text.SetValue(pretty_xml_as_string)
         e.Skip()
 
+
     def Quit(self, e):
         self.Destroy()
+
 
     def OnReadComplete(self):
         evt = ResultEvent(self._log_analyzer.msg_logs)
         wx.PostEvent(wx.GetApp().frame, evt)
-        
 
 
     def SetupGrid(self):
         self.min_time = datetime.strptime("3000 Jan 1" ,'%Y %b %d')
         self.max_time = datetime.strptime("1900 Jan 1", '%Y %b %d')
-        
+
         n = len(self.data_view)
         # self.grid.CreateGrid(max(25, n), 2)
         if n>self.grid.GetNumberRows():
@@ -386,10 +382,6 @@ class WindowClass(wx.Frame):
             self.grid.SetReadOnly(i, 0)
             self.grid.SetReadOnly(i, 1)
         #self.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.onRowClick)
-
-
-
-
 
 
 def main():
