@@ -94,14 +94,14 @@ elif platform.system() == "Linux":
         print "Unsupported operating system: " + str(arch)
         sys.exit()
 
-    libs = parse_libs(url, "so")
-    download_libs(url, libs)
+    # libs = parse_libs(url, "so")
+    # download_libs(url, libs)
     download_unix(url)
 
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
     lib_list     = ["./libs/" + x for x in os.listdir("./libs/")]
     DATA_FILES   = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ['ws_dissector/ws_dissector']),
-                  ('/usr/lib/', lib_list)]
+                  ('/usr/local/lib/', lib_list)]
 
 elif platform.system() == "Windows":
     arch = platform.architecture()
