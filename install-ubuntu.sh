@@ -32,9 +32,36 @@ fi
 cd ${WIRESHARK_SRC_PATH}
 ./configure --disable-wireshark
 
-echo "Compile wireshark 2.0.8 from source code, it may take a few minutes......"
-make || exit 1
-sudo make install
+echo "Check if wireshark dynamic library exists in system path......"
+
+FindWiresharkLibrary=true
+
+if ldconfig -p | grep "libwireshark.so "; then
+    echo "Found libwireshark.so!";
+else
+    echo "Didn't find libwireshark.so";
+    FindWiresharkLibrary=false
+fi
+
+if ldconfig -p | grep "libwiretap.so "; then
+    echo "Found libwiretap.so!";
+else
+    echo "Didn't find libwiretap.so";
+    FindWiresharkLibrary=false
+fi
+
+if ldconfig -p | grep "libwsutil.so "; then
+    echo "Found libwsutil.so!";
+else
+    echo "Didn't find libwsutil.so";
+    FindWiresharkLibrary=false
+fi
+
+if [ "$FindWiresharkLibrary" = false ] ; then
+    echo "Compile wireshark 2.0.8 from source code, it may take a few minutes......"
+    make || exit 1
+    sudo make install
+fi
 
 # Compile ws_dissector
 cd ../ws_dissector
