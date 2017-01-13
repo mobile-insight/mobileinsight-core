@@ -63,6 +63,9 @@ if [ "$FindWiresharkLibrary" = false ] ; then
     sudo make install
 fi
 
+sudo rm /etc/ld.so.cache
+sudo ldconfig
+
 # Compile ws_dissector
 cd ../ws_dissector
 if [ -e "ws_dissector" ]; then
@@ -77,10 +80,9 @@ cd ..
 sudo python setup.py install
 
 # Run example
-echo "\\n\\n"
+echo ""
 echo "Successfully installed the newest version of MobileInsight desktop version!"
 echo "Testing the offline analysis example."
 cd ./examples
 python ./offline-analysis-example.py
-echo "\\n\\n"
-echo "Successfully ran the offline analysis example!"
+echo ""
