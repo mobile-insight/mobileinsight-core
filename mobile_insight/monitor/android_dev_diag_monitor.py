@@ -161,7 +161,7 @@ class AndroidDevDiagMonitor(Monitor):
         """
         Monitor.__init__(self)
         self._fifo_path = self.TMP_FIFO_FILE
-        self._input_dir = None
+        self._input_dir = os.path.join(get_cache_dir(), "mi2log")
         self._log_cut_size = 0.5 # change size to 1.0 M
         # self._skip_decoding = False
         self._type_names = []
