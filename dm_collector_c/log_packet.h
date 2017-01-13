@@ -24,7 +24,7 @@ enum FmtType {
     RSRQ,
     SKIP,   // This field is ignored (but bytes are consumed)
     PLACEHOLDER, // This field is created with a dummy value (no byte is consumed)
-    WCDMA_MEAS, // Used for RSCP/RSSI/ECN0 in LTE_ML1_IRAT_MDB
+    WCDMA_MEAS, // Used for RSCP/RSSI/ECN0 in LTE_PHY_IRAT_MDB
 };
 
 struct Fmt {
@@ -82,7 +82,7 @@ const ValueName WcdmaSignalingMsgChannelType [] = {
     {0x03, "RRC_DL_DCCH"},
     {0x04, "RRC_DL_BCCH_BCH"},
     {0x06, "RRC_DL_PCCH"},
-    {0xfe, "RRC_COMPLETE_SIB"}, 
+    {0xfe, "RRC_COMPLETE_SIB"},
 };
 
 // ------------------------------------------------------------
@@ -338,11 +338,11 @@ const ValueName LteNasEmmState_v2_EmmSubstate_Registered [] = {
 };
 
 // ------------------------------------------------------------
-const Fmt LteLl1PdschDemapperConfigFmt [] = {
+const Fmt LtePhyPdschDemapperConfigFmt [] = {
     {UINT, "Version", 1}
 };
 
-const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
+const Fmt LtePhyPdschDemapperConfigFmt_v23 [] = {
     {UINT, "Serving Cell ID", 1},
     {UINT, "System Frame Number", 2},
     {PLACEHOLDER, "Subframe Number", 0},
@@ -371,25 +371,25 @@ const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
     {PLACEHOLDER, "Carrier Index", 0}
 };
 
-const ValueName LteLl1PdschDemapperConfig_v23_Modulation [] = {
+const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
     {0, "QPSK"},
     {1, "16QAM"},
     {2, "64QAM"}
 };
 
-const ValueName LteLl1PdschDemapperConfig_v23_Carrier_Index [] = {
+const ValueName LtePhyPdschDemapperConfig_v23_Carrier_Index [] = {
     {0, "PCC"},
     {1, "SCC"}
 };
 
 // ------------------------------------------------------------
-// LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results
-const Fmt LteMl1CmlifmrFmt [] = {
+// LTE_PHY_Connected_Mode_LTE_Intra_Freq_Meas_Results
+const Fmt LtePhyCmlifmrFmt [] = {
     {UINT, "Version", 1},
     {SKIP, NULL, 7},        // Unknown
 };
 
-const Fmt LteMl1CmlifmrFmt_v3_Header [] = {
+const Fmt LtePhyCmlifmrFmt_v3_Header [] = {
     {UINT, "E-ARFCN", 2},
     {UINT, "Serving Physical Cell ID", 2},  //serving cell ID
     {UINT, "Sub-frame Number", 2},
@@ -401,7 +401,7 @@ const Fmt LteMl1CmlifmrFmt_v3_Header [] = {
     {UINT, "Number of Detected Cells", 1}
 };
 
-const Fmt LteMl1CmlifmrFmt_v4_Header [] = {
+const Fmt LtePhyCmlifmrFmt_v4_Header [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Serving Physical Cell ID", 2},  //serving cell ID
     {UINT, "Sub-frame Number", 2},
@@ -416,7 +416,7 @@ const Fmt LteMl1CmlifmrFmt_v4_Header [] = {
     {SKIP, NULL, 2}
 };
 
-const Fmt LteMl1CmlifmrFmt_v3_Neighbor_Cell [] = {
+const Fmt LtePhyCmlifmrFmt_v3_Neighbor_Cell [] = {
     {UINT, "Physical Cell ID", 2},  //cell ID
     // {RSRP, "Filtered RSRP(dBm)", 2},
     {RSRP, "RSRP(dBm)", 2},
@@ -426,7 +426,7 @@ const Fmt LteMl1CmlifmrFmt_v3_Neighbor_Cell [] = {
     {SKIP, NULL, 4}     // Duplicated & reserved
 };
 
-const Fmt LteMl1CmlifmrFmt_v4_Neighbor_Cell [] = {
+const Fmt LtePhyCmlifmrFmt_v4_Neighbor_Cell [] = {
     {UINT, "Physical Cell ID", 2},  //cell ID
     // {RSRP, "Filtered RSRP(dBm)", 2},
     {RSRP, "RSRP(dBm)", 2},
@@ -436,13 +436,13 @@ const Fmt LteMl1CmlifmrFmt_v4_Neighbor_Cell [] = {
     {SKIP, NULL, 4}     // Duplicated & reserved
 };
 
-const Fmt LteMl1CmlifmrFmt_v3_Detected_Cell [] = {
+const Fmt LtePhyCmlifmrFmt_v3_Detected_Cell [] = {
     {UINT, "Physical Cell ID", 4},  //cell ID
     {UINT, "SSS Corr Value", 4},
     {UINT, "Reference Time", 8}
 };
 
-const Fmt LteMl1CmlifmrFmt_v4_Detected_Cell [] = {
+const Fmt LtePhyCmlifmrFmt_v4_Detected_Cell [] = {
     {UINT, "Physical Cell ID", 2},  //cell ID
     {SKIP, NULL, 2},
     {UINT, "SSS Corr Value", 4},
@@ -450,29 +450,29 @@ const Fmt LteMl1CmlifmrFmt_v4_Detected_Cell [] = {
 };
 
 // ------------------------------------------------------------
-const Fmt LteMl1SubpktFmt [] = {
+const Fmt LtePhySubpktFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Number of SubPackets", 1},
     {SKIP, NULL, 2}     // Unknown
 };
 
-const Fmt LteMl1SubpktFmt_v1_SubpktHeader [] = {
+const Fmt LtePhySubpktFmt_v1_SubpktHeader [] = {
     {UINT, "SubPacket ID", 1},
     {UINT, "Version", 1},
     {UINT, "SubPacket Size", 2},
 };
 
-const ValueName LteMl1Subpkt_SubpktType [] = {
+const ValueName LtePhySubpkt_SubpktType [] = {
     {25, "Serving_Cell_Measurement_Result"}
 };
 
 // Serving_Cell_Measurement_Result
-const Fmt LteMl1SubpktFmt_v1_Scmr_v4 [] = {
+const Fmt LtePhySubpktFmt_v1_Scmr_v4 [] = {
     {UINT, "E-ARFCN", 2},
     {UINT, "Physical Cell ID", 2}   //cell ID
 };
 
-const Fmt LteMl1SubpktFmt_v1_Scmr_v19 [] = {
+const Fmt LtePhySubpktFmt_v1_Scmr_v19 [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Num-of-cells", 2},
     {SKIP, NULL, 2},
@@ -486,41 +486,41 @@ const Fmt LteMl1SubpktFmt_v1_Scmr_v19 [] = {
 };
 
 // ------------------------------------------------------------
-// LTE ML1 IRAT MDB
+// LTE PHY IRAT MDB
 
-enum LteMl1IratType {
-    LteMl1IratType_HRPD=14,
-    LteMl1IratType_WCDMA=35,
-    LteMl1IratType_1x=41,
-    LteMl1IratType_GSM=42,
+enum LtePhyIratType {
+    LtePhyIratType_HRPD=14,
+    LtePhyIratType_WCDMA=35,
+    LtePhyIratType_1x=41,
+    LtePhyIratType_GSM=42,
 };
 
 
-const Fmt LteMl1IratFmt [] = {
+const Fmt LtePhyIratFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Subpacket count", 1},
     {SKIP, NULL, 2},
 };
 
-const Fmt LteMl1IratSubPktFmt [] = {
+const Fmt LtePhyIratSubPktFmt [] = {
     {UINT, "Subpacket ID", 1},
     {UINT, "Version", 1},
     {UINT, "Subpacket size", 2},
 };
 
-const Fmt LteMl1IratWCDMAFmt [] = {
+const Fmt LtePhyIratWCDMAFmt [] = {
     {UINT, "Current DRX cycle", 4},
     {UINT, "Number of frequencies", 1},
     {SKIP, NULL, 3},
 };
 
-const Fmt LteMl1IratWCDMACellMetaFmt [] = {
+const Fmt LtePhyIratWCDMACellMetaFmt [] = {
     {UINT, "Frequency", 2},
     {UINT, "Number of cells", 1},
     {SKIP, NULL, 1},
 };
 
-const Fmt LteMl1IratWCDMACellFmt [] = {
+const Fmt LtePhyIratWCDMACellFmt [] = {
     {UINT, "PSC+Energy", 2},
     {UINT, "CSG", 1},
     {SKIP, NULL, 1},
@@ -535,13 +535,13 @@ const Fmt LteMl1IratWCDMACellFmt [] = {
 
 };
 
-const Fmt LteMl1IratCDMACellFmt [] = {
+const Fmt LtePhyIratCDMACellFmt [] = {
     {UINT, "Number of Pilots", 1},
     {UINT, "Band", 1},
     {UINT, "Channel", 2},
 };
 
-const Fmt LteMl1IratCDMACellPilotFmt [] = {
+const Fmt LtePhyIratCDMACellPilotFmt [] = {
     {UINT, "Pilot ID", 2},
     {UINT, "RSS (dB)", 2},
     {SKIP, NULL, 4},
@@ -2096,6 +2096,7 @@ const ValueName ValueNameCarrierIndex [] = {
     {0, "PCC"},
     {1, "SCC"},
 };
+
 const ValueName ValueNameAggregationLevel [] = {
     // 2 bits
     {0, "Agg1"},
@@ -2165,6 +2166,11 @@ const ValueName ValueNameFrameStructure [] = {
     {1, "TDD"},
 };
 
+const ValueName ValueNameDuplexingMode [] = {
+    {0, "FDD"},
+    {1, "TDD"},
+};
+
 const ValueName ValueNameNumeNBAntennas [] = {
     {0, "1 or 2"},
 };
@@ -2175,6 +2181,15 @@ const ValueName ValueNameTrueOrFalse [] = {
 };
 
 const ValueName ValueNameHARQLogStatus [] = {
+    {0, "Normal"},
+};
+
+const ValueName ValueNameCPType [] = {
+    // 1 bit
+    {0, "Normal"},
+};
+
+const ValueName ValueNameNormalOrNot [] = {
     {0, "Normal"},
 };
 
@@ -2297,6 +2312,55 @@ const ValueName ValueNameWcdmaRrcStates [] = {
     {5, "URA_PCH"},
 };
 
+const ValueName ValueNameCellIndex [] = {
+    // 4 bits
+    {0, "PCell"},
+    {1, "SCell"},
+};
+
+const ValueName ValueNameBandClassGSM [] = {
+    // 4 bits
+    {0, "Current 900/1800 Setting"},
+    {10, "1900 PCS"},
+    {11, "GSM 850"},
+};
+
+const ValueName ValueNameBandClassCDMA [] = {
+    {0, "800 MHz Cellular"},
+    {1, "1.8 to 2.0 GHz PCS"},
+    {10, "Secondary 800 MHz"},
+    {255, "Disabled"},
+};
+
+const ValueName ValueNameTimerState [] = {
+    // 8 bits
+    {0, "Stopped"},
+    {1, "Running"},
+    {2, "Expired"},
+};
+
+const ValueName ValueNameTechnology [] = {
+    {0, "1x CDMA"},
+};
+
+const ValueName ValueNameQueue [] = {
+    {0, "HPQ0"},
+    {2, "Reserved"},
+};
+
+const ValueName ValueNamePilotSet [] = {
+    {0, "PreCandidate Set"},
+    {1, "Active Set"},
+    {2, "Candidate Set"},
+    {4, "Neighbor Set"},
+    {8, "Remaining Set"},
+};
+
+const ValueName ValueNameSearcherState [] = {
+    {2, "Synchronization"},
+    {3, "Idle"},
+    {4, "Traffic"},
+};
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},

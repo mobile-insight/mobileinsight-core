@@ -1,32 +1,32 @@
 /*
- * LTE LL1 Serving Cell COM Loop
+ * LTE PHY Serving Cell COM Loop
  */
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt LteLl1ServingCellComLoop_Fmt [] = {
+const Fmt LtePhyServingCellComLoop_Fmt [] = {
     {UINT, "Version", 1},
 };
 
-const Fmt LteLl1ServingCellComLoop_Payload_v41 [] = {
+const Fmt LtePhyServingCellComLoop_Payload_v41 [] = {
     {UINT, "Carrier Index", 2}, // 4 bits
     {PLACEHOLDER, "Cell ID", 0},    // 9 bits
     {UINT, "Number of Records", 1}, // right shift 1 bit, 5 bits
 };
-const Fmt LteLl1ServingCellComLoop_Payload_v22 [] = {
+const Fmt LtePhyServingCellComLoop_Payload_v22 [] = {
     {UINT, "Carrier Index", 2}, // 4 bits
     {PLACEHOLDER, "Number of Records", 0}, // 5 bits
     {SKIP, NULL, 1},
 };
 
-const ValueName LteLl1ServingCellComLoop_CarrierIndex [] = {
+const ValueName LtePhyServingCellComLoop_CarrierIndex [] = {
     {0, "PCC"},
     {1, "SCC"},
 };
 
-const Fmt LteLl1ServingCellComLoop_Record_v41 [] = {
+const Fmt LtePhyServingCellComLoop_Record_v41 [] = {
     {UINT, "System Frame Number", 2},   // 10 bits
     {PLACEHOLDER, "Subframe Number", 0},    // 4 bits
     {PLACEHOLDER, "Enabled", 0},    // 1 bit
@@ -40,12 +40,12 @@ const Fmt LteLl1ServingCellComLoop_Record_v41 [] = {
     {BYTE_STREAM, "COM Acc Stat[1]", 8},
     {SKIP, NULL, 16},
 };
-const ValueName LteLl1ServingCellComLoop_Record_Enabled [] = {
+const ValueName LtePhyServingCellComLoop_Record_Enabled [] = {
     {0, "Disabled"},
     {1, "Enabled"},
 };
 
-static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
+static int _decode_lte_phy_serving_cell_com_loop_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -53,8 +53,8 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
     switch (pkt_ver) {
     case 22:
         {
-            offset += _decode_by_fmt(LteLl1ServingCellComLoop_Payload_v22,
-                    ARRAY_SIZE(LteLl1ServingCellComLoop_Payload_v22, Fmt),
+            offset += _decode_by_fmt(LtePhyServingCellComLoop_Payload_v22,
+                    ARRAY_SIZE(LtePhyServingCellComLoop_Payload_v22, Fmt),
                     b, offset, length, result);
             int iNonDecodeP1 = _search_result_int(result, "Carrier Index");
             int iCarrierIndex = iNonDecodeP1 & 15;  // last 4 bits
@@ -63,8 +63,8 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
                     iCarrierIndex);
             Py_DECREF(old_object);
             (void) _map_result_field_to_name(result, "Carrier Index",
-                    LteLl1ServingCellComLoop_CarrierIndex,
-                    ARRAY_SIZE(LteLl1ServingCellComLoop_CarrierIndex, ValueName),
+                    LtePhyServingCellComLoop_CarrierIndex,
+                    ARRAY_SIZE(LtePhyServingCellComLoop_CarrierIndex, ValueName),
                     "(MI)Unknown");
             old_object = _replace_result_int(result, "Number of Records",
                     num_record);
@@ -73,8 +73,8 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteLl1ServingCellComLoop_Record_v41,
-                        ARRAY_SIZE(LteLl1ServingCellComLoop_Record_v41, Fmt),
+                offset += _decode_by_fmt(LtePhyServingCellComLoop_Record_v41,
+                        ARRAY_SIZE(LtePhyServingCellComLoop_Record_v41, Fmt),
                         b, offset, length, result_record_item);
                 int iNonDecodeP3_1 = _search_result_int(result_record_item,
                         "System Frame Number");
@@ -91,8 +91,8 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
                         "Enabled", iEnabled);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item, "Enabled",
-                        LteLl1ServingCellComLoop_Record_Enabled,
-                        ARRAY_SIZE(LteLl1ServingCellComLoop_Record_Enabled,
+                        LtePhyServingCellComLoop_Record_Enabled,
+                        ARRAY_SIZE(LtePhyServingCellComLoop_Record_Enabled,
                             ValueName),
                         "(MI)Unknown");
                 int iCIA = _search_result_int(result_record_item, "COM IIR Alpha");
@@ -143,8 +143,8 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
 
     case 41:
         {
-            offset += _decode_by_fmt(LteLl1ServingCellComLoop_Payload_v41,
-                    ARRAY_SIZE(LteLl1ServingCellComLoop_Payload_v41, Fmt),
+            offset += _decode_by_fmt(LtePhyServingCellComLoop_Payload_v41,
+                    ARRAY_SIZE(LtePhyServingCellComLoop_Payload_v41, Fmt),
                     b, offset, length, result);
             int iNonDecodeP1 = _search_result_int(result, "Carrier Index");
             int iCarrierIndex = iNonDecodeP1 & 15;  // last 4 bits
@@ -153,8 +153,8 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
                     iCarrierIndex);
             Py_DECREF(old_object);
             (void) _map_result_field_to_name(result, "Carrier Index",
-                    LteLl1ServingCellComLoop_CarrierIndex,
-                    ARRAY_SIZE(LteLl1ServingCellComLoop_CarrierIndex, ValueName),
+                    LtePhyServingCellComLoop_CarrierIndex,
+                    ARRAY_SIZE(LtePhyServingCellComLoop_CarrierIndex, ValueName),
                     "(MI)Unknown");
             old_object = _replace_result_int(result, "Cell ID", iCellId);
             Py_DECREF(old_object);
@@ -167,8 +167,8 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteLl1ServingCellComLoop_Record_v41,
-                        ARRAY_SIZE(LteLl1ServingCellComLoop_Record_v41, Fmt),
+                offset += _decode_by_fmt(LtePhyServingCellComLoop_Record_v41,
+                        ARRAY_SIZE(LtePhyServingCellComLoop_Record_v41, Fmt),
                         b, offset, length, result_record_item);
                 int iNonDecodeP3_1 = _search_result_int(result_record_item,
                         "System Frame Number");
@@ -185,8 +185,8 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
                         "Enabled", iEnabled);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item, "Enabled",
-                        LteLl1ServingCellComLoop_Record_Enabled,
-                        ARRAY_SIZE(LteLl1ServingCellComLoop_Record_Enabled,
+                        LtePhyServingCellComLoop_Record_Enabled,
+                        ARRAY_SIZE(LtePhyServingCellComLoop_Record_Enabled,
                             ValueName),
                         "(MI)Unknown");
                 unsigned int iCIA = _search_result_uint(result_record_item, "COM IIR Alpha");
@@ -235,7 +235,7 @@ static int _decode_lte_ll1_serving_cell_com_loop_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE LL1 Serving Cell COM Loop version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY Serving Cell COM Loop version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

@@ -1,16 +1,16 @@
 /*
- * LTE LL1 PDCCH Decoding Result
+ * LTE PHY PDCCH Decoding Result
  */
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt LteLl1PdcchDecodingResult_Fmt [] = {
+const Fmt LtePhyPdcchDecodingResult_Fmt [] = {
     {UINT, "Version", 1},
 };
 
-const Fmt LteLl1PdcchDecodingResult_Payload_v21 [] = {
+const Fmt LtePhyPdcchDecodingResult_Payload_v21 [] = {
     {UINT, "Subframe Number", 2},   // 4 bits
     {PLACEHOLDER, "System Frame Number", 0},    // 10 bits
     {SKIP, NULL, 3},
@@ -19,7 +19,7 @@ const Fmt LteLl1PdcchDecodingResult_Payload_v21 [] = {
     {UINT, "Number of Hypothesis", 1},
 };
 
-const Fmt LteLl1PdcchDecodingResult_Payload_v43 [] = {
+const Fmt LtePhyPdcchDecodingResult_Payload_v43 [] = {
     {UINT, "Num Records", 4},   // 4 bits
     {PLACEHOLDER, "Subframe Number", 0},    // 4 bits
     {PLACEHOLDER, "System Frame Number", 0},    // 10 bits
@@ -31,7 +31,7 @@ const Fmt LteLl1PdcchDecodingResult_Payload_v43 [] = {
     {PLACEHOLDER, "Carrier Index", 0},  // 4 bits
 };
 
-const Fmt LteLl1PdcchDecodingResult_Record_v43 [] = {
+const Fmt LtePhyPdcchDecodingResult_Record_v43 [] = {
     {UINT, "Subframe Offset", 2},
     {UINT, "CIF Configured", 2},    // 1 bit
     {PLACEHOLDER, "Two bits CSI Configured", 0},    // 1 bit
@@ -39,7 +39,7 @@ const Fmt LteLl1PdcchDecodingResult_Record_v43 [] = {
     {PLACEHOLDER, "Number of Hypothesis", 0},   // 8 bits
 };
 
-const Fmt LteLl1PdcchDecodingResult_Hypothesis_v21 [] = {
+const Fmt LtePhyPdcchDecodingResult_Hypothesis_v21 [] = {
     {BYTE_STREAM, "Payload", 8},
     {UINT, "Aggregation Level", 4}, // 2 bits
     {PLACEHOLDER, "Candidate", 0},  // 3 bits
@@ -55,7 +55,7 @@ const Fmt LteLl1PdcchDecodingResult_Hypothesis_v21 [] = {
     {UINT, "Symbol Error Rate", 4}, // x/2147483648.0
 };
 
-const Fmt LteLl1PdcchDecodingResult_Hypothesis_v43 [] = {
+const Fmt LtePhyPdcchDecodingResult_Hypothesis_v43 [] = {
     // totally 28
     {BYTE_STREAM, "Payload", 8},
     {UINT, "Aggregation Level", 4}, // 2 bits
@@ -75,7 +75,7 @@ const Fmt LteLl1PdcchDecodingResult_Hypothesis_v43 [] = {
     {UINT, "Symbol Error Rate", 4}, // x/2147483648.0
 };
 
-static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
+static int _decode_lte_phy_pdcch_decoding_result_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -86,8 +86,8 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
     switch (pkt_ver) {
     case 21:
         {
-            offset += _decode_by_fmt(LteLl1PdcchDecodingResult_Payload_v21,
-                    ARRAY_SIZE(LteLl1PdcchDecodingResult_Payload_v21, Fmt),
+            offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Payload_v21,
+                    ARRAY_SIZE(LtePhyPdcchDecodingResult_Payload_v21, Fmt),
                     b, offset, length, result);
             int iNonDecodeP1 = _search_result_int(result, "Subframe Number");
             int iSubFN = iNonDecodeP1 & 15; // 4 bits
@@ -112,8 +112,8 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteLl1PdcchDecodingResult_Hypothesis_v21,
-                        ARRAY_SIZE(LteLl1PdcchDecodingResult_Hypothesis_v21, Fmt),
+                offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Hypothesis_v21,
+                        ARRAY_SIZE(LtePhyPdcchDecodingResult_Hypothesis_v21, Fmt),
                         b, offset, length, result_record_item);
                 unsigned int iNonDecodeP3 = _search_result_uint(result_record_item,
                         "Aggregation Level");
@@ -212,8 +212,8 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
         }
     case 43:
         {
-            offset += _decode_by_fmt(LteLl1PdcchDecodingResult_Payload_v43,
-                    ARRAY_SIZE(LteLl1PdcchDecodingResult_Payload_v43, Fmt),
+            offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Payload_v43,
+                    ARRAY_SIZE(LtePhyPdcchDecodingResult_Payload_v43, Fmt),
                     b, offset, length, result);
             unsigned int temp = _search_result_uint(result, "Num Records");
             int num_record = temp & 15; // 4 bits
@@ -259,8 +259,8 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteLl1PdcchDecodingResult_Record_v43,
-                        ARRAY_SIZE(LteLl1PdcchDecodingResult_Record_v43, Fmt),
+                offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Record_v43,
+                        ARRAY_SIZE(LtePhyPdcchDecodingResult_Record_v43, Fmt),
                         b, offset, length, result_record_item);
                 temp = _search_result_int(result_record_item, "CIF Configured");
                 int iCC = temp & 1; // 1 bit
@@ -298,8 +298,8 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
                 PyObject *result_record_hypothesis = PyList_New(0);
                 for (int j = 0; j < num_hypothesis; j++) {
                     PyObject *result_record_hypothesis_item = PyList_New(0);
-                    offset += _decode_by_fmt(LteLl1PdcchDecodingResult_Hypothesis_v43,
-                            ARRAY_SIZE(LteLl1PdcchDecodingResult_Hypothesis_v43, Fmt),
+                    offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Hypothesis_v43,
+                            ARRAY_SIZE(LtePhyPdcchDecodingResult_Hypothesis_v43, Fmt),
                             b, offset, length, result_record_hypothesis_item);
 
                     temp = _search_result_uint(result_record_hypothesis_item,
@@ -437,7 +437,7 @@ static int _decode_lte_ll1_pdcch_decoding_result_payload (const char *b,
         }
 
     default:
-        printf("(MI)Unknown LTE LL1 PDCCH Decoding Result version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY PDCCH Decoding Result version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

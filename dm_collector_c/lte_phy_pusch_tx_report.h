@@ -1,16 +1,16 @@
 /*
- * LTE LL1 PUSCH Tx Report
+ * LTE PHY PUSCH Tx Report
  */
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt LteLl1PuschTxReport_Fmt [] = {
+const Fmt LtePhyPuschTxReport_Fmt [] = {
     {UINT, "Version", 1},
 };
 
-const Fmt LteLl1PuschTxReport_Payload_v43 [] = {
+const Fmt LtePhyPuschTxReport_Payload_v43 [] = {
     {UINT, "Serving Cell ID", 2},    // 9 bits
     {PLACEHOLDER, "Number of Records", 0},  // 5 bits
     {SKIP, NULL, 1},
@@ -18,7 +18,7 @@ const Fmt LteLl1PuschTxReport_Payload_v43 [] = {
     {SKIP, NULL, 2},
 };
 
-const Fmt LteLl1PuschTxReport_Record_v43 [] = {
+const Fmt LtePhyPuschTxReport_Record_v43 [] = {
     {UINT, "Current SFN SF", 2},
     {UINT, "Coding Rate Data", 2},  // x/1024.0
     {UINT, "ACK", 4},   // 1 bit
@@ -55,7 +55,7 @@ const Fmt LteLl1PuschTxReport_Record_v43 [] = {
     {UINT, "Tx Resampler", 4},
 };
 
-static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
+static int _decode_lte_phy_pusch_tx_report_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -69,8 +69,8 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
     switch (pkt_ver) {
     case 43:
         {
-            offset += _decode_by_fmt(LteLl1PuschTxReport_Payload_v43,
-                    ARRAY_SIZE(LteLl1PuschTxReport_Payload_v43, Fmt),
+            offset += _decode_by_fmt(LtePhyPuschTxReport_Payload_v43,
+                    ARRAY_SIZE(LtePhyPuschTxReport_Payload_v43, Fmt),
                     b, offset, length, result);
             temp = _search_result_uint(result, "Serving Cell ID");
             int iServingCellId = temp & 511;    // 9 bits
@@ -85,8 +85,8 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteLl1PuschTxReport_Record_v43,
-                        ARRAY_SIZE(LteLl1PuschTxReport_Record_v43, Fmt),
+                offset += _decode_by_fmt(LtePhyPuschTxReport_Record_v43,
+                        ARRAY_SIZE(LtePhyPuschTxReport_Record_v43, Fmt),
                         b, offset, length, result_record_item);
                 temp = _search_result_int(result_record_item, "Coding Rate Data");
                 float fCodingRateData = temp / 1024.0;
@@ -279,7 +279,7 @@ static int _decode_lte_ll1_pusch_tx_report_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE LL1 PDCCH Decoding Result version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY PDCCH Decoding Result version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

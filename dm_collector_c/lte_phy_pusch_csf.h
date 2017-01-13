@@ -1,16 +1,16 @@
 /*
- * LTE LL1 PUSCH CSF
+ * LTE PHY PUSCH CSF
  */
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt LteLl1PuschCsf_Fmt [] = {
+const Fmt LtePhyPuschCsf_Fmt [] = {
     {UINT, "Version", 1},
 };
 
-const Fmt LteLl1PuschCsf_Payload_v22 [] = {
+const Fmt LtePhyPuschCsf_Payload_v22 [] = {
     {UINT, "Start System Sub-frame Number", 2}, // 4 bits
     {PLACEHOLDER, "Start System Frame Number", 0},  // 10 bits
     {UINT, "PUSCH Reporting Mode", 1},  // right shift 1 bit, 3 bits
@@ -26,7 +26,7 @@ const Fmt LteLl1PuschCsf_Payload_v22 [] = {
     {UINT, "Carrier Index", 1}, // 4 bits
 };
 
-const Fmt LteLl1PuschCsf_Payload_v42 [] = {
+const Fmt LtePhyPuschCsf_Payload_v42 [] = {
     {UINT, "Start System Sub-frame Number", 2}, // 4 bits
     {PLACEHOLDER, "Start System Frame Number", 0},  // 10 bits
     {UINT, "PUSCH Reporting Mode", 1},  // last 2 bits in previous byte + 1 bit
@@ -44,20 +44,19 @@ const Fmt LteLl1PuschCsf_Payload_v42 [] = {
     {PLACEHOLDER, "Num CSIrs Ports", 0},    // 4 bits
 };
 
-static int _decode_lte_ll1_pusch_csf_payload (const char *b,
+static int _decode_lte_phy_pusch_csf_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 
     PyObject *old_object;
-    PyObject *pyfloat;
     int temp;
 
     switch (pkt_ver) {
     case 42:
         {
-            offset += _decode_by_fmt(LteLl1PuschCsf_Payload_v42,
-                    ARRAY_SIZE(LteLl1PuschCsf_Payload_v42, Fmt),
+            offset += _decode_by_fmt(LtePhyPuschCsf_Payload_v42,
+                    ARRAY_SIZE(LtePhyPuschCsf_Payload_v42, Fmt),
                     b, offset, length, result);
             temp = _search_result_int(result, "Start System Sub-frame Number");
             int iSubFN = temp & 15;
@@ -146,8 +145,8 @@ static int _decode_lte_ll1_pusch_csf_payload (const char *b,
         }
     case 22:
         {
-            offset += _decode_by_fmt(LteLl1PuschCsf_Payload_v22,
-                    ARRAY_SIZE(LteLl1PuschCsf_Payload_v22, Fmt),
+            offset += _decode_by_fmt(LtePhyPuschCsf_Payload_v22,
+                    ARRAY_SIZE(LtePhyPuschCsf_Payload_v22, Fmt),
                     b, offset, length, result);
             temp = _search_result_int(result, "Start System Sub-frame Number");
             int iSubFN = temp & 15;
@@ -223,7 +222,7 @@ static int _decode_lte_ll1_pusch_csf_payload (const char *b,
         }
 
     default:
-        printf("(MI)Unknown LTE LL1 PUSCH CSF version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY PUSCH CSF version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

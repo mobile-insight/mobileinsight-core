@@ -1,21 +1,21 @@
 /*
- * LTE ML1 System Scan Results
+ * LTE PHY System Scan Results
  */
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt LteMl1SystemScanResults_Fmt [] = {
+const Fmt LtePhySystemScanResults_Fmt [] = {
     {UINT, "Version", 1},
 };
 
-const Fmt LteMl1SystemScanResults_Payload_v2 [] = {
+const Fmt LtePhySystemScanResults_Payload_v2 [] = {
     {SKIP, NULL, 1},
     {UINT, "Num Candidates", 2}
 };
 
-const Fmt LteMl1SystemScanResults_Candidate_v2 [] = {
+const Fmt LtePhySystemScanResults_Candidate_v2 [] = {
     {UINT, "EARFCN", 4},
     {UINT, "Band", 2},
     {UINT, "Bandwidth (MHz)", 2},   // (x-1)*5
@@ -24,7 +24,7 @@ const Fmt LteMl1SystemScanResults_Candidate_v2 [] = {
 };
 
 
-static int _decode_lte_ml1_system_scan_results_payload (const char *b,
+static int _decode_lte_phy_system_scan_results_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -32,16 +32,16 @@ static int _decode_lte_ml1_system_scan_results_payload (const char *b,
     switch (pkt_ver) {
     case 2:
         {
-            offset += _decode_by_fmt(LteMl1SystemScanResults_Payload_v2,
-                    ARRAY_SIZE(LteMl1SystemScanResults_Payload_v2, Fmt),
+            offset += _decode_by_fmt(LtePhySystemScanResults_Payload_v2,
+                    ARRAY_SIZE(LtePhySystemScanResults_Payload_v2, Fmt),
                     b, offset, length, result);
             int num_candidate = _search_result_int(result, "Num Candidates");
 
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_candidate; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1SystemScanResults_Candidate_v2,
-                        ARRAY_SIZE(LteMl1SystemScanResults_Candidate_v2, Fmt),
+                offset += _decode_by_fmt(LtePhySystemScanResults_Candidate_v2,
+                        ARRAY_SIZE(LtePhySystemScanResults_Candidate_v2, Fmt),
                         b, offset, length, result_record_item);
                 int iBandwidth = _search_result_int(result_record_item,
                         "Bandwidth (MHz)");
@@ -70,7 +70,7 @@ static int _decode_lte_ml1_system_scan_results_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE PDSCH Stat Indication version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY System Scan Result version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
