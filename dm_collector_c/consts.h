@@ -92,6 +92,7 @@ enum LogPacketType {
     LTE_PHY_PDCCH_Decoding_Result = 0xB130,
     LTE_PHY_PDSCH_Decoding_Result = 0xB132,
     LTE_PHY_PUSCH_Tx_Report = 0xB139,
+    LTE_PHY_PUCCH_Tx_Report = 0xB13C,
     LTE_PHY_PUSCH_CSF = 0xB14E,
 
     GSM_Surround_Cell_BA_List = 0x5071,
@@ -256,6 +257,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_PHY_PDSCH_Decoding_Result", false},
     {LTE_PHY_PUSCH_Tx_Report,
         "LTE_PHY_PUSCH_Tx_Report", false},
+    {LTE_PHY_PUCCH_Tx_Report,
+        "LTE_PHY_PUCCH_Tx_Report", false},
     {LTE_PHY_PUSCH_CSF,
         "LTE_PHY_PUSCH_CSF", false},
 

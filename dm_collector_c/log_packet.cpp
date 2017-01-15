@@ -25,6 +25,7 @@
 #include "lte_phy_pdcch_decoding_result.h"
 #include "lte_phy_pdsch_decoding_result.h"
 #include "lte_phy_pusch_tx_report.h"
+#include "lte_phy_pucch_tx_report.h"
 #include "lte_phy_rlm_report.h"
 #include "lte_phy_pusch_csf.h"
 #include "lte_phy_cdrx_events_info.h"
@@ -4644,6 +4645,13 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 b, offset, length, result);
         offset += _decode_1xevdo_mcps_payload(b, offset, length, result);
         break;
+    case LTE_PHY_PUCCH_Tx_Report:
+        offset += _decode_by_fmt(LtePhyPucchTxReport_Fmt,
+                ARRAY_SIZE(LtePhyPucchTxReport_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_phy_pucch_tx_report_payload(b, offset, length, result);
+        break;
+
     default:
         break;
     };
