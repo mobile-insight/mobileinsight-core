@@ -2361,6 +2361,13 @@ const ValueName ValueNameSearcherState [] = {
     {3, "Idle"},
     {4, "Traffic"},
 };
+
+const ValueName ValueNameSRSShortingfor2ndSlot [] = {
+    // 1 bit
+    {0, "Normal"},
+    {1, "Shorten 2nd"},
+};
+
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},
