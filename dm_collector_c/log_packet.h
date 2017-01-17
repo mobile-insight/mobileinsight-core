@@ -94,12 +94,12 @@ const Fmt UmtsNasGmmStateFmt [] = {
 };
 
 const ValueName UmtsNasGmmState_GmmState [] = {
-    {0, "GMM_NULL"}, 
-    {1, "GMM_DEREGISTERED"}, 
-    {2, "GMM_REGISTERED_INITIATED"}, 
-    {3, "GMM_REGISTERED"}, 
-    {4, "GMM_DEREGISTERED_INITIATED"}, 
-    {5, "GMM_ROUTING_AREA_UPDATING_INITIATED"}, 
+    {0, "GMM_NULL"},
+    {1, "GMM_DEREGISTERED"},
+    {2, "GMM_REGISTERED_INITIATED"},
+    {3, "GMM_REGISTERED"},
+    {4, "GMM_DEREGISTERED_INITIATED"},
+    {5, "GMM_ROUTING_AREA_UPDATING_INITIATED"},
     {6, "GMM_SERVICE_REQUEST_INITIATED"}
 };
 
@@ -234,6 +234,15 @@ const Fmt LteRrcOtaPacketFmt_v8 [] = {
 };
 
 const Fmt LteRrcOtaPacketFmt_v9 [] = {
+    {UINT, "Freq", 4},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1},            //PDU number
+    {UINT, "SIB Mask in SI", 1},
+    {SKIP, NULL, 3},
+    {UINT, "Msg Length", 2}
+};
+
+const Fmt LteRrcOtaPacketFmt_v13 [] = {
     {UINT, "Freq", 4},                  //frequency
     {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
     {UINT, "PDU Number", 1},            //PDU number
