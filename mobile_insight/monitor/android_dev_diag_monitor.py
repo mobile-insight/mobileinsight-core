@@ -140,7 +140,7 @@ class AndroidDevDiagMonitor(Monitor):
     An Device Diag monitor for Android devices. Require root access to run.
     """
 
-    #: a list containing the currently supported message types.
+    #SUPPORTED_TYPES: a list containing the currently supported message types.
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
 
     # DIAG_CFG_DIR = "/sdcard/diag_logs"
@@ -155,9 +155,6 @@ class AndroidDevDiagMonitor(Monitor):
         """
         Configure this class with user preferences.
         This method should be called before any actual decoding.
-
-        :param prefs: configurations for message decoder. Empty by default.
-        :type prefs: dictionary
         """
         Monitor.__init__(self)
         self._fifo_path = self.TMP_FIFO_FILE
