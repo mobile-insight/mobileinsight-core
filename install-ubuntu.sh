@@ -23,7 +23,7 @@ sudo apt-get install pkg-config wget libglib2.0-dev bison flex libpcap-dev
 # Make sure the package version is in accordance to the version that was
 # installed previously
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
-	wget https://1.na.dl.wireshark.org/src/wireshark-2.0.8.tar.bz2
+	wget https://www.wireshark.org/download/src/all-versions/wireshark-2.0.8.tar.bz2
 	tar -xjvf wireshark-2.0.8.tar.bz2
 	rm wireshark-2.0.8.tar.bz2
 fi
