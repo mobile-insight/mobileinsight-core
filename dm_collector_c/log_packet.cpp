@@ -1945,28 +1945,59 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                             Py_DECREF(pystr);
 
                             if (strE == "1") {
-                                // Decode extra two bytes
-                                offset += _decode_by_fmt(
-                                        LteRlcUlAmAllPdu_Subpkt_PDU_Extra,
-                                        ARRAY_SIZE(
-                                            LteRlcUlAmAllPdu_Subpkt_PDU_Extra,
-                                        Fmt),
-                                        b, offset, length, result_pdu_item);
-                                int iNonDecodeLI = _search_result_int(
-                                        result_pdu_item, "RLC DATA LI");
-                                int iLeft1 = iNonDecodeLI / 4096;
-                                iNonDecodeLI -= iLeft1 * 4096;
-                                int iLeft2 = iNonDecodeLI / 256;
-                                iNonDecodeLI -= iLeft2 * 256;
-                                int iLeft3 = iNonDecodeLI / 16;
-                                iNonDecodeLI -= iLeft3 * 16;
-                                int iLeft4 = iNonDecodeLI;
-                                int iLI =
-                                    iLeft1 * 1 + iLeft3 * 256 + iLeft4 * 16;
-                                old_object = _replace_result_int(
-                                        result_pdu_item, "RLC DATA LI", iLI);
-                                Py_DECREF(old_object);
-                                iLoggedBytes = iLoggedBytes - 2;
+                                // Decode LI
+                                int numLI = (iLoggedBytes - 2) / 1.5;
+                                int iAllign = 0;
+                                int iHeadFromAllign = 0;
+
+                                PyObject *result_pdu_li = PyList_New(0);
+                                for (int indexLI = 0; indexLI < numLI; indexLI++) {
+                                    PyObject *result_pdu_li_item = PyList_New(0);
+                                    if (iAllign == 0) {
+                                        iAllign = 1;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN,
+                                                Fmt),
+                                                b, offset, length, result_pdu_li_item);
+                                        int iNonDecodeLI = _search_result_int(
+                                                result_pdu_li_item, "LI");
+                                        int iPart3 = iNonDecodeLI / 4096;
+                                        int iPart4 = (iNonDecodeLI - iPart3 * 4096) / 256;
+                                        int iPart1 = (iNonDecodeLI - iPart3 * 4096 - iPart4 * 256) / 16;
+                                        int iPart2 = iNonDecodeLI - iPart3 * 4096 - iPart4 * 256 - iPart1 * 16;
+                                        int iLI = (iPart1 % 8) * 256 + iPart2 * 16 + iPart3;
+                                        iHeadFromAllign = (iPart4 % 8) * 256;
+                                        old_object = _replace_result_int(
+                                                result_pdu_li_item, "LI", iLI);
+                                        Py_DECREF(old_object);
+                                    } else {
+                                        iAllign = 0;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING,
+                                                Fmt),
+                                                b, offset, length, result_pdu_li_item);
+                                        int iNonDecodeLI = _search_result_int(
+                                                result_pdu_li_item, "LI");
+                                        int iLI = iHeadFromAllign + iNonDecodeLI;
+                                        old_object = _replace_result_int(
+                                                result_pdu_li_item, "LI", iLI);
+                                        Py_DECREF(old_object);
+                                    }
+                                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                            result_pdu_li_item, "dict");
+                                    PyList_Append(result_pdu_li, t3);
+                                    Py_DECREF(t3);
+                                    Py_DECREF(result_pdu_li_item);
+                                }
+                                PyObject *t2 = Py_BuildValue("(sOs)", "RLC DATA LI",
+                                        result_pdu_li, "list");
+                                PyList_Append(result_pdu_item, t2);
+                                Py_DECREF(t2);
+                                Py_DECREF(result_pdu_li);
                             }
                         }
                         PyObject *t1 = Py_BuildValue("(sOs)", ("RLCUL PDU["
@@ -1975,7 +2006,6 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                         PyList_Append(result_pdu, t1);
                         Py_DECREF(t1);
                         Py_DECREF(result_pdu_item);
-                        offset += iLoggedBytes - 2;
                     }
                     PyObject *t1 = Py_BuildValue("(sOs)", "RLCUL PDUs",
                             result_pdu, "list");
@@ -2220,31 +2250,61 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                             Py_DECREF(pystr);
 
                             if (strE == "1") {
-                                // Decode extra two bytes
-                                offset += _decode_by_fmt(
-                                        LteRlcDlAmAllPdu_Subpkt_PDU_Extra,
-                                        ARRAY_SIZE(
-                                            LteRlcDlAmAllPdu_Subpkt_PDU_Extra,
-                                        Fmt),
-                                        b, offset, length, result_pdu_item);
-                                int iNonDecodeLI = _search_result_int(
-                                        result_pdu_item, "RLC DATA LI");
-                                int iLeft1 = iNonDecodeLI / 4096;
-                                iNonDecodeLI -= iLeft1 * 4096;
-                                int iLeft2 = iNonDecodeLI / 256;
-                                iNonDecodeLI -= iLeft2 * 256;
-                                int iLeft3 = iNonDecodeLI / 16;
-                                iNonDecodeLI -= iLeft3 * 16;
-                                int iLeft4 = iNonDecodeLI;
-                                int iLI =
-                                    iLeft1 * 1 + iLeft3 * 256 + iLeft4 * 16;
-                                old_object = _replace_result_int(
-                                        result_pdu_item, "RLC DATA LI", iLI);
-                                Py_DECREF(old_object);
-                                iLoggedBytes = iLoggedBytes - 2;
+                                // Decode LI
+                                int numLI = (iLoggedBytes - 2) / 1.5;
+                                int iAllign = 0;
+                                int iHeadFromAllign = 0;
+
+                                PyObject *result_pdu_li = PyList_New(0);
+                                for (int indexLI = 0; indexLI < numLI; indexLI++) {
+                                    PyObject *result_pdu_li_item = PyList_New(0);
+                                    if (iAllign == 0) {
+                                        iAllign = 1;
+                                        offset += _decode_by_fmt(
+                                                LteRlcDlAmAllPdu_Subpkt_PDU_LI_ALLIGN,
+                                                ARRAY_SIZE(
+                                                    LteRlcDlAmAllPdu_Subpkt_PDU_LI_ALLIGN,
+                                                Fmt),
+                                                b, offset, length, result_pdu_li_item);
+                                        int iNonDecodeLI = _search_result_int(
+                                                result_pdu_li_item, "LI");
+                                        int iPart3 = iNonDecodeLI / 4096;
+                                        int iPart4 = (iNonDecodeLI - iPart3 * 4096) / 256;
+                                        int iPart1 = (iNonDecodeLI - iPart3 * 4096 - iPart4 * 256) / 16;
+                                        int iPart2 = iNonDecodeLI - iPart3 * 4096 - iPart4 * 256 - iPart1 * 16;
+                                        int iLI = (iPart1 % 8) * 256 + iPart2 * 16 + iPart3;
+                                        iHeadFromAllign = (iPart4 % 8) * 256;
+                                        old_object = _replace_result_int(
+                                                result_pdu_li_item, "LI", iLI);
+                                        Py_DECREF(old_object);
+                                    } else {
+                                        iAllign = 0;
+                                        offset += _decode_by_fmt(
+                                                LteRlcDlAmAllPdu_Subpkt_PDU_LI_PADDING,
+                                                ARRAY_SIZE(
+                                                    LteRlcDlAmAllPdu_Subpkt_PDU_LI_PADDING,
+                                                Fmt),
+                                                b, offset, length, result_pdu_li_item);
+                                        int iNonDecodeLI = _search_result_int(
+                                                result_pdu_li_item, "LI");
+                                        int iLI = iHeadFromAllign + iNonDecodeLI;
+                                        old_object = _replace_result_int(
+                                                result_pdu_li_item, "LI", iLI);
+                                        Py_DECREF(old_object);
+                                    }
+                                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                            result_pdu_li_item, "dict");
+                                    PyList_Append(result_pdu_li, t3);
+                                    Py_DECREF(t3);
+                                    Py_DECREF(result_pdu_li_item);
+                                }
+                                PyObject *t2 = Py_BuildValue("(sOs)", "RLC DATA LI",
+                                        result_pdu_li, "list");
+                                PyList_Append(result_pdu_item, t2);
+                                Py_DECREF(t2);
+                                Py_DECREF(result_pdu_li);
                             }
                         }
-                        offset += iLoggedBytes - 2;
                         PyObject *t1 = Py_BuildValue("(sOs)", ("RLCDL PDU["
                                 + SSTR(i) + "]").c_str(), result_pdu_item,
                                 "dict");
