@@ -2384,6 +2384,23 @@ const ValueName ValueNameSRSShortingfor2ndSlot [] = {
     {1, "Shorten 2nd"},
 };
 
+const ValueName ValueNameCipherAlgo [] = {
+    // 1 byte
+    {2, "LTE SNOW-3G"},
+    {3, "LTE AES"},
+    {7, "None"},
+};
+
+const ValueName ValueNamePdcpSNLength [] = {
+    {0, "5 bit"},
+    {1, "7 bit"},
+    {2, "12 bit"},
+};
+
+const ValueName ValueNamePdcpCipherDataPduMode [] = {
+    {0, "AM"},
+};
+
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},

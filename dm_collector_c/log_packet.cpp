@@ -37,6 +37,8 @@
 #include "gsm_rr_cell_reselection_meas.h"
 #include "srch_tng_1x_searcher_dump.h"
 #include "1xevdo_multi_carrier_pilot_sets.h"
+#include "lte_pdcp_dl_cipher_data_pdu.h"
+#include "lte_pdcp_ul_cipher_data_pdu.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -2451,7 +2453,7 @@ static int _decode_lte_mac_rach_attempt_subpkt (const char *b, int offset,
                             LteMacRachAttempt_Subpkt_RachResult,
                             ARRAY_SIZE(LteMacRachAttempt_Subpkt_RachResult,
                                 ValueName),
-                            "Unsuccess");
+                            "(MI)Unknown");
                     (void) _map_result_field_to_name(result_subpkt,
                             "Contention procedure",
                             LteMacRachAttempt_Subpkt_ContentionProcedure,
@@ -4715,6 +4717,18 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 ARRAY_SIZE(LtePhyPucchTxReport_Fmt, Fmt),
                 b, offset, length, result);
         offset += _decode_lte_phy_pucch_tx_report_payload(b, offset, length, result);
+        break;
+    case LTE_PDCP_DL_Cipher_Data_PDU:
+        offset += _decode_by_fmt(LtePdcpDlCipherDataPdu_Fmt,
+                ARRAY_SIZE(LtePdcpDlCipherDataPdu_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_pdcp_dl_cipher_data_pdu_payload(b, offset, length, result);
+        break;
+    case LTE_PDCP_UL_Cipher_Data_PDU:
+        offset += _decode_by_fmt(LtePdcpUlCipherDataPdu_Fmt,
+                ARRAY_SIZE(LtePdcpUlCipherDataPdu_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_pdcp_ul_cipher_data_pdu_payload(b, offset, length, result);
         break;
 
     default:
