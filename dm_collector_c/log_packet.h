@@ -1077,8 +1077,11 @@ const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_DATA [] = {
     {PLACEHOLDER, "FI", 0},
     {PLACEHOLDER, "E", 0},
 };
-const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Extra [] = {
-    {UINT, "RLC DATA LI", 2}, // Only LI[0] is decoded
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN [] = {
+    {UINT, "LI", 2}, // 0x 0011 1100
+};
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING [] = {
+    {UINT, "LI", 1}, //
 };
 
 // ----------------------------------------------------------------------------
@@ -1136,8 +1139,11 @@ const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_DATA [] = {
     {PLACEHOLDER, "FI", 0},
     {PLACEHOLDER, "E", 0},
 };
-const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Extra [] = {
-    {UINT, "RLC DATA LI", 2}, // Only LI[0] is decoded
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_LI_ALLIGN [] = {
+    {UINT, "LI", 2}, // 0x 0011 1100
+};
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_LI_PADDING [] = {
+    {UINT, "LI", 1}, //
 };
 
 
