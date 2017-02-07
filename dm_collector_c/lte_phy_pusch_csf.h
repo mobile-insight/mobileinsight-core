@@ -66,7 +66,7 @@ static int _decode_lte_phy_pusch_csf_payload (const char *b,
             int iPuschReportingMode = ((temp & 1) << 2) | ileft;
             int iRankIndex = (temp >> 1) & 1;
             int iCsiMeasSetIndex = (temp >> 2) & 1;
-            uint utemp = _search_result_uint(result, "Number of Subbands");
+            unsigned int utemp = _search_result_uint(result, "Number of Subbands");
             int iNumSubbands = utemp & 31;
             int iWideBandCQICW0 = (utemp >> 5) & 15;
             int iWideBandCQICW1 = (utemp >> 9) & 15;
@@ -154,7 +154,7 @@ static int _decode_lte_phy_pusch_csf_payload (const char *b,
             temp = _search_result_int(result, "PUSCH Reporting Mode");
             int iPuschReportingMode = (temp >> 1) & 7;
             int iRankIndex = (temp >> 4) & 1;
-            uint utemp = _search_result_uint(result, "Number of Subbands");
+            unsigned int utemp = _search_result_uint(result, "Number of Subbands");
             int iNumSubbands = utemp & 31;
             int iWideBandCQICW0 = (utemp >> 5) & 15;
             int iWideBandCQICW1 = (utemp >> 9) & 15;
