@@ -55,7 +55,7 @@ static int _decode_lte_phy_cdrx_events_info_payload (const char *b,
                         ARRAY_SIZE(LtePhyCdrxEventsInfo_Record_v1, Fmt),
                         b, offset, length, result_record_item);
 
-                uint utemp = _search_result_uint(result_record_item, "SFN");
+                unsigned int utemp = _search_result_uint(result_record_item, "SFN");
                 int iSFN = utemp & 1023;
                 int iSubFN = (utemp >> 10) & 15;
                 int iCdrxEvent = (utemp >> 14) & 63;
@@ -100,7 +100,7 @@ static int _decode_lte_phy_cdrx_events_info_payload (const char *b,
                         ARRAY_SIZE(LtePhyCdrxEventsInfo_Record_v2, Fmt),
                         b, offset, length, result_record_item);
 
-                uint utemp = _search_result_uint(result_record_item, "SFN");
+                unsigned int utemp = _search_result_uint(result_record_item, "SFN");
                 int iSFN = utemp & 1023;
                 int iSubFN = (utemp >> 10) & 15;
                 int iCdrxEvent = (utemp >> 14) & 63;

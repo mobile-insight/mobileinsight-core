@@ -77,7 +77,7 @@ _search_result_int(PyObject *result, const char *target) {
 }
 
 // This function should be called when the value is 4 bytes long.
-// Return: uint
+// Return: unsigned int
 static unsigned int
 _search_result_uint(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
