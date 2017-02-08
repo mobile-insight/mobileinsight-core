@@ -1829,6 +1829,9 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                                 "sys_fn");
                         int iLoggedBytes = _search_result_int(result_pdu_item,
                                 "logged_bytes");
+                        // D/C LookAhead and SN (or Ack_SN) has already been parsed.
+                        iLoggedBytes -= 2;
+
                         // Handle fn
                         const unsigned int SFN_RSHIFT = 4,
                               SFN_MASK = (1 << 12) - 1;
@@ -1946,9 +1949,34 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
 
+                            if (strRF == "1") {
+                                // decode LSF and SO
+                                iLoggedBytes -= 2;
+
+                                offset += _decode_by_fmt(
+                                        LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO,
+                                        ARRAY_SIZE(
+                                            LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO,
+                                            Fmt),
+                                        b, offset, length, result_pdu_item);
+                                int temp = _search_result_int(result_pdu_item,
+                                        "LSF");
+                                int iLSF = temp >> 7;
+                                int iSO = _search_result_int(result_pdu_item,
+                                        "SO");
+                                iSO += (temp & 127) * 256;
+                                old_object = _replace_result_int(
+                                        result_pdu_item, "LSF", iLSF);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_pdu_item, "SO", iSO);
+                                Py_DECREF(old_object);
+                            }
+
                             if (strE == "1") {
                                 // Decode LI
-                                int numLI = (iLoggedBytes - 2) / 1.5;
+                                int numLI = iLoggedBytes / 1.5;
+                                iLoggedBytes = 0;
                                 int iAllign = 0;
                                 int iHeadFromAllign = 0;
 
@@ -2002,6 +2030,7 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                                 Py_DECREF(result_pdu_li);
                             }
                         }
+                        offset += iLoggedBytes;
                         PyObject *t1 = Py_BuildValue("(sOs)", ("RLCUL PDU["
                                 + SSTR(i) + "]").c_str(), result_pdu_item,
                                 "dict");
@@ -2125,6 +2154,9 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                                 "sys_fn");
                         int iLoggedBytes = _search_result_int(result_pdu_item,
                                 "logged_bytes");
+                        // D/C LookAhead and SN (or Ack_SN) has already been parsed.
+                        iLoggedBytes -= 2;
+
                         // Handle fn
                         const unsigned int SFN_RSHIFT = 4,
                               SFN_MASK = (1 << 12) - 1;
@@ -2251,9 +2283,34 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
 
+                            if (strRF == "1") {
+                                // decode LSF and SO
+                                iLoggedBytes -= 2;
+
+                                offset += _decode_by_fmt(
+                                        LteRlcDlAmAllPdu_Subpkt_PDU_LSF_SO,
+                                        ARRAY_SIZE(
+                                            LteRlcDlAmAllPdu_Subpkt_PDU_LSF_SO,
+                                            Fmt),
+                                        b, offset, length, result_pdu_item);
+                                int temp = _search_result_int(result_pdu_item,
+                                        "LSF");
+                                int iLSF = temp >> 7;
+                                int iSO = _search_result_int(result_pdu_item,
+                                        "SO");
+                                iSO += (temp & 127) * 256;
+                                old_object = _replace_result_int(
+                                        result_pdu_item, "LSF", iLSF);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_pdu_item, "SO", iSO);
+                                Py_DECREF(old_object);
+                            }
+
                             if (strE == "1") {
                                 // Decode LI
-                                int numLI = (iLoggedBytes - 2) / 1.5;
+                                int numLI = iLoggedBytes / 1.5;
+                                iLoggedBytes = 0;
                                 int iAllign = 0;
                                 int iHeadFromAllign = 0;
 
@@ -2307,6 +2364,7 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                                 Py_DECREF(result_pdu_li);
                             }
                         }
+                        offset += iLoggedBytes;
                         PyObject *t1 = Py_BuildValue("(sOs)", ("RLCDL PDU["
                                 + SSTR(i) + "]").c_str(), result_pdu_item,
                                 "dict");
