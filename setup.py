@@ -9,6 +9,7 @@ import sys
 import platform
 import stat
 from distutils.core import setup
+from setuptools import setup, Extension
 
 try:
     import py2exe
@@ -25,6 +26,16 @@ if use_py2exe:
 PY2EXE_OPTIONS = {
     "bundle_files": 1, # bundle everything
 }
+
+dm_collector_c_module = Extension('mobile_insight.monitor.dm_collector.dm_collector_c',
+                                sources = [ "dm_collector_c/dm_collector_c.cpp",
+                                            "dm_collector_c/export_manager.cpp",
+                                            "dm_collector_c/hdlc.cpp",
+                                            "dm_collector_c/log_config.cpp",
+                                            "dm_collector_c/log_packet.cpp",
+                                            "dm_collector_c/utils.cpp",],
+                                define_macros=[ ('EXPOSE_INTERNAL_LOGS', 1), ]
+                                )
 
 
 def parse_libs(url,suffix):
@@ -133,10 +144,9 @@ else:
 
 setup(
     name         = 'MobileInsight',
-    version      = '2.1.1',
+    version      = '2.2.0',
     description  = 'Mobile network monitoring and analysis',
     author       = 'UCLA WiNG group and OSU MSSN lab',
-    author_email = 'yuanjie.li@cs.ucla.edu, zyuan@cs.ucla.edu',
     url          = 'http://metro.cs.ucla.edu/mobile_insight',
     license      = 'Apache License 2.0',
     packages     = ['mobile_insight',
@@ -148,4 +158,5 @@ setup(
     package_data = PACKAGE_DATA,
     data_files   = DATA_FILES,
     options      = { 'py2exe' : PY2EXE_OPTIONS },
+    ext_modules  = [dm_collector_c_module],
 )
