@@ -13,4 +13,5 @@ recursive-exclude mobile_insight *.db
 exclude mobile_insight/monitor/android_qmdl_monitor.py
 exclude mobile_insight/analyzer/handoff_loop_analyzer.py
 prune docs/docs
+recursive-include dm_collector_c *.cpp *.h
 recursive-include ws_dissector Makefile *.cpp *.h
