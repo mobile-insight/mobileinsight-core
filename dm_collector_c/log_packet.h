@@ -1083,6 +1083,10 @@ const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN [] = {
 const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING [] = {
     {UINT, "LI", 1}, //
 };
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO [] = {
+    {UINT, "LSF", 1},   // & 128
+    {UINT, "SO", 1},    // the rest 7 bits of LSF (& 127) * 256 + this value
+};
 
 // ----------------------------------------------------------------------------
 // LTE_RLC_DL_AM_All_PDU
@@ -1145,8 +1149,10 @@ const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_LI_ALLIGN [] = {
 const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_LI_PADDING [] = {
     {UINT, "LI", 1}, //
 };
-
-
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_LSF_SO [] = {
+    {UINT, "LSF", 1},   // & 128
+    {UINT, "SO", 1},    // the rest 7 bits of LSF (& 127) * 256 + this value
+};
 
 // ----------------------------------------------------------------------------
 // LTE_MAC_Rach_Trigger
