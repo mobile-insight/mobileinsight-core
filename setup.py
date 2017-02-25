@@ -37,7 +37,6 @@ dm_collector_c_module = Extension('mobile_insight.monitor.dm_collector.dm_collec
                                 define_macros=[ ('EXPOSE_INTERNAL_LOGS', 1), ]
                                 )
 
-
 def parse_libs(url,suffix):
     pattern  = '<a href=".*%s.*">.*</a>' % suffix
     response = urllib.urlopen(url).read()
@@ -57,24 +56,14 @@ def download_libs(url, libs, chmod = True):
         for lib in libs:
             os.chmod("./libs/" + lib, 0o755 | stat.S_IEXEC)
 
-def download_unix(url):
-    if not os.path.isfile("./mobile_insight/monitor/dm_collector/dm_collector_c.so"):
-        urllib.urlretrieve (url+"dm_collector_c.so", "./mobile_insight/monitor/dm_collector/dm_collector_c.so")
-    os.chmod("./mobile_insight/monitor/dm_collector/dm_collector_c.so", 0o755 | stat.S_IEXEC)
-
 def download_win(url):
     if not os.path.isfile("./ws_dissector/ws_dissector.exe"):
             urllib.urlretrieve (url+"ws_dissector.exe", "./ws_dissector/ws_dissector.exe")
     if not os.path.isfile("./mobile_insight/monitor/dm_collector/dm_collector_c.pyd"):
         urllib.urlretrieve (url+"dm_collector_c.pyd", "./mobile_insight/monitor/dm_collector/dm_collector_c.pyd")
 
-# Download necessary libraries
-if not os.path.exists("./libs"):
-    os.makedirs("./libs")
-if not os.path.exists("./ws_dissector"):
-    os.makedirs("./ws_dissector")
 
-print "Downloading libraries..."
+print "Building libraries..."
 
 if platform.system() == "Darwin":
     arch = platform.architecture()
@@ -82,16 +71,8 @@ if platform.system() == "Darwin":
         print "Unsupported operating system: " + str(arch)
         sys.exit()
 
-    url  = "http://metro.cs.ucla.edu/mobile_insight/libs/osx/libs/"
-    download_unix(url)
-
-    # libs = parse_libs(url, "dylib")
-    # download_libs(url, libs)
-
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
-    lib_list     = ["./libs/" + x for x in os.listdir("./libs/")]
-    DATA_FILES   = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ['ws_dissector/ws_dissector']),
-                 ('/usr/local/lib/', lib_list)]
+    DATA_FILES   = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ['ws_dissector/ws_dissector'])]
 
 elif platform.system() == "Linux":
     arch = platform.architecture()
@@ -105,16 +86,16 @@ elif platform.system() == "Linux":
         print "Unsupported operating system: " + str(arch)
         sys.exit()
 
-    # libs = parse_libs(url, "so")
-    # download_libs(url, libs)
-    download_unix(url)
-
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
-    lib_list     = ["./libs/" + x for x in os.listdir("./libs/")]
-    DATA_FILES   = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ['ws_dissector/ws_dissector']),
-                  ('/usr/local/lib/', lib_list)]
+    DATA_FILES   = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ['ws_dissector/ws_dissector'])]
 
 elif platform.system() == "Windows":
+    # Download necessary libraries
+    if not os.path.exists("./libs"):
+        os.makedirs("./libs")
+    if not os.path.exists("./ws_dissector"):
+        os.makedirs("./ws_dissector")
+
     arch = platform.architecture()
     if arch[0] == '32bit':
         url = "http://metro.cs.ucla.edu/mobile_insight/libs/win-32/libs/"
@@ -144,7 +125,7 @@ else:
 
 setup(
     name         = 'MobileInsight',
-    version      = '2.2.0',
+    version      = '2.2.1',
     description  = 'Mobile network monitoring and analysis',
     author       = 'UCLA WiNG group and OSU MSSN lab',
     url          = 'http://metro.cs.ucla.edu/mobile_insight',

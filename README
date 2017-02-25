@@ -25,16 +25,20 @@ Second, MobileInsight builds on top of `pyserial` and `crcmod`, so please instal
 
 Then download MobileInsight and unpack the code:
 
-    tar -zxvf MobileInsight-2.1.1.tar.gz
-    cd MobileInsight-2.1.1
+    tar -zxvf MobileInsight-2.2.1.tar.gz
+    cd MobileInsight-2.2.1
 
 For macOS users, install MobileInsight using:
 
     ./install-macos.sh
 
+For Linux users, install MobileInsight using:
+
+    ./install-ubuntu.sh
+
 It will automatically run an offline analysis example at the end.
 
-For Linux and Windows users, install MobileInsight using:
+For Windows users, install MobileInsight using:
 
     python setup.py install
 
