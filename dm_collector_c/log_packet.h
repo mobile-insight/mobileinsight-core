@@ -381,6 +381,37 @@ const Fmt LtePhyPdschDemapperConfigFmt_v23 [] = {
     {PLACEHOLDER, "Carrier Index", 0}
 };
 
+const Fmt LtePhyPdschDemapperConfigFmt_v104 [] = {
+    // TODO: just copy from v23.
+    {UINT, "Serving Cell ID", 1},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {UINT, "PDSCH RNTIl ID", 2},
+    {PLACEHOLDER, "PDSCH RNTI Type", 0},
+    {UINT, "Number of Tx Antennas(M)", 2},
+    {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
+    {PLACEHOLDER, "Spatial Rank", 0},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
+    {UINT, "Frequency Selective PMI", 1},   // right shift 1 bit, 2 bits
+    {PLACEHOLDER, "PMI Index", 0},  // 4 bits
+    {UINT, "Transmission Scheme", 1},   // 4 bits
+    {SKIP, NULL, 2},
+    // {UINT, "Transport Block Size Stream 0", 2},
+    {UINT, "TBS 0", 2},
+    // {UINT, "Modulation Stream 0", 2},
+    {UINT, "MCS 0", 2},
+    {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
+    // {UINT, "Transport Block Size Stream 1", 2},
+    {UINT, "TBS 1", 2},
+    // {UINT, "Modulation Stream 1", 2},
+    {UINT, "MCS 1", 2},
+    {PLACEHOLDER, "Carrier Index", 0},
+    {SKIP, NULL, 4},
+};
+
 const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
     {0, "QPSK"},
     {1, "16QAM"},
@@ -1071,6 +1102,13 @@ const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Basic [] = {
 const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Control [] = {
     {PLACEHOLDER, "cpt", 0},
 };
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN [] = {
+    {UINT, "NACK_SN", 2},
+};
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING [] = {
+    {UINT, "NACK_SN", 1},
+};
+
 const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_DATA [] = {
     {PLACEHOLDER, "RF", 0},
     {PLACEHOLDER, "P", 0},
@@ -1137,6 +1175,13 @@ const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Basic [] = {
 const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Control [] = {
     {PLACEHOLDER, "cpt", 0},
 };
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_NACK_ALLIGN [] = {
+    {UINT, "NACK_SN", 2},
+};
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_NACK_PADDING [] = {
+    {UINT, "NACK_SN", 1},
+};
+
 const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_DATA [] = {
     {PLACEHOLDER, "RF", 0},
     {PLACEHOLDER, "P", 0},

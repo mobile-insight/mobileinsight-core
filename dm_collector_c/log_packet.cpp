@@ -505,6 +505,117 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "(MI)Unknown");
             break;
         }
+    case 104:
+        {
+            offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v104,
+                                        ARRAY_SIZE(LtePhyPdschDemapperConfigFmt_v104, Fmt),
+                                        b, offset, length, result);
+
+            const unsigned int SFN_RSHIFT = 5, SFN_MASK = (1 << 10) - 1;
+            const unsigned int SUBFRAME_RSHIFT = 1, SUBFRAME_MASK = (1 << 4) - 1;
+            int tmp = _search_result_int(result, "System Frame Number");
+            int sfn = (tmp >> SFN_RSHIFT) & SFN_MASK;
+            int subframe = (tmp >> SUBFRAME_RSHIFT) & SUBFRAME_MASK;
+            int serv_cell = _search_result_int(result, "Serving Cell ID");
+            serv_cell += (tmp & 0x1) << 8;
+
+            PyObject *old_object = _replace_result_int(result, "Serving Cell ID", serv_cell);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "System Frame Number", sfn);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Subframe Number", subframe);
+            Py_DECREF(old_object);
+
+            // # antennas
+            tmp = _search_result_int(result, "Number of Tx Antennas(M)");
+            int iRNTIType = tmp & 15;
+            int iSpatialRank = (tmp >> 14) & 3;
+            tmp = (tmp >> 8) & 0x0f;
+            int M = tmp & 0x3;
+            M = (M != 3? (1 << M): -1);
+            int N = (tmp >> 2) & 0x1;
+            N = (1 << N);
+
+            old_object = _replace_result_int(result, "PDSCH RNTI Type", iRNTIType);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "PDSCH RNTI Type",
+                    ValueNameRNTIType,
+                    ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                    "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "Number of Tx Antennas(M)", M);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Number of Rx Antennas(N)", N);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Spatial Rank", iSpatialRank);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Spatial Rank",
+                    ValueNameRankIndex,
+                    ARRAY_SIZE(ValueNameRankIndex, ValueName),
+                    "(MI)Unknown");
+
+            tmp = _search_result_int(result, "Frequency Selective PMI");
+            int iFrequencySelectivePMI = (tmp >> 1) & 3;
+            int iPMIIndex = (tmp >> 4) & 15;
+            tmp = _search_result_int(result, "Transmission Scheme");
+            int iTransmissionScheme = tmp & 15;
+
+            old_object = _replace_result_int(result, "Frequency Selective PMI",
+                    iFrequencySelectivePMI);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Frequency Selective PMI",
+                    ValueNameFrequencySelectivePMI,
+                    ARRAY_SIZE(ValueNameFrequencySelectivePMI, ValueName),
+                    "(MI)Unknown");
+            old_object = _replace_result_int(result, "PMI Index", iPMIIndex);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Transmission Scheme",
+                    iTransmissionScheme);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Transmission Scheme",
+                    ValueNameTransmissionScheme,
+                    ARRAY_SIZE(ValueNameTransmissionScheme, ValueName),
+                    "(MI)Unknown");
+
+            // modulation & ratio
+            tmp = _search_result_int(result, "MCS 0");
+            int mod_stream0 = (tmp >> 1) & 0x3;
+            float ratio = float((tmp >> 3) & 0x1fff) / 256.0;
+            tmp = _search_result_int(result, "MCS 1");
+            int mod_stream1 = (tmp >> 1) & 0x3;
+            int carrier_index = (tmp >> 9) & 0xf;
+
+            old_object = _replace_result_int(result, "MCS 0", mod_stream0);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "MCS 0",
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
+                                            "(MI)Unknown");
+
+            PyObject *pyfloat = Py_BuildValue("f", ratio);
+            old_object = _replace_result(result, "Traffic to Pilot Ratio", pyfloat);
+            Py_DECREF(old_object);
+            Py_DECREF(pyfloat);
+
+            old_object = _replace_result_int(result, "MCS 1", mod_stream1);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "MCS 1",
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
+                                            "(MI)Unknown");
+
+            // carrier index
+            old_object = _replace_result_int(result, "Carrier Index", carrier_index);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "Carrier Index",
+                                            LtePhyPdschDemapperConfig_v23_Carrier_Index,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Carrier_Index, ValueName),
+                                            "(MI)Unknown");
+            break;
+        }
 
     default:
         printf("(MI)Unknown LTE PHY PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
@@ -1859,6 +1970,7 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                             std::string strAckSN = "ACK_SN = ";
                             int iAckSN = DCLookAhead * 64 + iNonDecodeSN/4;
                             strAckSN += SSTR(iAckSN);
+                            int iHeadFromPadding = (iNonDecodeSN & 1) * 512;
                             pystr = Py_BuildValue("s", strAckSN.c_str());
                             old_object = _replace_result(result_pdu_item,
                                     "SN", pystr);
@@ -1876,6 +1988,73 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                                     "cpt", pystr);
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
+
+                            if (iLoggedBytes > 0) {
+                                // Decode NACK
+                                int numNack = iLoggedBytes / 1.5;
+                                int iAllign = 0;
+                                int iHeadFromAllign = 0;
+
+                                PyObject *result_pdu_nack = PyList_New(0);
+                                for (int indexNack = 0; indexNack < numNack; indexNack++) {
+                                    PyObject *result_pdu_nack_item = PyList_New(0);
+                                    if (iAllign == 0) {
+                                        iAllign = 1;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN,
+                                                Fmt),
+                                                b, offset, length, result_pdu_nack_item);
+                                        iLoggedBytes -= 2;
+                                        int iNonDecodeNACK = _search_result_int(
+                                                result_pdu_nack_item, "NACK_SN");
+                                        int iPart3 = iNonDecodeNACK / 4096;
+                                        int iPart4 = (iNonDecodeNACK - iPart3 * 4096) / 256;
+                                        int iPart1 = (iNonDecodeNACK - iPart3 * 4096 - iPart4 * 256) / 16;
+                                        int iPart2 = iNonDecodeNACK - iPart3 * 4096 - iPart4 * 256 - iPart1 * 16;
+                                        int iNack = iPart1 * 32 + iPart2 * 2 + iPart3 / 8 + iHeadFromPadding;
+                                        iHeadFromAllign = iPart4 + (iPart3 & 1) * 16;
+                                        int iE2 = iPart3 & 2;
+                                        if (iE2 == 2) {
+                                            indexNack = numNack - 1;
+                                        }
+                                        old_object = _replace_result_int(
+                                                result_pdu_nack_item, "NACK_SN", iNack);
+                                        Py_DECREF(old_object);
+                                    } else {
+                                        iAllign = 0;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING,
+                                                Fmt),
+                                                b, offset, length, result_pdu_nack_item);
+                                        iLoggedBytes -= 1;
+                                        int iNonDecodeNACK = _search_result_int(
+                                                result_pdu_nack_item, "NACK_SN");
+                                        int iNack = iHeadFromAllign * 32 + iNonDecodeNACK / 8;
+                                        int iE2 = iNonDecodeNACK & 2;
+                                        if (iE2 == 2) {
+                                            indexNack = numNack - 1;
+                                        }
+                                        iHeadFromPadding = (iNonDecodeNACK & 1) * 512;
+                                        old_object = _replace_result_int(
+                                                result_pdu_nack_item, "NACK_SN", iNack);
+                                        Py_DECREF(old_object);
+                                    }
+                                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                            result_pdu_nack_item, "dict");
+                                    PyList_Append(result_pdu_nack, t3);
+                                    Py_DECREF(t3);
+                                    Py_DECREF(result_pdu_nack_item);
+                                }
+                                PyObject *t2 = Py_BuildValue("(sOs)", "RLC CTRL NACK",
+                                        result_pdu_nack, "list");
+                                PyList_Append(result_pdu_item, t2);
+                                Py_DECREF(t2);
+                                Py_DECREF(result_pdu_nack);
+                            }
                         } else {
                             // Type = DATA
                             pystr = Py_BuildValue("s", "RLCUL DATA");
@@ -2189,6 +2368,7 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                             std::string strAckSN = "ACK_SN = ";
                             int iAckSN = DCLookAhead * 64 + iNonDecodeSN/4;
                             strAckSN += SSTR(iAckSN);
+                            int iHeadFromPadding = (iNonDecodeSN & 1) * 512;
                             pystr = Py_BuildValue("s", strAckSN.c_str());
                             old_object = _replace_result(result_pdu_item,
                                     "SN", pystr);
@@ -2206,6 +2386,73 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                                     "cpt", pystr);
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
+
+                            if (iLoggedBytes > 0) {
+                                // Decode NACK
+                                int numNack = iLoggedBytes / 1.5;
+                                int iAllign = 0;
+                                int iHeadFromAllign = 0;
+
+                                PyObject *result_pdu_nack = PyList_New(0);
+                                for (int indexNack = 0; indexNack < numNack; indexNack++) {
+                                    PyObject *result_pdu_nack_item = PyList_New(0);
+                                    if (iAllign == 0) {
+                                        iAllign = 1;
+                                        offset += _decode_by_fmt(
+                                                LteRlcDlAmAllPdu_Subpkt_PDU_NACK_ALLIGN,
+                                                ARRAY_SIZE(
+                                                    LteRlcDlAmAllPdu_Subpkt_PDU_NACK_ALLIGN,
+                                                Fmt),
+                                                b, offset, length, result_pdu_nack_item);
+                                        iLoggedBytes -= 2;
+                                        int iNonDecodeNACK = _search_result_int(
+                                                result_pdu_nack_item, "NACK_SN");
+                                        int iPart3 = iNonDecodeNACK / 4096;
+                                        int iPart4 = (iNonDecodeNACK - iPart3 * 4096) / 256;
+                                        int iPart1 = (iNonDecodeNACK - iPart3 * 4096 - iPart4 * 256) / 16;
+                                        int iPart2 = iNonDecodeNACK - iPart3 * 4096 - iPart4 * 256 - iPart1 * 16;
+                                        int iNack = iPart1 * 32 + iPart2 * 2 + iPart3 / 8 + iHeadFromPadding;
+                                        iHeadFromAllign = iPart4 + (iPart3 & 1) * 16;
+                                        int iE2 = iPart3 & 2;
+                                        if (iE2 == 2) {
+                                            indexNack = numNack - 1;
+                                        }
+                                        old_object = _replace_result_int(
+                                                result_pdu_nack_item, "NACK_SN", iNack);
+                                        Py_DECREF(old_object);
+                                    } else {
+                                        iAllign = 0;
+                                        offset += _decode_by_fmt(
+                                                LteRlcDlAmAllPdu_Subpkt_PDU_NACK_PADDING,
+                                                ARRAY_SIZE(
+                                                    LteRlcDlAmAllPdu_Subpkt_PDU_NACK_PADDING,
+                                                Fmt),
+                                                b, offset, length, result_pdu_nack_item);
+                                        iLoggedBytes -= 1;
+                                        int iNonDecodeNACK = _search_result_int(
+                                                result_pdu_nack_item, "NACK_SN");
+                                        int iNack = iHeadFromAllign * 32 + iNonDecodeNACK / 8;
+                                        int iE2 = iNonDecodeNACK & 2;
+                                        if (iE2 == 2) {
+                                            indexNack = numNack - 1;
+                                        }
+                                        iHeadFromPadding = (iNonDecodeNACK & 1) * 512;
+                                        old_object = _replace_result_int(
+                                                result_pdu_nack_item, "NACK_SN", iNack);
+                                        Py_DECREF(old_object);
+                                    }
+                                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                            result_pdu_nack_item, "dict");
+                                    PyList_Append(result_pdu_nack, t3);
+                                    Py_DECREF(t3);
+                                    Py_DECREF(result_pdu_nack_item);
+                                }
+                                PyObject *t2 = Py_BuildValue("(sOs)", "RLC CTRL NACK",
+                                        result_pdu_nack, "list");
+                                PyList_Append(result_pdu_item, t2);
+                                Py_DECREF(t2);
+                                Py_DECREF(result_pdu_nack);
+                            }
                         } else {
                             // Type = DATA
                             pystr = Py_BuildValue("s", "RLCDL DATA");
