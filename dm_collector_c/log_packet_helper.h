@@ -269,7 +269,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 PyObject *delta = PyDelta_FromDSU(0, seconds, useconds);
                 decoded = PyNumber_Add(epoch, delta);
                 n_consumed += fmt[i].len;
-                Py_DECREF(epoch); 
+                Py_DECREF(epoch);
                 Py_DECREF(delta);
                 break;
             }

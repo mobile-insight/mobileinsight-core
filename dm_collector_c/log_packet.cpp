@@ -1176,35 +1176,106 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                     bool success = false;
                     PyObject *result_sample_list = PyList_New(0);
                     switch (subpkt_ver) {
-                    case 1: // UL Transport Block Subpacket V1
-                        for (int j = 0; j < subpkt_nsample; j++) {
-                            PyObject *result_subpkt_sample = PyList_New(0);
-                            offset += _decode_by_fmt(LteMacULTransportBlock_SubpktV1_SampleFmt,
-                                    ARRAY_SIZE(LteMacULTransportBlock_SubpktV1_SampleFmt, Fmt),
-                                    b, offset, length, result_subpkt_sample);
-                            (void) _map_result_field_to_name(
-                                    result_subpkt_sample,
-                                    "BSR event",
-                                    BSREvent,
-                                    ARRAY_SIZE(BSREvent, ValueName),
-                                    "(MI)Unknown");
-                            (void) _map_result_field_to_name(
-                                    result_subpkt_sample,
-                                    "BSR trig",
-                                    BSRTrig,
-                                    ARRAY_SIZE(BSRTrig, ValueName),
-                                    "(MI)Unknown");
-                            offset += (_search_result_int(result_subpkt_sample,
-                                        "HDR LEN") + 2);
-
-                            PyObject *t = Py_BuildValue("(sOs)",
-                                    "Ignored", result_subpkt_sample, "dict");
-                            PyList_Append(result_sample_list, t);
-                            Py_DECREF(result_subpkt_sample);
-                            Py_DECREF(t);
-                        }
-                        success = true;
-                        break;
+                        case 1:
+                            {
+                                // UL Transport Block Subpacket V1
+                                for (int j = 0; j < subpkt_nsample; j++) {
+                                    PyObject *result_subpkt_sample = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacULTransportBlock_SubpktV1_SampleFmt,
+                                            ARRAY_SIZE(LteMacULTransportBlock_SubpktV1_SampleFmt, Fmt),
+                                            b, offset, length, result_subpkt_sample);
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "BSR event",
+                                            BSREvent,
+                                            ARRAY_SIZE(BSREvent, ValueName),
+                                            "(MI)Unknown");
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "BSR trig",
+                                            BSRTrig,
+                                            ARRAY_SIZE(BSRTrig, ValueName),
+                                            "(MI)Unknown");
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "RNTI Type",
+                                            ValueNameRNTIType,
+                                            ARRAY_SIZE(ValueNameRNTIType,
+                                                ValueName),
+                                            "(MI)Unknown");
+                                    int temp = _search_result_int(
+                                            result_subpkt_sample, "Sub-FN");
+                                    int iSubFN = temp & 15; // 4 bits
+                                    int iSFN = (temp >> 4);
+                                    PyObject *old_object = _replace_result_int(
+                                            result_subpkt_sample,
+                                            "Sub-FN", iSubFN);
+                                    Py_DECREF(old_object);
+                                    old_object = _replace_result_int(
+                                            result_subpkt_sample,
+                                            "SFN", iSFN);
+                                    Py_DECREF(old_object);
+                                    offset += _search_result_int(result_subpkt_sample,
+                                                "HDR LEN");
+                                    PyObject *t = Py_BuildValue("(sOs)",
+                                            "Ignored", result_subpkt_sample, "dict");
+                                    PyList_Append(result_sample_list, t);
+                                    Py_DECREF(result_subpkt_sample);
+                                    Py_DECREF(t);
+                                }
+                                success = true;
+                                break;
+                            }
+                        case 2:
+                            {
+                                // UL Transport Block Subpacket V2
+                                for (int j = 0; j < subpkt_nsample; j++) {
+                                    PyObject *result_subpkt_sample = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacULTransportBlock_SubpktV2_SampleFmt,
+                                            ARRAY_SIZE(LteMacULTransportBlock_SubpktV2_SampleFmt, Fmt),
+                                            b, offset, length, result_subpkt_sample);
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "BSR event",
+                                            BSREvent,
+                                            ARRAY_SIZE(BSREvent, ValueName),
+                                            "(MI)Unknown");
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "BSR trig",
+                                            BSRTrig,
+                                            ARRAY_SIZE(BSRTrig, ValueName),
+                                            "(MI)Unknown");
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "RNTI Type",
+                                            ValueNameRNTIType,
+                                            ARRAY_SIZE(ValueNameRNTIType,
+                                                ValueName),
+                                            "(MI)Unknown");
+                                    int temp = _search_result_int(
+                                            result_subpkt_sample, "Sub-FN");
+                                    int iSubFN = temp & 15; // 4 bits
+                                    int iSFN = (temp >> 4);
+                                    PyObject *old_object = _replace_result_int(
+                                            result_subpkt_sample,
+                                            "Sub-FN", iSubFN);
+                                    Py_DECREF(old_object);
+                                    old_object = _replace_result_int(
+                                            result_subpkt_sample,
+                                            "SFN", iSFN);
+                                    Py_DECREF(old_object);
+                                    offset += _search_result_int(
+                                            result_subpkt_sample, "HDR LEN");
+                                    PyObject *t = Py_BuildValue("(sOs)",
+                                            "Ignored", result_subpkt_sample, "dict");
+                                    PyList_Append(result_sample_list, t);
+                                    Py_DECREF(result_subpkt_sample);
+                                    Py_DECREF(t);
+                                }
+                                success = true;
+                                break;
+                            }
                     default:
                         break;
                     }
@@ -1276,29 +1347,81 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                     bool success = false;
                     PyObject *result_sample_list = PyList_New(0);
                     switch (subpkt_ver) {
-                    case 2: // DL Transport Block Subpacket
-                        for (int j = 0; j < subpkt_nsample; j++) {
-                            PyObject *result_subpkt_sample = PyList_New(0);
-                            offset += _decode_by_fmt(LteMacDLTransportBlock_SubpktV2_SampleFmt,
-                                    ARRAY_SIZE(LteMacDLTransportBlock_SubpktV2_SampleFmt, Fmt),
-                                    b, offset, length, result_subpkt_sample);
-                            (void) _map_result_field_to_name(
-                                    result_subpkt_sample,
-                                    "RNTI Type",
-                                    RNTIType,
-                                    ARRAY_SIZE(RNTIType, ValueName),
-                                    "(MI)Unknown");
-                            offset += _search_result_int(result_subpkt_sample, "HDR LEN");
-
-                            PyObject *t = Py_BuildValue("(sOs)",
-                                    "Ignored",
-                                    result_subpkt_sample, "dict");
-                            PyList_Append(result_sample_list, t);
-                            Py_DECREF(result_subpkt_sample);
-                            Py_DECREF(t);
+                    case 2:
+                        {
+                            // DL Transport Block Subpacket
+                            for (int j = 0; j < subpkt_nsample; j++) {
+                                PyObject *result_subpkt_sample = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacDLTransportBlock_SubpktV2_SampleFmt,
+                                        ARRAY_SIZE(LteMacDLTransportBlock_SubpktV2_SampleFmt, Fmt),
+                                        b, offset, length, result_subpkt_sample);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt_sample,
+                                        "RNTI Type",
+                                        ValueNameRNTIType,
+                                        ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                                        "(MI)Unknown");
+                                int temp = _search_result_int(
+                                        result_subpkt_sample, "Sub-FN");
+                                int iSubFN = temp & 15; // 4 bits
+                                int iSFN = (temp >> 4);
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt_sample,
+                                        "Sub-FN", iSubFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt_sample,
+                                        "SFN", iSFN);
+                                Py_DECREF(old_object);
+                                offset += _search_result_int(result_subpkt_sample, "HDR LEN");
+                                PyObject *t = Py_BuildValue("(sOs)",
+                                        "Ignored",
+                                        result_subpkt_sample, "dict");
+                                PyList_Append(result_sample_list, t);
+                                Py_DECREF(result_subpkt_sample);
+                                Py_DECREF(t);
+                            }
+                            success = true;
+                            break;
                         }
-                        success = true;
-                        break;
+                    case 4:
+                        {
+                            // DL Transport Block Subpacket
+                            for (int j = 0; j < subpkt_nsample; j++) {
+                                PyObject *result_subpkt_sample = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacDLTransportBlock_SubpktV4_SampleFmt,
+                                        ARRAY_SIZE(LteMacDLTransportBlock_SubpktV4_SampleFmt, Fmt),
+                                        b, offset, length, result_subpkt_sample);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt_sample,
+                                        "RNTI Type",
+                                        ValueNameRNTIType,
+                                        ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                                        "(MI)Unknown");
+                                int temp = _search_result_int(
+                                        result_subpkt_sample, "Sub-FN");
+                                int iSubFN = temp & 15; // 4 bits
+                                int iSFN = (temp >> 4);
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt_sample,
+                                        "Sub-FN", iSubFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt_sample,
+                                        "SFN", iSFN);
+                                Py_DECREF(old_object);
+                                offset += _search_result_int(result_subpkt_sample, "HDR LEN");
+                                PyObject *t = Py_BuildValue("(sOs)",
+                                        "Ignored",
+                                        result_subpkt_sample, "dict");
+                                PyList_Append(result_sample_list, t);
+                                Py_DECREF(result_subpkt_sample);
+                                Py_DECREF(t);
+                            }
+                            success = true;
+                            break;
+                        }
+
                     default:
                         break;
                     }
@@ -4568,10 +4691,10 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
     offset = 0;
     offset += _decode_by_fmt(LogPacketHeaderFmt, ARRAY_SIZE(LogPacketHeaderFmt, Fmt),
                                 b, offset, length, result);
-    PyObject *old_result = result;
-    result = PyList_GetSlice(result, 1, 4); // remove the duplicate "len1" field
-    Py_DECREF(old_result);
-    old_result = NULL;
+    // PyObject *old_result = result;
+    // result = PyList_GetSlice(result, 1, 4); // remove the duplicate "len1" field
+    // Py_DECREF(old_result);
+    // old_result = NULL;
 
     // Differentiate using type ID
     LogPacketType type_id = (LogPacketType) _map_result_field_to_name(

@@ -34,7 +34,7 @@ struct Fmt {
 };
 
 const Fmt LogPacketHeaderFmt [] = {
-    {UINT, "len1", 2},
+    {SKIP, NULL, 2},
     {UINT, "log_msg_len", 2},
     {UINT, "type_id", 2},
     {QCDM_TIMESTAMP, "timestamp", 8}
@@ -805,21 +805,36 @@ const Fmt LteMacULTransportBlock_SubpktHeaderFmt [] = {
     {UINT, "Version", 1},
     {UINT, "SubPacket Size", 2},
     {UINT, "Num Samples", 1},
-    {SKIP, "NULL", 2}
 };
 
 const Fmt LteMacULTransportBlock_SubpktV1_SampleFmt [] = {
-    {SKIP, "SFN and Sub-FN", 2}, // not byte aligned
-    // QCAT show "RNTI Type" and "HARQ ID" before Grant, but there's no corresponding hex data
+    {UINT, "HARQ ID", 1},
+    {UINT, "RNTI Type", 1},
+    {UINT, "Sub-FN", 2},    // 4 bits
+    {PLACEHOLDER, "SFN", 0},
     {UINT, "Grant (bytes)", 2},
     {UINT, "RLC PDUs", 1},
     {UINT, "Padding (bytes)", 2},
     {UINT, "BSR event", 1},
     {UINT, "BSR trig", 1},
     {UINT, "HDR LEN", 1},
-    // 
-    //{SKIP, "Mac Hdr + CE", 5}, // a flexible length field of Hex value in "Mac Hdr + CE", observed 5 or 7
-    //{SKIP, "NULL", 2}
+    // Mac Hdr + CE and UL TB Other Structure
+};
+
+const Fmt LteMacULTransportBlock_SubpktV2_SampleFmt [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Cell Id", 1},
+    {UINT, "HARQ ID", 1},
+    {UINT, "RNTI Type", 1},
+    {UINT, "Sub-FN", 2},    // 4 bits
+    {PLACEHOLDER, "SFN", 0},
+    {UINT, "Grant (bytes)", 2},
+    {UINT, "RLC PDUs", 1},
+    {UINT, "Padding (bytes)", 2},
+    {UINT, "BSR event", 1},
+    {UINT, "BSR trig", 1},
+    {UINT, "HDR LEN", 1},
+    // Mac Hdr + CE and UL TB Other Structure
 };
 
 // ----------------------------------------------------------
@@ -847,18 +862,33 @@ const Fmt LteMacDLTransportBlock_SubpktHeaderFmt [] = {
 };
 
 const Fmt LteMacDLTransportBlock_SubpktV2_SampleFmt [] = {
-    {SKIP, "SFN and Sub-FN", 2}, // not byte aligned
+    {UINT, "Sub-FN", 2},
+    {PLACEHOLDER, "SFN", 0},
     {UINT, "RNTI Type", 1},
     {UINT, "HARQ ID", 1},
-    {SKIP, "Area ID & PMCH ID", 2},
+    {PLACEHOLDER, "Area ID", 0},
+    {UINT, "PMCH ID", 2},
     {UINT, "DL TBS (bytes)", 2},
     {UINT, "RLC PDUs", 1},
-    // QCAT shows a "EMBMS PDUs" but there's no corresponding hex data
     {UINT, "Padding (bytes)", 2},
     {UINT, "HDR LEN", 1},
-    //
-    //{SKIP, "Mac Hdr + CE", 5}, // a flexible length field of Hex value in "Mac Hdr + CE", observed 5 or 7
-    //{SKIP, "NULL", 2}
+    // Mac Hdr + CE and UL TB Other Structure
+};
+
+const Fmt LteMacDLTransportBlock_SubpktV4_SampleFmt [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Cell Id", 1},
+    {UINT, "Sub-FN", 2},
+    {PLACEHOLDER, "SFN", 0},
+    {UINT, "RNTI Type", 1},
+    {UINT, "HARQ ID", 1},
+    {PLACEHOLDER, "Area ID", 0},
+    {UINT, "PMCH ID", 2},
+    {UINT, "DL TBS (bytes)", 2},
+    {UINT, "RLC PDUs", 1},
+    {UINT, "Padding (bytes)", 2},
+    {UINT, "HDR LEN", 1},
+    // Mac Hdr + CE and UL TB Other Structure
 };
 
 // ----------------------------------------------------------
