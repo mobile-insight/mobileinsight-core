@@ -749,7 +749,7 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 int subpkt_id = _search_result_int(result_subpkt, "SubPacket ID");
-                int subpkt_ver = _search_result_int(result_subpkt, "Version");
+                int subpkt_ver = _search_result_int(result_subpkt, "SubPacket Version");
                 const char *type_name = search_name(LtePhySubpkt_SubpktType,
                                                     ARRAY_SIZE(LtePhySubpkt_SubpktType, ValueName),
                                                     subpkt_id);
@@ -760,15 +760,167 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                     if (strcmp(type_name, "Serving_Cell_Measurement_Result") == 0) {
                         switch (subpkt_ver) {
                         case 4:
-                            offset += _decode_by_fmt(LtePhySubpktFmt_v1_Scmr_v4,
-                                                    ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v4, Fmt),
-                                                    b, offset, length, result_subpkt);
-                            success = true;
-                            break;
-                        // case 19:
-                        //     offset += _decode_by_fmt(LtePhySubpktFmt_v1_Scmr_v19,
-                        //                             ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v19, Fmt),
-                        //                             b, offset, length, result_subpkt);
+                            {
+                                offset += _decode_by_fmt(
+                                        LtePhySubpktFmt_v1_Scmr_v4,
+                                        ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v4,
+                                            Fmt),
+                                        b, offset, length, result_subpkt);
+                                success = true;
+                                break;
+                            }
+                        case 19:
+                            {
+                                offset += _decode_by_fmt(
+                                        LtePhySubpktFmt_v1_Scmr_v19,
+                                        ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v19,
+                                            Fmt),
+                                        b, offset, length, result_subpkt);
+                                int temp = _search_result_int(result_subpkt,
+                                        "Physical Cell ID");
+                                int iPhyCellId = temp & 1023;   // 10 bits
+                                int iServingCellIdx = (temp >> 10) & 3; // 2 bits
+                                int iIsServingCell = (temp >> 12) & 1;  // 1 bit
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Physical Cell ID", iPhyCellId);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Serving Cell Index", iServingCellIdx);
+                                Py_DECREF(old_object);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt,
+                                        "Serving Cell Index",
+                                        ValueNameCellIndex,
+                                        ARRAY_SIZE(ValueNameCellIndex,
+                                            ValueName),
+                                        "(MI)Unknown");
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Is Serving Cell", iIsServingCell);
+                                Py_DECREF(old_object);
+
+                                temp = _search_result_int(result_subpkt,
+                                        "Current SFN");
+                                int iSysFN = temp & 1023;   // 10 bits
+                                int iSubFN = (temp >> 10) & 15; // 4 bits
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current SFN", iSysFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current Subframe Number", iSubFN);
+                                Py_DECREF(old_object);
+
+                                unsigned int utemp = _search_result_uint(
+                                        result_subpkt, "RSRP");
+                                float RSRP = float((utemp >> 12) & 4095);
+                                RSRP = RSRP * 0.0625 - 180.0;
+                                PyObject *pyfloat = Py_BuildValue("f", RSRP);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSRQ");
+                                float RSRQ = float((utemp >> 20) & 1023);
+                                RSRQ = RSRQ * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSSI");
+                                float RSSI = float(utemp & 2047);
+                                RSSI = RSSI * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                success = true;
+                                break;
+                            }
+                        case 22:
+                            {
+                                offset += _decode_by_fmt(
+                                        LtePhySubpktFmt_v1_Scmr_v22,
+                                        ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v22,
+                                            Fmt),
+                                        b, offset, length, result_subpkt);
+                                int temp = _search_result_int(result_subpkt,
+                                        "Physical Cell ID");
+                                int iPhyCellId = temp & 1023;   // 10 bits
+                                int iServingCellIdx = (temp >> 10) & 3; // 2 bits
+                                int iIsServingCell = (temp >> 12) & 1;  // 1 bit
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Physical Cell ID", iPhyCellId);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Serving Cell Index", iServingCellIdx);
+                                Py_DECREF(old_object);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt,
+                                        "Serving Cell Index",
+                                        ValueNameCellIndex,
+                                        ARRAY_SIZE(ValueNameCellIndex,
+                                            ValueName),
+                                        "(MI)Unknown");
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Is Serving Cell", iIsServingCell);
+                                Py_DECREF(old_object);
+
+                                temp = _search_result_int(result_subpkt,
+                                        "Current SFN");
+                                int iSysFN = temp & 1023;   // 10 bits
+                                int iSubFN = (temp >> 10) & 15; // 4 bits
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current SFN", iSysFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current Subframe Number", iSubFN);
+                                Py_DECREF(old_object);
+
+                                unsigned int utemp = _search_result_uint(
+                                        result_subpkt, "RSRP");
+                                float RSRP = float((utemp >> 12) & 4095);
+                                RSRP = RSRP * 0.0625 - 180.0;
+                                PyObject *pyfloat = Py_BuildValue("f", RSRP);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSRQ");
+                                float RSRQ = float((utemp >> 10) & 1023);
+                                RSRQ = RSRQ * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSSI");
+                                float RSSI = float(utemp & 2047);
+                                RSSI = RSSI * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                success = true;
+                                break;
+                            }
                         default:
                             break;
                         }
@@ -781,7 +933,7 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        // printf("(MI)Unknown LTE PHY Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        printf("(MI)Unknown LTE PHY Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
             }

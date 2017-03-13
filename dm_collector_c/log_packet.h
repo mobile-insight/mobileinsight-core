@@ -499,7 +499,7 @@ const Fmt LtePhySubpktFmt [] = {
 
 const Fmt LtePhySubpktFmt_v1_SubpktHeader [] = {
     {UINT, "SubPacket ID", 1},
-    {UINT, "Version", 1},
+    {UINT, "SubPacket Version", 1},
     {UINT, "SubPacket Size", 2},
 };
 
@@ -517,13 +517,38 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v19 [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Num-of-cells", 2},
     {SKIP, NULL, 2},
+    {UINT, "Physical Cell ID", 2},  // 10 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 2 bits
+    {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 16},
+    {UINT, "RSRP", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {SKIP, NULL, 4},
+    {UINT, "RSRQ", 4},    // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {SKIP, NULL, 4},
+    {UINT, "RSSI", 4},    // then 11 bits, (0.0625 * x - 110) dBm
+};
 
-    {UINT, "Physical Cell ID", 2},
-    {SKIP, NULL, 2}, 
-    {UINT, "Current subframe", 2},
-    {SKIP, NULL, 2}, 
-    {SKIP, NULL, 9},    //Cell timing [1]
-    {RSRP, "RSRP", 2}
+const Fmt LtePhySubpktFmt_v1_Scmr_v22 [] = {
+    {UINT, "E-ARFCN", 4},
+    {UINT, "Num-of-cells", 2},
+    {SKIP, NULL, 2},
+    {UINT, "Physical Cell ID", 2},  // 10 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 2 bits
+    {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 20},
+    {UINT, "RSRP", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {SKIP, NULL, 8},
+    {UINT, "RSRQ", 4},    // skip 10 bits, then 10 bits, (0.0625 * x - 30) dB
+    {SKIP, NULL, 8},
+    {UINT, "RSSI", 4},    // then 11 bits, (0.0625 * x - 110) dBm
 };
 
 // ------------------------------------------------------------
