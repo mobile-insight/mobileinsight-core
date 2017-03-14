@@ -517,8 +517,8 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v19 [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Num-of-cells", 2},
     {SKIP, NULL, 2},
-    {UINT, "Physical Cell ID", 2},  // 10 bits
-    {PLACEHOLDER, "Serving Cell Index", 0},    // 2 bits
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
     {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
     {SKIP, NULL, 2},
     {UINT, "Current SFN", 2},   // 10 bits
@@ -536,8 +536,8 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v22 [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Num-of-cells", 2},
     {SKIP, NULL, 2},
-    {UINT, "Physical Cell ID", 2},  // 10 bits
-    {PLACEHOLDER, "Serving Cell Index", 0},    // 2 bits
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
     {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
     {SKIP, NULL, 2},
     {UINT, "Current SFN", 2},   // 10 bits

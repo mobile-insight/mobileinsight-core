@@ -54,10 +54,6 @@ const Fmt LtePdschStatIndication_Record_v5_P1 [] = {
     {UINT, "Serving Cell Index", 1},
 };
 
-const ValueName LtePdschStatIndication_Record_ServingCellIndex [] = {
-    {0, "PCell"},
-};
-
 const Fmt LtePdschStatIndication_Record_TB_v24 [] = {
     {UINT, "HARQ ID", 1},   // 4 bits
     {PLACEHOLDER, "RV", 0}, // 2 bits
@@ -189,9 +185,8 @@ static int _decode_lte_pdsch_stat_indication_payload (const char *b,
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item,
                         "Serving Cell Index",
-                        LtePdschStatIndication_Record_ServingCellIndex,
-                        ARRAY_SIZE(LtePdschStatIndication_Record_ServingCellIndex,
-                            ValueName),
+                        ValueNameCellIndex,
+                        ARRAY_SIZE(ValueNameCellIndex, ValueName),
                         "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "HSIC Enabled", iHSICEnabled);
@@ -347,9 +342,8 @@ static int _decode_lte_pdsch_stat_indication_payload (const char *b,
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item,
                         "Serving Cell Index",
-                        LtePdschStatIndication_Record_ServingCellIndex,
-                        ARRAY_SIZE(LtePdschStatIndication_Record_ServingCellIndex,
-                            ValueName),
+                        ValueNameCellIndex,
+                        ARRAY_SIZE(ValueNameCellIndex, ValueName),
                         "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "HSIC Enabled", iHSICEnabled);
@@ -497,9 +491,8 @@ static int _decode_lte_pdsch_stat_indication_payload (const char *b,
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item,
                         "Serving Cell Index",
-                        LtePdschStatIndication_Record_ServingCellIndex,
-                        ARRAY_SIZE(LtePdschStatIndication_Record_ServingCellIndex,
-                            ValueName),
+                        ValueNameCellIndex,
+                        ARRAY_SIZE(ValueNameCellIndex, ValueName),
                         "(MI)Unknown");
                 int num_TB = _search_result_int(result_record_item,
                         "Num Transport Blocks Present");
