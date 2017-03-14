@@ -855,7 +855,7 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                                 int temp = _search_result_int(result_subpkt,
                                         "Physical Cell ID");
                                 int iPhyCellId = temp & 511;   // 9 bits
-                                int iServingCellIdx = (temp >> 10) & 7; // 3 bits
+                                int iServingCellIdx = (temp >> 9) & 7; // 3 bits
                                 int iIsServingCell = (temp >> 12) & 1;  // 1 bit
                                 PyObject *old_object = _replace_result_int(
                                         result_subpkt,
