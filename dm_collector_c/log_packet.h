@@ -524,12 +524,24 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v19 [] = {
     {UINT, "Current SFN", 2},   // 10 bits
     {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
     {SKIP, NULL, 2},
-    {SKIP, NULL, 16},
+    {SKIP, NULL, 4},    // Is Restricted, Cell Timing [0]
+    {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN[0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
     {UINT, "RSRP", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
-    {SKIP, NULL, 4},
-    {UINT, "RSRQ", 4},    // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
-    {SKIP, NULL, 4},
-    {UINT, "RSSI", 4},    // then 11 bits, (0.0625 * x - 110) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
+    {PLACEHOLDER, "RSRQ", 0},   // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
+    {UINT, "RSSI", 4},    // 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 12},
+    {UINT, "Projected SIR", 4}, // Projected Sir, if x & 1<<31: x -= 4294967296
+                                // x /= 16
+    {UINT, "Post IC RSRQ", 4},  // (0.0625 * x - 30) dB
 };
 
 const Fmt LtePhySubpktFmt_v1_Scmr_v22 [] = {
@@ -543,12 +555,28 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v22 [] = {
     {UINT, "Current SFN", 2},   // 10 bits
     {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
     {SKIP, NULL, 2},
-    {SKIP, NULL, 20},
+    {SKIP, NULL, 4},    // Cell Timing [0]
+    {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN [0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {SKIP, NULL, 4},
     {UINT, "RSRP", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
-    {SKIP, NULL, 8},
+    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
     {UINT, "RSRQ", 4},    // skip 10 bits, then 10 bits, (0.0625 * x - 30) dB
-    {SKIP, NULL, 8},
+    {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
+    {SKIP, NULL, 4},
     {UINT, "RSSI", 4},    // then 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 16},
+    {UINT, "Projected SIR", 4}, // Projected Sir, if x & 1<<31: x -= 4294967296
+                                // x /= 16
+    {UINT, "Post IC RSRQ", 4},  // (0.0625 * x - 30) dB
+    {UINT, "CINR Rx[0]", 4},
+    {UINT, "CINR Rx[1]", 4},
 };
 
 // ------------------------------------------------------------
