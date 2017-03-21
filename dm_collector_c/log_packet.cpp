@@ -1040,7 +1040,7 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                                 Py_DECREF(old_object);
                                 Py_DECREF(pyfloat);
 
-                                float RSRQ = float((utemp >> 20) & 1023);
+                                float RSRQ = float((utemp >> 10) & 1023);
                                 RSRQ = RSRQ * 0.0625 - 30.0;
                                 pyfloat = Py_BuildValue("f", RSRQ);
                                 old_object = _replace_result(result_subpkt,
