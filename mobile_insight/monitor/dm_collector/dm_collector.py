@@ -128,7 +128,7 @@ class DMCollector(Monitor):
             # Open COM ports
             phy_ser = serial.Serial(self.phy_ser_name,
                                     baudrate=self.phy_baudrate,
-                                    timeout=.5)
+                                    timeout=.5, rtscts=True, dsrdtr=True)
             # phy_ser = open("hahaha.txt", "r+b")
 
             # Disable logs
