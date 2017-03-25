@@ -34,7 +34,7 @@ struct Fmt {
 };
 
 const Fmt LogPacketHeaderFmt [] = {
-    {UINT, "len1", 2},
+    {SKIP, NULL, 2},
     {UINT, "log_msg_len", 2},
     {UINT, "type_id", 2},
     {QCDM_TIMESTAMP, "timestamp", 8}
@@ -381,6 +381,37 @@ const Fmt LtePhyPdschDemapperConfigFmt_v23 [] = {
     {PLACEHOLDER, "Carrier Index", 0}
 };
 
+const Fmt LtePhyPdschDemapperConfigFmt_v104 [] = {
+    // TODO: just copy from v23.
+    {UINT, "Serving Cell ID", 1},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {UINT, "PDSCH RNTIl ID", 2},
+    {PLACEHOLDER, "PDSCH RNTI Type", 0},
+    {UINT, "Number of Tx Antennas(M)", 2},
+    {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
+    {PLACEHOLDER, "Spatial Rank", 0},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
+    {UINT, "Frequency Selective PMI", 1},   // right shift 1 bit, 2 bits
+    {PLACEHOLDER, "PMI Index", 0},  // 4 bits
+    {UINT, "Transmission Scheme", 1},   // 4 bits
+    {SKIP, NULL, 2},
+    // {UINT, "Transport Block Size Stream 0", 2},
+    {UINT, "TBS 0", 2},
+    // {UINT, "Modulation Stream 0", 2},
+    {UINT, "MCS 0", 2},
+    {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
+    // {UINT, "Transport Block Size Stream 1", 2},
+    {UINT, "TBS 1", 2},
+    // {UINT, "Modulation Stream 1", 2},
+    {UINT, "MCS 1", 2},
+    {PLACEHOLDER, "Carrier Index", 0},
+    {SKIP, NULL, 4},
+};
+
 const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
     {0, "QPSK"},
     {1, "16QAM"},
@@ -468,7 +499,7 @@ const Fmt LtePhySubpktFmt [] = {
 
 const Fmt LtePhySubpktFmt_v1_SubpktHeader [] = {
     {UINT, "SubPacket ID", 1},
-    {UINT, "Version", 1},
+    {UINT, "SubPacket Version", 1},
     {UINT, "SubPacket Size", 2},
 };
 
@@ -486,13 +517,66 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v19 [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Num-of-cells", 2},
     {SKIP, NULL, 2},
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 4},    // Is Restricted, Cell Timing [0]
+    {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN[0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
+    {PLACEHOLDER, "RSRQ", 0},   // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
+    {UINT, "RSSI", 4},    // 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 12},
+    {UINT, "Projected SIR", 4}, // Projected Sir, if x & 1<<31: x -= 4294967296
+                                // x /= 16
+    {UINT, "Post IC RSRQ", 4},  // (0.0625 * x - 30) dB
+};
 
-    {UINT, "Physical Cell ID", 2},
-    {SKIP, NULL, 2}, 
-    {UINT, "Current subframe", 2},
-    {SKIP, NULL, 2}, 
-    {SKIP, NULL, 9},    //Cell timing [1]
-    {RSRP, "RSRP", 2}
+const Fmt LtePhySubpktFmt_v1_Scmr_v22 [] = {
+    {UINT, "E-ARFCN", 4},
+    {UINT, "Num-of-cells", 2},
+    {SKIP, NULL, 2},
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 4},    // Cell Timing [0]
+    {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN [0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {SKIP, NULL, 4},
+    {UINT, "RSRP", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
+    {UINT, "RSRQ", 4},    // skip 10 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
+    {SKIP, NULL, 4},
+    {UINT, "RSSI", 4},    // then 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 16},
+    {UINT, "Projected SIR", 4}, // Projected Sir, if x & 1<<31: x -= 4294967296
+                                // x /= 16
+    {UINT, "Post IC RSRQ", 4},  // (0.0625 * x - 30) dB
+    {UINT, "CINR Rx[0]", 4},
+    {UINT, "CINR Rx[1]", 4},
 };
 
 // ------------------------------------------------------------
@@ -774,21 +858,36 @@ const Fmt LteMacULTransportBlock_SubpktHeaderFmt [] = {
     {UINT, "Version", 1},
     {UINT, "SubPacket Size", 2},
     {UINT, "Num Samples", 1},
-    {SKIP, "NULL", 2}
 };
 
 const Fmt LteMacULTransportBlock_SubpktV1_SampleFmt [] = {
-    {SKIP, "SFN and Sub-FN", 2}, // not byte aligned
-    // QCAT show "RNTI Type" and "HARQ ID" before Grant, but there's no corresponding hex data
+    {UINT, "HARQ ID", 1},
+    {UINT, "RNTI Type", 1},
+    {UINT, "Sub-FN", 2},    // 4 bits
+    {PLACEHOLDER, "SFN", 0},
     {UINT, "Grant (bytes)", 2},
     {UINT, "RLC PDUs", 1},
     {UINT, "Padding (bytes)", 2},
     {UINT, "BSR event", 1},
     {UINT, "BSR trig", 1},
     {UINT, "HDR LEN", 1},
-    // 
-    //{SKIP, "Mac Hdr + CE", 5}, // a flexible length field of Hex value in "Mac Hdr + CE", observed 5 or 7
-    //{SKIP, "NULL", 2}
+    // Mac Hdr + CE and UL TB Other Structure
+};
+
+const Fmt LteMacULTransportBlock_SubpktV2_SampleFmt [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Cell Id", 1},
+    {UINT, "HARQ ID", 1},
+    {UINT, "RNTI Type", 1},
+    {UINT, "Sub-FN", 2},    // 4 bits
+    {PLACEHOLDER, "SFN", 0},
+    {UINT, "Grant (bytes)", 2},
+    {UINT, "RLC PDUs", 1},
+    {UINT, "Padding (bytes)", 2},
+    {UINT, "BSR event", 1},
+    {UINT, "BSR trig", 1},
+    {UINT, "HDR LEN", 1},
+    // Mac Hdr + CE and UL TB Other Structure
 };
 
 // ----------------------------------------------------------
@@ -816,18 +915,33 @@ const Fmt LteMacDLTransportBlock_SubpktHeaderFmt [] = {
 };
 
 const Fmt LteMacDLTransportBlock_SubpktV2_SampleFmt [] = {
-    {SKIP, "SFN and Sub-FN", 2}, // not byte aligned
+    {UINT, "Sub-FN", 2},
+    {PLACEHOLDER, "SFN", 0},
     {UINT, "RNTI Type", 1},
     {UINT, "HARQ ID", 1},
-    {SKIP, "Area ID & PMCH ID", 2},
+    {PLACEHOLDER, "Area ID", 0},
+    {UINT, "PMCH ID", 2},
     {UINT, "DL TBS (bytes)", 2},
     {UINT, "RLC PDUs", 1},
-    // QCAT shows a "EMBMS PDUs" but there's no corresponding hex data
     {UINT, "Padding (bytes)", 2},
     {UINT, "HDR LEN", 1},
-    //
-    //{SKIP, "Mac Hdr + CE", 5}, // a flexible length field of Hex value in "Mac Hdr + CE", observed 5 or 7
-    //{SKIP, "NULL", 2}
+    // Mac Hdr + CE and UL TB Other Structure
+};
+
+const Fmt LteMacDLTransportBlock_SubpktV4_SampleFmt [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Cell Id", 1},
+    {UINT, "Sub-FN", 2},
+    {PLACEHOLDER, "SFN", 0},
+    {UINT, "RNTI Type", 1},
+    {UINT, "HARQ ID", 1},
+    {PLACEHOLDER, "Area ID", 0},
+    {UINT, "PMCH ID", 2},
+    {UINT, "DL TBS (bytes)", 2},
+    {UINT, "RLC PDUs", 1},
+    {UINT, "Padding (bytes)", 2},
+    {UINT, "HDR LEN", 1},
+    // Mac Hdr + CE and UL TB Other Structure
 };
 
 // ----------------------------------------------------------
@@ -1071,6 +1185,13 @@ const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Basic [] = {
 const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Control [] = {
     {PLACEHOLDER, "cpt", 0},
 };
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN [] = {
+    {UINT, "NACK_SN", 2},
+};
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING [] = {
+    {UINT, "NACK_SN", 1},
+};
+
 const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_DATA [] = {
     {PLACEHOLDER, "RF", 0},
     {PLACEHOLDER, "P", 0},
@@ -1137,6 +1258,13 @@ const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Basic [] = {
 const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Control [] = {
     {PLACEHOLDER, "cpt", 0},
 };
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_NACK_ALLIGN [] = {
+    {UINT, "NACK_SN", 2},
+};
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_NACK_PADDING [] = {
+    {UINT, "NACK_SN", 1},
+};
+
 const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_DATA [] = {
     {PLACEHOLDER, "RF", 0},
     {PLACEHOLDER, "P", 0},
