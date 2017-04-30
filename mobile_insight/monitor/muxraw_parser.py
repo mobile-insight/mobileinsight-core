@@ -8,6 +8,37 @@ import struct
 import sys
 import commands
 
+is_android=False
+try:
+    from jnius import autoclass #For Android
+    try:
+        service_context = autoclass('org.renpy.android.PythonService').mService
+        if not service_context:
+            service_context = cast("android.app.Activity",
+                            autoclass("org.renpy.android.PythonActivity").mActivity)
+    except Exception, e:
+        service_context = cast("android.app.Activity",
+                            autoclass("org.renpy.android.PythonActivity").mActivity)
+
+    is_android=True
+except Exception, e:
+    #not used, but bugs may exist on laptop
+    is_android=False
+
+ANDROID_SHELL = "/system/bin/sh"
+
+def get_cache_dir():
+    if is_android:
+        return str(service_context.getCacheDir().getAbsolutePath())
+    else:
+        return ""
+
+def get_files_dir():
+    if is_android:
+        return str(service_context.getFilesDir().getAbsolutePath())
+    else:
+        return ""
+
 #RRC_PAGING_TYPE1 = ['0x8b', '0x3', '0x0', '0x0']
 LTE_BCCH_BCH	= ['0xbc', '0x2', '0x0', '0x0']
 LTE_BCCH_DL_SCH	= ['0xbd', '0x2', '0x0', '0x0']
@@ -82,6 +113,13 @@ def decode(raw_msg):
     print "raw_msg: " + raw_msg
     msg =  "\\" + "\\".join([j[1:] for j in raw_msg[0]])
     print "msg: " + msg
+
+    """
+    FIXME: Replace the following ws_dissector with: 
+
+        libs_path = os.path.join(get_files_dir(),"data")
+        ws_dissector_path = os.path.join(libs_path,"android_pie_ws_dissector")
+    """
     return_code, output = commands.getstatusoutput("echo -ne " + msg +" | ~/mobileInsight/automator/ws_dissector/ws_dissector ")
     # FIXME: to be replaced with real message type ID
     return "LTE_RRC_OTA_Packet",output
