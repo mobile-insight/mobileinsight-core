@@ -79,8 +79,11 @@ class AndroidMuxrawMonitor(Monitor):
         self._read_latency = []
 
         libs_path = os.path.join(get_files_dir(),"data")
-        # libs_path = "./data"
+        ws_dissector_path = os.path.join(libs_path,"android_pie_ws_dissector")
+        self.libs_path = libs_path
+        self.ws_dissector_path = ws_dissector_path
         self._executable_path = os.path.join(libs_path,"diag_revealer_mtk")
+
         prefs={"ws_dissect_executable_path": os.path.join(libs_path,"android_pie_ws_dissector"),
             "libwireshark_path": libs_path}
         DMLogPacket.init(prefs)  # ???
@@ -167,38 +170,19 @@ class AndroidMuxrawMonitor(Monitor):
     def _run_shell_cmd(self, cmd, wait = False):
         p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         res,err = p.communicate(cmd+'\n')
-        # p.stdin.write(cmd+'\n')
         if wait:
             p.wait()
-            # return p.returncode
+            # return p.stdout
             return res
         else:
             # return None
             return res
 
     def _start_collection(self, log_directory):
-        # self._run_shell_cmd("diag_mdlog_mtk -start")
         cmd = "%s %s " % (self._executable_path, "-start")
         self._run_shell_cmd(cmd)
 
     def _stop_collection(self, wait=False):
-        # # Find diag_mdlog process
-        # diag_procs = []
-        # pids = [pid for pid in os.listdir("/proc") if pid.isdigit()]
-        # for pid in pids:
-        #     try:
-        #         cmdline = open(os.path.join("/proc", pid, "cmdline"), "rb").read()
-        #         if cmdline.startswith("diag_mdlog"):
-        #             diag_procs.append(int(pid))
-        #     except IOError:     # proc has been terminated
-        #         continue
-        #
-        # if len(diag_procs) > 0:
-        #     # self._run_shell_cmd("su -c kill " + " ".join([str(pid) for pid in diag_procs]),
-        #     #                     wait=wait)
-        #     self._run_shell_cmd("kill " + " ".join([str(pid) for pid in diag_procs]),
-        #                         wait=wait)
-        # self._run_shell_cmd("diag_mdlog_mtk -stop")
         cmd = "%s %s " % (self._executable_path, "-stop")
         self._run_shell_cmd(cmd)
 
@@ -246,8 +230,7 @@ class AndroidMuxrawMonitor(Monitor):
         """
         Return final position.
         """
-        BLOCK_SIZE = 64
-
+        BLOCK_SIZE = 128
         f.seek(cur_pos, 0)
         while True:
             t1 = timeit.default_timer()
@@ -262,7 +245,7 @@ class AndroidMuxrawMonitor(Monitor):
             #                                             True,   # include_timestamp
             #                                             )
             ######################################
-            decoded = muxraw_parser.feed_binary(s)
+            decoded = muxraw_parser.feed_binary(self, s) # self for debug
             # decoded = muxraw_parser.receive_log_packet(self._skip_decoding,
             #                                             True   # include_timestamp
             #                                             )
@@ -285,16 +268,17 @@ class AndroidMuxrawMonitor(Monitor):
 
                     ##############################################
                     for msg in decoded:
-                        typeid, xml = muxraw_parser.decode(msg)
+                        typeid, msgstr = muxraw_parser.decode(self, msg) #self for debug
+                        packet = DMLogPacket([(None, msgstr, typeid)])
+
                         event = Event(  timeit.default_timer(),
                                         typeid,
-                                        xml)
+                                        packet)
                         self.send(event)
                     ##############################################
 
                 except FormatError, e:
-                    # skip this packet
-                    print "FormatError: ", e
+                    print "FormatError: ", e # skip this packet
         return f.tell()
 
     def _parse_muxraws(self, monitoring_files):
@@ -358,4 +342,15 @@ class AndroidMuxrawMonitor(Monitor):
             sys.exit(str(traceback.format_exc()))
         finally:
             self._parse_muxraws(monitoring_files)
+            # decoded = muxraw_parser.last_seek()
+            # if decoded != []:
+            #     try:
+            #         for msg in decoded:
+            #             typeid, xml = muxraw_parser.decode(self, msg) #self for debug
+            #             event = Event(  timeit.default_timer(),
+            #                             typeid,
+            #                             xml)
+            #             self.send(event)
+            #     except FormatError, e:
+            #         print "FormatError: ", e
             self._stop_collection(wait=True)

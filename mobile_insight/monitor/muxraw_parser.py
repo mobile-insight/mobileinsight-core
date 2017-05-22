@@ -1,43 +1,13 @@
 # muxraw_parser.py
 # parse a muxraw file into strings of ws_dissector input
-# usage muxraw_parser.py MDLog1_2016_0402_183638.muxraw
-# output ['\\x00\\x00\\x00\\x6a\\x00\\x00\\x00\\x1e\\x42\\x75\\x8d\\xaa\\x56\\xb8\\x75\\xab\\xb2\\x3a\\xf8\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00'
-# , '\\x00\\x00\\x00\\x6a\\x00\\x00\\x00\\x1e\\x42\\x75\\xbb\\x99\\x6e\\xc0\\x55\\xff\\xa0\\x39\\xfc\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00']
+# sample input for ws_dissector:
+# echo -ne '\x00\x00\x00\xc8\x00\x00\x00\x09\x40\x01\xBF\x28\x1A\xEB\xA0\x00\x00' | LD_LIBRARY_PATH="/data/data/edu.ucla.cs.wing.mobileinsight/files/data/" /data/data/edu.ucla.cs.wing.mobileinsight/files/data/android_pie_ws_dissector
 
 import struct
 import sys
-import commands
-
-is_android=False
-try:
-    from jnius import autoclass #For Android
-    try:
-        service_context = autoclass('org.renpy.android.PythonService').mService
-        if not service_context:
-            service_context = cast("android.app.Activity",
-                            autoclass("org.renpy.android.PythonActivity").mActivity)
-    except Exception, e:
-        service_context = cast("android.app.Activity",
-                            autoclass("org.renpy.android.PythonActivity").mActivity)
-
-    is_android=True
-except Exception, e:
-    #not used, but bugs may exist on laptop
-    is_android=False
+import subprocess
 
 ANDROID_SHELL = "/system/bin/sh"
-
-def get_cache_dir():
-    if is_android:
-        return str(service_context.getCacheDir().getAbsolutePath())
-    else:
-        return ""
-
-def get_files_dir():
-    if is_android:
-        return str(service_context.getFilesDir().getAbsolutePath())
-    else:
-        return ""
 
 #RRC_PAGING_TYPE1 = ['0x8b', '0x3', '0x0', '0x0']
 LTE_BCCH_BCH	= ['0xbc', '0x2', '0x0', '0x0']
@@ -74,14 +44,13 @@ RRC_HANDOVERTOUTRANCOMMAND	= ['0x8f', '0x3', '0x0', '0x0']
 RRC_INTERRATHANDOVERINFO	= ['0x90', '0x3', '0x0', '0x0']
 EMM_SERVICE_REQUEST	= ['0x21', '0x3', '0x0', '0x0']
 
-#global_msg_id = [RRC_PAGING_TYPE1]
-#global_ws_id = [106]
-
 global_msg_id = [LTE_BCCH_BCH,LTE_BCCH_DL_SCH,LTE_DL_CCCH,LTE_DL_DCCH,LTE_PCCH,LTE_UL_CCCH,LTE_UL_DCCH,RRC_SI_MIB,RRC_SI_SB1,RRC_SI_SB2,RRC_SI_SIB1,RRC_SI_SIB2,RRC_SI_SIB3,RRC_SI_SIB4,RRC_SI_SIB5a,RRC_SI_SIB5b,RRC_SI_SIB6,RRC_SI_SIB7,RRC_SI_SIB11,RRC_SI_SIB12,RRC_SI_SIB18,RRC_SI_SIB19,RRC_SI_SIB20,RRC_DL_CCCH,RRC_DL_DCCH,RRC_PAGING_TYPE1,RRC_UL_CCCH,RRC_UL_DCCH,RRC_HANDOVERTOUTRANCOMMAND,RRC_INTERRATHANDOVERINFO,EMM_SERVICE_REQUEST]
 global_ws_id = [104,203,102,103,106,100,101,150,181,182,151,152,153,154,155,155,156,157,161,162,168,169,170,102,103,106,100,101,103,103,250]
 
 muxraw_parser_buff = []  # store bytes in current section
-def feed_binary(buff):
+first_header = False
+def feed_binary(logger, buff):
+    global muxraw_parser_buff
     msg_list = []
     cur_index = 0
     end_index = len(buff)
@@ -101,51 +70,45 @@ def feed_binary(buff):
                     msg_list.append(res)
                 muxraw_parser_buff = []
         cur_index+=1
-    res = seek_pstrace_magic(muxraw_parser_buff)
-    if res != []:
-        msg_list.append(res)
     return msg_list
 
-def decode(raw_msg):
+def decode(logger, raw_msg):
     """
     decode raw_msg and return the typeid, xml (for decoded message)
     """
-    print "raw_msg: " + raw_msg
+    msg_id = int(raw_msg[0][3], 16)
     msg =  "\\" + "\\".join([j[1:] for j in raw_msg[0]])
-    print "msg: " + msg
-
-    """
-    FIXME: Replace the following ws_dissector with: 
-
-        libs_path = os.path.join(get_files_dir(),"data")
-        ws_dissector_path = os.path.join(libs_path,"android_pie_ws_dissector")
-    """
-    return_code, output = commands.getstatusoutput("echo -ne " + msg +" | ~/mobileInsight/automator/ws_dissector/ws_dissector ")
+    logger.log_info("lizhehan: Receive message: " + msg)
+    output = msg
+    p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    output,err = p.communicate("echo -ne \'" + msg + "\' | LD_LIBRARY_PATH=" + logger.libs_path + ' ' + logger.ws_dissector_path + '\n')
+    p.wait()
+    return_code, output = commands.getstatusoutput("echo -ne " + msg +" | LD_LIBRARY_PATH=/data/data/edu.ucla.cs.wing.mobileinsight/files/data/ /data/data/edu.ucla.cs.wing.mobileinsight/files/data/android_pie_ws_dissector")
+    logger.log_info("lizhehan: Output: " + str(len(output)) + "  |  " + output)
     # FIXME: to be replaced with real message type ID
+    # I have msg_id
     return "LTE_RRC_OTA_Packet",output
 
-def test_feed(filename):
-    f = open(filename, "rb")
-    buf = f.read()
-    msg_list = feed_binary(buf)
-    f.close()
+def last_seek():
+    global muxraw_parser_buff
+    global first_header
+    msg_list = []
+    if first_header:
+        res = seek_pstrace_magic(muxraw_parser_buff)
+        if res != []:
+            msg_list.append(res)
     return msg_list
 
 def seek_pstrace_magic(bytes):
-
-    # idx_header = find_subtrace(header, bytes)
-    # if idx_header:
-    #     bytes = bytes[:idx_header] + bytes[idx_header+6:]
-    # global a
-    msg_id = bytes[0:4]
-    # a += 1
-    # print a, len(bytes), msg_id #, '\nbytes:\n',bytes[:50]
-
-    # if a > 24:
-    #     return []
+    global first_header
     pstrace = []
-    if msg_id in global_msg_id:
 
+    if not first_header:
+        first_header = True
+        return pstrace
+
+    msg_id = bytes[0:4]
+    if msg_id in global_msg_id:
         # calculate the length of raw_data
         decimal_high = int(bytes[4], 16)
         decimal_low = int(bytes[5], 16)
@@ -157,10 +120,7 @@ def seek_pstrace_magic(bytes):
             raw_msg = ['0x00'] * 3 + [hex(global_ws_id[global_msg_id.index(msg_id)])] + ['0x00'] * 2 + [
                 bytes[5]] + [bytes[4]] + raw_data
             pstrace.append(raw_msg)
-            # print 'added', length, msg_id
-            # print "\\" + "\\".join([j[1:] for j in raw_bytes])
             return pstrace
-    # print "None====================="
     return pstrace
 
 def parse_muxraw_magic(filename):
@@ -203,7 +163,6 @@ if __name__ == "__main__":
     # print "Processing ", filename
     # raw_msg_list = parse_muxraw(filename)
     raw_msg_list = parse_muxraw_magic(filename)
-    raw_msg_list = test_feed(filename)
     msg_list = []
     # print len(raw_msg_list)
 
@@ -211,10 +170,8 @@ if __name__ == "__main__":
         for i in raw_msg_list:
             output =  "\\" + "\\".join([j[1:] for j in i[0]])
             msg_list.append(output)
-            # print 'msg'
-            # print i[0]
-            # print output
+            print output
     # print msg_list
-    if raw_msg_list != []:
-        for msg in raw_msg_list:
-            print decode(msg)
+    # if raw_msg_list != []:
+    #     for msg in raw_msg_list:
+    #         print decode(msg)
