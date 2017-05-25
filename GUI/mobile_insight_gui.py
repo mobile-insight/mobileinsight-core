@@ -182,7 +182,7 @@ class WindowClass(wx.Frame):
         self.toolbar.AddSeparator()
         toolbar_filter = self.toolbar.AddLabelTool(ID_TB_FILTER, "Filter", wx.Bitmap("icons/filter.png"))
         self.toolbar.AddSeparator()
-        toolbar_search = self.toolbar.AddLabelTool(ID_TB_SEARCH, "Search", wx.Bitmap("icons/Search.png"))
+        toolbar_search = self.toolbar.AddLabelTool(ID_TB_SEARCH, "Search", wx.Bitmap("icons/search.png"))
         self.toolbar.AddSeparator()
         toolbar_time = self.toolbar.AddLabelTool(ID_TB_TIME, "Time Window", wx.Bitmap("icons/time.png"))
         self.toolbar.AddSeparator()

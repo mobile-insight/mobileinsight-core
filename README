@@ -18,15 +18,10 @@ Please see [here](http://metro.cs.ucla.edu/mobile_insight/get_started.html) for 
 
 First install [Python 2.7](https://www.python.org/) if you do not have it.
 
-Second, MobileInsight builds on top of `pyserial` and `crcmod`, so please install both libraries, for example, using `pip`:
-
-    pip install pyserial
-    pip install crcmod
-
 Then download MobileInsight and unpack the code:
 
-    tar -zxvf MobileInsight-2.2.1.tar.gz
-    cd MobileInsight-2.2.1
+    tar -zxvf MobileInsight-2.2.tar.gz
+    cd MobileInsight-2.2
 
 For macOS users, install MobileInsight using:
 
@@ -36,13 +31,20 @@ For Linux users, install MobileInsight using:
 
     ./install-ubuntu.sh
 
-It will automatically run an offline analysis example at the end.
-
 For Windows users, install MobileInsight using:
 
     python setup.py install
 
-To run MobileInsight GUI, please install the following Python libraries:
+The auto install script will run an offline analysis example at the end.
 
-    pip install wxPython
+
+# Dependencies #
+
+
+Second, MobileInsight builds on top of `pyserial` and `crcmod`, so please install both libraries, for example, using `pip`:
+
+    pip install pyserial
+    pip install crcmod
     pip install matplotlib
+
+    brew install wxpython
