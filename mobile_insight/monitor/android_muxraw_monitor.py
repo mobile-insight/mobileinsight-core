@@ -17,24 +17,25 @@ from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
 import muxraw_parser
 
-is_android=False
+is_android = False
 try:
-    from jnius import autoclass #For Android
+    from jnius import autoclass  # For Android
     try:
         service_context = autoclass('org.renpy.android.PythonService').mService
         if not service_context:
-            service_context = cast("android.app.Activity",
-                            autoclass("org.renpy.android.PythonActivity").mActivity)
-    except Exception, e:
-        service_context = cast("android.app.Activity",
-                            autoclass("org.renpy.android.PythonActivity").mActivity)
+            service_context = cast("android.app.Activity", autoclass(
+                "org.renpy.android.PythonActivity").mActivity)
+    except Exception as e:
+        service_context = cast("android.app.Activity", autoclass(
+            "org.renpy.android.PythonActivity").mActivity)
 
-    is_android=True
-except Exception, e:
-    #not used, but bugs may exist on laptop
-    is_android=False
+    is_android = True
+except Exception as e:
+    # not used, but bugs may exist on laptop
+    is_android = False
 
 ANDROID_SHELL = "/system/bin/sh"
+
 
 def get_cache_dir():
     if is_android:
@@ -42,11 +43,13 @@ def get_cache_dir():
     else:
         return ""
 
+
 def get_files_dir():
     if is_android:
         return str(service_context.getFilesDir().getAbsolutePath())
     else:
         return ""
+
 
 class AndroidMuxrawMonitor(Monitor):
 
@@ -61,7 +64,7 @@ class AndroidMuxrawMonitor(Monitor):
     in the trace as an event.
     """
 
-    #SUPPORTED_TYPES: a list containing the currently supported message types.
+    # SUPPORTED_TYPES: a list containing the currently supported message types.
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
 
     # DIAG_CFG_DIR = "/sdcard/diag_logs"
@@ -71,23 +74,26 @@ class AndroidMuxrawMonitor(Monitor):
 
         Monitor.__init__(self)
 
-        self._input_dir = os.path.join(get_cache_dir(), "mi2log")  # ??? getCacheDir()
+        self._input_dir = os.path.join(
+            get_cache_dir(), "mi2log")  # ??? getCacheDir()
         self._input_dir = "/sdcard/mtklog/mdlog1"
         self._type_names = []
         self._filename_sort_key = None
 
         self._read_latency = []
 
-        libs_path = os.path.join(get_files_dir(),"data")
-        ws_dissector_path = os.path.join(libs_path,"android_pie_ws_dissector")
+        libs_path = os.path.join(get_files_dir(), "data")
+        ws_dissector_path = os.path.join(libs_path, "android_pie_ws_dissector")
         self.libs_path = libs_path
         self.ws_dissector_path = ws_dissector_path
-        self._executable_path = os.path.join(libs_path,"diag_revealer_mtk")
+        self._executable_path = os.path.join(libs_path, "diag_revealer_mtk")
 
-        prefs={"ws_dissect_executable_path": os.path.join(libs_path,"android_pie_ws_dissector"),
+        prefs = {
+            "ws_dissect_executable_path": os.path.join(
+                libs_path,
+                "android_pie_ws_dissector"),
             "libwireshark_path": libs_path}
         DMLogPacket.init(prefs)  # ???
-
 
     def available_log_types(self):
         """
@@ -95,8 +101,7 @@ class AndroidMuxrawMonitor(Monitor):
 
         :returns: a list of supported message types
         """
-        return self.__class__.SUPPORTED_TYPES # ??? Current RRC only.
-
+        return self.__class__.SUPPORTED_TYPES  # ??? Current RRC only.
 
     def set_log_directory(self, directory):
         """
@@ -148,7 +153,7 @@ class AndroidMuxrawMonitor(Monitor):
                 self.log_warning("Unsupported log message type: %s" % n)
             elif n not in self._type_names:
                 self._type_names.append(n)
-                self.log_info("Enable collection: "+n)
+                self.log_info("Enable collection: " + n)
         dm_collector_c.set_filtered(self._type_names)  # ???
 
     def enable_log_all(self):
@@ -158,18 +163,23 @@ class AndroidMuxrawMonitor(Monitor):
         cls = self.__class__
         self.enable_log(cls.SUPPORTED_TYPES)
 
-    def save_log_as(self,path):
+    def save_log_as(self, path):
         """
         Save the log as a mi2log file (for offline analysis)
 
         :param path: the file name to be saved
         :type path: string
         """
-        dm_collector_c.set_filtered_export(path,self._type_names) # ???
+        dm_collector_c.set_filtered_export(path, self._type_names)  # ???
 
-    def _run_shell_cmd(self, cmd, wait = False):
-        p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        res,err = p.communicate(cmd+'\n')
+    def _run_shell_cmd(self, cmd, wait=False):
+        p = subprocess.Popen(
+            "su",
+            executable=ANDROID_SHELL,
+            shell=True,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE)
+        res, err = p.communicate(cmd + '\n')
         if wait:
             p.wait()
             # return p.stdout
@@ -221,7 +231,8 @@ class AndroidMuxrawMonitor(Monitor):
                 sum_latency += self._read_latency[i][0]
                 n += self._read_latency[i][1]
             else:
-                sum_latency += self._read_latency[i][0] * (float(last - n) / self._read_latency[i][1])
+                sum_latency += self._read_latency[i][0] * \
+                    (float(last - n) / self._read_latency[i][1])
                 n = last
             i -= 1
         return (sum_latency / n) if n > 0 else 0.0
@@ -245,7 +256,7 @@ class AndroidMuxrawMonitor(Monitor):
             #                                             True,   # include_timestamp
             #                                             )
             ######################################
-            decoded = muxraw_parser.feed_binary(self, s) # self for debug
+            decoded = muxraw_parser.feed_binary(self, s)  # self for debug
             # decoded = muxraw_parser.receive_log_packet(self._skip_decoding,
             #                                             True   # include_timestamp
             #                                             )
@@ -268,17 +279,18 @@ class AndroidMuxrawMonitor(Monitor):
 
                     ##############################################
                     for msg in decoded:
-                        typeid, msgstr = muxraw_parser.decode(self, msg) #self for debug
+                        typeid, msgstr = muxraw_parser.decode(
+                            self, msg)  # self for debug
                         packet = DMLogPacket([(None, msgstr, typeid)])
 
-                        event = Event(  timeit.default_timer(),
-                                        typeid,
-                                        packet)
+                        event = Event(timeit.default_timer(),
+                                      typeid,
+                                      packet)
                         self.send(event)
                     ##############################################
 
-                except FormatError, e:
-                    print "FormatError: ", e # skip this packet
+                except FormatError as e:
+                    print "FormatError: ", e  # skip this packet
         return f.tell()
 
     def _parse_muxraws(self, monitoring_files):
@@ -287,13 +299,16 @@ class AndroidMuxrawMonitor(Monitor):
             filename, cur_pos = monitoring_files[i]
             siz = os.path.getsize(filename)
             if cur_pos == 0:    # new file
-                self._run_shell_cmd("chmod -R 644 \"%s\"" % filename, wait=True)
+                self._run_shell_cmd(
+                    "chmod -R 644 \"%s\"" %
+                    filename, wait=True)
             if cur_pos < siz:   # has new content to read
                 f = open(filename, "rb")
                 cur_pos = self._read_muxraw(f, cur_pos)
                 f.close()
                 monitoring_files[i][1] = cur_pos
-            if i != len(monitoring_files) - 1: # new file appears so this file obsoletes
+            if i != len(monitoring_files) - \
+                    1:  # new file appears so this file obsoletes
                 event = Event(timeit.default_timer(), "new_diag_log", filename)
                 self.send(event)
                 monitoring_files.pop(i)
@@ -309,8 +324,9 @@ class AndroidMuxrawMonitor(Monitor):
         """
 
         if not self._input_dir:
-            #FIXME: test if self._input_dir exists in SDcard
-            raise RuntimeError("Log directory not set. Please call set_log_directory() first.")
+            # FIXME: test if self._input_dir exists in SDcard
+            raise RuntimeError(
+                "Log directory not set. Please call set_log_directory() first.")
         old_files = set(self._get_filenames(self._input_dir))
 
         try:
@@ -323,7 +339,7 @@ class AndroidMuxrawMonitor(Monitor):
                 old_files = current_files
 
                 if new_files:   # new muxraw files detected
-                    self.log_warning("New muxraw files "+str(new_files))
+                    self.log_warning("New muxraw files " + str(new_files))
                     if self._filename_sort_key is None:
                         k = AndroidMuxrawMonitor._default_filename_sort_key
                     else:
@@ -331,13 +347,12 @@ class AndroidMuxrawMonitor(Monitor):
                     new_files.sort(key=k)
 
                     for filename in new_files:
-                        monitoring_files.append( [filename, 0] )
+                        monitoring_files.append([filename, 0])
                         #                        [filename, cur_pos]
 
                 self._parse_muxraws(monitoring_files)
 
-
-        except Exception, e:
+        except Exception as e:
             import traceback
             sys.exit(str(traceback.format_exc()))
         finally:

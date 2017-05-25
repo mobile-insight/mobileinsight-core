@@ -40,7 +40,7 @@ class DMCollector(Monitor):
         :type prefs: dictionary
         """
         Monitor.__init__(self)
-        
+
         self.phy_baudrate = 9600
         self.phy_ser_name = None
         self._prefs = prefs
@@ -89,10 +89,10 @@ class DMCollector(Monitor):
             type_name = [type_name]
         for n in type_name:
             if n not in cls.SUPPORTED_TYPES:
-                self.log_warning("Unsupported log message type: %s" % n) 
+                self.log_warning("Unsupported log message type: %s" % n)
             if n not in self._type_names:
                 self._type_names.append(n)
-                self.log_info("Enable collection: "+n)
+                self.log_info("Enable collection: " + n)
         dm_collector_c.set_filtered(self._type_names)
 
     def enable_log_all(self):
@@ -102,7 +102,7 @@ class DMCollector(Monitor):
         cls = self.__class__
         self.enable_log(cls.SUPPORTED_TYPES)
 
-    def save_log_as(self,path):
+    def save_log_as(self, path):
         """
         Save the log as a mi2log file (for offline analysis)
 
@@ -111,7 +111,7 @@ class DMCollector(Monitor):
         :param log_types: a filter of message types to be saved
         :type log_types: list of string
         """
-        dm_collector_c.set_filtered_export(path,self._type_names)
+        dm_collector_c.set_filtered_export(path, self._type_names)
 
     def run(self):
         """
@@ -134,7 +134,7 @@ class DMCollector(Monitor):
             # Disable logs
             print "Disable logs"
             dm_collector_c.disable_logs(phy_ser)
-            
+
             # Enable logs
             print "Enable logs"
             dm_collector_c.enable_logs(phy_ser, self._type_names)
@@ -157,20 +157,19 @@ class DMCollector(Monitor):
                         # print xml
                         # print ""
                         # Send event to analyzers
-                        event = Event(  timeit.default_timer(),
-                                        d["type_id"],
-                                        packet)
+                        event = Event(timeit.default_timer(),
+                                      d["type_id"],
+                                      packet)
                         self.send(event)
-                    except FormatError, e:
+                    except FormatError as e:
                         # skip this packet
                         print "FormatError: ", e
 
-
-        except (KeyboardInterrupt, RuntimeError), e:
+        except (KeyboardInterrupt, RuntimeError) as e:
             print "\n\n%s Detected: Disabling all logs" % type(e).__name__
             # Disable logs
             dm_collector_c.disable_logs(phy_ser)
             phy_ser.close()
             sys.exit(e)
-        except Exception, e:
+        except Exception as e:
             sys.exit(e)

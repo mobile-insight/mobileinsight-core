@@ -13,14 +13,14 @@ from datetime import *
 import json
 import struct
 #import xml.etree.ElementTree as ET
-try: 
-    import xml.etree.cElementTree as ET 
-except ImportError: 
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
     import xml.etree.ElementTree as ET
 
 try:
     from utils import *
-except ImportError, e:
+except ImportError as e:
     # TODO: WTF can I do to remove this dependence ..?
     def static_var(varname, value):
         def decorate(func):
@@ -31,7 +31,10 @@ except ImportError, e:
 from ws_dissector import *
 
 import itertools
-range = lambda stop: iter(itertools.count().next, stop)
+
+
+def range(stop): return iter(itertools.count().next, stop)
+
 
 class SuperEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -73,75 +76,83 @@ class DMLogPacket:
 
         self._decoded_list = cls._preparse_internal_list(decoded_list)
 
-
     @classmethod
-    @static_var("wcdma_sib_types", {    0: "RRC_MIB",
-                                        1: "RRC_SIB1",
-                                        2: "RRC_SIB2",
-                                        3: "RRC_SIB3",
-                                        7: "RRC_SIB7",
-                                        12: "RRC_SIB12",
-                                        27: "RRC_SB1",
-                                        31: "RRC_SIB19",
-                                        })
+    @static_var("wcdma_sib_types", {0: "RRC_MIB",
+                                    1: "RRC_SIB1",
+                                    2: "RRC_SIB2",
+                                    3: "RRC_SIB3",
+                                    7: "RRC_SIB7",
+                                    12: "RRC_SIB12",
+                                    27: "RRC_SB1",
+                                    31: "RRC_SIB19",
+                                    })
     def _preparse_internal_list(cls, decoded_list):
         lst = []
         try:
             # for i in range(len(decoded_list)):
             i = 0
-            while i<len(decoded_list):
+            while i < len(decoded_list):
                 field_name, val, type_str = decoded_list[i]
                 if type_str.startswith("raw_msg/"):
                     msg_type = type_str[len("raw_msg/"):]
                     decoded = cls._decode_msg(msg_type, val)
-                    xmls = [decoded,]
+                    xmls = [decoded, ]
 
                     if msg_type == "RRC_DL_BCCH_BCH":
                         sib_types = cls._preparse_internal_list.wcdma_sib_types
                         try:
                             # xml = ET.fromstring(decoded)
                             xml = ET.XML(decoded)
-                        except Exception, e:
+                        except Exception as e:
                             print "Unsupported RRC_DL_BCCH_BCH"
                             xx = cls._wrap_decoded_xml(xmls)
                             lst.append(("Unsupported", xx, "msg"))
                             return lst
-                            
-                        sibs = xml.findall(".//field[@name='rrc.CompleteSIBshort_element']")
+
+                        sibs = xml.findall(
+                            ".//field[@name='rrc.CompleteSIBshort_element']")
                         if sibs:
                             # deal with a list of complete SIBs
                             for complete_sib in sibs:
-                                field = complete_sib.find("field[@name='rrc.sib_Type']")
+                                field = complete_sib.find(
+                                    "field[@name='rrc.sib_Type']")
                                 sib_id = int(field.get("show"))
                                 sib_name = field.get("showname")
-                                field = complete_sib.find("field[@name='rrc.sib_Data_variable']")
+                                field = complete_sib.find(
+                                    "field[@name='rrc.sib_Data_variable']")
                                 sib_msg = binascii.a2b_hex(field.get("value"))
                                 if sib_id in sib_types:
-                                    decoded = cls._decode_msg(sib_types[sib_id], sib_msg)
+                                    decoded = cls._decode_msg(
+                                        sib_types[sib_id], sib_msg)
                                     xmls.append(decoded)
                                     # print sib_types[sib_id]
                                 else:
                                     print "Unknown RRC SIB Type: %d" % sib_id
                         else:
                             # deal with a segmented SIB
-                            sib_segment = xml.find(".//field[@name='rrc.firstSegment_element']")
+                            sib_segment = xml.find(
+                                ".//field[@name='rrc.firstSegment_element']")
                             if sib_segment is None:
-                                sib_segment = xml.find(".//field[@name='rrc.subsequentSegment_element']")
+                                sib_segment = xml.find(
+                                    ".//field[@name='rrc.subsequentSegment_element']")
                             if sib_segment is None:
-                                sib_segment = xml.find(".//field[@name='rrc.lastSegmentShort_element']")
+                                sib_segment = xml.find(
+                                    ".//field[@name='rrc.lastSegmentShort_element']")
                             if sib_segment is not None:
-                                field = sib_segment.find("field[@name='rrc.sib_Type']")
+                                field = sib_segment.find(
+                                    "field[@name='rrc.sib_Type']")
                                 sib_id = int(field.get("show"))
-                                ## Zengwen: need to use log it back
-                                # print "RRC SIB Segment(type: %d) not handled" % sib_id
+                                # Zengwen: need to use log it back
+                                # print "RRC SIB Segment(type: %d) not handled"
+                                # % sib_id
                     xx = cls._wrap_decoded_xml(xmls)
-                    lst.append( (field_name, xx, "msg") )
+                    lst.append((field_name, xx, "msg"))
                 else:
                     lst.append(decoded_list[i])
-                i = i+1
+                i = i + 1
             return lst
 
-        except Exception, e:
+        except Exception as e:
             print len(decoded_list)
             print decoded_list
             i = 0
@@ -202,7 +213,9 @@ class DMLogPacket:
                 if out_type == "xml/list":
                     sub_tag = ET.SubElement(output_xml, "item")
                 elif out_type == "xml/dict":
-                    sub_tag = ET.SubElement(output_xml, "pair", {"key": field_name})
+                    sub_tag = ET.SubElement(
+                        output_xml, "pair", {
+                            "key": field_name})
 
                 if not type_str:
                     xx = str(xx)
@@ -216,7 +229,7 @@ class DMLogPacket:
                         sub_tag.set("type", type_str)
                     sub_tag.append(xx)
 
-            i = i+1
+            i = i + 1
 
         if out_type == "dict":
             return output_d
@@ -280,7 +293,7 @@ class DMLogPacket:
             import xmltodict
             if "Msg" in d:
                 d["Msg"] = xmltodict.parse(d["Msg"])
-        except ImportError: 
+        except ImportError:
             pass
         return json.dumps(d, cls=SuperEncoder)
 
@@ -296,8 +309,8 @@ class DMLogPacket:
         """
         if cls._init_called:
             return
-        WSDissector.init_proc(  prefs.get("ws_dissect_executable_path", None),
-                                prefs.get("libwireshark_path", None))
+        WSDissector.init_proc(prefs.get("ws_dissect_executable_path", None),
+                              prefs.get("libwireshark_path", None))
         cls._init_called = True
 
     @classmethod

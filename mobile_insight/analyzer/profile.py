@@ -6,20 +6,19 @@ Profile abstraction
 Author: Yuanjie Li
 """
 
-is_android=False
+is_android = False
 try:
-    from jnius import autoclass #For Android
-    is_android=True
-except Exception, e:
-    import sqlite3 #Laptop version
-    is_android=False
+    from jnius import autoclass  # For Android
+    is_android = True
+except Exception as e:
+    import sqlite3  # Laptop version
+    is_android = False
 
 import ast
 import os
 
 
-
-__all__=["ProfileHierarchy","Profile"]
+__all__ = ["ProfileHierarchy", "Profile"]
 
 
 '''
@@ -32,11 +31,13 @@ This is similar to HTTP, except that every level can define another ID for query
 The hierarchy ID is mandatory for root, but optional for non-root nodes
 '''
 
+
 class ProfileNode(object):
     '''
     A profile node for the ProfileHierarchy tree
     '''
-    def __init__(self,name,id_required):
+
+    def __init__(self, name, id_required):
         '''
         Initialization of a Profile node
 
@@ -47,10 +48,9 @@ class ProfileNode(object):
         '''
         self.name = name
         self.id_required = id_required
-        self.children = {} # A node list to its children
+        self.children = {}  # A node list to its children
 
-
-    def add(self,child,id_required):
+    def add(self, child, id_required):
         '''
         Add a child node
 
@@ -61,8 +61,8 @@ class ProfileNode(object):
 
         :returns: the added node
         '''
-        child_node = ProfileNode(child,id_required)
-        self.children[child]=child_node
+        child_node = ProfileNode(child, id_required)
+        self.children[child] = child_node
         return child_node
 
     def is_leaf(self):
@@ -76,9 +76,9 @@ class ProfileNode(object):
 
 class ProfileHierarchy(object):
 
-    '''An abstraction for analyzers to declare the profile it maintains. 
+    '''An abstraction for analyzers to declare the profile it maintains.
 
-    Given this hierarchy, the analyzer automatically builds underlying database, 
+    Given this hierarchy, the analyzer automatically builds underlying database,
     and enforces query with hierarchical name (e.g., LTERrcAnalyzer.Reconfig.Drx.long_drx)
 
     Example construction: consider the following RRC profile hierarchy
@@ -106,14 +106,14 @@ class ProfileHierarchy(object):
             drx.add('Drx_long',False);
     '''
 
-    def __init__(self,root):
+    def __init__(self, root):
         '''
         Initialization of the profile hierarchy
 
         :param root: the root profile table name
         :type root: string
         '''
-        self.__root = ProfileNode(root,True) #Root MUST have a unique ID
+        self.__root = ProfileNode(root, True)  # Root MUST have a unique ID
 
     def get_root(self):
         '''
@@ -121,7 +121,7 @@ class ProfileHierarchy(object):
         '''
         return self.__root
 
-    def get_node(self,name):
+    def get_node(self, name):
         '''
         Get the node based on the hierarchical name
 
@@ -135,7 +135,7 @@ class ProfileHierarchy(object):
         cur_node = self.__root
 
         node_split = nodes[count].split(':')
-        if node_split[0] != cur_node.name or len(node_split)==1:
+        if node_split[0] != cur_node.name or len(node_split) == 1:
             return None
 
         while True:
@@ -154,8 +154,8 @@ class ProfileHierarchy(object):
                 node_split = nodes[count].split(':')
 
                 if child.name == node_split[0]:
-                    if child.id_required and len(node_split)==1:
-                        #The mandatory ID is unavailable
+                    if child.id_required and len(node_split) == 1:
+                        # The mandatory ID is unavailable
                         return None
                     cur_node = child
                     match = True
@@ -167,7 +167,7 @@ class ProfileHierarchy(object):
 
 
 class Profile(object):
-    
+
     '''
     Profile abstraction
 
@@ -189,17 +189,18 @@ class Profile(object):
         self.__profile_hierarchy = profile_hierarchy
         self.__db = None
         self.__build_db()
- 
-    def __create_table(self,node):
+
+    def __create_table(self, node):
         '''
         Create SQL tables for the node
 
         :param node: a node in the profile hierarchy
         :type node: Node
         '''
-        sql_cmd = 'CREATE TABLE IF NOT EXISTS ' + node.name + "(id,profile,primary key(id))"
+        sql_cmd = 'CREATE TABLE IF NOT EXISTS ' + \
+            node.name + "(id,profile,primary key(id))"
         if is_android:
-            self.__db.execSQL(sql_cmd) 
+            self.__db.execSQL(sql_cmd)
         else:
             self.__db.execute(sql_cmd)
             self.__conn.commit()
@@ -214,25 +215,27 @@ class Profile(object):
         if self.__profile_hierarchy is None:
             self.__db = None
         else:
-            #setup internal database
+            # setup internal database
             root = self.__profile_hierarchy.get_root()
             if is_android:
                 Environment = autoclass("android.os.Environment")
                 state = Environment.getExternalStorageState()
-                if not Environment.MEDIA_MOUNTED==state:
+                if not Environment.MEDIA_MOUNTED == state:
                     self.__db = None
                     return
 
                 sdcard_path = Environment.getExternalStorageDirectory().toString()
-                DB_PATH = os.path.join(sdcard_path,"mobile_insight/dbs")
+                DB_PATH = os.path.join(sdcard_path, "mobile_insight/dbs")
                 activity = autoclass('org.renpy.android.PythonActivity')
                 if activity.mActivity:
-                    self.__db = activity.mActivity.openOrCreateDatabase(os.path.join(DB_PATH,root.name+'.db'),0,None)
+                    self.__db = activity.mActivity.openOrCreateDatabase(
+                        os.path.join(DB_PATH, root.name + '.db'), 0, None)
                 else:
                     service = autoclass('org.renpy.android.PythonService')
-                    self.__db = service.mService.openOrCreateDatabase(os.path.join(DB_PATH,root.name+'.db'),0,None)
+                    self.__db = service.mService.openOrCreateDatabase(
+                        os.path.join(DB_PATH, root.name + '.db'), 0, None)
             else:
-                self.__conn = sqlite3.connect(root.name+'.db')
+                self.__conn = sqlite3.connect(root.name + '.db')
                 self.__db = self.__conn.cursor()
 
             self.__create_table(root)
@@ -249,65 +252,66 @@ class Profile(object):
         '''
 
         try:
-            #Step 1: check if the name conforms to the hierarchy
-            if self.__profile_hierarchy is None: #no profile defined
+            # Step 1: check if the name conforms to the hierarchy
+            if self.__profile_hierarchy is None:  # no profile defined
                 return None
-            #Check if the field to query is valid
+            # Check if the field to query is valid
             profile_node = self.__profile_hierarchy.get_node(profile_name)
             if profile_node is None:
                 return None
 
             profile_nodes = profile_name.split('.')
 
-            #Step 2: extract the raw profile
-            #NOTE: root profile MUST have a id
-            sql_cmd = "select profile from "+self.__get_root_name()+" where id=\""+profile_nodes[0].split(":")[1]+"\""
-            
+            # Step 2: extract the raw profile
+            # NOTE: root profile MUST have a id
+            sql_cmd = "select profile from " + self.__get_root_name() + " where id=\"" + \
+                profile_nodes[0].split(":")[1] + "\""
+
             if is_android:
-                sql_res = self.__db.rawQuery(sql_cmd,None)
+                sql_res = self.__db.rawQuery(sql_cmd, None)
             else:
                 sql_res = self.__db.execute(sql_cmd).fetchall()
-            
+
             # if sql_res.getCount()==0: #the id does not exist
-            if (is_android and sql_res.getCount()==0) or (not is_android and len(sql_res)==0):
+            if (is_android and sql_res.getCount() == 0) or (
+                    not is_android and len(sql_res) == 0):
                 return None
 
             if is_android:
-                sql_res.moveToFirst();
-                res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
+                sql_res.moveToFirst()
+                # convert string to dictionary
+                res = ast.literal_eval(sql_res.getString(0))
             else:
                 res = ast.literal_eval(sql_res[0][0])
 
-            #Step 3: extract the result from raw profile
-            for i in range(1,len(profile_nodes)):
-                if res is None: #no profile
+            # Step 3: extract the result from raw profile
+            for i in range(1, len(profile_nodes)):
+                if res is None:  # no profile
                     break
                 profile_node_split = profile_nodes[i].split(":")
-                res = res[profile_node_split[0]]   
-                if len(profile_node_split)>1:
+                res = res[profile_node_split[0]]
+                if len(profile_node_split) > 1:
                     res = res[profile_node_split[1]]
             return res
-        except:
-            #TODO: raise warnings
+        except BaseException:            # TODO: raise warnings
             return False
 
     def update(self, profile_name, value_dict):
-        
         '''
         Update a profile value
 
         Example 1: self.update('LteRrc:87.Reconfig.Drx',{Drx_short:1,Drx_long:5})
         Example 2: self.update('LteRrc:87.Sib.Inter_freq:5780',{ThreshXHigh:1,ThreshXLow:2})
 
-        If the id does not exist, create a new item in the root, with specified values and all other fields as "null" 
+        If the id does not exist, create a new item in the root, with specified values and all other fields as "null"
 
-        Otherwise, update the specified field values, and keep the ramaining values unchanged. 
+        Otherwise, update the specified field values, and keep the ramaining values unchanged.
 
         The update operation is atomic. No partial update would be performed
 
         :param profile_name: a hierarcical name separated by '.' (e.g., LteRrc.Reconfig.Drx)
         :type profile_name: string
-        :param value: a field_name->value dictionary of the specified updated values. 
+        :param value: a field_name->value dictionary of the specified updated values.
         All the field names should appear in the profile_name.
         :type value: string->string dictionary
         :returns: True if the update succeeds, False otherwise
@@ -315,60 +319,64 @@ class Profile(object):
 
         try:
 
-            #Step 1: check if the name conforms to the hierarchy
-            if not self.__profile_hierarchy: #no profile defined
+            # Step 1: check if the name conforms to the hierarchy
+            if not self.__profile_hierarchy:  # no profile defined
                 raise Exception('No profile defined')
                 return False
-            #Check if the field to update is valid
+            # Check if the field to update is valid
             test_node = self.__profile_hierarchy.get_node(profile_name)
             if not test_node:
-                raise Exception('Invalid update: '+profile_name)
+                raise Exception('Invalid update: ' + profile_name)
                 return False
-            #Check the value fileds to update are indeed included based on hierarchy
+            # Check the value fileds to update are indeed included based on
+            # hierarchy
             for field_name in value_dict:
                 if field_name not in test_node.children:
-                    #Invalid node
-                    raise Exception('Invalid update field: '+str(value_dict))
+                    # Invalid node
+                    raise Exception('Invalid update field: ' + str(value_dict))
                     return False
 
             profile_nodes = profile_name.split('.')
 
-            #Step 2: check if the id exists or not
-            sql_cmd = "select profile from "+self.__get_root_name()+" where id=\""+profile_nodes[0].split(":")[1]+"\""
+            # Step 2: check if the id exists or not
+            sql_cmd = "select profile from " + self.__get_root_name() + " where id=\"" + \
+                profile_nodes[0].split(":")[1] + "\""
             if is_android:
-                sql_res = self.__db.rawQuery(sql_cmd,None)
+                sql_res = self.__db.rawQuery(sql_cmd, None)
             else:
                 sql_res = self.__db.execute(sql_cmd).fetchall()
-            
-            # if not query_res: 
+
+            # if not query_res:
             # if sql_res.getCount()==0:
-            if (is_android and sql_res and sql_res.getCount()==0) or (not is_android and len(sql_res)==0):
-                #The id does not exist. Create a new record
+            if (is_android and sql_res and sql_res.getCount() == 0) or (
+                    not is_android and len(sql_res) == 0):
+                # The id does not exist. Create a new record
 
                 query_res = {}
-                res=query_res
+                res = query_res
                 profile_node = self.__profile_hierarchy.get_root()
-                #Init: all root's children are not initialized
+                # Init: all root's children are not initialized
                 for child in profile_node.children:
-                    res[child]=None
+                    res[child] = None
 
-                #Go along hierarchy, init the remaining children    
-                for i in range(1,len(profile_nodes)):
+                # Go along hierarchy, init the remaining children
+                for i in range(1, len(profile_nodes)):
                     profile_node_split = profile_nodes[i].split(":")
                     profile_node = profile_node.children[profile_node_split[0]]
-                    res[profile_node_split[0]]={}
-                    res=res[profile_node_split[0]]
+                    res[profile_node_split[0]] = {}
+                    res = res[profile_node_split[0]]
                     if profile_node.id_required:
-                        res[profile_node_split[1]]={}
-                        res=res[profile_node_split[1]]
+                        res[profile_node_split[1]] = {}
+                        res = res[profile_node_split[1]]
                     for child in profile_node.children:
-                        res[child]=None
+                        res[child] = None
 
                 for item in value_dict:
-                    res[item]=value_dict[item]
-     
-                #Insert the new record into table
-                sql_cmd = "insert into "+self.__get_root_name() + "(id,profile) values(\""+profile_nodes[0].split(":")[1]+"\","+"\""+str(query_res)+"\")"
+                    res[item] = value_dict[item]
+
+                # Insert the new record into table
+                sql_cmd = "insert into " + self.__get_root_name() + "(id,profile) values(\"" + \
+                    profile_nodes[0].split(":")[1] + "\"," + "\"" + str(query_res) + "\")"
                 if is_android:
                     # print "Yuanjie: execSQL"
                     self.__db.execSQL(sql_cmd)
@@ -379,35 +387,37 @@ class Profile(object):
                 return True
             else:
                 if is_android:
-                    sql_res.moveToFirst();
-                    query_res = ast.literal_eval(sql_res.getString(0)) #convert string to dictionary
+                    sql_res.moveToFirst()
+                    query_res = ast.literal_eval(
+                        sql_res.getString(0))  # convert string to dictionary
                 else:
                     query_res = ast.literal_eval(sql_res[0][0])
-                #The id exists. Update the record
-                res=query_res
+                # The id exists. Update the record
+                res = query_res
                 profile_node = self.__profile_hierarchy.get_root()
-                
-                for i in range(1,len(profile_nodes)):
+
+                for i in range(1, len(profile_nodes)):
                     profile_node_split = profile_nodes[i].split(":")
                     if res[profile_node_split[0]] is not None:
                         res = res[profile_node_split[0]]
-                        if len(profile_node_split)>1:
-                            if not res.has_key(profile_node_split[1]):
-                                res[profile_node_split[1]]={}
+                        if len(profile_node_split) > 1:
+                            if profile_node_split[1] not in res:
+                                res[profile_node_split[1]] = {}
                             res = res[profile_node_split[1]]
                     else:
                         res[profile_node_split[0]] = {}
                         res = res[profile_node_split[0]]
-                        if len(profile_node_split)>1:
-                            if not res.has_key(profile_node_split[1]):
-                                res[profile_node_split[1]]={}
+                        if len(profile_node_split) > 1:
+                            if profile_node_split[1] not in res:
+                                res[profile_node_split[1]] = {}
                             res = res[profile_node_split[1]]
                         for child in profile_node.children:
-                            res[child]=None
+                            res[child] = None
                 for item in value_dict:
-                    res[item]=value_dict[item]
+                    res[item] = value_dict[item]
 
-                sql_cmd = "update " +self.__get_root_name()+" set profile=\""+str(query_res)+"\" where id=\""+profile_nodes[0].split(":")[1]+"\""
+                sql_cmd = "update " + self.__get_root_name() + " set profile=\"" + str(query_res) + \
+                    "\" where id=\"" + profile_nodes[0].split(":")[1] + "\""
                 if is_android:
                     self.__db.execSQL(sql_cmd)
                 else:
@@ -415,48 +425,48 @@ class Profile(object):
                     self.__conn.commit()
 
                 return True
-        except:
-            #TODO: raise warnings
+        except BaseException:            # TODO: raise warnings
             return False
 
-if __name__=="__main__":
 
-    #Create a profile
-    profile_hierarchy=ProfileHierarchy('LteRrc');
-    root=profile_hierarchy.get_root()
-    root.add('Root_leaf',False)
-    sib=root.add('Sib',False);
-    inter_freq=sib.add('Inter_freq',True)
-    inter_freq.add('ThreshXHigh',False)
-    inter_freq.add('ThreshXLow',False)
-    reconfig=root.add('Reconfig',False);
-    drx=reconfig.add('Drx',False);
-    drx.add('Drx_short',False);
-    drx.add('Drx_long',False);
+if __name__ == "__main__":
 
-    profile=Profile(profile_hierarchy)
+    # Create a profile
+    profile_hierarchy = ProfileHierarchy('LteRrc')
+    root = profile_hierarchy.get_root()
+    root.add('Root_leaf', False)
+    sib = root.add('Sib', False)
+    inter_freq = sib.add('Inter_freq', True)
+    inter_freq.add('ThreshXHigh', False)
+    inter_freq.add('ThreshXLow', False)
+    reconfig = root.add('Reconfig', False)
+    drx = reconfig.add('Drx', False)
+    drx.add('Drx_short', False)
+    drx.add('Drx_long', False)
 
-    res = profile.update('LteRrc:87.Reconfig.Drx',{'Drx_short':'1','Drx_long':'5'})
-    
+    profile = Profile(profile_hierarchy)
+
+    res = profile.update(
+        'LteRrc:87.Reconfig.Drx', {
+            'Drx_short': '1', 'Drx_long': '5'})
+
     print profile.query('LteRrc:87.Reconfig.Drx')
 
-    res = profile.update('LteRrc:87.Reconfig.Drx',{'Drx_long':'6'})
+    res = profile.update('LteRrc:87.Reconfig.Drx', {'Drx_long': '6'})
 
     print profile.query('LteRrc:87.Reconfig.Drx')
 
     print profile.query('LteRrc:87')
-    
-    res =  profile.update('LteRrc:86.Sib.Inter_freq:5780',{'ThreshXHigh':'1','ThreshXLow':'5'})
-    res =  profile.update('LteRrc:86.Sib.Inter_freq:1975',{'ThreshXHigh':'2','ThreshXLow':'8'})
+
+    res = profile.update(
+        'LteRrc:86.Sib.Inter_freq:5780', {
+            'ThreshXHigh': '1', 'ThreshXLow': '5'})
+    res = profile.update(
+        'LteRrc:86.Sib.Inter_freq:1975', {
+            'ThreshXHigh': '2', 'ThreshXLow': '8'})
 
     print profile.query('LteRrc:86.Sib')
 
-    profile.update('LteRrc:87',{'Root_leaf':10})
+    profile.update('LteRrc:87', {'Root_leaf': 10})
 
     print profile.query('LteRrc:87')
-
-
-
-
-
-

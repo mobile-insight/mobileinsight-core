@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Filename: analyzer.py
 """
-A event-driven analyzer abstraction, 
+A event-driven analyzer abstraction,
 including low-level msg filter and high-level analyzer
 
 Author: Yuanjie Li
@@ -28,70 +28,73 @@ class Analyzer(Element):
     """A base class for all the analyzers
     """
 
-    #Guanratee global uniqueness of analyzer
-    __analyzer_array={}    #Analyzer name --> object address
+    # Guanratee global uniqueness of analyzer
+    __analyzer_array = {}  # Analyzer name --> object address
     # logger=None
 
     def __init__(self):
         Element.__init__(self)
-        self.source=None    #trace source collector
-        #callback when source pushes messages
-        #FIXME: looks redundant with the from_list
-        self.source_callback=[]    
+        self.source = None  # trace source collector
+        # callback when source pushes messages
+        # FIXME: looks redundant with the from_list
+        self.source_callback = []
 
         # #setup the logs
         # self.set_log("",logging.INFO)
 
-        #Include itself into the global list
-        if not self.__class__.__name__ in Analyzer.__analyzer_array:
-            Analyzer.__analyzer_array[self.__class__.__name__]=self
+        # Include itself into the global list
+        if self.__class__.__name__ not in Analyzer.__analyzer_array:
+            Analyzer.__analyzer_array[self.__class__.__name__] = self
         else:
-            self.log_info("Warning: duplicate analyzer declaration: "+self.__class__.__name__)
+            self.log_info(
+                "Warning: duplicate analyzer declaration: " +
+                self.__class__.__name__)
 
-        self.__parent_analyzer=[] #a list of analyzers it depends on
+        self.__parent_analyzer = []  # a list of analyzers it depends on
 
-        #TODO: For Profile, each specific analyzer should declare it on demand
+        # TODO: For Profile, each specific analyzer should declare it on demand
 
     @staticmethod
     def reset():
         """
         Clean up all the analyzers
         """
-        Analyzer.__analyzer_array={}
-  
-    def set_source(self,source):
+        Analyzer.__analyzer_array = {}
+
+    def set_source(self, source):
         """
-        Set the source of the trace. 
+        Set the source of the trace.
         The messages from the source will drive the analysis.
 
         :param source: the source trace collector
         :param type: trace collector
         """
 
-        #Bottom-up setting: the included analyzers should be evaluated first, then top analyzer
+        # Bottom-up setting: the included analyzers should be evaluated first,
+        # then top analyzer
 
-        #Recursion for analyzers it depends on
+        # Recursion for analyzers it depends on
         for analyzer in self.from_list:
             analyzer.set_source(source)
-            
-        if self.source != None:
+
+        if self.source is not None:
             self.source.deregister(self)
         self.source = source
         source.register(self)
 
-    def add_source_callback(self,callback):
+    def add_source_callback(self, callback):
         """
-        Add a callback function to the analyzer. 
-        When a message arrives, the analyzer will trigger the callbacks for analysis. 
+        Add a callback function to the analyzer.
+        When a message arrives, the analyzer will trigger the callbacks for analysis.
 
         :param callback: the callback function to be added
         """
         if callback not in self.source_callback:
             self.source_callback.append(callback)
 
-    def rm_source_callback(self,callback):
+    def rm_source_callback(self, callback):
         """
-        Delete a callback function to the analyzer. 
+        Delete a callback function to the analyzer.
 
         :param callback: the callback function to be deleted
         """
@@ -104,22 +107,22 @@ class Analyzer(Element):
 
         :param analyzer_name: the local analyzer name
         :type analyzer_name: string
-        """    
-        res=""
+        """
+        res = ""
         for i in analyzer_name:
             if i.isupper():
                 if res:
-                    res=res+"_"+i.lower()
+                    res = res + "_" + i.lower()
                 else:
-                    res=res+i.lower()
+                    res = res + i.lower()
             else:
-                res=res+i
+                res = res + i
         return res
 
-    def include_analyzer(self,analyzer_name,callback_list,*args):
+    def include_analyzer(self, analyzer_name, callback_list, *args):
         """
         Declares the dependency from other analyzers.
-        Once declared, the current analyzer will receive events 
+        Once declared, the current analyzer will receive events
         from other analyzers, then trigger functions in callback_list
 
         :param analyzer_name: the name of analyzer to depend on
@@ -129,41 +132,52 @@ class Analyzer(Element):
 
         """
         if analyzer_name in Analyzer.__analyzer_array:
-            #Analyzer has been declared. Reuse it directly
-            self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
+            # Analyzer has been declared. Reuse it directly
+            self.from_list[Analyzer.__analyzer_array[analyzer_name]
+                           ] = callback_list
             if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                 Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
             self.__parent_analyzer.append(analyzer_name)
         else:
             try:
-                #If it's built-in analyzer, import from mobile_insight.analyzer
+                # If it's built-in analyzer, import from
+                # mobile_insight.analyzer
                 module_tmp = __import__("mobile_insight.analyzer")
-                analyzer_tmp = getattr(module_tmp.analyzer,analyzer_name)
-                Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp(*args) 
-                self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
+                analyzer_tmp = getattr(module_tmp.analyzer, analyzer_name)
+                Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp(*args)
+                self.from_list[Analyzer.__analyzer_array[analyzer_name]
+                               ] = callback_list
                 if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
-                    Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
+                    Analyzer.__analyzer_array[analyzer_name].to_list.append(
+                        self)
                 self.__parent_analyzer.append(analyzer_name)
-            except Exception, e:
-                #Not a built-in analyzer. Try to import it from local directory
+            except Exception as e:
+                # Not a built-in analyzer. Try to import it from local
+                # directory
                 try:
                     module_name = self.__get_module_name(analyzer_name)
                     module_tmp = __import__(module_name)
-                    analyzer_tmp = getattr(module_tmp,analyzer_name)
-                    Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp(*args) 
-                    self.from_list[Analyzer.__analyzer_array[analyzer_name]] = callback_list
+                    analyzer_tmp = getattr(module_tmp, analyzer_name)
+                    Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp(
+                        *args)
+                    self.from_list[Analyzer.__analyzer_array[analyzer_name]
+                                   ] = callback_list
                     if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
-                        Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
+                        Analyzer.__analyzer_array[analyzer_name].to_list.append(
+                            self)
                     self.__parent_analyzer.append(analyzer_name)
-                except Exception, e:
-                    #Either the analyzer is unavailable, or has semantic errors
-                    self.log_info("Runtime Error: unable to import "+analyzer_name)  
+                except Exception as e:
+                    # Either the analyzer is unavailable, or has semantic
+                    # errors
+                    self.log_info(
+                        "Runtime Error: unable to import " +
+                        analyzer_name)
                     import traceback
                     import sys
                     sys.exit(str(traceback.format_exc()))
 
-    def exclude_analyzer(self,analyzer_name):
-        #TODO: this API would be depreciated
+    def exclude_analyzer(self, analyzer_name):
+        # TODO: this API would be depreciated
         """
         Remove the dependency from the ananlyzer
 
@@ -172,10 +186,10 @@ class Analyzer(Element):
         """
 
         if analyzer_name in Analyzer.__analyzer_array \
-        and self in Analyzer.__analyzer_array:
+                and self in Analyzer.__analyzer_array:
             del self.from_list[Analyzer.__analyzer_array[analyzer_name]]
             Analyzer.__analyzer_array[analyzer_name].to_list.remove(self)
-            analyzer.to_list.remove(self) 
+            analyzer.to_list.remove(self)
 
             self.__parent_analyzer.remove(analyzer_name)
 
@@ -189,12 +203,12 @@ class Analyzer(Element):
         :returns: the instance of the specificed analyzer, or None if it does not exist
         """
         if analyzer_name in Analyzer.__analyzer_array \
-        and analyzer_name in self.__parent_analyzer:
+                and analyzer_name in self.__parent_analyzer:
             return Analyzer.__analyzer_array[analyzer_name]
         else:
             return None
 
-    def recv(self,module,event):
+    def recv(self, module, event):
         """
         Handle the received events.
         This is an overload member from Element
@@ -202,12 +216,13 @@ class Analyzer(Element):
         :param module: the analyzer/trace collector who raise the event
         :param event: the event to be raised
         """
-        
-        # A lambda function: input as a callback, output as passing event to this callback
-        G = lambda f: f(event) 
 
-        if module==self.source:
-            #Apply the event to all source callbacks
-            map(G,self.source_callback)
+        # A lambda function: input as a callback, output as passing event to
+        # this callback
+        def G(f): return f(event)
+
+        if module == self.source:
+            # Apply the event to all source callbacks
+            map(G, self.source_callback)
         else:
-            map(G,self.from_list[module])
+            map(G, self.from_list[module])
