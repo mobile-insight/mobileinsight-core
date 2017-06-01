@@ -13,6 +13,24 @@ import subprocess
 ANDROID_SHELL = "/system/bin/sh"
 
 #RRC_PAGING_TYPE1 = ['0x8b', '0x3', '0x0', '0x0']
+SMS_CP      = ['0x90', '0x1', '0x0', '0x0'] #400             
+MM_CM_REQ   = ['0x91', '0x1', '0x0', '0x0'] # 401             
+MM_AUTH_REQ = ['0x92', '0x1', '0x0', '0x0'] #402             
+GMM_UL      = ['0x93', '0x1', '0x0', '0x0'] #403
+                    # (gmm_identity_response)/(gmm_rau_comp)/gmm_service_req
+GMM_DL      = ['0x94', '0x1', '0x0', '0x0'] #404
+                    # (gmm_rau_accept)/gmm_service_accept
+SMS_RP      = ['0x95', '0x1', '0x0', '0x0'] #405
+CC_UL       = ['0x9e', '0x1', '0x0', '0x0'] #414
+CC_DL       = ['0x9f', '0x1', '0x0', '0x0'] #415
+SM_PDP      = ['0xa0', '0x1', '0x0', '0x0'] #416
+                    # (modify_pdp_accept/ul)
+_2G_RR      = ['0xf4', '0x1', '0x0', '0x0'] #500
+                    # (gprs_suspend_req_ul)/rr_ciphermode_command_dl/ul 
+_2G_RR_SI   = ['0xf5', '0x1', '0x0', '0x0'] #501
+_2G_RR_MEAS = ['0xf6', '0x1', '0x0', '0x0'] #502
+_2G_RR_CHNL = ['0xf7', '0x1', '0x0', '0x0'] #503    
+
 LTE_BCCH_BCH = ['0xbc', '0x2', '0x0', '0x0']
 LTE_BCCH_DL_SCH = ['0xbd', '0x2', '0x0', '0x0']
 LTE_DL_CCCH = ['0xbe', '0x2', '0x0', '0x0']
@@ -34,20 +52,34 @@ RRC_SI_SIB7 = ['0xf2', '0x3', '0x0', '0x0']
 RRC_SI_SIB11 = ['0xf6', '0x3', '0x0', '0x0']
 RRC_SI_SIB11_BIS = ['0xf7', '0x3', '0x0', '0x0']
 RRC_SI_SIB12 = ['0xf8', '0x3', '0x0', '0x0']
-RRC_SI_SIB18 = ['0xe', '0x4', '0x0', '0x0']
-RRC_SI_SIB19 = ['0xf', '0x4', '0x0', '0x0']
-RRC_SI_SIB20 = ['0x10', '0x4', '0x0', '0x0']
-RRC_BCCH_RACH = ['0x85', '0x3', '0x0', '0x0']
-RRC_DL_CCCH = ['0x86', '0x3', '0x0', '0x0']
-RRC_DL_DCCH = ['0x87', '0x3', '0x0', '0x0']
+RRC_BCCH_RACH   = ['0x85', '0x3', '0x0', '0x0']
+RRC_DL_CCCH     = ['0x86', '0x3', '0x0', '0x0']
+RRC_DL_DCCH     = ['0x87', '0x3', '0x0', '0x0']
 RRC_PAGING_TYPE1 = ['0x8b', '0x3', '0x0', '0x0']
-RRC_UL_CCCH = ['0xc0', '0x3', '0x0', '0x0']
-RRC_UL_DCCH = ['0x8d', '0x3', '0x0', '0x0']
+RRC_CONN_REQ    = ['0x8c', '0x3', '0x0', '0x0'] #908
+# RRC_UL_CCCH     = ['0xc0', '0x3', '0x0', '0x0']
+RRC_UL_DCCH     = ['0x8d', '0x3', '0x0', '0x0']
 RRC_HANDOVERTOUTRANCOMMAND = ['0x8f', '0x3', '0x0', '0x0']
 RRC_INTERRATHANDOVERINFO = ['0x90', '0x3', '0x0', '0x0']
 EMM_SERVICE_REQUEST = ['0x21', '0x3', '0x0', '0x0']
+RRC_SI_SIB18 = ['0xe', '0x4', '0x0', '0x0']
+RRC_SI_SIB19 = ['0xf', '0x4', '0x0', '0x0']
+RRC_SI_SIB20 = ['0x10', '0x4', '0x0', '0x0']
 
 global_msg_id = [
+    SMS_CP,
+    MM_CM_REQ,
+    MM_AUTH_REQ,
+    GMM_UL,
+    GMM_DL,
+    SMS_RP,
+    CC_UL,
+    CC_DL,
+    SM_PDP,
+    _2G_RR,
+    _2G_RR_SI,
+    _2G_RR_MEAS,
+    _2G_RR_CHNL,
     LTE_BCCH_BCH,
     LTE_BCCH_DL_SCH,
     LTE_DL_CCCH,
@@ -74,19 +106,37 @@ global_msg_id = [
     RRC_DL_CCCH,
     RRC_DL_DCCH,
     RRC_PAGING_TYPE1,
-    RRC_UL_CCCH,
+    RRC_CONN_REQ,
+    # RRC_UL_CCCH,
     RRC_UL_DCCH,
     RRC_HANDOVERTOUTRANCOMMAND,
     RRC_INTERRATHANDOVERINFO,
     EMM_SERVICE_REQUEST]
+
+
+
+
 global_ws_id = [
-    104,
+    0,
+    0,
+    0,
+    190,
+    190,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     203,
-    102,
-    103,
-    106,
-    100,
-    101,
+    203,
+    204,
+    201,
+    200,
+    205,
+    202,
     150,
     181,
     182,
@@ -107,6 +157,7 @@ global_ws_id = [
     103,
     106,
     100,
+    # 100,
     101,
     103,
     103,
