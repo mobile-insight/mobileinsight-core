@@ -230,7 +230,7 @@ class AndroidMuxrawMonitor(Monitor):
         """
         Return final position.
         """
-        BLOCK_SIZE = 128
+        BLOCK_SIZE = 512
         f.seek(cur_pos, 0)
         while True:
             t1 = timeit.default_timer()
@@ -269,8 +269,12 @@ class AndroidMuxrawMonitor(Monitor):
                     ##############################################
                     for msg in decoded:
                         typeid, msgstr = muxraw_parser.decode(self, msg) #self for debug
-                        packet = DMLogPacket([(None, msgstr, typeid)])
+                        if typeid == "":
+                            continue
+                        logger.log_info("lizhehan: Output: " + msgstr)
+                        logger.log_info("lizhehan: typeid: " + typeid)
 
+                        packet = DMLogPacket([(None, msgstr, typeid)])
                         event = Event(  timeit.default_timer(),
                                         typeid,
                                         packet)

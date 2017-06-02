@@ -46,6 +46,9 @@ EMM_SERVICE_REQUEST	= ['0x21', '0x3', '0x0', '0x0']
 
 global_msg_id = [LTE_BCCH_BCH,LTE_BCCH_DL_SCH,LTE_DL_CCCH,LTE_DL_DCCH,LTE_PCCH,LTE_UL_CCCH,LTE_UL_DCCH,RRC_SI_MIB,RRC_SI_SB1,RRC_SI_SB2,RRC_SI_SIB1,RRC_SI_SIB2,RRC_SI_SIB3,RRC_SI_SIB4,RRC_SI_SIB5a,RRC_SI_SIB5b,RRC_SI_SIB6,RRC_SI_SIB7,RRC_SI_SIB11,RRC_SI_SIB12,RRC_SI_SIB18,RRC_SI_SIB19,RRC_SI_SIB20,RRC_DL_CCCH,RRC_DL_DCCH,RRC_PAGING_TYPE1,RRC_UL_CCCH,RRC_UL_DCCH,RRC_HANDOVERTOUTRANCOMMAND,RRC_INTERRATHANDOVERINFO,EMM_SERVICE_REQUEST]
 global_ws_id = [104,203,102,103,106,100,101,150,181,182,151,152,153,154,155,155,156,157,161,162,168,169,170,102,103,106,100,101,103,103,250]
+global_msg_str = ["LTE_BCCH_BCH","LTE_BCCH_DL_SCH","LTE_DL_CCCH","LTE_DL_DCCH","LTE_PCCH","LTE_UL_CCCH","LTE_UL_DCCH","RRC_SI_MIB","RRC_SI_SB1","RRC_SI_SB2","RRC_SI_SIB1","RRC_SI_SIB2","RRC_SI_SIB3","RRC_SI_SIB4","RRC_SI_SIB5a","RRC_SI_SIB5b","RRC_SI_SIB6","RRC_SI_SIB7","RRC_SI_SIB11","RRC_SI_SIB12","RRC_SI_SIB18","RRC_SI_SIB19","RRC_SI_SIB20","RRC_DL_CCCH","RRC_DL_DCCH","RRC_PAGING_TYPE1","RRC_UL_CCCH","RRC_UL_DCCH","RRC_HANDOVERTOUTRANCOMMAND","RRC_INTERRATHANDOVERINFO","EMM_SERVICE_REQUEST"]
+global_msg_ = ["LTE_BCCH_BCH","LTE_BCCH_DL_SCH","LTE_RRC_OTA_Packet","LTE_RRC_OTA_Packet","LTE_PCCH","LTE_RRC_OTA_Packet","LTE_RRC_OTA_Packet","RRC_SI_MIB","RRC_SI_SB1","RRC_SI_SB2","RRC_SI_SIB1","RRC_SI_SIB2","RRC_SI_SIB3","RRC_SI_SIB4","RRC_SI_SIB5a","RRC_SI_SIB5b","RRC_SI_SIB6","RRC_SI_SIB7","RRC_SI_SIB11","RRC_SI_SIB12","RRC_SI_SIB18","RRC_SI_SIB19","RRC_SI_SIB20","RRC_DL_CCCH","RRC_DL_DCCH","RRC_PAGING_TYPE1","RRC_UL_CCCH","RRC_UL_DCCH","RRC_HANDOVERTOUTRANCOMMAND","RRC_INTERRATHANDOVERINFO","EMM_SERVICE_REQUEST"]
+
 
 muxraw_parser_buff = []  # store bytes in current section
 first_header = False
@@ -77,17 +80,18 @@ def decode(logger, raw_msg):
     decode raw_msg and return the typeid, xml (for decoded message)
     """
     msg_id = int(raw_msg[0][3], 16)
+    if msg_id > 103 or msg_id < 100:
+        return "",""
     msg =  "\\" + "\\".join([j[1:] for j in raw_msg[0]])
     logger.log_info("lizhehan: Receive message: " + msg)
-    output = msg
+    # output = msg
     p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     output,err = p.communicate("echo -ne \'" + msg + "\' | LD_LIBRARY_PATH=" + logger.libs_path + ' ' + logger.ws_dissector_path + '\n')
     p.wait()
     return_code, output = commands.getstatusoutput("echo -ne " + msg +" | LD_LIBRARY_PATH=/data/data/edu.ucla.cs.wing.mobileinsight/files/data/ /data/data/edu.ucla.cs.wing.mobileinsight/files/data/android_pie_ws_dissector")
-    logger.log_info("lizhehan: Output: " + str(len(output)) + "  |  " + output)
-    # FIXME: to be replaced with real message type ID
+    # logger.log_info("lizhehan: Output: " + str(len(output)) + "  |  " + output)
     # I have msg_id
-    return "LTE_RRC_OTA_Packet",output
+    return global_msg[global_msg_id.index(msg_id)],output
 
 def last_seek():
     global muxraw_parser_buff
@@ -158,20 +162,14 @@ def parse_muxraw_magic(filename):
 
 if __name__ == "__main__":
 
-    filename = sys.argv[1]
-    # filename = "./test_logs/MDLog1_2016_1119_175748.muxraw"
-    # print "Processing ", filename
-    # raw_msg_list = parse_muxraw(filename)
-    raw_msg_list = parse_muxraw_magic(filename)
-    msg_list = []
-    # print len(raw_msg_list)
-
-    if raw_msg_list != []:
-        for i in raw_msg_list:
-            output =  "\\" + "\\".join([j[1:] for j in i[0]])
-            msg_list.append(output)
-            print output
-    # print msg_list
+    for i in range(len(global_ws_id)):
+        print global_ws_id[i], global_msg_str[i]
+    # filename = sys.argv[1]
+    # raw_msg_list = parse_muxraw_magic(filename)
+    # msg_list = []
+    #
     # if raw_msg_list != []:
-    #     for msg in raw_msg_list:
-    #         print decode(msg)
+    #     for i in raw_msg_list:
+    #         output =  "\\" + "\\".join([j[1:] for j in i[0]])
+    #         msg_list.append(output)
+    #         print output
