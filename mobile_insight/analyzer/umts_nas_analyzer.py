@@ -8,9 +8,9 @@ Author: Yuanjie Li
 Author: Zengwen Yuan
 """
 
-try: 
-    import xml.etree.cElementTree as ET 
-except ImportError: 
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
     import xml.etree.ElementTree as ET
 from analyzer import *
 import timeit
@@ -21,7 +21,7 @@ from profile import Profile, ProfileHierarchy
 from nas_util import *
 
 
-__all__=["UmtsNasAnalyzer"]
+__all__ = ["UmtsNasAnalyzer"]
 
 
 class UmtsNasAnalyzer(ProtocolAnalyzer):
@@ -33,7 +33,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
     def __init__(self):
 
         ProtocolAnalyzer.__init__(self)
-        #init packet filters
+        # init packet filters
         self.add_source_callback(self.__nas_filter)
 
         self.__mm_status = MmStatus()
@@ -48,21 +48,20 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         '''
         return UmtsNasProfileHierarchy()
 
-    def set_source(self,source):
+    def set_source(self, source):
         """
         Set the trace source. Enable the LTE NAS messages.
 
         :param source: the trace source (collector).
         """
-        Analyzer.set_source(self,source)
-        #Enable MM/GMM/CM/SM logs
+        Analyzer.set_source(self, source)
+        # Enable MM/GMM/CM/SM logs
         source.enable_log("UMTS_NAS_OTA_Packet")
         source.enable_log("UMTS_NAS_GMM_State")
         source.enable_log("UMTS_NAS_MM_State")
         source.enable_log("UMTS_NAS_MM_REG_State")
 
-    def __nas_filter(self,msg):
-
+    def __nas_filter(self, msg):
         """
         Filter all NAS(MM/GMM/CM/SM) packets, and call functions to process it
 
@@ -72,24 +71,20 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         if msg.type_id == "UMTS_NAS_MM_State":
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
-            raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
+            raw_msg = Event(msg.timestamp, msg.type_id, log_item_dict)
             self.__callback_mm_state(raw_msg)
-
 
         if msg.type_id == "UMTS_NAS_MM_REG_State":
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
-            raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
+            raw_msg = Event(msg.timestamp, msg.type_id, log_item_dict)
             self.__callback_mm_reg_state(raw_msg)
 
-    
         if msg.type_id == "UMTS_NAS_GMM_State":
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
-            raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
+            raw_msg = Event(msg.timestamp, msg.type_id, log_item_dict)
             self.__callback_gmm_state(raw_msg)
-
-
 
         if msg.type_id == "UMTS_NAS_OTA_Packet":
             # log_item = msg.data
@@ -100,12 +95,12 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
             if 'Msg' not in log_item_dict:
                 return
 
-            #Convert msg to xml format
+            # Convert msg to xml format
             log_xml = ET.XML(log_item_dict['Msg'])
-            xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
+            xml_msg = Event(msg.timestamp, msg.type_id, log_xml)
             self.__callback_nas(xml_msg)
 
-    def __callback_mm_state(self,msg):
+    def __callback_mm_state(self, msg):
         """
         Given the MM message, update MM state and substate.
 
@@ -117,7 +112,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
 
         self.log_info(self.__mm_status.dump())
 
-    def __callback_mm_reg_state(self,msg):
+    def __callback_mm_reg_state(self, msg):
         """
         Given the MM message, update MM state and substate.
 
@@ -131,7 +126,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
 
         self.log_info(self.__mm_status.dump())
 
-    def __callback_gmm_state(self,msg):
+    def __callback_gmm_state(self, msg):
         """
         Given the GMM message, update GMM state and substate.
 
@@ -146,7 +141,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         self.__gmm_status.substate = msg.data['GMM Substate']
         self.__gmm_status.update_status = msg.data['GMM Update Status']
 
-    def __callback_nas(self,msg):
+    def __callback_nas(self, msg):
         """
         Extrace MM status and configurations from the NAS messages
 
@@ -154,7 +149,8 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         """
 
         # for proto in msg.data.iter('proto'):
-        #     if proto.get('name') == "gsm_a.dtap": #GSM A-I/F DTAP - Location Updating Request
+        # if proto.get('name') == "gsm_a.dtap": #GSM A-I/F DTAP - Location
+        # Updating Request
         for field in msg.data.iter('field'):
             if field.get('show') == "DRX Parameter":
                 field_val = {}
@@ -168,13 +164,15 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
 
-                self.__mm_nas_status.drx.split_pg_cycle_code = field_val["gsm_a.gm.gmm.split_pg_cycle_code"]
-                self.__mm_nas_status.drx.cn_spec_drx_cycle_len_coef = field_val["gsm_a.gm.gmm.cn_spec_drx_cycle_len_coef"]
+                self.__mm_nas_status.drx.split_pg_cycle_code = field_val[
+                    "gsm_a.gm.gmm.split_pg_cycle_code"]
+                self.__mm_nas_status.drx.cn_spec_drx_cycle_len_coef = field_val[
+                    "gsm_a.gm.gmm.cn_spec_drx_cycle_len_coef"]
                 self.__mm_nas_status.drx.split_on_ccch = field_val["gsm_a.gm.gmm.split_on_ccch"]
                 self.__mm_nas_status.drx.non_drx_timer = field_val["gsm_a.gm.gmm.non_drx_timer"]
 
             if field.get('show') == "Quality Of Service - New QoS" \
-            or field.get('show') == "Quality Of Service - Negotiated QoS":
+                    or field.get('show') == "Quality Of Service - Negotiated QoS":
                 field_val = {}
 
                 # Default value setting
@@ -208,28 +206,44 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
                     if "Maximum SDU size" in val.get('show'):
-                        field_val["gsm_a.gm.`sm.qos.max_sdu"] = val.get('value')
+                        field_val["gsm_a.gm.`sm.qos.max_sdu"] = val.get(
+                            'value')
 
                 # 10.5.6.5, TS24.008
-                self.__mm_nas_status.qos_negotiated.delay_class = int(field_val['gsm_a.gm.sm.qos.delay_cls'])
-                self.__mm_nas_status.qos_negotiated.reliability_class = int(field_val['gsm_a.gm.sm.qos.reliability_cls'])
-                self.__mm_nas_status.qos_negotiated.peak_throughput = 1000 * pow(2, int(field_val["gsm_a.gm.sm.qos.peak_throughput"]) - 1)
-                self.__mm_nas_status.qos_negotiated.precedence_class = int(field_val['gsm_a.gm.sm.qos.prec_class'])
-                self.__mm_nas_status.qos_negotiated.mean_throughput = mean_tput[int(field_val["gsm_a.gm.sm.qos.mean_throughput"])]
-                self.__mm_nas_status.qos_negotiated.traffic_class = int(field_val['gsm_a.gm.sm.qos.traffic_cls'])
-                self.__mm_nas_status.qos_negotiated.delivery_order = int(field_val['gsm_a.gm.sm.qos.del_order'])
-                self.__mm_nas_status.qos_negotiated.traffic_handling_priority = int(field_val['gsm_a.gm.sm.qos.traff_hdl_pri'])
-                self.__mm_nas_status.qos_negotiated.residual_ber = residual_ber[int(field_val['gsm_a.gm.sm.qos.ber'])]
-                self.__mm_nas_status.qos_negotiated.transfer_delay = trans_delay(int(field_val['gsm_a.gm.sm.qos.trans_delay']))
-                self.__mm_nas_status.qos_negotiated.max_bitrate_ulink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl']))
-                self.__mm_nas_status.qos_negotiated.max_bitrate_dlink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl']))
-                self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_ulink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl']))
-                self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl']))
+                self.__mm_nas_status.qos_negotiated.delay_class = int(
+                    field_val['gsm_a.gm.sm.qos.delay_cls'])
+                self.__mm_nas_status.qos_negotiated.reliability_class = int(
+                    field_val['gsm_a.gm.sm.qos.reliability_cls'])
+                self.__mm_nas_status.qos_negotiated.peak_throughput = 1000 * \
+                    pow(2, int(field_val["gsm_a.gm.sm.qos.peak_throughput"]) - 1)
+                self.__mm_nas_status.qos_negotiated.precedence_class = int(
+                    field_val['gsm_a.gm.sm.qos.prec_class'])
+                self.__mm_nas_status.qos_negotiated.mean_throughput = mean_tput[int(
+                    field_val["gsm_a.gm.sm.qos.mean_throughput"])]
+                self.__mm_nas_status.qos_negotiated.traffic_class = int(
+                    field_val['gsm_a.gm.sm.qos.traffic_cls'])
+                self.__mm_nas_status.qos_negotiated.delivery_order = int(
+                    field_val['gsm_a.gm.sm.qos.del_order'])
+                self.__mm_nas_status.qos_negotiated.traffic_handling_priority = int(
+                    field_val['gsm_a.gm.sm.qos.traff_hdl_pri'])
+                self.__mm_nas_status.qos_negotiated.residual_ber = residual_ber[int(
+                    field_val['gsm_a.gm.sm.qos.ber'])]
+                self.__mm_nas_status.qos_negotiated.transfer_delay = trans_delay(
+                    int(field_val['gsm_a.gm.sm.qos.trans_delay']))
+                self.__mm_nas_status.qos_negotiated.max_bitrate_ulink = max_bitrate(
+                    int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl']))
+                self.__mm_nas_status.qos_negotiated.max_bitrate_dlink = max_bitrate(
+                    int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl']))
+                self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_ulink = max_bitrate(
+                    int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl']))
+                self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink = max_bitrate(
+                    int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl']))
                 # self.__mm_nas_status.qos_negotiated.max_bitrate_ulink_ext = max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl_ext']))
-                self.__mm_nas_status.qos_negotiated.max_bitrate_dlink_ext = max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
+                self.__mm_nas_status.qos_negotiated.max_bitrate_dlink_ext = max_bitrate_ext(
+                    int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
                 # self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_ulink_ext = max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl_ext']))
-                self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink_ext = max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
-
+                self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink_ext = max_bitrate_ext(
+                    int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
                 # self.__mm_nas_status.qos_negotiated.del_of_err_sdu = field_val["gsm_a.gm.sm.qos.del_of_err_sdu"]
                 # self.__mm_nas_status.qos_negotiated.max_sdu = field_val["gsm_a.gm.sm.qos.max_sdu"]
@@ -240,34 +254,34 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
 
                 self.log_info(self.__mm_nas_status.dump())
                 # profile update for esm qos
-                self.profile.update("UmtsNasProfile:"+xstr(self.__mm_status.profile_id())+".pdp.qos",
-                    {
-                    'delay_class':xstr(self.__mm_nas_status.qos_negotiated.delay_class),
-                    'reliability_class':xstr(self.__mm_nas_status.qos_negotiated.reliability_class),
-                    'precedence_class':xstr(self.__mm_nas_status.qos_negotiated.precedence_class),
-                    'peak_tput':xstr(self.__mm_nas_status.qos_negotiated.peak_throughput),
-                    'mean_tput':xstr(self.__mm_nas_status.qos_negotiated.mean_throughput),
-                    'traffic_class':xstr(self.__mm_nas_status.qos_negotiated.traffic_class),
-                    'delivery_order':xstr(self.__mm_nas_status.qos_negotiated.delivery_order),
-                    'traffic_handling_priority':xstr(self.__mm_nas_status.qos_negotiated.traffic_handling_priority),
-                    'residual_ber':xstr(self.__mm_nas_status.qos_negotiated.residual_ber),
-                    'transfer_delay':xstr(self.__mm_nas_status.qos_negotiated.transfer_delay),
-                    'max_bitrate_ulink':xstr(self.__mm_nas_status.qos_negotiated.max_bitrate_ulink),
-                    'max_bitrate_dlink':xstr(self.__mm_nas_status.qos_negotiated.max_bitrate_dlink),
-                    'guaranteed_bitrate_ulink':xstr(self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_ulink),
-                    'guaranteed_bitrate_dlink':xstr(self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink),
+                self.profile.update("UmtsNasProfile:" + xstr(self.__mm_status.profile_id()) + ".pdp.qos",
+                                    {
+                    'delay_class': xstr(self.__mm_nas_status.qos_negotiated.delay_class),
+                    'reliability_class': xstr(self.__mm_nas_status.qos_negotiated.reliability_class),
+                    'precedence_class': xstr(self.__mm_nas_status.qos_negotiated.precedence_class),
+                    'peak_tput': xstr(self.__mm_nas_status.qos_negotiated.peak_throughput),
+                    'mean_tput': xstr(self.__mm_nas_status.qos_negotiated.mean_throughput),
+                    'traffic_class': xstr(self.__mm_nas_status.qos_negotiated.traffic_class),
+                    'delivery_order': xstr(self.__mm_nas_status.qos_negotiated.delivery_order),
+                    'traffic_handling_priority': xstr(self.__mm_nas_status.qos_negotiated.traffic_handling_priority),
+                    'residual_ber': xstr(self.__mm_nas_status.qos_negotiated.residual_ber),
+                    'transfer_delay': xstr(self.__mm_nas_status.qos_negotiated.transfer_delay),
+                    'max_bitrate_ulink': xstr(self.__mm_nas_status.qos_negotiated.max_bitrate_ulink),
+                    'max_bitrate_dlink': xstr(self.__mm_nas_status.qos_negotiated.max_bitrate_dlink),
+                    'guaranteed_bitrate_ulink': xstr(self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_ulink),
+                    'guaranteed_bitrate_dlink': xstr(self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink),
                     # 'max_bitrate_ulink_ext':xstr(self.__mm_nas_status.qos_negotiated.max_bitrate_ulink_ext),
-                    'max_bitrate_dlink_ext':xstr(self.__mm_nas_status.qos_negotiated.max_bitrate_dlink_ext),
+                    'max_bitrate_dlink_ext': xstr(self.__mm_nas_status.qos_negotiated.max_bitrate_dlink_ext),
                     # 'guaranteed_bitrate_ulink_ext':xstr(self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_ulink_ext),
-                    'guaranteed_bitrate_dlink_ext':xstr(self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink_ext),
-                    })
+                    'guaranteed_bitrate_dlink_ext': xstr(self.__mm_nas_status.qos_negotiated.guaranteed_bitrate_dlink_ext),
+                })
 
             if "Mobile Identity - TMSI/P-TMSI" in field.get('show'):
                 field_val = {}
 
                 # Default value setting
                 field_val["gsm_a.len"] = None
-                field_val["gsm_a.unused"] = None 
+                field_val["gsm_a.unused"] = None
                 field_val["gsm_a.oddevenind"] = None
                 field_val["gsm_a.ie.mobileid.type"] = None
                 field_val["gsm_a.tmsi"] = None
@@ -293,7 +307,8 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                 # field_val["gsm_a.spare_bits"] = None
                 field_val["gsm_a.gm.sm.qos.prec_class"] = None
                 # field_val["gsm_a.spare_bits"] = None
-                field_val["gsm_a.gm.sm.qos.mean_throughput"] = 31 #best-effort by default
+                # best-effort by default
+                field_val["gsm_a.gm.sm.qos.mean_throughput"] = 31
                 field_val["gsm_a.gm.sm.qos.traffic_cls"] = None
                 field_val["gsm_a.gm.sm.qos.del_order"] = None
                 # field_val["gsm_a.gm.sm.qos.del_of_err_sdu"] = None
@@ -318,44 +333,60 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                         field_val["gsm_a.gm.sm.qos.max_sdu"] = val.get('value')
 
                 # 10.5.6.5, TS24.008
-                self.__mm_nas_status.qos_requested.delay_class = int(field_val['gsm_a.gm.sm.qos.delay_cls'])
-                self.__mm_nas_status.qos_requested.reliability_class = int(field_val['gsm_a.gm.sm.qos.reliability_cls'])
-                self.__mm_nas_status.qos_requested.peak_throughput = 1000 * pow(2, int(field_val["gsm_a.gm.sm.qos.peak_throughput"]) - 1)
-                self.__mm_nas_status.qos_requested.precedence_class = int(field_val['gsm_a.gm.sm.qos.prec_class'])
-                self.__mm_nas_status.qos_requested.mean_throughput = mean_tput[int(field_val["gsm_a.gm.sm.qos.mean_throughput"])]
-                self.__mm_nas_status.qos_requested.traffic_class = int(field_val['gsm_a.gm.sm.qos.traffic_cls'])
-                self.__mm_nas_status.qos_requested.delivery_order = int(field_val['gsm_a.gm.sm.qos.del_order'])
-                self.__mm_nas_status.qos_requested.traffic_handling_priority = int(field_val['gsm_a.gm.sm.qos.traff_hdl_pri'])
-                self.__mm_nas_status.qos_requested.residual_ber = residual_ber[int(field_val['gsm_a.gm.sm.qos.ber'])]
-                self.__mm_nas_status.qos_requested.transfer_delay = trans_delay(int(field_val['gsm_a.gm.sm.qos.trans_delay']))
-                self.__mm_nas_status.qos_requested.max_bitrate_ulink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl']))
-                self.__mm_nas_status.qos_requested.max_bitrate_dlink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl']))
-                self.__mm_nas_status.qos_requested.guaranteed_bitrate_ulink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl']))
-                self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink = max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl']))
-                self.__mm_nas_status.qos_requested.max_bitrate_dlink_ext = max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
-                self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink_ext = max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
+                self.__mm_nas_status.qos_requested.delay_class = int(
+                    field_val['gsm_a.gm.sm.qos.delay_cls'])
+                self.__mm_nas_status.qos_requested.reliability_class = int(
+                    field_val['gsm_a.gm.sm.qos.reliability_cls'])
+                self.__mm_nas_status.qos_requested.peak_throughput = 1000 * \
+                    pow(2, int(field_val["gsm_a.gm.sm.qos.peak_throughput"]) - 1)
+                self.__mm_nas_status.qos_requested.precedence_class = int(
+                    field_val['gsm_a.gm.sm.qos.prec_class'])
+                self.__mm_nas_status.qos_requested.mean_throughput = mean_tput[int(
+                    field_val["gsm_a.gm.sm.qos.mean_throughput"])]
+                self.__mm_nas_status.qos_requested.traffic_class = int(
+                    field_val['gsm_a.gm.sm.qos.traffic_cls'])
+                self.__mm_nas_status.qos_requested.delivery_order = int(
+                    field_val['gsm_a.gm.sm.qos.del_order'])
+                self.__mm_nas_status.qos_requested.traffic_handling_priority = int(
+                    field_val['gsm_a.gm.sm.qos.traff_hdl_pri'])
+                self.__mm_nas_status.qos_requested.residual_ber = residual_ber[int(
+                    field_val['gsm_a.gm.sm.qos.ber'])]
+                self.__mm_nas_status.qos_requested.transfer_delay = trans_delay(
+                    int(field_val['gsm_a.gm.sm.qos.trans_delay']))
+                self.__mm_nas_status.qos_requested.max_bitrate_ulink = max_bitrate(
+                    int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl']))
+                self.__mm_nas_status.qos_requested.max_bitrate_dlink = max_bitrate(
+                    int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl']))
+                self.__mm_nas_status.qos_requested.guaranteed_bitrate_ulink = max_bitrate(
+                    int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl']))
+                self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink = max_bitrate(
+                    int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl']))
+                self.__mm_nas_status.qos_requested.max_bitrate_dlink_ext = max_bitrate_ext(
+                    int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
+                self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink_ext = max_bitrate_ext(
+                    int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
-                self.profile.update("UmtsNasProfile:"+xstr(self.__mm_status.profile_id())+".pdp.qos",
-                    {
-                    'delay_class':xstr(self.__mm_nas_status.qos_requested.delay_class),
-                    'reliability_class':xstr(self.__mm_nas_status.qos_requested.reliability_class),
-                    'precedence_class':xstr(self.__mm_nas_status.qos_requested.precedence_class),
-                    'peak_tput':xstr(self.__mm_nas_status.qos_requested.peak_throughput),
-                    'mean_tput':xstr(self.__mm_nas_status.qos_requested.mean_throughput),
-                    'traffic_class':xstr(self.__mm_nas_status.qos_requested.traffic_class),
-                    'delivery_order':xstr(self.__mm_nas_status.qos_requested.delivery_order),
-                    'traffic_handling_priority':xstr(self.__mm_nas_status.qos_requested.traffic_handling_priority),
-                    'residual_ber':xstr(self.__mm_nas_status.qos_requested.residual_ber),
-                    'transfer_delay':xstr(self.__mm_nas_status.qos_requested.transfer_delay),
-                    'max_bitrate_ulink':xstr(self.__mm_nas_status.qos_requested.max_bitrate_ulink),
-                    'max_bitrate_dlink':xstr(self.__mm_nas_status.qos_requested.max_bitrate_dlink),
+                self.profile.update("UmtsNasProfile:" + xstr(self.__mm_status.profile_id()) + ".pdp.qos",
+                                    {
+                    'delay_class': xstr(self.__mm_nas_status.qos_requested.delay_class),
+                    'reliability_class': xstr(self.__mm_nas_status.qos_requested.reliability_class),
+                    'precedence_class': xstr(self.__mm_nas_status.qos_requested.precedence_class),
+                    'peak_tput': xstr(self.__mm_nas_status.qos_requested.peak_throughput),
+                    'mean_tput': xstr(self.__mm_nas_status.qos_requested.mean_throughput),
+                    'traffic_class': xstr(self.__mm_nas_status.qos_requested.traffic_class),
+                    'delivery_order': xstr(self.__mm_nas_status.qos_requested.delivery_order),
+                    'traffic_handling_priority': xstr(self.__mm_nas_status.qos_requested.traffic_handling_priority),
+                    'residual_ber': xstr(self.__mm_nas_status.qos_requested.residual_ber),
+                    'transfer_delay': xstr(self.__mm_nas_status.qos_requested.transfer_delay),
+                    'max_bitrate_ulink': xstr(self.__mm_nas_status.qos_requested.max_bitrate_ulink),
+                    'max_bitrate_dlink': xstr(self.__mm_nas_status.qos_requested.max_bitrate_dlink),
                     # 'guaranteed_bitrate_ulink':xstr(self.__mm_nas_status.qos_requested.guaranteed_bitrate_ulink),
-                    'guaranteed_bitrate_dlink':xstr(self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink),
+                    'guaranteed_bitrate_dlink': xstr(self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink),
                     # 'max_bitrate_ulink_ext':xstr(self.__mm_nas_status.qos_requested.max_bitrate_ulink_ext),
-                    'max_bitrate_dlink_ext':xstr(self.__mm_nas_status.qos_requested.max_bitrate_dlink_ext),
+                    'max_bitrate_dlink_ext': xstr(self.__mm_nas_status.qos_requested.max_bitrate_dlink_ext),
                     # 'guaranteed_bitrate_ulink_ext':xstr(self.__mm_nas_status.qos_requested.guaranteed_bitrate_ulink_ext),
-                    'guaranteed_bitrate_dlink_ext':xstr(self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink_ext),
-                    })
+                    'guaranteed_bitrate_dlink_ext': xstr(self.__mm_nas_status.qos_requested.guaranteed_bitrate_dlink_ext),
+                })
             # TODO:
             # show="MS Network Capability"
             # show="Attach Type"
@@ -369,24 +400,27 @@ class GmmStatus:
     """
     An abstraction to maintain the GMM status.
     """
+
     def __init__(self):
         self.state = None
         self.substate = None
         self.update_status = None
 
+
 class MmStatus:
     """
     An abstraction to maintain the MM status.
     """
+
     def __init__(self):
         self.state = None
         self.substate = None
         self.update_status = None
-        self.plmn=None
-        self.lac=None
-        self.rac=None
-        self.operation_mode=None
-        self.service_type=None
+        self.plmn = None
+        self.lac = None
+        self.rac = None
+        self.operation_mode = None
+        self.service_type = None
 
     def profile_id(self):
         """
@@ -396,25 +430,25 @@ class MmStatus:
             return None
         else:
             return (str(self.plmn)
-                + '-' + str(self.lac)
-                + '-' + str(self.rac))
+                    + '-' + str(self.lac)
+                    + '-' + str(self.rac))
 
     def dump(self):
-    	"""
+        """
         Report the MM status
 
         :returns: a string that encodes MM status
         """
 
         return (self.__class__.__name__
-            + ' MM.state='+xstr(self.state) 
-            + ' MM.substate='+xstr(self.substate)
-            + ' MM.update_status='+xstr(self.update_status)
-            + ' PLMN=' + xstr(self.plmn)
-            + ' LAC=' + xstr(self.lac)
-            + ' RAC=' + xstr(self.rac)
-            + ' Network_operation_mode=' + xstr(self.operation_mode)
-            + ' CS/PS_service_type=' + xstr(self.service_type))
+                + ' MM.state=' + xstr(self.state)
+                + ' MM.substate=' + xstr(self.substate)
+                + ' MM.update_status=' + xstr(self.update_status)
+                + ' PLMN=' + xstr(self.plmn)
+                + ' LAC=' + xstr(self.lac)
+                + ' RAC=' + xstr(self.rac)
+                + ' Network_operation_mode=' + xstr(self.operation_mode)
+                + ' CS/PS_service_type=' + xstr(self.service_type))
 
 
 class MmNasStatusDrx:
@@ -423,6 +457,7 @@ class MmNasStatusDrx:
         self.cn_spec_drx_cycle_len_coef = None
         self.split_on_ccch = None
         self.non_drx_timer = None
+
 
 class MmNasQosNegotiated:
     def __init__(self):
@@ -448,22 +483,33 @@ class MmNasQosNegotiated:
         Report the data rate profile in ESM QoS, including the peak/mean throughput,
         maximum downlink/uplink data rate, guaranteed downlink/uplink data rate, etc.
 
-        :returns: a string that encodes all the data rate 
+        :returns: a string that encodes all the data rate
         :rtype: string
         """
-        return (self.__class__.__name__ 
-            + ' peak_tput=' + xstr(self.peak_throughput) + ' mean_tput=' + xstr(self.mean_throughput)
-            + ' max_bitrate_ulink=' + xstr(self.max_bitrate_ulink) + ' max_bitrate_dlink=' + xstr(self.max_bitrate_dlink)
-            + ' guaranteed_birate_ulink=' + xstr(self.guaranteed_bitrate_ulink) + ' guaranteed_birate_dlink=' + xstr(self.guaranteed_bitrate_dlink)
-            + ' max_bitrate_dlink_ext=' + xstr(self.max_bitrate_dlink_ext)
-            + ' guaranteed_birate_dlink_ext=' + xstr(self.guaranteed_bitrate_dlink_ext))
+        return (self.__class__.__name__ +
+                ' peak_tput=' +
+                xstr(self.peak_throughput) +
+                ' mean_tput=' +
+                xstr(self.mean_throughput) +
+                ' max_bitrate_ulink=' +
+                xstr(self.max_bitrate_ulink) +
+                ' max_bitrate_dlink=' +
+                xstr(self.max_bitrate_dlink) +
+                ' guaranteed_birate_ulink=' +
+                xstr(self.guaranteed_bitrate_ulink) +
+                ' guaranteed_birate_dlink=' +
+                xstr(self.guaranteed_bitrate_dlink) +
+                ' max_bitrate_dlink_ext=' +
+                xstr(self.max_bitrate_dlink_ext) +
+                ' guaranteed_birate_dlink_ext=' +
+                xstr(self.guaranteed_bitrate_dlink_ext))
 
     def dump_delivery(self):
         """
         Report the delivery profile in ESM QoS, including delivery order guarantee,
         traffic class, delay class, transfer delay, etc.
 
-        :returns: a string that encodes all the data rate, or None if not ready 
+        :returns: a string that encodes all the data rate, or None if not ready
         :rtype: string
         """
         if self.delivery_order:
@@ -474,10 +520,19 @@ class MmNasQosNegotiated:
             tra_class = traffic_class[self.traffic_class]
         else:
             tra_class = None
-        return (self.__class__.__name__
-            + ' delivery_order=' + xstr(order)
-            + ' traffic_class=' + xstr(tra_class)
-            + ' transfer_delay=' + xstr(self.transfer_delay) + ' residual_BER=' + xstr(self.residual_ber))
+        return (
+            self.__class__.__name__ +
+            ' delivery_order=' +
+            xstr(order) +
+            ' traffic_class=' +
+            xstr(tra_class) +
+            ' transfer_delay=' +
+            xstr(
+                self.transfer_delay) +
+            ' residual_BER=' +
+            xstr(
+                self.residual_ber))
+
 
 class MmNasQosRequested:
     def __init__(self):
@@ -503,22 +558,33 @@ class MmNasQosRequested:
         Report the data rate profile in ESM QoS, including the peak/mean throughput,
         maximum downlink/uplink data rate, guaranteed downlink/uplink data rate, etc.
 
-        :returns: a string that encodes all the data rate 
+        :returns: a string that encodes all the data rate
         :rtype: string
         """
-        return (self.__class__.__name__ 
-            + ' peak_tput=' + xstr(self.peak_throughput) + ' mean_tput=' + xstr(self.mean_throughput)
-            + ' max_bitrate_ulink=' + xstr(self.max_bitrate_ulink) + ' max_bitrate_dlink=' + xstr(self.max_bitrate_dlink)
-            + ' guaranteed_birate_ulink=' + xstr(self.guaranteed_bitrate_ulink) + ' guaranteed_birate_dlink=' + xstr(self.guaranteed_bitrate_dlink)
-            + ' max_bitrate_dlink_ext=' + xstr(self.max_bitrate_dlink_ext)
-            + ' guaranteed_birate_dlink_ext=' + xstr(self.guaranteed_bitrate_dlink_ext))
+        return (self.__class__.__name__ +
+                ' peak_tput=' +
+                xstr(self.peak_throughput) +
+                ' mean_tput=' +
+                xstr(self.mean_throughput) +
+                ' max_bitrate_ulink=' +
+                xstr(self.max_bitrate_ulink) +
+                ' max_bitrate_dlink=' +
+                xstr(self.max_bitrate_dlink) +
+                ' guaranteed_birate_ulink=' +
+                xstr(self.guaranteed_bitrate_ulink) +
+                ' guaranteed_birate_dlink=' +
+                xstr(self.guaranteed_bitrate_dlink) +
+                ' max_bitrate_dlink_ext=' +
+                xstr(self.max_bitrate_dlink_ext) +
+                ' guaranteed_birate_dlink_ext=' +
+                xstr(self.guaranteed_bitrate_dlink_ext))
 
     def dump_delivery(self):
         """
         Report the delivery profile in ESM QoS, including delivery order guarantee,
         traffic class, delay class, transfer delay, etc.
 
-        :returns: a string that encodes all the data rate, or None if not ready 
+        :returns: a string that encodes all the data rate, or None if not ready
         :rtype: string
         """
         if self.delivery_order:
@@ -529,11 +595,22 @@ class MmNasQosRequested:
             tra_class = traffic_class[self.traffic_class]
         else:
             tra_class = None
-        return (self.__class__.__name__
-            + ' delivery_order=' + xstr(order)
-            + ' traffic_class=' + xstr(tra_class)
-            + ' delay_class=' + xstr(self.delay_class)
-            + ' transfer_delay=' + xstr(self.transfer_delay) + ' residual_BER=' + xstr(self.residual_ber))
+        return (
+            self.__class__.__name__ +
+            ' delivery_order=' +
+            xstr(order) +
+            ' traffic_class=' +
+            xstr(tra_class) +
+            ' delay_class=' +
+            xstr(
+                self.delay_class) +
+            ' transfer_delay=' +
+            xstr(
+                self.transfer_delay) +
+            ' residual_BER=' +
+            xstr(
+                self.residual_ber))
+
 
 class MmNasTmsi:
     def __init__(self):
@@ -548,16 +625,20 @@ class MmNasStatus:
     """
     An abstraction to maintain the MM NAS status.
     """
+
     def __init__(self):
         self.drx = MmNasStatusDrx()
-        self.qos_negotiated = MmNasQosNegotiated ()
-        self.qos_requested= MmNasQosRequested()
+        self.qos_negotiated = MmNasQosNegotiated()
+        self.qos_requested = MmNasQosRequested()
         self.tmsi = MmNasTmsi()
 
     def dump(self):
-        return (self.__class__.__name__      
-            + ":\n\t"+self.qos_negotiated.dump_rate()+'\n\t'+self.qos_negotiated.dump_delivery())
-
+        return (
+            self.__class__.__name__ +
+            ":\n\t" +
+            self.qos_negotiated.dump_rate() +
+            '\n\t' +
+            self.qos_negotiated.dump_delivery())
 
 
 def UmtsNasProfileHierarchy():
@@ -569,33 +650,29 @@ def UmtsNasProfileHierarchy():
 
     profile_hierarchy = ProfileHierarchy('UmtsNasProfile')
     root = profile_hierarchy.get_root()
-    eps = root.add('pdp',False)
-    
-    qos = eps.add('qos',False) #Active-state configurations (indexed by EPS type: default or dedicated)
+    eps = root.add('pdp', False)
 
-    #QoS parameters
-    qos.add('delay_class',False)
-    qos.add('reliability_class',False)
-    qos.add('precedence_class',False)
-    qos.add('peak_tput',False)
-    qos.add('mean_tput',False)
-    qos.add('traffic_class',False)
-    qos.add('delivery_order',False)
-    qos.add('transfer_delay',False)
-    qos.add('traffic_handling_priority',False)
-    qos.add('max_bitrate_ulink',False)
-    qos.add('max_bitrate_dlink',False)
-    qos.add('guaranteed_bitrate_ulink',False)
-    qos.add('guaranteed_bitrate_dlink',False)
+    # Active-state configurations (indexed by EPS type: default or dedicated)
+    qos = eps.add('qos', False)
+
+    # QoS parameters
+    qos.add('delay_class', False)
+    qos.add('reliability_class', False)
+    qos.add('precedence_class', False)
+    qos.add('peak_tput', False)
+    qos.add('mean_tput', False)
+    qos.add('traffic_class', False)
+    qos.add('delivery_order', False)
+    qos.add('transfer_delay', False)
+    qos.add('traffic_handling_priority', False)
+    qos.add('max_bitrate_ulink', False)
+    qos.add('max_bitrate_dlink', False)
+    qos.add('guaranteed_bitrate_ulink', False)
+    qos.add('guaranteed_bitrate_dlink', False)
     # qos.add('max_bitrate_ulink_ext',False)
-    qos.add('max_bitrate_dlink_ext',False)
-    qos.add('guaranteed_bitrate_ulink_ext',False)
-    qos.add('guaranteed_bitrate_dlink_ext',False)
-    qos.add('residual_ber',False)
+    qos.add('max_bitrate_dlink_ext', False)
+    qos.add('guaranteed_bitrate_ulink_ext', False)
+    qos.add('guaranteed_bitrate_dlink_ext', False)
+    qos.add('residual_ber', False)
 
     return profile_hierarchy
-
-        
-
-        
-        

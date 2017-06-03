@@ -7,11 +7,11 @@ import sys
 Offline analysis: save the log as a new one with pre-defined filter
 """
 
-#Import MobileInsight modules
+# Import MobileInsight modules
 from mobile_insight.monitor import OfflineReplayer
 
 if __name__ == "__main__":
-    
+
     # Initialize a 3G/4G monitor
     src = OfflineReplayer()
     src.set_input_path("./offline_log_example.mi2log")
@@ -26,5 +26,5 @@ if __name__ == "__main__":
     # Save log as
     src.save_log_as("./filtered_log.mi2log")
 
-    #Start the monitoring
+    # Start the monitoring
     src.run()

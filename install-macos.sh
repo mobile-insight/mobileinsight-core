@@ -61,6 +61,11 @@ g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags 
 	-I"${WIRESHARK_SRC_PATH}" -L"${LD_LIBRARY_PATH}" -lwireshark -lwsutil -lwiretap
 strip ws_dissector
 
+# install dependency for mobileInsight GUI
+brew install wxpython
+pip install matplotlib
+pip install pyserial
+
 # Install compiled MobileInsight desktop version
 cd ..
 sudo python setup.py install

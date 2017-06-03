@@ -30,7 +30,7 @@ class Monitor(Element):
         """
         return None
 
-    def save_log_as(self,path):
+    def save_log_as(self, path):
         """
         Save the log as a mi2log file (for offline analysis)
 
@@ -41,20 +41,17 @@ class Monitor(Element):
         """
         pass
 
-
-
     def set_skip_decoding(self, decoding):
         """
         Configure whether deferred message decoding is enabled
 
         :param decoding: if True, only the message header would be decoded, otherwise the entire packet would be decoded
-        :type decoding: Boolean 
+        :type decoding: Boolean
         """
         self._skip_decoding = decoding
 
-
     # Add an analyzer that needs the message
-    def register(self,analyzer):
+    def register(self, analyzer):
         """
         Register an analyzer driven by this monitor
 
@@ -64,7 +61,7 @@ class Monitor(Element):
         if analyzer not in self.to_list:
             self.to_list.append(analyzer)
 
-    def deregister(self,analyzer):
+    def deregister(self, analyzer):
         """
         Deregister an analyzer driven by this monitor
 
@@ -95,8 +92,8 @@ class Monitor(Element):
 
         This method should be overloaded in every subclass.
         """
-        #send() is used to pass message to analyzers
-        #EVERY derived collector SHOULD overload this function to generate msg (event) 
-        #Currently only QXDM is used, and each time only ONE collector can be used
+        # send() is used to pass message to analyzers
+        # EVERY derived collector SHOULD overload this function to generate msg (event)
+        # Currently only QXDM is used, and each time only ONE collector can be used
         # TODO: we may extend this module to support multiple sources later
         pass

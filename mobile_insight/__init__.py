@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__all__=["analyzer","monitor","element","utils"]
+__all__ = ["analyzer", "monitor", "element", "utils"]
 
 # from analyzer import *
 # from monitor import *

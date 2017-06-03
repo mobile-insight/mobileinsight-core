@@ -8,9 +8,9 @@ Author: Jiayao Li
 
 from analyzer import *
 
-try: 
-    import xml.etree.cElementTree as ET 
-except ImportError: 
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
     import xml.etree.ElementTree as ET
 import datetime
 import re
@@ -37,21 +37,26 @@ class Span(object):
 def in_span(service_log):
     return len(service_log) > 0 and service_log[-1].end is None
 
+
 def start_span(service_log, log_item, **additional_info):
     if not in_span(service_log):
-        service_log.append(Span(log_item["timestamp"], None, **additional_info))
+        service_log.append(
+            Span(
+                log_item["timestamp"],
+                None,
+                **additional_info))
+
 
 def end_span(service_log, log_item):
     if in_span(service_log):
         service_log[-1].end = log_item["timestamp"]
 
 
-
 class MmAnalyzer(Analyzer):
     """
     Analyze the MM state change of the phone.
     """
-    
+
     def __init__(self):
         Analyzer.__init__(self)
         self.add_source_callback(self.__filter)
@@ -76,18 +81,16 @@ class MmAnalyzer(Analyzer):
         self.__last_wcdma_rrc_mib_info = None
         self.__n_lte_rrc_reconfig = 0
 
-
-    def set_source(self,source):
+    def set_source(self, source):
         """
         Set the trace source. Enable the WCDMA RRC messages.
 
         :param source: the trace source.
         :type source: trace collector
         """
-        Analyzer.set_source(self,source)
+        Analyzer.set_source(self, source)
 
         source.enable_log_all()
-
 
     def get_umts_normal_service_log(self):
         """
@@ -127,7 +130,7 @@ class MmAnalyzer(Analyzer):
 
     def get_lte_plmn_search_log(self):
         """
-        Return the PLMN search time span of LTE network, as well as how long the 
+        Return the PLMN search time span of LTE network, as well as how long the
         phone spends on searching each cell.
         """
         return self.__lte_plmn_search
@@ -158,7 +161,6 @@ class MmAnalyzer(Analyzer):
 
     def get_n_lte_rrc_reconfig(self):
         return self.__n_lte_rrc_reconfig
-
 
     def __filter(self, event):
         log_item = event.data.decode()
@@ -198,7 +200,6 @@ class MmAnalyzer(Analyzer):
         elif event.type_id == "LTE_RRC_Serv_Cell_Info":
             self.__callback_lte_rrc_serv_cell_info(decoded_event)
 
-
     def __pause(self, last_valid_timestamp):
         log_item = {"timestamp": last_valid_timestamp}
 
@@ -207,21 +208,19 @@ class MmAnalyzer(Analyzer):
         end_span(self.__lte_normal_service, log_item)
         self.__end_plmn_search(log_item)
 
-
     def __start_plmn_search(self, network, last_normal_service, log_item):
         if network == "LTE":
             start_span(self.__lte_plmn_search, log_item,
-                        search_log=[],
-                        from_where=last_normal_service,
-                        network=network)
+                       search_log=[],
+                       from_where=last_normal_service,
+                       network=network)
         elif network == "UMTS":
             start_span(self.__umts_plmn_search, log_item,
-                        search_log=[],
-                        from_where=last_normal_service,
-                        network=network)
+                       search_log=[],
+                       from_where=last_normal_service,
+                       network=network)
         else:
             raise RuntimeError("wtf")
-
 
     def __add_plmn_search_cell(self, cell_id, log_item):
         if in_span(self.__umts_plmn_search):
@@ -239,7 +238,6 @@ class MmAnalyzer(Analyzer):
             elif not in_span(l):
                 start_span(l, log_item, cell_id=cell_id)
 
-
     def __end_plmn_search(self, log_item):
         # end potential WCDMA PLMN search
         if in_span(self.__umts_plmn_search):
@@ -250,20 +248,17 @@ class MmAnalyzer(Analyzer):
             end_span(self.__lte_plmn_search[-1].search_log, log_item)
             end_span(self.__lte_plmn_search, log_item)
 
-
     def __callback_cdma_paging_chann(self, event):
         log_item = event.data
 
         s = "CDMA"
         self.__add_plmn_search_cell(s, log_item)
 
-
     def __callback_1xev_broadcast_chann(self, event):
         log_item = event.data
 
         s = "1xEV/B%(Band)d-%(HSTR)d" % log_item
         self.__add_plmn_search_cell(s, log_item)
-
 
     def __callback_umts_nas_gmm(self, event):
         log_item = event.data
@@ -289,7 +284,6 @@ class MmAnalyzer(Analyzer):
         elif log_item["GMM State"] == "GMM_REGISTERED" and log_item["GMM Substate"] == "GMM_NORMAL_SERVICE":
             self.__end_plmn_search(log_item)
 
-
     def __callback_wcdma_rrc_ota(self, event):
         log_item = event.data
         # log_xml = ET.fromstring(log_item["Msg"])
@@ -302,13 +296,12 @@ class MmAnalyzer(Analyzer):
                 mib = val
             if val.get("name") == "rrc.SysInfoType3_element":
                 sib3 = val
-        
+
         if mib is not None:
             self.__callback_wcdma_rrc_ota_mib(event, mib)
-        
+
         if sib3 is not None:
             self.__callback_wcdma_rrc_ota_sib3(event, sib3)
-
 
     def __callback_wcdma_rrc_ota_mib(self, event, mib):
         log_item = event.data
@@ -330,7 +323,6 @@ class MmAnalyzer(Analyzer):
 
         self.__last_wcdma_rrc_mib_info = info
 
-
     def __callback_wcdma_rrc_ota_sib3(self, event, sib3):
         log_item = event.data
 
@@ -348,7 +340,6 @@ class MmAnalyzer(Analyzer):
         if cell_id:
             self.__add_plmn_search_cell(cell_id, log_item)
 
-
     def __callback_umts_nas(self, event):
         log_item = event.data
         # log_xml = ET.fromstring(log_item["Msg"])
@@ -357,7 +348,10 @@ class MmAnalyzer(Analyzer):
 
         nas_type = ""
         for val in log_xml.iter("field"):
-            if val.get("name") in {"gsm_a.dtap.msg_mm_type", "gsm_a.dtap.msg_gmm_type", "gsm_a.dtap.msg_sm_type"}:
+            if val.get("name") in {
+                "gsm_a.dtap.msg_mm_type",
+                "gsm_a.dtap.msg_gmm_type",
+                    "gsm_a.dtap.msg_sm_type"}:
                 s = val.get("showname")
                 nas_type = re.findall(NasTypePattern, s)[0]
                 break
@@ -365,7 +359,11 @@ class MmAnalyzer(Analyzer):
 
         # WCDMA Attach
         if nas_type == "Attach Request":
-            start_span(self.__umts_attach, log_item, request=nas_type, response=None)
+            start_span(
+                self.__umts_attach,
+                log_item,
+                request=nas_type,
+                response=None)
         elif nas_type in {"Attach Complete", "Attach Reject"}:
             if in_span(self.__umts_attach):
                 end_span(self.__umts_attach, log_item)
@@ -373,7 +371,11 @@ class MmAnalyzer(Analyzer):
 
         # WCDMA Routing Area Update
         if nas_type == "Routing Area Update Request":
-            start_span(self.__umts_rau, log_item, request=nas_type, response=None)
+            start_span(
+                self.__umts_rau,
+                log_item,
+                request=nas_type,
+                response=None)
         elif nas_type in {"Routing Area Update Complete", "Routing Area Update Reject"}:
             if in_span(self.__umts_rau):
                 end_span(self.__umts_rau, log_item)
@@ -381,18 +383,20 @@ class MmAnalyzer(Analyzer):
 
         # WCDMA Location Update
         if nas_type == "Location Updating Request":
-            start_span(self.__umts_lu, log_item, request=nas_type, response=None)
+            start_span(
+                self.__umts_lu,
+                log_item,
+                request=nas_type,
+                response=None)
         elif nas_type in {"Location Updating Accept", "Location Updating Reject"}:
             if in_span(self.__umts_lu):
                 end_span(self.__umts_lu, log_item)
                 self.__umts_lu[-1].response = nas_type
 
-
     def __callback_wcdma_cell_id(self, event):
         log_item = event.data
 
         self.__last_normal_service = "WCDMA/%s" % log_item["PLMN"]
-
 
     def __callback_lte_nas_emm(self, event):
         log_item = event.data
@@ -410,11 +414,12 @@ class MmAnalyzer(Analyzer):
             #     self.__last_normal_service = ""
 
         # PLMN service span
-        if log_item["EMM Substate"] in {"EMM_DEREGISTERED_PLMN_SEARCH", "EMM_REGISTERED_PLMN_SEARCH"}:
+        if log_item["EMM Substate"] in {
+            "EMM_DEREGISTERED_PLMN_SEARCH",
+                "EMM_REGISTERED_PLMN_SEARCH"}:
             self.__start_plmn_search("LTE", last_normal_service, log_item)
         elif log_item["EMM Substate"] == "EMM_REGISTERED_NORMAL_SERVICE":
             self.__end_plmn_search(log_item)
-
 
     def __callback_lte_nas(self, event):
         log_item = event.data
@@ -424,30 +429,51 @@ class MmAnalyzer(Analyzer):
 
         nas_type = ""
         for val in log_xml.iter("field"):
-            if val.get("name") in {"nas_eps.nas_msg_emm_type", "nas_eps.nas_msg_esm_type"}:
+            if val.get("name") in {
+                "nas_eps.nas_msg_emm_type",
+                    "nas_eps.nas_msg_esm_type"}:
                 s = val.get("showname")
                 nas_type = re.findall(NasTypePattern, s)[0]
                 break
-        # print nas_type        
+        # print nas_type
 
         # LTE Attach
         if nas_type in {"Attach request"}:
-            start_span(self.__lte_attach, log_item, request=nas_type, response=None)
+            start_span(
+                self.__lte_attach,
+                log_item,
+                request=nas_type,
+                response=None)
         elif nas_type in {"Attach complete", "Attach reject"}:
             if in_span(self.__lte_attach):
                 end_span(self.__lte_attach, log_item)
                 self.__lte_attach[-1].response = nas_type
-        
+
         # LTE Tracking Area Update
         if nas_type in {"Tracking area update request"}:
-            start_span(self.__lte_tau, log_item, request=nas_type, response=None)
+            start_span(
+                self.__lte_tau,
+                log_item,
+                request=nas_type,
+                response=None)
         elif nas_type in {"Tracking area update complete", "Tracking area update reject"}:
             if in_span(self.__lte_tau):
                 end_span(self.__lte_tau, log_item)
                 self.__lte_tau[-1].response = nas_type
 
         if nas_type == "Activate default EPS bearer context request":
-            keys = ("qci", "delay_class", "traffic_class", "delivery_err_sdu", "traffic_hand_pri", "traffic_hand_pri", "traffic_hand_pri", "apn_ambr_dl_ext", "apn_ambr_ul_ext", "apn_ambr_dl_ext2", "apn_ambr_ul_ext2")
+            keys = (
+                "qci",
+                "delay_class",
+                "traffic_class",
+                "delivery_err_sdu",
+                "traffic_hand_pri",
+                "traffic_hand_pri",
+                "traffic_hand_pri",
+                "apn_ambr_dl_ext",
+                "apn_ambr_ul_ext",
+                "apn_ambr_dl_ext2",
+                "apn_ambr_ul_ext2")
             info = dict([(k, None) for k in keys])
             Pattern1 = re.compile(r": (.*) \((\d+)\)$")
             Pattern2 = re.compile(r": (\d+ \w+)$")
@@ -458,15 +484,20 @@ class MmAnalyzer(Analyzer):
                 elif val.get("name") == "gsm_a.gm.sm.qos.delay_cls":
                     info["delay_class"] = re.findall(Pattern1, s)[0][0]
                 elif val.get("name") == "gsm_a.gm.sm.qos.traffic_cls":
-                    info["traffic_class"] = "%s (%s)" % re.findall(Pattern1, s)[0]
+                    info["traffic_class"] = "%s (%s)" % re.findall(
+                        Pattern1, s)[0]
                 elif val.get("name") == "gsm_a.gm.sm.qos.del_of_err_sdu":
-                    info["delivery_err_sdu"] = "%s (%s)" % re.findall(Pattern1, s)[0]
+                    info["delivery_err_sdu"] = "%s (%s)" % re.findall(Pattern1, s)[
+                        0]
                 elif val.get("name") == "gsm_a.gm.sm.qos.traff_hdl_pri":
-                    info["traffic_hand_pri"] = "%s (%s)" % re.findall(Pattern1, s)[0]
+                    info["traffic_hand_pri"] = "%s (%s)" % re.findall(Pattern1, s)[
+                        0]
                 elif val.get("name") == "gsm_a.gm.sm.qos.max_bitrate_downl_ext":
-                    info["traffic_hand_pri"] = "%s (%s)" % re.findall(Pattern1, s)[0]
+                    info["traffic_hand_pri"] = "%s (%s)" % re.findall(Pattern1, s)[
+                        0]
                 elif val.get("name") == "gsm_a.gm.sm.qos.max_bitrate_upl_ext":
-                    info["traffic_hand_pri"] = "%s (%s)" % re.findall(Pattern1, s)[0]
+                    info["traffic_hand_pri"] = "%s (%s)" % re.findall(Pattern1, s)[
+                        0]
                 elif val.get("name") == "nas_eps.emm.apn_ambr_dl_ext":
                     info["apn_ambr_dl_ext"] = re.findall(Pattern2, s)[0]
                 elif val.get("name") == "nas_eps.emm.apn_ambr_ul_ext":
@@ -478,10 +509,9 @@ class MmAnalyzer(Analyzer):
             info["last_lte_rrc_freq"] = self.__last_lte_rrc_freq
             self.__lte_tau_qos_info.append(info)
 
-
     def __callback_lte_rrc_ota(self, event):
         log_item = event.data
-        if not log_item.has_key("Msg"):
+        if "Msg" not in log_item:
             return
         # log_xml = ET.fromstring(log_item["Msg"])
         log_xml = ET.XML(log_item["Msg"])
@@ -491,9 +521,10 @@ class MmAnalyzer(Analyzer):
         is_rrc_conn_reconfig = False
 
         cell_info = {"plmn": None, "tac": None, "cell_id": None}
-        if log_item["PDU Number"] == 2: # BCCH_DL_SCH
+        if log_item["PDU Number"] == 2:  # BCCH_DL_SCH
             for val in log_xml.iter("field"):
-                if val.get("name") == "lte-rrc.systemInformationBlockType1_element":
+                if val.get(
+                        "name") == "lte-rrc.systemInformationBlockType1_element":
                     is_sib1 = True
                 elif val.get("name") == "lte-rrc.sib6_element":
                     is_sib6 = True
@@ -508,9 +539,10 @@ class MmAnalyzer(Analyzer):
                 elif val.get("name") == "lte-rrc.cellIdentity":
                     cell_info["cell_id"] = int(val.get("value"), base=16) / 16
 
-        elif log_item["PDU Number"] == 6: # LTE-RRC_DL_DCCH
+        elif log_item["PDU Number"] == 6:  # LTE-RRC_DL_DCCH
             for val in log_xml.iter("field"):
-                if val.get("name") == "lte-rrc.rrcConnectionReconfiguration_element":
+                if val.get(
+                        "name") == "lte-rrc.rrcConnectionReconfiguration_element":
                     is_rrc_conn_reconfig = True
                     break
 
@@ -528,7 +560,10 @@ class MmAnalyzer(Analyzer):
                     }
             for attr in log_xml.iter("field"):
                 ss = attr.get("showname")
-                if attr.get("name") in ("lte-rrc.subframeAssignment", "lte-rrc.specialSubframePatterns", "lte-rrc.si_WindowLength"):
+                if attr.get("name") in (
+                    "lte-rrc.subframeAssignment",
+                    "lte-rrc.specialSubframePatterns",
+                        "lte-rrc.si_WindowLength"):
                     info[attr.get("name")[8:]] = re.findall(Pattern1, ss)[0]
                 elif attr.get("name") == "lte-rrc.systemInfoValueTag":
                     info[attr.get("name")[8:]] = re.findall(Pattern2, ss)[0]
@@ -543,27 +578,36 @@ class MmAnalyzer(Analyzer):
                     # Iter over all attrs
                     for attr in val.iter("field"):
                         s = attr.get("showname")
-                        if attr.get("name") in ("lte-rrc.threshX_High", "lte-rrc.threshX_Low", "lte-rrc.q_RxLevMin"):
-                            info[attr.get("name")[8:]] = re.findall(Pattern1, s)[0]
+                        if attr.get("name") in (
+                            "lte-rrc.threshX_High",
+                            "lte-rrc.threshX_Low",
+                                "lte-rrc.q_RxLevMin"):
+                            info[attr.get("name")[8:]] = re.findall(
+                                Pattern1, s)[0]
                         elif attr.get("name") in ("lte-rrc.carrierFreq", "lte-rrc.cellReselectionPriority", "lte-rrc.p_MaxUTRA", "lte-rrc.q_QualMin"):
-                            info[attr.get("name")[8:]] = re.findall(Pattern2, s)[0]
+                            info[attr.get("name")[8:]] = re.findall(
+                                Pattern2, s)[0]
                     info["lte_rrc_freq"] = log_item["Freq"]
                     self.__lte_cell_resel_to_umts_config.append(info)
 
         if is_rrc_conn_reconfig:
             # Find drx-Config setup
             for val in log_xml.iter("field"):
-                if val.get("name") == "lte-rrc.drx_Config" and val.get("show") == "1":
+                if val.get(
+                        "name") == "lte-rrc.drx_Config" and val.get("show") == "1":
                     info = {"shortDRX_Cycle": None, "drxShortCycleTimer": None}
                     for attr in val.iter("field"):
                         s = attr.get("showname")
-                        if attr.get("name") in ("lte-rrc.onDurationTimer",
-                                                "lte-rrc.drx_InactivityTimer",
-                                                "lte-rrc.drx_RetransmissionTimer",
-                                                "lte-rrc.shortDRX_Cycle"):
-                            info[attr.get("name")[8:]] = re.findall(Pattern1, s)[0]
+                        if attr.get("name") in (
+                            "lte-rrc.onDurationTimer",
+                            "lte-rrc.drx_InactivityTimer",
+                            "lte-rrc.drx_RetransmissionTimer",
+                                "lte-rrc.shortDRX_Cycle"):
+                            info[attr.get("name")[8:]] = re.findall(
+                                Pattern1, s)[0]
                         elif attr.get("name") == "lte-rrc.drxShortCycleTimer":
-                            info[attr.get("name")[8:]] = re.findall(Pattern2, s)[0]
+                            info[attr.get("name")[8:]] = re.findall(
+                                Pattern2, s)[0]
                     info["lte_rrc_freq"] = log_item["Freq"]
                     self.__lte_drx_config.append(info)
                     break
@@ -571,11 +615,10 @@ class MmAnalyzer(Analyzer):
 
         self.__last_lte_rrc_freq = log_item["Freq"]
 
-
     def __callback_lte_rrc_serv_cell_info(self, event):
         log_item = event.data
 
-        if not log_item.has_key("MNC Digit"):
+        if "MNC Digit" not in log_item:
             return
 
         if log_item["MNC Digit"] == 3:

@@ -8,11 +8,12 @@ Abstract protocol FSMs, and operationnal policies (algorithms)
 Author: Yuanjie Li
 """
 
-__all__=["StateMachine"]
+__all__ = ["StateMachine"]
+
 
 class StateMachine(object):
-    
-    def __init__(self,state_machine,init_callback):
+
+    def __init__(self, state_machine, init_callback):
         '''
         Initialize a state machine with a pre-define profile
         Example:
@@ -40,26 +41,26 @@ class StateMachine(object):
         self.state_machine = state_machine
         self.init_callback = init_callback
         self.cur_state = None
-        self.state_history = {} #history of state transisions. timestamp-->state
+        self.state_history = {}  # history of state transisions. timestamp-->state
 
-    def __init_state(self,event):
+    def __init_state(self, event):
         '''
         A specical callback to initiate the current state.
-        Why this is needed: when MobileInsight starts, the device can be in any state. 
+        Why this is needed: when MobileInsight starts, the device can be in any state.
         The state machine must have a callback to determine the initial state.
         This callback is protocol specific, since it depends on specific messages
         '''
         if not self.cur_state:
             init_state = self.init_callback(event)
             if self.state_machine \
-            and init_state in self.state_machine.keys():
-                #Always check if the new state is declared
+                    and init_state in self.state_machine.keys():
+                # Always check if the new state is declared
                 self.cur_state = init_state
                 self.state_history[event.timestamp] = init_state
 
-    def update_state(self,event):
+    def update_state(self, event):
         '''
-        Trigger state transition from analyzer events. 
+        Trigger state transition from analyzer events.
         If more than one state transition is satisfied, return False
 
         :param event: the event from analyzer
@@ -68,24 +69,24 @@ class StateMachine(object):
         '''
 
         if not self.cur_state:
-            #state not initialized yet
+            # state not initialized yet
             self.__init_state(event)
         else:
-            #assert: state always declared in state_machine (checked by __init_state)
-            tx_condition=[]
+            # assert: state always declared in state_machine (checked by
+            # __init_state)
+            tx_condition = []
             for item in self.state_machine[self.cur_state]:
-                #evaluate the transition condition 1-by-1
+                # evaluate the transition condition 1-by-1
                 if self.state_machine[self.cur_state][item](event):
                     tx_condition.append(item)
-            
-            if len(tx_condition)>1:
-                #More than 1 state transition is satisfied
+
+            if len(tx_condition) > 1:
+                # More than 1 state transition is satisfied
                 return False
-            elif len(tx_condition)==1:
+            elif len(tx_condition) == 1:
                 self.cur_state = tx_condition[0]
                 self.state_history[event.timestamp] = tx_condition[0]
             return True
-        
 
     def get_current_state(self):
         '''
@@ -95,7 +96,7 @@ class StateMachine(object):
         '''
         return self.cur_state
 
-    def get_transition_condition(self,src,dest):
+    def get_transition_condition(self, src, dest):
         '''
         Get transition condition from source to destination
 
@@ -104,6 +105,5 @@ class StateMachine(object):
         :param dest: destination state
         :type dest: string
         :returns: an ordered list of callbacks that represent the state transition
-        ''' 
+        '''
         pass
-

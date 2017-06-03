@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # Filename: online_monitor.py
 """
-A universal, cross-platform MobileInsight online monitor. 
+A universal, cross-platform MobileInsight online monitor.
 
-It abstracts the low-level complexity of platform-dependent monitors. 
+It abstracts the low-level complexity of platform-dependent monitors.
 It wraps monitors for mobile version (currently Android only) and desktop version.
 
 Author: Yuanjie Li
@@ -12,14 +12,13 @@ Author: Yuanjie Li
 __all__ = ["OnlineMonitor"]
 
 
-
-#Test the OS version
-is_android=False
+# Test the OS version
+is_android = False
 try:
-    from jnius import autoclass #For Android
+    from jnius import autoclass  # For Android
     from android_dev_diag_monitor import AndroidDevDiagMonitor
 
-    is_android=True
+    is_android = True
 
     class OnlineMonitor(AndroidDevDiagMonitor):
         def __init__(self):
@@ -43,13 +42,12 @@ try:
             """
             print "WARNING: Android version does not need to configure baudrate"
 
-except Exception, e:
+except Exception as e:
 
-    #not used, but bugs may exist on laptop
+    # not used, but bugs may exist on laptop
     from dm_collector.dm_collector import DMCollector
-    is_android=False
+    is_android = False
 
     class OnlineMonitor(DMCollector):
         def __init__(self):
             DMCollector.__init__(self)
-
