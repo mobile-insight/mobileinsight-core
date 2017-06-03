@@ -286,7 +286,7 @@ class AndroidMuxrawMonitor(Monitor):
                         self.log_info("lizhehan: Receive Message: " + msgstr)
                         # self.log_info("lizhehan: typeid: " + typeid)
 
-                        packet = DMLogPacket([(None, msgstr, "msg")])
+                        packet = DMLogPacket([("oooooo", msgstr, "msg")])
                         event = Event(  timeit.default_timer(),
                                         typeid,
                                         packet)

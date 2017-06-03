@@ -9,6 +9,10 @@
 import struct
 import sys
 import subprocess
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
 
 ANDROID_SHELL = "/system/bin/sh"
 
@@ -296,9 +300,11 @@ def decode(logger, raw_msg):
     msg =  "\\" + "\\".join([j[1:] for j in raw_msg[0]])
     output = msg
     # logger.log_info("lizhehan: Receive message: " + msg)
-    # p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    # output,err = p.communicate("echo -ne \'" + msg + "\' | LD_LIBRARY_PATH=" + logger.libs_path + ' ' + logger.ws_dissector_path + '\n')
-    # p.wait()
+    p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    output,err = p.communicate("echo -ne \'" + msg + "\' | LD_LIBRARY_PATH=" + logger.libs_path + ' ' + logger.ws_dissector_path + '\n')
+    p.wait()
+    end = output.rfind('>') + 1
+    output = output[:end]
     # logger.log_info("lizhehan: Output: " + output)
     return global_msg[global_ws_id.index(msg_id)],output
 
