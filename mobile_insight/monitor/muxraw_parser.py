@@ -13,9 +13,9 @@ import subprocess
 ANDROID_SHELL = "/system/bin/sh"
 
 #RRC_PAGING_TYPE1 = ['0x8b', '0x3', '0x0', '0x0']
-SMS_CP      = ['0x90', '0x1', '0x0', '0x0'] #400             
-MM_CM_REQ   = ['0x91', '0x1', '0x0', '0x0'] # 401             
-MM_AUTH_REQ = ['0x92', '0x1', '0x0', '0x0'] #402             
+SMS_CP      = ['0x90', '0x1', '0x0', '0x0'] #400
+MM_CM_REQ   = ['0x91', '0x1', '0x0', '0x0'] # 401
+MM_AUTH_REQ = ['0x92', '0x1', '0x0', '0x0'] #402
 GMM_UL      = ['0x93', '0x1', '0x0', '0x0'] #403
                     # (gmm_identity_response)/(gmm_rau_comp)/gmm_service_req
 GMM_DL      = ['0x94', '0x1', '0x0', '0x0'] #404
@@ -26,10 +26,10 @@ CC_DL       = ['0x9f', '0x1', '0x0', '0x0'] #415
 SM_PDP      = ['0xa0', '0x1', '0x0', '0x0'] #416
                     # (modify_pdp_accept/ul)
 _2G_RR      = ['0xf4', '0x1', '0x0', '0x0'] #500
-                    # (gprs_suspend_req_ul)/rr_ciphermode_command_dl/ul 
+                    # (gprs_suspend_req_ul)/rr_ciphermode_command_dl/ul
 _2G_RR_SI   = ['0xf5', '0x1', '0x0', '0x0'] #501
 _2G_RR_MEAS = ['0xf6', '0x1', '0x0', '0x0'] #502
-_2G_RR_CHNL = ['0xf7', '0x1', '0x0', '0x0'] #503    
+_2G_RR_CHNL = ['0xf7', '0x1', '0x0', '0x0'] #503
 
 LTE_BCCH_BCH = ['0xbc', '0x2', '0x0', '0x0']
 LTE_BCCH_DL_SCH = ['0xbd', '0x2', '0x0', '0x0']
@@ -113,9 +113,6 @@ global_msg_id = [
     RRC_INTERRATHANDOVERINFO,
     EMM_SERVICE_REQUEST]
 
-
-
-
 global_ws_id = [
     # 0,
     190,
@@ -163,11 +160,106 @@ global_ws_id = [
     103,
     250]
 
+global_msg_str = [
+    # "SMS_CP",
+    "MM_CM_REQ",
+    "MM_AUTH_REQ",
+    "GMM_UL",
+    "GMM_DL",
+    # "SMS_RP",
+    "CC_UL",
+    "CC_DL",
+    "SM_PDP",
+    # "_2G_RR",
+    # "_2G_RR_SI",
+    # "_2G_RR_MEAS",
+    # "_2G_RR_CHNL",
+    "LTE_BCCH_BCH",
+    "LTE_BCCH_DL_SCH",
+    "LTE_DL_CCCH",
+    "LTE_DL_DCCH",
+    "LTE_PCCH",
+    "LTE_UL_CCCH",
+    "LTE_UL_DCCH",
+    "RRC_SI_MIB",
+    "RRC_SI_SB1",
+    "RRC_SI_SB2",
+    "RRC_SI_SIB1",
+    "RRC_SI_SIB2",
+    "RRC_SI_SIB3",
+    "RRC_SI_SIB4",
+    "RRC_SI_SIB5a",
+    "RRC_SI_SIB5b",
+    "RRC_SI_SIB6",
+    "RRC_SI_SIB7",
+    "RRC_SI_SIB11",
+    "RRC_SI_SIB12",
+    "RRC_SI_SIB18",
+    "RRC_SI_SIB19",
+    "RRC_SI_SIB20",
+    "RRC_DL_CCCH",
+    "RRC_DL_DCCH",
+    "RRC_PAGING_TYPE1",
+    "RRC_CONN_REQ",
+    # "RRC_UL_CCCH",
+    "RRC_UL_DCCH",
+    "RRC_HANDOVERTOUTRANCOMMAND",
+    "RRC_INTERRATHANDOVERINFO",
+    "EMM_SERVICE_REQUEST"]
+
+global_msg = [
+    # "SMS_CP",
+    "MM_CM_REQ",
+    "MM_AUTH_REQ",
+    "GMM_UL",
+    "GMM_DL",
+    # "SMS_RP",
+    "CC_UL",
+    "CC_DL",
+    "SM_PDP",
+    # "_2G_RR",
+    # "_2G_RR_SI",
+    # "_2G_RR_MEAS",
+    # "_2G_RR_CHNL",
+    "LTE_BCCH_BCH",
+    "LTE_BCCH_DL_SCH",
+    "LTE_RRC_OTA_Packet",#"LTE_DL_CCCH",
+    "LTE_RRC_OTA_Packet",#"LTE_DL_DCCH",
+    "LTE_PCCH",
+    "LTE_RRC_OTA_Packet",#"LTE_UL_CCCH",
+    "LTE_RRC_OTA_Packet",#"LTE_UL_DCCH",
+    "RRC_SI_MIB",
+    "RRC_SI_SB1",
+    "RRC_SI_SB2",
+    "RRC_SI_SIB1",
+    "RRC_SI_SIB2",
+    "RRC_SI_SIB3",
+    "RRC_SI_SIB4",
+    "RRC_SI_SIB5a",
+    "RRC_SI_SIB5b",
+    "RRC_SI_SIB6",
+    "RRC_SI_SIB7",
+    "RRC_SI_SIB11",
+    "RRC_SI_SIB12",
+    "RRC_SI_SIB18",
+    "RRC_SI_SIB19",
+    "RRC_SI_SIB20",
+    "RRC_DL_CCCH",
+    "RRC_DL_DCCH",
+    "RRC_PAGING_TYPE1",
+    "RRC_CONN_REQ",
+    # "RRC_UL_CCCH",
+    "RRC_UL_DCCH",
+    "RRC_HANDOVERTOUTRANCOMMAND",
+    "RRC_INTERRATHANDOVERINFO",
+    "EMM_SERVICE_REQUEST"]
+
+
 muxraw_parser_buff = []  # store bytes in current section
 first_header = False
 
 
-def feed_binary(logger, buff):
+def feed_binary(buff):
     global muxraw_parser_buff
     msg_list = []
     cur_index = 0
@@ -197,30 +289,18 @@ def decode(logger, raw_msg):
     decode raw_msg and return the typeid, xml (for decoded message)
     """
     msg_id = int(raw_msg[0][3], 16)
-    msg = "\\" + "\\".join([j[1:] for j in raw_msg[0]])
-    logger.log_info("lizhehan: Receive message: " + msg)
+    if msg_id not in global_ws_id:
+        return "",""
+    if global_msg[global_ws_id.index(msg_id)] != "LTE_RRC_OTA_Packet":
+        return "",""
+    msg =  "\\" + "\\".join([j[1:] for j in raw_msg[0]])
     output = msg
-    p = subprocess.Popen(
-        "su",
-        executable=ANDROID_SHELL,
-        shell=True,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE)
-    output, err = p.communicate("echo -ne \'" +
-                                msg +
-                                "\' | LD_LIBRARY_PATH=" +
-                                logger.libs_path +
-                                ' ' +
-                                logger.ws_dissector_path +
-                                '\n')
-    p.wait()
-    return_code, output = commands.getstatusoutput(
-        "echo -ne " + msg + " | LD_LIBRARY_PATH=/data/data/edu.ucla.cs.wing.mobileinsight/files/data/ /data/data/edu.ucla.cs.wing.mobileinsight/files/data/android_pie_ws_dissector")
-    logger.log_info("lizhehan: Output: " + str(len(output)) + "  |  " + output)
-    # FIXME: to be replaced with real message type ID
-    # I have msg_id
-    return "LTE_RRC_OTA_Packet", output
-
+    # logger.log_info("lizhehan: Receive message: " + msg)
+    # p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    # output,err = p.communicate("echo -ne \'" + msg + "\' | LD_LIBRARY_PATH=" + logger.libs_path + ' ' + logger.ws_dissector_path + '\n')
+    # p.wait()
+    # logger.log_info("lizhehan: Output: " + output)
+    return global_msg[global_ws_id.index(msg_id)],output
 
 def last_seek():
     global muxraw_parser_buff
@@ -294,6 +374,9 @@ def parse_muxraw_magic(filename):
 
 if __name__ == "__main__":
 
+    # for i in range(len(global_ws_id)):
+    #     print global_ws_id[i], global_msg_str[i]
+
     filename = sys.argv[1]
     # filename = "./test_logs/MDLog1_2016_1119_175748.muxraw"
     # print "Processing ", filename
@@ -308,6 +391,3 @@ if __name__ == "__main__":
             msg_list.append(output)
             print output
     # print msg_list
-    # if raw_msg_list != []:
-    #     for msg in raw_msg_list:
-    #         print decode(msg)

@@ -256,7 +256,7 @@ class AndroidMuxrawMonitor(Monitor):
             #                                             True,   # include_timestamp
             #                                             )
             ######################################
-            decoded = muxraw_parser.feed_binary(self, s)  # self for debug
+            decoded = muxraw_parser.feed_binary(s)  # self for debug
             # decoded = muxraw_parser.receive_log_packet(self._skip_decoding,
             #                                             True   # include_timestamp
             #                                             )
@@ -279,13 +279,17 @@ class AndroidMuxrawMonitor(Monitor):
 
                     ##############################################
                     for msg in decoded:
-                        typeid, msgstr = muxraw_parser.decode(
-                            self, msg)  # self for debug
-                        packet = DMLogPacket([(None, msgstr, typeid)])
 
-                        event = Event(timeit.default_timer(),
-                                      typeid,
-                                      packet)
+                        typeid, msgstr = muxraw_parser.decode(self, msg) #self for debug
+                        if typeid == "":
+                            continue
+                        self.log_info("lizhehan: Receive Message: " + msgstr)
+                        # self.log_info("lizhehan: typeid: " + typeid)
+
+                        packet = DMLogPacket([(None, msgstr, "msg")])
+                        event = Event(  timeit.default_timer(),
+                                        typeid,
+                                        packet)
                         self.send(event)
                     ##############################################
 
