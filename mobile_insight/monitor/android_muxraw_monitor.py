@@ -298,13 +298,6 @@ class AndroidMuxrawMonitor(Monitor):
                         typeid, msgstr = muxraw_parser.decode(self, msg) #self for debug
                         if typeid == "":
                             continue
-<<<<<<< HEAD
-                        # self.log_info("lizhehan: Receive Message: " + msgstr)
-=======
-                        # self.log_info("lizhehan: Receive Message: ")
->>>>>>> 9c500a93d064470d21cb9b020a2e76815ead262b
-                        # self.log_info("lizhehan: typeid: " + typeid)
-
                         packet = DMLogPacket([("MediaTek", msgstr, "msg")])
                         event = Event(  timeit.default_timer(),
                                         typeid,
@@ -345,6 +338,8 @@ class AndroidMuxrawMonitor(Monitor):
         This is the entrance of monitoring and analysis.
         :except RuntimeError: set_log_directory() or enable_log() not called before.
         """
+
+        self.broadcast_info('STARTED',{})
 
         if not self._input_dir:
             # FIXME: test if self._input_dir exists in SDcard

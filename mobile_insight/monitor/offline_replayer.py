@@ -165,6 +165,8 @@ class OfflineReplayer(Monitor):
 
         try:
 
+            self.broadcast_info('STARTED',{})
+
             log_list = []
             if os.path.isfile(self._input_path):
                 log_list = [self._input_path]
