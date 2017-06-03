@@ -35,7 +35,10 @@ except Exception as e:
     is_android = False
 
 ANDROID_SHELL = "/system/bin/sh"
-
+msg_type = ["UMTS_NAS_OTA_Packet","LTE_RRC_OTA_Packet","WCDMA_RRC_OTA_Packet","LTE_NAS_ESM_OTA_Incoming_Packet"]
+msg_enabled = [0,0,0,0]
+type_num = len(msg_type)
+dest_file = "catcher_filter_1_lwg_n.bin"
 
 def get_cache_dir():
     if is_android:
@@ -76,7 +79,7 @@ class AndroidMuxrawMonitor(Monitor):
 
         self._input_dir = os.path.join(
             get_cache_dir(), "mi2log")  # ??? getCacheDir()
-        self._input_dir = "/sdcard/mtklog/mdlog1"
+        self._input_dir = "/sdcard/mtklog"
         self._type_names = []
         self._filename_sort_key = None
 
@@ -113,7 +116,7 @@ class AndroidMuxrawMonitor(Monitor):
         # /sdcard/mtklog/mdlog1/MDLog1_YYYY_MMDD_HHMMSS/MDLog1_YYYY_MMDD_HHMMSS.muxraw.tmp
         # -->  /sdcard/mtklog/mdlog1/MDLog1_YYYY_MMDD_HHMMSS/MDLog1_YYYY_MMDD_HHMMSS.muxraw
         self._input_dir = directory  # ???
-        self._input_dir = "/sdcard/mtklog/mdlog1"
+        self._input_dir = "/sdcard/mtklog"
 
     def set_log_cut_size(self, siz):
         """
@@ -154,6 +157,18 @@ class AndroidMuxrawMonitor(Monitor):
             elif n not in self._type_names:
                 self._type_names.append(n)
                 self.log_info("Enable collection: " + n)
+
+        # msg_enabled[msg_type.index(type_name)] = 1
+        # src_file = ""
+        # for i in range(type_num):
+        #     if msg_enabled[i] == 1:
+        #         src_file += msg_type[i]
+        # if src_file == "":
+        #     src_file = "default"
+        # src_file += ".bin"
+        # bin_store_path = self._input_dir + "binFiles"
+        # cmd = "cp" + bin_store_path + "/" + src_file + " " + self._input_dir + "/mdlog1_config/" + dest_file
+        # self._run_shell_cmd(cmd)
         dm_collector_c.set_filtered(self._type_names)  # ???
 
     def enable_log_all(self):
@@ -283,10 +298,14 @@ class AndroidMuxrawMonitor(Monitor):
                         typeid, msgstr = muxraw_parser.decode(self, msg) #self for debug
                         if typeid == "":
                             continue
+<<<<<<< HEAD
                         # self.log_info("lizhehan: Receive Message: " + msgstr)
+=======
+                        # self.log_info("lizhehan: Receive Message: ")
+>>>>>>> 9c500a93d064470d21cb9b020a2e76815ead262b
                         # self.log_info("lizhehan: typeid: " + typeid)
 
-                        packet = DMLogPacket([("oooooo", msgstr, "msg")])
+                        packet = DMLogPacket([("MediaTek", msgstr, "msg")])
                         event = Event(  timeit.default_timer(),
                                         typeid,
                                         packet)
