@@ -283,10 +283,10 @@ class AndroidMuxrawMonitor(Monitor):
                         typeid, msgstr = muxraw_parser.decode(self, msg) #self for debug
                         if typeid == "":
                             continue
-                        self.log_info("lizhehan: Receive Message: " + msgstr)
+                        # self.log_info("lizhehan: Receive Message: ")
                         # self.log_info("lizhehan: typeid: " + typeid)
 
-                        packet = DMLogPacket([("oooooo", msgstr, "msg")])
+                        packet = DMLogPacket([("MediaTek", msgstr, "msg")])
                         event = Event(  timeit.default_timer(),
                                         typeid,
                                         packet)
