@@ -2,7 +2,7 @@
 """
 An MUXRAW monitor for Android platform.
 
-Author: Jiayao Li, Yuanjie Li, Zhehan Li
+Author: Zhehan Li, Yuanjie Li
 """
 
 __all__ = ["AndroidMuxrawMonitor"]
@@ -283,7 +283,7 @@ class AndroidMuxrawMonitor(Monitor):
                         typeid, msgstr = muxraw_parser.decode(self, msg) #self for debug
                         if typeid == "":
                             continue
-                        self.log_info("lizhehan: Receive Message: " + msgstr)
+                        # self.log_info("lizhehan: Receive Message: " + msgstr)
                         # self.log_info("lizhehan: typeid: " + typeid)
 
                         packet = DMLogPacket([("oooooo", msgstr, "msg")])

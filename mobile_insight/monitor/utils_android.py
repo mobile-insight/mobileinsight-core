@@ -6,14 +6,23 @@ Utility functions for android
 Author: Yuanjie Li
 """
 
-from enum import Enum
+__all__ = ["ChipsetType","get_chipset_type","run_shell_cmd"]
 
-class ChipsetType(Enum):
+import subprocess
 
+
+ANDROID_SHELL = "/system/bin/sh"
+
+
+class ChipsetType:
+	"""
+	Cellular modem type
+	"""
     QUALCOMM = 0
     MTK = 1
 
 def run_shell_cmd(cmd, wait=False):
+
     p = subprocess.Popen(
         "su",
         executable=ANDROID_SHELL,
@@ -41,7 +50,7 @@ def get_chipset_type():
     Qualcomm: [ro.board.platform]: [msm8084]
     """
     cmd = "getprop ro.board.platform;"
-    res = run_shell_cmd(cmd).split('\n')
+    res = run_shell_cmd(cmd)
     if res.startswith("mt"):
         return ChipsetType.MTK
     elif res.startswith("msm") or res.startswith("mdm"):
