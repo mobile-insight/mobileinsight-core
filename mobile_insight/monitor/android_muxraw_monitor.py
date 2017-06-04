@@ -159,7 +159,8 @@ class AndroidMuxrawMonitor(Monitor):
                 self._type_names.append(n)
                 self.log_info("Enable collection: " + n)
 
-        # msg_enabled[msg_type.index(type_name)] = 1
+        msg_enabled[msg_type.index(type_name)] = 1
+        muxraw_parser.setfilter(msg_type, msg_enabled)
         # src_file = ""
         # for i in range(type_num):
         #     if msg_enabled[i] == 1:
@@ -301,7 +302,7 @@ class AndroidMuxrawMonitor(Monitor):
                             continue
                         #FIXME: set message length
                         packet = DMLogPacket([
-                            ("log_msg_len",0,""), 
+                            ("log_msg_len",0,""),
                             ('type_id', typeid, ''),
                             ('timestamp', datetime.datetime.now(), ''),
                             ("Msg", msgstr, "msg")])
@@ -328,6 +329,7 @@ class AndroidMuxrawMonitor(Monitor):
                 f = open(filename, "rb")
                 cur_pos = self._read_muxraw(f, cur_pos)
                 f.close()
+                # self.log_info("lizhehan: cur_pos: "+cur_pos/1000+" file size: "+siz/1000+"ratio: "+cur_pos/siz)
                 monitoring_files[i][1] = cur_pos
             if i != len(monitoring_files) - \
                     1:  # new file appears so this file obsoletes
