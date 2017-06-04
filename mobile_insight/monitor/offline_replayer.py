@@ -198,6 +198,7 @@ class OfflineReplayer(Monitor):
                         try:
                             # packet = DMLogPacket(decoded)
                             packet = DMLogPacket(decoded[0])
+                            print "DMLogPacket decoded[0]:",str(decoded[0])
                             d = packet.decode()
                             # print d["type_id"], d["timestamp"]
                             # xml = packet.decode_xml()

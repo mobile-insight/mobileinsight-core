@@ -15,9 +15,9 @@ ANDROID_SHELL = "/system/bin/sh"
 
 
 class ChipsetType:
-	"""
-	Cellular modem type
-	"""
+    """
+    Cellular modem type
+    """
     QUALCOMM = 0
     MTK = 1
 

@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import timeit
+import datetime
 
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
@@ -298,7 +299,12 @@ class AndroidMuxrawMonitor(Monitor):
                         typeid, msgstr = muxraw_parser.decode(self, msg) #self for debug
                         if typeid == "":
                             continue
-                        packet = DMLogPacket([("MediaTek", msgstr, "msg")])
+                        #FIXME: set message length
+                        packet = DMLogPacket([
+                            ("log_msg_len",0,""), 
+                            ('type_id', typeid, ''),
+                            ('timestamp', datetime.datetime.now(), ''),
+                            ("Msg", msgstr, "msg")])
                         event = Event(  timeit.default_timer(),
                                         typeid,
                                         packet)

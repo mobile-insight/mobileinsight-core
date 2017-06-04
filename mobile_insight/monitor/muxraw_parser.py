@@ -296,8 +296,9 @@ def decode(logger, raw_msg):
     msg_id = int(raw_msg[0][3], 16)
     if msg_id not in global_ws_id:
         return "",""
-    if global_msg[global_ws_id.index(msg_id)] != "LTE_RRC_OTA_Packet":
-        return "",""
+    # if global_msg[global_ws_id.index(msg_id)] != "LTE_RRC_OTA_Packet":
+    #     return "",""
+    print "global_msg_id ",global_msg[global_ws_id.index(msg_id)]
     msg =  "\\" + "\\".join([j[1:] for j in raw_msg[0]])
     output = msg
     # logger.log_info("lizhehan: Receive message: " + msg)

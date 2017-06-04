@@ -199,6 +199,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         if msg.type_id == "LTE_RRC_OTA_Packet":
 
             if 'Msg' not in log_item_dict:
+                self.log_debug("Msg not in LTE_RRC_OTA_Packet"+str(log_item_dict))
                 return
 
             # Convert msg to xml format
@@ -865,7 +866,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             if field.get(
                     'name') == "lte-rrc.rrcConnectionSetupComplete_element":
                 self.__status.conn = True
-                # self.log_info(self.__status.dump())
+                self.log_debug(self.__status.dump())
                 # self.log_info("FSM test: "+self.get_protocol_state())
 
                 drx_state = {}
@@ -876,7 +877,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
             if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
                 self.__status.conn = False
-                # self.log_info(self.__status.dump())
+                # self.log_debug(self.__status.dump())
                 # self.log_info("FSM test: "+self.get_protocol_state())
 
                 drx_state = {}

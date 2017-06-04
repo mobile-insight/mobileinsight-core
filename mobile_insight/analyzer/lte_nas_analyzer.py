@@ -104,8 +104,10 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
 
+
             # if not log_item_dict.has_key('Msg'):
             if 'Msg' not in log_item_dict:
+                self.log_info('Msg not in log_item_dict: '+ str(log_item_dict))
                 return
 
             # Convert msg to xml format
