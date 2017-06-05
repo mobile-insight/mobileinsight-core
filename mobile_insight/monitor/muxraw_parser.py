@@ -262,6 +262,13 @@ global_msg = [
 
 muxraw_parser_buff = []  # store bytes in current section
 first_header = False
+msg_type = []
+msg_enabled = []
+
+def setfilter(m_type, m_enabled):
+    global msg_type, msg_enabled
+    msg_type = m_type
+    msg_enabled = msg_enabled
 
 
 def feed_binary(buff):
@@ -296,9 +303,10 @@ def decode(logger, raw_msg):
     msg_id = int(raw_msg[0][3], 16)
     if msg_id not in global_ws_id:
         return "",""
-    # if global_msg[global_ws_id.index(msg_id)] != "LTE_RRC_OTA_Packet":
+    type_str = global_msg[global_ws_id.index(msg_id)]
+    # if msg_enabled[msg_type.index(type_str)] != 1:
     #     return "",""
-    print "global_msg_id ",global_msg[global_ws_id.index(msg_id)]
+    print "global_msg_id ", type_str
     msg =  "\\" + "\\".join([j[1:] for j in raw_msg[0]])
     output = msg
     # logger.log_info("lizhehan: Receive message: " + msg)
