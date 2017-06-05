@@ -1,11 +1,11 @@
-# Filename: android_muxraw_monitor.py
+# Filename: android_mtk_monitor.py
 """
-An MUXRAW monitor for Android platform.
+An MediaTek-version monitor for Android platform.
 
 Author: Zhehan Li, Yuanjie Li
 """
 
-__all__ = ["AndroidMuxrawMonitor"]
+__all__ = ["AndroidMtkMonitor"]
 
 import os
 import re
@@ -16,7 +16,7 @@ import datetime
 
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
-import muxraw_parser
+import mtk_log_parser
 
 is_android = False
 try:
@@ -37,7 +37,8 @@ except Exception as e:
 
 ANDROID_SHELL = "/system/bin/sh"
 msg_type = ["UMTS_NAS_OTA_Packet","LTE_RRC_OTA_Packet","WCDMA_RRC_OTA_Packet","LTE_NAS_ESM_OTA_Incoming_Packet"]
-msg_enabled = [0,0,0,0]
+msg_enabled = [0 for x in range(0,len(msg_type))]
+
 type_num = len(msg_type)
 dest_file = "catcher_filter_1_lwg_n.bin"
 
@@ -55,10 +56,10 @@ def get_files_dir():
         return ""
 
 
-class AndroidMuxrawMonitor(Monitor):
+class AndroidMtkMonitor(Monitor):
 
     """
-    An MUXRAW monitor for Android devics. Require root access to run.
+    An MediaTek-version monitor for Android devics. Require root access to run.
 
     This class runs the in-phone logging program [to enable emdlogger],
     and collect traces from emdlogger output.
@@ -109,7 +110,7 @@ class AndroidMuxrawMonitor(Monitor):
 
     def set_log_directory(self, directory):
         """
-        Set the directory that will store Muxraw files.
+        Set the directory that will store MTK log files.
 
         :param directory: the path of dir
         :type directory: string
@@ -129,7 +130,7 @@ class AndroidMuxrawMonitor(Monitor):
 
     def set_filename_sort_key(key):
         """
-        Set the key used to sort muxraw file names.
+        Set the key used to sort MTK log file names.
 
         If key is None, a default one will be used
 
@@ -154,13 +155,16 @@ class AndroidMuxrawMonitor(Monitor):
             type_name = [type_name]
         for n in type_name:
             if n not in cls.SUPPORTED_TYPES:
-                self.log_warning("Unsupported log message type: %s" % n)
+                self.log_warning("Unsupported message by MediaTek: %s" % n)
             elif n not in self._type_names:
                 self._type_names.append(n)
                 self.log_info("Enable collection: " + n)
 
-        msg_enabled[msg_type.index(type_name)] = 1
-        muxraw_parser.setfilter(msg_type, msg_enabled)
+        if type_name in msg_type:
+            msg_enabled[msg_type.index(type_name)] = 1
+            mtk_log_parser.setfilter(msg_type, msg_enabled)
+        else:
+            self.log_warning("Unsupported message by MediaTek: "+str(type_name))
         # src_file = ""
         # for i in range(type_num):
         #     if msg_enabled[i] == 1:
@@ -273,8 +277,8 @@ class AndroidMuxrawMonitor(Monitor):
             #                                             True,   # include_timestamp
             #                                             )
             ######################################
-            decoded = muxraw_parser.feed_binary(s)  # self for debug
-            # decoded = muxraw_parser.receive_log_packet(self._skip_decoding,
+            decoded = mtk_log_parser.feed_binary(s)  # self for debug
+            # decoded = mtk_log_parser.receive_log_packet(self._skip_decoding,
             #                                             True   # include_timestamp
             #                                             )
             ######################################
@@ -297,7 +301,7 @@ class AndroidMuxrawMonitor(Monitor):
                     ##############################################
                     for msg in decoded:
 
-                        typeid, msgstr = muxraw_parser.decode(self, msg) #self for debug
+                        typeid, msgstr = mtk_log_parser.decode(self, msg) #self for debug
                         if typeid == "":
                             continue
                         #FIXME: set message length
@@ -367,7 +371,7 @@ class AndroidMuxrawMonitor(Monitor):
                 if new_files:   # new muxraw files detected
                     self.log_warning("New muxraw files " + str(new_files))
                     if self._filename_sort_key is None:
-                        k = AndroidMuxrawMonitor._default_filename_sort_key
+                        k = AndroidMtkMonitor._default_filename_sort_key
                     else:
                         k = self._filename_sort_key
                     new_files.sort(key=k)
@@ -383,11 +387,11 @@ class AndroidMuxrawMonitor(Monitor):
             sys.exit(str(traceback.format_exc()))
         finally:
             self._parse_muxraws(monitoring_files)
-            # decoded = muxraw_parser.last_seek()
+            # decoded = mtk_log_parser.last_seek()
             # if decoded != []:
             #     try:
             #         for msg in decoded:
-            #             typeid, xml = muxraw_parser.decode(self, msg) #self for debug
+            #             typeid, xml = mtk_log_parser.decode(self, msg) #self for debug
             #             event = Event(  timeit.default_timer(),
             #                             typeid,
             #                             xml)

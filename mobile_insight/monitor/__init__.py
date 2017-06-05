@@ -6,7 +6,7 @@ __all__ = [
     "DMCollector",  # P4A: THIS LINE WILL BE DELETED ###
     "OfflineReplayer",
     "OnlineMonitor",
-    "AndroidMuxrawMonitor"
+    "AndroidMtkMonitor"
 ]
 
 is_android = False
@@ -20,7 +20,7 @@ except Exception as e:
 
 if is_android:
     from android_dev_diag_monitor import AndroidDevDiagMonitor
-    from android_muxraw_monitor import AndroidMuxrawMonitor
+    from android_mtk_monitor import AndroidMtkMonitor
 from monitor import Monitor
 from dm_collector import *  # P4A: THIS LINE WILL BE DELETED ###
 from offline_replayer import OfflineReplayer

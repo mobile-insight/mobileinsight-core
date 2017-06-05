@@ -94,10 +94,10 @@ try:
                 """
                 print "WARNING: Android version does not need to configure baudrate"
     elif chipset_type == ChipsetType.MTK:
-        from android_muxraw_monitor import AndroidMuxrawMonitor
-        class OnlineMonitor(AndroidMuxrawMonitor):
+        from android_mtk_monitor import AndroidMtkMonitor
+        class OnlineMonitor(AndroidMtkMonitor):
             def __init__(self):
-                AndroidMuxrawMonitor.__init__(self)
+                AndroidMtkMonitor.__init__(self)
         
             def set_serial_port(self, phy_ser_name):
                 """

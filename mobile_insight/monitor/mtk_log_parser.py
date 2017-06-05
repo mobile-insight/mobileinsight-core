@@ -1,11 +1,9 @@
-# muxraw_parser.py
-# parse a muxraw file into strings of ws_dissector input
-# sample input for ws_dissector:
-# echo -ne
-# '\x00\x00\x00\xc8\x00\x00\x00\x09\x40\x01\xBF\x28\x1A\xEB\xA0\x00\x00' |
-# LD_LIBRARY_PATH="/data/data/edu.ucla.cs.wing.mobileinsight/files/data/"
-# /data/data/edu.ucla.cs.wing.mobileinsight/files/data/android_pie_ws_dissector
+# Filename: android_mtk_log_monitor.py
+"""
+An MTK log parser 
 
+Author: Qianru Li, Zhehui Zhang
+"""
 import struct
 import sys
 import subprocess
@@ -260,7 +258,7 @@ global_msg = [
     ]
 
 
-muxraw_parser_buff = []  # store bytes in current section
+mtk_log_parser_buff = []  # store bytes in current section
 first_header = False
 msg_type = []
 msg_enabled = []
@@ -272,7 +270,7 @@ def setfilter(m_type, m_enabled):
 
 
 def feed_binary(buff):
-    global muxraw_parser_buff
+    global mtk_log_parser_buff
     msg_list = []
     cur_index = 0
     end_index = len(buff)
@@ -283,15 +281,15 @@ def feed_binary(buff):
         byte = buff[cur_index]
         # byte_value couldn't be print out
         byte_value = struct.unpack('B', byte)[0]
-        muxraw_parser_buff.append(hex(byte_value))
-        if len(muxraw_parser_buff) > 6:
-            if muxraw_parser_buff[-6:-2] == header:
-                muxraw_parser_buff = muxraw_parser_buff[:-6]
-            if muxraw_parser_buff[-6:] == header_magic:
-                res = seek_pstrace_magic(muxraw_parser_buff)
+        mtk_log_parser_buff.append(hex(byte_value))
+        if len(mtk_log_parser_buff) > 6:
+            if mtk_log_parser_buff[-6:-2] == header:
+                mtk_log_parser_buff = mtk_log_parser_buff[:-6]
+            if mtk_log_parser_buff[-6:] == header_magic:
+                res = seek_pstrace_magic(mtk_log_parser_buff)
                 if res != []:
                     msg_list.append(res)
-                muxraw_parser_buff = []
+                mtk_log_parser_buff = []
         cur_index += 1
     return msg_list
 
@@ -299,6 +297,12 @@ def feed_binary(buff):
 def decode(logger, raw_msg):
     """
     decode raw_msg and return the typeid, xml (for decoded message)
+
+    sample input for ws_dissector:
+    echo -ne
+    '\x00\x00\x00\xc8\x00\x00\x00\x09\x40\x01\xBF\x28\x1A\xEB\xA0\x00\x00' |
+    LD_LIBRARY_PATH="/data/data/edu.ucla.cs.wing.mobileinsight/files/data/"
+    /data/data/edu.ucla.cs.wing.mobileinsight/files/data/android_pie_ws_dissector
     """
     msg_id = int(raw_msg[0][3], 16)
     if msg_id not in global_ws_id:
@@ -319,11 +323,11 @@ def decode(logger, raw_msg):
     return global_msg[global_ws_id.index(msg_id)],output
 
 def last_seek():
-    global muxraw_parser_buff
+    global mtk_log_parser_buff
     global first_header
     msg_list = []
     if first_header:
-        res = seek_pstrace_magic(muxraw_parser_buff)
+        res = seek_pstrace_magic(mtk_log_parser_buff)
         if res != []:
             msg_list.append(res)
     return msg_list
@@ -354,7 +358,7 @@ def seek_pstrace_magic(bytes):
     return pstrace
 
 
-def parse_muxraw_magic(filename):
+def parse_mtk_log_magic(filename):
     msg_list = []
     # global a
     with open(filename, 'rb') as f:
@@ -386,24 +390,3 @@ def parse_muxraw_magic(filename):
             msg_list.append(res)
             # print 'yes'
     return msg_list
-
-
-if __name__ == "__main__":
-
-    # for i in range(len(global_ws_id)):
-    #     print global_ws_id[i], global_msg_str[i]
-
-    filename = sys.argv[1]
-    # filename = "./test_logs/MDLog1_2016_1119_175748.muxraw"
-    # print "Processing ", filename
-    # raw_msg_list = parse_muxraw(filename)
-    raw_msg_list = parse_muxraw_magic(filename)
-    msg_list = []
-    # print len(raw_msg_list)
-
-    if raw_msg_list != []:
-        for i in raw_msg_list:
-            output = "\\" + "\\".join([j[1:] for j in i[0]])
-            msg_list.append(output)
-            print output
-    # print msg_list
