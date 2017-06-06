@@ -162,7 +162,7 @@ global_ws_id = [
     103,
     250]
 
-global_msg_str = [
+global_raw_msg = [
     # "SMS_CP",
     "MM_CM_REQ",
     "MM_AUTH_REQ",
@@ -177,12 +177,12 @@ global_msg_str = [
     # "_2G_RR_MEAS",
     # "_2G_RR_CHNL",
     "LTE_BCCH_BCH",
-    "LTE_BCCH_DL_SCH",
+    "LTE-RRC_BCCH_DL_SCH", #"LTE_BCCH_DL_SCH",
     "LTE_DL_CCCH",
-    "LTE_DL_DCCH",
+    "LTE-RRC_DL_DCCH", #"LTE_DL_DCCH",
     "LTE_PCCH",
     "LTE_UL_CCCH",
-    "LTE_UL_DCCH",
+    "LTE-RRC_UL_DCCH", #"LTE_UL_DCCH",
     "RRC_SI_MIB",
     "RRC_SI_SB1",
     "RRC_SI_SB2",
@@ -267,7 +267,7 @@ def setfilter(m_type, m_enabled):
     global msg_type, msg_enabled
     msg_type = m_type
     msg_enabled = msg_enabled
-    
+
 
 def feed_binary(buff):
     global mtk_log_parser_buff
@@ -308,6 +308,7 @@ def decode(logger, raw_msg):
     if msg_id not in global_ws_id:
         return "",""
     type_str = global_msg[global_ws_id.index(msg_id)]
+    raw_str = global_raw_msg[global_ws_id.index(msg_id)]
     # if msg_enabled[msg_type.index(type_str)] != 1:
     #     return "",""
     # print "global_msg_id ", type_str
@@ -320,18 +321,7 @@ def decode(logger, raw_msg):
     end = output.rfind('>') + 1
     output = output[:end]
     # logger.log_info("lizhehan: Output: " + output)
-    return global_msg[global_ws_id.index(msg_id)],output
-
-def last_seek():
-    global mtk_log_parser_buff
-    global first_header
-    msg_list = []
-    if first_header:
-        res = seek_pstrace_magic(mtk_log_parser_buff)
-        if res != []:
-            msg_list.append(res)
-    return msg_list
-
+    return type_str, raw_str, output
 
 def seek_pstrace_magic(bytes):
     global first_header

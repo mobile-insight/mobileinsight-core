@@ -91,9 +91,10 @@ class AndroidMtkMonitor(Monitor):
         ws_dissector_path = os.path.join(libs_path, "android_pie_ws_dissector")
         self.libs_path = libs_path
         self.ws_dissector_path = ws_dissector_path
-        self._executable_path = os.path.join(libs_path, "diag_revealer_mtk")
-        self._filter_src_path = os.path.join(libs_path, "MTK-filter")
-        self._filter_dest_path = os.path.join(_input_dir, "mdlog1_config")
+        self._executable_path = os.path.join(self.libs_path, "diag_revealer_mtk")
+        self._log_path = os.path.join(self._input_dir, "mdlog1")
+        self._filter_src_path = os.path.join(self.libs_path, "MTK-filter")
+        self._filter_dest_path = os.path.join(self._input_dir, "mdlog1_config")
 
         prefs = {
             "ws_dissect_executable_path": os.path.join(
@@ -153,19 +154,10 @@ class AndroidMtkMonitor(Monitor):
 
         :except ValueError: unsupported message type encountered
         """
-        cls = self.__class__
-        if isinstance(type_name, str):
-            type_name = [type_name]
-        for n in type_name:
-            if n not in cls.SUPPORTED_TYPES:
-                self.log_warning("Unsupported message by MediaTek: %s" % n)
-            elif n not in self._type_names:
-                self._type_names.append(n)
-                self.log_info("Enable collection: " + n)
-
         if type_name in msg_type:
             msg_enabled[msg_type.index(type_name)] = 1
             mtk_log_parser.setfilter(msg_type, msg_enabled)
+            self.log_info("Enable collection: " + type_name)
         else:
             self.log_warning("Unsupported message by MediaTek: "+str(type_name))
         dm_collector_c.set_filtered(self._type_names)  # ???
@@ -177,16 +169,11 @@ class AndroidMtkMonitor(Monitor):
         src_file = ""
         for i in range(type_num):
             if msg_enabled[i] == 1:
-                src_file += msg_type[i]
+                src_file += msg_short[i]
         if src_file == "":
             src_file = "default"
-
-        #debug:
-        src_file = "default"
-
         src_file += ".bin"
-        cmd = "cp" + os.path.join(self._filter_src_path, src_file) + " " + os.path.join(self._filter_dest_path, dest_file)
-        self.log_info("lizhehan: cmd:" + cmd)
+        cmd = "cp " + os.path.join(self._filter_src_path, src_file) + " " + os.path.join(self._filter_dest_path, dest_file)
         self._run_shell_cmd(cmd)
         mtk_log_parser.setfilter(msg_type, msg_enabled)
 
@@ -223,11 +210,11 @@ class AndroidMtkMonitor(Monitor):
             # return None
             return res
 
-    def _start_collection(self, log_directory):
+    def _start_collection(self):
         cmd = "%s %s " % (self._executable_path, "-start")
         self._run_shell_cmd(cmd)
 
-    def _stop_collection(self, wait=False):
+    def _stop_collection(self):
         cmd = "%s %s " % (self._executable_path, "-stop")
         self._run_shell_cmd(cmd)
 
@@ -315,14 +302,14 @@ class AndroidMtkMonitor(Monitor):
                     ##############################################
                     for msg in decoded:
 
-                        typeid, msgstr = mtk_log_parser.decode(self, msg) #self for debug
+                        typeid, rawid, msgstr = mtk_log_parser.decode(self, msg) #self for debug
                         if typeid == "":
                             continue
                         packet = DMLogPacket([
                             ("log_msg_len", len(msg), ""),
                             ('type_id', typeid, ''),
                             ('timestamp', datetime.datetime.now(), ''),
-                            ("Msg", msgstr, "msg")]) #msg/raw_data
+                            ("Msg", msgstr, "msg")]) # ("Msg", msg, "raw_msg/" + rawid)
                         event = Event(  timeit.default_timer(),
                                         typeid,
                                         packet)
@@ -371,14 +358,16 @@ class AndroidMtkMonitor(Monitor):
             raise RuntimeError(
                 "Log directory not set. Please call set_log_directory() first.")
         self.set_filter()
-        old_files = set(self._get_filenames(self._input_dir))
+        cmd = "rm -r " + os.path.join(self._log_path, "/*")
+        self._run_shell_cmd(cmd)
+        old_files = set()
 
         try:
-            self._stop_collection(self._input_dir)
-            self._start_collection(self._input_dir)
+            self._stop_collection()
+            self._start_collection()
             monitoring_files = []
             while True:
-                current_files = set(self._get_filenames(self._input_dir))
+                current_files = set(self._get_filenames(self._log_path))
                 new_files = list(current_files - old_files)
                 old_files = current_files
 
@@ -401,15 +390,4 @@ class AndroidMtkMonitor(Monitor):
             sys.exit(str(traceback.format_exc()))
         finally:
             self._parse_muxraws(monitoring_files)
-            # decoded = mtk_log_parser.last_seek()
-            # if decoded != []:
-            #     try:
-            #         for msg in decoded:
-            #             typeid, xml = mtk_log_parser.decode(self, msg) #self for debug
-            #             event = Event(  timeit.default_timer(),
-            #                             typeid,
-            #                             xml)
-            #             self.send(event)
-            #     except FormatError, e:
-            #         print "FormatError: ", e
-            self._stop_collection(wait=True)
+            self._stop_collection()
