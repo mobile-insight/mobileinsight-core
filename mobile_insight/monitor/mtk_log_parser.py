@@ -1,6 +1,6 @@
 # Filename: android_mtk_log_monitor.py
 """
-An MTK log parser 
+An MTK log parser
 
 Author: Qianru Li, Zhehui Zhang
 """
@@ -267,7 +267,7 @@ def setfilter(m_type, m_enabled):
     global msg_type, msg_enabled
     msg_type = m_type
     msg_enabled = msg_enabled
-
+    
 
 def feed_binary(buff):
     global mtk_log_parser_buff
@@ -310,7 +310,7 @@ def decode(logger, raw_msg):
     type_str = global_msg[global_ws_id.index(msg_id)]
     # if msg_enabled[msg_type.index(type_str)] != 1:
     #     return "",""
-    print "global_msg_id ", type_str
+    # print "global_msg_id ", type_str
     msg =  "\\" + "\\".join([j[1:] for j in raw_msg[0]])
     output = msg
     # logger.log_info("lizhehan: Receive message: " + msg)

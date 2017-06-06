@@ -36,7 +36,8 @@ except Exception as e:
     is_android = False
 
 ANDROID_SHELL = "/system/bin/sh"
-msg_type = ["UMTS_NAS_OTA_Packet","LTE_RRC_OTA_Packet","WCDMA_RRC_OTA_Packet","LTE_NAS_ESM_OTA_Incoming_Packet"]
+msg_type = ["UMTS_NAS_OTA_Packet", "LTE_NAS_ESM_OTA_Incoming_Packet", "WCDMA_RRC_OTA_Packet", "LTE_RRC_OTA_Packet"]
+msg_short = ["N3", "N4", "R3", "R4"]
 msg_enabled = [0 for x in range(0,len(msg_type))]
 
 type_num = len(msg_type)
@@ -47,7 +48,6 @@ def get_cache_dir():
         return str(service_context.getCacheDir().getAbsolutePath())
     else:
         return ""
-
 
 def get_files_dir():
     if is_android:
@@ -92,6 +92,8 @@ class AndroidMtkMonitor(Monitor):
         self.libs_path = libs_path
         self.ws_dissector_path = ws_dissector_path
         self._executable_path = os.path.join(libs_path, "diag_revealer_mtk")
+        self._filter_src_path = os.path.join(libs_path, "MTK-filter")
+        self._filter_dest_path = os.path.join(_input_dir, "mdlog1_config")
 
         prefs = {
             "ws_dissect_executable_path": os.path.join(
@@ -117,6 +119,7 @@ class AndroidMtkMonitor(Monitor):
         """
         # /sdcard/mtklog/mdlog1/MDLog1_YYYY_MMDD_HHMMSS/MDLog1_YYYY_MMDD_HHMMSS.muxraw.tmp
         # -->  /sdcard/mtklog/mdlog1/MDLog1_YYYY_MMDD_HHMMSS/MDLog1_YYYY_MMDD_HHMMSS.muxraw
+        #FIXME: inputdir called by upperlayer
         self._input_dir = directory  # ???
         self._input_dir = "/sdcard/mtklog"
 
@@ -165,17 +168,27 @@ class AndroidMtkMonitor(Monitor):
             mtk_log_parser.setfilter(msg_type, msg_enabled)
         else:
             self.log_warning("Unsupported message by MediaTek: "+str(type_name))
-        # src_file = ""
-        # for i in range(type_num):
-        #     if msg_enabled[i] == 1:
-        #         src_file += msg_type[i]
-        # if src_file == "":
-        #     src_file = "default"
-        # src_file += ".bin"
-        # bin_store_path = self._input_dir + "binFiles"
-        # cmd = "cp" + bin_store_path + "/" + src_file + " " + self._input_dir + "/mdlog1_config/" + dest_file
-        # self._run_shell_cmd(cmd)
         dm_collector_c.set_filtered(self._type_names)  # ???
+
+    def set_filter(self):
+        """
+        Copy the chosen filter to its path
+        """
+        src_file = ""
+        for i in range(type_num):
+            if msg_enabled[i] == 1:
+                src_file += msg_type[i]
+        if src_file == "":
+            src_file = "default"
+
+        #debug:
+        src_file = "default"
+
+        src_file += ".bin"
+        cmd = "cp" + os.path.join(self._filter_src_path, src_file) + " " + os.path.join(self._filter_dest_path, dest_file)
+        self.log_info("lizhehan: cmd:" + cmd)
+        self._run_shell_cmd(cmd)
+        mtk_log_parser.setfilter(msg_type, msg_enabled)
 
     def enable_log_all(self):
         """
@@ -183,6 +196,7 @@ class AndroidMtkMonitor(Monitor):
         """
         cls = self.__class__
         self.enable_log(cls.SUPPORTED_TYPES)
+        msg_enabled = [1 for x in range(0,len(msg_type))]
 
     def save_log_as(self, path):
         """
@@ -304,12 +318,11 @@ class AndroidMtkMonitor(Monitor):
                         typeid, msgstr = mtk_log_parser.decode(self, msg) #self for debug
                         if typeid == "":
                             continue
-                        #FIXME: set message length
                         packet = DMLogPacket([
-                            ("log_msg_len",0,""),
+                            ("log_msg_len", len(msg), ""),
                             ('type_id', typeid, ''),
                             ('timestamp', datetime.datetime.now(), ''),
-                            ("Msg", msgstr, "msg")])
+                            ("Msg", msgstr, "msg")]) #msg/raw_data
                         event = Event(  timeit.default_timer(),
                                         typeid,
                                         packet)
@@ -357,6 +370,7 @@ class AndroidMtkMonitor(Monitor):
             # FIXME: test if self._input_dir exists in SDcard
             raise RuntimeError(
                 "Log directory not set. Please call set_log_directory() first.")
+        self.set_filter()
         old_files = set(self._get_filenames(self._input_dir))
 
         try:
