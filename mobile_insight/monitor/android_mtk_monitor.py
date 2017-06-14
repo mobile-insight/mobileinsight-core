@@ -154,12 +154,15 @@ class AndroidMtkMonitor(Monitor):
 
         :except ValueError: unsupported message type encountered
         """
-        if type_name in msg_type:
-            msg_enabled[msg_type.index(type_name)] = 1
-            mtk_log_parser.setfilter(msg_type, msg_enabled)
-            self.log_info("Enable collection: " + type_name)
-        else:
-            self.log_warning("Unsupported message by MediaTek: "+str(type_name))
+        cls = self.__class__
+        if isinstance(type_name, str):
+            type_name = [type_name]
+        for tn in type_name:
+            if tn in msg_type:
+                msg_enabled[msg_type.index(tn)] = 1
+                self.log_info("Enable collection: " + tn)
+            else:
+                self.log_warning("Unsupported message by MediaTek: "+str(tn))
         dm_collector_c.set_filtered(self._type_names)  # ???
 
     def set_filter(self):
@@ -358,13 +361,14 @@ class AndroidMtkMonitor(Monitor):
             raise RuntimeError(
                 "Log directory not set. Please call set_log_directory() first.")
         self.set_filter()
-        cmd = "rm -r " + os.path.join(self._log_path, "/*")
+        cmd = "rm -r " + os.path.join(self._log_path, "*")
         self._run_shell_cmd(cmd)
         old_files = set()
 
         try:
             self._stop_collection()
             self._start_collection()
+            self.log_info("lizhehan: Start the collection")
             monitoring_files = []
             while True:
                 current_files = set(self._get_filenames(self._log_path))
