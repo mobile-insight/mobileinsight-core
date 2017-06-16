@@ -163,7 +163,7 @@ class AndroidMtkMonitor(Monitor):
                 self.log_info("Enable collection: " + tn)
             else:
                 self.log_warning("Unsupported message by MediaTek: "+str(tn))
-        dm_collector_c.set_filtered(self._type_names)  # ???
+        # dm_collector_c.set_filtered(self._type_names)  # ???
 
     def set_filter(self):
         """
