@@ -115,9 +115,8 @@ class ChronicleProcessor(object):
                         self.to_read[cls.READ_FILENAME] = msg_len
                         self.state = cls.READ_FILENAME
                     else:
-                        raise RuntimeError(
-                            "Unknown msg type %s" % str(
-                                self.msg_type))
+                        # raise RuntimeError("Unknown msg type %s" % str(self.msg_type))
+                        print "Unknown msg type %s" % str(self.msg_type)
             elif self.state == cls.READ_TS:
                 if self.to_read[self.state] == 0:   # current field is complete
                     ret_ts = struct.unpack("<d", self.bytes[self.state])[0]
@@ -359,6 +358,8 @@ class AndroidDevDiagMonitor(Monitor):
             except IOError:     # proc has been terminated
                 continue
 
+        print "killing diag_revealer"
+
         if len(diag_procs) > 0:
             cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
             self._run_shell_cmd(cmd2)
@@ -423,7 +424,7 @@ class AndroidDevDiagMonitor(Monitor):
                         raise err  # something else has happened -- better reraise
 
                 while s:   # preprocess metadata
-                    # self.log_info("Before chproc.process(s)")
+                    # self.log_info("Before chproc.process: %s" % s)
                     ret_msg_type, ret_ts, ret_payload, ret_filename, remain = chproc.process(
                         s)
                     # self.log_info("After chproc.process(s)")

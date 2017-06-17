@@ -37,7 +37,7 @@ except Exception as e:
 
 ANDROID_SHELL = "/system/bin/sh"
 msg_type = ["UMTS_NAS_OTA_Packet", "LTE_NAS_ESM_OTA_Incoming_Packet", "WCDMA_RRC_OTA_Packet", "LTE_RRC_OTA_Packet"]
-msg_short = ["N3", "N4", "R3", "R4"]
+msg_short = ["NAS3G", "NAS4G", "RRC3G", "RRC4G"]
 msg_enabled = [0 for x in range(0,len(msg_type))]
 
 type_num = len(msg_type)
@@ -101,7 +101,7 @@ class AndroidMtkMonitor(Monitor):
                 libs_path,
                 "android_pie_ws_dissector"),
             "libwireshark_path": libs_path}
-        DMLogPacket.init(prefs)  # ???
+        DMLogPacket.init(prefs)  # 
 
     def available_log_types(self):
         """
@@ -154,16 +154,13 @@ class AndroidMtkMonitor(Monitor):
 
         :except ValueError: unsupported message type encountered
         """
-        cls = self.__class__
-        if isinstance(type_name, str):
-            type_name = [type_name]
-        for tn in type_name:
-            if tn in msg_type:
-                msg_enabled[msg_type.index(tn)] = 1
-                self.log_info("Enable collection: " + tn)
-            else:
-                self.log_warning("Unsupported message by MediaTek: "+str(tn))
-        # dm_collector_c.set_filtered(self._type_names)  # ???
+        if type_name in msg_type:
+            msg_enabled[msg_type.index(type_name)] = 1
+            mtk_log_parser.setfilter(msg_type, msg_enabled)
+            self.log_info("Enable collection: " + type_name)
+            # dm_collector_c.set_filtered(self._type_names)  # ???
+        else:
+            self.log_warning("Unsupported message by MediaTek: "+str(type_name))
 
     def set_filter(self):
         """
@@ -312,7 +309,7 @@ class AndroidMtkMonitor(Monitor):
                             ("log_msg_len", len(msg), ""),
                             ('type_id', typeid, ''),
                             ('timestamp', datetime.datetime.now(), ''),
-                            ("Msg", msgstr, "raw_msg/" + rawid)]) # ("Msg", msg, "raw_msg/" + rawid)
+                            ("Msg", msgstr, "msg")]) # ("Msg", msg, "raw_msg/" + rawid)
                         event = Event(  timeit.default_timer(),
                                         typeid,
                                         packet)
@@ -361,14 +358,13 @@ class AndroidMtkMonitor(Monitor):
             raise RuntimeError(
                 "Log directory not set. Please call set_log_directory() first.")
         self.set_filter()
-        cmd = "rm -r " + os.path.join(self._log_path, "*")
+        cmd = "rm -r " + os.path.join(self._log_path, "/*")
         self._run_shell_cmd(cmd)
         old_files = set()
 
         try:
             self._stop_collection()
             self._start_collection()
-            self.log_info("lizhehan: Start the collection")
             monitoring_files = []
             while True:
                 current_files = set(self._get_filenames(self._log_path))
@@ -376,7 +372,7 @@ class AndroidMtkMonitor(Monitor):
                 old_files = current_files
 
                 if new_files:   # new muxraw files detected
-                    self.log_warning("New muxraw files " + str(new_files))
+                    # self.log_warning("New muxraw files " + str(new_files))
                     if self._filename_sort_key is None:
                         k = AndroidMtkMonitor._default_filename_sort_key
                     else:
