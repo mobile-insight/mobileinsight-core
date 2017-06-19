@@ -281,6 +281,7 @@ class AndroidMtkMonitor(Monitor):
             #                                             True,   # include_timestamp
             #                                             )
             ######################################
+
             decoded = mtk_log_parser.feed_binary(s)  # self for debug
             # decoded = mtk_log_parser.receive_log_packet(self._skip_decoding,
             #                                             True   # include_timestamp
@@ -321,6 +322,9 @@ class AndroidMtkMonitor(Monitor):
 
                 except FormatError as e:
                     print "FormatError: ", e  # skip this packet
+            else:
+                # self.log_debug("empty decoded list")
+                pass
         return f.tell()
 
     def _parse_muxraws(self, monitoring_files):
@@ -368,15 +372,15 @@ class AndroidMtkMonitor(Monitor):
         try:
             self._stop_collection()
             self._start_collection()
-            self.log_info("lizhehan: Start the collection")
+            # self.log_info("lizhehan: Start the collection")
             monitoring_files = []
             while True:
                 current_files = set(self._get_filenames(self._log_path))
                 new_files = list(current_files - old_files)
                 old_files = current_files
 
-                if new_files:   # new muxraw files detected
-                    self.log_warning("New muxraw files " + str(new_files))
+                if new_files:   # new log files detected
+                    # self.log_warning("New log files " + str(new_files))
                     if self._filename_sort_key is None:
                         k = AndroidMtkMonitor._default_filename_sort_key
                     else:
