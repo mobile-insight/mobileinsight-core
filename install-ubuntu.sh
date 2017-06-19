@@ -4,12 +4,12 @@
 # installation location /usr/local/lib
 # Author  : Haotian Deng
 # Date    : 2016-12-28
-# Version : 1.0
+# Version : 1.11
 
 # Use your local library path
 LD_LIBRARY_PATH=/usr/local/lib
 # A copy of Wireshark sources will be put inside the MobileInsight source folder
-WIRESHARK_SRC_PATH=$(pwd)/wireshark-2.0.8
+WIRESHARK_SRC_PATH=$(pwd)/wireshark-2.0.11
 
 # Clean up libraries installed by the old version of MobileInsight
 sudo rm /usr/lib/libwireshark.so*
@@ -23,12 +23,12 @@ sudo apt-get install pkg-config wget libglib2.0-dev bison flex libpcap-dev
 # Make sure the package version is in accordance to the version that was
 # installed previously
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
-	wget https://www.wireshark.org/download/src/all-versions/wireshark-2.0.8.tar.bz2
-	tar -xjvf wireshark-2.0.8.tar.bz2
-	rm wireshark-2.0.8.tar.bz2
+	wget https://www.wireshark.org/download/src/all-versions/wireshark-2.0.11.tar.bz2
+	tar -xjvf wireshark-2.0.11.tar.bz2
+	rm wireshark-2.0.11.tar.bz2
 fi
 
-# Generate config.h for Wireshark 2.0.8
+# Generate config.h for Wireshark 2.0.11
 cd ${WIRESHARK_SRC_PATH}
 ./configure --disable-wireshark
 
@@ -36,21 +36,21 @@ echo "Check if wireshark dynamic library exists in system path......"
 
 FindWiresharkLibrary=true
 
-if ldconfig -p | grep "libwireshark.so "; then
+if ldconfig -p | grep "/usr/local/lib/libwireshark.so"; then
     echo "Found libwireshark.so!";
 else
     echo "Didn't find libwireshark.so";
     FindWiresharkLibrary=false
 fi
 
-if ldconfig -p | grep "libwiretap.so "; then
+if ldconfig -p | grep "/usr/local/lib/libwiretap.so"; then
     echo "Found libwiretap.so!";
 else
     echo "Didn't find libwiretap.so";
     FindWiresharkLibrary=false
 fi
 
-if ldconfig -p | grep "libwsutil.so "; then
+if ldconfig -p | grep "/usr/local/lib/libwsutil.so"; then
     echo "Found libwsutil.so!";
 else
     echo "Didn't find libwsutil.so";
@@ -58,7 +58,7 @@ else
 fi
 
 if [ "$FindWiresharkLibrary" = false ] ; then
-    echo "Compile wireshark 2.0.8 from source code, it may take a few minutes......"
+    echo "Compile wireshark 2.0.11 from source code, it may take a few minutes......"
     make || exit 1
     sudo make install
 fi
@@ -76,7 +76,7 @@ g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags 
 strip ws_dissector
 
 # install wxPython and matplotlib for GUI
-sudo apt-get install python-wxgtk2.8
+sudo apt-get install python-wxgtk3.0
 pip install matplotlib
 pip install pyserial
 

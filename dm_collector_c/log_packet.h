@@ -2420,6 +2420,15 @@ const ValueName ValueNamePuschReportingMode [] = {
     {4, "MODE_APERIODIC_RM31"},
 };
 
+const ValueName ValueNamePucchReportType [] = {
+    {2, "Type 2, Wideband CQI, PMI Feedback"},
+    {3, "Type 3, RI Feedback"},
+};
+
+const ValueName ValueNamePucchReportingMode [] = {
+    {2, "MODE_1_1"},
+};
+
 const ValueName ValueNameTransmissionScheme [] = {
     // 4 bits
     {1, "Single Antenna Port (SISO or SIMO)"},
