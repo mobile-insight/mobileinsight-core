@@ -39,6 +39,7 @@
 #include "1xevdo_multi_carrier_pilot_sets.h"
 #include "lte_pdcp_dl_cipher_data_pdu.h"
 #include "lte_pdcp_ul_cipher_data_pdu.h"
+#include "lte_phy_pucch_csf.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -5508,7 +5509,12 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 b, offset, length, result);
         offset += _decode_lte_pdcp_ul_cipher_data_pdu_payload(b, offset, length, result);
         break;
-
+    case LTE_PHY_PUCCH_CSF:
+        offset += _decode_by_fmt(LtePhyPucchCsf_Fmt,
+                ARRAY_SIZE(LtePhyPucchCsf_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_phy_pucch_csf_payload(b, offset, length, result);
+        break;
     default:
         break;
     };
