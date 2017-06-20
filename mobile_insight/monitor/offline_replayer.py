@@ -54,13 +54,6 @@ class OfflineReplayer(Monitor):
         self.__test_android()
 
         if self.is_android:
-            # prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
-            #        "libwireshark_path": "/system/lib"}
-            # if self.service_context:
-            #     libs_path = os.path.join(self.__get_files_dir(),"data")
-            # else:
-            #     libs_path = "./data"
-            # libs_path = os.path.join(self.__get_files_dir(),"data")
             libs_path = self.__get_libs_path()
             prefs = {
                 "ws_dissect_executable_path": os.path.join(

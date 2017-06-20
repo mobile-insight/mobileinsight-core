@@ -270,7 +270,8 @@ class AndroidMtkMonitor(Monitor):
         f.seek(cur_pos, 0)
         while True:
             t1 = timeit.default_timer()
-            s = f.read(BLOCK_SIZE)
+            # s = f.read(BLOCK_SIZE)
+            s = f.read()
             if not s:   # EOF encountered
                 break
             t2 = timeit.default_timer()
@@ -281,7 +282,7 @@ class AndroidMtkMonitor(Monitor):
             #                                             True,   # include_timestamp
             #                                             )
             ######################################
-
+            # self.log_debug('before feed_binary: '+"\\x".join("{:02x}".format(ord(c)) for c in s))
             decoded = mtk_log_parser.feed_binary(s)  # self for debug
             # decoded = mtk_log_parser.receive_log_packet(self._skip_decoding,
             #                                             True   # include_timestamp
@@ -313,7 +314,7 @@ class AndroidMtkMonitor(Monitor):
                             ("log_msg_len", len(msg), ""),
                             ('type_id', typeid, ''),
                             ('timestamp', datetime.datetime.now(), ''),
-                            ("Msg", msgstr, "raw_msg/" + rawid)]) # ("Msg", msg, "raw_msg/" + rawid)
+                            ("Msg", msgstr, "msg")]) # ("Msg", msgstr, "raw_msg/" + rawid)])
                         event = Event(  timeit.default_timer(),
                                         typeid,
                                         packet)
@@ -323,7 +324,7 @@ class AndroidMtkMonitor(Monitor):
                 except FormatError as e:
                     print "FormatError: ", e  # skip this packet
             else:
-                # self.log_debug("empty decoded list")
+                self.log_debug("empty decoded list")
                 pass
         return f.tell()
 
