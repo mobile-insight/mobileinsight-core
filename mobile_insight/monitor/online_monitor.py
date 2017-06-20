@@ -64,11 +64,12 @@ try:
         elif res.startswith("msm") or res.startswith("mdm"):
             return ChipsetType.QUALCOMM
         else:
+            print "WARNING: Unknown type:",res
             return None
 
     
     chipset_type = get_chipset_type()
-    print "chipset_type",chipset_type
+    # print "chipset_type",chipset_type
 
     if chipset_type == ChipsetType.QUALCOMM:
         from android_dev_diag_monitor import AndroidDevDiagMonitor
@@ -116,11 +117,35 @@ try:
                 :type rate: int
                 """
                 print "WARNING: Android version does not need to configure baudrate"
+    else:
+        from monitor import Monitor
+        class OnlineMonitor(Monitor):
+            def __init__(self):
+                Monitor.__init__(self)
+                self.log_warning("Unsupported chipset type")
+        
+            def set_serial_port(self, phy_ser_name):
+                """
+                NOT USED: Compatability with DMCollector
+
+                :param phy_ser_name: the serial port name (path)
+                :type phy_ser_name: string
+                """
+                print "WARNING: Android version does not need to configure serial port"
+
+            def set_baudrate(self, rate):
+                """
+                NOT USED: Compatability with DMCollector
+
+                :param rate: the baudrate of the port
+                :type rate: int
+                """
+                print "WARNING: Android version does not need to configure baudrate"
     
 
 except Exception as e:
     # import traceback
-    # traceback.print_exc()
+    # print str(traceback.format_exc())
 
     # not used, but bugs may exist on laptop
     from dm_collector.dm_collector import DMCollector
