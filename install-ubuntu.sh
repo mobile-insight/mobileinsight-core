@@ -17,7 +17,7 @@ sudo rm /usr/lib/libwiretap.so*
 sudo rm /usr/lib/libwsutil.so*
 
 # Make sure compile environment and other dependencies are installed
-sudo apt-get install pkg-config wget libglib2.0-dev bison flex libpcap-dev
+sudo apt-get -y install pkg-config wget libglib2.0-dev bison flex libpcap-dev
 
 # Download necessary source files to compile ws_dissector
 # Make sure the package version is in accordance to the version that was
@@ -76,7 +76,7 @@ g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags 
 strip ws_dissector
 
 # install wxPython and matplotlib for GUI
-sudo apt-get install python-wxgtk3.0
+sudo apt-get -y install python-wxgtk3.0
 pip install matplotlib
 pip install pyserial
 
