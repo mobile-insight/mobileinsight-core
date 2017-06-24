@@ -314,7 +314,8 @@ class AndroidMtkMonitor(Monitor):
                             ("log_msg_len", len(msg), ""),
                             ('type_id', typeid, ''),
                             ('timestamp', datetime.datetime.now(), ''),
-                            ("Msg", msgstr, "msg")]) # ("Msg", msgstr, "raw_msg/" + rawid)])
+                            ("Msg", msgstr, "msg")]) 
+                            # ("Msg", msgstr, "raw_msg/" + rawid)]) #TODO: optimize parsing speed
                         event = Event(  timeit.default_timer(),
                                         typeid,
                                         packet)
@@ -322,10 +323,7 @@ class AndroidMtkMonitor(Monitor):
                     ##############################################
 
                 except FormatError as e:
-                    print "FormatError: ", e  # skip this packet
-            else:
-                self.log_debug("empty decoded list")
-                pass
+                    self.log_error("FormatError: %s" % str(e))   # skip this packet
         return f.tell()
 
     def _parse_muxraws(self, monitoring_files):
@@ -381,7 +379,7 @@ class AndroidMtkMonitor(Monitor):
                 old_files = current_files
 
                 if new_files:   # new log files detected
-                    # self.log_warning("New log files " + str(new_files))
+                    self.log_warning("New log files " + str(new_files))
                     if self._filename_sort_key is None:
                         k = AndroidMtkMonitor._default_filename_sort_key
                     else:

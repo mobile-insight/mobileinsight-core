@@ -251,7 +251,7 @@ def feed_binary(buff):
     msg_list = []
     cur_index = 0
     end_index = len(buff)
-    print end_index
+    # print end_index
     # parse file into sections devided by '\0x8f\0x9a\0x9a\0x8d\0x04\0x00'
     header = '\xac\xca\x00\xff'
     header_magic = '\x8f\x9a\x9a\x8d\x04\x00'
