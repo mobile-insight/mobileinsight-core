@@ -310,7 +310,6 @@ def feed_binary(buff):
 
 
 def decode(logger, raw_msg):
-# def decode_tmp(raw_msg):
     """
     decode raw_msg and return the typeid, xml (for decoded message)
 
