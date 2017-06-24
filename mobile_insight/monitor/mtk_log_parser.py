@@ -7,6 +7,7 @@ Author: Qianru Li, Zhehui Zhang
 import struct
 import sys
 import subprocess
+import re
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -250,35 +251,62 @@ def feed_binary(buff):
     msg_list = []
     cur_index = 0
     end_index = len(buff)
+    print end_index
     # parse file into sections devided by '\0x8f\0x9a\0x9a\0x8d\0x04\0x00'
-    # header = ['0xac', '0xca', '0x0', '0xff']
     header = '\xac\xca\x00\xff'
-    # header_magic = ['0x8f', '0x9a', '0x9a', '0x8d', '0x4', '0x0']
     header_magic = '\x8f\x9a\x9a\x8d\x04\x00'
     
-    while cur_index != end_index:
-        # if cur_index % 1000 == 0:
-        #     print cur_index
-        # if cur_index > 3000000:
-        #     print cur_index
-        byte = buff[cur_index]
-        # byte_value couldn't be print out
-        byte_value = struct.unpack('B', byte)[0]
-        # mtk_log_parser_buff.append(hex(byte_value))
+    mtk_log_str = ''.join(map(lambda x: chr(struct.unpack('B',x)[0]), buff))
+    mtk_log_str = re.sub('\xac\xca\x00\xff..','',mtk_log_str)
+    new_log_len = len(mtk_log_str)
+    # print len(mtk_log_str)
 
-        mtk_log_parser_buff += chr(byte_value)
-        if len(mtk_log_parser_buff) > 6:
-            if mtk_log_parser_buff[-6:-2] == header:
-                print "MTK header!"
-                mtk_log_parser_buff = mtk_log_parser_buff[:-6]
-            if mtk_log_parser_buff[-6:] == header_magic:
-                print "MTK magic!"
-                res = seek_pstrace_magic(mtk_log_parser_buff)
-                if res != []:
-                    msg_list.append(res)
-                mtk_log_parser_buff = ''
-        cur_index += 1
+    loc = mtk_log_str.find('\x8f\x9a\x9a\x8d\x04\x00')
+    while loc >= 0:
+        # copy seek_pstrace_magic()
+        pstrace = []
+
+        msg_id = mtk_log_str[6+loc:10+loc]
+        if msg_id in type_id_mapping:
+            # calculate the length of raw_data
+            decimal_high    = ord(mtk_log_str[10+loc])
+            decimal_low     = ord(mtk_log_str[11+loc]) 
+            length          = decimal_low * 256 + decimal_high
+
+        if length > 0 and length < new_log_len - loc:
+            raw_bytes = mtk_log_str[12+loc:12 + length+loc]
+            raw_data = map(lambda x: x if (x != '\x00') else '\x00', raw_bytes)
+            raw_msg = ['\x00'] * 3 + [msg_id] + ['\x00'] * 2 + [chr(decimal_low)] + [chr(decimal_high)] + raw_data
+            pstrace.append(raw_msg)
+            msg_list.append(pstrace)
+
+        loc = mtk_log_str.find('\x8f\x9a\x9a\x8d\x04\x00',loc+12)
+
     return msg_list
+    # print mtk_log_str.find('\x8f\x9a\x9a\x8d\x04\x00')
+
+    # block by qianru
+    # while cur_index != end_index:
+    #     byte = buff[cur_index]
+    #     # byte_value couldn't be print out
+    #     byte_value = struct.unpack('B', byte)[0]
+        
+    #     mtk_log_parser_buff += chr(byte_value)
+    #     # print chr(byte_value),
+    #     if len(mtk_log_parser_buff) > 6:
+    #         if mtk_log_parser_buff[-6:-2] == header:
+    #             mtk_log_parser_buff = mtk_log_parser_buff[:-6]
+    #             # print mtk_log_parser_buff
+    #         if mtk_log_parser_buff[-6:] == header_magic:
+    #             # print mtk_log_parser_buff
+    #             print 'magic'
+    #             res = seek_pstrace_magic(mtk_log_parser_buff)
+    #             if res != []:
+    #                 msg_list.append(res)
+    #             mtk_log_parser_buff = ''
+    #     cur_index += 1
+    # return msg_list
+    # block by qianru end
 
 
 def decode(logger, raw_msg):
@@ -292,12 +320,6 @@ def decode(logger, raw_msg):
     LD_LIBRARY_PATH="/data/data/edu.ucla.cs.wing.mobileinsight/files/data/"
     /data/data/edu.ucla.cs.wing.mobileinsight/files/data/android_pie_ws_dissector
     """
-
-    # msg_id = int(raw_msg[0][3], 16)
-    # if msg_id not in global_ws_id:
-    #     return "",""
-    # type_str = global_msg[global_ws_id.index(msg_id)]
-    # raw_str = global_raw_msg[global_ws_id.index(msg_id)]
     msg_id = raw_msg[0][3]
     if msg_id not in type_id_mapping:
         return "",""
@@ -305,20 +327,19 @@ def decode(logger, raw_msg):
     raw_str     = type_id_mapping[msg_id][2]
 
     raw_msg[0][3] = chr(type_id_mapping[msg_id][0])
-
+    # qianru-edit-end
     # print "global_msg_id ", type_str
-    # msg =  "\\" + "\\".join([j[1:] for j in raw_msg[0]])
     msg =  "\\" + "\\".join([format(ord(j), '#04x')[1:] for j in raw_msg[0]])
     output = msg
 
     # logger.log_info("lizhehan: Receive message: " + msg)
-
+    # qianru-edit
     p = subprocess.Popen("su", executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     output,err = p.communicate("echo -ne \'" + msg + "\' | LD_LIBRARY_PATH=" + logger.libs_path + ' ' + logger.ws_dissector_path + '\n')
     p.wait()
     end = output.rfind('>') + 1
     output = output[:end]
-
+    # qianru-edit
     # logger.log_info("lizhehan: Output: " + output)
     return type_str, raw_str, output
 
@@ -331,24 +352,17 @@ def seek_pstrace_magic(bytes):
         return pstrace
 
     msg_id = bytes[0:4]
-    # if msg_id in global_msg_id:
     if msg_id in type_id_mapping:
         # calculate the length of raw_data
-        # decimal_high = int(bytes[4], 16)
-        # decimal_low = int(bytes[5], 16)
         decimal_high    = ord(bytes[4])
         decimal_low     = ord(bytes[5]) 
         length          = decimal_low * 256 + decimal_high
-        # print 'hello', length, '\n\n', bytes[:20]
+        
         if length > 0 and length < len(bytes):
             raw_bytes = bytes[6:6 + length]
             # raw_data = map(lambda x: x if (x != '0x0') else '0x00', raw_bytes)
             raw_data = map(lambda x: x if (x != '\x00') else '\x00', raw_bytes)
-            # raw_msg = ['0x00'] * 3 + [hex(global_ws_id[global_msg_id.index(msg_id)])] + [
-                # '0x00'] * 2 + [bytes[5]] + [bytes[4]] + raw_data
-                # hex(global_msg_id[msg_id][0])
-            # raw_msg = ['0x00'] * 3 + [hex(global_msg_id[msg_id][0])] + ['0x00'] * 2 + [bytes[5]] + [bytes[4]] + raw_data
-            # raw_msg = ['0x00'] * 3 + [msg_id] + ['0x00'] * 2 + [bytes[5]] + [bytes[4]] + raw_data
+            
             raw_msg = ['\x00'] * 3 + [msg_id] + ['\x00'] * 2 + [bytes[5]] + [bytes[4]] + raw_data
             pstrace.append(raw_msg)
             # return pstrace
@@ -389,7 +403,7 @@ def parse_mtk_log_magic(filename):
     return msg_list
 
 # if __name__ == '__main__':
-#     fp = open('../../../testFile.muxraw','r')
+#     fp = open('./runtime.muxraw','r')
 #     s = fp.read()
 #     # print s 
 #     # print '\x00\x00\x00\xc8\x00\x00\x00\x09\x40\x01\xBF\x28\x1A\xEB\xA0\x00\x00'
@@ -397,10 +411,3 @@ def parse_mtk_log_magic(filename):
 
 #     for msg in msgList:
 #         typeid, rawid, msgstr = decode_tmp(msg) #self for debug
-        # if typeid == "":
-        #     continue
-        # packet = DMLogPacket([("log_msg_len", len(msg), ""),
-        #                     ('type_id', typeid, ''),
-        #                     ('timestamp', datetime.datetime.now(), ''),
-        #                     ("Msg", msgstr, "raw_msg/" + rawid)]) # ("Msg", msg, "raw_msg/" + rawid)
-        
