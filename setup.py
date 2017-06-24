@@ -125,7 +125,7 @@ else:
 
 setup(
     name         = 'MobileInsight',
-    version      = '2.2.1',
+    version      = '3.0.0',
     description  = 'Mobile network monitoring and analysis',
     author       = 'UCLA WiNG group and OSU MSSN lab',
     url          = 'http://metro.cs.ucla.edu/mobile_insight',
