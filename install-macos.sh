@@ -1,80 +1,109 @@
 #!/bin/bash
-# Migration script for mobileInsight desktop version on macOS
-# It deletes old libraries installed and use standard
-# installation location /usr/local/lib
+# Installation script for mobileinsight-core on macOS
+# It installs package under /usr/local folder
 # Author  : Zengwen Yuan
-# Date    : 2016-11-22
-# Version : 1.0
+# Date    : 2017-06-24
+# Version : 2.0
 
-# Use your local library path
+# Wireshark version to install
+WS_VER=2.0.13
+
+# Use local library path
 LD_LIBRARY_PATH=/usr/local/lib
-# A copy of Wireshark sources will be put inside the MobileInsight source folder
-WIRESHARK_SRC_PATH=$(pwd)/wireshark-2.0.8
-
-# Clean up libraries installed by the old version of MobileInsight
-sudo rm /usr/lib/libglib-2.0.dylib
-sudo rm /usr/lib/libgobject-2.0.dylib
-sudo rm /usr/lib/libgio-2.0.dylib
-sudo rm /usr/lib/libgmodule-2.0.dylib
-sudo rm /usr/lib/libgthread-2.0.dylib
-sudo rm /usr/lib/libwireshark.6.dylib
-sudo rm /usr/lib/libwireshark.dylib
-sudo rm /usr/lib/libwiretap.5.dylib
-sudo rm /usr/lib/libwiretap.dylib
-sudo rm /usr/lib/libwsutil.6.dylib
-sudo rm /usr/lib/libwsutil.dylib
+MOBILEINSIGHT_PATH=$(pwd)
+WIRESHARK_SRC_PATH=${MOBILEINSIGHT_PATH}/wireshark-${WS_VER}
 
 # Install up-to-date Homebrew and use default prefixes
-# You can check related environment variables using `brew config`
-# HOMEBREW_PREFIX: /usr/local
-# HOMEBREW_REPOSITORY: /usr/local/Homebrew
-# HOMEBREW_CELLAR: /usr/local/Cellar
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
-# First let Homebrew install Wireshark 2.2.2 once, and solve dependencies
-brew install wireshark
-# Make sure compile environment and other dependencies are installed
-brew install pkg-config cmake wget glib gettext libffi
-# Remove Wireshark 2.2.2 and install the old stable version 2.0.8 using our own formulae
-brew remove wireshark
-brew install ./wireshark.rb
-brew link --overwrite wireshark
-
-# Download necessary source files to compile ws_dissector
-# Make sure the package version is in accordance to the version that was installed by Homebrew
-if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
-	wget https://1.na.dl.wireshark.org/src/wireshark-2.0.8.tar.bz2
-	tar -xjvf wireshark-2.0.8.tar.bz2
-	rm wireshark-2.0.8.tar.bz2
+echo "Checking if you have Homebrew installed..."
+which -s brew
+if [[ $? != 0 ]] ; then
+    echo "It appears that Homebrew is not installed on your computer, installing..."
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+else
+    echo "Updating Homebrew"
+    brew update
 fi
 
-# Generate config.h for Wireshark 2.0.8
+# Check if Wireshark is installed
+wireshark=$(brew ls --versions wireshark)
+if [[ $? != 0 ]]; then
+    echo "You don't have a Wireshark installed by Homebrew, installing..."
+    # Wireshark is not installed, install dependencies
+    brew install pkg-config cmake
+    brew install glib gnutls libgcrypt dbus
+    brew install geoip c-ares
+    # Install Wireshark stable version 2.0.x using our own formulae
+    brew install ./wireshark.rb
+elif [[ $wireshark == *${WS_VER}* ]]; then
+    echo "Congrats! You have a Wireshark version ${WS_VER} installed, continuing..."
+else
+    echo "You have a Wireshark other than current version installed."
+    echo "Installing Wireshark version ${WS_VER}..."
+    brew install ./wireshark.rb
+    brew link --overwrite wireshark
+fi
+
+echo "Installing dependencies for compiling Wireshark libraries"
+brew install wget gettext libffi
+
+# Download Wireshark source files to compile ws_dissector
+if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
+    echo "You do not have source codes for Wireshark version ${WS_VER}, downloading..."
+    wget https://www.wireshark.org/download/src/all-versions/wireshark-${WS_VER}.tar.bz2
+    tar xvf wireshark-${WS_VER}.tar.bz2
+    rm wireshark-${WS_VER}.tar.bz2
+fi
+
+echo "Configuring Wireshark for compilation..."
 cd ${WIRESHARK_SRC_PATH}
 ./configure --disable-wireshark
 
-# Compile ws_dissector
-cd ../ws_dissector
+echo "Compiling Wireshark dissector for mobileinsight..."
+cd ${mobileinsight_PATH}/ws_dissector
 if [ -e "ws_dissector" ]; then
-	rm ws_dissector
+    rm ws_dissector
 fi
 g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags glib-2.0` \
-	-I"${WIRESHARK_SRC_PATH}" -L"${LD_LIBRARY_PATH}" -lwireshark -lwsutil -lwiretap
+    -I"${WIRESHARK_SRC_PATH}" -L"${LD_LIBRARY_PATH}" -lwireshark -lwsutil -lwiretap
 strip ws_dissector
 
-# install dependency for mobileInsight GUI
-brew install wxpython
-pip install matplotlib
-pip install pyserial
+echo "Installing dependencies for mobileinsight GUI..."
+which -s pip
+if [[ $? != 0 ]] ; then
+    echo "It appears that pip is not installed on your computer, installing..."
+    brew install python
+    brew install wxpython
+    pip install pyserial matplotlib
+else
+    brew install wxpython
+    echo "wxPython is successfully installed!"
+    if pip install pyserial matplotlib > /dev/null; then
+        echo "pyserial and matplotlib are successfully installed!"
+    else
+        echo "Installing pyserial and matplotlib using sudo, your password may be required..."
+        sudo pip install pyserial matplotlib
+    fi
+fi
 
-# Install compiled MobileInsight desktop version
-cd ..
-sudo python setup.py install
+wireshark=$(brew ls --versions wireshark)
+if pip uninstall mobile > /dev/null; then
+    echo "Congratulations! mobileinsight-core is successfully installed!"
+else
+    echo "Installing mobileinsight-core using sudo, your password may be required..."
+    sudo python setup.py install
+fi
+
+echo "Installing mobileinsight-core..."
+cd ${MOBILEINSIGHT_PATH}
+if python setup.py install > /dev/null; then
+    echo "Congratulations! mobileinsight-core is successfully installed!"
+else
+    echo "Installing mobileinsight-core using sudo, your password may be required..."
+    sudo python setup.py install
+fi
 
 # Run example
-echo "\\n\\n"
-echo "Successfully installed the newest version of MobileInsight desktop version!"
-echo "Testing the offline analysis example."
-cd ./examples
-python ./offline-analysis-example.py
-echo "\\n\\n"
-echo "Successfully ran the offline analysis example!"
+echo $"\n\nTesting the MobileInsight offline analysis example."
+cd ${MOBILEINSIGHT_PATH}/examples
+python offline-analysis-example.py
+echo $"\n\nSuccessfully ran the offline analysis example!"

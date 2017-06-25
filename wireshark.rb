@@ -1,17 +1,17 @@
 #!/bin/ruby
-# Special Homebrew formulae for Wireshark 2.0.8 stable version
+# Special Homebrew formulae for Wireshark 2.0.x stable version
 # Adapted from the following URL
 # https://github.com/Homebrew/homebrew-core/blob/master/Formula/wireshark.rb
 # Contributor  : Zengwen Yuan
-# Date         : 2016-11-21
-# Version      : 1.0
+# Date         : 2017-06-24
+# Version      : 1.0.13
 
 class Wireshark < Formula
   desc "Graphical network analyzer and capture tool"
   homepage "https://www.wireshark.org"
-  url "https://www.wireshark.org/download/src/all-versions/wireshark-2.0.8.tar.bz2"
-  mirror "https://1.na.dl.wireshark.org/src/wireshark-2.0.8.tar.bz2"
-  sha256 "2a6f7119ebc4d8fe1dfea6b0ce4dc036d67ea0e59410e6fdcd3ae15ee0834380"
+  url "https://www.wireshark.org/download/src/all-versions/wireshark-2.0.13.tar.bz2"
+  mirror "https://1.eu.dl.wireshark.org/src/wireshark-2.0.13.tar.bz2"
+  sha256 "6bb8398edb7b59e7265b763aba54610c3f362af8a0ecfe6d4c9e51069687e243"
   head "https://code.wireshark.org/review/wireshark", :using => :git
 
   option "with-gtk+3", "Build the wireshark command with gtk+3"

@@ -25,11 +25,11 @@ Then download MobileInsight and unpack the code:
 
 For macOS users, install MobileInsight using:
 
-    ./install-macos.sh
+    ./install-macos.sh (DO NOT EXECUTE WITH ROOT PRIVILEDGE!)
 
 For Linux users, install MobileInsight using:
 
-    ./install-ubuntu.sh
+    ./install-ubuntu.sh (DO NOT EXECUTE WITH ROOT PRIVILEDGE!)
 
 For Windows users, install MobileInsight using:
 
@@ -48,3 +48,29 @@ Second, MobileInsight builds on top of `pyserial` and `crcmod`, so please instal
     pip install matplotlib
 
     brew install wxpython
+
+## Upgrade to New Version
+
+Old version of mobileInsight-core may have installed Wireshark and Glib libraries under the `/usr/lib` folder.
+It is recommended to remove them if you want to use the new version.
+Please find the instruction below for different platforms.
+
+Linux:
+
+    rm /usr/lib/libwireshark.so*
+    rm /usr/lib/libwiretap.so*
+    rm /usr/lib/libwsutil.so*
+
+macOS:
+
+    rm /usr/lib/libwireshark.6.dylib
+    rm /usr/lib/libwireshark.dylib
+    rm /usr/lib/libwiretap.5.dylib
+    rm /usr/lib/libwiretap.dylib
+    rm /usr/lib/libwsutil.6.dylib
+    rm /usr/lib/libwsutil.dylib
+    rm /usr/lib/libglib-2.0.dylib
+    rm /usr/lib/libgobject-2.0.dylib
+    rm /usr/lib/libgio-2.0.dylib
+    rm /usr/lib/libgmodule-2.0.dylib
+    rm /usr/lib/libgthread-2.0.dylib
