@@ -12,6 +12,7 @@ __all__ = ["MtkOfflineReplayer"]
 import sys
 import os
 import timeit
+import datetime
 
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
@@ -60,6 +61,9 @@ class MtkOfflineReplayer(Monitor):
 
         if self.is_android:
             libs_path = self.__get_libs_path()
+            ws_dissector_path = os.path.join(libs_path, "android_pie_ws_dissector")
+            self.libs_path = libs_path
+            self.ws_dissector_path = ws_dissector_path
             prefs = {
                 "ws_dissect_executable_path": os.path.join(
                     libs_path,
@@ -200,6 +204,8 @@ class MtkOfflineReplayer(Monitor):
         # dm_collector_c.generate_diag_cfg(fd, self._type_names)
         # fd.close()
 
+        self.log_info("Running Offline replayer")
+
         try:
 
             self.broadcast_info('STARTED',{})
@@ -209,11 +215,10 @@ class MtkOfflineReplayer(Monitor):
                 log_list = [self._input_path]
             elif os.path.isdir(self._input_path):
                 for file in os.listdir(self._input_path):
-                    # if file.endswith(".mi2log") or file.endswith(".qmdl"):
                     if file.endswith(".muxraw"):
-                        # log_list.append(self._input_path+"/"+file)
                         log_list.append(os.path.join(self._input_path, file))
             else:
+            	self.log_debug("No files???")
                 return
 
             log_list.sort()  # Hidden assumption: logs follow the diag_log_TIMSTAMP_XXX format
@@ -223,7 +228,7 @@ class MtkOfflineReplayer(Monitor):
                 self._input_file = open(file, "rb")
                 dm_collector_c.reset()
                 while True:
-                    s = self._input_file.read() # ??? only 1 byte
+                    s = self._input_file.read() 
                     if not s:
                         break
                     decoded = mtk_log_parser.feed_binary(s)  # self for debug
@@ -265,5 +270,5 @@ class MtkOfflineReplayer(Monitor):
 
         except Exception as e:
             import traceback
-            sys.exit(str(traceback.format_exc()))
+            print str(traceback.format_exc())
             # sys.exit(e)

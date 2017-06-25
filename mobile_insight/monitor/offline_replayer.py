@@ -55,6 +55,7 @@ class OfflineReplayer(Monitor):
 
         if self.is_android:
             libs_path = self.__get_libs_path()
+            
             prefs = {
                 "ws_dissect_executable_path": os.path.join(
                     libs_path,

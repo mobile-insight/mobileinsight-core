@@ -103,6 +103,7 @@ class AndroidMtkMonitor(Monitor):
             "libwireshark_path": libs_path}
         DMLogPacket.init(prefs)  # ???
 
+
     def available_log_types(self):
         """
         Return available log types
