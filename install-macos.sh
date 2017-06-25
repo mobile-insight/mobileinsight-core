@@ -86,7 +86,7 @@ else
 fi
 
 wireshark=$(brew ls --versions wireshark)
-if pip uninstall mobile > /dev/null; then
+if python setup.py install > /dev/null; then
     echo "Congratulations! mobileinsight-core is successfully installed!"
 else
     echo "Installing mobileinsight-core using sudo, your password may be required..."
