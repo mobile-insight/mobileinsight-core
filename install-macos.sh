@@ -58,8 +58,8 @@ echo "Configuring Wireshark for compilation..."
 cd ${WIRESHARK_SRC_PATH}
 ./configure --disable-wireshark
 
-echo "Compiling Wireshark dissector for mobileinsight..."
-cd ${mobileinsight_PATH}/ws_dissector
+echo "Compiling Wireshark dissector for MobileInsight..."
+cd ${MOBILEINSIGHT_PATH}/ws_dissector
 if [ -e "ws_dissector" ]; then
     rm ws_dissector
 fi
@@ -67,7 +67,7 @@ g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags 
     -I"${WIRESHARK_SRC_PATH}" -L"${LD_LIBRARY_PATH}" -lwireshark -lwsutil -lwiretap
 strip ws_dissector
 
-echo "Installing dependencies for mobileinsight GUI..."
+echo "Installing dependencies for MobileInsight GUI..."
 which -s pip
 if [[ $? != 0 ]] ; then
     echo "It appears that pip is not installed on your computer, installing..."
