@@ -12,11 +12,13 @@ MOBILEINSIGHT_PATH=$(pwd)
 # Clean up compiled codes
 cd ${MOBILEINSIGHT_PATH}
 sudo rm -rf MobileInsight.egg-info build dist ws_dissector/ws_dissector wireshark-${WS_VER}
+sudo rm -rf ~/.cache/Python-Eggs/MobileInsight*
+sudo rm -rf ~/.python-eggs/MobileInsight*
 
 # Clean up installed binaries
 sudo rm /usr/local/bin/mi-gui
 sudo rm /usr/local/bin/ws_dissector
-sudo rm /usr/local/share/mobileinsight/
+sudo rm -rf /usr/local/share/mobileinsight/
 
 # Clean up old MobileInsight-2.x installed libraries
 sudo rm /usr/lib/libwireshark.so*

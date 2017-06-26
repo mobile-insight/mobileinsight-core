@@ -94,7 +94,6 @@ brew install wxpython
 
 echo "Installing mobileinsight-core..."
 cd ${MOBILEINSIGHT_PATH}
-sudo rm -rf MobileInsight.egg-info build dist
 if python setup.py install > /dev/null; then
     echo "Congratulations! mobileinsight-core is successfully installed!"
 else
@@ -106,12 +105,10 @@ echo "Installing GUI for MobileInsight..."
 cd ${MOBILEINSIGHT_PATH}
 if mkdir -p /usr/local/share/mobileinsight/ > /dev/null; then
     cp -r gui/* /usr/local/share/mobileinsight/
-    sudo rm /usr/local/bin/mi-gui
     ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
 else
     sudo mkdir -p /usr/local/share/mobileinsight/
     sudo cp -r gui/* /usr/local/share/mobileinsight/
-    sudo rm /usr/local/bin/mi-gui
     sudo ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
 fi
 

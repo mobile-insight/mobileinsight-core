@@ -119,13 +119,11 @@ echo "Installing GUI for MobileInsight..."
 cd ${MOBILEINSIGHT_PATH}
 if mkdir -p /usr/local/share/mobileinsight/ > /dev/null; then
     cp -r gui/* /usr/local/share/mobileinsight/
-    rm /usr/local/bin/mi-gui
     ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
 else
     echo "Installing GUI for MobileInsight using sudo, your password may be required..."
     sudo mkdir -p /usr/local/share/mobileinsight/
     sudo cp -r gui/* /usr/local/share/mobileinsight/
-    sudo rm /usr/local/bin/mi-gui
     sudo ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
 fi
 
