@@ -225,7 +225,7 @@ class Profile(object):
                     return
 
                 sdcard_path = Environment.getExternalStorageDirectory().toString()
-                DB_PATH = os.path.join(sdcard_path, "mobile_insight/dbs")
+                DB_PATH = os.path.join(sdcard_path, "mobileinsight/dbs")
                 activity = autoclass('org.renpy.android.PythonActivity')
                 if activity.mActivity:
                     self.__db = activity.mActivity.openOrCreateDatabase(
