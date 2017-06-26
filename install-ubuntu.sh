@@ -86,6 +86,9 @@ fi
 g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags glib-2.0` \
 	-I"${WIRESHARK_SRC_PATH}" -L"${LD_LIBRARY_PATH}" -lwireshark -lwsutil -lwiretap
 strip ws_dissector
+sudo rm -rf /usr/mobile_insight/
+cp ws_dissector /usr/local/bin/
+chmod 755 /usr/local/bin/ws_dissector
 
 echo "Installing dependencies for mobileinsight for GUI..."
 sudo apt-get -y install python-wxgtk3.0
