@@ -65,29 +65,9 @@ def download_win(url):
 
 print "Building libraries..."
 
-if platform.system() == "Darwin":
-    arch = platform.architecture()
-    if arch[0] != '64bit':
-        print "Unsupported operating system: " + str(arch)
-        sys.exit()
-
+if platform.system() == "Darwin" or platform.system() == "Linux":
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
-    DATA_FILES   = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ['ws_dissector/ws_dissector'])]
-
-elif platform.system() == "Linux":
-    arch = platform.architecture()
-    if arch[0] == '32bit':
-        url = "http://metro.cs.ucla.edu/mobile_insight/libs/linux-32/libs/"
-        print "Unsupported operating system: Linux-32bit. Please use Linux-64bit."
-        sys.exit()
-    elif arch[0] == '64bit':
-        url = "http://metro.cs.ucla.edu/mobile_insight/libs/linux-64/libs/"
-    else:
-        print "Unsupported operating system: " + str(arch)
-        sys.exit()
-
-    PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
-    DATA_FILES   = [(sys.exec_prefix + '/mobile_insight/ws_dissector/', ['ws_dissector/ws_dissector'])]
+    DATA_FILES   = []
 
 elif platform.system() == "Windows":
     # Download necessary libraries

@@ -30,15 +30,15 @@ class WSDissector:
     # Keep consistent with ws_dissector/packet-aww.cpp
     """Test comment for SUPPORTED_TYPES"""
     SUPPORTED_TYPES = {
-        # WCDMA: 100~199
-        # - WCDMA RRC: 100~149
+        # WCDMA: 100-199
+        # - WCDMA RRC: 100-149
         "RRC_UL_CCCH": 100,
         "RRC_UL_DCCH": 101,
         "RRC_DL_CCCH": 102,
         "RRC_DL_DCCH": 103,
         "RRC_DL_BCCH_BCH": 104,
         "RRC_DL_PCCH": 106,
-        # - WCDMA RRC SysInfo: 150~199
+        # - WCDMA RRC SysInfo: 150-199
         "RRC_MIB": 150,
         "RRC_SIB1": 151,
         "RRC_SIB2": 152,
@@ -47,11 +47,11 @@ class WSDissector:
         "RRC_SIB7": 157,
         "RRC_SIB12": 162,
         "RRC_SIB19": 169,
-        #   - WCDMA RRC SchedulingBlock
+        # - WCDMA RRC SchedulingBlock
         "RRC_SB1": 181,
         # - NAS
         "NAS": 190,
-        # LTE: 200~299
+        # LTE: 200-299
         "LTE-RRC_PCCH": 200,
         "LTE-RRC_DL_DCCH": 201,
         "LTE-RRC_UL_DCCH": 202,
@@ -83,22 +83,21 @@ class WSDissector:
         if executable_path:
             real_executable_path = executable_path
         else:
-            real_executable_path = sys.exec_prefix + \
-                "/mobile_insight/ws_dissector/ws_dissector"
-            # real_executable_path = sys.exec_prefix + "/local/bin/ws_dissector"
+            if platform.system() == "Windows":
+                real_executable_path = sys.exec_prefix + "/mobile_insight/ws_dissector/ws_dissector.exe"
+            else:   # Linux or macOS
+                real_executable_path = "/usr/local/bin/ws_dissector"
+
         env = dict(os.environ)
         if platform.system() == "Windows":
-            real_executable_path += ".exe"
             if ws_library_path:
                 env["PATH"] = ws_library_path + ";" + env.get("PATH", "")
-        else:   # Linux or OS X
+        else:
             if ws_library_path:
                 env["LD_LIBRARY_PATH"] = ws_library_path + \
                     ":" + env.get("LD_LIBRARY_PATH", "")
         cls._proc = subprocess.Popen([real_executable_path],
                                      bufsize=-1,
-                                     # shell=True,     ### P4A: THIS LINE WILL
-                                     # BE DELETED ###
                                      stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
                                      env=env
