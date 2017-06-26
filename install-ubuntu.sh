@@ -102,11 +102,11 @@ which pip
 if [[ $? != 0 ]] ; then
     sudo apt-get -y install python-pip
 fi
-if pip install matplotlib pyserial > /dev/null; then
+if python -m pip install matplotlib pyserial > /dev/null; then
     echo "pyserial and matplotlib are successfully installed!"
 else
     echo "Installing pyserial and matplotlib using sudo, your password may be required..."
-    sudo pip install pyserial matplotlib
+    sudo python -m pip install pyserial matplotlib
     echo "pyserial and matplotlib are successfully installed!"
 fi
 

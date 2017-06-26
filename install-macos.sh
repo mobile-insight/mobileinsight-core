@@ -80,13 +80,13 @@ which -s pip
 if [[ $? != 0 ]] ; then
     echo "It appears that pip is not installed on your computer, installing..."
     brew install python
+    export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/site-packages
 fi
-
-if pip install pyserial matplotlib > /dev/null; then
+if python -m pip install pyserial matplotlib > /dev/null; then
     echo "pyserial and matplotlib are successfully installed!"
 else
     echo "Installing pyserial and matplotlib using sudo, your password may be required..."
-    sudo pip install pyserial matplotlib
+    sudo python -m pip install pyserial matplotlib
 fi
 
 echo "Installing wxPython..."
