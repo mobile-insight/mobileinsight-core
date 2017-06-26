@@ -46,7 +46,7 @@ fi
 echo "Installing dependencies for compiling Wireshark libraries"
 brew install wget gettext libffi
 
-# Download Wireshark source files to compile ws_dissector
+echo "Download Wireshark source to compile ws_dissector"
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
     echo "You do not have source codes for Wireshark version ${WS_VER}, downloading..."
     wget https://www.wireshark.org/download/src/all-versions/wireshark-${WS_VER}.tar.bz2
@@ -54,7 +54,7 @@ if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
     rm wireshark-${WS_VER}.tar.bz2
 fi
 
-echo "Configuring Wireshark for compilation..."
+echo "Configuring Wireshark source for ws_dissector compilation..."
 cd ${WIRESHARK_SRC_PATH}
 ./configure --disable-wireshark
 
@@ -67,31 +67,26 @@ g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags 
     -I"${WIRESHARK_SRC_PATH}" -L"${LD_LIBRARY_PATH}" -lwireshark -lwsutil -lwiretap
 strip ws_dissector
 
+echo "Installing Wireshark dissector to /usr/local/bin"
+cp ws_dissector /usr/local/bin/
+chmod 755 /usr/local/bin/ws_dissector
+
 echo "Installing dependencies for MobileInsight GUI..."
 which -s pip
 if [[ $? != 0 ]] ; then
     echo "It appears that pip is not installed on your computer, installing..."
     brew install python
-    brew install wxpython
-    pip install pyserial matplotlib
-else
-    brew install wxpython
-    echo "wxPython is successfully installed!"
-    if pip install pyserial matplotlib > /dev/null; then
-        echo "pyserial and matplotlib are successfully installed!"
-    else
-        echo "Installing pyserial and matplotlib using sudo, your password may be required..."
-        sudo pip install pyserial matplotlib
-    fi
 fi
 
-wireshark=$(brew ls --versions wireshark)
-if python setup.py install > /dev/null; then
-    echo "Congratulations! mobileinsight-core is successfully installed!"
+if pip install pyserial matplotlib > /dev/null; then
+    echo "pyserial and matplotlib are successfully installed!"
 else
-    echo "Installing mobileinsight-core using sudo, your password may be required..."
-    sudo python setup.py install
+    echo "Installing pyserial and matplotlib using sudo, your password may be required..."
+    sudo pip install pyserial matplotlib
 fi
+
+echo "Installing wxPython..."
+brew install wxpython
 
 echo "Installing mobileinsight-core..."
 cd ${MOBILEINSIGHT_PATH}
