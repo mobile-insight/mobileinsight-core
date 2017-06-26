@@ -316,8 +316,8 @@ def decode(logger, raw_msg):
     sample input for ws_dissector:
     echo -ne
     '\x00\x00\x00\xc8\x00\x00\x00\x09\x40\x01\xBF\x28\x1A\xEB\xA0\x00\x00' |
-    LD_LIBRARY_PATH="/data/data/edu.ucla.cs.wing.mobileinsight/files/data/"
-    /data/data/edu.ucla.cs.wing.mobileinsight/files/data/android_pie_ws_dissector
+    LD_LIBRARY_PATH="/data/data/net.mobileinsight.app/files/data/"
+    /data/data/net.mobileinsight.app/files/data/android_pie_ws_dissector
     """
     msg_id = raw_msg[0][3]
     if msg_id not in type_id_mapping:

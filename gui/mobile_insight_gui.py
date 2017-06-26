@@ -236,7 +236,7 @@ class WindowClass(wx.Frame):
         leftbox = wx.BoxSizer(wx.VERTICAL)
         self.status_text = wx.StaticText(
             leftPanel,
-            label="Welcome to MobileInsight!\n\nMobileInsight is a Python (2.7) package for mobile network monitoring and analysis on the end device. It is developed by UCLA Wireless Networking Group (WiNG) and OSU MSSN lab.",
+            label="Welcome to MobileInsight!\n\nMobileInsight is a Python (2.7) package for mobile network monitoring and analysis on the end device.",
             style=wx.ALIGN_LEFT)
         self.details_text = wx.TextCtrl(
             leftPanel, style=wx.ALIGN_LEFT | wx.TE_MULTILINE)
@@ -363,11 +363,12 @@ class WindowClass(wx.Frame):
 
     def OnAbout(self, e):
         about_text = (
-            'MobileInsight GUI\n' +
-            'UCLA WiNG group & OSU MSSN Lab\n\n' +
-            'Developers: \n  Moustafa Alzantot, \n    Priyanka Avinash Kachare,\n' +
-            '    Michael Ivan, \n    Yuanjie Li\n\n' +
-            'Copyright (c) 2014-2016')
+            'MobileInsight GUI\n\n\n' +
+            'Copyright (c) 2014-2016 MobileInsight Team\n\n' +
+            'Developers:\n    Moustafa Alzantot,\n' +
+            '    Priyanka Avinash Kachare,\n' +
+            '    Michael Ivan,\n' +
+            '    Yuanjie Li')
         search_dlg = wx.MessageDialog(
             self, about_text, "About MobileInsight GUI", wx.OK)
         search_dlg.ShowModal()

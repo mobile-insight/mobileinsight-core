@@ -78,10 +78,9 @@ elif platform.system() == "Windows":
 
     arch = platform.architecture()
     if arch[0] == '32bit':
-        url = "http://metro.cs.ucla.edu/mobile_insight/libs/win-32/libs/"
+        url = "http://www.mobileinsight.net/libs/win-32/libs/"
     elif arch[0] == '64bit':
-        # url = "http://metro.cs.ucla.edu/mobile_insight/libs/win-64/libs/"
-        url = "http://metro.cs.ucla.edu/mobile_insight/libs/win-32/libs/"
+        url = "http://www.mobileinsight.net/libs/win-32/libs/"
     else:
         print "Unsupported operating system: " + str(arch)
         sys.exit()
@@ -107,7 +106,7 @@ setup(
     name         = 'MobileInsight',
     version      = '3.0.0',
     description  = 'Mobile network monitoring and analysis',
-    author       = 'MobileInsight Team',
+    author       = 'UCLA Wireless Networking Group and Purdue Peng Group',
     url          = 'http://www.mobileinsight.net',
     license      = 'Apache License 2.0',
     packages     = ['mobile_insight',
