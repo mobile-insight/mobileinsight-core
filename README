@@ -20,16 +20,16 @@ First install [Python 2.7](https://www.python.org/) if you do not have it.
 
 Then download MobileInsight and unpack the code:
 
-    tar -zxvf MobileInsight-2.2.tar.gz
-    cd MobileInsight-2.2
+    tar -zxvf MobileInsight-3.0.tar.gz
+    cd MobileInsight-3.0
 
-For macOS users, install MobileInsight using:
+For macOS users, install MobileInsight using the installation script (DO NOT EXECUTE WITH ROOT PRIVILEDGE!):
 
-    ./install-macos.sh (DO NOT EXECUTE WITH ROOT PRIVILEDGE!)
+    ./install-macos.sh
 
-For Linux users, install MobileInsight using:
+For Linux users, install MobileInsight using (DO NOT EXECUTE WITH ROOT PRIVILEDGE!):
 
-    ./install-ubuntu.sh (DO NOT EXECUTE WITH ROOT PRIVILEDGE!)
+    ./install-ubuntu.sh
 
 For Windows users, install MobileInsight using:
 
@@ -38,39 +38,26 @@ For Windows users, install MobileInsight using:
 The auto install script will run an offline analysis example at the end.
 
 
-# Dependencies #
+## Dependencies
 
-
-Second, MobileInsight builds on top of `pyserial` and `crcmod`, so please install both libraries, for example, using `pip`:
+MobileInsight builds on top of `pyserial` and `crcmod`, which can be installed using `pip`:
 
     pip install pyserial
     pip install crcmod
+
+The GUI of MobileInsight requires `matplotlib` and `wxPython`. `matplotlib` can be installed via `pip`:
+
     pip install matplotlib
 
+`wxPython` can be installed using Homebrew (macOS) or apt-get (Ubuntu).
+
     brew install wxpython
+    apt-get install python-wxgtk3.0
 
 ## Upgrade to New Version
 
 Old version of mobileInsight-core may have installed Wireshark and Glib libraries under the `/usr/lib` folder.
 It is recommended to remove them if you want to use the new version.
-Please find the instruction below for different platforms.
+Please run our uninstallation script to to proper clean up.
 
-Linux:
-
-    rm /usr/lib/libwireshark.so*
-    rm /usr/lib/libwiretap.so*
-    rm /usr/lib/libwsutil.so*
-
-macOS:
-
-    rm /usr/lib/libwireshark.6.dylib
-    rm /usr/lib/libwireshark.dylib
-    rm /usr/lib/libwiretap.5.dylib
-    rm /usr/lib/libwiretap.dylib
-    rm /usr/lib/libwsutil.6.dylib
-    rm /usr/lib/libwsutil.dylib
-    rm /usr/lib/libglib-2.0.dylib
-    rm /usr/lib/libgobject-2.0.dylib
-    rm /usr/lib/libgio-2.0.dylib
-    rm /usr/lib/libgmodule-2.0.dylib
-    rm /usr/lib/libgthread-2.0.dylib
+    ./uninstall.sh

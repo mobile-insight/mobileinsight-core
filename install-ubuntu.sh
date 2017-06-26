@@ -88,7 +88,6 @@ g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags 
 strip ws_dissector
 
 echo "Installing Wireshark dissector to /usr/local/bin"
-sudo rm -rf /usr/mobile_insight/
 if cp ws_dissector /usr/local/bin/ > /dev/null; then
     chmod 755 /usr/local/bin/ws_dissector
 else

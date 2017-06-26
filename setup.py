@@ -1,5 +1,5 @@
 #!/bin/python
-# MobileInsight desktop version installation script
+# MobileInsight package installation script
 
 import urllib
 import re
@@ -107,8 +107,8 @@ setup(
     name         = 'MobileInsight',
     version      = '3.0.0',
     description  = 'Mobile network monitoring and analysis',
-    author       = 'UCLA WiNG group and OSU MSSN lab',
-    url          = 'http://metro.cs.ucla.edu/mobile_insight',
+    author       = 'MobileInsight Team',
+    url          = 'http://www.mobileinsight.net',
     license      = 'Apache License 2.0',
     packages     = ['mobile_insight',
                     'mobile_insight.analyzer',

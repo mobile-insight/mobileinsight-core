@@ -94,6 +94,7 @@ brew install wxpython
 
 echo "Installing mobileinsight-core..."
 cd ${MOBILEINSIGHT_PATH}
+sudo rm -rf MobileInsight.egg-info build dist
 if python setup.py install > /dev/null; then
     echo "Congratulations! mobileinsight-core is successfully installed!"
 else
