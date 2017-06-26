@@ -6,10 +6,13 @@
 # Date    : 2017-6-24
 # Version : 2.0
 
+# Wireshark version to install
+WS_VER=2.0.13
+
 # Use your local library path
 LD_LIBRARY_PATH=/usr/local/lib
 # A copy of Wireshark sources will be put inside the MobileInsight source folder
-WIRESHARK_SRC_PATH=$(pwd)/wireshark-2.0.13
+WIRESHARK_SRC_PATH=$(pwd)/wireshark-${WS_VER}
 
 MOBILEINSIGHT_PATH=$(pwd)
 
@@ -18,19 +21,19 @@ sudo apt-get -y install pkg-config wget libglib2.0-dev bison flex libpcap-dev
 
 # Download necessary source files to compile ws_dissector
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
-    echo "Downloading source code of wireshark-2.0.13..."
-	wget https://www.wireshark.org/download/src/all-versions/wireshark-2.0.13.tar.bz2
-	tar -xjvf wireshark-2.0.13.tar.bz2
-	rm wireshark-2.0.13.tar.bz2
+    echo "Downloading source code of wireshark-${WS_VER}..."
+	wget https://www.wireshark.org/download/src/all-versions/wireshark-${WS_VER}.tar.bz2
+	tar -xjvf wireshark-${WS_VER}.tar.bz2
+	rm wireshark-${WS_VER}.tar.bz2
 fi
 
-# read -p "We will try to config wireshark-2.0.13 and it may takes a few seconds, do you want to continue? [Yy] " -r
+# read -p "We will try to config wireshark-${WS_VER} and it may takes a few seconds, do you want to continue? [Yy] " -r
 # if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
 #     echo "Not positive input"
 #     echo "The installation is aborted."
 #     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
 # fi
-echo "Generating config.h of wireshark-2.0.13..."
+echo "Generating config.h of wireshark-${WS_VER}..."
 cd ${WIRESHARK_SRC_PATH}
 ./configure --disable-wireshark
 
@@ -60,16 +63,16 @@ else
 fi
 
 if [ "$FindWiresharkLibrary" = false ] ; then
-    # read -p "Could not find necessary wireshark library, we will try to compile wireshark-2.0.13 from source code and it may takes a few minutes, do you want to continue? [Yy] " -r
+    # read -p "Could not find necessary wireshark library, we will try to compile wireshark-${WS_VER} from source code and it may takes a few minutes, do you want to continue? [Yy] " -r
 	# if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
     #     echo "Not positive input"
     #     echo "The installation is aborted."
 	#     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
 	# fi
     # echo "Yes"
-    echo "Compiling wireshark-2.0.13 from source code, it may take a few minutes..."
+    echo "Compiling wireshark-${WS_VER} from source code, it may take a few minutes..."
     make || exit 1
-    echo "Installing wireshark-2.0.13"
+    echo "Installing wireshark-${WS_VER}"
     sudo make install
 fi
 
@@ -90,12 +93,29 @@ which pip
 if [[ $? != 0 ]] ; then
     sudo apt-get -y install python-pip
 fi
-pip install matplotlib
-pip install pyserial
+if pip install matplotlib pyserial > /dev/null; then
+    echo "pyserial and matplotlib are successfully installed!"
+else
+    echo "Installing pyserial and matplotlib using sudo, your password may be required..."
+    sudo pip install pyserial matplotlib
+    echo "pyserial and matplotlib are successfully installed!"
+fi
+
 
 echo "Installing mobileinsight-core..."
 cd ${MOBILEINSIGHT_PATH}
 sudo python setup.py install
+
+echo "Installing GUI for MobileInsight..."
+cd ${MOBILEINSIGHT_PATH}
+if mkdir -p /usr/local/share/mobileinsight/ > /dev/null; then
+    cp -r gui/* /usr/local/share/mobileinsight/
+    ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
+else
+    sudo mkdir -p /usr/local/share/mobileinsight/
+    sudo cp -r gui/* /usr/local/share/mobileinsight/
+    sudo ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
+fi
 
 # Run example
 echo ""
@@ -104,4 +124,8 @@ cd ${MOBILEINSIGHT_PATH}/examples
 python offline-analysis-example.py
 echo ""
 echo "Successfully ran the offline analysis example!"
+
+echo "Testing MobileInsight GUI (you need to be in a graphic session)..."
+mi-gui
+
 echo "The installation of mobileinsight-core is finished!"
