@@ -102,8 +102,21 @@ else
     sudo python setup.py install
 fi
 
-# Run example
-echo $"\n\nTesting the MobileInsight offline analysis example."
+echo "Installing GUI for MobileInsight..."
+cd ${MOBILEINSIGHT_PATH}
+if mkdir -p /usr/local/share/mobileinsight/ > /dev/null; then
+    cp -r gui/* /usr/local/share/mobileinsight/
+    ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
+else
+    sudo mkdir -p /usr/local/share/mobileinsight/
+    sudo cp -r gui/* /usr/local/share/mobileinsight/
+    sudo ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
+fi
+
+echo -e "Testing the MobileInsight offline analysis example.\n"
 cd ${MOBILEINSIGHT_PATH}/examples
 python offline-analysis-example.py
-echo $"\n\nSuccessfully ran the offline analysis example!"
+echo -e "Successfully ran the offline analysis example!\n"
+
+echo "Testing MobileInsight GUI (you need to be in a graphic session)..."
+mi-gui

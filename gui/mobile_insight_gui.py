@@ -87,7 +87,7 @@ class TimeWindowDialog(wx.Dialog):
 
         self.btns = self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL)
         start_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        start_sizer.Add(wx.StaticText(self, -1, "Start : "), 0, wx.ALL, 1)
+        start_sizer.Add(wx.StaticText(self, -1, "Start: "), 0, wx.ALL, 1)
         self.start_slider = wx.Slider(
             self, -1, 0, 0, 100, wx.DefaultPosition, (250, -1), wx.SL_HORIZONTAL)
         start_sizer.Add(self.start_slider, 0, wx.ALL | wx.EXPAND, 5)
@@ -188,24 +188,24 @@ class WindowClass(wx.Frame):
             wx.TB_FLAT | wx.TB_TEXT | wx.TB_HORIZONTAL | wx.NO_BORDER)
 
         toolbar_open = self.toolbar.AddLabelTool(
-            ID_TB_OPEN, "Open", wx.Bitmap("icons/open.png"))
+            ID_TB_OPEN, "Open", wx.Bitmap("/usr/local/share/mobileinsight/icons/open.png"))
         self.toolbar.AddSeparator()
         toolbar_filter = self.toolbar.AddLabelTool(
-            ID_TB_FILTER, "Filter", wx.Bitmap("icons/filter.png"))
+            ID_TB_FILTER, "Filter", wx.Bitmap("/usr/local/share/mobileinsight/icons/filter.png"))
         self.toolbar.AddSeparator()
         toolbar_search = self.toolbar.AddLabelTool(
-            ID_TB_SEARCH, "Search", wx.Bitmap("icons/search.png"))
+            ID_TB_SEARCH, "Search", wx.Bitmap("/usr/local/share/mobileinsight/icons/search.png"))
         self.toolbar.AddSeparator()
         toolbar_time = self.toolbar.AddLabelTool(
-            ID_TB_TIME, "Time Window", wx.Bitmap("icons/time.png"))
+            ID_TB_TIME, "Time Window", wx.Bitmap("/usr/local/share/mobileinsight/icons/time.png"))
         self.toolbar.AddSeparator()
         toolbar_reset = self.toolbar.AddLabelTool(
-            ID_TB_RESET, "Reset", wx.Bitmap("icons/reset.png"))
+            ID_TB_RESET, "Reset", wx.Bitmap("/usr/local/share/mobileinsight/icons/reset.png"))
         # self.toolbar.AddSeparator()
-        # toolbar_graph = self.toolbar.AddLabelTool(ID_TB_GRAPH, "Graph", wx.Bitmap("icons/graph.png"))
+        # toolbar_graph = self.toolbar.AddLabelTool(ID_TB_GRAPH, "Graph", wx.Bitmap("/usr/local/share/mobileinsight/icons/graph.png"))
         self.toolbar.AddSeparator()
         toolbar_about = self.toolbar.AddLabelTool(
-            ID_TB_GRAPH, "About", wx.Bitmap("icons/about.png"))
+            ID_TB_GRAPH, "About", wx.Bitmap("/usr/local/share/mobileinsight/icons/about.png"))
 
         self.Bind(wx.EVT_TOOL, self.Open, toolbar_open)
         self.Bind(wx.EVT_TOOL, self.OnFilter, toolbar_filter)
@@ -236,7 +236,7 @@ class WindowClass(wx.Frame):
         leftbox = wx.BoxSizer(wx.VERTICAL)
         self.status_text = wx.StaticText(
             leftPanel,
-            label="Welcome to MobileInsight!\n\nMobileInsight is a Python (2.7) package for mobile network monitoring and analysis on the end device. It is developed by UCLA Wireless Networking Group (Wing) and OSU MSSN lab.",
+            label="Welcome to MobileInsight!\n\nMobileInsight is a Python (2.7) package for mobile network monitoring and analysis on the end device. It is developed by UCLA Wireless Networking Group (WiNG) and OSU MSSN lab.",
             style=wx.ALIGN_LEFT)
         self.details_text = wx.TextCtrl(
             leftPanel, style=wx.ALIGN_LEFT | wx.TE_MULTILINE)
@@ -363,11 +363,11 @@ class WindowClass(wx.Frame):
 
     def OnAbout(self, e):
         about_text = (
-            'MobileInsight 2.0 GUI\n' +
+            'MobileInsight GUI\n' +
             'UCLA WiNG group & OSU MSSN Lab\n\n' +
-            'Developers: \n   Moustafa Alzantot, \n    Priyanka Avinash Kachare,\n' +
+            'Developers: \n  Moustafa Alzantot, \n    Priyanka Avinash Kachare,\n' +
             '    Michael Ivan, \n    Yuanjie Li\n\n' +
-            'Copyright 2014-2016')
+            'Copyright (c) 2014-2016')
         search_dlg = wx.MessageDialog(
             self, about_text, "About MobileInsight GUI", wx.OK)
         search_dlg.ShowModal()
