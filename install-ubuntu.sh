@@ -22,9 +22,9 @@ sudo apt-get -y install pkg-config wget libglib2.0-dev bison flex libpcap-dev
 # Download necessary source files to compile ws_dissector
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
     echo "Downloading source code of wireshark-${WS_VER}..."
-	wget https://www.wireshark.org/download/src/all-versions/wireshark-${WS_VER}.tar.bz2
-	tar -xjvf wireshark-${WS_VER}.tar.bz2
-	rm wireshark-${WS_VER}.tar.bz2
+    wget https://www.wireshark.org/download/src/all-versions/wireshark-${WS_VER}.tar.bz2
+    tar -xjvf wireshark-${WS_VER}.tar.bz2
+    rm wireshark-${WS_VER}.tar.bz2
 fi
 
 # read -p "We will try to config wireshark-${WS_VER} and it may takes a few seconds, do you want to continue? [Yy] " -r
@@ -64,11 +64,11 @@ fi
 
 if [ "$FindWiresharkLibrary" = false ] ; then
     # read -p "Could not find necessary wireshark library, we will try to compile wireshark-${WS_VER} from source code and it may takes a few minutes, do you want to continue? [Yy] " -r
-	# if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
+    # if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
     #     echo "Not positive input"
     #     echo "The installation is aborted."
-	#     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
-	# fi
+    #     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
+    # fi
     # echo "Yes"
     echo "Compiling wireshark-${WS_VER} from source code, it may take a few minutes..."
     make || exit 1
@@ -81,14 +81,21 @@ echo "Compiling Wireshark dissector for mobileinsight..."
 cd ${MOBILEINSIGHT_PATH}/ws_dissector
 if [ -e "ws_dissector" ]; then
     echo "Removing old ws_dissector"
-	rm -f ws_dissector
+    rm -f ws_dissector
 fi
 g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags glib-2.0` \
-	-I"${WIRESHARK_SRC_PATH}" -L"${LD_LIBRARY_PATH}" -lwireshark -lwsutil -lwiretap
+    -I"${WIRESHARK_SRC_PATH}" -L"${LD_LIBRARY_PATH}" -lwireshark -lwsutil -lwiretap
 strip ws_dissector
+
+echo "Installing Wireshark dissector to /usr/local/bin"
 sudo rm -rf /usr/mobile_insight/
-cp ws_dissector /usr/local/bin/
-chmod 755 /usr/local/bin/ws_dissector
+if cp ws_dissector /usr/local/bin/ > /dev/null; then
+    chmod 755 /usr/local/bin/ws_dissector
+else
+    echo "Installing Wireshark dissector using sudo, your password may be required..."
+    sudo cp ws_dissector /usr/local/bin/
+    sudo chmod 755 /usr/local/bin/ws_dissector
+fi
 
 echo "Installing dependencies for mobileinsight for GUI..."
 sudo apt-get -y install python-wxgtk3.0
@@ -113,10 +120,13 @@ echo "Installing GUI for MobileInsight..."
 cd ${MOBILEINSIGHT_PATH}
 if mkdir -p /usr/local/share/mobileinsight/ > /dev/null; then
     cp -r gui/* /usr/local/share/mobileinsight/
+    rm /usr/local/bin/mi-gui
     ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
 else
+    echo "Installing GUI for MobileInsight using sudo, your password may be required..."
     sudo mkdir -p /usr/local/share/mobileinsight/
     sudo cp -r gui/* /usr/local/share/mobileinsight/
+    sudo rm /usr/local/bin/mi-gui
     sudo ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
 fi
 

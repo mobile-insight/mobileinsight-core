@@ -68,8 +68,12 @@ g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags 
 strip ws_dissector
 
 echo "Installing Wireshark dissector to /usr/local/bin"
-cp ws_dissector /usr/local/bin/
-chmod 755 /usr/local/bin/ws_dissector
+if cp ws_dissector /usr/local/bin/ > /dev/null; then
+    chmod 755 /usr/local/bin/ws_dissector
+else
+    sudo cp ws_dissector /usr/local/bin/
+    sudo chmod 755 /usr/local/bin/ws_dissector
+fi
 
 echo "Installing dependencies for MobileInsight GUI..."
 which -s pip
@@ -101,10 +105,12 @@ echo "Installing GUI for MobileInsight..."
 cd ${MOBILEINSIGHT_PATH}
 if mkdir -p /usr/local/share/mobileinsight/ > /dev/null; then
     cp -r gui/* /usr/local/share/mobileinsight/
+    sudo rm /usr/local/bin/mi-gui
     ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
 else
     sudo mkdir -p /usr/local/share/mobileinsight/
     sudo cp -r gui/* /usr/local/share/mobileinsight/
+    sudo rm /usr/local/bin/mi-gui
     sudo ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
 fi
 
