@@ -5,13 +5,18 @@
 # Date    : 2017-06-24
 # Version : 2.0
 
+sh uninstall.sh
+
+set -e
+set -u
+
 # Wireshark version to install
-WS_VER=2.0.13
+ws_ver=2.0.13
 
 # Use local library path
 LD_LIBRARY_PATH=/usr/local/lib
 MOBILEINSIGHT_PATH=$(pwd)
-WIRESHARK_SRC_PATH=${MOBILEINSIGHT_PATH}/wireshark-${WS_VER}
+WIRESHARK_SRC_PATH=${MOBILEINSIGHT_PATH}/wireshark-${ws_ver}
 
 # Install up-to-date Homebrew and use default prefixes
 echo "Checking if you have Homebrew installed..."
@@ -34,11 +39,11 @@ if [[ $? != 0 ]]; then
     brew install geoip c-ares
     # Install Wireshark stable version 2.0.x using our own formulae
     brew install ./wireshark.rb
-elif [[ $wireshark == *${WS_VER}* ]]; then
-    echo "Congrats! You have a Wireshark version ${WS_VER} installed, continuing..."
+elif [[ $wireshark == *${ws_ver}* ]]; then
+    echo "Congrats! You have a Wireshark version ${ws_ver} installed, continuing..."
 else
     echo "You have a Wireshark other than current version installed."
-    echo "Installing Wireshark version ${WS_VER}..."
+    echo "Installing Wireshark version ${ws_ver}..."
     brew install ./wireshark.rb
     brew link --overwrite wireshark
 fi
@@ -48,10 +53,10 @@ brew install wget gettext libffi
 
 echo "Download Wireshark source to compile ws_dissector"
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
-    echo "You do not have source codes for Wireshark version ${WS_VER}, downloading..."
-    wget https://www.wireshark.org/download/src/all-versions/wireshark-${WS_VER}.tar.bz2
-    tar xvf wireshark-${WS_VER}.tar.bz2
-    rm wireshark-${WS_VER}.tar.bz2
+    echo "You do not have source codes for Wireshark version ${ws_ver}, downloading..."
+    wget https://www.wireshark.org/download/src/all-versions/wireshark-${ws_ver}.tar.bz2
+    tar xvf wireshark-${ws_ver}.tar.bz2
+    rm wireshark-${ws_ver}.tar.bz2
 fi
 
 echo "Configuring Wireshark source for ws_dissector compilation..."
