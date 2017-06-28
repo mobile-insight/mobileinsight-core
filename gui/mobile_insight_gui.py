@@ -71,14 +71,13 @@ class TimeWindowDialog(wx.Dialog):
         self.start_label = wx.StaticText(self, -1, label="...", style=wx.BOLD)
         self.end_label = wx.StaticText(self, -1, label="...", style=wx.BOLD)
         self.window_label = wx.StaticText(self, -1, "\t to \t")
-        self.start_label.SetFont(wx.Font(11, wx.DEFAULT, wx.BOLD, wx.NORMAL))
-        self.window_label.SetFont(
-            wx.Font(
-                11,
-                wx.DEFAULT,
-                wx.ITALIC,
-                wx.NORMAL))
-        self.end_label.SetFont(wx.Font(11, wx.DEFAULT, wx.BOLD, wx.NORMAL))
+        # self.start_label.SetFont(wx.Font(11, wx.DEFAULT, wx.BOLD, wx.NORMAL))
+        # self.window_label.SetFont(wx.Font(11, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
+        # self.end_label.SetFont(wx.Font(11, wx.DEFAULT, wx.BOLD, wx.NORMAL))
+
+        self.start_label.SetFont(wx.Font(11, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_SLANT, wx.FONTWEIGHT_NORMAL))
+        self.window_label.SetFont(wx.Font(11, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL))
+        self.end_label.SetFont(wx.Font(11, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_SLANT, wx.FONTWEIGHT_NORMAL))
 
         labelSizer = wx.BoxSizer(wx.HORIZONTAL)
         labelSizer.Add(self.start_label, 0, wx.ALL | wx.EXPAND, 3)
