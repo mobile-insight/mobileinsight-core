@@ -16,6 +16,7 @@ import datetime
 
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
+# from monitor.dm_collector.dm_endec.ws_dissector import *
 import mtk_log_parser
 
 
@@ -58,6 +59,10 @@ class MtkOfflineReplayer(Monitor):
         self.service_context = None
 
         self.__test_android()
+
+        # self.ws_dissector_path = "ws_dissector"
+        self.ws_dissector_path = None
+        self.libs_path = None
 
         if self.is_android:
             libs_path = self.__get_libs_path()
@@ -223,6 +228,8 @@ class MtkOfflineReplayer(Monitor):
 
             log_list.sort()  # Hidden assumption: logs follow the diag_log_TIMSTAMP_XXX format
 
+            # mtk_log_parser.ws_dissector_proc_start(self.ws_dissector_path, self.libs_path)
+
             for file in log_list:
                 self.log_info("Loading " + file)
                 self._input_file = open(file, "rb")
@@ -254,11 +261,12 @@ class MtkOfflineReplayer(Monitor):
 
                     ##############################################
                             for msg in decoded:
-
                                 typeid, rawid, msgstr = mtk_log_parser.decode(self, msg) #self for debug
+
                                 if typeid == "":
                                     continue
                                 packet = DMLogPacket([("log_msg_len", len(msg), ""),('type_id', typeid, ''),('timestamp', datetime.datetime.now(), ''),("Msg", msgstr, "msg")]) # ("Msg", msgstr, "raw_msg/" + rawid)])
+                                # print "DMLogPacket decoded[0]:",str([typeid])
                                 event = Event(  timeit.default_timer(), typeid, packet)
                                 self.send(event)
                     ##############################################
@@ -271,4 +279,3 @@ class MtkOfflineReplayer(Monitor):
         except Exception as e:
             import traceback
             print str(traceback.format_exc())
-            # sys.exit(e)
