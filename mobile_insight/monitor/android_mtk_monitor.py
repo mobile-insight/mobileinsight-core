@@ -101,7 +101,11 @@ class AndroidMtkMonitor(Monitor):
                 libs_path,
                 "android_pie_ws_dissector"),
             "libwireshark_path": libs_path}
-        DMLogPacket.init(prefs)  # ???
+        DMLogPacket.init(prefs) 
+        # res = mtk_log_parser.ws_dissector_proc_start(prefs.get("ws_dissect_executable_path", None), prefs.get("libwireshark_path", None)) 
+        # self.log_debug('qianru init: ' + str(res))
+        # WSDissector.init_proc(prefs.get("ws_dissect_executable_path", None),
+        #                       prefs.get("libwireshark_path", None))
 
 
     def available_log_types(self):
@@ -162,9 +166,9 @@ class AndroidMtkMonitor(Monitor):
             if tn in msg_type:
                 msg_enabled[msg_type.index(tn)] = 1
                 self.log_info("Enable collection: " + tn)
-            else:
-                self.log_warning("Unsupported message by MediaTek: "+str(tn))
-        # dm_collector_c.set_filtered(self._type_names)  # ???
+            # else: # delelte by qianru
+            #     self.log_warning("Unsupported message by MediaTek: "+str(tn))
+        # # dm_collector_c.set_filtered(self._type_names)  # ???
 
     def set_filter(self):
         """
@@ -267,6 +271,7 @@ class AndroidMtkMonitor(Monitor):
         """
         Return final position.
         """
+        # mtk_log_parser.ws_dissector_proc_start(self.ws_dissector_path, self.libs_path)
         BLOCK_SIZE = 128
         f.seek(cur_pos, 0)
         while True:
