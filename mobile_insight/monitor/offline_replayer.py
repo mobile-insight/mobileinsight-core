@@ -23,58 +23,52 @@ class OfflineReplayer(Monitor):
     """
 
     SUPPORTED_TYPES = set(dm_collector_c.log_packet_types)
-    
+
     def __test_android(self):
         try:
-            from jnius import autoclass,cast #For Android
+            from jnius import autoclass, cast  # For Android
             # try:
             #     self.service_context = autoclass('org.renpy.android.PythonService').mService
             #     if not self.service_context:
             #         self.service_context = autoclass("org.renpy.android.PythonActivity").mActivity
             # except Exception, e:
             #     self.service_context = autoclass("org.renpy.android.PythonActivity").mActivity
-            self.is_android=True
+            self.is_android = True
             try:
                 import mi2app_utils
-                self.service_context = autoclass('org.renpy.android.PythonService').mService
-            except Exception, e:
+                self.service_context = autoclass(
+                    'org.renpy.android.PythonService').mService
+            except Exception as e:
                 self.service_context = None
-            
-        except Exception, e:
-            #not used, but bugs may exist on laptop
-            self.is_android=False
 
-
+        except Exception as e:
+            # not used, but bugs may exist on laptop
+            self.is_android = False
 
     def __init__(self):
         Monitor.__init__(self)
 
-        self.is_android=False
-        self.service_context=None
-
+        self.is_android = False
+        self.service_context = None
 
         self.__test_android()
 
         if self.is_android:
-            # prefs={"ws_dissect_executable_path": "/system/bin/android_pie_ws_dissector",
-            #        "libwireshark_path": "/system/lib"}
-            # if self.service_context:
-            #     libs_path = os.path.join(self.__get_files_dir(),"data")
-            # else:
-            #     libs_path = "./data"
-            # libs_path = os.path.join(self.__get_files_dir(),"data")
             libs_path = self.__get_libs_path()
-            prefs={"ws_dissect_executable_path": os.path.join(libs_path,"android_pie_ws_dissector"),
-                   "libwireshark_path": libs_path}
+            
+            prefs = {
+                "ws_dissect_executable_path": os.path.join(
+                    libs_path,
+                    "android_pie_ws_dissector"),
+                "libwireshark_path": libs_path}
         else:
-            prefs={}
+            prefs = {}
 
         print prefs
-  
+
         DMLogPacket.init(prefs)
 
-        self._type_names=[]
-
+        self._type_names = []
 
     def __del__(self):
         if self.is_android and self.service_context:
@@ -90,10 +84,10 @@ class OfflineReplayer(Monitor):
 
     def __get_libs_path(self):
         if self.is_android and self.service_context:
-            return os.path.join(self.service_context.getFilesDir().getAbsolutePath(),"data")
+            return os.path.join(
+                self.service_context.getFilesDir().getAbsolutePath(), "data")
         else:
             return "./data"
-
 
     def available_log_types(self):
         """
@@ -119,10 +113,10 @@ class OfflineReplayer(Monitor):
             type_name = [type_name]
         for n in type_name:
             if n not in cls.SUPPORTED_TYPES:
-                self.log_warning("Unsupported log message type: %s" % n) 
+                self.log_warning("Unsupported log message type: %s" % n)
             if n not in self._type_names:
                 self._type_names.append(n)
-                self.log_info("Enable "+n)
+                self.log_info("Enable " + n)
         dm_collector_c.set_filtered(self._type_names)
 
     def enable_log_all(self):
@@ -143,7 +137,7 @@ class OfflineReplayer(Monitor):
         self._input_path = path
         # self._input_file = open(path, "rb")
 
-    def save_log_as(self,path):
+    def save_log_as(self, path):
         """
         Save the log as a mi2log file (for offline analysis)
 
@@ -152,7 +146,7 @@ class OfflineReplayer(Monitor):
         :param log_types: a filter of message types to be saved
         :type log_types: list of string
         """
-        dm_collector_c.set_filtered_export(path,self._type_names)
+        dm_collector_c.set_filtered_export(path, self._type_names)
 
     def run(self):
         """
@@ -165,22 +159,23 @@ class OfflineReplayer(Monitor):
 
         try:
 
-            log_list=[]
+            self.broadcast_info('STARTED',{})
+
+            log_list = []
             if os.path.isfile(self._input_path):
                 log_list = [self._input_path]
             elif os.path.isdir(self._input_path):
                 for file in os.listdir(self._input_path):
                     if file.endswith(".mi2log") or file.endswith(".qmdl"):
                         # log_list.append(self._input_path+"/"+file)
-                        log_list.append(os.path.join(self._input_path,file))
+                        log_list.append(os.path.join(self._input_path, file))
             else:
                 return
 
-            log_list.sort() #Hidden assumption: logs follow the diag_log_TIMSTAMP_XXX format
-
+            log_list.sort()  # Hidden assumption: logs follow the diag_log_TIMSTAMP_XXX format
 
             for file in log_list:
-            	self.log_info("Loading "+file)
+                self.log_info("Loading " + file)
                 self._input_file = open(file, "rb")
                 dm_collector_c.reset()
                 while True:
@@ -197,6 +192,7 @@ class OfflineReplayer(Monitor):
                         try:
                             # packet = DMLogPacket(decoded)
                             packet = DMLogPacket(decoded[0])
+                            print "DMLogPacket decoded[0]:",str(decoded[0])
                             d = packet.decode()
                             # print d["type_id"], d["timestamp"]
                             # xml = packet.decode_xml()
@@ -205,18 +201,18 @@ class OfflineReplayer(Monitor):
                             # Send event to analyzers
 
                             if d["type_id"] in self._type_names:
-                                event = Event(  timeit.default_timer(),
-                                                d["type_id"],
-                                                packet)
+                                event = Event(timeit.default_timer(),
+                                              d["type_id"],
+                                              packet)
                                 self.send(event)
 
-                        except FormatError, e:
+                        except FormatError as e:
                             # skip this packet
                             print "FormatError: ", e
 
                 self._input_file.close()
 
-        except Exception, e:
+        except Exception as e:
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)

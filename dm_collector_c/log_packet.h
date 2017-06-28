@@ -24,7 +24,7 @@ enum FmtType {
     RSRQ,
     SKIP,   // This field is ignored (but bytes are consumed)
     PLACEHOLDER, // This field is created with a dummy value (no byte is consumed)
-    WCDMA_MEAS, // Used for RSCP/RSSI/ECN0 in LTE_ML1_IRAT_MDB
+    WCDMA_MEAS, // Used for RSCP/RSSI/ECN0 in LTE_PHY_IRAT_MDB
 };
 
 struct Fmt {
@@ -34,7 +34,7 @@ struct Fmt {
 };
 
 const Fmt LogPacketHeaderFmt [] = {
-    {UINT, "len1", 2},
+    {SKIP, NULL, 2},
     {UINT, "log_msg_len", 2},
     {UINT, "type_id", 2},
     {QCDM_TIMESTAMP, "timestamp", 8}
@@ -82,7 +82,8 @@ const ValueName WcdmaSignalingMsgChannelType [] = {
     {0x03, "RRC_DL_DCCH"},
     {0x04, "RRC_DL_BCCH_BCH"},
     {0x06, "RRC_DL_PCCH"},
-    {0xfe, "RRC_COMPLETE_SIB"}, 
+    {0x09, "Extension SIB"},
+    {0xfe, "RRC_COMPLETE_SIB"},
 };
 
 // ------------------------------------------------------------
@@ -94,12 +95,12 @@ const Fmt UmtsNasGmmStateFmt [] = {
 };
 
 const ValueName UmtsNasGmmState_GmmState [] = {
-    {0, "GMM_NULL"}, 
-    {1, "GMM_DEREGISTERED"}, 
-    {2, "GMM_REGISTERED_INITIATED"}, 
-    {3, "GMM_REGISTERED"}, 
-    {4, "GMM_DEREGISTERED_INITIATED"}, 
-    {5, "GMM_ROUTING_AREA_UPDATING_INITIATED"}, 
+    {0, "GMM_NULL"},
+    {1, "GMM_DEREGISTERED"},
+    {2, "GMM_REGISTERED_INITIATED"},
+    {3, "GMM_REGISTERED"},
+    {4, "GMM_DEREGISTERED_INITIATED"},
+    {5, "GMM_ROUTING_AREA_UPDATING_INITIATED"},
     {6, "GMM_SERVICE_REQUEST_INITIATED"}
 };
 
@@ -242,6 +243,15 @@ const Fmt LteRrcOtaPacketFmt_v9 [] = {
     {UINT, "Msg Length", 2}
 };
 
+const Fmt LteRrcOtaPacketFmt_v13 [] = {
+    {UINT, "Freq", 4},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1},            //PDU number
+    {UINT, "SIB Mask in SI", 1},
+    {SKIP, NULL, 3},
+    {UINT, "Msg Length", 2}
+};
+
 const ValueName LteRrcOtaPduType [] = {
     {0x02, "LTE-RRC_BCCH_DL_SCH"},
     {0x04, "LTE-RRC_PCCH"},
@@ -338,11 +348,11 @@ const ValueName LteNasEmmState_v2_EmmSubstate_Registered [] = {
 };
 
 // ------------------------------------------------------------
-const Fmt LteLl1PdschDemapperConfigFmt [] = {
+const Fmt LtePhyPdschDemapperConfigFmt [] = {
     {UINT, "Version", 1}
 };
 
-const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
+const Fmt LtePhyPdschDemapperConfigFmt_v23 [] = {
     {UINT, "Serving Cell ID", 1},
     {UINT, "System Frame Number", 2},
     {PLACEHOLDER, "Subframe Number", 0},
@@ -371,25 +381,56 @@ const Fmt LteLl1PdschDemapperConfigFmt_v23 [] = {
     {PLACEHOLDER, "Carrier Index", 0}
 };
 
-const ValueName LteLl1PdschDemapperConfig_v23_Modulation [] = {
+const Fmt LtePhyPdschDemapperConfigFmt_v104 [] = {
+    // TODO: just copy from v23.
+    {UINT, "Serving Cell ID", 1},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {UINT, "PDSCH RNTIl ID", 2},
+    {PLACEHOLDER, "PDSCH RNTI Type", 0},
+    {UINT, "Number of Tx Antennas(M)", 2},
+    {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
+    {PLACEHOLDER, "Spatial Rank", 0},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
+    {UINT, "Frequency Selective PMI", 1},   // right shift 1 bit, 2 bits
+    {PLACEHOLDER, "PMI Index", 0},  // 4 bits
+    {UINT, "Transmission Scheme", 1},   // 4 bits
+    {SKIP, NULL, 2},
+    // {UINT, "Transport Block Size Stream 0", 2},
+    {UINT, "TBS 0", 2},
+    // {UINT, "Modulation Stream 0", 2},
+    {UINT, "MCS 0", 2},
+    {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
+    // {UINT, "Transport Block Size Stream 1", 2},
+    {UINT, "TBS 1", 2},
+    // {UINT, "Modulation Stream 1", 2},
+    {UINT, "MCS 1", 2},
+    {PLACEHOLDER, "Carrier Index", 0},
+    {SKIP, NULL, 4},
+};
+
+const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
     {0, "QPSK"},
     {1, "16QAM"},
     {2, "64QAM"}
 };
 
-const ValueName LteLl1PdschDemapperConfig_v23_Carrier_Index [] = {
+const ValueName LtePhyPdschDemapperConfig_v23_Carrier_Index [] = {
     {0, "PCC"},
     {1, "SCC"}
 };
 
 // ------------------------------------------------------------
-// LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results
-const Fmt LteMl1CmlifmrFmt [] = {
+// LTE_PHY_Connected_Mode_LTE_Intra_Freq_Meas_Results
+const Fmt LtePhyCmlifmrFmt [] = {
     {UINT, "Version", 1},
     {SKIP, NULL, 7},        // Unknown
 };
 
-const Fmt LteMl1CmlifmrFmt_v3_Header [] = {
+const Fmt LtePhyCmlifmrFmt_v3_Header [] = {
     {UINT, "E-ARFCN", 2},
     {UINT, "Serving Physical Cell ID", 2},  //serving cell ID
     {UINT, "Sub-frame Number", 2},
@@ -401,7 +442,7 @@ const Fmt LteMl1CmlifmrFmt_v3_Header [] = {
     {UINT, "Number of Detected Cells", 1}
 };
 
-const Fmt LteMl1CmlifmrFmt_v4_Header [] = {
+const Fmt LtePhyCmlifmrFmt_v4_Header [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Serving Physical Cell ID", 2},  //serving cell ID
     {UINT, "Sub-frame Number", 2},
@@ -416,7 +457,7 @@ const Fmt LteMl1CmlifmrFmt_v4_Header [] = {
     {SKIP, NULL, 2}
 };
 
-const Fmt LteMl1CmlifmrFmt_v3_Neighbor_Cell [] = {
+const Fmt LtePhyCmlifmrFmt_v3_Neighbor_Cell [] = {
     {UINT, "Physical Cell ID", 2},  //cell ID
     // {RSRP, "Filtered RSRP(dBm)", 2},
     {RSRP, "RSRP(dBm)", 2},
@@ -426,7 +467,7 @@ const Fmt LteMl1CmlifmrFmt_v3_Neighbor_Cell [] = {
     {SKIP, NULL, 4}     // Duplicated & reserved
 };
 
-const Fmt LteMl1CmlifmrFmt_v4_Neighbor_Cell [] = {
+const Fmt LtePhyCmlifmrFmt_v4_Neighbor_Cell [] = {
     {UINT, "Physical Cell ID", 2},  //cell ID
     // {RSRP, "Filtered RSRP(dBm)", 2},
     {RSRP, "RSRP(dBm)", 2},
@@ -436,13 +477,13 @@ const Fmt LteMl1CmlifmrFmt_v4_Neighbor_Cell [] = {
     {SKIP, NULL, 4}     // Duplicated & reserved
 };
 
-const Fmt LteMl1CmlifmrFmt_v3_Detected_Cell [] = {
+const Fmt LtePhyCmlifmrFmt_v3_Detected_Cell [] = {
     {UINT, "Physical Cell ID", 4},  //cell ID
     {UINT, "SSS Corr Value", 4},
     {UINT, "Reference Time", 8}
 };
 
-const Fmt LteMl1CmlifmrFmt_v4_Detected_Cell [] = {
+const Fmt LtePhyCmlifmrFmt_v4_Detected_Cell [] = {
     {UINT, "Physical Cell ID", 2},  //cell ID
     {SKIP, NULL, 2},
     {UINT, "SSS Corr Value", 4},
@@ -450,77 +491,130 @@ const Fmt LteMl1CmlifmrFmt_v4_Detected_Cell [] = {
 };
 
 // ------------------------------------------------------------
-const Fmt LteMl1SubpktFmt [] = {
+const Fmt LtePhySubpktFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Number of SubPackets", 1},
     {SKIP, NULL, 2}     // Unknown
 };
 
-const Fmt LteMl1SubpktFmt_v1_SubpktHeader [] = {
+const Fmt LtePhySubpktFmt_v1_SubpktHeader [] = {
     {UINT, "SubPacket ID", 1},
-    {UINT, "Version", 1},
+    {UINT, "SubPacket Version", 1},
     {UINT, "SubPacket Size", 2},
 };
 
-const ValueName LteMl1Subpkt_SubpktType [] = {
+const ValueName LtePhySubpkt_SubpktType [] = {
     {25, "Serving_Cell_Measurement_Result"}
 };
 
 // Serving_Cell_Measurement_Result
-const Fmt LteMl1SubpktFmt_v1_Scmr_v4 [] = {
+const Fmt LtePhySubpktFmt_v1_Scmr_v4 [] = {
     {UINT, "E-ARFCN", 2},
     {UINT, "Physical Cell ID", 2}   //cell ID
 };
 
-const Fmt LteMl1SubpktFmt_v1_Scmr_v19 [] = {
+const Fmt LtePhySubpktFmt_v1_Scmr_v19 [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Num-of-cells", 2},
     {SKIP, NULL, 2},
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 4},    // Is Restricted, Cell Timing [0]
+    {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN[0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
+    {PLACEHOLDER, "RSRQ", 0},   // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
+    {UINT, "RSSI", 4},    // 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 12},
+    {UINT, "Projected SIR", 4}, // Projected Sir, if x & 1<<31: x -= 4294967296
+                                // x /= 16
+    {UINT, "Post IC RSRQ", 4},  // (0.0625 * x - 30) dB
+};
 
-    {UINT, "Physical Cell ID", 2},
-    {SKIP, NULL, 2}, 
-    {UINT, "Current subframe", 2},
-    {SKIP, NULL, 2}, 
-    {SKIP, NULL, 9},    //Cell timing [1]
-    {RSRP, "RSRP", 2}
+const Fmt LtePhySubpktFmt_v1_Scmr_v22 [] = {
+    {UINT, "E-ARFCN", 4},
+    {UINT, "Num-of-cells", 2},
+    {SKIP, NULL, 2},
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 4},    // Cell Timing [0]
+    {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN [0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {SKIP, NULL, 4},
+    {UINT, "RSRP", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
+    {UINT, "RSRQ", 4},    // skip 10 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
+    {SKIP, NULL, 4},
+    {UINT, "RSSI", 4},    // then 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 16},
+    {UINT, "Projected SIR", 4}, // Projected Sir, if x & 1<<31: x -= 4294967296
+                                // x /= 16
+    {UINT, "Post IC RSRQ", 4},  // (0.0625 * x - 30) dB
+    {UINT, "CINR Rx[0]", 4},
+    {UINT, "CINR Rx[1]", 4},
 };
 
 // ------------------------------------------------------------
-// LTE ML1 IRAT MDB
+// LTE PHY IRAT MDB
 
-enum LteMl1IratType {
-    LteMl1IratType_HRPD=14,
-    LteMl1IratType_WCDMA=35,
-    LteMl1IratType_1x=41,
-    LteMl1IratType_GSM=42,
+enum LtePhyIratType {
+    LtePhyIratType_HRPD=14,
+    LtePhyIratType_WCDMA=35,
+    LtePhyIratType_1x=41,
+    LtePhyIratType_GSM=42,
 };
 
 
-const Fmt LteMl1IratFmt [] = {
+const Fmt LtePhyIratFmt [] = {
     {UINT, "Version", 1},
     {UINT, "Subpacket count", 1},
     {SKIP, NULL, 2},
 };
 
-const Fmt LteMl1IratSubPktFmt [] = {
+const Fmt LtePhyIratSubPktFmt [] = {
     {UINT, "Subpacket ID", 1},
     {UINT, "Version", 1},
     {UINT, "Subpacket size", 2},
 };
 
-const Fmt LteMl1IratWCDMAFmt [] = {
+const Fmt LtePhyIratWCDMAFmt [] = {
     {UINT, "Current DRX cycle", 4},
     {UINT, "Number of frequencies", 1},
     {SKIP, NULL, 3},
 };
 
-const Fmt LteMl1IratWCDMACellMetaFmt [] = {
+const Fmt LtePhyIratWCDMACellMetaFmt [] = {
     {UINT, "Frequency", 2},
     {UINT, "Number of cells", 1},
     {SKIP, NULL, 1},
 };
 
-const Fmt LteMl1IratWCDMACellFmt [] = {
+const Fmt LtePhyIratWCDMACellFmt [] = {
     {UINT, "PSC+Energy", 2},
     {UINT, "CSG", 1},
     {SKIP, NULL, 1},
@@ -535,13 +629,13 @@ const Fmt LteMl1IratWCDMACellFmt [] = {
 
 };
 
-const Fmt LteMl1IratCDMACellFmt [] = {
+const Fmt LtePhyIratCDMACellFmt [] = {
     {UINT, "Number of Pilots", 1},
     {UINT, "Band", 1},
     {UINT, "Channel", 2},
 };
 
-const Fmt LteMl1IratCDMACellPilotFmt [] = {
+const Fmt LtePhyIratCDMACellPilotFmt [] = {
     {UINT, "Pilot ID", 2},
     {UINT, "RSS (dB)", 2},
     {SKIP, NULL, 4},
@@ -764,21 +858,36 @@ const Fmt LteMacULTransportBlock_SubpktHeaderFmt [] = {
     {UINT, "Version", 1},
     {UINT, "SubPacket Size", 2},
     {UINT, "Num Samples", 1},
-    {SKIP, "NULL", 2}
 };
 
 const Fmt LteMacULTransportBlock_SubpktV1_SampleFmt [] = {
-    {SKIP, "SFN and Sub-FN", 2}, // not byte aligned
-    // QCAT show "RNTI Type" and "HARQ ID" before Grant, but there's no corresponding hex data
+    {UINT, "HARQ ID", 1},
+    {UINT, "RNTI Type", 1},
+    {UINT, "Sub-FN", 2},    // 4 bits
+    {PLACEHOLDER, "SFN", 0},
     {UINT, "Grant (bytes)", 2},
     {UINT, "RLC PDUs", 1},
     {UINT, "Padding (bytes)", 2},
     {UINT, "BSR event", 1},
     {UINT, "BSR trig", 1},
     {UINT, "HDR LEN", 1},
-    // 
-    //{SKIP, "Mac Hdr + CE", 5}, // a flexible length field of Hex value in "Mac Hdr + CE", observed 5 or 7
-    //{SKIP, "NULL", 2}
+    // Mac Hdr + CE and UL TB Other Structure
+};
+
+const Fmt LteMacULTransportBlock_SubpktV2_SampleFmt [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Cell Id", 1},
+    {UINT, "HARQ ID", 1},
+    {UINT, "RNTI Type", 1},
+    {UINT, "Sub-FN", 2},    // 4 bits
+    {PLACEHOLDER, "SFN", 0},
+    {UINT, "Grant (bytes)", 2},
+    {UINT, "RLC PDUs", 1},
+    {UINT, "Padding (bytes)", 2},
+    {UINT, "BSR event", 1},
+    {UINT, "BSR trig", 1},
+    {UINT, "HDR LEN", 1},
+    // Mac Hdr + CE and UL TB Other Structure
 };
 
 // ----------------------------------------------------------
@@ -806,18 +915,33 @@ const Fmt LteMacDLTransportBlock_SubpktHeaderFmt [] = {
 };
 
 const Fmt LteMacDLTransportBlock_SubpktV2_SampleFmt [] = {
-    {SKIP, "SFN and Sub-FN", 2}, // not byte aligned
+    {UINT, "Sub-FN", 2},
+    {PLACEHOLDER, "SFN", 0},
     {UINT, "RNTI Type", 1},
     {UINT, "HARQ ID", 1},
-    {SKIP, "Area ID & PMCH ID", 2},
+    {PLACEHOLDER, "Area ID", 0},
+    {UINT, "PMCH ID", 2},
     {UINT, "DL TBS (bytes)", 2},
     {UINT, "RLC PDUs", 1},
-    // QCAT shows a "EMBMS PDUs" but there's no corresponding hex data
     {UINT, "Padding (bytes)", 2},
     {UINT, "HDR LEN", 1},
-    //
-    //{SKIP, "Mac Hdr + CE", 5}, // a flexible length field of Hex value in "Mac Hdr + CE", observed 5 or 7
-    //{SKIP, "NULL", 2}
+    // Mac Hdr + CE and UL TB Other Structure
+};
+
+const Fmt LteMacDLTransportBlock_SubpktV4_SampleFmt [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Cell Id", 1},
+    {UINT, "Sub-FN", 2},
+    {PLACEHOLDER, "SFN", 0},
+    {UINT, "RNTI Type", 1},
+    {UINT, "HARQ ID", 1},
+    {PLACEHOLDER, "Area ID", 0},
+    {UINT, "PMCH ID", 2},
+    {UINT, "DL TBS (bytes)", 2},
+    {UINT, "RLC PDUs", 1},
+    {UINT, "Padding (bytes)", 2},
+    {UINT, "HDR LEN", 1},
+    // Mac Hdr + CE and UL TB Other Structure
 };
 
 // ----------------------------------------------------------
@@ -1061,14 +1185,28 @@ const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Basic [] = {
 const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Control [] = {
     {PLACEHOLDER, "cpt", 0},
 };
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN [] = {
+    {UINT, "NACK_SN", 2},
+};
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING [] = {
+    {UINT, "NACK_SN", 1},
+};
+
 const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_DATA [] = {
     {PLACEHOLDER, "RF", 0},
     {PLACEHOLDER, "P", 0},
     {PLACEHOLDER, "FI", 0},
     {PLACEHOLDER, "E", 0},
 };
-const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Extra [] = {
-    {UINT, "RLC DATA LI", 2}, // Only LI[0] is decoded
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN [] = {
+    {UINT, "LI", 2}, // 0x 0011 1100
+};
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING [] = {
+    {UINT, "LI", 1}, //
+};
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO [] = {
+    {UINT, "LSF", 1},   // & 128
+    {UINT, "SO", 1},    // the rest 7 bits of LSF (& 127) * 256 + this value
 };
 
 // ----------------------------------------------------------------------------
@@ -1120,17 +1258,29 @@ const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Basic [] = {
 const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Control [] = {
     {PLACEHOLDER, "cpt", 0},
 };
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_NACK_ALLIGN [] = {
+    {UINT, "NACK_SN", 2},
+};
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_NACK_PADDING [] = {
+    {UINT, "NACK_SN", 1},
+};
+
 const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_DATA [] = {
     {PLACEHOLDER, "RF", 0},
     {PLACEHOLDER, "P", 0},
     {PLACEHOLDER, "FI", 0},
     {PLACEHOLDER, "E", 0},
 };
-const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_Extra [] = {
-    {UINT, "RLC DATA LI", 2}, // Only LI[0] is decoded
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_LI_ALLIGN [] = {
+    {UINT, "LI", 2}, // 0x 0011 1100
 };
-
-
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_LI_PADDING [] = {
+    {UINT, "LI", 1}, //
+};
+const Fmt LteRlcDlAmAllPdu_Subpkt_PDU_LSF_SO [] = {
+    {UINT, "LSF", 1},   // & 128
+    {UINT, "SO", 1},    // the rest 7 bits of LSF (& 127) * 256 + this value
+};
 
 // ----------------------------------------------------------------------------
 // LTE_MAC_Rach_Trigger
@@ -2096,6 +2246,7 @@ const ValueName ValueNameCarrierIndex [] = {
     {0, "PCC"},
     {1, "SCC"},
 };
+
 const ValueName ValueNameAggregationLevel [] = {
     // 2 bits
     {0, "Agg1"},
@@ -2165,6 +2316,11 @@ const ValueName ValueNameFrameStructure [] = {
     {1, "TDD"},
 };
 
+const ValueName ValueNameDuplexingMode [] = {
+    {0, "FDD"},
+    {1, "TDD"},
+};
+
 const ValueName ValueNameNumeNBAntennas [] = {
     {0, "1 or 2"},
 };
@@ -2175,6 +2331,15 @@ const ValueName ValueNameTrueOrFalse [] = {
 };
 
 const ValueName ValueNameHARQLogStatus [] = {
+    {0, "Normal"},
+};
+
+const ValueName ValueNameCPType [] = {
+    // 1 bit
+    {0, "Normal"},
+};
+
+const ValueName ValueNameNormalOrNot [] = {
     {0, "Normal"},
 };
 
@@ -2255,6 +2420,15 @@ const ValueName ValueNamePuschReportingMode [] = {
     {4, "MODE_APERIODIC_RM31"},
 };
 
+const ValueName ValueNamePucchReportType [] = {
+    {2, "Type 2, Wideband CQI, PMI Feedback"},
+    {3, "Type 3, RI Feedback"},
+};
+
+const ValueName ValueNamePucchReportingMode [] = {
+    {2, "MODE_1_1"},
+};
+
 const ValueName ValueNameTransmissionScheme [] = {
     // 4 bits
     {1, "Single Antenna Port (SISO or SIMO)"},
@@ -2295,6 +2469,79 @@ const ValueName ValueNameWcdmaRrcStates [] = {
     {3, "CELL_DCH"},
     {4, "CELL_PCH"},
     {5, "URA_PCH"},
+};
+
+const ValueName ValueNameCellIndex [] = {
+    // 4 bits
+    {0, "PCell"},
+    {1, "SCell"},
+};
+
+const ValueName ValueNameBandClassGSM [] = {
+    // 4 bits
+    {0, "Current 900/1800 Setting"},
+    {10, "1900 PCS"},
+    {11, "GSM 850"},
+};
+
+const ValueName ValueNameBandClassCDMA [] = {
+    {0, "800 MHz Cellular"},
+    {1, "1.8 to 2.0 GHz PCS"},
+    {10, "Secondary 800 MHz"},
+    {255, "Disabled"},
+};
+
+const ValueName ValueNameTimerState [] = {
+    // 8 bits
+    {0, "Stopped"},
+    {1, "Running"},
+    {2, "Expired"},
+};
+
+const ValueName ValueNameTechnology [] = {
+    {0, "1x CDMA"},
+};
+
+const ValueName ValueNameQueue [] = {
+    {0, "HPQ0"},
+    {2, "Reserved"},
+};
+
+const ValueName ValueNamePilotSet [] = {
+    {0, "PreCandidate Set"},
+    {1, "Active Set"},
+    {2, "Candidate Set"},
+    {4, "Neighbor Set"},
+    {8, "Remaining Set"},
+};
+
+const ValueName ValueNameSearcherState [] = {
+    {2, "Synchronization"},
+    {3, "Idle"},
+    {4, "Traffic"},
+};
+
+const ValueName ValueNameSRSShortingfor2ndSlot [] = {
+    // 1 bit
+    {0, "Normal"},
+    {1, "Shorten 2nd"},
+};
+
+const ValueName ValueNameCipherAlgo [] = {
+    // 1 byte
+    {2, "LTE SNOW-3G"},
+    {3, "LTE AES"},
+    {7, "None"},
+};
+
+const ValueName ValueNamePdcpSNLength [] = {
+    {0, "5 bit"},
+    {1, "7 bit"},
+    {2, "12 bit"},
+};
+
+const ValueName ValueNamePdcpCipherDataPduMode [] = {
+    {0, "AM"},
 };
 
 // ----------------------------------------------------------------------------

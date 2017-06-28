@@ -54,13 +54,14 @@ class LteNasAnalyzer(ProtocolAnalyzer):
     """
 
     def __init__(self):
-        
+
         ProtocolAnalyzer.__init__(self)
         #init packet filters
         self.add_source_callback(self.__nas_filter)
         #EMM/ESM status initialization
         self.__emm_status = EmmStatus()
         self.__esm_status = {} #EPS ID -> EsmStatus()
+        #####use EPS bearer ID or EPS bearer state????
         self.__cur_eps_id = None
         # self.__esm_status = EsmStatus()
 
@@ -97,8 +98,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         if msg.type_id == "LTE_NAS_ESM_OTA_Incoming_Packet" \
         or msg.type_id == "LTE_NAS_ESM_OTA_Outgoing_Packet" \
         or msg.type_id == "LTE_NAS_EMM_OTA_Incoming_Packet" \
-        or msg.type_id == "LTE_NAS_EMM_OTA_Outgoing_Packet":    
-            # log_item = msg.data
+        or msg.type_id == "LTE_NAS_EMM_OTA_Outgoing_Packet":
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
 
@@ -122,9 +122,9 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         if msg.type_id == "LTE_NAS_EMM_State":
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
+
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_emm_state(raw_msg)
-
             self.send(msg)
 
         if msg.type_id == "LTE_NAS_ESM_State":
@@ -140,20 +140,31 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         Given the EMM message, update EMM state and substate.
 
         :param msg: the NAS signaling message that carries EMM state
-        """  
+        """
         self.__emm_status.state = msg.data["EMM State"]
-        self.__emm_status.substate = msg.data["EMM Substate"]  
+        self.__emm_status.substate = msg.data["EMM Substate"]
         tmp = msg.data["PLMN"].split('-')
         self.__emm_status.guti.mcc = tmp[0]
         self.__emm_status.guti.mnc = tmp[1]
-        self.__emm_status.guti.mme_group_id = msg.data["GUTI MME Group ID"] 
-        self.__emm_status.guti.mme_code = msg.data["GUTI MME Code"] 
-        self.__emm_status.guti.m_tmsi = msg.data["GUTI M-TMSI"] 
+        self.__emm_status.guti.mme_group_id = msg.data["GUTI MME Group ID"]
+        self.__emm_status.guti.mme_code = msg.data["GUTI MME Code"]
+        self.__emm_status.guti.m_tmsi = msg.data["GUTI M-TMSI"]
         self.log_info(self.__emm_status.dump())
+
+        #broadcast
+        state = {
+            'conn state': self.__emm_status.state,
+            'conn substate': self.__emm_status.substate,
+        }
+
+        self.log_info(str(state))
+        self.broadcast_info('EMM_STATE', state)
+
+
 
     def __callback_esm_state(self,msg):
         """
-        Given the ESM message, update ESM state 
+        Given the ESM message, update ESM state
 
         :param msg: the NAS signaling message that carries EMM state
         """
@@ -173,6 +184,8 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext=msg.data["UL GBR ext"]
         self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=msg.data["DL MBR ext"]
 
+        self.__esm_status[self.__cur_eps_id].timestamp = msg.data["timestamp"]
+
         self.log_info(self.__esm_status[self.__cur_eps_id].dump())
 
         self.profile.update("LteNasProfile:"+self.__emm_status.profile_id()+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type],
@@ -187,6 +200,13 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                      'guaranteed_bitrate_dlink_ext':self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext,
                      })
 
+        # broadcast
+        state = {
+            'conn state': esm_state[int(msg.data["EPS bearer state"]) - 1],
+        }
+        self.log_info(str(state))
+        self.broadcast_info('ESM_STATE', state)
+
     def __callback_emm(self,msg):
         """
         Extract EMM status and configurations from the NAS messages
@@ -197,7 +217,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         for field in msg.data.iter('field'):
 
             if field.get('show')=="EPS mobile identity - GUTI":
-                
+
                 field_val={}
 
                 field_val['e212.mcc']=None
@@ -234,7 +254,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
 
             if field.get('show')=="Quality Of Service - Negotiated QoS" \
             or field.get('show')=="Quality Of Service - New QoS" \
-            or field.get('show')=="Quality Of Service - Requested QoS": 
+            or field.get('show')=="Quality Of Service - Requested QoS":
 
                 field_val={}
 
@@ -278,21 +298,21 @@ class LteNasAnalyzer(ProtocolAnalyzer):
 
                 if field_val.has_key('gsm_a.gm.sm.qos.max_bitrate_downl'):
                     self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl']))
-                
+
                 if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_upl'):
                     self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl']))
-                
+
                 if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_downl'):
                     self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl']))
-                
+
                 if field_val.has_key('gsm_a.gm.sm.qos.max_bitrate_upl_ext'):
                     self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl_ext']))
-                
-                if field_val.has_key('gsm_a.gm.sm.qos.max_bitrate_downl_ext'):    
+
+                if field_val.has_key('gsm_a.gm.sm.qos.max_bitrate_downl_ext'):
                     self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
-                if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_upl_ext'):    
+                if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_upl_ext'):
                     self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl_ext']))
-                if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_downl_ext'):    
+                if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_downl_ext'):
                     self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
                 self.log_info("EPS_Id="+str(self.__cur_eps_id)+self.__esm_status[self.__cur_eps_id].dump())
@@ -319,6 +339,11 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                     'guaranteed_bitrate_ulink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext),
                     'guaranteed_bitrate_dlink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext),
                     })
+
+    def getTimeInterval(self, preTime, curTime):
+        # preTime_parse = dt.strptime(preTime, '%Y-%m-%d %H:%M:%S.%f')
+        # curTime_parse = dt.strptime(curTime, '%Y-%m-%d %H:%M:%S.%f')
+        return (curTime - preTime).total_seconds() * 1000000.0
 
     def get_qos(self):
         # return self.__esm_status.qos
@@ -367,11 +392,11 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         #     tmp = self.profile.query("LteNasProfile:"+xstr(self.__emm_status.profile_id())+".eps.qos:"+bearer_type[self.__esm_status[self.__cur_eps_id].type])
         #     print tmp
         # else:
-        #     return None    
+        #     return None
 
 class EmmStatus:
     """
-    An abstraction to maintain the EMM status, including the registeration states, 
+    An abstraction to maintain the EMM status, including the registeration states,
     temporary IDs (GUTI), security options, etc.
     """
     def __init__(self):
@@ -380,6 +405,7 @@ class EmmStatus:
         self.guti = Guti()
         self.ciphering = None
         self.integrity = None
+        self.timestamp = None
 
     def inited(self):
         return (self.state and self.substate and self.guti.inited())
@@ -441,6 +467,7 @@ class EsmStatus:
         self.eps_id = None
         self.type = 0    #default or dedicated
         self.qos=EsmQos()
+        self.timestamp = None
 
     def dump(self):
         return (' EPS_ID=' + xstr(self.eps_id) + ' type=' + xstr(bearer_type[self.type])
@@ -476,10 +503,10 @@ class EsmQos:
         Report the data rate profile in ESM QoS, including the peak/mean throughput,
         maximum downlink/uplink data rate, guaranteed downlink/uplink data rate, etc.
 
-        :returns: a string that encodes all the data rate 
+        :returns: a string that encodes all the data rate
         :rtype: string
         """
-        return (self.__class__.__name__ 
+        return (self.__class__.__name__
             + ' peak_tput=' + xstr(self.peak_tput) + ' mean_tput=' + xstr(self.mean_tput)
             + ' max_bitrate_ulink=' + xstr(self.max_bitrate_ulink) + ' max_bitrate_dlink=' + xstr(self.max_bitrate_dlink)
             + ' guaranteed_birate_ulink=' + xstr(self.guaranteed_bitrate_ulink) + ' guaranteed_birate_dlink=' + xstr(self.guaranteed_bitrate_dlink)
@@ -491,7 +518,7 @@ class EsmQos:
         Report the delivery profile in ESM QoS, including delivery order guarantee,
         traffic class, QCI, delay class, transfer delay, etc.
 
-        :returns: a string that encodes all the data rate, or None if not ready 
+        :returns: a string that encodes all the data rate, or None if not ready
         :rtype: string
         """
 
@@ -519,7 +546,7 @@ def LteNasProfileHierarchy():
     profile_hierarchy = ProfileHierarchy('LteNasProfile')
     root = profile_hierarchy.get_root()
     eps = root.add('eps',False)
-    
+
     qos = eps.add('qos',True) #Active-state configurations (indexed by EPS type: default or dedicated)
 
     #QoS parameters

@@ -55,7 +55,7 @@ manager_export_binary (struct ExportManagerState *pstate, const char *b, size_t 
 void
 manager_change_config (struct ExportManagerState *pstate,
                         const char *new_path, const IdVector &whitelist) {
-    if (pstate->log_fp != NULL && pstate->filename != new_path) {   // close old file
+    if (pstate->log_fp != NULL && new_path != NULL && pstate->filename != new_path) {   // close old file
         fclose(pstate->log_fp);
         pstate->log_fp = NULL;
         pstate->filename = "";

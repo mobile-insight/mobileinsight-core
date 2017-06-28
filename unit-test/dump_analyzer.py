@@ -23,6 +23,7 @@ class DumpAnalyzer(Analyzer):
         self.mi2log = ""
 
     def close(self):
+        print "End"
         pass
 
     def set_mi2log(self, path):
@@ -77,11 +78,12 @@ class DumpAnalyzer(Analyzer):
         # source.enable_log("LTE_PHY_Connected_Mode_Intra_Freq_Meas")
         # source.enable_log("LTE_PHY_Inter_RAT_Measurement")
         # source.enable_log("LTE_PHY_Inter_RAT_CDMA_Measurement")
+        # source.enable_log("LTE_PHY_Idle_Neighbor_Cell_Meas")
 
-        # source.enable_log("LTE_PUCCH_Power_Control")
-        # source.enable_log("LTE_PUSCH_Power_Control")
-        # source.enable_log("LTE_PDCCH_PHICH_Indication_Report")
-        # source.enable_log("LTE_PDSCH_Stat_Indication")
+        # source.enable_log("LTE_PHY_PUCCH_Power_Control")
+        # source.enable_log("LTE_PHY_PUSCH_Power_Control")
+        # source.enable_log("LTE_PHY_PDCCH_PHICH_Indication_Report")
+        # source.enable_log("LTE_PHY_PDSCH_Stat_Indication")
         # source.enable_log("LTE_PHY_System_Scan_Results")
         # source.enable_log("LTE_PHY_BPLMN_Cell_Request")
         # source.enable_log("LTE_PHY_BPLMN_Cell_Confirm")
@@ -89,10 +91,11 @@ class DumpAnalyzer(Analyzer):
         # source.enable_log("LTE_PHY_PDCCH_Decoding_Result")
         # source.enable_log("LTE_PHY_PDSCH_Decoding_Result")
         # source.enable_log("LTE_PHY_PUSCH_Tx_Report")
+        source.enable_log("LTE_PHY_PUCCH_Tx_Report")
         # source.enable_log("LTE_PHY_RLM_Report")
         # source.enable_log("LTE_PHY_PUSCH_CSF")
         # source.enable_log("LTE_PHY_CDRX_Events_Info")
-        source.enable_log("WCDMA_RRC_States")
+        # source.enable_log("WCDMA_RRC_States")
 
 
         # source.enable_log("1xEV_Rx_Partial_MultiRLP_Packet")
@@ -103,11 +106,20 @@ class DumpAnalyzer(Analyzer):
 
         # source.enable_log("WCDMA_RRC_OTA_Packet")
         # source.enable_log("WCDMA_RRC_Serv_Cell_Info")
+        # source.enable_log("WCDMA_Search_Cell_Reselection_Rank")
 
         # source.enable_log("UMTS_NAS_OTA_Packet")
         # source.enable_log("UMTS_NAS_GMM_State")
         # source.enable_log("UMTS_NAS_MM_State")
         # source.enable_log("UMTS_NAS_MM_REG_State")
+
+        # source.enable_log("GSM_RR_Cell_Information")
+        # source.enable_log("GSM_Surround_Cell_BA_List");
+        # source.enable_log("GSM_RR_Cell_Reselection_Meas");
+
+        # source.enable_log("Srch_TNG_1x_Searcher_Dump");
+        # source.enable_log("_1xEVDO_Multi_Carrier_Pilot_Sets");
+
 
     def __msg_callback(self,msg):
         s = msg.data.decode_xml().replace("\n", "")

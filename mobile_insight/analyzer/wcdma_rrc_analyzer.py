@@ -26,6 +26,8 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
 
     def __init__(self):
 
+        self.log_info("Initialing WcdmaRrcAnalyzer..")
+
         ProtocolAnalyzer.__init__(self)
 
         #init packet filters
@@ -66,17 +68,26 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         """
 
         if msg.type_id == "WCDMA_RRC_Serv_Cell_Info":
+
+            self.log_info("Find One WCDMA_RRC_Serv_Cell_Info")
+
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
             raw_msg=Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_serv_cell(raw_msg)
 
         elif msg.type_id == "WCDMA_RRC_States":
+
+            self.log_info("Find One WCDMA_RRC_States")
+
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
             self.__callback_rrc_state(log_item_dict)
 
-        elif msg.type_id == "WCDMA_RRC_OTA_Packet": 
+        elif msg.type_id == "WCDMA_RRC_OTA_Packet":
+
+            self.log_info("Find One WCDMA_RRC_OTA_Packet")
+
             log_item = msg.data.decode()
             log_item_dict = dict(log_item) 
             log_xml = None
@@ -101,11 +112,11 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
             self.send(xml_msg) #deliver WCDMA signaling messages only (decoded)
 
     def __callback_rrc_state(self,msg):
-        self.log_info("RRC_State="+str(msg['RRC State']))
+        # self.log_info("RRC_State="+str(msg['RRC State'])+" Timestamp="+str(msg['timestamp']))
         rrc_state = {}
         rrc_state['RRC State'] = str(msg['RRC State'])
+        rrc_state['Timestamp'] = str(msg['timestamp'])
         self.broadcast_info('RRC_STATE',rrc_state)
-
 
     def __callback_serv_cell(self,msg):
         """

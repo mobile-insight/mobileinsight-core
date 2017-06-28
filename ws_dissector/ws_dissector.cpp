@@ -117,6 +117,9 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    // to prevent "started_with_special_privs: assertion failed" error.
+    init_process_policies();
+
     epan_init(register_all_protocols, register_all_protocol_handoffs,
                 NULL, NULL);
 

@@ -1,13 +1,17 @@
 include README.md
 include LICENSE
 include setup.py
+include wireshark.rb
+include install-macos.sh
+include install-ubuntu.sh
 exclude setup-internal.py
-recursive-include GUI * 
+recursive-include GUI *
 recursive-include examples *.json *.py *.mi2log *.mi2app *.txt
 recursive-include mobile_insight *.py  *.m *.pyd README
 recursive-exclude examples *.db
 recursive-exclude mobile_insight *.db
 exclude mobile_insight/monitor/android_qmdl_monitor.py
 exclude mobile_insight/analyzer/handoff_loop_analyzer.py
-prune dm_collector_c 
 prune docs/docs
+recursive-include dm_collector_c *.cpp *.h
+recursive-include ws_dissector Makefile *.cpp *.h

@@ -8,6 +8,7 @@ Author: Jiayao Li
 
 __all__ = ["static_var"]
 
+
 def static_var(varname, value):
     def decorate(func):
         setattr(func, varname, value)

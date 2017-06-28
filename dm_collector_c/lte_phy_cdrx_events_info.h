@@ -1,63 +1,61 @@
 /*
- * LTE ML1 CDRX Events Info
+ * LTE PHY CDRX Events Info
  */
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt LteMl1CdrxEventsInfo_Fmt [] = {
+const Fmt LtePhyCdrxEventsInfo_Fmt [] = {
     {UINT, "Version", 1},
 };
 
-const Fmt LteMl1CdrxEventsInfo_Payload_v1 [] = {
+const Fmt LtePhyCdrxEventsInfo_Payload_v1 [] = {
     {UINT, "Num Records", 1},
     {SKIP, NULL, 2},
 };
 
-const Fmt LteMl1CdrxEventsInfo_Record_v1 [] = {
+const Fmt LtePhyCdrxEventsInfo_Record_v1 [] = {
     {UINT, "SFN", 4},   // 10 bits
     {PLACEHOLDER, "Sub-FN", 0}, // 4 bits
     {PLACEHOLDER, "CDRX Event", 0}, // 6 bits
 };
 
-const Fmt LteMl1CdrxEventsInfo_Payload_v2 [] = {
+const Fmt LtePhyCdrxEventsInfo_Payload_v2 [] = {
     {UINT, "Num Records", 1},
     {SKIP, NULL, 2},
 };
 
-const Fmt LteMl1CdrxEventsInfo_Record_v2 [] = {
+const Fmt LtePhyCdrxEventsInfo_Record_v2 [] = {
     {UINT, "SFN", 4},   // 10 bits
     {PLACEHOLDER, "Sub-FN", 0}, // 4 bits
     {PLACEHOLDER, "CDRX Event", 0}, // 6 bits
     {UINT, "Internal Field Mask", 4},   // 32 bits
 };
 
-static int _decode_lte_ml1_cdrx_events_info_payload (const char *b,
+static int _decode_lte_phy_cdrx_events_info_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 
     PyObject *old_object;
-    PyObject *pyfloat;
-    int temp;
 
     switch (pkt_ver) {
     case 1:
         {
-            offset += _decode_by_fmt(LteMl1CdrxEventsInfo_Payload_v1,
-                    ARRAY_SIZE(LteMl1CdrxEventsInfo_Payload_v1, Fmt),
+            offset += _decode_by_fmt(LtePhyCdrxEventsInfo_Payload_v1,
+                    ARRAY_SIZE(LtePhyCdrxEventsInfo_Payload_v1, Fmt),
                     b, offset, length, result);
             int num_record = _search_result_int(result, "Num Records");
 
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1CdrxEventsInfo_Record_v1,
-                        ARRAY_SIZE(LteMl1CdrxEventsInfo_Record_v1, Fmt),
+                offset += _decode_by_fmt(LtePhyCdrxEventsInfo_Record_v1,
+                        ARRAY_SIZE(LtePhyCdrxEventsInfo_Record_v1, Fmt),
                         b, offset, length, result_record_item);
 
-                uint utemp = _search_result_uint(result_record_item, "SFN");
+                unsigned int utemp = _search_result_uint(result_record_item, "SFN");
                 int iSFN = utemp & 1023;
                 int iSubFN = (utemp >> 10) & 15;
                 int iCdrxEvent = (utemp >> 14) & 63;
@@ -90,19 +88,19 @@ static int _decode_lte_ml1_cdrx_events_info_payload (const char *b,
         }
     case 2:
         {
-            offset += _decode_by_fmt(LteMl1CdrxEventsInfo_Payload_v2,
-                    ARRAY_SIZE(LteMl1CdrxEventsInfo_Payload_v2, Fmt),
+            offset += _decode_by_fmt(LtePhyCdrxEventsInfo_Payload_v2,
+                    ARRAY_SIZE(LtePhyCdrxEventsInfo_Payload_v2, Fmt),
                     b, offset, length, result);
             int num_record = _search_result_int(result, "Num Records");
 
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1CdrxEventsInfo_Record_v2,
-                        ARRAY_SIZE(LteMl1CdrxEventsInfo_Record_v2, Fmt),
+                offset += _decode_by_fmt(LtePhyCdrxEventsInfo_Record_v2,
+                        ARRAY_SIZE(LtePhyCdrxEventsInfo_Record_v2, Fmt),
                         b, offset, length, result_record_item);
 
-                uint utemp = _search_result_uint(result_record_item, "SFN");
+                unsigned int utemp = _search_result_uint(result_record_item, "SFN");
                 int iSFN = utemp & 1023;
                 int iSubFN = (utemp >> 10) & 15;
                 int iCdrxEvent = (utemp >> 14) & 63;
@@ -180,7 +178,7 @@ static int _decode_lte_ml1_cdrx_events_info_payload (const char *b,
         }
 
     default:
-        printf("(MI)Unknown LTE ML1 CDRX Events Info version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY CDRX Events Info version: 0x%x\n", pkt_ver);
         return 0;
     }
 }

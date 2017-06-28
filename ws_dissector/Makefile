@@ -1,30 +1,26 @@
-WS_LIB_PATH=/usr/local/lib
-WS_SRC_PATH=$(HOME)/Documents/wireshark-2.0.2
-WS_ANDROID_LIB_PATH=$(HOME)/android/prefix/lib
-GLIB_SRC_PATH=$(HOME)/android-glib/glib
-GLIB_ANDROID_LIB_PATH=$(HOME)/android-glib/lib
-LIBPCAP_PATH=$(HOME)/projects/platform_external_libpcap
+# Makefile for ws_dissector PC and Android version
+# Author  : Zengwen Yuan, Yuanjie Li, Jiayao Li
+# Date    : 2016-11-22
+# Version : 2.0
 
-# WS_SRC_PATH=/home/mobileinsight-dev/wireshark-2.0.2
-# WS_ANDROID_LIB_PATH=/home/mobileinsight-dev/wireshark-2.0.2/lib
-# GLIB_SRC_PATH=$(HOME)/Code/glib
-# GLIB_ANDROID_LIB_PATH=$(HOME)/Code/glib/libs/armeabi
-# LIBPCAP_PATH=$(HOME)/Code/platform_external_libpcap
+LIB_PREFIX=/usr/local/lib
+WIRESHARK_SRC=$(HOME)/dev/wireshark-2.0.8
+GLIB_SRC=$(HOME)/dev/glib-2.50.22
+LIBPCAP_SRC=$(HOME)/dev/libpcap-1.8.0
 
-CROSS_COMPILE=arm-linux-androideabi
-ANDROID_PREFIX=$(HOME)/androidcc
-CROSS_PATH=${ANDROID_PREFIX}/bin/${CROSS_COMPILE}
+ANDROID_PREFIX=$(HOME)/dev/android
+ANDROID_LIB_PREFIX=$(HOME)/dev/android/lib
+ARCH=arm-linux-androideabi
+CROSS_PATH=${ANDROID_PREFIX}/bin/${ARCH}
 CXX=${CROSS_PATH}-g++
 STRIP=${CROSS_PATH}-strip
-
-ANDROID_CC_FLAGS=-I"$(WS_SRC_PATH)" \
-				-I"$(LIBPCAP_PATH)" \
-				-I"$(GLIB_SRC_PATH)" \
-				-I"$(GLIB_SRC_PATH)/glib" \
-				-I"$(GLIB_SRC_PATH)/gmodule" \
-				-I"$(GLIB_SRC_PATH)/android" \
-				-L"$(WS_ANDROID_LIB_PATH)" -lwireshark \
-				-L"$(GLIB_ANDROID_LIB_PATH)" -lglib-2.0
+ANDROID_CC_FLAGS=-I"$(WIRESHARK_SRC)" \
+				-I"$(LIBPCAP_SRC)" \
+				-I"$(GLIB_SRC)" \
+				-I"$(GLIB_SRC)/glib" \
+				-I"$(GLIB_SRC)/gmodule" \
+				-I"$(GLIB_SRC)/android" \
+				-L"$(ANDROID_LIB_PREFIX)" -lwireshark -lglib-2.0
 
 
 all: ws_dissector

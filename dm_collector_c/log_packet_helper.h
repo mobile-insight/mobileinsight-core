@@ -76,6 +76,8 @@ _search_result_int(PyObject *result, const char *target) {
     return val;
 }
 
+// This function should be called when the value is 4 bytes long.
+// Return: unsigned int
 static unsigned int
 _search_result_uint(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
@@ -267,7 +269,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 PyObject *delta = PyDelta_FromDSU(0, seconds, useconds);
                 decoded = PyNumber_Add(epoch, delta);
                 n_consumed += fmt[i].len;
-                Py_DECREF(epoch); 
+                Py_DECREF(epoch);
                 Py_DECREF(delta);
                 break;
             }

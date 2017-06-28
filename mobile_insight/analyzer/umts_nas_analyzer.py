@@ -19,6 +19,7 @@ from protocol_analyzer import *
 from profile import Profile, ProfileHierarchy
 
 from nas_util import *
+# from mobile_insight.element import *
 
 
 __all__=["UmtsNasAnalyzer"]
@@ -31,6 +32,8 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
     """
 
     def __init__(self):
+
+        self.log_info("Initialing UmtsNasAnalyzer..")
 
         ProtocolAnalyzer.__init__(self)
         #init packet filters
@@ -57,8 +60,8 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         Analyzer.set_source(self,source)
         #Enable MM/GMM/CM/SM logs
         source.enable_log("UMTS_NAS_OTA_Packet")
-        source.enable_log("UMTS_NAS_GMM_State")
-        source.enable_log("UMTS_NAS_MM_State")
+        source.enable_log("UMTS_NAS_GMM_State") #GMM state/GMM substate
+        source.enable_log("UMTS_NAS_MM_State") #MM state/MM substate
         source.enable_log("UMTS_NAS_MM_REG_State")
 
     def __nas_filter(self,msg):
@@ -70,6 +73,9 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         """
 
         if msg.type_id == "UMTS_NAS_MM_State":
+
+            self.log_info("Find One UMTS_NAS_MM_State")
+
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
@@ -77,6 +83,9 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
 
 
         if msg.type_id == "UMTS_NAS_MM_REG_State":
+
+            self.log_info("Find One UMTS_NAS_MM_REG_State")
+
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
@@ -84,6 +93,9 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
 
     
         if msg.type_id == "UMTS_NAS_GMM_State":
+
+            self.log_info("Find One UMTS_NAS_GMM_State")
+
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
@@ -92,6 +104,9 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
 
 
         if msg.type_id == "UMTS_NAS_OTA_Packet":
+
+            self.log_info("Find One UMTS_NAS_OTA_Packet")
+
             # log_item = msg.data
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
@@ -106,6 +121,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
             self.__callback_nas(xml_msg)
 
     def __callback_mm_state(self,msg):
+
         """
         Given the MM message, update MM state and substate.
 
@@ -116,6 +132,13 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         self.__mm_status.update_status = msg.data["MM Update Status"]
 
         self.log_info(self.__mm_status.dump())
+
+        # broadcast
+        mm_state = {}
+        mm_state["conn state"] = self.__mm_status.state
+        mm_state["conn substate"] = self.__mm_status.substate
+        mm_state["update state"] = self.__mm_status.update_status
+        self.broadcast_info("MM_STATE", mm_state)
 
     def __callback_mm_reg_state(self,msg):
         """
@@ -131,6 +154,18 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
 
         self.log_info(self.__mm_status.dump())
 
+        # broadcast
+        mm_reg_state = {}
+        mm_reg_state["service type"] = self.__mm_status.service_type
+        mm_reg_state["operation mode"] = self.__mm_status.operation_mode
+
+        # Bug here. without exception catch, the process will terminate here.
+        # but it do works.
+        try:
+            self.broadcast_info("MM_REG_STATE", mm_reg_state)
+        except:
+            pass
+
     def __callback_gmm_state(self,msg):
         """
         Given the GMM message, update GMM state and substate.
@@ -145,6 +180,12 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         self.__gmm_status.state = msg.data['GMM State']
         self.__gmm_status.substate = msg.data['GMM Substate']
         self.__gmm_status.update_status = msg.data['GMM Update Status']
+
+        #broadcast
+        gmm_state = {}
+        gmm_state["conn state"] = self.__gmm_status.state
+        gmm_state["conn substate"] = self.__gmm_status.substate
+        self.broadcast_info("GMM_STATE", gmm_state)
 
     def __callback_nas(self,msg):
         """
@@ -400,7 +441,7 @@ class MmStatus:
                 + '-' + str(self.rac))
 
     def dump(self):
-    	"""
+        """
         Report the MM status
 
         :returns: a string that encodes MM status
@@ -594,8 +635,3 @@ def UmtsNasProfileHierarchy():
     qos.add('residual_ber',False)
 
     return profile_hierarchy
-
-        
-
-        
-        

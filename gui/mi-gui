@@ -1,0 +1,1 @@
+$(which python) /usr/local/share/mobileinsight/mobile_insight_gui.py

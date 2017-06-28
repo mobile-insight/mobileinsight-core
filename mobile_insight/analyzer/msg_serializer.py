@@ -15,7 +15,7 @@ from analyzer import *
 
 class MsgSerializer(Analyzer):
     """
-    An ananlyzer to save the message to disk. 
+    An ananlyzer to save the message to disk.
     It can be used for replay-based debugging and offline analysis.
     """
 
@@ -23,7 +23,7 @@ class MsgSerializer(Analyzer):
         Analyzer.__init__(self)
         # a message dump has no analyzer in from/to_list
         # it only has a single callback for the source
-        self.__msg_log = [] # in-memory message log
+        self.__msg_log = []  # in-memory message log
         self.add_source_callback(self.__dump_message)
 
     def set_output_path(self, path):
@@ -36,7 +36,7 @@ class MsgSerializer(Analyzer):
         self.__output_path = path
         self.__output_file = open(path, "wb")
 
-    def __dump_message(self,msg):
+    def __dump_message(self, msg):
         """
         A callback function to save message to the disk
 

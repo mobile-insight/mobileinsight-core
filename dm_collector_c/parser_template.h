@@ -100,7 +100,7 @@ static int _decode_lte_***_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE *** version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE *** version: %d\n", pkt_ver);
         return 0;
     }
 }

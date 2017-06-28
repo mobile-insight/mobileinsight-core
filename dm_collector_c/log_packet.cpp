@@ -18,17 +18,28 @@
 #include "1xev_connection_attempt.h"
 #include "1xev_connection_release.h"
 #include "lte_pdsch_stat_indication.h"
-#include "lte_ml1_system_scan_results.h"
-#include "lte_ml1_bplmn_cell_request.h"
-#include "lte_ml1_bplmn_cell_confirm.h"
-#include "lte_ll1_serving_cell_com_loop.h"
-#include "lte_ll1_pdcch_decoding_result.h"
-#include "lte_ll1_pdsch_decoding_result.h"
-#include "lte_ll1_pusch_tx_report.h"
-#include "lte_ml1_rlm_report.h"
-#include "lte_ll1_pusch_csf.h"
-#include "lte_ml1_cdrx_events_info.h"
+#include "lte_phy_system_scan_results.h"
+#include "lte_phy_bplmn_cell_request.h"
+#include "lte_phy_bplmn_cell_confirm.h"
+#include "lte_phy_serving_cell_com_loop.h"
+#include "lte_phy_pdcch_decoding_result.h"
+#include "lte_phy_pdsch_decoding_result.h"
+#include "lte_phy_pusch_tx_report.h"
+#include "lte_phy_pucch_tx_report.h"
+#include "lte_phy_rlm_report.h"
+#include "lte_phy_pusch_csf.h"
+#include "lte_phy_cdrx_events_info.h"
 #include "wcdma_rrc_states.h"
+#include "lte_phy_idle_neighbor_cell_meas.h"
+#include "wcdma_search_cell_reselection_rank.h"
+#include "gsm_rr_cell_information.h"
+#include "gsm_surround_cell_ba_list.h"
+#include "gsm_rr_cell_reselection_meas.h"
+#include "srch_tng_1x_searcher_dump.h"
+#include "1xevdo_multi_carrier_pilot_sets.h"
+#include "lte_pdcp_dl_cipher_data_pdu.h"
+#include "lte_pdcp_ul_cipher_data_pdu.h"
+#include "lte_phy_pucch_csf.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -176,6 +187,11 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
     case 9:
         offset += _decode_by_fmt(LteRrcOtaPacketFmt_v9,
                                     ARRAY_SIZE(LteRrcOtaPacketFmt_v9, Fmt),
+                                    b, offset, length, result);
+        break;
+    case 13:
+        offset += _decode_by_fmt(LteRrcOtaPacketFmt_v13,
+                                    ARRAY_SIZE(LteRrcOtaPacketFmt_v13, Fmt),
                                     b, offset, length, result);
         break;
     default:
@@ -373,7 +389,7 @@ _decode_lte_nas_emm_state(const char *b, int offset, size_t length,
 }
 
 static int
-_decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
+_decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -381,8 +397,8 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
     switch (pkt_ver) {
     case 23:
         {
-            offset += _decode_by_fmt(LteLl1PdschDemapperConfigFmt_v23,
-                                        ARRAY_SIZE(LteLl1PdschDemapperConfigFmt_v23, Fmt),
+            offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v23,
+                                        ARRAY_SIZE(LtePhyPdschDemapperConfigFmt_v23, Fmt),
                                         b, offset, length, result);
 
             const unsigned int SFN_RSHIFT = 5, SFN_MASK = (1 << 10) - 1;
@@ -463,8 +479,8 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
             Py_DECREF(old_object);
             (void)_map_result_field_to_name(result,
                                             "MCS 0",
-                                            LteLl1PdschDemapperConfig_v23_Modulation,
-                                            ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Modulation, ValueName),
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
                                             "(MI)Unknown");
 
             PyObject *pyfloat = Py_BuildValue("f", ratio);
@@ -476,8 +492,8 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
             Py_DECREF(old_object);
             (void)_map_result_field_to_name(result,
                                             "MCS 1",
-                                            LteLl1PdschDemapperConfig_v23_Modulation,
-                                            ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Modulation, ValueName),
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
                                             "(MI)Unknown");
 
             // carrier index
@@ -485,14 +501,125 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
             Py_DECREF(old_object);
             (void)_map_result_field_to_name(result,
                                             "Carrier Index",
-                                            LteLl1PdschDemapperConfig_v23_Carrier_Index,
-                                            ARRAY_SIZE(LteLl1PdschDemapperConfig_v23_Carrier_Index, ValueName),
+                                            LtePhyPdschDemapperConfig_v23_Carrier_Index,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Carrier_Index, ValueName),
+                                            "(MI)Unknown");
+            break;
+        }
+    case 104:
+        {
+            offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v104,
+                                        ARRAY_SIZE(LtePhyPdschDemapperConfigFmt_v104, Fmt),
+                                        b, offset, length, result);
+
+            const unsigned int SFN_RSHIFT = 5, SFN_MASK = (1 << 10) - 1;
+            const unsigned int SUBFRAME_RSHIFT = 1, SUBFRAME_MASK = (1 << 4) - 1;
+            int tmp = _search_result_int(result, "System Frame Number");
+            int sfn = (tmp >> SFN_RSHIFT) & SFN_MASK;
+            int subframe = (tmp >> SUBFRAME_RSHIFT) & SUBFRAME_MASK;
+            int serv_cell = _search_result_int(result, "Serving Cell ID");
+            serv_cell += (tmp & 0x1) << 8;
+
+            PyObject *old_object = _replace_result_int(result, "Serving Cell ID", serv_cell);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "System Frame Number", sfn);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Subframe Number", subframe);
+            Py_DECREF(old_object);
+
+            // # antennas
+            tmp = _search_result_int(result, "Number of Tx Antennas(M)");
+            int iRNTIType = tmp & 15;
+            int iSpatialRank = (tmp >> 14) & 3;
+            tmp = (tmp >> 8) & 0x0f;
+            int M = tmp & 0x3;
+            M = (M != 3? (1 << M): -1);
+            int N = (tmp >> 2) & 0x1;
+            N = (1 << N);
+
+            old_object = _replace_result_int(result, "PDSCH RNTI Type", iRNTIType);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "PDSCH RNTI Type",
+                    ValueNameRNTIType,
+                    ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                    "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "Number of Tx Antennas(M)", M);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Number of Rx Antennas(N)", N);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Spatial Rank", iSpatialRank);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Spatial Rank",
+                    ValueNameRankIndex,
+                    ARRAY_SIZE(ValueNameRankIndex, ValueName),
+                    "(MI)Unknown");
+
+            tmp = _search_result_int(result, "Frequency Selective PMI");
+            int iFrequencySelectivePMI = (tmp >> 1) & 3;
+            int iPMIIndex = (tmp >> 4) & 15;
+            tmp = _search_result_int(result, "Transmission Scheme");
+            int iTransmissionScheme = tmp & 15;
+
+            old_object = _replace_result_int(result, "Frequency Selective PMI",
+                    iFrequencySelectivePMI);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Frequency Selective PMI",
+                    ValueNameFrequencySelectivePMI,
+                    ARRAY_SIZE(ValueNameFrequencySelectivePMI, ValueName),
+                    "(MI)Unknown");
+            old_object = _replace_result_int(result, "PMI Index", iPMIIndex);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Transmission Scheme",
+                    iTransmissionScheme);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Transmission Scheme",
+                    ValueNameTransmissionScheme,
+                    ARRAY_SIZE(ValueNameTransmissionScheme, ValueName),
+                    "(MI)Unknown");
+
+            // modulation & ratio
+            tmp = _search_result_int(result, "MCS 0");
+            int mod_stream0 = (tmp >> 1) & 0x3;
+            float ratio = float((tmp >> 3) & 0x1fff) / 256.0;
+            tmp = _search_result_int(result, "MCS 1");
+            int mod_stream1 = (tmp >> 1) & 0x3;
+            int carrier_index = (tmp >> 9) & 0xf;
+
+            old_object = _replace_result_int(result, "MCS 0", mod_stream0);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "MCS 0",
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
+                                            "(MI)Unknown");
+
+            PyObject *pyfloat = Py_BuildValue("f", ratio);
+            old_object = _replace_result(result, "Traffic to Pilot Ratio", pyfloat);
+            Py_DECREF(old_object);
+            Py_DECREF(pyfloat);
+
+            old_object = _replace_result_int(result, "MCS 1", mod_stream1);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "MCS 1",
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
+                                            "(MI)Unknown");
+
+            // carrier index
+            old_object = _replace_result_int(result, "Carrier Index", carrier_index);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "Carrier Index",
+                                            LtePhyPdschDemapperConfig_v23_Carrier_Index,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Carrier_Index, ValueName),
                                             "(MI)Unknown");
             break;
         }
 
     default:
-        printf("(MI)Unknown LTE LL1 PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
         return 0;
     }
 
@@ -500,7 +627,7 @@ _decode_lte_ll1_pdsch_demapper_config(const char *b, int offset, size_t length,
 }
 
 static int
-_decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
+_decode_lte_phy_cmlifmr(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -508,8 +635,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
     switch (pkt_ver) {
     case 3:
         {
-            offset += _decode_by_fmt(LteMl1CmlifmrFmt_v3_Header,
-                                        ARRAY_SIZE(LteMl1CmlifmrFmt_v3_Header, Fmt),
+            offset += _decode_by_fmt(LtePhyCmlifmrFmt_v3_Header,
+                                        ARRAY_SIZE(LtePhyCmlifmrFmt_v3_Header, Fmt),
                                         b, offset, length, result);
             int n_neighbor_cells = _search_result_int(result, "Number of Neighbor Cells");
             int n_detected_cells = _search_result_int(result, "Number of Detected Cells");
@@ -520,8 +647,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             result_allcells = PyList_New(0);
             for (int i = 0; i < n_neighbor_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1CmlifmrFmt_v3_Neighbor_Cell,
-                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v3_Neighbor_Cell, Fmt),
+                offset += _decode_by_fmt(LtePhyCmlifmrFmt_v3_Neighbor_Cell,
+                                            ARRAY_SIZE(LtePhyCmlifmrFmt_v3_Neighbor_Cell, Fmt),
                                             b, offset, length, result_cell);
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
@@ -537,8 +664,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             result_allcells = PyList_New(0);
             for (int i = 0; i < n_detected_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1CmlifmrFmt_v3_Detected_Cell,
-                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v3_Detected_Cell, Fmt),
+                offset += _decode_by_fmt(LtePhyCmlifmrFmt_v3_Detected_Cell,
+                                            ARRAY_SIZE(LtePhyCmlifmrFmt_v3_Detected_Cell, Fmt),
                                             b, offset, length, result_cell);
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
@@ -554,8 +681,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
         }
     case 4:
         {
-            offset += _decode_by_fmt(LteMl1CmlifmrFmt_v4_Header,
-                                        ARRAY_SIZE(LteMl1CmlifmrFmt_v4_Header, Fmt),
+            offset += _decode_by_fmt(LtePhyCmlifmrFmt_v4_Header,
+                                        ARRAY_SIZE(LtePhyCmlifmrFmt_v4_Header, Fmt),
                                         b, offset, length, result);
             int n_neighbor_cells = _search_result_int(result, "Number of Neighbor Cells");
             int n_detected_cells = _search_result_int(result, "Number of Detected Cells");
@@ -566,8 +693,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             result_allcells = PyList_New(0);
             for (int i = 0; i < n_neighbor_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1CmlifmrFmt_v4_Neighbor_Cell,
-                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v4_Neighbor_Cell, Fmt),
+                offset += _decode_by_fmt(LtePhyCmlifmrFmt_v4_Neighbor_Cell,
+                                            ARRAY_SIZE(LtePhyCmlifmrFmt_v4_Neighbor_Cell, Fmt),
                                             b, offset, length, result_cell);
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
@@ -583,8 +710,8 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             result_allcells = PyList_New(0);
             for (int i = 0; i < n_detected_cells; i++) {
                 PyObject *result_cell = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1CmlifmrFmt_v4_Detected_Cell,
-                                            ARRAY_SIZE(LteMl1CmlifmrFmt_v4_Detected_Cell, Fmt),
+                offset += _decode_by_fmt(LtePhyCmlifmrFmt_v4_Detected_Cell,
+                                            ARRAY_SIZE(LtePhyCmlifmrFmt_v4_Detected_Cell, Fmt),
                                             b, offset, length, result_cell);
                 t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
                 PyList_Append(result_allcells, t);
@@ -599,13 +726,13 @@ _decode_lte_ml1_cmlifmr(const char *b, int offset, size_t length,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE ML1 CMLIFMR version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY CMLIFMR version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
 
 static int
-_decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
+_decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -618,31 +745,381 @@ _decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
             for (int i = 0; i < n_subpkt; i++) {
                 PyObject *result_subpkt = PyList_New(0);
                 // Decode subpacket header
-                offset += _decode_by_fmt(LteMl1SubpktFmt_v1_SubpktHeader,
-                                            ARRAY_SIZE(LteMl1SubpktFmt_v1_SubpktHeader, Fmt),
+                offset += _decode_by_fmt(LtePhySubpktFmt_v1_SubpktHeader,
+                                            ARRAY_SIZE(LtePhySubpktFmt_v1_SubpktHeader, Fmt),
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 int subpkt_id = _search_result_int(result_subpkt, "SubPacket ID");
-                int subpkt_ver = _search_result_int(result_subpkt, "Version");
-                const char *type_name = search_name(LteMl1Subpkt_SubpktType,
-                                                    ARRAY_SIZE(LteMl1Subpkt_SubpktType, ValueName),
+                int subpkt_ver = _search_result_int(result_subpkt, "SubPacket Version");
+                const char *type_name = search_name(LtePhySubpkt_SubpktType,
+                                                    ARRAY_SIZE(LtePhySubpkt_SubpktType, ValueName),
                                                     subpkt_id);
                 if (type_name == NULL) {    // not found
-                    printf("(MI)Unknown LTE ML1 Subpacket ID: 0x%x\n", subpkt_id);
+                    printf("(MI)Unknown LTE PHY Subpacket ID: 0x%x\n", subpkt_id);
                 } else {
                     bool success = false;
                     if (strcmp(type_name, "Serving_Cell_Measurement_Result") == 0) {
                         switch (subpkt_ver) {
                         case 4:
-                            offset += _decode_by_fmt(LteMl1SubpktFmt_v1_Scmr_v4,
-                                                    ARRAY_SIZE(LteMl1SubpktFmt_v1_Scmr_v4, Fmt),
-                                                    b, offset, length, result_subpkt);
-                            success = true;
-                            break;
-                        // case 19:
-                        //     offset += _decode_by_fmt(LteMl1SubpktFmt_v1_Scmr_v19,
-                        //                             ARRAY_SIZE(LteMl1SubpktFmt_v1_Scmr_v19, Fmt),
-                        //                             b, offset, length, result_subpkt);
+                            {
+                                offset += _decode_by_fmt(
+                                        LtePhySubpktFmt_v1_Scmr_v4,
+                                        ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v4,
+                                            Fmt),
+                                        b, offset, length, result_subpkt);
+                                success = true;
+                                break;
+                            }
+                        case 19:
+                            {
+                                offset += _decode_by_fmt(
+                                        LtePhySubpktFmt_v1_Scmr_v19,
+                                        ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v19,
+                                            Fmt),
+                                        b, offset, length, result_subpkt);
+                                int temp = _search_result_int(result_subpkt,
+                                        "Physical Cell ID");
+                                int iPhyCellId = temp & 511;   // 9 bits
+                                int iServingCellIdx = (temp >> 9) & 7; // 3 bits
+                                int iIsServingCell = (temp >> 12) & 1;  // 1 bit
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Physical Cell ID", iPhyCellId);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Serving Cell Index", iServingCellIdx);
+                                Py_DECREF(old_object);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt,
+                                        "Serving Cell Index",
+                                        ValueNameCellIndex,
+                                        ARRAY_SIZE(ValueNameCellIndex,
+                                            ValueName),
+                                        "(MI)Unknown");
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Is Serving Cell", iIsServingCell);
+                                Py_DECREF(old_object);
+
+                                temp = _search_result_int(result_subpkt,
+                                        "Current SFN");
+                                int iSysFN = temp & 1023;   // 10 bits
+                                int iSubFN = (temp >> 10) & 15; // 4 bits
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current SFN", iSysFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current Subframe Number", iSubFN);
+                                Py_DECREF(old_object);
+
+                                unsigned int utemp;
+                                PyObject *pyfloat;
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP Rx[0]");
+                                float RSRP0 = float((utemp >> 10) & 4095);
+                                RSRP0 = RSRP0 * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP Rx[1]");
+                                float RSRP1 = float((utemp >> 12) & 4095);
+                                RSRP1 = RSRP1 * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP");
+                                float RSRP = float((utemp >> 12) & 4095);
+                                RSRP = RSRP * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRQ Rx[0]");
+                                float RSRQ0 = float((utemp >> 12) & 1023);
+                                RSRQ0 = RSRQ0 * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRQ Rx[1]");
+                                float RSRQ1 = float(utemp & 1023);
+                                RSRQ1 = RSRQ1 * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float RSRQ = float((utemp >> 20) & 1023);
+                                RSRQ = RSRQ * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSSI Rx[0]");
+                                float RSSI0 = float((utemp >> 10) & 2047);
+                                RSSI0 = RSSI0 * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float RSSI1 = float((utemp >> 21) & 2047);
+                                RSSI1 = RSSI1 * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSSI");
+                                float RSSI = float(utemp & 2047);
+                                RSSI = RSSI * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "FTL SNR Rx[0]");
+                                float SNR0 = float(utemp & 511);
+                                SNR0 = SNR0 * 0.1 - 20.0;
+                                pyfloat = Py_BuildValue("f", SNR0);
+                                old_object = _replace_result(result_subpkt,
+                                        "FTL SNR Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float SNR1 = float((utemp >> 9) & 511);
+                                SNR1 = SNR1 * 0.1 - 20.0;
+                                pyfloat = Py_BuildValue("f", SNR1);
+                                old_object = _replace_result(result_subpkt,
+                                        "FTL SNR Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "Post IC RSRQ");
+                                float postICRSRQ = float(utemp * 0.0625 - 30);
+                                pyfloat = Py_BuildValue("f", postICRSRQ);
+                                old_object = _replace_result(result_subpkt,
+                                        "Post IC RSRQ", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "Projected SIR");
+                                int SIR = 0;
+                                if (utemp & (1 << 31)) {
+                                    SIR = utemp - 4294967296;
+                                } else {
+                                    SIR = utemp;
+                                }
+                                SIR = SIR / 16;
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Projected SIR", SIR);
+                                Py_DECREF(old_object);
+
+                                success = true;
+                                break;
+                            }
+                        case 22:
+                            {
+                                offset += _decode_by_fmt(
+                                        LtePhySubpktFmt_v1_Scmr_v22,
+                                        ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v22,
+                                            Fmt),
+                                        b, offset, length, result_subpkt);
+                                int temp = _search_result_int(result_subpkt,
+                                        "Physical Cell ID");
+                                int iPhyCellId = temp & 511;   // 9 bits
+                                int iServingCellIdx = (temp >> 9) & 7; // 3 bits
+                                int iIsServingCell = (temp >> 12) & 1;  // 1 bit
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Physical Cell ID", iPhyCellId);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Serving Cell Index", iServingCellIdx);
+                                Py_DECREF(old_object);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt,
+                                        "Serving Cell Index",
+                                        ValueNameCellIndex,
+                                        ARRAY_SIZE(ValueNameCellIndex,
+                                            ValueName),
+                                        "(MI)Unknown");
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Is Serving Cell", iIsServingCell);
+                                Py_DECREF(old_object);
+
+                                temp = _search_result_int(result_subpkt,
+                                        "Current SFN");
+                                int iSysFN = temp & 1023;   // 10 bits
+                                int iSubFN = (temp >> 10) & 15; // 4 bits
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current SFN", iSysFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current Subframe Number", iSubFN);
+                                Py_DECREF(old_object);
+
+                                unsigned int utemp;
+                                PyObject *pyfloat;
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP Rx[0]");
+                                float RSRP0 = float((utemp >> 10) & 4095);
+                                RSRP0 = RSRP0 * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP Rx[1]");
+                                float RSRP1 = float((utemp >> 12) & 4095);
+                                RSRP1 = RSRP1 * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP");
+                                float RSRP = float((utemp >> 12) & 4095);
+                                RSRP = RSRP * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRQ Rx[0]");
+                                float RSRQ0 = float((utemp >> 12) & 1023);
+                                RSRQ0 = RSRQ0 * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRQ Rx[1]");
+                                float RSRQ1 = float(utemp & 1023);
+                                RSRQ1 = RSRQ1 * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float RSRQ = float((utemp >> 10) & 1023);
+                                RSRQ = RSRQ * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSSI Rx[0]");
+                                float RSSI0 = float((utemp >> 10) & 2047);
+                                RSSI0 = RSSI0 * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float RSSI1 = float((utemp >> 21) & 2047);
+                                RSSI1 = RSSI1 * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSSI");
+                                float RSSI = float(utemp & 2047);
+                                RSSI = RSSI * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "FTL SNR Rx[0]");
+                                float SNR0 = float(utemp & 511);
+                                SNR0 = SNR0 * 0.1 - 20.0;
+                                pyfloat = Py_BuildValue("f", SNR0);
+                                old_object = _replace_result(result_subpkt,
+                                        "FTL SNR Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float SNR1 = float((utemp >> 9) & 511);
+                                SNR1 = SNR1 * 0.1 - 20.0;
+                                pyfloat = Py_BuildValue("f", SNR1);
+                                old_object = _replace_result(result_subpkt,
+                                        "FTL SNR Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "Post IC RSRQ");
+                                float postICRSRQ = float(utemp * 0.0625 - 30);
+                                pyfloat = Py_BuildValue("f", postICRSRQ);
+                                old_object = _replace_result(result_subpkt,
+                                        "Post IC RSRQ", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "Projected SIR");
+                                int SIR = 0;
+                                if (utemp & (1 << 31)) {
+                                    SIR = utemp - 4294967296;
+                                } else {
+                                    SIR = utemp;
+                                }
+                                SIR = SIR / 16;
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Projected SIR", SIR);
+                                Py_DECREF(old_object);
+
+                                success = true;
+                                break;
+                            }
                         default:
                             break;
                         }
@@ -655,7 +1132,7 @@ _decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        // printf("(MI)Unknown LTE ML1 Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        printf("(MI)Unknown LTE PHY Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
             }
@@ -667,13 +1144,13 @@ _decode_lte_ml1_subpkt(const char *b, int offset, size_t length,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE ML1 packet version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY packet version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
 
 static int
-_decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, size_t length,
+_decode_lte_phy_irat_cdma_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
 
     int start = offset;
@@ -687,8 +1164,8 @@ _decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, size_t length,
 
                 PyObject *result_subpkt = PyList_New(0);
                 // Decode subpacket header
-                offset += _decode_by_fmt(LteMl1IratSubPktFmt,
-                                            ARRAY_SIZE(LteMl1IratSubPktFmt, Fmt),
+                offset += _decode_by_fmt(LtePhyIratSubPktFmt,
+                                            ARRAY_SIZE(LtePhyIratSubPktFmt, Fmt),
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 // int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
@@ -696,15 +1173,15 @@ _decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, size_t length,
                 // int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
 
                 PyObject *result_subpkt_cdma = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1IratCDMACellFmt,
-                                            ARRAY_SIZE(LteMl1IratCDMACellFmt, Fmt),
+                offset += _decode_by_fmt(LtePhyIratCDMACellFmt,
+                                            ARRAY_SIZE(LtePhyIratCDMACellFmt, Fmt),
                                             b, offset, length, result_subpkt_cdma);
                 int n_pilot = _search_result_int(result_subpkt_cdma, "Number of Pilots");
                 int band = _search_result_int(result_subpkt_cdma, "Band");
                 for(int j=0; j<n_pilot; j++){
                     PyObject *result_subpkt_cdma_pilot = PyList_New(0);
-                    offset += _decode_by_fmt(LteMl1IratCDMACellPilotFmt,
-                                            ARRAY_SIZE(LteMl1IratCDMACellPilotFmt, Fmt),
+                    offset += _decode_by_fmt(LtePhyIratCDMACellPilotFmt,
+                                            ARRAY_SIZE(LtePhyIratCDMACellPilotFmt, Fmt),
                                             b, offset, length, result_subpkt_cdma_pilot);
                     char name[64];
                     sprintf(name,"Pilot_%d",j);
@@ -738,7 +1215,7 @@ _decode_lte_ml1_irat_cdma_subpkt(const char *b, int offset, size_t length,
 
 
 static int
-_decode_lte_ml1_irat_subpkt(const char *b, int offset, size_t length,
+_decode_lte_phy_irat_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
 
     int start = offset;
@@ -752,32 +1229,32 @@ _decode_lte_ml1_irat_subpkt(const char *b, int offset, size_t length,
 
                 PyObject *result_subpkt = PyList_New(0);
                 // Decode subpacket header
-                offset += _decode_by_fmt(LteMl1IratSubPktFmt,
-                                            ARRAY_SIZE(LteMl1IratSubPktFmt, Fmt),
+                offset += _decode_by_fmt(LtePhyIratSubPktFmt,
+                                            ARRAY_SIZE(LtePhyIratSubPktFmt, Fmt),
                                             b, offset, length, result_subpkt);
                 // Decode payload
                 int subpkt_id = _search_result_int(result_subpkt, "Subpacket ID");
                 // int subpkt_ver = _search_result_int(result_subpkt, "Version");
                 int subpkt_size = _search_result_int(result_subpkt, "Subpacket size");
                 switch(subpkt_id){
-                    case LteMl1IratType_WCDMA:
+                    case LtePhyIratType_WCDMA:
                     {
                         PyObject *result_subpkt_wcdma = PyList_New(0);
-                        offset += _decode_by_fmt(LteMl1IratWCDMAFmt,
-                                            ARRAY_SIZE(LteMl1IratWCDMAFmt, Fmt),
+                        offset += _decode_by_fmt(LtePhyIratWCDMAFmt,
+                                            ARRAY_SIZE(LtePhyIratWCDMAFmt, Fmt),
                                             b, offset, length, result_subpkt_wcdma);
                         int n_freq = _search_result_int(result_subpkt_wcdma, "Number of frequencies");
                         for(int j=0; j<n_freq; j++){
                             PyObject *result_subpkt_wcdma_freq = PyList_New(0);
-                            offset += _decode_by_fmt(LteMl1IratWCDMACellMetaFmt,
-                                            ARRAY_SIZE(LteMl1IratWCDMACellMetaFmt, Fmt),
+                            offset += _decode_by_fmt(LtePhyIratWCDMACellMetaFmt,
+                                            ARRAY_SIZE(LtePhyIratWCDMACellMetaFmt, Fmt),
                                             b, offset, length, result_subpkt_wcdma_freq);
                             // int freq = _search_result_int(result_subpkt_wcdma_freq, "Frequency");
                             int n_cell = _search_result_int(result_subpkt_wcdma_freq, "Number of cells");
                             for(int k=0; k<n_cell; k++){
                                 PyObject *result_subpkt_wcdma_cell = PyList_New(0);
-                                offset += _decode_by_fmt(LteMl1IratWCDMACellFmt,
-                                            ARRAY_SIZE(LteMl1IratWCDMACellFmt, Fmt),
+                                offset += _decode_by_fmt(LtePhyIratWCDMACellFmt,
+                                            ARRAY_SIZE(LtePhyIratWCDMACellFmt, Fmt),
                                             b, offset, length, result_subpkt_wcdma_cell);
 
                                 char name[64];
@@ -1050,35 +1527,106 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                     bool success = false;
                     PyObject *result_sample_list = PyList_New(0);
                     switch (subpkt_ver) {
-                    case 1: // UL Transport Block Subpacket V1
-                        for (int j = 0; j < subpkt_nsample; j++) {
-                            PyObject *result_subpkt_sample = PyList_New(0);
-                            offset += _decode_by_fmt(LteMacULTransportBlock_SubpktV1_SampleFmt,
-                                    ARRAY_SIZE(LteMacULTransportBlock_SubpktV1_SampleFmt, Fmt),
-                                    b, offset, length, result_subpkt_sample);
-                            (void) _map_result_field_to_name(
-                                    result_subpkt_sample,
-                                    "BSR event",
-                                    BSREvent,
-                                    ARRAY_SIZE(BSREvent, ValueName),
-                                    "(MI)Unknown");
-                            (void) _map_result_field_to_name(
-                                    result_subpkt_sample,
-                                    "BSR trig",
-                                    BSRTrig,
-                                    ARRAY_SIZE(BSRTrig, ValueName),
-                                    "(MI)Unknown");
-                            offset += (_search_result_int(result_subpkt_sample,
-                                        "HDR LEN") + 2);
-
-                            PyObject *t = Py_BuildValue("(sOs)",
-                                    "Ignored", result_subpkt_sample, "dict");
-                            PyList_Append(result_sample_list, t);
-                            Py_DECREF(result_subpkt_sample);
-                            Py_DECREF(t);
-                        }
-                        success = true;
-                        break;
+                        case 1:
+                            {
+                                // UL Transport Block Subpacket V1
+                                for (int j = 0; j < subpkt_nsample; j++) {
+                                    PyObject *result_subpkt_sample = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacULTransportBlock_SubpktV1_SampleFmt,
+                                            ARRAY_SIZE(LteMacULTransportBlock_SubpktV1_SampleFmt, Fmt),
+                                            b, offset, length, result_subpkt_sample);
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "BSR event",
+                                            BSREvent,
+                                            ARRAY_SIZE(BSREvent, ValueName),
+                                            "(MI)Unknown");
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "BSR trig",
+                                            BSRTrig,
+                                            ARRAY_SIZE(BSRTrig, ValueName),
+                                            "(MI)Unknown");
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "RNTI Type",
+                                            ValueNameRNTIType,
+                                            ARRAY_SIZE(ValueNameRNTIType,
+                                                ValueName),
+                                            "(MI)Unknown");
+                                    int temp = _search_result_int(
+                                            result_subpkt_sample, "Sub-FN");
+                                    int iSubFN = temp & 15; // 4 bits
+                                    int iSFN = (temp >> 4);
+                                    PyObject *old_object = _replace_result_int(
+                                            result_subpkt_sample,
+                                            "Sub-FN", iSubFN);
+                                    Py_DECREF(old_object);
+                                    old_object = _replace_result_int(
+                                            result_subpkt_sample,
+                                            "SFN", iSFN);
+                                    Py_DECREF(old_object);
+                                    offset += _search_result_int(result_subpkt_sample,
+                                                "HDR LEN");
+                                    PyObject *t = Py_BuildValue("(sOs)",
+                                            "Ignored", result_subpkt_sample, "dict");
+                                    PyList_Append(result_sample_list, t);
+                                    Py_DECREF(result_subpkt_sample);
+                                    Py_DECREF(t);
+                                }
+                                success = true;
+                                break;
+                            }
+                        case 2:
+                            {
+                                // UL Transport Block Subpacket V2
+                                for (int j = 0; j < subpkt_nsample; j++) {
+                                    PyObject *result_subpkt_sample = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacULTransportBlock_SubpktV2_SampleFmt,
+                                            ARRAY_SIZE(LteMacULTransportBlock_SubpktV2_SampleFmt, Fmt),
+                                            b, offset, length, result_subpkt_sample);
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "BSR event",
+                                            BSREvent,
+                                            ARRAY_SIZE(BSREvent, ValueName),
+                                            "(MI)Unknown");
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "BSR trig",
+                                            BSRTrig,
+                                            ARRAY_SIZE(BSRTrig, ValueName),
+                                            "(MI)Unknown");
+                                    (void) _map_result_field_to_name(
+                                            result_subpkt_sample,
+                                            "RNTI Type",
+                                            ValueNameRNTIType,
+                                            ARRAY_SIZE(ValueNameRNTIType,
+                                                ValueName),
+                                            "(MI)Unknown");
+                                    int temp = _search_result_int(
+                                            result_subpkt_sample, "Sub-FN");
+                                    int iSubFN = temp & 15; // 4 bits
+                                    int iSFN = (temp >> 4);
+                                    PyObject *old_object = _replace_result_int(
+                                            result_subpkt_sample,
+                                            "Sub-FN", iSubFN);
+                                    Py_DECREF(old_object);
+                                    old_object = _replace_result_int(
+                                            result_subpkt_sample,
+                                            "SFN", iSFN);
+                                    Py_DECREF(old_object);
+                                    offset += _search_result_int(
+                                            result_subpkt_sample, "HDR LEN");
+                                    PyObject *t = Py_BuildValue("(sOs)",
+                                            "Ignored", result_subpkt_sample, "dict");
+                                    PyList_Append(result_sample_list, t);
+                                    Py_DECREF(result_subpkt_sample);
+                                    Py_DECREF(t);
+                                }
+                                success = true;
+                                break;
+                            }
                     default:
                         break;
                     }
@@ -1150,29 +1698,81 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                     bool success = false;
                     PyObject *result_sample_list = PyList_New(0);
                     switch (subpkt_ver) {
-                    case 2: // DL Transport Block Subpacket
-                        for (int j = 0; j < subpkt_nsample; j++) {
-                            PyObject *result_subpkt_sample = PyList_New(0);
-                            offset += _decode_by_fmt(LteMacDLTransportBlock_SubpktV2_SampleFmt,
-                                    ARRAY_SIZE(LteMacDLTransportBlock_SubpktV2_SampleFmt, Fmt),
-                                    b, offset, length, result_subpkt_sample);
-                            (void) _map_result_field_to_name(
-                                    result_subpkt_sample,
-                                    "RNTI Type",
-                                    RNTIType,
-                                    ARRAY_SIZE(RNTIType, ValueName),
-                                    "(MI)Unknown");
-                            offset += _search_result_int(result_subpkt_sample, "HDR LEN");
-
-                            PyObject *t = Py_BuildValue("(sOs)",
-                                    "Ignored",
-                                    result_subpkt_sample, "dict");
-                            PyList_Append(result_sample_list, t);
-                            Py_DECREF(result_subpkt_sample);
-                            Py_DECREF(t);
+                    case 2:
+                        {
+                            // DL Transport Block Subpacket
+                            for (int j = 0; j < subpkt_nsample; j++) {
+                                PyObject *result_subpkt_sample = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacDLTransportBlock_SubpktV2_SampleFmt,
+                                        ARRAY_SIZE(LteMacDLTransportBlock_SubpktV2_SampleFmt, Fmt),
+                                        b, offset, length, result_subpkt_sample);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt_sample,
+                                        "RNTI Type",
+                                        ValueNameRNTIType,
+                                        ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                                        "(MI)Unknown");
+                                int temp = _search_result_int(
+                                        result_subpkt_sample, "Sub-FN");
+                                int iSubFN = temp & 15; // 4 bits
+                                int iSFN = (temp >> 4);
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt_sample,
+                                        "Sub-FN", iSubFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt_sample,
+                                        "SFN", iSFN);
+                                Py_DECREF(old_object);
+                                offset += _search_result_int(result_subpkt_sample, "HDR LEN");
+                                PyObject *t = Py_BuildValue("(sOs)",
+                                        "Ignored",
+                                        result_subpkt_sample, "dict");
+                                PyList_Append(result_sample_list, t);
+                                Py_DECREF(result_subpkt_sample);
+                                Py_DECREF(t);
+                            }
+                            success = true;
+                            break;
                         }
-                        success = true;
-                        break;
+                    case 4:
+                        {
+                            // DL Transport Block Subpacket
+                            for (int j = 0; j < subpkt_nsample; j++) {
+                                PyObject *result_subpkt_sample = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacDLTransportBlock_SubpktV4_SampleFmt,
+                                        ARRAY_SIZE(LteMacDLTransportBlock_SubpktV4_SampleFmt, Fmt),
+                                        b, offset, length, result_subpkt_sample);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt_sample,
+                                        "RNTI Type",
+                                        ValueNameRNTIType,
+                                        ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                                        "(MI)Unknown");
+                                int temp = _search_result_int(
+                                        result_subpkt_sample, "Sub-FN");
+                                int iSubFN = temp & 15; // 4 bits
+                                int iSFN = (temp >> 4);
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt_sample,
+                                        "Sub-FN", iSubFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt_sample,
+                                        "SFN", iSFN);
+                                Py_DECREF(old_object);
+                                offset += _search_result_int(result_subpkt_sample, "HDR LEN");
+                                PyObject *t = Py_BuildValue("(sOs)",
+                                        "Ignored",
+                                        result_subpkt_sample, "dict");
+                                PyList_Append(result_sample_list, t);
+                                Py_DECREF(result_subpkt_sample);
+                                Py_DECREF(t);
+                            }
+                            success = true;
+                            break;
+                        }
+
                     default:
                         break;
                     }
@@ -1814,6 +2414,9 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                                 "sys_fn");
                         int iLoggedBytes = _search_result_int(result_pdu_item,
                                 "logged_bytes");
+                        // D/C LookAhead and SN (or Ack_SN) has already been parsed.
+                        iLoggedBytes -= 2;
+
                         // Handle fn
                         const unsigned int SFN_RSHIFT = 4,
                               SFN_MASK = (1 << 12) - 1;
@@ -1841,6 +2444,7 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                             std::string strAckSN = "ACK_SN = ";
                             int iAckSN = DCLookAhead * 64 + iNonDecodeSN/4;
                             strAckSN += SSTR(iAckSN);
+                            int iHeadFromPadding = (iNonDecodeSN & 1) * 512;
                             pystr = Py_BuildValue("s", strAckSN.c_str());
                             old_object = _replace_result(result_pdu_item,
                                     "SN", pystr);
@@ -1858,6 +2462,73 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                                     "cpt", pystr);
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
+
+                            if (iLoggedBytes > 0) {
+                                // Decode NACK
+                                int numNack = iLoggedBytes / 1.5;
+                                int iAllign = 0;
+                                int iHeadFromAllign = 0;
+
+                                PyObject *result_pdu_nack = PyList_New(0);
+                                for (int indexNack = 0; indexNack < numNack; indexNack++) {
+                                    PyObject *result_pdu_nack_item = PyList_New(0);
+                                    if (iAllign == 0) {
+                                        iAllign = 1;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN,
+                                                Fmt),
+                                                b, offset, length, result_pdu_nack_item);
+                                        iLoggedBytes -= 2;
+                                        int iNonDecodeNACK = _search_result_int(
+                                                result_pdu_nack_item, "NACK_SN");
+                                        int iPart3 = iNonDecodeNACK / 4096;
+                                        int iPart4 = (iNonDecodeNACK - iPart3 * 4096) / 256;
+                                        int iPart1 = (iNonDecodeNACK - iPart3 * 4096 - iPart4 * 256) / 16;
+                                        int iPart2 = iNonDecodeNACK - iPart3 * 4096 - iPart4 * 256 - iPart1 * 16;
+                                        int iNack = iPart1 * 32 + iPart2 * 2 + iPart3 / 8 + iHeadFromPadding;
+                                        iHeadFromAllign = iPart4 + (iPart3 & 1) * 16;
+                                        int iE2 = iPart3 & 2;
+                                        if (iE2 == 2) {
+                                            indexNack = numNack - 1;
+                                        }
+                                        old_object = _replace_result_int(
+                                                result_pdu_nack_item, "NACK_SN", iNack);
+                                        Py_DECREF(old_object);
+                                    } else {
+                                        iAllign = 0;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING,
+                                                Fmt),
+                                                b, offset, length, result_pdu_nack_item);
+                                        iLoggedBytes -= 1;
+                                        int iNonDecodeNACK = _search_result_int(
+                                                result_pdu_nack_item, "NACK_SN");
+                                        int iNack = iHeadFromAllign * 32 + iNonDecodeNACK / 8;
+                                        int iE2 = iNonDecodeNACK & 2;
+                                        if (iE2 == 2) {
+                                            indexNack = numNack - 1;
+                                        }
+                                        iHeadFromPadding = (iNonDecodeNACK & 1) * 512;
+                                        old_object = _replace_result_int(
+                                                result_pdu_nack_item, "NACK_SN", iNack);
+                                        Py_DECREF(old_object);
+                                    }
+                                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                            result_pdu_nack_item, "dict");
+                                    PyList_Append(result_pdu_nack, t3);
+                                    Py_DECREF(t3);
+                                    Py_DECREF(result_pdu_nack_item);
+                                }
+                                PyObject *t2 = Py_BuildValue("(sOs)", "RLC CTRL NACK",
+                                        result_pdu_nack, "list");
+                                PyList_Append(result_pdu_item, t2);
+                                Py_DECREF(t2);
+                                Py_DECREF(result_pdu_nack);
+                            }
                         } else {
                             // Type = DATA
                             pystr = Py_BuildValue("s", "RLCUL DATA");
@@ -1931,38 +2602,94 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
 
-                            if (strE == "1") {
-                                // Decode extra two bytes
+                            if (strRF == "1") {
+                                // decode LSF and SO
+                                iLoggedBytes -= 2;
+
                                 offset += _decode_by_fmt(
-                                        LteRlcUlAmAllPdu_Subpkt_PDU_Extra,
+                                        LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO,
                                         ARRAY_SIZE(
-                                            LteRlcUlAmAllPdu_Subpkt_PDU_Extra,
-                                        Fmt),
+                                            LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO,
+                                            Fmt),
                                         b, offset, length, result_pdu_item);
-                                int iNonDecodeLI = _search_result_int(
-                                        result_pdu_item, "RLC DATA LI");
-                                int iLeft1 = iNonDecodeLI / 4096;
-                                iNonDecodeLI -= iLeft1 * 4096;
-                                int iLeft2 = iNonDecodeLI / 256;
-                                iNonDecodeLI -= iLeft2 * 256;
-                                int iLeft3 = iNonDecodeLI / 16;
-                                iNonDecodeLI -= iLeft3 * 16;
-                                int iLeft4 = iNonDecodeLI;
-                                int iLI =
-                                    iLeft1 * 1 + iLeft3 * 256 + iLeft4 * 16;
+                                int temp = _search_result_int(result_pdu_item,
+                                        "LSF");
+                                int iLSF = temp >> 7;
+                                int iSO = _search_result_int(result_pdu_item,
+                                        "SO");
+                                iSO += (temp & 127) * 256;
                                 old_object = _replace_result_int(
-                                        result_pdu_item, "RLC DATA LI", iLI);
+                                        result_pdu_item, "LSF", iLSF);
                                 Py_DECREF(old_object);
-                                iLoggedBytes = iLoggedBytes - 2;
+                                old_object = _replace_result_int(
+                                        result_pdu_item, "SO", iSO);
+                                Py_DECREF(old_object);
+                            }
+
+                            if (strE == "1") {
+                                // Decode LI
+                                int numLI = iLoggedBytes / 1.5;
+                                iLoggedBytes = 0;
+                                int iAllign = 0;
+                                int iHeadFromAllign = 0;
+
+                                PyObject *result_pdu_li = PyList_New(0);
+                                for (int indexLI = 0; indexLI < numLI; indexLI++) {
+                                    PyObject *result_pdu_li_item = PyList_New(0);
+                                    if (iAllign == 0) {
+                                        iAllign = 1;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN,
+                                                Fmt),
+                                                b, offset, length, result_pdu_li_item);
+                                        int iNonDecodeLI = _search_result_int(
+                                                result_pdu_li_item, "LI");
+                                        int iPart3 = iNonDecodeLI / 4096;
+                                        int iPart4 = (iNonDecodeLI - iPart3 * 4096) / 256;
+                                        int iPart1 = (iNonDecodeLI - iPart3 * 4096 - iPart4 * 256) / 16;
+                                        int iPart2 = iNonDecodeLI - iPart3 * 4096 - iPart4 * 256 - iPart1 * 16;
+                                        int iLI = (iPart1 % 8) * 256 + iPart2 * 16 + iPart3;
+                                        iHeadFromAllign = (iPart4 % 8) * 256;
+                                        old_object = _replace_result_int(
+                                                result_pdu_li_item, "LI", iLI);
+                                        Py_DECREF(old_object);
+                                    } else {
+                                        iAllign = 0;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING,
+                                                Fmt),
+                                                b, offset, length, result_pdu_li_item);
+                                        int iNonDecodeLI = _search_result_int(
+                                                result_pdu_li_item, "LI");
+                                        int iLI = iHeadFromAllign + iNonDecodeLI;
+                                        old_object = _replace_result_int(
+                                                result_pdu_li_item, "LI", iLI);
+                                        Py_DECREF(old_object);
+                                    }
+                                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                            result_pdu_li_item, "dict");
+                                    PyList_Append(result_pdu_li, t3);
+                                    Py_DECREF(t3);
+                                    Py_DECREF(result_pdu_li_item);
+                                }
+                                PyObject *t2 = Py_BuildValue("(sOs)", "RLC DATA LI",
+                                        result_pdu_li, "list");
+                                PyList_Append(result_pdu_item, t2);
+                                Py_DECREF(t2);
+                                Py_DECREF(result_pdu_li);
                             }
                         }
+                        offset += iLoggedBytes;
                         PyObject *t1 = Py_BuildValue("(sOs)", ("RLCUL PDU["
                                 + SSTR(i) + "]").c_str(), result_pdu_item,
                                 "dict");
                         PyList_Append(result_pdu, t1);
                         Py_DECREF(t1);
                         Py_DECREF(result_pdu_item);
-                        offset += iLoggedBytes - 2;
                     }
                     PyObject *t1 = Py_BuildValue("(sOs)", "RLCUL PDUs",
                             result_pdu, "list");
@@ -2080,6 +2807,9 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                                 "sys_fn");
                         int iLoggedBytes = _search_result_int(result_pdu_item,
                                 "logged_bytes");
+                        // D/C LookAhead and SN (or Ack_SN) has already been parsed.
+                        iLoggedBytes -= 2;
+
                         // Handle fn
                         const unsigned int SFN_RSHIFT = 4,
                               SFN_MASK = (1 << 12) - 1;
@@ -2112,6 +2842,7 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                             std::string strAckSN = "ACK_SN = ";
                             int iAckSN = DCLookAhead * 64 + iNonDecodeSN/4;
                             strAckSN += SSTR(iAckSN);
+                            int iHeadFromPadding = (iNonDecodeSN & 1) * 512;
                             pystr = Py_BuildValue("s", strAckSN.c_str());
                             old_object = _replace_result(result_pdu_item,
                                     "SN", pystr);
@@ -2129,6 +2860,73 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                                     "cpt", pystr);
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
+
+                            if (iLoggedBytes > 0) {
+                                // Decode NACK
+                                int numNack = iLoggedBytes / 1.5;
+                                int iAllign = 0;
+                                int iHeadFromAllign = 0;
+
+                                PyObject *result_pdu_nack = PyList_New(0);
+                                for (int indexNack = 0; indexNack < numNack; indexNack++) {
+                                    PyObject *result_pdu_nack_item = PyList_New(0);
+                                    if (iAllign == 0) {
+                                        iAllign = 1;
+                                        offset += _decode_by_fmt(
+                                                LteRlcDlAmAllPdu_Subpkt_PDU_NACK_ALLIGN,
+                                                ARRAY_SIZE(
+                                                    LteRlcDlAmAllPdu_Subpkt_PDU_NACK_ALLIGN,
+                                                Fmt),
+                                                b, offset, length, result_pdu_nack_item);
+                                        iLoggedBytes -= 2;
+                                        int iNonDecodeNACK = _search_result_int(
+                                                result_pdu_nack_item, "NACK_SN");
+                                        int iPart3 = iNonDecodeNACK / 4096;
+                                        int iPart4 = (iNonDecodeNACK - iPart3 * 4096) / 256;
+                                        int iPart1 = (iNonDecodeNACK - iPart3 * 4096 - iPart4 * 256) / 16;
+                                        int iPart2 = iNonDecodeNACK - iPart3 * 4096 - iPart4 * 256 - iPart1 * 16;
+                                        int iNack = iPart1 * 32 + iPart2 * 2 + iPart3 / 8 + iHeadFromPadding;
+                                        iHeadFromAllign = iPart4 + (iPart3 & 1) * 16;
+                                        int iE2 = iPart3 & 2;
+                                        if (iE2 == 2) {
+                                            indexNack = numNack - 1;
+                                        }
+                                        old_object = _replace_result_int(
+                                                result_pdu_nack_item, "NACK_SN", iNack);
+                                        Py_DECREF(old_object);
+                                    } else {
+                                        iAllign = 0;
+                                        offset += _decode_by_fmt(
+                                                LteRlcDlAmAllPdu_Subpkt_PDU_NACK_PADDING,
+                                                ARRAY_SIZE(
+                                                    LteRlcDlAmAllPdu_Subpkt_PDU_NACK_PADDING,
+                                                Fmt),
+                                                b, offset, length, result_pdu_nack_item);
+                                        iLoggedBytes -= 1;
+                                        int iNonDecodeNACK = _search_result_int(
+                                                result_pdu_nack_item, "NACK_SN");
+                                        int iNack = iHeadFromAllign * 32 + iNonDecodeNACK / 8;
+                                        int iE2 = iNonDecodeNACK & 2;
+                                        if (iE2 == 2) {
+                                            indexNack = numNack - 1;
+                                        }
+                                        iHeadFromPadding = (iNonDecodeNACK & 1) * 512;
+                                        old_object = _replace_result_int(
+                                                result_pdu_nack_item, "NACK_SN", iNack);
+                                        Py_DECREF(old_object);
+                                    }
+                                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                            result_pdu_nack_item, "dict");
+                                    PyList_Append(result_pdu_nack, t3);
+                                    Py_DECREF(t3);
+                                    Py_DECREF(result_pdu_nack_item);
+                                }
+                                PyObject *t2 = Py_BuildValue("(sOs)", "RLC CTRL NACK",
+                                        result_pdu_nack, "list");
+                                PyList_Append(result_pdu_item, t2);
+                                Py_DECREF(t2);
+                                Py_DECREF(result_pdu_nack);
+                            }
                         } else {
                             // Type = DATA
                             pystr = Py_BuildValue("s", "RLCDL DATA");
@@ -2206,32 +3004,88 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                             Py_DECREF(old_object);
                             Py_DECREF(pystr);
 
-                            if (strE == "1") {
-                                // Decode extra two bytes
+                            if (strRF == "1") {
+                                // decode LSF and SO
+                                iLoggedBytes -= 2;
+
                                 offset += _decode_by_fmt(
-                                        LteRlcDlAmAllPdu_Subpkt_PDU_Extra,
+                                        LteRlcDlAmAllPdu_Subpkt_PDU_LSF_SO,
                                         ARRAY_SIZE(
-                                            LteRlcDlAmAllPdu_Subpkt_PDU_Extra,
-                                        Fmt),
+                                            LteRlcDlAmAllPdu_Subpkt_PDU_LSF_SO,
+                                            Fmt),
                                         b, offset, length, result_pdu_item);
-                                int iNonDecodeLI = _search_result_int(
-                                        result_pdu_item, "RLC DATA LI");
-                                int iLeft1 = iNonDecodeLI / 4096;
-                                iNonDecodeLI -= iLeft1 * 4096;
-                                int iLeft2 = iNonDecodeLI / 256;
-                                iNonDecodeLI -= iLeft2 * 256;
-                                int iLeft3 = iNonDecodeLI / 16;
-                                iNonDecodeLI -= iLeft3 * 16;
-                                int iLeft4 = iNonDecodeLI;
-                                int iLI =
-                                    iLeft1 * 1 + iLeft3 * 256 + iLeft4 * 16;
+                                int temp = _search_result_int(result_pdu_item,
+                                        "LSF");
+                                int iLSF = temp >> 7;
+                                int iSO = _search_result_int(result_pdu_item,
+                                        "SO");
+                                iSO += (temp & 127) * 256;
                                 old_object = _replace_result_int(
-                                        result_pdu_item, "RLC DATA LI", iLI);
+                                        result_pdu_item, "LSF", iLSF);
                                 Py_DECREF(old_object);
-                                iLoggedBytes = iLoggedBytes - 2;
+                                old_object = _replace_result_int(
+                                        result_pdu_item, "SO", iSO);
+                                Py_DECREF(old_object);
+                            }
+
+                            if (strE == "1") {
+                                // Decode LI
+                                int numLI = iLoggedBytes / 1.5;
+                                iLoggedBytes = 0;
+                                int iAllign = 0;
+                                int iHeadFromAllign = 0;
+
+                                PyObject *result_pdu_li = PyList_New(0);
+                                for (int indexLI = 0; indexLI < numLI; indexLI++) {
+                                    PyObject *result_pdu_li_item = PyList_New(0);
+                                    if (iAllign == 0) {
+                                        iAllign = 1;
+                                        offset += _decode_by_fmt(
+                                                LteRlcDlAmAllPdu_Subpkt_PDU_LI_ALLIGN,
+                                                ARRAY_SIZE(
+                                                    LteRlcDlAmAllPdu_Subpkt_PDU_LI_ALLIGN,
+                                                Fmt),
+                                                b, offset, length, result_pdu_li_item);
+                                        int iNonDecodeLI = _search_result_int(
+                                                result_pdu_li_item, "LI");
+                                        int iPart3 = iNonDecodeLI / 4096;
+                                        int iPart4 = (iNonDecodeLI - iPart3 * 4096) / 256;
+                                        int iPart1 = (iNonDecodeLI - iPart3 * 4096 - iPart4 * 256) / 16;
+                                        int iPart2 = iNonDecodeLI - iPart3 * 4096 - iPart4 * 256 - iPart1 * 16;
+                                        int iLI = (iPart1 % 8) * 256 + iPart2 * 16 + iPart3;
+                                        iHeadFromAllign = (iPart4 % 8) * 256;
+                                        old_object = _replace_result_int(
+                                                result_pdu_li_item, "LI", iLI);
+                                        Py_DECREF(old_object);
+                                    } else {
+                                        iAllign = 0;
+                                        offset += _decode_by_fmt(
+                                                LteRlcDlAmAllPdu_Subpkt_PDU_LI_PADDING,
+                                                ARRAY_SIZE(
+                                                    LteRlcDlAmAllPdu_Subpkt_PDU_LI_PADDING,
+                                                Fmt),
+                                                b, offset, length, result_pdu_li_item);
+                                        int iNonDecodeLI = _search_result_int(
+                                                result_pdu_li_item, "LI");
+                                        int iLI = iHeadFromAllign + iNonDecodeLI;
+                                        old_object = _replace_result_int(
+                                                result_pdu_li_item, "LI", iLI);
+                                        Py_DECREF(old_object);
+                                    }
+                                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                            result_pdu_li_item, "dict");
+                                    PyList_Append(result_pdu_li, t3);
+                                    Py_DECREF(t3);
+                                    Py_DECREF(result_pdu_li_item);
+                                }
+                                PyObject *t2 = Py_BuildValue("(sOs)", "RLC DATA LI",
+                                        result_pdu_li, "list");
+                                PyList_Append(result_pdu_item, t2);
+                                Py_DECREF(t2);
+                                Py_DECREF(result_pdu_li);
                             }
                         }
-                        offset += iLoggedBytes - 2;
+                        offset += iLoggedBytes;
                         PyObject *t1 = Py_BuildValue("(sOs)", ("RLCDL PDU["
                                 + SSTR(i) + "]").c_str(), result_pdu_item,
                                 "dict");
@@ -2378,7 +3232,7 @@ static int _decode_lte_mac_rach_attempt_subpkt (const char *b, int offset,
                             LteMacRachAttempt_Subpkt_RachResult,
                             ARRAY_SIZE(LteMacRachAttempt_Subpkt_RachResult,
                                 ValueName),
-                            "Unsuccess");
+                            "(MI)Unknown");
                     (void) _map_result_field_to_name(result_subpkt,
                             "Contention procedure",
                             LteMacRachAttempt_Subpkt_ContentionProcedure,
@@ -3588,7 +4442,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                         LtePucchPowerControl_Record_v4_DCI_Format,
                         ARRAY_SIZE(LtePucchPowerControl_Record_v4_DCI_Format,
                             ValueName),
-                        "Invalid");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "PUCCH Format", iPUCCH);
                 Py_DECREF(old_object);
@@ -3597,7 +4451,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                         LtePucchPowerControl_Record_v4_PUCCH_Format,
                         ARRAY_SIZE(LtePucchPowerControl_Record_v4_PUCCH_Format,
                             ValueName),
-                        "Invalid");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "N_HARQ", iN_HARQ);
                 Py_DECREF(old_object);
@@ -3694,7 +4548,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                         LtePuschPowerControl_Record_v5_DCI_Format,
                         ARRAY_SIZE(LtePuschPowerControl_Record_v5_DCI_Format,
                             ValueName),
-                        "Invalid");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Tx Type", iTxType);
                 Py_DECREF(old_object);
@@ -3794,7 +4648,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                         LtePuschPowerControl_Record_v5_DCI_Format,
                         ARRAY_SIZE(LtePuschPowerControl_Record_v5_DCI_Format,
                             ValueName),
-                        "Invalid");
+                        "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
                         "Tx Type", iTxType);
                 Py_DECREF(old_object);
@@ -4188,10 +5042,10 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
     offset = 0;
     offset += _decode_by_fmt(LogPacketHeaderFmt, ARRAY_SIZE(LogPacketHeaderFmt, Fmt),
                                 b, offset, length, result);
-    PyObject *old_result = result;
-    result = PyList_GetSlice(result, 1, 4); // remove the duplicate "len1" field
-    Py_DECREF(old_result);
-    old_result = NULL;
+    // PyObject *old_result = result;
+    // result = PyList_GetSlice(result, 1, 4); // remove the duplicate "len1" field
+    // Py_DECREF(old_result);
+    // old_result = NULL;
 
     // Differentiate using type ID
     LogPacketType type_id = (LogPacketType) _map_result_field_to_name(
@@ -4302,40 +5156,40 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
         offset += _decode_lte_nas_esm_state(b, offset, length, result);
         break;
 
-    case LTE_LL1_PDSCH_Demapper_Configuration:
-        offset += _decode_by_fmt(LteLl1PdschDemapperConfigFmt,
-                                    ARRAY_SIZE(LteLl1PdschDemapperConfigFmt, Fmt),
+    case LTE_PHY_PDSCH_Demapper_Configuration:
+        offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt,
+                                    ARRAY_SIZE(LtePhyPdschDemapperConfigFmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_lte_ll1_pdsch_demapper_config(b, offset, length, result);
+        offset += _decode_lte_phy_pdsch_demapper_config(b, offset, length, result);
         break;
 
-    case LTE_ML1_Connected_Mode_LTE_Intra_Freq_Meas_Results:
-        offset += _decode_by_fmt(LteMl1CmlifmrFmt,
-                                    ARRAY_SIZE(LteMl1CmlifmrFmt, Fmt),
+    case LTE_PHY_Connected_Mode_LTE_Intra_Freq_Meas_Results:
+        offset += _decode_by_fmt(LtePhyCmlifmrFmt,
+                                    ARRAY_SIZE(LtePhyCmlifmrFmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_lte_ml1_cmlifmr(b, offset, length, result);
+        offset += _decode_lte_phy_cmlifmr(b, offset, length, result);
         break;
 
-    case LTE_ML1_Serving_Cell_Measurement_Result:
-        offset += _decode_by_fmt(LteMl1SubpktFmt,
-                                    ARRAY_SIZE(LteMl1SubpktFmt, Fmt),
+    case LTE_PHY_Serving_Cell_Measurement_Result:
+        offset += _decode_by_fmt(LtePhySubpktFmt,
+                                    ARRAY_SIZE(LtePhySubpktFmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_lte_ml1_subpkt(b, offset, length, result);
+        offset += _decode_lte_phy_subpkt(b, offset, length, result);
         break;
 
-    case LTE_ML1_IRAT_MDB:
-        offset += _decode_by_fmt(LteMl1IratFmt,
-                                    ARRAY_SIZE(LteMl1IratFmt, Fmt),
+    case LTE_PHY_IRAT_MDB:
+        offset += _decode_by_fmt(LtePhyIratFmt,
+                                    ARRAY_SIZE(LtePhyIratFmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_lte_ml1_irat_subpkt(b, offset, length, result);
+        offset += _decode_lte_phy_irat_subpkt(b, offset, length, result);
         break;
 
-    case LTE_ML1_CDMA_MEAS:
-        //It shares similar packet format as LTE_ML1_IRAT_MDB
-        offset += _decode_by_fmt(LteMl1IratFmt,
-                                    ARRAY_SIZE(LteMl1IratFmt, Fmt),
+    case LTE_PHY_CDMA_MEAS:
+        //It shares similar packet format as LTE_PHY_IRAT_MDB
+        offset += _decode_by_fmt(LtePhyIratFmt,
+                                    ARRAY_SIZE(LtePhyIratFmt, Fmt),
                                     b, offset, length, result);
-        offset += _decode_lte_ml1_irat_cdma_subpkt(b, offset, length, result);
+        offset += _decode_lte_phy_irat_cdma_subpkt(b, offset, length, result);
         break;
 
     case LTE_PDCP_DL_SRB_Integrity_Data_PDU:
@@ -4532,68 +5386,134 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                 b, offset, length, result);
         offset += _decode_lte_pdsch_stat_indication_payload(b, offset, length, result);
         break;
-    case LTE_ML1_System_Scan_Results:
-        offset += _decode_by_fmt(LteMl1SystemScanResults_Fmt,
-                ARRAY_SIZE(LteMl1SystemScanResults_Fmt, Fmt),
+    case LTE_PHY_System_Scan_Results:
+        offset += _decode_by_fmt(LtePhySystemScanResults_Fmt,
+                ARRAY_SIZE(LtePhySystemScanResults_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_system_scan_results_payload(b, offset, length, result);
+        offset += _decode_lte_phy_system_scan_results_payload(b, offset, length, result);
         break;
-    case LTE_ML1_BPLMN_Cell_Request:
-        offset += _decode_by_fmt(LteMl1BplmnCellRequest_Fmt,
-                ARRAY_SIZE(LteMl1BplmnCellRequest_Fmt, Fmt),
+    case LTE_PHY_BPLMN_Cell_Request:
+        offset += _decode_by_fmt(LtePhyBplmnCellRequest_Fmt,
+                ARRAY_SIZE(LtePhyBplmnCellRequest_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_bplmn_cell_request_payload(b, offset, length, result);
+        offset += _decode_lte_phy_bplmn_cell_request_payload(b, offset, length, result);
         break;
-    case LTE_ML1_BPLMN_Cell_Confirm:
-        offset += _decode_by_fmt(LteMl1BplmnCellConfirm_Fmt,
-                ARRAY_SIZE(LteMl1BplmnCellConfirm_Fmt, Fmt),
+    case LTE_PHY_BPLMN_Cell_Confirm:
+        offset += _decode_by_fmt(LtePhyBplmnCellConfirm_Fmt,
+                ARRAY_SIZE(LtePhyBplmnCellConfirm_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_bplmn_cell_confirm_payload(b, offset, length, result);
+        offset += _decode_lte_phy_bplmn_cell_confirm_payload(b, offset, length, result);
         break;
-    case LTE_LL1_Serving_Cell_COM_Loop:
-        offset += _decode_by_fmt(LteLl1ServingCellComLoop_Fmt,
-                ARRAY_SIZE(LteLl1ServingCellComLoop_Fmt, Fmt),
+    case LTE_PHY_Serving_Cell_COM_Loop:
+        offset += _decode_by_fmt(LtePhyServingCellComLoop_Fmt,
+                ARRAY_SIZE(LtePhyServingCellComLoop_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ll1_serving_cell_com_loop_payload(b, offset, length, result);
+        offset += _decode_lte_phy_serving_cell_com_loop_payload(b, offset, length, result);
         break;
-    case LTE_LL1_PDCCH_Decoding_Result:
-        offset += _decode_by_fmt(LteLl1PdcchDecodingResult_Fmt,
-                ARRAY_SIZE(LteLl1PdcchDecodingResult_Fmt, Fmt),
+    case LTE_PHY_PDCCH_Decoding_Result:
+        offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Fmt,
+                ARRAY_SIZE(LtePhyPdcchDecodingResult_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ll1_pdcch_decoding_result_payload(b, offset, length, result);
+        offset += _decode_lte_phy_pdcch_decoding_result_payload(b, offset, length, result);
         break;
-    case LTE_LL1_PDSCH_Decoding_Result:
-        offset += _decode_by_fmt(LteLl1PdschDecodingResult_Fmt,
-                ARRAY_SIZE(LteLl1PdschDecodingResult_Fmt, Fmt),
+    case LTE_PHY_PDSCH_Decoding_Result:
+        offset += _decode_by_fmt(LtePhyPdschDecodingResult_Fmt,
+                ARRAY_SIZE(LtePhyPdschDecodingResult_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ll1_pdsch_decoding_result_payload(b, offset, length, result);
+        offset += _decode_lte_phy_pdsch_decoding_result_payload(b, offset, length, result);
         break;
-    case LTE_LL1_PUSCH_Tx_Report:
-        offset += _decode_by_fmt(LteLl1PuschTxReport_Fmt,
-                ARRAY_SIZE(LteLl1PuschTxReport_Fmt, Fmt),
+    case LTE_PHY_PUSCH_Tx_Report:
+        offset += _decode_by_fmt(LtePhyPuschTxReport_Fmt,
+                ARRAY_SIZE(LtePhyPuschTxReport_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ll1_pusch_tx_report_payload(b, offset, length, result);
+        offset += _decode_lte_phy_pusch_tx_report_payload(b, offset, length, result);
         break;
-    case LTE_ML1_RLM_Report:
-        offset += _decode_by_fmt(LteMl1RlmReport_Fmt,
-                ARRAY_SIZE(LteMl1RlmReport_Fmt, Fmt),
+    case LTE_PHY_RLM_Report:
+        offset += _decode_by_fmt(LtePhyRlmReport_Fmt,
+                ARRAY_SIZE(LtePhyRlmReport_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_rlm_report_payload(b, offset, length, result);
+        offset += _decode_lte_phy_rlm_report_payload(b, offset, length, result);
         break;
-    case LTE_LL1_PUSCH_CSF:
-        offset += _decode_by_fmt(LteLl1PuschCsf_Fmt,
-                ARRAY_SIZE(LteLl1PuschCsf_Fmt, Fmt),
+    case LTE_PHY_PUSCH_CSF:
+        offset += _decode_by_fmt(LtePhyPuschCsf_Fmt,
+                ARRAY_SIZE(LtePhyPuschCsf_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ll1_pusch_csf_payload(b, offset, length, result);
+        offset += _decode_lte_phy_pusch_csf_payload(b, offset, length, result);
         break;
-    case LTE_ML1_CDRX_Events_Info:
-        offset += _decode_by_fmt(LteMl1CdrxEventsInfo_Fmt,
-                ARRAY_SIZE(LteMl1CdrxEventsInfo_Fmt, Fmt),
+    case LTE_PHY_CDRX_Events_Info:
+        offset += _decode_by_fmt(LtePhyCdrxEventsInfo_Fmt,
+                ARRAY_SIZE(LtePhyCdrxEventsInfo_Fmt, Fmt),
                 b, offset, length, result);
-        offset += _decode_lte_ml1_cdrx_events_info_payload(b, offset, length, result);
+        offset += _decode_lte_phy_cdrx_events_info_payload(b, offset, length, result);
         break;
     case WCDMA_RRC_States:
         offset += _decode_wcdma_rrc_states_payload(b, offset, length, result);
+        break;
+    case LTE_PHY_Idle_Neighbor_Cell_Meas:
+        offset += _decode_by_fmt(LtePhyIncm_Fmt,
+                ARRAY_SIZE(LtePhyIncm_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_phy_idle_neighbor_cell_meas_payload(b, offset, length, result);
+        break;
+    case WCDMA_Search_Cell_Reselection_Rank:
+        offset += _decode_by_fmt(WcdmaScrr_Fmt,
+                ARRAY_SIZE(WcdmaScrr_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_wcdma_scrr_payload(b, offset, length, result);
+        break;
+    case GSM_RR_Cell_Information:
+        offset += _decode_by_fmt(GsmRrCellInfo_Fmt,
+                ARRAY_SIZE(GsmRrCellInfo_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_gsm_rci_payload(b, offset, length, result);
+        break;
+    case GSM_Surround_Cell_BA_List:
+        offset += _decode_by_fmt(GsmScbl_Fmt,
+                ARRAY_SIZE(GsmScbl_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_gsm_scbl_payload(b, offset, length, result);
+        break;
+    case GSM_RR_Cell_Reselection_Meas:
+        offset += _decode_by_fmt(GsmRrCellResMeas_Fmt,
+                ARRAY_SIZE(GsmRrCellResMeas_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_gsm_rcrm_payload(b, offset, length, result);
+        break;
+    case Srch_TNG_1x_Searcher_Dump:
+        offset += _decode_by_fmt(SrchTng1xsd_Fmt,
+                ARRAY_SIZE(SrchTng1xsd_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_srch_tng_1xsd_payload(b, offset, length, result);
+        break;
+    case _1xEVDO_Multi_Carrier_Pilot_Sets:
+        offset += _decode_by_fmt(_1xEvdoMcps_Fmt,
+                ARRAY_SIZE(_1xEvdoMcps_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_1xevdo_mcps_payload(b, offset, length, result);
+        break;
+    case LTE_PHY_PUCCH_Tx_Report:
+        offset += _decode_by_fmt(LtePhyPucchTxReport_Fmt,
+                ARRAY_SIZE(LtePhyPucchTxReport_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_phy_pucch_tx_report_payload(b, offset, length, result);
+        break;
+    case LTE_PDCP_DL_Cipher_Data_PDU:
+        offset += _decode_by_fmt(LtePdcpDlCipherDataPdu_Fmt,
+                ARRAY_SIZE(LtePdcpDlCipherDataPdu_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_pdcp_dl_cipher_data_pdu_payload(b, offset, length, result);
+        break;
+    case LTE_PDCP_UL_Cipher_Data_PDU:
+        offset += _decode_by_fmt(LtePdcpUlCipherDataPdu_Fmt,
+                ARRAY_SIZE(LtePdcpUlCipherDataPdu_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_pdcp_ul_cipher_data_pdu_payload(b, offset, length, result);
+        break;
+    case LTE_PHY_PUCCH_CSF:
+        offset += _decode_by_fmt(LtePhyPucchCsf_Fmt,
+                ARRAY_SIZE(LtePhyPucchCsf_Fmt, Fmt),
+                b, offset, length, result);
+        offset += _decode_lte_phy_pucch_csf_payload(b, offset, length, result);
         break;
     default:
         break;

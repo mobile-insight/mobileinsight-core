@@ -1,21 +1,21 @@
 /*
- * LTE ML1 RLM Report
+ * LTE PHY RLM Report
  */
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt LteMl1RlmReport_Fmt [] = {
+const Fmt LtePhyRlmReport_Fmt [] = {
     {UINT, "Version", 1},
 };
 
-const Fmt LteMl1RlmReport_Payload_v1 [] = {
+const Fmt LtePhyRlmReport_Payload_v1 [] = {
     {SKIP, NULL, 2},
     {UINT, "Number of Records", 1},
 };
 
-const Fmt LteMl1RlmReport_Record_v1 [] = {
+const Fmt LtePhyRlmReport_Record_v1 [] = {
     {UINT, "System Frame Number", 2},   // 10 bits
     {PLACEHOLDER, "Sub-frame Number", 0},   // 4 bits
     {UINT, "Out of Sync BLER (%)", 2},
@@ -26,7 +26,7 @@ const Fmt LteMl1RlmReport_Record_v1 [] = {
     {SKIP, NULL, 3},
 };
 
-static int _decode_lte_ml1_rlm_report_payload (const char *b,
+static int _decode_lte_phy_rlm_report_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
@@ -38,16 +38,16 @@ static int _decode_lte_ml1_rlm_report_payload (const char *b,
     switch (pkt_ver) {
     case 1:
         {
-            offset += _decode_by_fmt(LteMl1RlmReport_Payload_v1,
-                    ARRAY_SIZE(LteMl1RlmReport_Payload_v1, Fmt),
+            offset += _decode_by_fmt(LtePhyRlmReport_Payload_v1,
+                    ARRAY_SIZE(LtePhyRlmReport_Payload_v1, Fmt),
                     b, offset, length, result);
             int num_record = _search_result_int(result, "Number of Records");
 
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LteMl1RlmReport_Record_v1,
-                        ARRAY_SIZE(LteMl1RlmReport_Record_v1, Fmt),
+                offset += _decode_by_fmt(LtePhyRlmReport_Record_v1,
+                        ARRAY_SIZE(LtePhyRlmReport_Record_v1, Fmt),
                         b, offset, length, result_record_item);
                 temp = _search_result_int(result_record_item, "System Frame Number");
                 int iSFN = temp & 1023;
@@ -98,7 +98,7 @@ static int _decode_lte_ml1_rlm_report_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE ML1 RLM Report version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY RLM Report version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
