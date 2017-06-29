@@ -33,3 +33,5 @@ sudo rm /usr/lib/libwsutil.dylib
 
 # Clean up old MobileInsight-2.x installed binary
 sudo rm -rf $((echo "import sys" ; echo "print sys.exec_prefix+'/mobile_insight'") | python)
+
+echo "Uninstallation finished."

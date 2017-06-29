@@ -12,6 +12,8 @@ Using MobileInsight, users can declare a monitor to track the network status and
 
 ## Installation
 
+Currently MobileInsight supports installation on macOS and Ubuntu/Debian systems. To install it on Windows, please use our all-in-one virtual machine from [`mobileinsight-dev`](https://github.com/mobile-insight/mobileinsight-dev).
+
 First install latest [Python 2.7](https://www.python.org/), then download MobileInsight from the [release page](https://github.com/mobile-insight/mobileinsight-core/releases):
 
     tar -zxvf mobileinsight-3.0.tar.gz
@@ -19,9 +21,8 @@ First install latest [Python 2.7](https://www.python.org/), then download Mobile
 
 Next, run installation script (but __do not__ execute with root priviledge!):
 
-    sh install-macos.sh (macOS)
-    sh install-ubuntu.sh (Ubuntu)
-    python setup.py install (Windows)
+    ./install-macos.sh (macOS)
+    ./install-ubuntu.sh (Ubuntu)
 
 The install script will install MobileInsight package to your `PYTHONPATH`, install MobileInsight GUI to `/usr/local/bin/mi-gui`, and run an offline analysis example at the end.
 
@@ -39,8 +40,8 @@ The GUI of MobileInsight requires `matplotlib` and `wxPython`. `matplotlib` can 
 
 `wxPython` can be installed using Homebrew (macOS) or apt-get (Ubuntu).
 
-    brew install wxpython
-    apt-get install python-wxgtk3.0
+    brew install wxpython (macOS)
+    apt-get install python-wxgtk3.0 (Ubuntu)
 
 
 ## Upgrade to New Version
@@ -57,5 +58,6 @@ We love pull requests and discussing novel ideas. You can open issues here to re
 The following Slack group is used exclusively for discussions about developing the MobileInsight and its sister projects:
 
 + Dev Slack Group: https://mobileinsight-dev.slack.com
++ Email: mobileinsight.team@gmail.com
 
 For other advanced topics, please refer to the wiki and the [MobileInsight website](http://mobileinsight.net).

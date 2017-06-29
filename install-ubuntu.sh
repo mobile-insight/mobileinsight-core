@@ -6,10 +6,10 @@
 # Date    : 2017-6-24
 # Version : 2.0
 
-sh uninstall.sh
+./uninstall.sh
 
-set -e
-set -u
+# set -e
+# set -u
 
 # Wireshark version to install
 ws_ver=2.0.13
@@ -137,10 +137,21 @@ echo ""
 echo "Testing the offline analysis example."
 cd ${MOBILEINSIGHT_PATH}/examples
 python offline-analysis-example.py
-echo ""
-echo "Successfully ran the offline analysis example!"
+if [[ $? != 0 ]] ; then
+    echo ""
+    echo "Successfully ran the offline analysis example!"
+else
+    echo "Failed to run offline analysis example!"
+fi
 
 echo "Testing MobileInsight GUI (you need to be in a graphic session)..."
 mi-gui
+if [[ $? != 0 ]] ; then
+    echo ""
+    echo "Successfully ran MobileInsight GUI!"
+    echo "The installation of mobileinsight-core is finished!"
+else
+    echo "Failed to run MobileInsight GUI!"
+    echo "The installation of mobileinsight-core failed! Please report bugs to us at https://github.com/mobile-insight/mobileinsight-core"
+fi
 
-echo "The installation of mobileinsight-core is finished!"
