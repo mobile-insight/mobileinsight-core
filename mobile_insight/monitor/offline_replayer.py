@@ -55,16 +55,15 @@ class OfflineReplayer(Monitor):
 
         if self.is_android:
             libs_path = self.__get_libs_path()
-            
+
             prefs = {
                 "ws_dissect_executable_path": os.path.join(
                     libs_path,
                     "android_pie_ws_dissector"),
                 "libwireshark_path": libs_path}
+            print prefs
         else:
             prefs = {}
-
-        print prefs
 
         DMLogPacket.init(prefs)
 
@@ -192,7 +191,7 @@ class OfflineReplayer(Monitor):
                         try:
                             # packet = DMLogPacket(decoded)
                             packet = DMLogPacket(decoded[0])
-                            print "DMLogPacket decoded[0]:",str(decoded[0])
+                            # print "DMLogPacket decoded[0]:",str(decoded[0])
                             d = packet.decode()
                             # print d["type_id"], d["timestamp"]
                             # xml = packet.decode_xml()

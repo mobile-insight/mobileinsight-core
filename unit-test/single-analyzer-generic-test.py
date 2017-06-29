@@ -52,10 +52,10 @@ class SingleAnalyzerTest(unittest.TestCase):
 
 if __name__ == "__main__":
 
-    
+
     if len(sys.argv) > 1:
         #Test with a specified log
-    
+
         operator_logs={
             "external":sys.argv.pop()
 
@@ -64,14 +64,14 @@ if __name__ == "__main__":
         #Test with built-in logs
 
         operator_logs={
-                   "att" : "./test-logs/ATT.mi2log",
+                   "att" : "./test-logs/att.mi2log",
                    "tmobile" : "./test-logs/tmobile.mi2log",
                    "verizon" : "./test-logs/verizon.mi2log",
                    "sprint" : "./test-logs/sprint.mi2log",
-                   "cmcc" : "./test-logs/CMCC.mi2log",
-                   "att-iphone" : "./test-logs/ATT-iphone.mi2log",
+                   "cmcc" : "./test-logs/cmcc.mi2log",
+                   "att-iphone" : "./test-logs/att-iphone.mi2log",
                    }
-        
+
     analyzers = mobile_insight.analyzer.__all__
     forbidden_list=["Analyzer","LogAnalyzer","ProfileHierarchy","Profile","StateMachine","HandoffLoopAnalyzer"]
     analyzers = [x for x in analyzers if x not in forbidden_list]
