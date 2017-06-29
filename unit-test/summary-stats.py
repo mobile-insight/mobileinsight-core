@@ -71,11 +71,11 @@ if __name__ == "__main__":
         #Test with built-in logs
 
         operator_logs={
-                   "att" : "./test-logs/ATT.mi2log",
+                   "att" : "./test-logs/att.mi2log",
                    "tmobile" : "./test-logs/tmobile.mi2log",
                    "sprint" : "./test-logs/sprint.mi2log",
-                   "cmcc" : "./test-logs/CMCC.mi2log",
-                   "att-iphone" : "./test-logs/ATT-iphone.mi2log",
+                   "cmcc" : "./test-logs/cmcc.mi2log",
+                   "att-iphone" : "./test-logs/att-iphone.mi2log",
                    }
 
     analyzers = ["StatsAnalyzer"]

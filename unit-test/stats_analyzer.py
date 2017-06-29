@@ -445,7 +445,7 @@ class StatsAnalyzer(Analyzer):
         # source.enable_log("LTE_PUCCH_Power_Control")
         # source.enable_log("LTE_PUSCH_Power_Control")
         # source.enable_log("LTE_PDCCH_PHICH_Indication_Report")
-        source.enable_log("LTE_PDSCH_Stat_Indication")
+        source.enable_log("LTE_PHY_PDSCH_Stat_Indication")
         # source.enable_log("LTE_PHY_System_Scan_Results")
         # source.enable_log("LTE_PHY_BPLMN_Cell_Request")
         # source.enable_log("LTE_PHY_BPLMN_Cell_Confirm")
