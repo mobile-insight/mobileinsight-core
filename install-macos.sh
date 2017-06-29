@@ -5,6 +5,7 @@
 # Date    : 2017-06-24
 # Version : 2.0
 
+echo "Upgrading MobileInsight..."
 ./uninstall.sh
 
 # set -e
@@ -29,6 +30,18 @@ else
     brew update
 fi
 
+echo "Consulting Homebrew doctor for potential issues..."
+echo -e "Output from Homebrew doctor:\n"
+brew doctor
+if [[ $? != 0 ]] ; then
+    echo "Homebrew reported that your environment has some issues! You must fix them before proceeding."
+    echo "Exiting now. MobileInsight installation failed with status 2."
+    exit 2
+else
+    echo "All clear, updating Homebrew..."
+    brew update
+fi
+
 # Check if Wireshark is installed
 wireshark=$(brew ls --versions wireshark)
 if [[ $? != 0 ]]; then
@@ -44,6 +57,7 @@ elif [[ $wireshark == *${ws_ver}* ]]; then
 else
     echo "You have a Wireshark other than current version installed."
     echo "Installing Wireshark version ${ws_ver}..."
+    brew remove wireshark
     brew install ./wireshark.rb
     brew link --overwrite wireshark
 fi
@@ -81,11 +95,21 @@ else
 fi
 
 echo "Installing dependencies for MobileInsight GUI..."
+brew ls --versions python
+if [[ $? != 0 ]] ; then
+    echo "Installing Python via Homebrew..."
+    brew install python
+else
+    echo "Python is installed on your mac by Homebrew"
+fi
+
+echo "Installing wxPython..."
+brew install wxpython
+
 which -s pip
 if [[ $? != 0 ]] ; then
     echo "It appears that pip is not installed on your computer, installing..."
     brew install python
-    export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/site-packages
 fi
 if python -m pip install pyserial matplotlib > /dev/null; then
     echo "pyserial and matplotlib are successfully installed!"
@@ -93,9 +117,6 @@ else
     echo "Installing pyserial and matplotlib using sudo, your password may be required..."
     sudo python -m pip install pyserial matplotlib
 fi
-
-echo "Installing wxPython..."
-brew install wxpython
 
 echo "Installing mobileinsight-core..."
 cd ${MOBILEINSIGHT_PATH}
@@ -131,7 +152,4 @@ mi-gui
 if [[ $? != 0 ]] ; then
     echo -e "Successfully ran MobileInsight GUI!\n"
     echo -e "The installation of mobileinsight-core is finished!"
-else
-    echo -e "Failed to run MobileInsight GUI!\n"
-    echo -e "The installation of mobileinsight-core failed! Please report bugs to us at https://github.com/mobile-insight/mobileinsight-core"
 fi

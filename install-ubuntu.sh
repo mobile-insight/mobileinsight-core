@@ -150,8 +150,5 @@ if [[ $? != 0 ]] ; then
     echo ""
     echo "Successfully ran MobileInsight GUI!"
     echo "The installation of mobileinsight-core is finished!"
-else
-    echo "Failed to run MobileInsight GUI!"
-    echo "The installation of mobileinsight-core failed! Please report bugs to us at https://github.com/mobile-insight/mobileinsight-core"
 fi
 
