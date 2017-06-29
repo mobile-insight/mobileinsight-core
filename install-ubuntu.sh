@@ -81,6 +81,10 @@ if [ "$FindWiresharkLibrary" = false ] ; then
     sudo make install
 fi
 
+echo "Reload ldconfig cache, your password may be required..."
+sudo rm /etc/ld.so.cache
+sudo ldconfig
+
 echo "Compiling Wireshark dissector for mobileinsight..."
 # Compile ws_dissector
 cd ${MOBILEINSIGHT_PATH}/ws_dissector
