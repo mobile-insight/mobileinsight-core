@@ -48,3 +48,5 @@ contributions, just a bit more lax. We don't ask you to go through all the
 hassle just to correct a single typo. For more complex contributions, please
 follow the suggested workflow.
 
+
+__Acknowledgment__: This contributing guide is mainly based on [Kivy](https://github.com/kivy/kivy)'s [contributing guide](https://github.com/kivy/kivy/blob/master/.github/CONTRIBUTING.md).
