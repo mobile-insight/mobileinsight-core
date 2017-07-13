@@ -13,6 +13,7 @@ try:
 except ImportError: 
     import xml.etree.ElementTree as ET
 from analyzer import *
+from state_machine import *
 import timeit
 
 from protocol_analyzer import *
@@ -64,6 +65,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         #####use EPS bearer ID or EPS bearer state????
         self.__cur_eps_id = None
         # self.__esm_status = EsmStatus()
+        self.__esm_state_machine = self.create_esm_state_machine()
 
     def create_profile_hierarchy(self):
         '''
@@ -87,6 +89,32 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         source.enable_log("LTE_NAS_EMM_OTA_Outgoing_Packet")
         source.enable_log("LTE_NAS_EMM_State")
         source.enable_log("LTE_NAS_ESM_State")
+
+    def create_esm_state_machine(self):
+        """
+        Declare a ESM state machine
+
+        returns: a StateMachine
+        """
+
+        def con_to_discon(msg):
+            if int(msg.data["EPS bearer state"]) - 1 == 0:
+                return True
+
+        def discon_to_con(msg):
+            if int(msg.data["EPS bearer state"]) - 1 == 1:
+                return True
+
+        def init_state(msg):
+            if int(msg.data["EPS bearer state"]) - 1 == 0:
+                return 'ESM_DISCON'
+            elif int(msg.data["EPS bearer state"]) - 1 == 1:
+                return 'ESM_CON'
+
+        state_machine={'ESM_CON': {'ESM_DISCON': con_to_discon},
+                       'ESM_DISCON': {'ESM_CON': discon_to_con}}
+
+        return StateMachine(state_machine, init_state)
 
     def __nas_filter(self,msg):
         """
@@ -132,6 +160,8 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             log_item_dict = dict(log_item)
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_esm_state(raw_msg)
+            if self.__esm_state_machine.update_state(raw_msg):
+                self.log_info("ESM state: " + self.__esm_state_machine.get_current_state())
 
             self.send(msg)
 

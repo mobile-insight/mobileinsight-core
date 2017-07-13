@@ -3,7 +3,7 @@
 """
 A WCDMA (3G) RRC analyzer.
 
-Author: Yuanjie Li
+Author: Yuanjie Li, Zhehui Zhang
 """
 
 try: 
@@ -11,6 +11,7 @@ try:
 except ImportError: 
     import xml.etree.ElementTree as ET
 from analyzer import *
+from state_machine import *
 from protocol_analyzer import *
 import timeit
 
@@ -37,6 +38,8 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         self.__status=WcdmaRrcStatus()    # current cell status
         self.__history={}    # cell history: timestamp -> WcdmaRrcStatus()
         self.__config={}    # cell_id -> WcdmaRrcConfig()
+        self.state_machine = self.create_state_machine()
+        print type(self.state_machine)
 
         #FIXME: change the timestamp
         self.__history[0]=self.__config
@@ -58,6 +61,56 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         source.enable_log("WCDMA_RRC_OTA_Packet")
         source.enable_log("WCDMA_RRC_Serv_Cell_Info")
         source.enable_log("WCDMA_RRC_States")
+
+    def create_state_machine(self):
+        """
+        Declare a RRC state machine
+
+        returns: a StateMachine
+        """
+
+        def to_cell_fach(msg):
+            if msg.type_id == "WCDMA_RRC_States" and str(msg.data['RRC State']) == 'CELL_FACH':
+                return True
+
+        def to_cell_dch(msg):
+            if msg.type_id == "WCDMA_RRC_States" and str(msg.data['RRC State']) == 'CELL_DCH':
+                return True
+
+        def to_ura_pch(msg):
+            if msg.type_id == "WCDMA_RRC_States" and str(msg.data['RRC State']) == 'URA_PCH':
+                return True
+
+        def to_cell_pch(msg):
+            if msg.type_id == "WCDMA_RRC_States" and str(msg.data['RRC State']) == 'CELL_PCH':
+                return True
+
+        def to_idle(msg):
+            if msg.type_id == "WCDMA_RRC_States" and str(msg.data['RRC State']) == 'DISCONNECTED':
+                return True
+
+        def init_state(msg):
+            if msg.type_id == "WCDMA_RRC_States":
+                state = 'IDLE' if str(msg.data['RRC State']) == 'DISCONNECTED' else str(msg.data['RRC State'])
+                return state
+
+        # def idle_to_dch(msg):
+        #     for field in msg.data.iter('field'):
+        #         if field.get('name') == "rrc.rrcConnectionSetup":
+        #             return True
+        #
+        # def dch_to_idle(msg):
+        #     for field in msg.data.iter('field'):
+        #         if field.get('name') == "rrc.rrcConnectionRelease":
+        #             return True
+
+        rrc_state_machine={'URA_PCH': {'CELL_FACH': to_cell_fach, 'CELL_DCH': to_cell_dch},
+                       'CELL_PCH': {'CELL_FACH': to_cell_fach},
+                       'CELL_DCH': {'URA_PCH': to_ura_pch, 'CELL_PCH': to_cell_pch, 'CELL_FACH': to_cell_fach, 'IDLE': to_idle},
+                       'CELL_FACH': {'URA_PCH': to_ura_pch, 'CELL_PCH': to_cell_pch, 'CELL_DCH': to_cell_dch, 'IDLE': to_idle},
+                       'IDLE': {'CELL_DCH': to_cell_dch, 'CELL_FACH': to_cell_fach}}
+
+        return StateMachine(rrc_state_machine, init_state)
 
     def __rrc_filter(self,msg):
         
@@ -83,6 +136,9 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
             self.__callback_rrc_state(log_item_dict)
+            raw_msg = Event(msg.timestamp, msg.type_id, log_item_dict)
+            if self.state_machine.update_state(raw_msg):
+                self.log_info("WCDMA state: " + self.state_machine.get_current_state())
 
         elif msg.type_id == "WCDMA_RRC_OTA_Packet":
 
@@ -449,27 +505,6 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
 
         return profile_hierarchy
 
-    def create_state_machine(self):
-        """
-        Declare a RRC state machine
-
-        returns: a StateMachnie
-        """
-        
-        def idle_to_dch(msg):
-            for field in msg.data.iter('field'):
-                if field.get('name') == "rrc.rrcConnectionSetup":
-                    return True
-
-        def dch_to_idle(msg):
-            for field in msg.data.iter('field'):
-                if field.get('name') == "rrc.rrcConnectionRelease":
-                    return True
-
-        state_machine={'RRC_IDLE':{'RRC_DCH':idle_to_dch},
-                       'RRC_DCH':{'RRC_IDLE':dch_to_idle}}  
-
-        return state_machine 
 
     def init_protocol_state(self, msg):
         """

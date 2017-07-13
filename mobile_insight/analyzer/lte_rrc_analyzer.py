@@ -272,8 +272,11 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             self.__callback_serv_cell(raw_msg)
         elif msg.type_id == "LTE_RRC_CDRX_Events_Info":
             for item in log_item_dict['Records']:
-                if self.state_machine.update_state(Event(log_item_dict['timestamp'], msg.type_id, item)):
+                # print item
+                raw_msg = Event(' '.join(map(str, [log_item_dict['timestamp'], item['SFN'], item['Sub-FN']])), msg.type_id, item)
+                if self.state_machine.update_state(raw_msg):
                     self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
+                    # self.log_info("rrc state history: " + str(self.state_machine.state_history))
             self.__callback_drx(log_item_dict)
 
 

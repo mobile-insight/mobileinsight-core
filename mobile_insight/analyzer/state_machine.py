@@ -5,7 +5,7 @@ State machine abstraction
 
 Abstract protocol FSMs, and operationnal policies (algorithms)
 
-Author: Yuanjie Li
+Author: Yuanjie Li, Zhehui Zhang
 """
 
 __all__ = ["StateMachine"]
@@ -41,7 +41,8 @@ class StateMachine(object):
         self.state_machine = state_machine
         self.init_callback = init_callback
         self.cur_state = None
-        self.state_history = {}  # history of state transisions. [timestamp, sn, sfn, state]
+        self.state_history = []  # history of state transisions. (timestamp, state)
+        # TODO: add property for states
 
     def __init_state(self, event):
         '''
@@ -56,7 +57,7 @@ class StateMachine(object):
                     and init_state in self.state_machine.keys():
                 # Always check if the new state is declared
                 self.cur_state = init_state
-                self.state_history[str(event.timestamp)] = init_state
+                self.state_history.append((str(event.timestamp), init_state))
 
     def update_state(self, event):
         '''
@@ -86,7 +87,7 @@ class StateMachine(object):
                 return False
             elif len(tx_condition) == 1:
                 self.cur_state = tx_condition[0]
-                self.state_history[event.timestamp] = tx_condition[0]
+                self.state_history.append((str(event.timestamp), tx_condition[0]))
                 return True
             return False
 
