@@ -56,7 +56,7 @@ class StateMachine(object):
                     and init_state in self.state_machine.keys():
                 # Always check if the new state is declared
                 self.cur_state = init_state
-                self.state_history[event.timestamp] = init_state
+                self.state_history[str(event.timestamp)] = init_state
 
     def update_state(self, event):
         '''

@@ -41,6 +41,8 @@ docs/_build
 # Example files
 *.db
 examples/test.txt
+examples/apps/*
+examples/demo/*
 
 # Wireshark sources
 wireshark-2.*/

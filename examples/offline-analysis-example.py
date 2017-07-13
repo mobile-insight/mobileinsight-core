@@ -16,6 +16,7 @@ if __name__ == "__main__":
     # Initialize a 3G/4G monitor
     src = OfflineReplayer()
     src.set_input_path("./offline_log_example.mi2log")
+    src.set_input_path("./demo/RRCStateMachine/LTE_RRC_state_sample.mi2log")
 
     logger = MsgLogger()
     logger.set_decode_format(MsgLogger.XML)
