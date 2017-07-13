@@ -41,7 +41,7 @@ class StateMachine(object):
         self.state_machine = state_machine
         self.init_callback = init_callback
         self.cur_state = None
-        self.state_history = {}  # history of state transisions. timestamp-->state
+        self.state_history = {}  # history of state transisions. [timestamp, sn, sfn, state]
 
     def __init_state(self, event):
         '''
@@ -71,6 +71,7 @@ class StateMachine(object):
         if not self.cur_state:
             # state not initialized yet
             self.__init_state(event)
+            return True
         else:
             # assert: state always declared in state_machine (checked by
             # __init_state)
@@ -86,7 +87,8 @@ class StateMachine(object):
             elif len(tx_condition) == 1:
                 self.cur_state = tx_condition[0]
                 self.state_history[event.timestamp] = tx_condition[0]
-            return True
+                return True
+            return False
 
     def get_current_state(self):
         '''

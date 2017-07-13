@@ -141,18 +141,48 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         returns: a StateMachine
         """
 
-        def idle_to_conn(msg):
-            for field in msg.data.iter('field'):
-                if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
+        def idle_to_crx(msg):
+            if msg.type_id == "LTE_RRC_OTA_Packet":
+                for field in msg.data.iter('field'):
+                    if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
+                        return True
+
+        def crx_to_sdrx(msg):
+            if msg.type_id == "LTE_RRC_CDRX_Events_Info":
+                if msg.data['CDRX Event'] == "SHORT_CYCLE_START":
                     return True
 
-        def conn_to_idle(msg):
-            for field in msg.data.iter('field'):
-                if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
+        def crx_to_ldrx(msg):
+            if msg.type_id == "LTE_RRC_CDRX_Events_Info":
+                if msg.data['CDRX Event'] == "LONG_CYCLE_START":
                     return True
 
-        state_machine={'RRC_IDLE':{'RRC_CONNECTED':idle_to_conn},
-                       'RRC_CONNECTED':{'RRC_IDLE':conn_to_idle}}
+        def crx_to_idle(msg):
+            if msg.type_id == "LTE_RRC_OTA_Packet":
+                for field in msg.data.iter('field'):
+                    if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
+                        return True
+
+        def sdrx_to_ldrx(msg):
+            if msg.type_id == "LTE_RRC_CDRX_Events_Info":
+                if msg.data['CDRX Event'] == "LONG_CYCLE_START":
+                    return True
+
+        def sdrx_to_crx(msg):
+            if msg.type_id == "LTE_RRC_CDRX_Events_Info":
+                if msg.data['CDRX Event'] == "INACTIVITY_TIMER_START" or msg.data['CDRX Event'] == "INACTIVITY_TIMER_END":
+                    return True
+
+        def ldrx_to_crx(msg):
+            if msg.type_id == "LTE_RRC_CDRX_Events_Info":
+                if msg.data['CDRX Event'] == "INACTIVITY_TIMER_START" or msg.data['CDRX Event'] == "INACTIVITY_TIMER_END" :
+                    return True
+
+
+        state_machine={'RRC_IDLE': {'RRC_CRX': idle_to_crx},
+                       'RRC_CRX': {'RRC_SDRX': crx_to_sdrx, 'RRC_LDRX': crx_to_ldrx, 'RRC_IDLE': crx_to_idle},
+                       'RRC_SDRX': {'RRC_LDRX': sdrx_to_ldrx, 'RRC_CRX': sdrx_to_crx},
+                       'RRC_LDRX': {'RRC_CRX': ldrx_to_crx}}
 
         return StateMachine(state_machine, self.init_protocol_state)
 
@@ -162,12 +192,20 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
         :returns: current RRC state, or None if not determinable 
         """
-        for field in msg.data.iter('field'):
-            if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element" \
-                    or field.get('name') == "lte-rrc.rrcConnectionReconfiguration_element":
-                return 'RRC_CONNECTED'
-            elif field.get('name') == "lte-rrc.rrcConnectionRelease_element":
-                return 'RRC_IDLE'
+        if msg.type_id == "LTE_RRC_OTA_Packet":
+            for field in msg.data.iter('field'):
+                if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element" \
+                        or field.get('name') == "lte-rrc.rrcConnectionReconfiguration_element":
+                    return 'RRC_CRX'
+                elif field.get('name') == "lte-rrc.rrcConnectionRelease_element":
+                    return 'RRC_IDLE'
+        elif msg.type_id == "LTE_RRC_CDRX_Events_Info":
+            if msg.data['CDRX Event'] == "INACTIVITY_TIMER_START" or msg.data['CDRX Event'] == "INACTIVITY_TIMER_END":
+                    return 'RRC_CRX'
+            elif msg.data['CDRX Event'] == "LONG_CYCLE_START":
+                return 'RRC_LDRX'
+            elif msg.data['CDRX Event'] == "SHORT_CYCLE_START":
+                return 'RRC_SDRX'
         return None
 
     def __rrc_filter(self,msg):
@@ -196,8 +234,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             # xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
             xml_msg = Event(log_item_dict['timestamp'],msg.type_id,log_xml)
 
-            self.state_machine.update_state(xml_msg)
-            self.log_info("RRC state: " + str(self.state_machine.get_current_state()))
+            if self.state_machine.update_state(xml_msg):
+                self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
 
             tic = time.clock()
             self.__callback_rrc_conn(xml_msg)
@@ -233,7 +271,11 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_serv_cell(raw_msg)
         elif msg.type_id == "LTE_RRC_CDRX_Events_Info":
+            for item in log_item_dict['Records']:
+                if self.state_machine.update_state(Event(log_item_dict['timestamp'], msg.type_id, item)):
+                    self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
             self.__callback_drx(log_item_dict)
+
 
 
     def __callback_drx(self,msg):
