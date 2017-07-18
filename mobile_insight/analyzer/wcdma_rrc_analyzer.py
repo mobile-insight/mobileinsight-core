@@ -39,7 +39,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
         self.__history={}    # cell history: timestamp -> WcdmaRrcStatus()
         self.__config={}    # cell_id -> WcdmaRrcConfig()
         self.state_machine = self.create_state_machine()
-        print type(self.state_machine)
+        # print type(self.state_machine)
 
         #FIXME: change the timestamp
         self.__history[0]=self.__config

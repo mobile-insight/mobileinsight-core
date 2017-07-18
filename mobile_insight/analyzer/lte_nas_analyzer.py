@@ -65,7 +65,8 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         #####use EPS bearer ID or EPS bearer state????
         self.__cur_eps_id = None
         # self.__esm_status = EsmStatus()
-        self.__esm_state_machine = self.create_esm_state_machine()
+        self.esm_state_machine = self.create_esm_state_machine()
+        self.emm_state_machine = self.create_emm_state_machine()
 
     def create_profile_hierarchy(self):
         '''
@@ -116,6 +117,41 @@ class LteNasAnalyzer(ProtocolAnalyzer):
 
         return StateMachine(state_machine, init_state)
 
+    def create_emm_state_machine(self):
+        """
+        Declare a ESM state machine
+
+        returns: a StateMachine
+        """
+
+        def to_deregister(msg):
+            if msg.data["EMM State"] == 'EMM_DEREGISTERED':
+                return True
+
+        def to_deregister_init(msg):
+            if msg.data["EMM State"] == 'EMM_DEREGISTERED_INITIATED':
+                return True
+
+        def to_register(msg):
+            if msg.data["EMM State"] == 'EMM_REGISTERED':
+                return True
+
+        def to_register_init(msg):
+            if msg.data["EMM State"] == 'EMM_REGISTERED_INITIATED':
+                return True
+
+        def init_state(msg):
+            if msg.data["EMM State"] in ['EMM_REGISTERED', 'EMM_REGISTERED_INITIATED', 'EMM_DEREGISTERED',
+                       'EMM_DEREGISTERED_INITIATED']:
+                return msg.data["EMM State"]
+
+        state_machine={'EMM_REGISTERED': {'EMM_DEREGISTERED': to_deregister, 'EMM_DEREGISTERED_INITIATED': to_deregister_init},
+                       'EMM_REGISTERED_INITIATED': {'EMM_REGISTERED': to_register, 'EMM_DEREGISTERED': to_deregister},
+                       'EMM_DEREGISTERED': {'EMM_REGISTERED_INITIATED': to_register_init},
+                       'EMM_DEREGISTERED_INITIATED': {'EMM_DEREGISTERED': to_deregister}}
+
+        return StateMachine(state_machine, init_state)
+
     def __nas_filter(self,msg):
         """
         Filter all NAS(EMM/ESM) packets, and call functions to process it
@@ -153,6 +189,9 @@ class LteNasAnalyzer(ProtocolAnalyzer):
 
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_emm_state(raw_msg)
+            if self.emm_state_machine.update_state(raw_msg):
+                self.log_info("EMM state: " + self.emm_state_machine.get_current_state())
+
             self.send(msg)
 
         if msg.type_id == "LTE_NAS_ESM_State":
@@ -160,8 +199,8 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             log_item_dict = dict(log_item)
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_esm_state(raw_msg)
-            if self.__esm_state_machine.update_state(raw_msg):
-                self.log_info("ESM state: " + self.__esm_state_machine.get_current_state())
+            if self.esm_state_machine.update_state(raw_msg):
+                self.log_info("ESM state: " + self.esm_state_machine.get_current_state())
 
             self.send(msg)
 

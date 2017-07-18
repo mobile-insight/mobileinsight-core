@@ -46,3 +46,5 @@ from modem_debug_analyzer import ModemDebugAnalyzer
 
 # Visualization
 from log_analyzer import LogAnalyzer
+
+from vr_test_analyzer import VrTestAnalyzer

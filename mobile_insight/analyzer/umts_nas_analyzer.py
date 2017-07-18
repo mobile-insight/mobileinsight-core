@@ -13,6 +13,7 @@ try:
 except ImportError: 
     import xml.etree.ElementTree as ET
 from analyzer import *
+from state_machine import *
 import timeit
 
 from protocol_analyzer import *
@@ -42,6 +43,9 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         self.__mm_status = MmStatus()
         self.__gmm_status = GmmStatus()
         self.__mm_nas_status = MmNasStatus()
+        self.mm_state_machine = self.create_mm_state_machine()
+        self.gmm_state_machine = self.create_gmm_state_machine()
+        self.cm_state_machine = self.create_cm_state_machine()
 
     def create_profile_hierarchy(self):
         '''
@@ -50,6 +54,129 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         :returns: ProfileHierarchy for LTE NAS
         '''
         return UmtsNasProfileHierarchy()
+
+    def create_mm_state_machine(self):
+        """
+        Declare an MM state machine
+
+        returns: a StateMachine
+        """
+
+        def to_wait_ntk(msg):
+            if msg.type_id == "UMTS_NAS_MM_State" and str(msg.data["MM State"]) == 'CELL_FACH':
+                return True
+
+        def to_idle(msg):
+            if msg.type_id == "UMTS_NAS_MM_State" and str(msg.data['MM State']) == 'MM_IDLE':
+                return True
+
+        def to_wait_outgoing_con(msg):
+            if msg.type_id == "UMTS_NAS_MM_State" and str(msg.data['MM State']) == 'MM_WAIT_FOR_OUTGOING_MM_CONNECTION':
+                return True
+
+        def to_con_active(msg):
+            if msg.type_id == "UMTS_NAS_MM_State" and str(msg.data['MM State']) == 'MM_CONNECTION_ACTIVE':
+                return True
+
+        def init_state(msg):
+            if msg.type_id == "UMTS_NAS_MM_State":
+                state = str(msg.data['MM State'])
+                if state in ["MM_WAIT_FOR_NETWORK_COMMAND", "MM_IDLE", "MM_WAIT_FOR_OUTGOING_MM_CONNECTION", "MM_CONNECTION_ACTIVE"]:
+                    return state
+
+        state_machine={"MM_WAIT_FOR_NETWORK_COMMAND": {'MM_IDLE': to_idle, 'MM_CONNECTION_ACTIVE': to_con_active},
+                       "MM_IDLE": {'MM_WAIT_FOR_OUTGOING_MM_CONNECTION': to_wait_outgoing_con},
+                       "MM_WAIT_FOR_OUTGOING_MM_CONNECTION": {'MM_CONNECTION_ACTIVE': to_con_active},
+                       "MM_CONNECTION_ACTIVE": {'MM_WAIT_FOR_NETWORK_COMMAND': to_wait_ntk, 'MM_WAIT_FOR_OUTGOING_MM_CONNECTION': to_wait_outgoing_con, 'MM_IDLE': to_idle}}
+
+        return StateMachine(state_machine, init_state)
+
+    def create_gmm_state_machine(self):
+        """
+        Declare a GMM state machine
+
+        returns: a StateMachine
+        """
+
+        def to_deregistered(msg):
+            if msg.type_id == "UMTS_NAS_GMM_State" and str(msg.data["GMM State"]) == 'GMM_DEREGISTERED':
+                return True
+
+        def to_registered(msg):
+            if msg.type_id == "UMTS_NAS_GMM_State" and str(msg.data['GMM State']) == 'GMM_REGISTERED':
+                return True
+
+        def init_state(msg):
+            if msg.type_id == "UMTS_NAS_GMM_State":
+                msg_state = str(msg.data['GMM State'])
+                state = msg_state if msg_state in ['GMM_DEREGISTERED', 'GMM_REGISTERED'] else None
+                return state
+
+        state_machine={"GMM_REGISTERED": {'GMM_DEREGISTERED': to_deregistered},
+                       "GMM_DEREGISTERED": {'GMM_REGISTERED': to_registered}}
+
+        return StateMachine(state_machine, init_state)
+
+
+    def create_cm_state_machine(self):
+        """
+        Declare a GMM state machine
+
+        returns: a StateMachine
+        """
+
+        def to_service_req(msg):
+            if msg.type_id == "UMTS_NAS_OTA_Packet" and str(msg.data) == "CM Service Request":
+                return True
+
+        def to_setup(msg):
+            if msg.type_id == "UMTS_NAS_OTA_Packet" and str(msg.data) == 'Setup':
+                return True
+
+        def to_call_proceeding(msg):
+            if msg.type_id == "UMTS_NAS_OTA_Packet" and str(msg.data) == 'Call Proceeding':
+                return True
+
+        def to_alerting(msg):
+            if msg.type_id == "UMTS_NAS_OTA_Packet" and str(msg.data) == 'Alerting':
+                return True
+
+        def to_connect(msg):
+            if msg.type_id == "UMTS_NAS_OTA_Packet" and str(msg.data) == 'Connect':
+                return True
+
+        def to_connect_ack(msg):
+            if msg.type_id == "UMTS_NAS_OTA_Packet" and str(msg.data) == 'Connect Acknowledge':
+                return True
+
+        def to_disconnect(msg):
+            if msg.type_id == "UMTS_NAS_OTA_Packet" and str(msg.data) == 'Disconnect':
+                return True
+
+        def to_release(msg):
+            if msg.type_id == "UMTS_NAS_OTA_Packet" and str(msg.data) == 'Release':
+                return True
+
+        def to_idle(msg):
+            if msg.type_id == "UMTS_NAS_OTA_Packet":
+                if str(msg.data) == 'Release Complete' or str(msg.data) == 'CM Service Abort':
+                    return True
+
+        def init_state(msg):
+            if msg.type_id == "UMTS_NAS_OTA_Packet" and str(msg.data) == "CM Service Request":
+                return "CM_SERVICE_REQUEST"
+
+        state_machine={"CM_IDLE": {"CM_SERVICE_REQUEST": to_service_req},
+                       "CM_SERVICE_REQUEST": {'CM_SETUP': to_setup, 'CM_IDLE': to_idle},
+                       "CM_SETUP": {'CM_CALL_PROCEEDING': to_call_proceeding},
+                       "CM_CALL_PROCEEDING": {'CM_ALERTING': to_alerting, 'CM_DISCONNET': to_disconnect},
+                       "CM_ALERTING": {'CM_CONNECT': to_connect, 'CM_DISCONNET': to_disconnect},
+                       "CM_CONNECT": {'CM_CONNECT_ACK': to_connect_ack, 'CM_DISCONNET': to_disconnect},
+                       "CM_CONNECT_ACK": {'CM_DISCONNET': to_disconnect, 'CM_DISCONNET': to_disconnect},
+                       "CM_DISCONNET": {"CM_RELEASE": to_release},
+                       "CM_RELEASE": {"CM_IDLE": to_idle}}
+
+        return StateMachine(state_machine, init_state)
 
     def set_source(self,source):
         """
@@ -80,6 +207,8 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
             log_item_dict = dict(log_item)
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_mm_state(raw_msg)
+            if self.mm_state_machine.update_state(raw_msg):
+                print "MM State:", self.mm_state_machine.get_current_state()
 
 
         if msg.type_id == "UMTS_NAS_MM_REG_State":
@@ -100,6 +229,8 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
             log_item_dict = dict(log_item)
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_gmm_state(raw_msg)
+            if self.gmm_state_machine.update_state(raw_msg):
+                print self.gmm_state_machine.get_current_state()
 
 
 
@@ -118,6 +249,8 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
             #Convert msg to xml format
             log_xml = ET.XML(log_item_dict['Msg'])
             xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
+            # print str(log_item_dict)
+
             self.__callback_nas(xml_msg)
 
     def __callback_mm_state(self,msg):
@@ -196,6 +329,20 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
 
         # for proto in msg.data.iter('proto'):
         #     if proto.get('name') == "gsm_a.dtap": #GSM A-I/F DTAP - Location Updating Request
+
+        for proto in msg.data.iter('proto'):
+            if proto.get('name') == "gsm_a.dtap":
+                raw_state_name = proto.get('showname')
+                raw_state = raw_state_name.split('-')[-1].split('(')[0]
+                if raw_state != "" and raw_state[0] == " ":
+                    raw_state = raw_state[1:]
+                if raw_state != "" and raw_state[-1] == " ":
+                    raw_state = raw_state[:-1]
+                print raw_state
+                if self.cm_state_machine.update_state(Event(msg.timestamp, msg.type_id, raw_state)):
+                    print "CM State:", self.cm_state_machine.get_current_state()
+
+
         for field in msg.data.iter('field'):
             if field.get('show') == "DRX Parameter":
                 field_val = {}
