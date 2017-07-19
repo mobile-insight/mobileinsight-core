@@ -66,6 +66,10 @@ _search_result(PyObject *result, const char *target) {
 // Find an integer field by its name in a result list, and return a C int with
 // the same value (overflow is ignored).
 // Return: int
+static int _search_result_int(
+        PyObject *result,
+        const char *target)
+    __attribute__ ((unused));
 static int
 _search_result_int(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
@@ -78,6 +82,10 @@ _search_result_int(PyObject *result, const char *target) {
 
 // This function should be called when the value is 4 bytes long.
 // Return: unsigned int
+static unsigned int _search_result_uint(
+        PyObject *result,
+        const char *target)
+    __attribute__ ((unused));
 static unsigned int
 _search_result_uint(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
@@ -107,6 +115,11 @@ _replace_result(PyObject *result, const char *target, PyObject *new_object) {
 
 // Find a field in a result list and replace it with an integer.
 // Return: New reference to the old object
+static PyObject * _replace_result_int(
+        PyObject *result,
+        const char *target,
+        int new_int)
+    __attribute__ ((unused));
 static PyObject *
 _replace_result_int(PyObject *result, const char *target, int new_int) {
     PyObject *pyint = Py_BuildValue("i", new_int);
@@ -120,6 +133,13 @@ _replace_result_int(PyObject *result, const char *target, int new_int) {
 // If there is no correponding string, or if the mapping is NULL, map this 
 // integer to *not_found*.
 // Return: old number
+static int _map_result_field_to_name(
+        PyObject *result,
+        const char *target,
+        const ValueName mapping [],
+        int n,
+        const char *not_found)
+    __attribute__ ((unused));
 static int
 _map_result_field_to_name(PyObject *result, const char *target,
                             const ValueName mapping [], int n,
@@ -147,6 +167,14 @@ _map_result_field_to_name(PyObject *result, const char *target,
 
 // Decode a binary string according to an array of field description (fmt[]).
 // Decoded fields are appended to result
+static int _decode_by_fmt (
+        const Fmt fmt [],
+        int n_fmt,
+        const char *b,
+        int offset,
+        int length,
+        PyObject *result)
+    __attribute__ ((unused));
 static int
 _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 const char *b, int offset, int length,
