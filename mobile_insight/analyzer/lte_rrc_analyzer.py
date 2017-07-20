@@ -3,7 +3,7 @@
 """
 A LTE RRC analyzer.
 
-Author: Yuanjie Li
+Author: Yuanjie Li, Zhehui Zhang
 """
 
 try:
@@ -230,7 +230,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             # log_xml = ET.fromstring(log_item_dict['Msg'])
             log_xml = ET.XML(log_item_dict['Msg'])
             # print xml_log
-            # print msg
+            # print str(log_item_dict)
             # xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
             xml_msg = Event(log_item_dict['timestamp'],msg.type_id,log_xml)
 
@@ -333,6 +333,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
         if status_updated:
             self.log_info(self.__status.dump())
+            self.broadcast_info('LteRrcStatus', self.__status.dump())
 
     def __callback_sib_config(self,msg):
         """
@@ -343,6 +344,18 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         """
 
         for field in msg.data.iter('field'):
+
+            if field.get('name') == 'lte-rrc.measResultPCell_element':
+                meas_report = {}
+                meas_report['timestamp'] = str(msg.timestamp)
+                for val in field.iter('field'):
+                    if val.get('name') == 'lte-rrc.rsrpResult':
+                        meas_report['rsrp'] = int(val.get('show'))
+                        meas_report['rssi'] = meas_report['rsrp'] - 141 # map rsrp to rssi
+                    elif val.get('name') == 'lte-rrc.rsrqResult':
+                        meas_report['rsrq'] = int(val.get('show'))
+                self.broadcast_info('MeasureResultPcell', meas_report)
+                self.log_info('MeasureResultPcell: ' + str(meas_report))
 
             #TODO: use MIB, not lte-rrc.trackingAreaCode
             if field.get('name') == "lte-rrc.trackingAreaCode": #tracking area code
@@ -399,6 +412,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
                                          'p_Max':field_val['lte-rrc.p_Max'],
                                          's_IntraSearch':str(float(field_val['lte-rrc.s_IntraSearch'])*2)})
+                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
+                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
+
 
             #inter-frequency (LTE)
             if field.get('name') == "lte-rrc.interFreqCarrierFreqList":
@@ -464,6 +480,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                         offset_pair = (cell_id,neighbor_freq)
                         self.__config[cur_pair].sib.inter_freq_cell_config[offset_pair] = q_offset_range[int(offset)]
 
+                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
+                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
+
 
             #inter-RAT (UTRA)
             if field.get('name') == "lte-rrc.CarrierFreqUTRA_FDD_element":
@@ -511,6 +530,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
                                          'q_offset_freq':'0'
                                          })
+
+                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
+                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
 
             if field.get('name') == "lte-rrc.t_ReselectionUTRA":
                 cur_pair = (self.__status.id,self.__status.freq)
@@ -568,6 +590,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
                                          'q_offset_freq':'0'
                                          })
+                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
+                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
 
             #FIXME: t_ReselectionGERAN appears BEFORE config, so this code does not work!
             if field.get('name') == "lte-rrc.t_ReselectionGERAN":
@@ -578,6 +602,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 for config in self.__config[cur_pair].sib.inter_freq_config.itervalues():
                     if config.rat == "GERAN":
                         config.tReselection = float(field.get('show'))
+                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
+                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
 
 
             #intra-frequency cell offset
@@ -598,8 +624,12 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 cell_id = int(field_val['lte-rrc.physCellId'])
                 offset = int(field_val['lte-rrc.q_OffsetCell'])
                 self.__config[cur_pair].sib.intra_freq_cell_config[cell_id] = q_offset_range[int(offset)]
+                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
+                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
 
                 #TODO: RRC connection status update
+
+
 
     def __callback_rrc_reconfig(self,msg):
 
@@ -613,6 +643,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         #TODO: optimize code to handle objects/config under the same ID
         measobj_id = -1
         report_id = -1
+
+
 
         for field in msg.data.iter('field'):
 
@@ -657,6 +689,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                             else:
                                 cell_offset = 0
                             self.__config[cur_pair].active.measobj[freq].add_cell(cell_id,cell_offset)
+
+                self.broadcast_info('RrcReconfig', self.__config.dump())
+                self.log_info('RrcReconfig: ' + str(self.__config.dump()))
 
             #Add a UTRA (3G) measurement object:
             if field.get('name') == "lte-rrc.measObjectUTRA_element":
@@ -853,6 +888,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 obj_id = int(field_val['lte-rrc.measObjectId'])
                 config_id = int(field_val['lte-rrc.reportConfigId'])
                 self.__config[cur_pair].active.measid_list[meas_id] = (obj_id,config_id)
+
+
 
     def __callback_rrc_conn(self,msg):
         """

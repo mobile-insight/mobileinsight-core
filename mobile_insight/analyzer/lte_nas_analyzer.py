@@ -285,6 +285,16 @@ class LteNasAnalyzer(ProtocolAnalyzer):
 
         for field in msg.data.iter('field'):
 
+
+            if field.get('show') == "UE network capability":
+                print str(ET.dump(field))
+                for val in field.iter('field'):
+                    if val.get('name') == 'nas_eps.emm.acc_csfb_cap':
+                        csfb_cap = True if val.get('show') == '1' else False
+                        self.log_info("CSFB Capbility: " + str(csfb_cap))
+                        self.broadcast_info('CsfbCap', csfb_cap)
+
+
             if field.get('show')=="EPS mobile identity - GUTI":
 
                 field_val={}
@@ -408,6 +418,11 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                     'guaranteed_bitrate_ulink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext),
                     'guaranteed_bitrate_dlink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext),
                     })
+        self.log_info(str(self.__esm_status[self.__cur_eps_id].qos.dump_rate()))
+        self.log_info(str(self.__esm_status[self.__cur_eps_id].qos.dump_delivery()))
+        self.broadcast_info('QosDelivery', self.__esm_status[self.__cur_eps_id].qos.dump_delivery())
+        self.broadcast_info('QosRate', self.__esm_status[self.__cur_eps_id].qos.dump_rate())
+
 
     def getTimeInterval(self, preTime, curTime):
         # preTime_parse = dt.strptime(preTime, '%Y-%m-%d %H:%M:%S.%f')
