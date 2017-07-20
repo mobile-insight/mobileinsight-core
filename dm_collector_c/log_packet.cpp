@@ -80,6 +80,7 @@ namespace patch
 static int
 _decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
                                     PyObject *result) {
+    (void)length;
     int ch_num = _search_result_int(result, "Channel Type");
     const char *ch_name = search_name(WcdmaSignalingMsgChannelType,
                                         ARRAY_SIZE(WcdmaSignalingMsgChannelType, ValueName),
@@ -104,6 +105,9 @@ _decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
 static int
 _decode_umts_nas_gmm_state(const char *b, int offset, size_t length,
                             PyObject *result) {
+    (void)b;
+    (void)offset;
+    (void)length;
     (void) _map_result_field_to_name(result,
                                         "GMM State",
                                         UmtsNasGmmState_GmmState,
@@ -125,6 +129,9 @@ _decode_umts_nas_gmm_state(const char *b, int offset, size_t length,
 static int
 _decode_umts_nas_mm_state(const char *b, int offset, size_t length,
                             PyObject *result) {
+    (void)b;
+    (void)offset;
+    (void)length;
     (void) _map_result_field_to_name(result,
                                         "MM State",
                                         UmtsNasMmState_MmState,
@@ -146,6 +153,7 @@ _decode_umts_nas_mm_state(const char *b, int offset, size_t length,
 static int
 _decode_umts_nas_ota(const char *b, int offset, size_t length,
                         PyObject *result) {
+    (void)length;
     //int start = offset;
     (void) _map_result_field_to_name(result,
                                     "Message Direction",
@@ -1305,6 +1313,7 @@ _decode_lte_phy_irat_subpkt(const char *b, int offset, size_t length,
 static int
 _decode_lte_pdcp_dl_srb_integrity_data_pdu(const char *b, int offset, size_t length,
                                             PyObject *result) {
+    (void)length;
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 
@@ -1336,6 +1345,7 @@ _decode_lte_pdcp_dl_srb_integrity_data_pdu(const char *b, int offset, size_t len
 static int
 _decode_lte_pdcp_ul_srb_integrity_data_pdu(const char *b, int offset, size_t length,
                                             PyObject *result) {
+    (void)length;
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 
@@ -1814,6 +1824,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Num SubPkt");
 
+    PyObject *old_object;
     switch (pkt_ver) {
     case 1:
         {
@@ -1843,31 +1854,86 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                 } else {
                     bool success = false;
                     switch (subpkt_ver) {
-                    case 3: // UL Buffer Status SubPacket
-                        for (int j = 0; j < subpkt_nsample; j++) {
-                            PyObject *result_subpkt_sample = PyList_New(0);
-                            offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt,
-                                    ARRAY_SIZE(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt, Fmt),
-                                    b, offset, length, result_subpkt_sample);
-                            int num_active_lcid = _search_result_int(result_subpkt_sample, "Number of active LCID");
-                            for (int k = 0; k < num_active_lcid; k++) {
-                                PyObject *result_subpkt_sample_lcid = PyList_New(0);
-                                offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt,
-                                        ARRAY_SIZE(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt, Fmt),
-                                        b, offset, length, result_subpkt_sample_lcid);
-                                PyObject *t = Py_BuildValue("(sOs)",
-                                                        "Sample", result_subpkt_sample_lcid, "dict");
-                                PyList_Append(result_subpkt_sample, t);
-                                Py_DECREF(result_subpkt_sample_lcid);
-                            }
+                    case 3:
+                        // UL Buffer Status SubPacket v3
+                        {
+                            for (int j = 0; j < subpkt_nsample; j++) {
+                                PyObject *result_subpkt_sample = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt,
+                                        ARRAY_SIZE(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt, Fmt),
+                                        b, offset, length, result_subpkt_sample);
+                                int num_active_lcid = _search_result_int(result_subpkt_sample, "Number of active LCID");
+                                int temp = _search_result_int(result_subpkt_sample, "Sub FN");
+                                int iSubFN = temp & 15;
+                                int iSysFN = (temp >> 4) & 1023;
+                                old_object = _replace_result_int(result_subpkt_sample,
+                                        "Sub FN", iSubFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(result_subpkt_sample,
+                                        "Sys FN", iSysFN);
+                                Py_DECREF(old_object);
+                                for (int k = 0; k < num_active_lcid; k++) {
+                                    PyObject *result_subpkt_sample_lcid = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt,
+                                            ARRAY_SIZE(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt, Fmt),
+                                            b, offset, length, result_subpkt_sample_lcid);
+                                    PyObject *t = Py_BuildValue("(sOs)",
+                                                            "Sample", result_subpkt_sample_lcid, "dict");
+                                    PyList_Append(result_subpkt_sample, t);
+                                    Py_DECREF(result_subpkt_sample_lcid);
+                                }
 
-                            PyObject *t = Py_BuildValue("(sOs)",
-                                                        "Sample", result_subpkt_sample, "dict");
-                            PyList_Append(result_subpkt, t);
-                            Py_DECREF(result_subpkt_sample);
+                                PyObject *t = Py_BuildValue("(sOs)",
+                                                            "Sample", result_subpkt_sample, "dict");
+                                PyList_Append(result_subpkt, t);
+                                Py_DECREF(result_subpkt_sample);
+                            }
+                            success = true;
+                            break;
                         }
-                        success = true;
-                        break;
+                    case 24:
+                        {
+                            for (int j = 0; j < subpkt_nsample; j++) {
+                                PyObject *result_subpkt_sample = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt_v24,
+                                        ARRAY_SIZE(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt_v24, Fmt),
+                                        b, offset, length, result_subpkt_sample);
+                                int num_active_lcid = _search_result_int(result_subpkt_sample, "Number of active LCID");
+                                int temp = _search_result_int(result_subpkt_sample, "Sub FN");
+                                int iSubFN = temp & 15;
+                                int iSysFN = (temp >> 4) & 1023;
+                                old_object = _replace_result_int(result_subpkt_sample,
+                                        "Sub FN", iSubFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(result_subpkt_sample,
+                                        "Sys FN", iSysFN);
+                                Py_DECREF(old_object);
+                                for (int k = 0; k < num_active_lcid; k++) {
+                                    PyObject *result_subpkt_sample_lcid = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt_v24,
+                                            ARRAY_SIZE(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt_v24, Fmt),
+                                            b, offset, length, result_subpkt_sample_lcid);
+                                    unsigned int iNewUncompressedBytes = _search_result_uint(result_subpkt_sample_lcid, "New Uncompressed Bytes");
+                                    unsigned int iNewCompressedBytes = _search_result_uint(result_subpkt_sample_lcid, "New Compressed Bytes");
+                                    unsigned int iRetxBytes = _search_result_uint(result_subpkt_sample_lcid, "Retx bytes");
+                                    int iCtrlBytes = _search_result_int(result_subpkt_sample_lcid, "Ctrl bytes");
+                                    int iTotalBytes = (int)iNewUncompressedBytes + (int)iNewCompressedBytes + (int)iRetxBytes + iCtrlBytes;
+                                    old_object = _replace_result_int(result_subpkt_sample_lcid,
+                                            "Total Bytes", iTotalBytes);
+                                    Py_DECREF(old_object);
+                                    PyObject *t = Py_BuildValue("(sOs)",
+                                                            "Sample", result_subpkt_sample_lcid, "dict");
+                                    PyList_Append(result_subpkt_sample, t);
+                                    Py_DECREF(result_subpkt_sample_lcid);
+                                }
+                                PyObject *t = Py_BuildValue("(sOs)",
+                                                            "Sample", result_subpkt_sample, "dict");
+                                PyList_Append(result_subpkt, t);
+                                Py_DECREF(result_subpkt_sample);
+                            }
+                            success = true;
+                            break;
+                        }
                     default:
                         break;
                     }
@@ -1879,8 +1945,6 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                     } else {
                         printf("(MI)Unknown LTE MAC Uplink Buffer Status Internel Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
-
-
                 }
             }
             PyObject *t = Py_BuildValue("(sOs)",
@@ -4423,8 +4487,8 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                 int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
                 int iPower = (iNonDecodeSFN >> 14) & 255; // next 8 bits
                 int iDCI = (iNonDecodeSFN >> 22) & 15; // next 4 bits
-                int iPUCCH = (iNonDecodeSFN >> 26) && 7; // next 3 bits
-                int iN_HARQ = (iNonDecodeSFN >> 29) && 1; // next 1 bit
+                int iPUCCH = (iNonDecodeSFN >> 26) & 7; // next 3 bits
+                int iN_HARQ = (iNonDecodeSFN >> 29) & 1; // next 1 bit
                 PyObject *old_object = _replace_result_int(result_record_item,
                         "SFN", iSFN);
                 Py_DECREF(old_object);
@@ -4530,7 +4594,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                 int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
                 int iPower = (iNonDecodeSFN >> 14) & 255; // next 8 bits
                 int iDCI = (iNonDecodeSFN >> 22) & 15; // next 4 bits
-                int iTxType = (iNonDecodeSFN >> 26) && 3; // next 3 bits
+                int iTxType = (iNonDecodeSFN >> 26) & 3; // next 3 bits
                 PyObject *old_object = _replace_result_int(result_record_item,
                         "SFN", iSFN);
                 Py_DECREF(old_object);
@@ -4630,7 +4694,7 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                 int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
                 int iPower = (iNonDecodeSFN >> 14) & 255; // next 8 bits
                 int iDCI = (iNonDecodeSFN >> 22) & 15; // next 4 bits
-                int iTxType = (iNonDecodeSFN >> 26) && 3; // next 3 bits
+                int iTxType = (iNonDecodeSFN >> 26) & 3; // next 3 bits
                 PyObject *old_object = _replace_result_int(result_record_item,
                         "SFN", iSFN);
                 Py_DECREF(old_object);
@@ -5529,6 +5593,7 @@ static int
 _decode_by_fmt_modem (const Fmt fmt [], int n_fmt,
                 const char *b, int offset, size_t length,
                 PyObject *result) {
+    (void)length;
     assert(PyList_Check(result));
     int n_consumed = 0;
 

@@ -10,6 +10,7 @@
 #define __DM_COLLECTOR_C_LOG_PACKET_H__
 
 #include "consts.h"
+#include <stddef.h>
 
 // Field types
 enum FmtType {
@@ -987,10 +988,8 @@ const Fmt LteMacULBufferStatusInternal_SubpktHeaderFmt [] = {
 };
 
 const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt [] = {
-    // Currently parsing half a byte is not supported
-    //{UINT, "SFN", 1.5},
-    //{UINT, "Sub FN", 0.5},
-    {UINT, "SFN and Sub FN", 2},
+    {UINT, "Sub FN", 2},
+    {PLACEHOLDER, "Sys FN", 0},
     {UINT, "Number of active LCID", 1}
 };
 
@@ -998,8 +997,25 @@ const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt [] = {
     {UINT, "Ld Id", 1},
     {UINT, "Priority", 1},
     {UINT, "New bytes", 4},
-    {UINT, "Ret bytes", 4},
+    {UINT, "Retx bytes", 4},
     {UINT, "Ctrl bytes", 2},
+};
+
+const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt_v24 [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Sub FN", 2},
+    {PLACEHOLDER, "Sys FN", 0},
+    {UINT, "Number of active LCID", 1}
+};
+
+const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt_v24 [] = {
+    {UINT, "Ld Id", 1},
+    {UINT, "Priority", 1},
+    {UINT, "New Uncompressed Bytes", 4},
+    {UINT, "New Compressed Bytes", 4},
+    {UINT, "Retx bytes", 4},
+    {UINT, "Ctrl bytes", 2},
+    {PLACEHOLDER, "Total Bytes", 0},
 };
 
 // ----------------------------------------------------------------------------

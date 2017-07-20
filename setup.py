@@ -27,6 +27,15 @@ PY2EXE_OPTIONS = {
     "bundle_files": 1, # bundle everything
 }
 
+# =============================================================================
+# Remove the "-Wstrict-prototypes" compiler option, which isn't valid for C++.
+import distutils.sysconfig
+cfg_vars = distutils.sysconfig.get_config_vars()
+for key, value in cfg_vars.items():
+        if type(value) == str:
+                    cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
+# =============================================================================
+
 dm_collector_c_module = Extension('mobile_insight.monitor.dm_collector.dm_collector_c',
                                 sources = [ "dm_collector_c/dm_collector_c.cpp",
                                             "dm_collector_c/export_manager.cpp",
