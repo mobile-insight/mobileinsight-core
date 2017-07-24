@@ -72,7 +72,8 @@ class StateMachine(object):
         if not self.cur_state:
             # state not initialized yet
             self.__init_state(event)
-            return True
+            if self.cur_state:
+                return True
         else:
             # assert: state always declared in state_machine (checked by
             # __init_state)
@@ -81,15 +82,13 @@ class StateMachine(object):
                 # evaluate the transition condition 1-by-1
                 if self.state_machine[self.cur_state][item](event):
                     tx_condition.append(item)
+            # print tx_condition
 
-            if len(tx_condition) > 1:
-                # More than 1 state transition is satisfied
-                return False
-            elif len(tx_condition) == 1:
+            if len(tx_condition) == 1:
                 self.cur_state = tx_condition[0]
                 self.state_history.append((str(event.timestamp), tx_condition[0]))
                 return True
-            return False
+        return False
 
     def get_current_state(self):
         '''

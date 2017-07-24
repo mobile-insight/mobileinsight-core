@@ -172,7 +172,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                        "CM_CALL_PROCEEDING": {'CM_ALERTING': to_alerting, 'CM_DISCONNET': to_disconnect},
                        "CM_ALERTING": {'CM_CONNECT': to_connect, 'CM_DISCONNET': to_disconnect},
                        "CM_CONNECT": {'CM_CONNECT_ACK': to_connect_ack, 'CM_DISCONNET': to_disconnect},
-                       "CM_CONNECT_ACK": {'CM_DISCONNET': to_disconnect, 'CM_DISCONNET': to_disconnect},
+                       "CM_CONNECT_ACK": {'CM_DISCONNET': to_disconnect},
                        "CM_DISCONNET": {"CM_RELEASE": to_release},
                        "CM_RELEASE": {"CM_IDLE": to_idle}}
 
@@ -230,7 +230,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_gmm_state(raw_msg)
             if self.gmm_state_machine.update_state(raw_msg):
-                print self.gmm_state_machine.get_current_state()
+                print "GMM State:", self.gmm_state_machine.get_current_state()
 
 
 
@@ -271,6 +271,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         mm_state["conn state"] = self.__mm_status.state
         mm_state["conn substate"] = self.__mm_status.substate
         mm_state["update state"] = self.__mm_status.update_status
+        mm_state['timestamp'] = str(msg.data["timestamp"])
         self.broadcast_info("MM_STATE", mm_state)
 
     def __callback_mm_reg_state(self,msg):
@@ -318,6 +319,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
         gmm_state = {}
         gmm_state["conn state"] = self.__gmm_status.state
         gmm_state["conn substate"] = self.__gmm_status.substate
+        gmm_state['timestamp'] = str(msg.data["timestamp"])
         self.broadcast_info("GMM_STATE", gmm_state)
 
     def __callback_nas(self,msg):
@@ -338,9 +340,13 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
                     raw_state = raw_state[1:]
                 if raw_state != "" and raw_state[-1] == " ":
                     raw_state = raw_state[:-1]
-                print raw_state
+                # print raw_state
                 if self.cm_state_machine.update_state(Event(msg.timestamp, msg.type_id, raw_state)):
-                    print "CM State:", self.cm_state_machine.get_current_state()
+                    cm_state = {}
+                    cm_state["state"] = self.cm_state_machine.get_current_state()
+                    cm_state['timestamp'] = str(msg.timestamp)
+                    self.broadcast_info("CM_STATE", cm_state)
+                    self.log_info("CM State: " + self.cm_state_machine.get_current_state())
 
 
         for field in msg.data.iter('field'):
