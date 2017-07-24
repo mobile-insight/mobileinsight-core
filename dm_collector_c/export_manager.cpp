@@ -45,6 +45,7 @@ manager_export_binary (struct ExportManagerState *pstate, const char *b, size_t 
         if (pstate->log_fp != NULL) {
             std::string frame = encode_hdlc_frame(b, (int) length);
             size_t cnt = fwrite(frame.c_str(), sizeof(char), frame.size(), pstate->log_fp);
+            (void)cnt;
         }
         return true;
     }
