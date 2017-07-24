@@ -46,7 +46,7 @@ The GUI of MobileInsight requires `matplotlib` and `wxPython`. `matplotlib` can 
 
 ## Upgrade to New Version
 
-Old version of mobileInsight-core may have installed Wireshark and Glib libraries under the `/usr/lib` folder. The installation script will auto handle the uninstallation of the old version. If you encounter issues, you may execute the uninstallation script manually to remove them. Please run the uninstallation script with __root__ priviledge to perform proper clean up.
+Old version of `mobileInsight-core` may have installed Wireshark and Glib libraries under the `/usr/lib` folder. The installation script will auto handle the uninstallation of the old version. If you encounter issues, you may execute the uninstallation script manually to remove them. Please run the uninstallation script with __root__ priviledge to perform proper clean up.
 
     sudo ./uninstall.sh
 
@@ -57,7 +57,7 @@ We love pull requests and discussing novel ideas. You can open issues here to re
 
 The following Slack group is used exclusively for discussions about developing the MobileInsight and its sister projects:
 
-+ Dev Slack Group: https://mobileinsight-dev.slack.com
-+ Email: mobileinsight.team@gmail.com
++ Dev Slack Group: https://mobileinsight-dev.slack.com (join via this [link](https://goo.gl/htJGqT))
++ Email: support@mobileinsight.net
 
 For other advanced topics, please refer to the wiki and the [MobileInsight website](http://mobileinsight.net).
