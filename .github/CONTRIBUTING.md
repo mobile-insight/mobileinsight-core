@@ -11,8 +11,8 @@ Just talk to us if you want to help, and we will help you help us.
 This is by far the easiest way to contribute something. If you are using
 MobileInsight for your own project, don't hesitate sharing. If you have something
 that you would like to tell us, please don't hesitate. You can reach us either
-by joining our [Slack Dev Channel](https://mobileinsight-dev.slack.com) or email
-us at mobileinsight.team@gmail.com.
+by [joining](https://goo.gl/htJGqT) our [Slack Dev Channel](https://mobileinsight-dev.slack.com) or email
+us at support@mobileinsight.net.
 
 
 We are also interested in the problems you had when getting started. Please

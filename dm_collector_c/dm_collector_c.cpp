@@ -183,6 +183,7 @@ get_posix_timestamp () {
 // Return: successful or not
 static PyObject *
 dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
+    (void)self;
     IdVector empty;
     BinaryBuffer buf;
     PyObject *serial_port = NULL;
@@ -312,6 +313,7 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
 // If error occurs, false is returned and PyErr_SetString() will be called.
 static bool
 generate_log_config_headers (PyObject *file_or_serial, PyObject *type_names) {
+    (void)type_names;
     BinaryBuffer buf;
     IdVector empty;
     for (int k = 0; k < 12; k++) {
@@ -371,6 +373,7 @@ generate_log_config_headers (PyObject *file_or_serial, PyObject *type_names) {
 // If error occurs, false is returned and PyErr_SetString() will be called.
 static bool
 generate_log_config_ends (PyObject *file_or_serial, PyObject *type_names) {
+    (void)type_names;
     BinaryBuffer buf;
     IdVector empty;
     buf = encode_log_config(DIAG_END_6000, empty);
@@ -390,6 +393,7 @@ generate_log_config_ends (PyObject *file_or_serial, PyObject *type_names) {
 // Return: successful or not
 static PyObject *
 dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
+    (void)self;
     PyObject *serial_port = NULL;
     PyObject *sequence = NULL;
     bool success = false;
@@ -427,6 +431,7 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
 // Return: successful or not
 static PyObject *
 dm_collector_c_set_filtered_export (PyObject *self, PyObject *args) {
+    (void)self;
     const char *path;
     PyObject *sequence = NULL;
     IdVector type_ids;
@@ -461,6 +466,7 @@ dm_collector_c_set_filtered_export (PyObject *self, PyObject *args) {
 // Return: successful or not
 static PyObject *
 dm_collector_c_set_filtered (PyObject *self, PyObject *args) {
+    (void)self;
     PyObject *sequence = NULL;
     IdVector type_ids;
     bool success = false;
@@ -494,6 +500,7 @@ dm_collector_c_set_filtered (PyObject *self, PyObject *args) {
 // Return: successful or not
 static PyObject *
 dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
+    (void)self;
     PyObject *file = NULL;
     PyObject *sequence = NULL;
     bool success = false;
@@ -565,6 +572,7 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
 // Return: None
 static PyObject *
 dm_collector_c_feed_binary (PyObject *self, PyObject *args) {
+    (void)self;
     const char *b;
     int length;
     if (!PyArg_ParseTuple(args, "s#", &b, &length)){
@@ -577,6 +585,8 @@ dm_collector_c_feed_binary (PyObject *self, PyObject *args) {
 
 static PyObject *
 dm_collector_c_reset (PyObject *self, PyObject *args) {
+    (void)self;
+    (void)args;
     reset_binary();
     Py_RETURN_NONE;
 }
@@ -585,6 +595,7 @@ dm_collector_c_reset (PyObject *self, PyObject *args) {
 // Return: decoded_list or None
 static PyObject *
 dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
+    (void)self;
     std::string frame;
     bool crc_correct = false;
     bool skip_decoding = false, include_timestamp = false;  // default values
@@ -695,7 +706,7 @@ initdm_collector_c(void)
     PyObject *log_packet_types;
 
     // dm_ccllector_c.log_packet_types: stores all supported type names
-    if(EXPOSE_INTERNAL_LOGS==1){
+    if(EXPOSE_INTERNAL_LOGS == 1) {
         //YUANJIE: expose all logs to MobileInsight
         int n_types = ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName);
         log_packet_types = PyTuple_New(n_types);
@@ -712,17 +723,17 @@ initdm_collector_c(void)
         }
 
     }
-    else{
+    else {
         //YUANJIE: internal logs are not exposed
         int n_types = 0;
-        for (int i = 0; i < ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++)
+        for (int i = 0; i < (int)ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++)
         {
             if(LogPacketTypeID_To_Name[i].b_public)
                 n_types++;
         }
         log_packet_types = PyTuple_New(n_types);
         int count=0;
-        for (int i = 0; i < ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++)
+        for (int i = 0; i < (int)ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++)
         {
             if(LogPacketTypeID_To_Name[i].b_public){
                 // printf("%s\n",LogPacketTypeID_To_Name[i].name);
