@@ -333,7 +333,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
         if status_updated:
             self.log_info(self.__status.dump())
-            self.broadcast_info('LteRrcStatus', self.__status.dump())
+            self.broadcast_info('LTE_RRC_STATUS', self.__status.dump_dict())
 
     def __callback_sib_config(self,msg):
         """
@@ -354,8 +354,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                         meas_report['rssi'] = meas_report['rsrp'] - 141 # map rsrp to rssi
                     elif val.get('name') == 'lte-rrc.rsrqResult':
                         meas_report['rsrq'] = int(val.get('show'))
-                self.broadcast_info('MeasureResultPcell', meas_report)
-                self.log_info('MeasureResultPcell: ' + str(meas_report))
+                self.broadcast_info('MEAR_PCELL', meas_report)
+                self.log_info('MEAR_PCELL: ' + str(meas_report))
 
             #TODO: use MIB, not lte-rrc.trackingAreaCode
             if field.get('name') == "lte-rrc.trackingAreaCode": #tracking area code
@@ -412,8 +412,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
                                          'p_Max':field_val['lte-rrc.p_Max'],
                                          's_IntraSearch':str(float(field_val['lte-rrc.s_IntraSearch'])*2)})
-                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
-                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
 
             #inter-frequency (LTE)
@@ -480,8 +480,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                         offset_pair = (cell_id,neighbor_freq)
                         self.__config[cur_pair].sib.inter_freq_cell_config[offset_pair] = q_offset_range[int(offset)]
 
-                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
-                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
 
             #inter-RAT (UTRA)
@@ -531,8 +531,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          'q_offset_freq':'0'
                                          })
 
-                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
-                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             if field.get('name') == "lte-rrc.t_ReselectionUTRA":
                 cur_pair = (self.__status.id,self.__status.freq)
@@ -590,8 +590,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
                                          'q_offset_freq':'0'
                                          })
-                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
-                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             #FIXME: t_ReselectionGERAN appears BEFORE config, so this code does not work!
             if field.get('name') == "lte-rrc.t_ReselectionGERAN":
@@ -602,8 +602,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 for config in self.__config[cur_pair].sib.inter_freq_config.itervalues():
                     if config.rat == "GERAN":
                         config.tReselection = float(field.get('show'))
-                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
-                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
 
             #intra-frequency cell offset
@@ -624,8 +624,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 cell_id = int(field_val['lte-rrc.physCellId'])
                 offset = int(field_val['lte-rrc.q_OffsetCell'])
                 self.__config[cur_pair].sib.intra_freq_cell_config[cell_id] = q_offset_range[int(offset)]
-                self.broadcast_info('SibConfig', self.__config[cur_pair].dump())
-                self.log_info('SibConfig: ' + str(self.__config[cur_pair].dump()))
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
                 #TODO: RRC connection status update
 
@@ -690,8 +690,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                 cell_offset = 0
                             self.__config[cur_pair].active.measobj[freq].add_cell(cell_id,cell_offset)
 
-                self.broadcast_info('RrcReconfig', self.__config.dump())
-                self.log_info('RrcReconfig: ' + str(self.__config.dump()))
+                self.broadcast_info('RRC_RECONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('RRC_RECONFIG: ' + str(self.__config[cur_pair].dump()))
 
             #Add a UTRA (3G) measurement object:
             if field.get('name') == "lte-rrc.measObjectUTRA_element":
@@ -1016,6 +1016,20 @@ class LteRrcStatus:
                 + " TAC=" + str(self.tac)
                 + " connected=" + str(self.conn) + '\n')
 
+    def dump_dict(self):
+        """
+        Report the cell status
+
+        :returns: a dict that encodes the cell status
+        :rtype: dict
+        """
+        dumped_dict = {}
+        dumped_dict['cellID'] = str(self.id)
+        dumped_dict['frequency'] = str(self.freq)
+        dumped_dict['TAC'] = str(self.tac)
+        dumped_dict['connected'] = str(self.conn)
+        return dumped_dict
+
     def inited(self):
         # return (self.id!=None and self.freq!=None)
         return (self.id and self.freq)
@@ -1053,6 +1067,18 @@ class LteRrcConfig:
                 + self.status.dump()
                 + self.sib.dump()
                 + self.active.dump() )
+
+    def dump_dict(self):
+        """
+        Report the cell configurations
+
+        :returns: a dict that encodes the cell's configurations
+        :rtype: dict
+        """
+        res = {}
+        res.update(self.status.dump_dict())
+        res.update(self.sib.dump_dict())
+        return res
 
     def get_cell_reselection_config(self,cell_meta):
         """
@@ -1225,6 +1251,24 @@ class LteRrcSib:
                     + str(self.inter_freq_cell_config[item]) + '\n')
         return res
 
+    def dump_dict(self):
+        """
+        Report the cell SIB configurations
+
+        :returns: a dict that encodes the cell's SIB configurations
+        :rtype: dict
+        """
+        res = self.serv_config.dump() + self.intra_freq_config.dump()
+        for item in self.inter_freq_config:
+            res += self.inter_freq_config[item].dump()
+        for item in self.intra_freq_cell_config:
+            res += ("Intra-freq offset: " + str(item) + ' '
+                    + str(self.intra_freq_cell_config[item]) + '\n')
+        for item in self.inter_freq_cell_config:
+            res += ("Inter-freq offset: " + str(item) + ' '
+                    + str(self.inter_freq_cell_config[item]) + '\n')
+        return {'sib config': res}
+
 
 class LteRrcReselectionConfig:
     """
@@ -1357,6 +1401,18 @@ class LteRrcActive:
             res += self.report_list[item].dump()
         for item in self.measid_list:
             res += "MeasObj "+str(item)+' '+str(self.measid_list[item])+'\n'
+        return res
+
+    def dump_dict(self):
+        """
+        Report the cell's active-state configurations
+
+        :returns: a dict that encodes the cell's active-state configurations
+        :rtype: dict
+        """
+        res = {}
+        for item in self.measobj:
+            res[item] = self.measobj[item].dump()
         return res
 
 
