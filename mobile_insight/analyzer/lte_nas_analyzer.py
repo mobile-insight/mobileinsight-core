@@ -13,6 +13,7 @@ try:
 except ImportError: 
     import xml.etree.ElementTree as ET
 from analyzer import *
+from state_machine import *
 import timeit
 
 from protocol_analyzer import *
@@ -44,7 +45,7 @@ emm_substate={
     14: "registered.imsi_detach_inited"}
 
 #ESM session connection state
-esm_state={0:"disconnected",1:"connected"}
+esm_state={0:"disconnected", 1:"connected", -1:"disconnected"}
 
 # class LteNasAnalyzer(Analyzer):
 class LteNasAnalyzer(ProtocolAnalyzer):
@@ -64,6 +65,9 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         #####use EPS bearer ID or EPS bearer state????
         self.__cur_eps_id = None
         # self.__esm_status = EsmStatus()
+        self.esm_state_machine = self.create_esm_state_machine()
+        self.emm_state_machine = self.create_emm_state_machine()
+        self.callflow_state_machine = self.create_callflow_state_machine()
 
     def create_profile_hierarchy(self):
         '''
@@ -87,6 +91,159 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         source.enable_log("LTE_NAS_EMM_OTA_Outgoing_Packet")
         source.enable_log("LTE_NAS_EMM_State")
         source.enable_log("LTE_NAS_ESM_State")
+
+    def create_callflow_state_machine(self):
+        """
+        Declare a callflow state machine
+
+        returns: a StateMachine
+        """
+
+        def idle_to_csfb(msg):
+            if msg.type_id == 'LTE_NAS_EMM_State':
+                return
+            extended_service_req_flag = False
+            for field in msg.data.iter('field'):
+                if field.get('name') == 'nas_eps.nas_msg_emm_type' and field.get('value') == '4c':
+                    extended_service_req_flag = True
+                elif extended_service_req_flag and field.get('name') == 'nas_eps.emm.service_type' \
+                        and (field.get('show') == '0' or field.get('show') == '1'):
+                    return True
+
+
+        def idle_to_volte(msg):
+            if msg.type_id == 'LTE_NAS_EMM_State':
+                return
+            act_bearer_flag = False
+            for proto in msg.data.iter('proto'):
+                if proto.get('name') == 'nas-eps':
+                    for field in proto.iter('field'):
+                        # print ET.dump(field)
+                        if field.get('name') == 'nas_eps.nas_msg_esm_type' and field.get('value') == 'c5':
+                            act_bearer_flag = True
+                        elif act_bearer_flag and field.get('show') == 'EPS quality of service':
+                            # print ET.dump(field)
+                            for val in field.iter('field'):
+                                if val.get('name') == 'nas_eps.emm.qci' and val.get('show') == '1':
+                                    # print ET.dump(val)
+                                    return True
+
+
+        def con_to_volte(msg):
+            if msg.type_id == 'LTE_NAS_EMM_State':
+                return
+            deact_bearer_flag = False
+            for proto in msg.data.iter('proto'):
+                if proto.get('name') == 'nas-eps':
+                    for field in proto.iter('field'):
+                        if field.get('value') == 'cd':  # Deactivate EPS bearer context request (0xcd)
+                            deact_bearer_flag = True
+                        elif deact_bearer_flag and field.get('show') == 'ESM cause':
+                            for val in field.iter('field'):
+                                if val.get('name') == 'nas_eps.esm.cause' and val.get('show') == '36':
+                                    return True
+
+
+        def csfb_to_idle(msg):
+            if msg.type_id == 'LTE_NAS_EMM_State' and msg.data["EMM Substate"] == 'EMM_REGISTERED_NORMAL_SERVICE':
+                return True
+
+        def volte_to_con(msg):
+            if msg.type_id == 'LTE_NAS_EMM_State':
+                return
+            act_bearer_flag = False
+            for proto in msg.data.iter('proto'):
+                if proto.get('name') == 'nas-eps':
+                    # print ET.dump(proto)
+                    for field in proto.iter('field'):
+                        if field.get('value') == 'c6': # Activate dedicated EPS bearer context accept (0xc6)
+                            act_bearer_flag = True
+                            # TODO: add check on bearer id
+                            return True
+
+        def volte_to_idle(msg):
+            if msg.type_id == 'LTE_NAS_EMM_State':
+                return
+            deact_bearer_flag = False
+            for proto in msg.data.iter('proto'):
+                if proto.get('name') == 'nas-eps':
+                    for field in proto.iter('field'):
+                        if field.get('value') == 'ce':  # Deactivate EPS bearer context accept (0xce)
+                            deact_bearer_flag = True
+                            # TODO: add check on bearer id
+                            return True
+
+        def init_state(msg):
+            return 'IDLE'
+
+        state_machine={'IDLE': {'CALL_FALLBACK': idle_to_csfb, 'VoLTE_PROCESSING': idle_to_volte},
+                       'CONNECTED': {'VoLTE_PROCESSING': con_to_volte},
+                       'CALL_FALLBACK': {'IDLE': csfb_to_idle},
+                       'VoLTE_PROCESSING': {'CONNECTED': volte_to_con, 'IDLE': volte_to_idle}}
+
+        return StateMachine(state_machine, init_state)
+
+
+    def create_esm_state_machine(self):
+        """
+        Declare a ESM state machine
+        returns: a StateMachine
+        """
+
+        def con_to_discon(msg):
+            if int(msg.data["EPS bearer state"]) - 1 == 0:
+                return True
+
+        def discon_to_con(msg):
+            if int(msg.data["EPS bearer state"]) - 1 == 1:
+                return True
+
+        def init_state(msg):
+            if int(msg.data["EPS bearer state"]) - 1 == 0:
+                return 'ESM_DISCON'
+            elif int(msg.data["EPS bearer state"]) - 1 == 1:
+                return 'ESM_CON'
+
+        state_machine = {'ESM_CON': {'ESM_DISCON': con_to_discon},
+                         'ESM_DISCON': {'ESM_CON': discon_to_con}}
+
+        return StateMachine(state_machine, init_state)
+
+
+    def create_emm_state_machine(self):
+        """
+        Declare a EMM state machine
+
+        returns: a StateMachine
+        """
+
+        def to_deregister(msg):
+            if msg.data["EMM State"] == 'EMM_DEREGISTERED':
+                return True
+
+        def to_deregister_init(msg):
+            if msg.data["EMM State"] == 'EMM_DEREGISTERED_INITIATED':
+                return True
+
+        def to_register(msg):
+            if msg.data["EMM State"] == 'EMM_REGISTERED':
+                return True
+
+        def to_register_init(msg):
+            if msg.data["EMM State"] == 'EMM_REGISTERED_INITIATED':
+                return True
+
+        def init_state(msg):
+            if msg.data["EMM State"] in ['EMM_REGISTERED', 'EMM_REGISTERED_INITIATED', 'EMM_DEREGISTERED',
+                       'EMM_DEREGISTERED_INITIATED']:
+                return msg.data["EMM State"]
+
+        state_machine={'EMM_REGISTERED': {'EMM_DEREGISTERED': to_deregister, 'EMM_DEREGISTERED_INITIATED': to_deregister_init},
+                       'EMM_REGISTERED_INITIATED': {'EMM_REGISTERED': to_register, 'EMM_DEREGISTERED': to_deregister},
+                       'EMM_DEREGISTERED': {'EMM_REGISTERED_INITIATED': to_register_init},
+                       'EMM_DEREGISTERED_INITIATED': {'EMM_DEREGISTERED': to_deregister}}
+
+        return StateMachine(state_machine, init_state)
 
     def __nas_filter(self,msg):
         """
@@ -125,6 +282,9 @@ class LteNasAnalyzer(ProtocolAnalyzer):
 
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_emm_state(raw_msg)
+            if self.emm_state_machine.update_state(raw_msg):
+                self.log_info("EMM state: " + str(self.emm_state_machine.get_current_state()))
+
             self.send(msg)
 
         if msg.type_id == "LTE_NAS_ESM_State":
@@ -132,6 +292,8 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             log_item_dict = dict(log_item)
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_esm_state(raw_msg)
+            if self.esm_state_machine.update_state(raw_msg):
+                self.log_info("ESM state: " + self.esm_state_machine.get_current_state())
 
             self.send(msg)
 
@@ -157,8 +319,11 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             'conn substate': self.__emm_status.substate,
         }
 
-        self.log_info(str(state))
+        # self.log_info('EMM_STATE', str(state))
         self.broadcast_info('EMM_STATE', state)
+
+        if self.callflow_state_machine.update_state(msg):
+            self.log_info("Call flow status: " + str(self.callflow_state_machine.get_current_state()))
 
 
 
@@ -169,11 +334,16 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         :param msg: the NAS signaling message that carries EMM state
         """
         self.__cur_eps_id = msg.data["EPS bearer ID"]
+
         if self.__cur_eps_id not in self.__esm_status:
             self.__esm_status[self.__cur_eps_id] = EsmStatus()
 
+        # print self.__cur_eps_id, str(self.__esm_status), str(bearer_type), msg.data["EPS bearer type"], str(msg.data['timestamp'])
+
         self.__esm_status[self.__cur_eps_id].eps_id = int(msg.data["EPS bearer ID"])
         self.__esm_status[self.__cur_eps_id].type = int(msg.data["EPS bearer type"])
+        if self.__esm_status[self.__cur_eps_id].type == 255:
+            self.__esm_status[self.__cur_eps_id].type = 1
         self.__esm_status[self.__cur_eps_id].qos.qci = msg.data["QCI"]
         self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink = msg.data["UL MBR"]
         self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink = msg.data["DL MBR"]
@@ -203,8 +373,9 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         # broadcast
         state = {
             'conn state': esm_state[int(msg.data["EPS bearer state"]) - 1],
+            'timestamp' : str(msg.data['timestamp'])
         }
-        self.log_info(str(state))
+        # self.log_info(str(state))
         self.broadcast_info('ESM_STATE', state)
 
     def __callback_emm(self,msg):
@@ -215,6 +386,15 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         """
 
         for field in msg.data.iter('field'):
+
+            if field.get('show') == "UE network capability":
+                # print str(ET.dump(field))
+                for val in field.iter('field'):
+                    if val.get('name') == 'nas_eps.emm.acc_csfb_cap':
+                        csfb_cap = True if val.get('show') == '1' else False
+                        self.log_info("CSFB Capbility: " + str(csfb_cap))
+                        self.broadcast_info('CSFB_CAP', str(csfb_cap))
+
 
             if field.get('show')=="EPS mobile identity - GUTI":
 
@@ -241,6 +421,9 @@ class LteNasAnalyzer(ProtocolAnalyzer):
 
         :param msg: the ESM NAS message
         """
+
+        if self.callflow_state_machine.update_state(msg):
+            self.log_info("Call flow status: " + str(self.callflow_state_machine.get_current_state()))
 
         for field in msg.data.iter('field'):
 
@@ -339,6 +522,12 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                     'guaranteed_bitrate_ulink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext),
                     'guaranteed_bitrate_dlink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext),
                     })
+        if self.__esm_status.has_key(self.__cur_eps_id):
+            self.log_info(str(self.__esm_status[self.__cur_eps_id].qos.dump_rate()))
+            self.log_info(str(self.__esm_status[self.__cur_eps_id].qos.dump_delivery()))
+            self.broadcast_info('QOS_DELIVERY', self.__esm_status[self.__cur_eps_id].qos.dump_delivery_dict())
+            self.broadcast_info('QOS_RATE', self.__esm_status[self.__cur_eps_id].qos.dump_rate_dict())
+
 
     def getTimeInterval(self, preTime, curTime):
         # preTime_parse = dt.strptime(preTime, '%Y-%m-%d %H:%M:%S.%f')
@@ -470,8 +659,10 @@ class EsmStatus:
         self.timestamp = None
 
     def dump(self):
-        return (' EPS_ID=' + xstr(self.eps_id) + ' type=' + xstr(bearer_type[self.type])
-            + ":\n\t"+self.qos.dump_rate()+'\n\t'+self.qos.dump_delivery())
+        # TODO: deal with potential KeyError here
+        dump_text = ' EPS_ID=' + xstr(self.eps_id) + ' type=' + xstr(bearer_type[self.type]) \
+            + ":\n\t"+self.qos.dump_rate()+'\n\t'+self.qos.dump_delivery()
+        return dump_text
 
 class EsmQos:
     """
@@ -513,6 +704,27 @@ class EsmQos:
             + ' max_bitrate_ulink_ext=' + xstr(self.max_bitrate_ulink_ext) + ' max_bitrate_dlink_ext=' + xstr(self.max_bitrate_dlink_ext)
             + ' guaranteed_birate_ulink_ext=' + xstr(self.guaranteed_bitrate_ulink_ext) + ' guaranteed_birate_dlink_ext=' + xstr(self.guaranteed_bitrate_dlink_ext))
 
+    def dump_rate_dict(self):
+        """
+        Report the data rate profile in ESM QoS, including the peak/mean throughput,
+        maximum downlink/uplink data rate, guaranteed downlink/uplink data rate, etc.
+
+        :returns: a dict that encodes all the data rate
+        :rtype: dict
+        """
+        res = {}
+        res['peak_tput'] = xstr(self.peak_tput)
+        res['mean_tput'] = xstr(self.mean_tput)
+        res['max_bitrate_ulink'] = xstr(self.peak_tput)
+        res['max_bitrate_dlink'] = xstr(self.max_bitrate_dlink)
+        res['guaranteed_birate_ulink'] = xstr(self.guaranteed_bitrate_ulink)
+        res['guaranteed_birate_dlink'] = xstr(self.guaranteed_bitrate_dlink)
+        res['max_bitrate_ulink_ext'] = xstr(self.max_bitrate_ulink_ext)
+        res['max_bitrate_dlink_ext'] = xstr(self.max_bitrate_dlink_ext)
+        res['guaranteed_birate_ulink_ext'] = xstr(self.guaranteed_bitrate_ulink_ext)
+        res['guaranteed_birate_dlink_ext'] = xstr(self.guaranteed_bitrate_dlink_ext)
+        return res
+
     def dump_delivery(self):
         """
         Report the delivery profile in ESM QoS, including delivery order guarantee,
@@ -535,6 +747,32 @@ class EsmQos:
             + ' traffic_class=' + xstr(tra_class)
             + ' QCI=' + xstr(self.qci) + ' delay_class=' + xstr(self.delay_class)
             + ' transfer_delay=' + xstr(self.transfer_delay) + ' residual_BER=' + xstr(self.residual_ber))
+
+    def dump_delivery_dict(self):
+        """
+        Report the delivery profile in ESM QoS, including delivery order guarantee,
+        traffic class, QCI, delay class, transfer delay, etc.
+
+        :returns: a string that encodes all the data rate, or None if not ready
+        :rtype: string
+        """
+
+        if self.delivery_order:
+            order = delivery_order[self.delivery_order]
+        else:
+            order = None
+        if self.traffic_class:
+            tra_class = traffic_class[self.traffic_class]
+        else:
+            tra_class = None
+        res = {}
+        res['delivery_order'] = xstr(order)
+        res['traffic_class'] = xstr(tra_class)
+        res['QCI'] = xstr(self.qci)
+        res['delay_class'] = xstr(self.delay_class)
+        res['transfer_delay'] = xstr(self.transfer_delay)
+        res['residual_BER'] = xstr(self.residual_ber)
+        return res
 
 def LteNasProfileHierarchy():
     '''

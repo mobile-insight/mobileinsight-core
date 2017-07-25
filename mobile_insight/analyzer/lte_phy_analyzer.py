@@ -63,6 +63,16 @@ class LtePhyAnalyzer(Analyzer):
         self.cur_cqi1 = 0
         self.cur_tbs = None
 
+        # Flag to show if it is the first sr event
+        self.init_flag = False
+
+        # Resource slot used by SR
+        self.rb_slot1 = None
+        self.rb_slot2 = None
+
+        # Scheduled SR subframenumber
+        self.sr_sfn = None
+
     def set_source(self, source):
         """
         Set the trace source. Enable the cellular signaling messages
@@ -76,6 +86,45 @@ class LtePhyAnalyzer(Analyzer):
         source.enable_log("LTE_PHY_PUSCH_CSF")
         # includes PUSCH grant usage info (~10 msg/s)
         source.enable_log("LTE_MAC_UL_Tx_Statistics")
+        source.enable_log("LTE_PHY_PUCCH_Tx_Report")
+
+    def callback_pucch(self, msg):
+        """
+        Dump PUCCH scheduling request information
+        :param msg: raw LTE_PHY_PUCCH_Tx_Report packet
+        :return:
+        """
+        log_item = msg.data.decode()
+        records = log_item['Records']
+        timestamp = str(log_item['timestamp'])
+        # a = unicode(timestamp).split(':')
+        # timestamp = int(a[0][-2:]) * 3600 + int(a[1]) * 60 + float(a[2])
+
+        for record in records:
+            uciformat = record['Format']
+            if uciformat == 'Format 1':
+                self.init_flag = True
+                self.rb_slot1 = record['Start RB Slot 0']
+                self.rb_slot2 = record['Start RB Slot 1']
+                self.sr_sfn = record['Current SFN SF'] % 10  # subframenumber
+                sr_dict = {}
+                sr_dict['timestamp'] = timestamp
+                sr_dict['fn and subfn'] = record['Current SFN SF']
+                self.broadcast_info("SR_EVENT", sr_dict)
+                self.log_info("SR_EVENT" + str(sr_dict))
+            elif uciformat == 'Format 1B' or uciformat == 'Format 1A':
+                # TODO: reset init_flag for new logs
+                if self.init_flag:
+                    if int(record['Start RB Slot 1']) == self.rb_slot2 and int(record['Start RB Slot 0']) == self.rb_slot1 \
+                            and record['Current SFN SF'] % 10 == self.sr_sfn:
+                        sr_dict = {}
+                        sr_dict['timestamp'] = timestamp
+                        sr_dict['fn and subfn'] = record['Current SFN SF']
+                        self.broadcast_info("SR_EVENT", sr_dict)
+                        self.log_info("SR_EVENT" + str(sr_dict))
+            elif uciformat == "Format 3":
+                # TODO: Deal with SR event in format 3
+                pass
 
     def callback_pdsch(self, msg):
         """
@@ -152,12 +201,18 @@ class LtePhyAnalyzer(Analyzer):
                 bcast_dict['Modulation-16QAM'] = str(self.mcs_16qam_count)
                 bcast_dict['Modulation-64QAM'] = str(self.mcs_64qam_count)
 
+                mod_dict = {}
+                mod_dict['Modulation 0'] = str(log_item["MCS 0"])
+                mod_dict['Modulation 1'] = str(log_item["MCS 1"])
+
                 # Log/notify average bandwidth
                 self.log_info(str(log_item['timestamp']) +
                               ' LTE_DL_Bandwidth=' +
                               bcast_dict['Bandwidth (Mbps)'] +
                               "Mbps")
                 self.broadcast_info('LTE_DL_BW', bcast_dict)
+                self.log_info('MODULATION_SCHEME: ' + str(mod_dict))
+                self.broadcast_info('MODULATION_SCHEME', mod_dict)
 
                 # Reset bandwidth statistics
                 self.prev_timestamp_dl = log_item['timestamp']
@@ -177,6 +232,11 @@ class LtePhyAnalyzer(Analyzer):
         log_item = msg.data.decode()
         self.cur_cqi0 = log_item['WideBand CQI CW0']
         self.cur_cqi1 = log_item['WideBand CQI CW1']
+        bcast_dict = {}
+        bcast_dict['WideBand CQI CW0'] = str(self.cur_cqi0)
+        bcast_dict['WideBand CQI CW1'] = str(self.cur_cqi1)
+        self.broadcast_info('PUSCH_CQI', bcast_dict)
+        self.log_info('PUSCH_CQI: ' + str(bcast_dict))
 
     def callback_pusch_grant(self, msg):
 
@@ -193,7 +253,7 @@ class LtePhyAnalyzer(Analyzer):
         grant_utilized = 0
         grant_utilization = 0
 
-        for i in range(0, log_item['Num SubPkt']):
+        for i in range(0, len(log_item['Subpackets'])):
             grant_received += log_item['Subpackets'][i]['Sample']['Grant received']
             grant_utilized += log_item['Subpackets'][i]['Sample']['Grant utilized']
 
@@ -257,6 +317,8 @@ class LtePhyAnalyzer(Analyzer):
 
         """
         if self.cur_cqi0 in cqi_to_bw:
+            self.broadcast_info('PREDICTED_DL_BW', str(cqi_to_bw[self.cur_cqi0]))
+            self.log_info('PREDICTED_DL_BW: ' + str(cqi_to_bw[self.cur_cqi0]) + 'Mbps')
             return cqi_to_bw[self.cur_cqi0]
         else:
             return None
@@ -269,3 +331,5 @@ class LtePhyAnalyzer(Analyzer):
             self.callback_pusch(msg)
         elif msg.type_id == "LTE_MAC_UL_Tx_Statistics":
             self.callback_pusch_grant(msg)
+        elif msg.type_id == "LTE_PHY_PUCCH_Tx_Report":
+            self.callback_pucch(msg)

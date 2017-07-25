@@ -3,14 +3,15 @@
 """
 A LTE RRC analyzer.
 
-Author: Yuanjie Li
+Author: Yuanjie Li, Zhehui Zhang
 """
 
-try: 
-    import xml.etree.cElementTree as ET 
-except ImportError: 
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
     import xml.etree.ElementTree as ET
 from analyzer import *
+from state_machine import *
 from protocol_analyzer import *
 import timeit
 import time
@@ -22,9 +23,9 @@ __all__=["LteRrcAnalyzer"]
 #Q-offset range mapping (6.3.4, TS36.331)
 q_offset_range = {
     0:-24, 1:-22, 2:-20, 3:-18, 4:-16, 5:-14,
-    6:-12, 7:-10, 8:-8, 9:-6, 10:-5, 11:-4, 
-    12:-3, 13:-2, 14:-1, 15:0, 16:1, 17:2, 
-    18:3, 19:4, 20:5, 21:6, 22:8, 23:10, 24:12, 
+    6:-12, 7:-10, 8:-8, 9:-6, 10:-5, 11:-4,
+    12:-3, 13:-2, 14:-1, 15:0, 16:1, 17:2,
+    18:3, 19:4, 20:5, 21:6, 22:8, 23:10, 24:12,
     25:14, 26:16, 27:18, 28:20, 29:22, 30:24
 }
 
@@ -37,6 +38,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
     def __init__(self):
 
         ProtocolAnalyzer.__init__(self)
+        self.state_machine = self.create_state_machine()
 
         #init packet filters
         self.add_source_callback(self.__rrc_filter)
@@ -115,7 +117,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         meas_obj.add('freq',False) # carrier frequency
         meas_obj.add('offset_freq',False) # frequency-specific measurement offset
         individual_offset = meas_obj.add('offset',True) # cellID->cellIndividualOffset
-        individual_offset.add('offset',False) 
+        individual_offset.add('offset',False)
         #TODO: add cell blacklist
 
         report_list.add('id',False) #report ID
@@ -131,28 +133,58 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         measid_list.add('report_id',False)
 
         return profile_hierarchy
-        
+
     def create_state_machine(self):
         """
         Declare a RRC state machine
 
         returns: a StateMachine
         """
-        
-        def idle_to_conn(msg):
-            for field in msg.data.iter('field'):
-                if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
+
+        def idle_to_crx(msg):
+            if msg.type_id == "LTE_RRC_OTA_Packet":
+                for field in msg.data.iter('field'):
+                    if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
+                        return True
+
+        def crx_to_sdrx(msg):
+            if msg.type_id == "LTE_RRC_CDRX_Events_Info":
+                if msg.data['CDRX Event'] == "SHORT_CYCLE_START":
                     return True
 
-        def conn_to_idle(msg):
-            for field in msg.data.iter('field'):
-                if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
+        def crx_to_ldrx(msg):
+            if msg.type_id == "LTE_RRC_CDRX_Events_Info":
+                if msg.data['CDRX Event'] == "LONG_CYCLE_START":
                     return True
 
-        state_machine={'RRC_IDLE':{'RRC_CONNECTED':idle_to_conn},
-                       'RRC_CONNECTED':{'RRC_IDLE':conn_to_idle}}  
+        def crx_to_idle(msg):
+            if msg.type_id == "LTE_RRC_OTA_Packet":
+                for field in msg.data.iter('field'):
+                    if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
+                        return True
 
-        return state_machine
+        def sdrx_to_ldrx(msg):
+            if msg.type_id == "LTE_RRC_CDRX_Events_Info":
+                if msg.data['CDRX Event'] == "LONG_CYCLE_START":
+                    return True
+
+        def sdrx_to_crx(msg):
+            if msg.type_id == "LTE_RRC_CDRX_Events_Info":
+                if msg.data['CDRX Event'] == "INACTIVITY_TIMER_START" or msg.data['CDRX Event'] == "INACTIVITY_TIMER_END":
+                    return True
+
+        def ldrx_to_crx(msg):
+            if msg.type_id == "LTE_RRC_CDRX_Events_Info":
+                if msg.data['CDRX Event'] == "INACTIVITY_TIMER_START" or msg.data['CDRX Event'] == "INACTIVITY_TIMER_END" :
+                    return True
+
+
+        state_machine={'RRC_IDLE': {'RRC_CRX': idle_to_crx},
+                       'RRC_CRX': {'RRC_SDRX': crx_to_sdrx, 'RRC_LDRX': crx_to_ldrx, 'RRC_IDLE': crx_to_idle},
+                       'RRC_SDRX': {'RRC_LDRX': sdrx_to_ldrx, 'RRC_CRX': sdrx_to_crx},
+                       'RRC_LDRX': {'RRC_CRX': ldrx_to_crx}}
+
+        return StateMachine(state_machine, self.init_protocol_state)
 
     def init_protocol_state(self, msg):
         """
@@ -160,14 +192,22 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
         :returns: current RRC state, or None if not determinable 
         """
-        for field in msg.data.iter('field'):
-            if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element" \
-            or field.get('name') == "lte-rrc.rrcConnectionReconfiguration_element":
-                return 'RRC_CONNECTED'
-            elif field.get('name') == "lte-rrc.rrcConnectionRelease_element":
-                return 'RRC_IDLE'
+        if msg.type_id == "LTE_RRC_OTA_Packet":
+            for field in msg.data.iter('field'):
+                if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element" \
+                        or field.get('name') == "lte-rrc.rrcConnectionReconfiguration_element":
+                    return 'RRC_CRX'
+                elif field.get('name') == "lte-rrc.rrcConnectionRelease_element":
+                    return 'RRC_IDLE'
+        elif msg.type_id == "LTE_RRC_CDRX_Events_Info":
+            if msg.data['CDRX Event'] == "INACTIVITY_TIMER_START" or msg.data['CDRX Event'] == "INACTIVITY_TIMER_END":
+                    return 'RRC_CRX'
+            elif msg.data['CDRX Event'] == "LONG_CYCLE_START":
+                return 'RRC_LDRX'
+            elif msg.data['CDRX Event'] == "SHORT_CYCLE_START":
+                return 'RRC_SDRX'
         return None
-     
+
     def __rrc_filter(self,msg):
 
         """
@@ -178,8 +218,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         # log_item = msg.data
         log_item = msg.data.decode()
         log_item_dict = dict(log_item)
-        
-        
+
+
         # Calllbacks triggering
         if msg.type_id == "LTE_RRC_OTA_Packet":
 
@@ -189,8 +229,13 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             #Convert msg to xml format
             # log_xml = ET.fromstring(log_item_dict['Msg'])
             log_xml = ET.XML(log_item_dict['Msg'])
+            # print xml_log
+            # print str(log_item_dict)
             # xml_msg = Event(msg.timestamp,msg.type_id,log_xml)
             xml_msg = Event(log_item_dict['timestamp'],msg.type_id,log_xml)
+
+            if self.state_machine.update_state(xml_msg):
+                self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
 
             tic = time.clock()
             self.__callback_rrc_conn(xml_msg)
@@ -226,7 +271,14 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_serv_cell(raw_msg)
         elif msg.type_id == "LTE_RRC_CDRX_Events_Info":
+            for item in log_item_dict['Records']:
+                # print item
+                raw_msg = Event(' '.join(map(str, [log_item_dict['timestamp'], item['SFN'], item['Sub-FN']])), msg.type_id, item)
+                if self.state_machine.update_state(raw_msg):
+                    self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
+                    # self.log_info("rrc state history: " + str(self.state_machine.state_history))
             self.__callback_drx(log_item_dict)
+
 
 
     def __callback_drx(self,msg):
@@ -267,8 +319,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
         else:
             if self.__status.freq != msg.data['Downlink frequency'] \
-            or self.__status.id != msg.data['Cell ID'] \
-            or self.__status.tac != msg.data['TAC']:
+                    or self.__status.id != msg.data['Cell ID'] \
+                    or self.__status.tac != msg.data['TAC']:
                 status_updated = True
                 curr_conn = self.__status.conn
                 self.__status = LteRrcStatus()
@@ -278,9 +330,10 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 self.__status.tac = msg.data['TAC']
                 self.__history[msg.timestamp] = self.__status
 
-        
+
         if status_updated:
             self.log_info(self.__status.dump())
+            self.broadcast_info('LTE_RRC_STATUS', self.__status.dump_dict())
 
     def __callback_sib_config(self,msg):
         """
@@ -291,6 +344,18 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         """
 
         for field in msg.data.iter('field'):
+
+            if field.get('name') == 'lte-rrc.measResultPCell_element':
+                meas_report = {}
+                meas_report['timestamp'] = str(msg.timestamp)
+                for val in field.iter('field'):
+                    if val.get('name') == 'lte-rrc.rsrpResult':
+                        meas_report['rsrp'] = int(val.get('show'))
+                        meas_report['rssi'] = meas_report['rsrp'] - 141 # map rsrp to rssi
+                    elif val.get('name') == 'lte-rrc.rsrqResult':
+                        meas_report['rsrq'] = int(val.get('show'))
+                self.broadcast_info('MEAR_PCELL', meas_report)
+                self.log_info('MEAR_PCELL: ' + str(meas_report))
 
             #TODO: use MIB, not lte-rrc.trackingAreaCode
             if field.get('name') == "lte-rrc.trackingAreaCode": #tracking area code
@@ -329,24 +394,27 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 #Test profile
                 if self.__status.inited():
                     self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.serv_config",
-                        {'priority':field_val['lte-rrc.cellReselectionPriority'],
-                         'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
-                         's_nonintrasearch':str(int(field_val['lte-rrc.s_NonIntraSearch'])*2),
-                         'q_hyst':field_val['lte-rrc.q_Hyst']})
-                
+                                        {'priority':field_val['lte-rrc.cellReselectionPriority'],
+                                         'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
+                                         's_nonintrasearch':str(int(field_val['lte-rrc.s_NonIntraSearch'])*2),
+                                         'q_hyst':field_val['lte-rrc.q_Hyst']})
+
                 self.__config[cur_pair].sib.intra_freq_config = LteRrcSibIntraFreqConfig(
                     int(field_val['lte-rrc.t_ReselectionEUTRA']),
                     int(field_val['lte-rrc.q_RxLevMin'])*2,
                     int(field_val['lte-rrc.p_Max']),
-                    float(field_val['lte-rrc.s_IntraSearch'])*2) 
+                    float(field_val['lte-rrc.s_IntraSearch'])*2)
 
                 #Test profile
                 if self.__status.inited():
                     self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.intra_freq_config",
-                        {'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
-                         'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
-                         'p_Max':field_val['lte-rrc.p_Max'],
-                         's_IntraSearch':str(float(field_val['lte-rrc.s_IntraSearch'])*2)})
+                                        {'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
+                                         'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                                         'p_Max':field_val['lte-rrc.p_Max'],
+                                         's_IntraSearch':str(float(field_val['lte-rrc.s_IntraSearch'])*2)})
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+
 
             #inter-frequency (LTE)
             if field.get('name') == "lte-rrc.interFreqCarrierFreqList":
@@ -372,29 +440,29 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 neighbor_freq=int(field_val['lte-rrc.dl_CarrierFreq'])
                 self.__config[cur_pair].sib.inter_freq_config[neighbor_freq] = LteRrcSibInterFreqConfig(
-                        "LTE",
-                        neighbor_freq,
-                        int(field_val['lte-rrc.t_ReselectionEUTRA']),
-                        int(field_val['lte-rrc.q_RxLevMin'])*2,
-                        int(field_val['lte-rrc.p_Max']),
-                        int(field_val['lte-rrc.cellReselectionPriority']),
-                        int(field_val['lte-rrc.threshX_High'])*2,
-                        int(field_val['lte-rrc.threshX_Low'])*2,
-                        int(field_val['lte-rrc.q_OffsetFreq']))
+                    "LTE",
+                    neighbor_freq,
+                    int(field_val['lte-rrc.t_ReselectionEUTRA']),
+                    int(field_val['lte-rrc.q_RxLevMin'])*2,
+                    int(field_val['lte-rrc.p_Max']),
+                    int(field_val['lte-rrc.cellReselectionPriority']),
+                    int(field_val['lte-rrc.threshX_High'])*2,
+                    int(field_val['lte-rrc.threshX_Low'])*2,
+                    int(field_val['lte-rrc.q_OffsetFreq']))
 
                 #Test profile
                 if self.__status.inited():
                     self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
-                        {'rat':'LTE',
-                         'freq':str(neighbor_freq),
-                         'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
-                         'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
-                         'p_Max':field_val['lte-rrc.p_Max'],
-                         'priority':field_val['lte-rrc.cellReselectionPriority'],
-                         'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
-                         'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
-                         'q_offset_freq':field_val['lte-rrc.q_OffsetFreq']
-                         })
+                                        {'rat':'LTE',
+                                         'freq':str(neighbor_freq),
+                                         'tReselection':field_val['lte-rrc.t_ReselectionEUTRA'],
+                                         'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                                         'p_Max':field_val['lte-rrc.p_Max'],
+                                         'priority':field_val['lte-rrc.cellReselectionPriority'],
+                                         'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
+                                         'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
+                                         'q_offset_freq':field_val['lte-rrc.q_OffsetFreq']
+                                         })
 
                 #2nd round: inter-freq cell individual offset
                 for val in field.iter('field'):
@@ -411,6 +479,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                         offset = int(field_val2['lte-rrc.q_OffsetCell'])
                         offset_pair = (cell_id,neighbor_freq)
                         self.__config[cur_pair].sib.inter_freq_cell_config[offset_pair] = q_offset_range[int(offset)]
+
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
 
             #inter-RAT (UTRA)
@@ -434,31 +505,34 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     self.__config[cur_pair] = LteRrcConfig()
                     self.__config[cur_pair].status = self.__status
 
-                neighbor_freq=int(field_val['lte-rrc.carrierFreq']) 
+                neighbor_freq=int(field_val['lte-rrc.carrierFreq'])
                 self.__config[cur_pair].sib.inter_freq_config[neighbor_freq] = LteRrcSibInterFreqConfig(
-                        "UTRA",
-                        neighbor_freq,
-                        None,    #For 3G, tReselection is not in this IE
-                        int(field_val['lte-rrc.q_RxLevMin'])*2,
-                        int(field_val['lte-rrc.p_MaxUTRA']),
-                        int(field_val['lte-rrc.cellReselectionPriority']),
-                        int(field_val['lte-rrc.threshX_High'])*2,
-                        int(field_val['lte-rrc.threshX_Low'])*2,
-                        0)    #inter-RAT has no freq-offset
+                    "UTRA",
+                    neighbor_freq,
+                    None,    #For 3G, tReselection is not in this IE
+                    int(field_val['lte-rrc.q_RxLevMin'])*2,
+                    int(field_val['lte-rrc.p_MaxUTRA']),
+                    int(field_val['lte-rrc.cellReselectionPriority']),
+                    int(field_val['lte-rrc.threshX_High'])*2,
+                    int(field_val['lte-rrc.threshX_Low'])*2,
+                    0)    #inter-RAT has no freq-offset
 
                 #Test profile
                 if self.__status.inited():
                     self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
-                        {'rat':'UTRA',
-                         'freq':str(neighbor_freq),
-                         'tReselection':'null',
-                         'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
-                         'p_Max':field_val['lte-rrc.p_MaxUTRA'],
-                         'priority':field_val['lte-rrc.cellReselectionPriority'],
-                         'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
-                         'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
-                         'q_offset_freq':'0'
-                         })
+                                        {'rat':'UTRA',
+                                         'freq':str(neighbor_freq),
+                                         'tReselection':'null',
+                                         'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                                         'p_Max':field_val['lte-rrc.p_MaxUTRA'],
+                                         'priority':field_val['lte-rrc.cellReselectionPriority'],
+                                         'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
+                                         'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
+                                         'q_offset_freq':'0'
+                                         })
+
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             if field.get('name') == "lte-rrc.t_ReselectionUTRA":
                 cur_pair = (self.__status.id,self.__status.freq)
@@ -491,31 +565,33 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     self.__config[cur_pair] = LteRrcConfig()
                     self.__config[cur_pair].status = self.__status
 
-                neighbor_freq = int(field_val['lte-rrc.startingARFCN']) 
+                neighbor_freq = int(field_val['lte-rrc.startingARFCN'])
                 self.__config[cur_pair].sib.inter_freq_config[neighbor_freq] = LteRrcSibInterFreqConfig(
-                        "GERAN",
-                        neighbor_freq,
-                        None,    #For 3G, tReselection is not in this IE
-                        int(field_val['lte-rrc.q_RxLevMin'])*2,
-                        int(field_val['lte-rrc.p_MaxGERAN']),
-                        int(field_val['lte-rrc.cellReselectionPriority']),
-                        int(field_val['lte-rrc.threshX_High'])*2,
-                        int(field_val['lte-rrc.threshX_Low'])*2,
-                        0)    #inter-RAT has no freq-offset
+                    "GERAN",
+                    neighbor_freq,
+                    None,    #For 3G, tReselection is not in this IE
+                    int(field_val['lte-rrc.q_RxLevMin'])*2,
+                    int(field_val['lte-rrc.p_MaxGERAN']),
+                    int(field_val['lte-rrc.cellReselectionPriority']),
+                    int(field_val['lte-rrc.threshX_High'])*2,
+                    int(field_val['lte-rrc.threshX_Low'])*2,
+                    0)    #inter-RAT has no freq-offset
 
                 #Test profile
                 if self.__status.inited():
                     self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.inter_freq_config:"+str(neighbor_freq),
-                        {'rat':'GERAN',
-                         'freq':str(neighbor_freq),
-                         'tReselection':'null',
-                         'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
-                         'p_Max':field_val['lte-rrc.p_MaxGERAN'],
-                         'priority':field_val['lte-rrc.cellReselectionPriority'],
-                         'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
-                         'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
-                         'q_offset_freq':'0'
-                         })
+                                        {'rat':'GERAN',
+                                         'freq':str(neighbor_freq),
+                                         'tReselection':'null',
+                                         'q_RxLevMin':str(int(field_val['lte-rrc.q_RxLevMin'])*2),
+                                         'p_Max':field_val['lte-rrc.p_MaxGERAN'],
+                                         'priority':field_val['lte-rrc.cellReselectionPriority'],
+                                         'threshx_high':str(int(field_val['lte-rrc.threshX_High'])*2),
+                                         'threshx_low':str(int(field_val['lte-rrc.threshX_Low'])*2),
+                                         'q_offset_freq':'0'
+                                         })
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             #FIXME: t_ReselectionGERAN appears BEFORE config, so this code does not work!
             if field.get('name') == "lte-rrc.t_ReselectionGERAN":
@@ -526,6 +602,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 for config in self.__config[cur_pair].sib.inter_freq_config.itervalues():
                     if config.rat == "GERAN":
                         config.tReselection = float(field.get('show'))
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
 
             #intra-frequency cell offset
@@ -546,11 +624,15 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 cell_id = int(field_val['lte-rrc.physCellId'])
                 offset = int(field_val['lte-rrc.q_OffsetCell'])
                 self.__config[cur_pair].sib.intra_freq_cell_config[cell_id] = q_offset_range[int(offset)]
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
-            #TODO: RRC connection status update
+                #TODO: RRC connection status update
+
+
 
     def __callback_rrc_reconfig(self,msg):
-        
+
         """
         Extract configurations from RRCReconfiguration Message, 
         including the measurement profiles, the MAC/RLC/PDCP configurations, etc.
@@ -561,6 +643,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         #TODO: optimize code to handle objects/config under the same ID
         measobj_id = -1
         report_id = -1
+
+
 
         for field in msg.data.iter('field'):
 
@@ -573,7 +657,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
 
             #Add a LTE measurement object
-            if field.get('name') == "lte-rrc.measObjectEUTRA_element": 
+            if field.get('name') == "lte-rrc.measObjectEUTRA_element":
                 field_val = {}
 
                 field_val['lte-rrc.carrierFreq'] = 0
@@ -605,6 +689,9 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                             else:
                                 cell_offset = 0
                             self.__config[cur_pair].active.measobj[freq].add_cell(cell_id,cell_offset)
+
+                self.broadcast_info('RRC_RECONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('RRC_RECONFIG: ' + str(self.__config[cur_pair].dump()))
 
             #Add a UTRA (3G) measurement object:
             if field.get('name') == "lte-rrc.measObjectUTRA_element":
@@ -802,6 +889,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 config_id = int(field_val['lte-rrc.reportConfigId'])
                 self.__config[cur_pair].active.measid_list[meas_id] = (obj_id,config_id)
 
+
+
     def __callback_rrc_conn(self,msg):
         """
         Update RRC connectivity status
@@ -820,7 +909,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 drx_state['Timestamp'] = str(msg.timestamp)
                 self.broadcast_info('DRX',drx_state)
 
-                
+
             if field.get('name') == "lte-rrc.rrcConnectionRelease_element":
                 self.__status.conn = False
                 # self.log_info(self.__status.dump())
@@ -922,10 +1011,24 @@ class LteRrcStatus:
         :rtype: string
         """
         return (self.__class__.__name__
-            + " cellID=" + str(self.id)
-            + " frequency=" + str(self.freq)
-            + " TAC=" + str(self.tac)
-            + " connected=" + str(self.conn) + '\n')
+                + " cellID=" + str(self.id)
+                + " frequency=" + str(self.freq)
+                + " TAC=" + str(self.tac)
+                + " connected=" + str(self.conn) + '\n')
+
+    def dump_dict(self):
+        """
+        Report the cell status
+
+        :returns: a dict that encodes the cell status
+        :rtype: dict
+        """
+        dumped_dict = {}
+        dumped_dict['cellID'] = str(self.id)
+        dumped_dict['frequency'] = str(self.freq)
+        dumped_dict['TAC'] = str(self.tac)
+        dumped_dict['connected'] = str(self.conn)
+        return dumped_dict
 
     def inited(self):
         # return (self.id!=None and self.freq!=None)
@@ -945,7 +1048,7 @@ class LteRrcConfig:
     """
 
     # Update in 2.0: query and storage with hierarchical name
-    
+
     def __init__(self):
         self.status = LteRrcStatus() #the metadata of this cell
         self.status.rat = "LTE"
@@ -961,9 +1064,21 @@ class LteRrcConfig:
         """
 
         return (self.__class__.__name__ + '\n'
-            + self.status.dump()
-            + self.sib.dump()
-            + self.active.dump() )
+                + self.status.dump()
+                + self.sib.dump()
+                + self.active.dump() )
+
+    def dump_dict(self):
+        """
+        Report the cell configurations
+
+        :returns: a dict that encodes the cell's configurations
+        :rtype: dict
+        """
+        res = {}
+        res.update(self.status.dump_dict())
+        res.update(self.sib.dump_dict())
+        return res
 
     def get_cell_reselection_config(self,cell_meta):
         """
@@ -988,7 +1103,7 @@ class LteRrcConfig:
             # return LteRrcReselectionConfig(cell,freq,self.sib.serv_config.priority, \
             #     offset,None,None,self.sib.serv_config.threshserv_low)
             return LteRrcReselectionConfig(cell,freq,self.sib.serv_config.priority,
-                offset,None,None,self.sib.serv_config.threshserv_low)
+                                           offset,None,None,self.sib.serv_config.threshserv_low)
         else:
             #inter-frequency/RAT
             if freq not in self.sib.inter_freq_config:
@@ -1003,9 +1118,9 @@ class LteRrcConfig:
             #     freq_config.threshx_high,freq_config.threshx_low, \
             #     self.sib.serv_config.threshserv_low)
             return LteRrcReselectionConfig(cell,freq,freq_config.priority,
-                freq_config.q_offset_freq+offset_cell+hyst,
-                freq_config.threshx_high,freq_config.threshx_low,
-                self.sib.serv_config.threshserv_low)
+                                           freq_config.q_offset_freq+offset_cell+hyst,
+                                           freq_config.threshx_high,freq_config.threshx_low,
+                                           self.sib.serv_config.threshserv_low)
 
     def get_meas_config(self,cell_meta):
 
@@ -1053,7 +1168,7 @@ class LteRrcConfig:
                         # res.append(LteRrcReselectionConfig(cell,freq,priority, \
                         #     None,threshX_High,None,self.sib.serv_config.threshserv_low))
                         res.append(LteRrcReselectionConfig(cell,freq,priority,
-                            None,threshX_High,None,self.sib.serv_config.threshserv_low))
+                                                           None,threshX_High,None,self.sib.serv_config.threshserv_low))
                     if item.type=="a2":
                         pass
                     if item.type=="a3":
@@ -1065,7 +1180,7 @@ class LteRrcConfig:
                         # res.append(LteRrcReselectionConfig(cell,freq,priority, \
                         #     offset,None,None,self.sib.serv_config.threshserv_low))
                         res.append(LteRrcReselectionConfig(cell,freq,priority,
-                            offset,None,None,self.sib.serv_config.threshserv_low))
+                                                           offset,None,None,self.sib.serv_config.threshserv_low))
                     if item.type=="a4":
                         #equivalent to high-priority reselection
                         priority=self.sib.serv_config.priority+1
@@ -1075,7 +1190,7 @@ class LteRrcConfig:
                         # res.append(LteRrcReselectionConfig(cell,freq,priority,None, \
                         #     threshX_High,None,self.sib.serv_config.threshserv_low))
                         res.append(LteRrcReselectionConfig(cell,freq,priority,None,
-                            threshX_High,None,self.sib.serv_config.threshserv_low))
+                                                           threshX_High,None,self.sib.serv_config.threshserv_low))
                     if item.type=="a5":
                         #equivalent o low-priority reselection
                         priority=self.sib.serv_config.priority-1
@@ -1084,8 +1199,8 @@ class LteRrcConfig:
                         threshX_Low=item.threshold2+hyst-self.active.measobj[freq].offset_freq
                         if cell in self.active.measobj[freq].cell_list[freq]:
                             threshX_Low-=self.active.measobj[freq].cell_list[cell]
-                        res.append(LteRrcReselectionConfig(cell,freq,priority,None, 
-                            threshX_Low,threshserv_low))
+                        res.append(LteRrcReselectionConfig(cell,freq,priority,None,
+                                                           threshX_Low,threshserv_low))
 
                     if item.type=="b2":
                         #equivalent o low-priority reselection
@@ -1093,8 +1208,8 @@ class LteRrcConfig:
                         #TODO: add thresh_serv. Currently use offset
                         threshserv_low=item.threshold1-hyst
                         threshX_Low=item.threshold2+hyst-self.active.measobj[freq].offset_freq
-                        res.append(LteRrcReselectionConfig(cell,freq,priority,None, 
-                            threshX_Low,threshserv_low))
+                        res.append(LteRrcReselectionConfig(cell,freq,priority,None,
+                                                           threshX_Low,threshserv_low))
         return res
 
 
@@ -1106,13 +1221,13 @@ class LteRrcSib:
     def __init__(self):
         #FIXME: init based on the default value in TS36.331
         #configuration as a serving cell (LteRrcSibServ)
-        self.serv_config = LteRrcSibServ(7,0,float('inf'),0) 
+        self.serv_config = LteRrcSibServ(7,0,float('inf'),0)
 
         #Per-frequency configurations
         #Intra-freq reselection config
-        self.intra_freq_config = LteRrcSibIntraFreqConfig(None,None,None,None) 
+        self.intra_freq_config = LteRrcSibIntraFreqConfig(None,None,None,None)
         #Inter-freq/RAT reselection config. Freq -> LteRrcSibInterFreqConfig
-        self.inter_freq_config = {}  
+        self.inter_freq_config = {}
 
         #TODO: add intra_cell_config and inter_cell config, which maps individual cell offset
         self.intra_freq_cell_config = {} # cell -> offset
@@ -1130,11 +1245,29 @@ class LteRrcSib:
             res += self.inter_freq_config[item].dump()
         for item in self.intra_freq_cell_config:
             res += ("Intra-freq offset: " + str(item) + ' '
-                + str(self.intra_freq_cell_config[item]) + '\n')
+                    + str(self.intra_freq_cell_config[item]) + '\n')
         for item in self.inter_freq_cell_config:
             res += ("Inter-freq offset: " + str(item) + ' '
-                + str(self.inter_freq_cell_config[item]) + '\n')
+                    + str(self.inter_freq_cell_config[item]) + '\n')
         return res
+
+    def dump_dict(self):
+        """
+        Report the cell SIB configurations
+
+        :returns: a dict that encodes the cell's SIB configurations
+        :rtype: dict
+        """
+        res = self.serv_config.dump() + self.intra_freq_config.dump()
+        for item in self.inter_freq_config:
+            res += self.inter_freq_config[item].dump()
+        for item in self.intra_freq_cell_config:
+            res += ("Intra-freq offset: " + str(item) + ' '
+                    + str(self.intra_freq_cell_config[item]) + '\n')
+        for item in self.inter_freq_cell_config:
+            res += ("Inter-freq offset: " + str(item) + ' '
+                    + str(self.inter_freq_cell_config[item]) + '\n')
+        return {'sib config': res}
 
 
 class LteRrcReselectionConfig:
@@ -1172,10 +1305,10 @@ class LteRrcSibServ:
         # + str(self.threshserv_low) + ' ' + str(self.s_nonintrasearch) + ' '\
         # + str(self.q_hyst) + '\n'
         return (self.__class__.__name__
-            + ' ' + str(self.priority)
-            + ' ' + str(self.threshserv_low)
-            + ' ' + str(self.s_nonintrasearch)
-            + ' ' + str(self.q_hyst) + '\n')
+                + ' ' + str(self.priority)
+                + ' ' + str(self.threshserv_low)
+                + ' ' + str(self.s_nonintrasearch)
+                + ' ' + str(self.q_hyst) + '\n')
 
 
 class LteRrcSibIntraFreqConfig:
@@ -1199,16 +1332,16 @@ class LteRrcSibIntraFreqConfig:
         # return self.__class__.__name__ + ' ' + str(self.tReselection) + ' ' \
         # + str(self.q_RxLevMin) + ' ' + str(self.p_Max) + ' ' + str(self.s_IntraSearch) + '\n'
         return (self.__class__.__name__
-            + ' ' + str(self.tReselection)
-            + ' ' + str(self.q_RxLevMin)
-            + ' ' + str(self.p_Max)
-            + ' ' + str(self.s_IntraSearch) + '\n')
+                + ' ' + str(self.tReselection)
+                + ' ' + str(self.q_RxLevMin)
+                + ' ' + str(self.p_Max)
+                + ' ' + str(self.s_IntraSearch) + '\n')
 
 
 class LteRrcSibInterFreqConfig:
     """
     Inter-frequency SIB configurations
-    """    
+    """
     #FIXME: the current list is incomplete
     #FIXME: individual cell offset
     def __init__(self,rat,freq,tReselection,q_RxLevMin,p_Max,priority,threshx_high,threshx_low,q_offset_freq):
@@ -1234,14 +1367,14 @@ class LteRrcSibInterFreqConfig:
         # +str(self.q_RxLevMin)+' '+str(self.p_Max)+' '+str(self.priority)+' '\
         # +str(self.threshx_high)+' '+str(self.threshx_low)+'\n'
         return (self.__class__.__name__
-            + ' ' + str(self.rat)
-            + ' ' + str(self.freq)
-            + ' ' + str(self.tReselection)
-            + ' ' + str(self.q_RxLevMin)
-            + ' ' + str(self.p_Max)
-            + ' ' + str(self.priority)
-            + ' ' + str(self.threshx_high)
-            + ' ' + str(self.threshx_low) + '\n')
+                + ' ' + str(self.rat)
+                + ' ' + str(self.freq)
+                + ' ' + str(self.tReselection)
+                + ' ' + str(self.q_RxLevMin)
+                + ' ' + str(self.p_Max)
+                + ' ' + str(self.priority)
+                + ' ' + str(self.threshx_high)
+                + ' ' + str(self.threshx_low) + '\n')
 
 
 class LteRrcActive:
@@ -1268,6 +1401,18 @@ class LteRrcActive:
             res += self.report_list[item].dump()
         for item in self.measid_list:
             res += "MeasObj "+str(item)+' '+str(self.measid_list[item])+'\n'
+        return res
+
+    def dump_dict(self):
+        """
+        Report the cell's active-state configurations
+
+        :returns: a dict that encodes the cell's active-state configurations
+        :rtype: dict
+        """
+        res = {}
+        for item in self.measobj:
+            res[item] = self.measobj[item].dump()
         return res
 
 
@@ -1304,10 +1449,10 @@ class LteMeasObjectEutra:
         # res = self.__class__.__name__+' '+str(self.obj_id)+' '\
         # +str(self.freq)+' '+ str(self.offset_freq)+'\n'
         res = (self.__class__.__name__
-            + ' ' + str(self.obj_id)
-            + ' ' + str(self.freq)
-            + ' ' + str(self.offset_freq)
-            +'\n')
+               + ' ' + str(self.obj_id)
+               + ' ' + str(self.freq)
+               + ' ' + str(self.offset_freq)
+               +'\n')
         for item in self.cell_list:
             res += str(item) + ' ' + str(self.cell_list[item]) + '\n'
         return res
@@ -1323,7 +1468,7 @@ class LteMeasObjectUtra:
         self.freq = freq # carrier frequency
         self.offset_freq = offset_freq # frequency-specific measurement offset
         #TODO: add cell list
-        
+
     def dump(self):
         """
         Report the cell's 3G measurement configurations
@@ -1334,9 +1479,9 @@ class LteMeasObjectUtra:
         # return self.__class__.__name__+' '+str(self.obj_id)+' '\
         # +str(self.freq,self.offset_freq)+'\n'
         return (self.__class__.__name__
-            + ' ' + str(self.obj_id)
-            + ' ' + str(self.freq) 
-            + ' ' + str(self.offset_freq) + '\n')
+                + ' ' + str(self.obj_id)
+                + ' ' + str(self.freq)
+                + ' ' + str(self.offset_freq) + '\n')
 
 
 class LteReportConfig:
@@ -1369,12 +1514,12 @@ class LteReportConfig:
         :rtype: string
         """
         res = (self.__class__.__name__
-            + ' ' + str(self.report_id)
-            + ' ' + str(self.hyst) + '\n')
+               + ' ' + str(self.report_id)
+               + ' ' + str(self.hyst) + '\n')
         for item in self.event_list:
-            res += (str(item.type) 
-                + ' ' + str(item.threshold1) 
-                + ' ' + str(item.threshold2) + '\n')
+            res += (str(item.type)
+                    + ' ' + str(item.threshold1)
+                    + ' ' + str(item.threshold2) + '\n')
         return res
 
 
@@ -1386,3 +1531,11 @@ class LteRportEvent:
         self.type = event_type
         self.threshold1 = threshold1
         self.threshold2 = threshold2    
+
+#class Event:
+#    """
+#    Abstraction of callback event
+#    """
+#    def __init__(self, msg):
+#        self.timestamp = str(msg.timestamp)
+#        self.type = None
