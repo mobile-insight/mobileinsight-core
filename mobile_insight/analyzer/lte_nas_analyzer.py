@@ -394,7 +394,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                     if val.get('name') == 'nas_eps.emm.acc_csfb_cap':
                         csfb_cap = True if val.get('show') == '1' else False
                         self.log_info("CSFB Capbility: " + str(csfb_cap))
-                        self.broadcast_info('CsfbCap', csfb_cap)
+                        self.broadcast_info('CSFB_CAP', str(csfb_cap))
 
 
             if field.get('show')=="EPS mobile identity - GUTI":
@@ -526,8 +526,8 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         if self.__esm_status.has_key(self.__cur_eps_id):
             self.log_info(str(self.__esm_status[self.__cur_eps_id].qos.dump_rate()))
             self.log_info(str(self.__esm_status[self.__cur_eps_id].qos.dump_delivery()))
-            self.broadcast_info('QosDelivery', self.__esm_status[self.__cur_eps_id].qos.dump_delivery())
-            self.broadcast_info('QosRate', self.__esm_status[self.__cur_eps_id].qos.dump_rate())
+            self.broadcast_info('QOS_DELIVERY', self.__esm_status[self.__cur_eps_id].qos.dump_delivery_dict())
+            self.broadcast_info('QOS_RATE', self.__esm_status[self.__cur_eps_id].qos.dump_rate_dict())
 
 
     def getTimeInterval(self, preTime, curTime):
@@ -705,6 +705,27 @@ class EsmQos:
             + ' max_bitrate_ulink_ext=' + xstr(self.max_bitrate_ulink_ext) + ' max_bitrate_dlink_ext=' + xstr(self.max_bitrate_dlink_ext)
             + ' guaranteed_birate_ulink_ext=' + xstr(self.guaranteed_bitrate_ulink_ext) + ' guaranteed_birate_dlink_ext=' + xstr(self.guaranteed_bitrate_dlink_ext))
 
+    def dump_rate_dict(self):
+        """
+        Report the data rate profile in ESM QoS, including the peak/mean throughput,
+        maximum downlink/uplink data rate, guaranteed downlink/uplink data rate, etc.
+
+        :returns: a dict that encodes all the data rate
+        :rtype: dict
+        """
+        res = {}
+        res['peak_tput'] = xstr(self.peak_tput)
+        res['mean_tput'] = xstr(self.mean_tput)
+        res['max_bitrate_ulink'] = xstr(self.peak_tput)
+        res['max_bitrate_dlink'] = xstr(self.max_bitrate_dlink)
+        res['guaranteed_birate_ulink'] = xstr(self.guaranteed_bitrate_ulink)
+        res['guaranteed_birate_dlink'] = xstr(self.guaranteed_bitrate_dlink)
+        res['max_bitrate_ulink_ext'] = xstr(self.max_bitrate_ulink_ext)
+        res['max_bitrate_dlink_ext'] = xstr(self.max_bitrate_dlink_ext)
+        res['guaranteed_birate_ulink_ext'] = xstr(self.guaranteed_bitrate_ulink_ext)
+        re['guaranteed_birate_dlink_ext'] = xstr(self.guaranteed_bitrate_dlink_ext)
+        return res
+
     def dump_delivery(self):
         """
         Report the delivery profile in ESM QoS, including delivery order guarantee,
@@ -727,6 +748,32 @@ class EsmQos:
             + ' traffic_class=' + xstr(tra_class)
             + ' QCI=' + xstr(self.qci) + ' delay_class=' + xstr(self.delay_class)
             + ' transfer_delay=' + xstr(self.transfer_delay) + ' residual_BER=' + xstr(self.residual_ber))
+
+    def dump_delivery_dict(self):
+        """
+        Report the delivery profile in ESM QoS, including delivery order guarantee,
+        traffic class, QCI, delay class, transfer delay, etc.
+
+        :returns: a string that encodes all the data rate, or None if not ready
+        :rtype: string
+        """
+
+        if self.delivery_order:
+            order = delivery_order[self.delivery_order]
+        else:
+            order = None
+        if self.traffic_class:
+            tra_class = traffic_class[self.traffic_class]
+        else:
+            tra_class = None
+        res = {}
+        res['delivery_order'] = xstr(order)
+        res['traffic_class'] = xstr(tra_class)
+        res['QCI'] = xstr(self.qci)
+        res['delay_class'] = xstr(self.delay_class)
+        res['transfer_delay'] = xstr(self.transfer_delay)
+        res['residual_BER'] = xstr(self.residual_ber)
+        return res
 
 def LteNasProfileHierarchy():
     '''

@@ -96,7 +96,7 @@ class LtePhyAnalyzer(Analyzer):
         """
         log_item = msg.data.decode()
         records = log_item['Records']
-        timestamp = log_item['timestamp']
+        timestamp = str(log_item['timestamp'])
         # a = unicode(timestamp).split(':')
         # timestamp = int(a[0][-2:]) * 3600 + int(a[1]) * 60 + float(a[2])
 
