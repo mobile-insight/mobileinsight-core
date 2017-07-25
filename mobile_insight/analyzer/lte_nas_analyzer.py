@@ -296,7 +296,6 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                 self.log_info("ESM state: " + self.esm_state_machine.get_current_state())
 
             self.send(msg)
-        self.log_info("Call flow status: " + str(self.callflow_state_machine.get_current_state()))
 
     def __callback_emm_state(self,msg):
         """
@@ -320,7 +319,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
             'conn substate': self.__emm_status.substate,
         }
 
-        self.log_info(str(state))
+        # self.log_info('EMM_STATE', str(state))
         self.broadcast_info('EMM_STATE', state)
 
         if self.callflow_state_machine.update_state(msg):
@@ -374,9 +373,9 @@ class LteNasAnalyzer(ProtocolAnalyzer):
         # broadcast
         state = {
             'conn state': esm_state[int(msg.data["EPS bearer state"]) - 1],
-            'timestamp' : msg.data['timestamp']
+            'timestamp' : str(msg.data['timestamp'])
         }
-        self.log_info(str(state))
+        # self.log_info(str(state))
         self.broadcast_info('ESM_STATE', state)
 
     def __callback_emm(self,msg):
@@ -723,7 +722,7 @@ class EsmQos:
         res['max_bitrate_ulink_ext'] = xstr(self.max_bitrate_ulink_ext)
         res['max_bitrate_dlink_ext'] = xstr(self.max_bitrate_dlink_ext)
         res['guaranteed_birate_ulink_ext'] = xstr(self.guaranteed_bitrate_ulink_ext)
-        re['guaranteed_birate_dlink_ext'] = xstr(self.guaranteed_bitrate_dlink_ext)
+        res['guaranteed_birate_dlink_ext'] = xstr(self.guaranteed_bitrate_dlink_ext)
         return res
 
     def dump_delivery(self):

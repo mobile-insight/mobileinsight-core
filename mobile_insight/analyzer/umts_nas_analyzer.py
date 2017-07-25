@@ -208,7 +208,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_mm_state(raw_msg)
             if self.mm_state_machine.update_state(raw_msg):
-                print "MM State:", self.mm_state_machine.get_current_state()
+                self.log_info("MM State: " + self.mm_state_machine.get_current_state())
 
 
         if msg.type_id == "UMTS_NAS_MM_REG_State":
@@ -230,7 +230,7 @@ class UmtsNasAnalyzer(ProtocolAnalyzer):
             raw_msg = Event(msg.timestamp,msg.type_id,log_item_dict)
             self.__callback_gmm_state(raw_msg)
             if self.gmm_state_machine.update_state(raw_msg):
-                print "GMM State:", self.gmm_state_machine.get_current_state()
+                self.log_info("GMM State: " + self.gmm_state_machine.get_current_state())
 
 
 
