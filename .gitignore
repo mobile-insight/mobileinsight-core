@@ -41,6 +41,10 @@ docs/_build
 # Example files
 *.db
 examples/test.txt
+examples/apps/*
+examples/demo/*
+examples/tmp/
+examples/lte-rrc-example.py
 
 # Wireshark sources
 wireshark-2.*/
