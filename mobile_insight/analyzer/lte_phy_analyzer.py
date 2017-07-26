@@ -87,6 +87,22 @@ class LtePhyAnalyzer(Analyzer):
         # includes PUSCH grant usage info (~10 msg/s)
         source.enable_log("LTE_MAC_UL_Tx_Statistics")
         source.enable_log("LTE_PHY_PUCCH_Tx_Report")
+        source.enable_log("LTE_PHY_PUSCH_Tx_Report")
+
+    def callback_pusch_tx(self, msg):
+        """
+        Dump PUSCH power measurement information
+        :param msg: raw LTE_PHY_PUSCH_Tx_Report packet
+        :return:
+        """
+        log_item = msg.data.decode()
+        print log_item
+        # records = log_item['Records']
+        timestamp = str(log_item['timestamp'])
+
+        # for record in records:
+        #     print record
+            # pusch_tx_power = record['PUSCH Tx Power (dBm)']
 
     def callback_pucch(self, msg):
         """
@@ -97,10 +113,14 @@ class LtePhyAnalyzer(Analyzer):
         log_item = msg.data.decode()
         records = log_item['Records']
         timestamp = str(log_item['timestamp'])
-        # a = unicode(timestamp).split(':')
-        # timestamp = int(a[0][-2:]) * 3600 + int(a[1]) * 60 + float(a[2])
 
         for record in records:
+            pucch_tx_power = record['PUCCH Tx Power (dBm)']
+            bcast_dict = {}
+            bcast_dict['tx power'] = pucch_tx_power
+            bcast_dict['timestamp'] = timestamp
+            self.broadcast_info("PUCCH_TX_POWER", bcast_dict)
+            self.log_info("PUCCH_TX_POWER: " + str(bcast_dict))
             uciformat = record['Format']
             if uciformat == 'Format 1':
                 self.init_flag = True
@@ -121,7 +141,7 @@ class LtePhyAnalyzer(Analyzer):
                         sr_dict['timestamp'] = timestamp
                         sr_dict['fn and subfn'] = record['Current SFN SF']
                         self.broadcast_info("SR_EVENT", sr_dict)
-                        self.log_info("SR_EVENT" + str(sr_dict))
+                        self.log_info("SR_EVENT: " + str(sr_dict))
             elif uciformat == "Format 3":
                 # TODO: Deal with SR event in format 3
                 pass
@@ -333,3 +353,5 @@ class LtePhyAnalyzer(Analyzer):
             self.callback_pusch_grant(msg)
         elif msg.type_id == "LTE_PHY_PUCCH_Tx_Report":
             self.callback_pucch(msg)
+        elif msg.type_id == "LTE_PHY_PUSCH_Tx_Report":
+            self.callback_pusch_tx(msg)
