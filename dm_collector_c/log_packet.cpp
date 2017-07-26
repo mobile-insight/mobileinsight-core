@@ -1857,6 +1857,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                     case 3:
                         // UL Buffer Status SubPacket v3
                         {
+                            PyObject *result_subpkt_allsamples = PyList_New(0);
                             for (int j = 0; j < subpkt_nsample; j++) {
                                 PyObject *result_subpkt_sample = PyList_New(0);
                                 offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt,
@@ -1872,27 +1873,47 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                                 old_object = _replace_result_int(result_subpkt_sample,
                                         "Sys FN", iSysFN);
                                 Py_DECREF(old_object);
+
+                                PyObject *result_subpkt_sample_alllcids = PyList_New(0);
                                 for (int k = 0; k < num_active_lcid; k++) {
                                     PyObject *result_subpkt_sample_lcid = PyList_New(0);
                                     offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt,
                                             ARRAY_SIZE(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt, Fmt),
                                             b, offset, length, result_subpkt_sample_lcid);
-                                    PyObject *t = Py_BuildValue("(sOs)",
-                                                            "Sample", result_subpkt_sample_lcid, "dict");
-                                    PyList_Append(result_subpkt_sample, t);
+                                    PyObject *t4 = Py_BuildValue("(sOs)",
+                                                            "Ignored", result_subpkt_sample_lcid, "dict");
+                                    PyList_Append(result_subpkt_sample_alllcids, t4);
                                     Py_DECREF(result_subpkt_sample_lcid);
                                 }
+                                PyObject *t3 = Py_BuildValue("(sOs)",
+                                        "LCIDs",
+                                        result_subpkt_sample_alllcids,
+                                        "list");
+                                PyList_Append(result_subpkt_sample, t3);
+                                Py_DECREF(t3);
+                                Py_DECREF(result_subpkt_sample_alllcids);
 
-                                PyObject *t = Py_BuildValue("(sOs)",
-                                                            "Sample", result_subpkt_sample, "dict");
-                                PyList_Append(result_subpkt, t);
+                                PyObject *t2 = Py_BuildValue("(sOs)",
+                                        "Ignored",
+                                        result_subpkt_sample,
+                                        "dict");
+                                PyList_Append(result_subpkt_allsamples, t2);
+                                Py_DECREF(t2);
                                 Py_DECREF(result_subpkt_sample);
                             }
+                            PyObject *t1 = Py_BuildValue("(sOs)",
+                                    "Samples",
+                                    result_subpkt_allsamples, "list");
+                            PyList_Append(result_subpkt, t1);
+                            Py_DECREF(t1);
+                            Py_DECREF(result_subpkt_allsamples);
+
                             success = true;
                             break;
                         }
                     case 24:
                         {
+                            PyObject *result_subpkt_allsamples = PyList_New(0);
                             for (int j = 0; j < subpkt_nsample; j++) {
                                 PyObject *result_subpkt_sample = PyList_New(0);
                                 offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt_v24,
@@ -1908,6 +1929,8 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                                 old_object = _replace_result_int(result_subpkt_sample,
                                         "Sys FN", iSysFN);
                                 Py_DECREF(old_object);
+
+                                PyObject *result_subpkt_sample_alllcids = PyList_New(0);
                                 for (int k = 0; k < num_active_lcid; k++) {
                                     PyObject *result_subpkt_sample_lcid = PyList_New(0);
                                     offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt_v24,
@@ -1921,16 +1944,34 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                                     old_object = _replace_result_int(result_subpkt_sample_lcid,
                                             "Total Bytes", iTotalBytes);
                                     Py_DECREF(old_object);
-                                    PyObject *t = Py_BuildValue("(sOs)",
-                                                            "Sample", result_subpkt_sample_lcid, "dict");
-                                    PyList_Append(result_subpkt_sample, t);
+                                    PyObject *t4 = Py_BuildValue("(sOs)",
+                                                            "Ignored", result_subpkt_sample_lcid, "dict");
+                                    PyList_Append(result_subpkt_sample_alllcids, t4);
                                     Py_DECREF(result_subpkt_sample_lcid);
                                 }
-                                PyObject *t = Py_BuildValue("(sOs)",
-                                                            "Sample", result_subpkt_sample, "dict");
-                                PyList_Append(result_subpkt, t);
+                                PyObject *t3 = Py_BuildValue("(sOs)",
+                                        "LCIDs",
+                                        result_subpkt_sample_alllcids,
+                                        "list");
+                                PyList_Append(result_subpkt_sample, t3);
+                                Py_DECREF(t3);
+                                Py_DECREF(result_subpkt_sample_alllcids);
+
+                                PyObject *t2 = Py_BuildValue("(sOs)",
+                                        "Ignored",
+                                        result_subpkt_sample,
+                                        "dict");
+                                PyList_Append(result_subpkt_allsamples, t2);
+                                Py_DECREF(t2);
                                 Py_DECREF(result_subpkt_sample);
                             }
+                            PyObject *t1 = Py_BuildValue("(sOs)",
+                                    "Samples",
+                                    result_subpkt_allsamples, "list");
+                            PyList_Append(result_subpkt, t1);
+                            Py_DECREF(t1);
+                            Py_DECREF(result_subpkt_allsamples);
+
                             success = true;
                             break;
                         }
