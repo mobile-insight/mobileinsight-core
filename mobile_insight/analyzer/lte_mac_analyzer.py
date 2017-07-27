@@ -33,7 +33,6 @@ class LteMacAnalyzer(Analyzer):
         # store every failed_harq by ['timestamp', 'cell_idx', 'harq_id', 'tb_idx', 'tb_size', 'retx_succeed', 'retx_cnt', 'trigger_rlc_retx', 'sn_sfn', 'delay']
         self.mac_retx = []  # for each retx, get [timestamp, fn_sfn, time, delay]
 
-
     def set_source(self, source):
         """
         Set the trace source. Enable the cellular signaling messages
@@ -95,6 +94,7 @@ class LteMacAnalyzer(Analyzer):
                                     # reset historical data if time lag is bigger than 2ms
                                     lag = sys_fn * 10 + sub_fn - self.cur_fn[0] * 10 - self.cur_fn[1]
                                     if lag > 2 or -10238 < lag < 0:
+
                                         self.last_bytes = {}
                                         self.buffer = {}
                                         self.ctrl_pkt_sfn = {}
@@ -154,8 +154,8 @@ class LteMacAnalyzer(Analyzer):
                                             self.log_info(str(log_item['timestamp']) + " UL_PKT_DELAY: " + str(pkt_delay))
                                         else:
                                             pkt[1] -= sent_bytes
-
                                 self.last_bytes[idx] = total_bytes
+                                
         elif msg.type_id == "LTE_PHY_PDSCH_Stat_Indication":
             self.__msg_callback_pdsch_stat(msg)
 
