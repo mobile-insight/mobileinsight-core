@@ -96,9 +96,11 @@ class LtePhyAnalyzer(Analyzer):
         :return:
         """
         log_item = msg.data.decode()
-        print log_item
+        # print log_item
         # records = log_item['Records']
         timestamp = str(log_item['timestamp'])
+
+        # TODO: Extract PUSCH tx power information and add broadcast to it
 
         # for record in records:
         #     print record
