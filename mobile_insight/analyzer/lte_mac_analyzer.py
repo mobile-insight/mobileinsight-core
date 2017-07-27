@@ -25,8 +25,14 @@ class LteMacAnalyzer(Analyzer):
         self.add_source_callback(self.__msg_callback)
         self.last_bytes = {} # LACI -> bytes <int> Last remaining bytes in MAC UL buffer
         self.buffer = {} # LCID -> [(sys_fn, sun_fn), packet_bytes] buffered mac ul packets
-        self.ctrl_pkt_sfn = {} # [sys_fn, sun_fn] when last mac ul control packet comes
+        self.ctrl_pkt_sfn = {} # LCID -> [sys_fn, sun_fn] when last mac ul control packet comes
         self.cur_fn = None # Record current [sys_fn, sub_fn] for mac ul buffer
+        self.cell_id = {} # cell_name -> idx Keep index for each type of cell
+        self.idx = 0 # current recorded cell idx
+        self.failed_harq = [0] * 8 * 3 * 2
+        # store every failed_harq by ['timestamp', 'cell_idx', 'harq_id', 'tb_idx', 'tb_size', 'retx_succeed', 'retx_cnt', 'trigger_rlc_retx', 'sn_sfn', 'delay']
+        self.mac_retx = []  # for each retx, get [timestamp, fn_sfn, time, delay]
+
 
     def set_source(self, source):
         """
@@ -39,6 +45,7 @@ class LteMacAnalyzer(Analyzer):
         # Phy-layer logs
         source.enable_log("LTE_MAC_UL_Tx_Statistics")
         source.enable_log("LTE_MAC_UL_Buffer_Status_Internal")
+        source.enable_log("LTE_PHY_PDSCH_Stat_Indication")
 
     def __msg_callback(self, msg):
 
@@ -88,7 +95,6 @@ class LteMacAnalyzer(Analyzer):
                                     # reset historical data if time lag is bigger than 2ms
                                     lag = sys_fn * 10 + sub_fn - self.cur_fn[0] * 10 - self.cur_fn[1]
                                     if lag > 2 or -10238 < lag < 0:
-                                        # print str(log_item['timestamp']), sys_fn, sub_fn, lag, self.cur_fn, self.buffer, self.ctrl_pkt_sfn
                                         self.last_bytes = {}
                                         self.buffer = {}
                                         self.ctrl_pkt_sfn = {}
@@ -103,13 +109,11 @@ class LteMacAnalyzer(Analyzer):
                             if not self.cur_fn:
                                 break
 
-                            print str(log_item['timestamp']), self.cur_fn, self.buffer
                             for lcid in sample['LCIDs']:
                                 idx = lcid['Ld Id']
                                 new_bytes = int(lcid['New Compressed Bytes'])
                                 ctrl_bytes = int(lcid['Ctrl bytes'])
                                 total_bytes = int(lcid['Total Bytes'])
-                                print new_bytes, ctrl_bytes, total_bytes
 
                                 if idx not in self.buffer:
                                     self.buffer[idx] = []
@@ -152,3 +156,82 @@ class LteMacAnalyzer(Analyzer):
                                             pkt[1] -= sent_bytes
 
                                 self.last_bytes[idx] = total_bytes
+        elif msg.type_id == "LTE_PHY_PDSCH_Stat_Indication":
+            self.__msg_callback_pdsch_stat(msg)
+
+    def __msg_callback_pdsch_stat(self, msg):
+        log_item = msg.data.decode()
+        timestamp = str(log_item['timestamp'])
+        # two_tb_flag = False # if a record has 'Serving Cell Index' key, two tb share the same cell idx
+        if log_item.has_key('Records'):
+            for i in range(0, len(log_item['Records'])):
+                record = log_item['Records'][i]
+                if 'Transport Blocks' in record:
+                    if 'Serving Cell Index' in record:
+                        # two_tb_flag = True
+                        cell_id_str = record['Serving Cell Index']
+                        if cell_id_str not in self.cell_id:
+                            self.cell_id[cell_id_str] = self.idx
+                            cell_idx = self.idx
+                            self.idx += 1
+                        else:
+                            cell_idx = self.cell_id[cell_id_str]
+                        sn = int(record['Frame Num'])
+                        sfn = int(record['Subframe Num'])
+                        sn_sfn = sn * 10 + sfn
+                    for blocks in log_item['Records'][i]['Transport Blocks']:
+                        # if not two_tb_flag:
+                        harq_id = int(blocks['HARQ ID'])
+                        tb_idx = int(blocks['TB Index'])
+                        is_retx = True if blocks['Did Recombining'][-2:] == "es" else False
+                        crc_check = True if blocks['CRC Result'][-2:] == "ss" else False
+                        tb_size = int(blocks['TB Size'])
+                        rv_value = int(blocks['RV'])
+
+                        id = harq_id + cell_idx * 8 + tb_idx * 24
+
+                        # print crc_check #self.failed_harq
+
+                        if not crc_check:  # add retx instance or add retx time for existing instance
+                            cur_fail = [timestamp, cell_idx, harq_id, tb_idx, tb_size, False, 0, False, sn_sfn]
+                            # print cur_fail, rv_value
+                            if self.failed_harq[id] != 0:
+                                if rv_value > 0:
+                                    self.failed_harq[id][6] += 1
+                                else:
+                                    self.failed_harq[id][-2] = True
+                                    rlc_retx += 1
+                                    delay = sn_sfn - self.failed_harq[id][-1]
+                                    self.mac_retx.append(self.failed_harq[id] + [delay])
+                                    self.failed_harq[id] = 0
+                            elif rv_value == 0:
+                                self.failed_harq[id] = cur_fail
+                            # print self.failed_harq
+
+                        else:  # check if it trigger rlc_retx or mark as retx_succeed
+                            if self.failed_harq[id] != 0:
+                                if rv_value > 0 or is_retx:
+                                    self.failed_harq[id][6] += 1
+                                    self.failed_harq[id][-4] = True
+                                    delay = sn_sfn - self.failed_harq[id][-1]
+                                    self.mac_retx.append(self.failed_harq[id] + [delay])
+                                    bcast_dict = {}
+                                    bcast_dict['pkt size'] = self.failed_harq[id][4]
+                                    # bcast_dict['cell index'] = self.failed_harq[id][1]
+                                    bcast_dict['timestamp'] = timestamp
+                                    bcast_dict['delay'] = delay
+                                    self.broadcast_info('MAC_RETX', bcast_dict)
+                                    self.log_info('MAC_RETX: ' + str(bcast_dict))
+                                else:
+                                    self.failed_harq[id][-2] = True
+                                    rlc_retx += 1
+                                    delay = sn_sfn - self.failed_harq[id][-1]
+                                    self.mac_retx.append(self.failed_harq[id] + [delay])
+                                    bcast_dict = {}
+                                    bcast_dict['pkt size'] = self.failed_harq[id][4]
+                                    # bcast_dict['cell index'] = self.failed_harq[id][1]
+                                    bcast_dict['timestamp'] = timestamp
+                                    bcast_dict['delay'] = delay
+                                    self.broadcast_info('RLC_RETX', bcast_dict)
+                                    self.log_info('RLC_RETX: ' + str(bcast_dict))
+                                self.failed_harq[id] = 0
