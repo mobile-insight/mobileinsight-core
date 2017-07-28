@@ -30,8 +30,9 @@ class LteMacAnalyzer(Analyzer):
         self.cell_id = {} # cell_name -> idx Keep index for each type of cell
         self.idx = 0 # current recorded cell idx
         self.failed_harq = [0] * 8 * 3 * 2
+        self.queue_length = 0
         # store every failed_harq by ['timestamp', 'cell_idx', 'harq_id', 'tb_idx', 'tb_size', 'retx_succeed', 'retx_cnt', 'trigger_rlc_retx', 'sn_sfn', 'delay']
-        self.mac_retx = []  # for each retx, get [timestamp, fn_sfn, time, delay]
+        # self.mac_retx = []  # for each retx, get [timestamp, fn_sfn, time, delay]
 
     def set_source(self, source):
         """
@@ -140,6 +141,10 @@ class LteMacAnalyzer(Analyzer):
                                         ctrl_pkt_delay += 10240 if ctrl_pkt_delay < 0 else 0
                                         self.ctrl_pkt_sfn[idx] = None
                                         self.log_info(str(log_item['timestamp']) + " UL_CTRL_PKT_DELAY: " + str(ctrl_pkt_delay))
+                                        bcast_dict = {}
+                                        bcast_dict['timestamp'] = str(log_item['timestamp'])
+                                        bcast_dict['delay'] = str(ctrl_pkt_delay)
+                                        self.broadcast_info("UL_CTRL_PKT_DELAY", bcast_dict)
 
                                 if self.last_bytes[idx] > total_bytes:
                                     sent_bytes = self.last_bytes[idx] - total_bytes
@@ -152,9 +157,23 @@ class LteMacAnalyzer(Analyzer):
                                             self.buffer[idx].pop(0)
                                             sent_bytes -= pkt[1]
                                             self.log_info(str(log_item['timestamp']) + " UL_PKT_DELAY: " + str(pkt_delay))
+                                            bcast_dict = {}
+                                            bcast_dict['timestamp'] = str(log_item['timestamp'])
+                                            bcast_dict['delay'] = str(pkt_delay)
+                                            self.broadcast_info("UL_PKT_DELAY", bcast_dict)
                                         else:
                                             pkt[1] -= sent_bytes
                                 self.last_bytes[idx] = total_bytes
+                            queue_length = 0
+                            for idx in self.last_bytes:
+                                queue_length += self.last_bytes[idx]
+                                if queue_length > 0 and queue_length != self.queue_length:
+                                    self.queue_length = queue_length
+                                    self.log_info(str(log_item['timestamp']) + " UL_QUEUE_LENGTH: " + str(queue_length))
+                                    bcast_dict = {}
+                                    bcast_dict['timestamp'] = str(log_item['timestamp'])
+                                    bcast_dict['length'] = str(queue_length)
+                                    self.broadcast_info("UL_QUEUE_LENGTH", bcast_dict)
                                 
         elif msg.type_id == "LTE_PHY_PDSCH_Stat_Indication":
             self.__msg_callback_pdsch_stat(msg)
@@ -202,7 +221,13 @@ class LteMacAnalyzer(Analyzer):
                                     self.failed_harq[id][-2] = True
                                     rlc_retx += 1
                                     delay = sn_sfn - self.failed_harq[id][-1]
-                                    self.mac_retx.append(self.failed_harq[id] + [delay])
+                                    bcast_dict = {}
+                                    bcast_dict['pkt size'] = self.failed_harq[id][4]
+                                    # bcast_dict['cell index'] = self.failed_harq[id][1]
+                                    bcast_dict['timestamp'] = timestamp
+                                    bcast_dict['delay'] = delay
+                                    self.broadcast_info('RLC_RETX', bcast_dict)
+                                    self.log_info('RLC_RETX: ' + str(bcast_dict))
                                     self.failed_harq[id] = 0
                             elif rv_value == 0:
                                 self.failed_harq[id] = cur_fail
@@ -214,7 +239,7 @@ class LteMacAnalyzer(Analyzer):
                                     self.failed_harq[id][6] += 1
                                     self.failed_harq[id][-4] = True
                                     delay = sn_sfn - self.failed_harq[id][-1]
-                                    self.mac_retx.append(self.failed_harq[id] + [delay])
+                                    # self.mac_retx.append(self.failed_harq[id] + [delay])
                                     bcast_dict = {}
                                     bcast_dict['pkt size'] = self.failed_harq[id][4]
                                     # bcast_dict['cell index'] = self.failed_harq[id][1]
@@ -226,7 +251,7 @@ class LteMacAnalyzer(Analyzer):
                                     self.failed_harq[id][-2] = True
                                     rlc_retx += 1
                                     delay = sn_sfn - self.failed_harq[id][-1]
-                                    self.mac_retx.append(self.failed_harq[id] + [delay])
+                                    # self.mac_retx.append(self.failed_harq[id] + [delay])
                                     bcast_dict = {}
                                     bcast_dict['pkt size'] = self.failed_harq[id][4]
                                     # bcast_dict['cell index'] = self.failed_harq[id][1]
