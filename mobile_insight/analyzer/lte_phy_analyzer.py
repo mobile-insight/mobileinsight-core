@@ -97,14 +97,19 @@ class LtePhyAnalyzer(Analyzer):
         """
         log_item = msg.data.decode()
         # print log_item
-        # records = log_item['Records']
+        records = log_item['Records']
         timestamp = str(log_item['timestamp'])
 
         # TODO: Extract PUSCH tx power information and add broadcast to it
 
-        # for record in records:
+        for record in records:
         #     print record
-            # pusch_tx_power = record['PUSCH Tx Power (dBm)']
+            pusch_tx_power = record['PUSCH Tx Power (dBm)']
+            bcast_dict = {}
+            bcast_dict['tx power'] = pusch_tx_power
+            bcast_dict['timestamp'] = timestamp
+            self.broadcast_info("PUSCH_TX_POWER", bcast_dict)
+            self.log_info("PUSCH_TX_POWER: " + str(bcast_dict))
 
     def callback_pucch(self, msg):
         """
@@ -133,7 +138,7 @@ class LtePhyAnalyzer(Analyzer):
                 sr_dict['timestamp'] = timestamp
                 sr_dict['fn and subfn'] = record['Current SFN SF']
                 self.broadcast_info("SR_EVENT", sr_dict)
-                self.log_info("SR_EVENT" + str(sr_dict))
+                self.log_info("SR_EVENT: " + str(sr_dict))
             elif uciformat == 'Format 1B' or uciformat == 'Format 1A':
                 # TODO: reset init_flag for new logs
                 if self.init_flag:
