@@ -249,7 +249,6 @@ class LteMacAnalyzer(Analyzer):
                                     self.log_info('MAC_RETX: ' + str(bcast_dict))
                                 else:
                                     self.failed_harq[id][-2] = True
-                                    rlc_retx += 1
                                     delay = sn_sfn - self.failed_harq[id][-1]
                                     # self.mac_retx.append(self.failed_harq[id] + [delay])
                                     bcast_dict = {}

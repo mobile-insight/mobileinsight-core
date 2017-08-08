@@ -200,7 +200,7 @@ class LtePhyAnalyzer(Analyzer):
                 bcast_dict = {}
                 bandwidth = self.lte_dl_bw / \
                     ((log_item['timestamp'] - self.prev_timestamp_dl).total_seconds() * 1000000.0)
-                pred_bandwidth = self.predict_bw()
+                pred_bandwidth = self.predict_bw(log_item['timestamp'])
                 bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth, 2))
 
                 # """
@@ -337,14 +337,17 @@ class LtePhyAnalyzer(Analyzer):
             self.lte_ul_bw = 0
             self.lte_ul_grant_utilized = 0
 
-    def predict_bw(self):
+    def predict_bw(self, timestamp):
         """
         Predict bandwidth based on CQI
         Currently it implements a naive solution based on pre-trained CQI->BW table
 
         """
         if self.cur_cqi0 in cqi_to_bw:
-            self.broadcast_info('PREDICTED_DL_BW', str(cqi_to_bw[self.cur_cqi0]))
+            bcast_dict = {}
+            bcast_dict['bandwidth'] = str(cqi_to_bw[self.cur_cqi0])
+            bcast_dict['timestamp'] = str(timestamp)
+            self.broadcast_info('PREDICTED_DL_BW', bcast_dict)
             self.log_info('PREDICTED_DL_BW: ' + str(cqi_to_bw[self.cur_cqi0]) + 'Mbps')
             return cqi_to_bw[self.cur_cqi0]
         else:
