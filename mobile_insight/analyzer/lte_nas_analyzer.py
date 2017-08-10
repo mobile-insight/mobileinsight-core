@@ -199,7 +199,9 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                 return True
 
         def init_state(msg):
-            if int(msg.data["EPS bearer state"]) - 1 == 0:
+            if "EPS bearer state" not in msg.data:
+                return "ESM_DISCON"
+            elif int(msg.data["EPS bearer state"]) - 1 == 0:
                 return 'ESM_DISCON'
             elif int(msg.data["EPS bearer state"]) - 1 == 1:
                 return 'ESM_CON'
