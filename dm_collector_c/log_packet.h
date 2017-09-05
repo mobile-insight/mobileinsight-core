@@ -244,6 +244,15 @@ const Fmt LteRrcOtaPacketFmt_v9 [] = {
     {UINT, "Msg Length", 2}
 };
 
+const Fmt LteRrcOtaPacketFmt_v12 [] = {
+    {UINT, "Freq", 4},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1},            //PDU number
+    {UINT, "SIB Mask in SI", 1},
+    {SKIP, NULL, 3},
+    {UINT, "Msg Length", 2}
+};
+
 const Fmt LteRrcOtaPacketFmt_v13 [] = {
     {UINT, "Freq", 4},                  //frequency
     {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
