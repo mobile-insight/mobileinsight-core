@@ -2270,6 +2270,7 @@ const ValueName ValueNameCarrierIndex [] = {
     // 4 bits
     {0, "PCC"},
     {1, "SCC"},
+    {2, "SCC-2"},
 };
 
 const ValueName ValueNameAggregationLevel [] = {
@@ -2330,10 +2331,16 @@ const ValueName ValueNamePruneStatus [] = {
     {8, "TAIL_MISMATCH"},
     {9, "FAIL_SURVIVOR_SELECT"},
     {10, "PADDING_ERROR"},
+    {13, "RB_ALLOC_SET_NUM_ERROR_TYPE1"},
     {17, "DUPLICATE_HARQ_ID_ERROR"},
     {24, "BAD_RIV_DCI0"},
+    {25, "RB_ALLOC_ERROR_DCI0"},
     {26, "INVALID_RB_NUM_DCI0"},
+    {33, "RB_ALLOC_ERROR_DCI1A"},
+    {34, "INVALID_RB_NUM_DCI1A"},
+    {48, "PMI_ERROR_DCI2_2A"},
     {50, "NUM_LAYERS_ERROR_DCI2_2A_TB1"},
+    {64, "FAIL_SER_ENGYMTRC_CHECK"},
 };
 
 const ValueName ValueNameFrameStructure [] = {
@@ -2346,8 +2353,10 @@ const ValueName ValueNameDuplexingMode [] = {
     {1, "TDD"},
 };
 
-const ValueName ValueNameNumeNBAntennas [] = {
+const ValueName ValueNameNumNBAntennas [] = {
     {0, "1 or 2"},
+    {1, "2 antennas"},
+    {2, "4 antennas"},
 };
 
 const ValueName ValueNameTrueOrFalse [] = {
