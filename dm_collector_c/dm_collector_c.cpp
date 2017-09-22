@@ -595,42 +595,38 @@ dm_collector_c_reset (PyObject *self, PyObject *args) {
 // Return: decoded_list or None
 static PyObject *
 dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
-    (void)self;
+    // (void)self;
     std::string frame;
     bool crc_correct = false;
     bool skip_decoding = false, include_timestamp = false;  // default values
-    PyObject *arg_skip_decoding = NULL;
-    PyObject *arg_include_timestamp = NULL;
-    if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
-                                &arg_skip_decoding, &arg_include_timestamp))
-        return NULL;
-    if (arg_skip_decoding != NULL) {
-        Py_INCREF(arg_skip_decoding);
-        skip_decoding = (PyObject_IsTrue(arg_skip_decoding) == 1);
-        Py_DECREF(arg_skip_decoding);
-    }
-    if (arg_include_timestamp != NULL) {
-        Py_INCREF(arg_include_timestamp);
-        include_timestamp = (PyObject_IsTrue(arg_include_timestamp) == 1);
-        Py_DECREF(arg_include_timestamp);
-    }
-    // printf("skip_decoding=%d, include_timestamp=%d\n", skip_decoding, include_timestamp);
     double posix_timestamp = (include_timestamp? get_posix_timestamp(): -1.0);
-
+    
     bool success = get_next_frame(frame, crc_correct);
     // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
     // if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
     if (success && crc_correct) {
-        // manager_export_binary(&g_emanager, frame.c_str(), frame.size());
-        if (!manager_export_binary(&g_emanager, frame.c_str(), frame.size())) {
-            Py_RETURN_NONE;
-        }
-        else if(is_log_packet(frame.c_str(), frame.size())){
+            PyObject *arg_skip_decoding = NULL;
+            PyObject *arg_include_timestamp = NULL;
+            if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
+                                        &arg_skip_decoding, &arg_include_timestamp))
+                return NULL;
+            if (arg_skip_decoding != NULL) {
+                Py_INCREF(arg_skip_decoding);
+                skip_decoding = (PyObject_IsTrue(arg_skip_decoding) == 1);
+                Py_DECREF(arg_skip_decoding);
+            }
+            if (arg_include_timestamp != NULL) {
+                Py_INCREF(arg_include_timestamp);
+                include_timestamp = (PyObject_IsTrue(arg_include_timestamp) == 1);
+                Py_DECREF(arg_include_timestamp);
+            }
+
+        manager_export_binary(&g_emanager, frame.c_str(), frame.size());
+        if(is_log_packet(frame.c_str(), frame.size())){
             const char *s = frame.c_str();
-            // printf("%x %x %x %x\n",s[0],s[1],s[2],s[3]);
-            PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
-                                                    frame.size() - 2,
-                                                    skip_decoding);
+            PyObject *decoded = decode_log_packet(s + 2,  // skip first two bytes
+                                                  frame.size() - 2,
+                                                  skip_decoding);
             if (include_timestamp) {
                 PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
                 Py_DECREF(decoded);
@@ -638,7 +634,6 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
             } else {
                 return decoded;
             }
-
         }
         else if(is_debug_packet(frame.c_str(), frame.size())){
             //Yuanjie: the original debug msg does not have header...

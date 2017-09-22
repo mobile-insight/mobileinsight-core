@@ -670,7 +670,7 @@ const Fmt LteRrcServCellInfoLogPacketFmt_v2 [] = {
     {BANDWIDTH, "Uplink bandwidth", 1},    //Uplink bandwidth
     {UINT, "Cell Identity", 4}, //cell ID
     {UINT, "TAC", 2},   //Tracking area code
-    {UINT, "Band indicator", 4},    //Band indicator
+    {UINT, "Band Indicator", 4},    //Band indicator
     {UINT, "MCC", 2},   //MCC
     {UINT, "MNC Digit", 1}, //MNC digit
     {UINT, "MNC", 2},   //MNC
@@ -691,21 +691,6 @@ const Fmt LteRrcServCellInfoLogPacketFmt_v3 [] = {
     {UINT, "MNC", 2},   //MNC
     {UINT, "Allowed Access", 1} //Allowed access
 };
-
-// const Fmt LteRrcServCellInfoLogPacketFmt_v3 [] = {
-//     {UINT, "Physical Cell ID", 2},  //Physical cell ID
-//     {UINT, "DL FREQ", 4},   //Downlink frequency
-//     {UINT, "UL FREQ", 4},   //Uplink frequency
-//     {BANDWIDTH, "DL BW", 1},    //Downlink bandwidth
-//     {BANDWIDTH, "UL BW", 1},    //Uplink bandwidth
-//     {UINT, "Cell Identity", 4}, //cell ID
-//     {UINT, "TAC", 2},   //Tracking area code
-//     {UINT, "Band Indicator", 4},    //Band indicator
-//     {UINT, "MCC", 2},   //MCC
-//     {UINT, "MNC Digit", 1}, //MNC digit
-//     {UINT, "MNC", 2},   //MNC
-//     {UINT, "Allowed Access", 1} //Allowed access
-// };
 
 // TODO: interpret the value of "Allowed Access"
 
@@ -2596,6 +2581,8 @@ bool is_debug_packet (const char *b, size_t length);   //Yuanjie: test if it's a
 // Return a specailly formatted Python list that stores the decoding result.
 // If skip_decoding is True, only the header would be decoded.
 PyObject * decode_log_packet (const char *b, size_t length, bool skip_decoding);
+
+void on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject* result);
 
 
 PyObject * decode_log_packet_modem (const char *b, size_t length, bool skip_decoding);

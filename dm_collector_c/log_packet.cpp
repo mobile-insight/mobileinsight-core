@@ -5,41 +5,41 @@
 
 #include <Python.h>
 #include <datetime.h>
-#include <fstream>
 #include <map>
-#include <sstream>
 #include <string>
+#include <sstream>
+#include <fstream>
 
+#include "consts.h"
+#include "log_packet.h"
+#include "log_packet_helper.h"
+#include "1xev_rx_partial_multirlp_packet.h"
 #include "1xev_connected_state_search_info.h"
 #include "1xev_connection_attempt.h"
 #include "1xev_connection_release.h"
-#include "1xev_rx_partial_multirlp_packet.h"
-#include "1xevdo_multi_carrier_pilot_sets.h"
-#include "consts.h"
-#include "gsm_rr_cell_information.h"
-#include "gsm_rr_cell_reselection_meas.h"
-#include "gsm_surround_cell_ba_list.h"
-#include "log_packet.h"
-#include "log_packet_helper.h"
-#include "lte_pdcp_dl_cipher_data_pdu.h"
-#include "lte_pdcp_ul_cipher_data_pdu.h"
 #include "lte_pdsch_stat_indication.h"
-#include "lte_phy_bplmn_cell_confirm.h"
+#include "lte_phy_system_scan_results.h"
 #include "lte_phy_bplmn_cell_request.h"
-#include "lte_phy_cdrx_events_info.h"
-#include "lte_phy_idle_neighbor_cell_meas.h"
+#include "lte_phy_bplmn_cell_confirm.h"
+#include "lte_phy_serving_cell_com_loop.h"
 #include "lte_phy_pdcch_decoding_result.h"
 #include "lte_phy_pdsch_decoding_result.h"
-#include "lte_phy_pucch_csf.h"
-#include "lte_phy_pucch_tx_report.h"
-#include "lte_phy_pusch_csf.h"
 #include "lte_phy_pusch_tx_report.h"
+#include "lte_phy_pucch_tx_report.h"
 #include "lte_phy_rlm_report.h"
-#include "lte_phy_serving_cell_com_loop.h"
-#include "lte_phy_system_scan_results.h"
-#include "srch_tng_1x_searcher_dump.h"
+#include "lte_phy_pusch_csf.h"
+#include "lte_phy_cdrx_events_info.h"
 #include "wcdma_rrc_states.h"
+#include "lte_phy_idle_neighbor_cell_meas.h"
 #include "wcdma_search_cell_reselection_rank.h"
+#include "gsm_rr_cell_information.h"
+#include "gsm_surround_cell_ba_list.h"
+#include "gsm_rr_cell_reselection_meas.h"
+#include "srch_tng_1x_searcher_dump.h"
+#include "1xevdo_multi_carrier_pilot_sets.h"
+#include "lte_pdcp_dl_cipher_data_pdu.h"
+#include "lte_pdcp_ul_cipher_data_pdu.h"
+#include "lte_phy_pucch_csf.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -1831,8 +1831,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
 
     PyObject *old_object;
     switch (pkt_ver) {
-    case 1:
-        {
+        case 1:{
             PyObject *result_allpkts = PyList_New(0);
             for (int i = 0; i < n_subpkt; i++) {
                 PyObject *result_subpkt = PyList_New(0);
@@ -1859,9 +1858,8 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                 } else {
                     bool success = false;
                     switch (subpkt_ver) {
-                    case 3:
-                        // UL Buffer Status SubPacket v3
-                        {
+                        case 3:{
+                            // UL Buffer Status SubPacket v3
                             PyObject *result_subpkt_allsamples = PyList_New(0);
                             for (int j = 0; j < subpkt_nsample; j++) {
                                 PyObject *result_subpkt_sample = PyList_New(0);
@@ -1888,6 +1886,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                                     PyObject *t4 = Py_BuildValue("(sOs)",
                                                             "Ignored", result_subpkt_sample_lcid, "dict");
                                     PyList_Append(result_subpkt_sample_alllcids, t4);
+                                    Py_DECREF(t4);
                                     Py_DECREF(result_subpkt_sample_lcid);
                                 }
                                 PyObject *t3 = Py_BuildValue("(sOs)",
@@ -1916,8 +1915,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                             success = true;
                             break;
                         }
-                    case 24:
-                        {
+                        case 24:{
                             PyObject *result_subpkt_allsamples = PyList_New(0);
                             for (int j = 0; j < subpkt_nsample; j++) {
                                 PyObject *result_subpkt_sample = PyList_New(0);
@@ -1952,6 +1950,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                                     PyObject *t4 = Py_BuildValue("(sOs)",
                                                             "Ignored", result_subpkt_sample_lcid, "dict");
                                     PyList_Append(result_subpkt_sample_alllcids, t4);
+                                    Py_DECREF(t4);
                                     Py_DECREF(result_subpkt_sample_lcid);
                                 }
                                 PyObject *t3 = Py_BuildValue("(sOs)",
@@ -1980,18 +1979,20 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                             success = true;
                             break;
                         }
-                    default:
-                        break;
+                        default:
+                            break;
                     }
                     if (success) {
                         PyObject *t = Py_BuildValue("(sOs)",
                                                     "MAC Subpacket", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
-                        Py_DECREF(result_subpkt);
+                        Py_DECREF(t);
                     } else {
                         printf("(MI)Unknown LTE MAC Uplink Buffer Status Internel Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
+
+                Py_DECREF(result_subpkt);
             }
             PyObject *t = Py_BuildValue("(sOs)",
                                         "Subpackets", result_allpkts, "list");
@@ -2000,10 +2001,12 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
             Py_DECREF(result_allpkts);
             return offset - start;
         }
-    default:
-        printf("(MI)Unknown LTE MAC Uplink Buffer Status Internal packet version: 0x%x\n", pkt_ver);
-        return 0;
+        default:
+            printf("(MI)Unknown LTE MAC Uplink Buffer Status Internal packet version: 0x%x\n", pkt_ver);
+            return 0;
     }
+
+    return 0;
 }
 
 //------------------------------------------------------
@@ -2016,8 +2019,7 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, size_t length,
     int n_subpkt = _search_result_int(result, "Num SubPkt");
 
     switch (pkt_ver) {
-    case 1:
-        {
+        case 1:{
             PyObject *result_allpkts = PyList_New(0);
             for (int i = 0; i < n_subpkt; i++) {
                 PyObject *result_subpkt = PyList_New(0);
@@ -2043,29 +2045,31 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, size_t length,
                 } else {
                     bool success = false;
                     switch (subpkt_ver) {
-                    case 1: // UL Tx Stats SubPacket
-                        {
-                            PyObject *result_subpkt_sample = PyList_New(0);
-                            offset += _decode_by_fmt(LteMacULTxStatistics_ULTxStatsSubPacketFmt,
-                                    ARRAY_SIZE(LteMacULTxStatistics_ULTxStatsSubPacketFmt, Fmt),
-                                    b, offset, length, result_subpkt_sample);
+                        case 1: // UL Tx Stats SubPacket
+                            {
+                                PyObject *result_subpkt_sample = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacULTxStatistics_ULTxStatsSubPacketFmt,
+                                        ARRAY_SIZE(LteMacULTxStatistics_ULTxStatsSubPacketFmt, Fmt),
+                                        b, offset, length, result_subpkt_sample);
 
-                            PyObject *t = Py_BuildValue("(sOs)",
-                                                        "Sample", result_subpkt_sample, "dict");
-                            PyList_Append(result_subpkt, t);
-                            Py_DECREF(result_subpkt_sample);
-                            success = true;
+                                PyObject *t = Py_BuildValue("(sOs)",
+                                                            "Sample", result_subpkt_sample, "dict");
+                                PyList_Append(result_subpkt, t);
+                                Py_DECREF(result_subpkt_sample);
+                                success = true;
+                                break;
+                            }
+                        default:
                             break;
-                        }
-                    default:
-                        break;
                     }
                     if (success) {
                         PyObject *t = Py_BuildValue("(sOs)",
                                                     "MAC Subpacket", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
+                        Py_DECREF(t);
                         Py_DECREF(result_subpkt);
                     } else {
+                        Py_DECREF(result_subpkt);
                         printf("(MI)Unknown LTE MAC Uplink Tx Statistics Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
 
@@ -2079,11 +2083,12 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, size_t length,
             Py_DECREF(result_allpkts);
             return offset - start;
         }
-    default:
-        printf("(MI)Unknown LTE MAC Uplink Tx Statistics packet version: 0x%x\n", pkt_ver);
-        return 0;
+        default:
+            printf("(MI)Unknown LTE MAC Uplink Tx Statistics packet version: 0x%x\n", pkt_ver);
+            return 0;
     }
 }
+
 
 // ----------------------------------------------------------------------------
 static int _decode_lte_rlc_ul_config_log_packet_subpkt (const char *b,
@@ -5138,6 +5143,472 @@ is_debug_packet (const char *b, size_t length) {
     // return length >=2 && (b[0] ==  '\x79');
 }
 
+void 
+on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject* result)
+{
+    int offset = 0;
+    switch (type_id) {
+        case CDMA_Paging_Channel_Message:
+            // Not decoded yet.
+            break;
+
+        // // Yuanjie: Incomplete support. Disable it temporarily
+        // case _1xEV_Signaling_Control_Channel_Broadcast:
+        //     offset += _decode_by_fmt(_1xEVSignalingFmt,
+        //                                 ARRAY_SIZE(_1xEVSignalingFmt, Fmt),
+        //                                 b, offset, length, result);
+        //     break;
+
+        case WCDMA_CELL_ID:
+            offset += _decode_by_fmt(WcdmaCellIdFmt,
+                                        ARRAY_SIZE(WcdmaCellIdFmt, Fmt),
+                                        b, offset, length, result);
+            break;
+
+        case WCDMA_Signaling_Messages:
+            offset += _decode_by_fmt(WcdmaSignalingMessagesFmt,
+                                        ARRAY_SIZE(WcdmaSignalingMessagesFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_wcdma_signaling_messages(b, offset, length, result);
+            break;
+
+        case UMTS_NAS_GMM_State:
+            offset += _decode_by_fmt(UmtsNasGmmStateFmt,
+                                        ARRAY_SIZE(UmtsNasGmmStateFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_umts_nas_gmm_state(b, offset, length, result);
+            break;
+
+        case UMTS_NAS_MM_State:
+            offset += _decode_by_fmt(UmtsNasMmStateFmt,
+                                        ARRAY_SIZE(UmtsNasMmStateFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_umts_nas_mm_state(b, offset, length, result);
+            break;
+
+        case UMTS_NAS_MM_REG_State:
+            offset += _decode_by_fmt(UmtsNasMmRegStateFmt,
+                                        ARRAY_SIZE(UmtsNasMmRegStateFmt, Fmt),
+                                        b, offset, length, result);
+            break;
+
+        case UMTS_NAS_OTA:
+            offset += _decode_by_fmt(UmtsNasOtaFmt,
+                                        ARRAY_SIZE(UmtsNasOtaFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_umts_nas_ota(b, offset, length, result);
+            break;
+
+        case LTE_RRC_OTA_Packet:
+            offset += _decode_by_fmt(LteRrcOtaPacketFmt,
+                                        ARRAY_SIZE(LteRrcOtaPacketFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_rrc_ota(b, offset, length, result);
+            break;
+
+        case LTE_RRC_MIB_Message_Log_Packet:
+            offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt,
+                                        ARRAY_SIZE(LteRrcMibMessageLogPacketFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_rrc_mib(b, offset, length, result);
+            break;
+
+        case LTE_RRC_Serv_Cell_Info_Log_Packet:
+            offset += _decode_by_fmt(LteRrcServCellInfoLogPacketFmt,
+                                        ARRAY_SIZE(LteRrcServCellInfoLogPacketFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_rrc_serv_cell_info(b, offset, length, result);
+            break;
+
+        case LTE_NAS_ESM_Plain_OTA_Incoming_Message:
+        case LTE_NAS_ESM_Plain_OTA_Outgoing_Message:
+        case LTE_NAS_EMM_Plain_OTA_Incoming_Message:
+        case LTE_NAS_EMM_Plain_OTA_Outgoing_Message:
+            offset += _decode_by_fmt(LteNasPlainFmt,
+                                        ARRAY_SIZE(LteNasPlainFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_nas_plain(b, offset, length, result);
+            break;
+
+        case LTE_NAS_EMM_State:
+            offset += _decode_by_fmt(LteNasEmmStateFmt,
+                                        ARRAY_SIZE(LteNasEmmStateFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_nas_emm_state(b, offset, length, result);
+            break;
+
+        case LTE_NAS_ESM_State:
+            offset += _decode_by_fmt(LteNasEsmStateFmt,
+                                        ARRAY_SIZE(LteNasEsmStateFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_nas_esm_state(b, offset, length, result);
+            break;
+
+        case LTE_PHY_PDSCH_Demapper_Configuration:
+            offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt,
+                                        ARRAY_SIZE(LtePhyPdschDemapperConfigFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_phy_pdsch_demapper_config(b, offset, length, result);
+            break;
+
+        case LTE_PHY_Connected_Mode_LTE_Intra_Freq_Meas_Results:
+            offset += _decode_by_fmt(LtePhyCmlifmrFmt,
+                                        ARRAY_SIZE(LtePhyCmlifmrFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_phy_cmlifmr(b, offset, length, result);
+            break;
+
+        case LTE_PHY_Serving_Cell_Measurement_Result:
+            offset += _decode_by_fmt(LtePhySubpktFmt,
+                                        ARRAY_SIZE(LtePhySubpktFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_phy_subpkt(b, offset, length, result);
+            break;
+
+        case LTE_PHY_IRAT_MDB:
+            offset += _decode_by_fmt(LtePhyIratFmt,
+                                        ARRAY_SIZE(LtePhyIratFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_phy_irat_subpkt(b, offset, length, result);
+            break;
+
+        case LTE_PHY_CDMA_MEAS:
+            //It shares similar packet format as LTE_PHY_IRAT_MDB
+            offset += _decode_by_fmt(LtePhyIratFmt,
+                                        ARRAY_SIZE(LtePhyIratFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_phy_irat_cdma_subpkt(b, offset, length, result);
+            break;
+
+        case LTE_PDCP_DL_SRB_Integrity_Data_PDU:
+            offset += _decode_by_fmt(LtePdcpDlSrbIntegrityDataPduFmt,
+                                        ARRAY_SIZE(LtePdcpDlSrbIntegrityDataPduFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_pdcp_dl_srb_integrity_data_pdu(b, offset, length, result);
+            break;
+
+        case LTE_PDCP_UL_SRB_Integrity_Data_PDU:
+            offset += _decode_by_fmt(LtePdcpUlSrbIntegrityDataPduFmt,
+                                        ARRAY_SIZE(LtePdcpUlSrbIntegrityDataPduFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_pdcp_ul_srb_integrity_data_pdu(b, offset, length, result);
+            break;
+
+        case LTE_MAC_Configuration:// Jie
+            offset += _decode_by_fmt(LteMacConfigurationFmt, ARRAY_SIZE(LteMacConfigurationFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_mac_configuration_subpkt(b, offset, length, result);
+            break;
+
+        case LTE_MAC_UL_Transport_Block:// Jie
+            offset += _decode_by_fmt(LteMacULTransportBlockFmt, ARRAY_SIZE(LteMacULTransportBlockFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_mac_ul_transportblock_subpkt(b, offset, length, result);
+            break;
+
+        case LTE_MAC_DL_Transport_Block:// Jie
+            offset += _decode_by_fmt(LteMacDLTransportBlockFmt,
+                                        ARRAY_SIZE(LteMacDLTransportBlockFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_mac_dl_transportblock_subpkt(b, offset, length, result);
+            break;
+
+        case LTE_MAC_UL_Buffer_Status_Internal:// Jie
+            offset += _decode_by_fmt(LteMacULBufferStatusInternalFmt,
+                                        ARRAY_SIZE(LteMacULBufferStatusInternalFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_mac_ul_bufferstatusinternal_subpkt(b, offset, length, result);
+            break;
+        case LTE_MAC_UL_Tx_Statistics:// Jie
+            offset += _decode_by_fmt(LteMacULTxStatisticsFmt,
+                                        ARRAY_SIZE(LteMacULTxStatisticsFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_mac_ul_txstatistics_subpkt(b, offset, length, result);
+            break;
+
+        case LTE_RLC_UL_Config_Log_Packet:
+            offset += _decode_by_fmt(LteRlcUlConfigLogPacketFmt,
+                    ARRAY_SIZE(LteRlcUlConfigLogPacketFmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_rlc_ul_config_log_packet_subpkt(b, offset,
+                    length, result);
+            break;
+
+        case LTE_RLC_DL_Config_Log_Packet:
+            offset += _decode_by_fmt(LteRlcDlConfigLogPacketFmt,
+                    ARRAY_SIZE(LteRlcDlConfigLogPacketFmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_rlc_dl_config_log_packet_subpkt(b, offset,
+                    length, result);
+            break;
+
+        case LTE_RLC_UL_AM_All_PDU:
+            offset += _decode_by_fmt(LteRlcUlAmAllPduFmt,
+                    ARRAY_SIZE(LteRlcUlAmAllPduFmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_rlc_ul_am_all_pdu_subpkt(b, offset,
+                    length, result);
+            break;
+
+        case LTE_RLC_DL_AM_All_PDU:
+            offset += _decode_by_fmt(LteRlcDlAmAllPduFmt,
+                    ARRAY_SIZE(LteRlcDlAmAllPduFmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_rlc_dl_am_all_pdu_subpkt(b, offset,
+                    length, result);
+            break;
+
+        case LTE_MAC_Rach_Trigger:
+            offset += _decode_by_fmt(LteMacRachTriggerFmt,
+                    ARRAY_SIZE(LteMacRachTriggerFmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_mac_rach_trigger_subpkt(b, offset, length,
+                    result);
+            break;
+        case LTE_MAC_Rach_Attempt:
+            offset += _decode_by_fmt(LteMacRachAttempt_Fmt,
+                    ARRAY_SIZE(LteMacRachAttempt_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_mac_rach_attempt_subpkt(b, offset, length,
+                    result);
+            break;
+        case LTE_PDCP_DL_Config:
+            offset += _decode_by_fmt(LtePdcpDlConfig_Fmt,
+                    ARRAY_SIZE(LtePdcpDlConfig_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdcp_dl_config_subpkt(b, offset, length, result);
+            break;
+        case LTE_PDCP_UL_Config:
+            offset += _decode_by_fmt(LtePdcpUlConfig_Fmt,
+                    ARRAY_SIZE(LtePdcpUlConfig_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdcp_ul_config_subpkt(b, offset, length, result);
+            break;
+        case LTE_PDCP_UL_Data_PDU:
+            offset += _decode_by_fmt(LtePdcpUlDataPdu_Fmt,
+                    ARRAY_SIZE(LtePdcpUlDataPdu_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdcp_ul_data_pdu_subpkt(b, offset, length, result);
+            break;
+        case LTE_PDCP_DL_Stats:
+            offset += _decode_by_fmt(LtePdcpDlStats_Fmt,
+                    ARRAY_SIZE(LtePdcpDlStats_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdcp_dl_stats_subpkt(b, offset, length, result);
+            break;
+        case LTE_PDCP_UL_Stats:
+            offset += _decode_by_fmt(LtePdcpUlStats_Fmt,
+                    ARRAY_SIZE(LtePdcpUlStats_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdcp_ul_stats_subpkt(b, offset, length, result);
+            break;
+        case LTE_RLC_UL_Stats:
+            offset += _decode_by_fmt(LteRlcUlStats_Fmt,
+                    ARRAY_SIZE(LteRlcUlStats_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_rlc_ul_stats_subpkt(b, offset, length, result);
+            break;
+        case LTE_RLC_DL_Stats:
+            offset += _decode_by_fmt(LteRlcDlStats_Fmt,
+                    ARRAY_SIZE(LteRlcDlStats_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_rlc_dl_stats_subpkt(b, offset, length, result);
+            break;
+        case LTE_PDCP_DL_Ctrl_PDU:
+            offset += _decode_by_fmt(LtePdcpDlCtrlPdu_Fmt,
+                    ARRAY_SIZE(LtePdcpDlCtrlPdu_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdcp_dl_ctrl_pdu_subpkt(b, offset, length, result);
+            break;
+        case LTE_PDCP_UL_Ctrl_PDU:
+            offset += _decode_by_fmt(LtePdcpDlCtrlPdu_Fmt,
+                    ARRAY_SIZE(LtePdcpDlCtrlPdu_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdcp_ul_ctrl_pdu_subpkt(b, offset, length, result);
+            break;
+        case LTE_PUCCH_Power_Control:
+            offset += _decode_by_fmt(LtePucchPowerControl_Fmt,
+                    ARRAY_SIZE(LtePucchPowerControl_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pucch_power_control_payload(b, offset, length, result);
+            break;
+        case LTE_PUSCH_Power_Control:
+            offset += _decode_by_fmt(LtePuschPowerControl_Fmt,
+                    ARRAY_SIZE(LtePuschPowerControl_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pusch_power_control_payload(b, offset, length, result);
+            break;
+        case LTE_PDCCH_PHICH_Indication_Report:
+            offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Fmt,
+                    ARRAY_SIZE(LtePdcchPhichIndicationReport_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdcch_phich_indication_report_payload(b, offset, length, result);
+            break;
+        case _1xEV_Rx_Partial_MultiRLP_Packet:
+            offset += _decode_by_fmt(_1xEVRxPartialMultiRLPPacket_Fmt,
+                    ARRAY_SIZE(_1xEVRxPartialMultiRLPPacket_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_1xev_rx_partial_multirlp_packet_payload(b, offset, length, result);
+            break;
+        case _1xEV_Connected_State_Search_Info:
+            offset += _decode_by_fmt(_1xEVConnectedStateSearchInfo_Fmt,
+                    ARRAY_SIZE(_1xEVConnectedStateSearchInfo_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_1xev_connected_state_search_info_payload(b, offset, length, result);
+            break;
+        case _1xEV_Connection_Attempt:
+            offset += _decode_by_fmt(_1xEVConnectionAttempt_Fmt,
+                    ARRAY_SIZE(_1xEVConnectionAttempt_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_1xev_connection_attempt_payload(b, offset, length, result);
+            break;
+        case _1xEV_Connection_Release:
+            offset += _decode_by_fmt(_1xEVConnectionRelease_Fmt,
+                    ARRAY_SIZE(_1xEVConnectionRelease_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_1xev_connection_release_payload(b, offset, length, result);
+            break;
+        case LTE_PDSCH_Stat_Indication:
+            offset += _decode_by_fmt(LtePdschStatIndication_Fmt,
+                    ARRAY_SIZE(LtePdschStatIndication_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdsch_stat_indication_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_System_Scan_Results:
+            offset += _decode_by_fmt(LtePhySystemScanResults_Fmt,
+                    ARRAY_SIZE(LtePhySystemScanResults_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_system_scan_results_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_BPLMN_Cell_Request:
+            offset += _decode_by_fmt(LtePhyBplmnCellRequest_Fmt,
+                    ARRAY_SIZE(LtePhyBplmnCellRequest_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_bplmn_cell_request_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_BPLMN_Cell_Confirm:
+            offset += _decode_by_fmt(LtePhyBplmnCellConfirm_Fmt,
+                    ARRAY_SIZE(LtePhyBplmnCellConfirm_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_bplmn_cell_confirm_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_Serving_Cell_COM_Loop:
+            offset += _decode_by_fmt(LtePhyServingCellComLoop_Fmt,
+                    ARRAY_SIZE(LtePhyServingCellComLoop_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_serving_cell_com_loop_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_PDCCH_Decoding_Result:
+            offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Fmt,
+                    ARRAY_SIZE(LtePhyPdcchDecodingResult_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_pdcch_decoding_result_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_PDSCH_Decoding_Result:
+            offset += _decode_by_fmt(LtePhyPdschDecodingResult_Fmt,
+                    ARRAY_SIZE(LtePhyPdschDecodingResult_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_pdsch_decoding_result_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_PUSCH_Tx_Report:
+            offset += _decode_by_fmt(LtePhyPuschTxReport_Fmt,
+                    ARRAY_SIZE(LtePhyPuschTxReport_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_pusch_tx_report_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_RLM_Report:
+            offset += _decode_by_fmt(LtePhyRlmReport_Fmt,
+                    ARRAY_SIZE(LtePhyRlmReport_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_rlm_report_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_PUSCH_CSF:
+            offset += _decode_by_fmt(LtePhyPuschCsf_Fmt,
+                    ARRAY_SIZE(LtePhyPuschCsf_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_pusch_csf_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_CDRX_Events_Info:
+            offset += _decode_by_fmt(LtePhyCdrxEventsInfo_Fmt,
+                    ARRAY_SIZE(LtePhyCdrxEventsInfo_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_cdrx_events_info_payload(b, offset, length, result);
+            break;
+        case WCDMA_RRC_States:
+            offset += _decode_wcdma_rrc_states_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_Idle_Neighbor_Cell_Meas:
+            offset += _decode_by_fmt(LtePhyIncm_Fmt,
+                    ARRAY_SIZE(LtePhyIncm_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_idle_neighbor_cell_meas_payload(b, offset, length, result);
+            break;
+        case WCDMA_Search_Cell_Reselection_Rank:
+            offset += _decode_by_fmt(WcdmaScrr_Fmt,
+                    ARRAY_SIZE(WcdmaScrr_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_wcdma_scrr_payload(b, offset, length, result);
+            break;
+        case GSM_RR_Cell_Information:
+            offset += _decode_by_fmt(GsmRrCellInfo_Fmt,
+                    ARRAY_SIZE(GsmRrCellInfo_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_rci_payload(b, offset, length, result);
+            break;
+        case GSM_Surround_Cell_BA_List:
+            offset += _decode_by_fmt(GsmScbl_Fmt,
+                    ARRAY_SIZE(GsmScbl_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_scbl_payload(b, offset, length, result);
+            break;
+        case GSM_RR_Cell_Reselection_Meas:
+            offset += _decode_by_fmt(GsmRrCellResMeas_Fmt,
+                    ARRAY_SIZE(GsmRrCellResMeas_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_rcrm_payload(b, offset, length, result);
+            break;
+        case Srch_TNG_1x_Searcher_Dump:
+            offset += _decode_by_fmt(SrchTng1xsd_Fmt,
+                    ARRAY_SIZE(SrchTng1xsd_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_srch_tng_1xsd_payload(b, offset, length, result);
+            break;
+        case _1xEVDO_Multi_Carrier_Pilot_Sets:
+            offset += _decode_by_fmt(_1xEvdoMcps_Fmt,
+                    ARRAY_SIZE(_1xEvdoMcps_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_1xevdo_mcps_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_PUCCH_Tx_Report:
+            offset += _decode_by_fmt(LtePhyPucchTxReport_Fmt,
+                    ARRAY_SIZE(LtePhyPucchTxReport_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_pucch_tx_report_payload(b, offset, length, result);
+            break;
+        case LTE_PDCP_DL_Cipher_Data_PDU:
+            offset += _decode_by_fmt(LtePdcpDlCipherDataPdu_Fmt,
+                    ARRAY_SIZE(LtePdcpDlCipherDataPdu_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdcp_dl_cipher_data_pdu_payload(b, offset, length, result);
+            break;
+        case LTE_PDCP_UL_Cipher_Data_PDU:
+            offset += _decode_by_fmt(LtePdcpUlCipherDataPdu_Fmt,
+                    ARRAY_SIZE(LtePdcpUlCipherDataPdu_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_pdcp_ul_cipher_data_pdu_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_PUCCH_CSF:
+            offset += _decode_by_fmt(LtePhyPucchCsf_Fmt,
+                    ARRAY_SIZE(LtePhyPucchCsf_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_pucch_csf_payload(b, offset, length, result);
+            break;
+        default:
+            break;
+    };
+
+}
+
 PyObject *
 decode_log_packet (const char *b, size_t length, bool skip_decoding) {
 
@@ -5166,468 +5637,17 @@ decode_log_packet (const char *b, size_t length, bool skip_decoding) {
                                 "Unsupported");
 
     if (skip_decoding) {    // skip further decoding
+
+        PyObject *t = Py_BuildValue("(ss#s)",
+                                "Msg", b + offset, length-offset,
+                                "raw_msg/skip_decoding");
+        PyList_Append(result, t);
+        Py_DECREF(t);
         return result;
     }
 
-    switch (type_id) {
-    case CDMA_Paging_Channel_Message:
-        // Not decoded yet.
-        break;
+    on_demand_decode(b+offset, length-offset, type_id, result);
 
-    // // Yuanjie: Incomplete support. Disable it temporarily
-    // case _1xEV_Signaling_Control_Channel_Broadcast:
-    //     offset += _decode_by_fmt(_1xEVSignalingFmt,
-    //                                 ARRAY_SIZE(_1xEVSignalingFmt, Fmt),
-    //                                 b, offset, length, result);
-    //     break;
-
-    case WCDMA_CELL_ID:
-        offset += _decode_by_fmt(WcdmaCellIdFmt,
-                                    ARRAY_SIZE(WcdmaCellIdFmt, Fmt),
-                                    b, offset, length, result);
-        break;
-
-    case WCDMA_Signaling_Messages:
-        offset += _decode_by_fmt(WcdmaSignalingMessagesFmt,
-                                    ARRAY_SIZE(WcdmaSignalingMessagesFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_wcdma_signaling_messages(b, offset, length, result);
-        break;
-
-    case UMTS_NAS_GMM_State:
-        offset += _decode_by_fmt(UmtsNasGmmStateFmt,
-                                    ARRAY_SIZE(UmtsNasGmmStateFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_umts_nas_gmm_state(b, offset, length, result);
-        break;
-
-    case UMTS_NAS_MM_State:
-        offset += _decode_by_fmt(UmtsNasMmStateFmt,
-                                    ARRAY_SIZE(UmtsNasMmStateFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_umts_nas_mm_state(b, offset, length, result);
-        break;
-
-    case UMTS_NAS_MM_REG_State:
-        offset += _decode_by_fmt(UmtsNasMmRegStateFmt,
-                                    ARRAY_SIZE(UmtsNasMmRegStateFmt, Fmt),
-                                    b, offset, length, result);
-        break;
-
-    case UMTS_NAS_OTA:
-        offset += _decode_by_fmt(UmtsNasOtaFmt,
-                                    ARRAY_SIZE(UmtsNasOtaFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_umts_nas_ota(b, offset, length, result);
-        break;
-
-    case LTE_RRC_OTA_Packet:
-        offset += _decode_by_fmt(LteRrcOtaPacketFmt,
-                                    ARRAY_SIZE(LteRrcOtaPacketFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_rrc_ota(b, offset, length, result);
-        break;
-
-    case LTE_RRC_MIB_Message_Log_Packet:
-        offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt,
-                                    ARRAY_SIZE(LteRrcMibMessageLogPacketFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_rrc_mib(b, offset, length, result);
-        break;
-
-    case LTE_RRC_Serv_Cell_Info_Log_Packet:
-        offset += _decode_by_fmt(LteRrcServCellInfoLogPacketFmt,
-                                    ARRAY_SIZE(LteRrcServCellInfoLogPacketFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_rrc_serv_cell_info(b, offset, length, result);
-        break;
-
-    case LTE_NAS_ESM_Plain_OTA_Incoming_Message:
-    case LTE_NAS_ESM_Plain_OTA_Outgoing_Message:
-    case LTE_NAS_EMM_Plain_OTA_Incoming_Message:
-    case LTE_NAS_EMM_Plain_OTA_Outgoing_Message:
-        offset += _decode_by_fmt(LteNasPlainFmt,
-                                    ARRAY_SIZE(LteNasPlainFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_nas_plain(b, offset, length, result);
-        break;
-
-    case LTE_NAS_EMM_State:
-        offset += _decode_by_fmt(LteNasEmmStateFmt,
-                                    ARRAY_SIZE(LteNasEmmStateFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_nas_emm_state(b, offset, length, result);
-        break;
-
-    case LTE_NAS_ESM_State:
-        offset += _decode_by_fmt(LteNasEsmStateFmt,
-                                    ARRAY_SIZE(LteNasEsmStateFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_nas_esm_state(b, offset, length, result);
-        break;
-
-    case LTE_PHY_PDSCH_Demapper_Configuration:
-        offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt,
-                                    ARRAY_SIZE(LtePhyPdschDemapperConfigFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_phy_pdsch_demapper_config(b, offset, length, result);
-        break;
-
-    case LTE_PHY_Connected_Mode_LTE_Intra_Freq_Meas_Results:
-        offset += _decode_by_fmt(LtePhyCmlifmrFmt,
-                                    ARRAY_SIZE(LtePhyCmlifmrFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_phy_cmlifmr(b, offset, length, result);
-        break;
-
-    case LTE_PHY_Serving_Cell_Measurement_Result:
-        offset += _decode_by_fmt(LtePhySubpktFmt,
-                                    ARRAY_SIZE(LtePhySubpktFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_phy_subpkt(b, offset, length, result);
-        break;
-
-    case LTE_PHY_IRAT_MDB:
-        offset += _decode_by_fmt(LtePhyIratFmt,
-                                    ARRAY_SIZE(LtePhyIratFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_phy_irat_subpkt(b, offset, length, result);
-        break;
-
-    case LTE_PHY_CDMA_MEAS:
-        //It shares similar packet format as LTE_PHY_IRAT_MDB
-        offset += _decode_by_fmt(LtePhyIratFmt,
-                                    ARRAY_SIZE(LtePhyIratFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_phy_irat_cdma_subpkt(b, offset, length, result);
-        break;
-
-    case LTE_PDCP_DL_SRB_Integrity_Data_PDU:
-        offset += _decode_by_fmt(LtePdcpDlSrbIntegrityDataPduFmt,
-                                    ARRAY_SIZE(LtePdcpDlSrbIntegrityDataPduFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_pdcp_dl_srb_integrity_data_pdu(b, offset, length, result);
-        break;
-
-    case LTE_PDCP_UL_SRB_Integrity_Data_PDU:
-        offset += _decode_by_fmt(LtePdcpUlSrbIntegrityDataPduFmt,
-                                    ARRAY_SIZE(LtePdcpUlSrbIntegrityDataPduFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_pdcp_ul_srb_integrity_data_pdu(b, offset, length, result);
-        break;
-
-    case LTE_MAC_Configuration:// Jie
-        offset += _decode_by_fmt(LteMacConfigurationFmt, ARRAY_SIZE(LteMacConfigurationFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_mac_configuration_subpkt(b, offset, length, result);
-        break;
-
-    case LTE_MAC_UL_Transport_Block:// Jie
-        offset += _decode_by_fmt(LteMacULTransportBlockFmt, ARRAY_SIZE(LteMacULTransportBlockFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_mac_ul_transportblock_subpkt(b, offset, length, result);
-        break;
-
-    case LTE_MAC_DL_Transport_Block:// Jie
-        offset += _decode_by_fmt(LteMacDLTransportBlockFmt,
-                                    ARRAY_SIZE(LteMacDLTransportBlockFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_mac_dl_transportblock_subpkt(b, offset, length, result);
-        break;
-
-    case LTE_MAC_UL_Buffer_Status_Internal:// Jie
-        offset += _decode_by_fmt(LteMacULBufferStatusInternalFmt,
-                                    ARRAY_SIZE(LteMacULBufferStatusInternalFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_mac_ul_bufferstatusinternal_subpkt(b, offset, length, result);
-        break;
-    case LTE_MAC_UL_Tx_Statistics:// Jie
-        offset += _decode_by_fmt(LteMacULTxStatisticsFmt,
-                                    ARRAY_SIZE(LteMacULTxStatisticsFmt, Fmt),
-                                    b, offset, length, result);
-        offset += _decode_lte_mac_ul_txstatistics_subpkt(b, offset, length, result);
-        break;
-
-    case LTE_RLC_UL_Config_Log_Packet:
-        offset += _decode_by_fmt(LteRlcUlConfigLogPacketFmt,
-                ARRAY_SIZE(LteRlcUlConfigLogPacketFmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_rlc_ul_config_log_packet_subpkt(b, offset,
-                length, result);
-        break;
-
-    case LTE_RLC_DL_Config_Log_Packet:
-        offset += _decode_by_fmt(LteRlcDlConfigLogPacketFmt,
-                ARRAY_SIZE(LteRlcDlConfigLogPacketFmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_rlc_dl_config_log_packet_subpkt(b, offset,
-                length, result);
-        break;
-
-    case LTE_RLC_UL_AM_All_PDU:
-        offset += _decode_by_fmt(LteRlcUlAmAllPduFmt,
-                ARRAY_SIZE(LteRlcUlAmAllPduFmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_rlc_ul_am_all_pdu_subpkt(b, offset,
-                length, result);
-        break;
-
-    case LTE_RLC_DL_AM_All_PDU:
-        offset += _decode_by_fmt(LteRlcDlAmAllPduFmt,
-                ARRAY_SIZE(LteRlcDlAmAllPduFmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_rlc_dl_am_all_pdu_subpkt(b, offset,
-                length, result);
-        break;
-
-    case LTE_MAC_Rach_Trigger:
-        offset += _decode_by_fmt(LteMacRachTriggerFmt,
-                ARRAY_SIZE(LteMacRachTriggerFmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_mac_rach_trigger_subpkt(b, offset, length,
-                result);
-        break;
-    case LTE_MAC_Rach_Attempt:
-        offset += _decode_by_fmt(LteMacRachAttempt_Fmt,
-                ARRAY_SIZE(LteMacRachAttempt_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_mac_rach_attempt_subpkt(b, offset, length,
-                result);
-        break;
-    case LTE_PDCP_DL_Config:
-        offset += _decode_by_fmt(LtePdcpDlConfig_Fmt,
-                ARRAY_SIZE(LtePdcpDlConfig_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdcp_dl_config_subpkt(b, offset, length, result);
-        break;
-    case LTE_PDCP_UL_Config:
-        offset += _decode_by_fmt(LtePdcpUlConfig_Fmt,
-                ARRAY_SIZE(LtePdcpUlConfig_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdcp_ul_config_subpkt(b, offset, length, result);
-        break;
-    case LTE_PDCP_UL_Data_PDU:
-        offset += _decode_by_fmt(LtePdcpUlDataPdu_Fmt,
-                ARRAY_SIZE(LtePdcpUlDataPdu_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdcp_ul_data_pdu_subpkt(b, offset, length, result);
-        break;
-    case LTE_PDCP_DL_Stats:
-        offset += _decode_by_fmt(LtePdcpDlStats_Fmt,
-                ARRAY_SIZE(LtePdcpDlStats_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdcp_dl_stats_subpkt(b, offset, length, result);
-        break;
-    case LTE_PDCP_UL_Stats:
-        offset += _decode_by_fmt(LtePdcpUlStats_Fmt,
-                ARRAY_SIZE(LtePdcpUlStats_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdcp_ul_stats_subpkt(b, offset, length, result);
-        break;
-    case LTE_RLC_UL_Stats:
-        offset += _decode_by_fmt(LteRlcUlStats_Fmt,
-                ARRAY_SIZE(LteRlcUlStats_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_rlc_ul_stats_subpkt(b, offset, length, result);
-        break;
-    case LTE_RLC_DL_Stats:
-        offset += _decode_by_fmt(LteRlcDlStats_Fmt,
-                ARRAY_SIZE(LteRlcDlStats_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_rlc_dl_stats_subpkt(b, offset, length, result);
-        break;
-    case LTE_PDCP_DL_Ctrl_PDU:
-        offset += _decode_by_fmt(LtePdcpDlCtrlPdu_Fmt,
-                ARRAY_SIZE(LtePdcpDlCtrlPdu_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdcp_dl_ctrl_pdu_subpkt(b, offset, length, result);
-        break;
-    case LTE_PDCP_UL_Ctrl_PDU:
-        offset += _decode_by_fmt(LtePdcpDlCtrlPdu_Fmt,
-                ARRAY_SIZE(LtePdcpDlCtrlPdu_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdcp_ul_ctrl_pdu_subpkt(b, offset, length, result);
-        break;
-    case LTE_PUCCH_Power_Control:
-        offset += _decode_by_fmt(LtePucchPowerControl_Fmt,
-                ARRAY_SIZE(LtePucchPowerControl_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pucch_power_control_payload(b, offset, length, result);
-        break;
-    case LTE_PUSCH_Power_Control:
-        offset += _decode_by_fmt(LtePuschPowerControl_Fmt,
-                ARRAY_SIZE(LtePuschPowerControl_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pusch_power_control_payload(b, offset, length, result);
-        break;
-    case LTE_PDCCH_PHICH_Indication_Report:
-        offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Fmt,
-                ARRAY_SIZE(LtePdcchPhichIndicationReport_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdcch_phich_indication_report_payload(b, offset, length, result);
-        break;
-    case _1xEV_Rx_Partial_MultiRLP_Packet:
-        offset += _decode_by_fmt(_1xEVRxPartialMultiRLPPacket_Fmt,
-                ARRAY_SIZE(_1xEVRxPartialMultiRLPPacket_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_1xev_rx_partial_multirlp_packet_payload(b, offset, length, result);
-        break;
-    case _1xEV_Connected_State_Search_Info:
-        offset += _decode_by_fmt(_1xEVConnectedStateSearchInfo_Fmt,
-                ARRAY_SIZE(_1xEVConnectedStateSearchInfo_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_1xev_connected_state_search_info_payload(b, offset, length, result);
-        break;
-    case _1xEV_Connection_Attempt:
-        offset += _decode_by_fmt(_1xEVConnectionAttempt_Fmt,
-                ARRAY_SIZE(_1xEVConnectionAttempt_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_1xev_connection_attempt_payload(b, offset, length, result);
-        break;
-    case _1xEV_Connection_Release:
-        offset += _decode_by_fmt(_1xEVConnectionRelease_Fmt,
-                ARRAY_SIZE(_1xEVConnectionRelease_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_1xev_connection_release_payload(b, offset, length, result);
-        break;
-    case LTE_PDSCH_Stat_Indication:
-        offset += _decode_by_fmt(LtePdschStatIndication_Fmt,
-                ARRAY_SIZE(LtePdschStatIndication_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdsch_stat_indication_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_System_Scan_Results:
-        offset += _decode_by_fmt(LtePhySystemScanResults_Fmt,
-                ARRAY_SIZE(LtePhySystemScanResults_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_system_scan_results_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_BPLMN_Cell_Request:
-        offset += _decode_by_fmt(LtePhyBplmnCellRequest_Fmt,
-                ARRAY_SIZE(LtePhyBplmnCellRequest_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_bplmn_cell_request_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_BPLMN_Cell_Confirm:
-        offset += _decode_by_fmt(LtePhyBplmnCellConfirm_Fmt,
-                ARRAY_SIZE(LtePhyBplmnCellConfirm_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_bplmn_cell_confirm_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_Serving_Cell_COM_Loop:
-        offset += _decode_by_fmt(LtePhyServingCellComLoop_Fmt,
-                ARRAY_SIZE(LtePhyServingCellComLoop_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_serving_cell_com_loop_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_PDCCH_Decoding_Result:
-        offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Fmt,
-                ARRAY_SIZE(LtePhyPdcchDecodingResult_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_pdcch_decoding_result_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_PDSCH_Decoding_Result:
-        offset += _decode_by_fmt(LtePhyPdschDecodingResult_Fmt,
-                ARRAY_SIZE(LtePhyPdschDecodingResult_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_pdsch_decoding_result_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_PUSCH_Tx_Report:
-        offset += _decode_by_fmt(LtePhyPuschTxReport_Fmt,
-                ARRAY_SIZE(LtePhyPuschTxReport_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_pusch_tx_report_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_RLM_Report:
-        offset += _decode_by_fmt(LtePhyRlmReport_Fmt,
-                ARRAY_SIZE(LtePhyRlmReport_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_rlm_report_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_PUSCH_CSF:
-        offset += _decode_by_fmt(LtePhyPuschCsf_Fmt,
-                ARRAY_SIZE(LtePhyPuschCsf_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_pusch_csf_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_CDRX_Events_Info:
-        offset += _decode_by_fmt(LtePhyCdrxEventsInfo_Fmt,
-                ARRAY_SIZE(LtePhyCdrxEventsInfo_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_cdrx_events_info_payload(b, offset, length, result);
-        break;
-    case WCDMA_RRC_States:
-        offset += _decode_wcdma_rrc_states_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_Idle_Neighbor_Cell_Meas:
-        offset += _decode_by_fmt(LtePhyIncm_Fmt,
-                ARRAY_SIZE(LtePhyIncm_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_idle_neighbor_cell_meas_payload(b, offset, length, result);
-        break;
-    case WCDMA_Search_Cell_Reselection_Rank:
-        offset += _decode_by_fmt(WcdmaScrr_Fmt,
-                ARRAY_SIZE(WcdmaScrr_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_wcdma_scrr_payload(b, offset, length, result);
-        break;
-    case GSM_RR_Cell_Information:
-        offset += _decode_by_fmt(GsmRrCellInfo_Fmt,
-                ARRAY_SIZE(GsmRrCellInfo_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_gsm_rci_payload(b, offset, length, result);
-        break;
-    case GSM_Surround_Cell_BA_List:
-        offset += _decode_by_fmt(GsmScbl_Fmt,
-                ARRAY_SIZE(GsmScbl_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_gsm_scbl_payload(b, offset, length, result);
-        break;
-    case GSM_RR_Cell_Reselection_Meas:
-        offset += _decode_by_fmt(GsmRrCellResMeas_Fmt,
-                ARRAY_SIZE(GsmRrCellResMeas_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_gsm_rcrm_payload(b, offset, length, result);
-        break;
-    case Srch_TNG_1x_Searcher_Dump:
-        offset += _decode_by_fmt(SrchTng1xsd_Fmt,
-                ARRAY_SIZE(SrchTng1xsd_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_srch_tng_1xsd_payload(b, offset, length, result);
-        break;
-    case _1xEVDO_Multi_Carrier_Pilot_Sets:
-        offset += _decode_by_fmt(_1xEvdoMcps_Fmt,
-                ARRAY_SIZE(_1xEvdoMcps_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_1xevdo_mcps_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_PUCCH_Tx_Report:
-        offset += _decode_by_fmt(LtePhyPucchTxReport_Fmt,
-                ARRAY_SIZE(LtePhyPucchTxReport_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_pucch_tx_report_payload(b, offset, length, result);
-        break;
-    case LTE_PDCP_DL_Cipher_Data_PDU:
-        offset += _decode_by_fmt(LtePdcpDlCipherDataPdu_Fmt,
-                ARRAY_SIZE(LtePdcpDlCipherDataPdu_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdcp_dl_cipher_data_pdu_payload(b, offset, length, result);
-        break;
-    case LTE_PDCP_UL_Cipher_Data_PDU:
-        offset += _decode_by_fmt(LtePdcpUlCipherDataPdu_Fmt,
-                ARRAY_SIZE(LtePdcpUlCipherDataPdu_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_pdcp_ul_cipher_data_pdu_payload(b, offset, length, result);
-        break;
-    case LTE_PHY_PUCCH_CSF:
-        offset += _decode_by_fmt(LtePhyPucchCsf_Fmt,
-                ARRAY_SIZE(LtePhyPucchCsf_Fmt, Fmt),
-                b, offset, length, result);
-        offset += _decode_lte_phy_pucch_csf_payload(b, offset, length, result);
-        break;
-    default:
-        break;
-    };
     return result;
 }
 
