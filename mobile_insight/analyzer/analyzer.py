@@ -219,6 +219,9 @@ class Analyzer(Element):
 
         # A lambda function: input as a callback, output as passing event to
         # this callback
+
+        if not event.data:
+            return
         def G(f): return f(event)
 
         if module == self.source:

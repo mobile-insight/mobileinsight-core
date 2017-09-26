@@ -97,6 +97,8 @@ class MsgLogger(Analyzer):
 
         :param msg: the received message
         """
+        if not msg.data:
+            return
         self.__msg_log.append(msg)
         date = datetime.datetime.fromtimestamp(
             msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')

@@ -87,6 +87,8 @@ class ProtocolAnalyzer(Analyzer):
         """
 
         # Decode the message to XML format
+        if not msg.data:
+            return
 
         # FIXME: duplicate message decoding, inefficient
         log_item = msg.data.decode()
