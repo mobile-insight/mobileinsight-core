@@ -595,7 +595,9 @@ dm_collector_c_reset (PyObject *self, PyObject *args) {
 // Return: decoded_list or None
 static PyObject *
 dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
+
     // (void)self;
+
     std::string frame;
     bool crc_correct = false;
     bool skip_decoding = false, include_timestamp = false;  // default values

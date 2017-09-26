@@ -1858,9 +1858,10 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                 } else {
                     bool success = false;
                     switch (subpkt_ver) {
-                        case 3:{
+                        case 3: {
                             // UL Buffer Status SubPacket v3
                             PyObject *result_subpkt_allsamples = PyList_New(0);
+
                             for (int j = 0; j < subpkt_nsample; j++) {
                                 PyObject *result_subpkt_sample = PyList_New(0);
                                 offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt,
@@ -1878,6 +1879,7 @@ _decode_lte_mac_ul_bufferstatusinternal_subpkt(const char *b, int offset, size_t
                                 Py_DECREF(old_object);
 
                                 PyObject *result_subpkt_sample_alllcids = PyList_New(0);
+
                                 for (int k = 0; k < num_active_lcid; k++) {
                                     PyObject *result_subpkt_sample_lcid = PyList_New(0);
                                     offset += _decode_by_fmt(LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt,
