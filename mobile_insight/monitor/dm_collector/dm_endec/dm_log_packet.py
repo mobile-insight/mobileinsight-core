@@ -76,6 +76,11 @@ class DMLogPacket:
 
         self._decoded_list = cls._preparse_internal_list(decoded_list)
 
+        # Optimization: Cache the decoded message. Avoid repetitive decoding
+        self.decoded_cache = None
+        self.decoded_xml_cache = None
+        self.decoded_json_cache = None
+
     @classmethod
     @static_var("wcdma_sib_types", {0: "RRC_MIB",
                                     1: "RRC_SIB1",
@@ -174,6 +179,86 @@ class DMLogPacket:
         :param decoded_list: output of dm_collector_c library
         :type decoded_list: list
         """
+        if out_type == "dict":
+            return cls._parse_internal_list_dict(decoded_list)
+        elif out_type == "list":
+            return cls._parse_internal_list_list(decoded_list)
+        elif out_type.startswith("xml/"):
+            tag_name = out_type[len("xml/"):]
+            return cls._parse_internal_list_xml(tag_name, decoded_list)
+
+    @classmethod
+    def _parse_internal_list_dict(cls, decoded_list):
+        output_d = dict()
+        i, list_len = 0, len(decoded_list)
+        while i < list_len:
+            field_name, val, type_str = decoded_list[i] # TODO: avoid assignment?
+            if type_str == "dict":
+                xx = cls._parse_internal_list_dict(val)
+            elif type_str == "list":
+                xx = cls._parse_internal_list_list(val)
+            else:    # "msg" or None: default type
+                xx = val
+
+            output_d[field_name] = xx
+            i += 1
+        return output_d
+
+    @classmethod
+    def _parse_internal_list_list(cls, decoded_list):
+        output_lst = []
+        i, list_len = 0, len(decoded_list)
+        while i < list_len:
+            field_name, val, type_str = decoded_list[i] # TODO: avoid assignment?
+            if type_str == "dict":
+                xx = cls._parse_internal_list_dict(val)
+            elif type_str == "list":
+                xx = cls._parse_internal_list_list(val)
+            else:    # "msg" or None: default type
+                xx = val
+            output_lst.append(xx)
+            i += 1
+        return output_lst
+
+    @classmethod
+    def _parse_internal_list_xml(cls, tag_name, decoded_list):
+        output_xml = ET.Element(tag_name)
+        i, list_len = 0, len(decoded_list)
+        while i < list_len:
+            field_name, val, type_str = decoded_list[i] # TODO: avoid assignment?
+            if type_str == "dict":
+                xx = cls._parse_internal_list_xml("dict", val)
+            elif type_str == "list":
+                xx = cls._parse_internal_list_xml("list", val)
+            else:
+                xx = val # "msg" or None: default type
+
+            # Create tag
+            if tag_name == "list":
+                sub_tag = ET.SubElement(output_xml, "item")
+            elif tag_name == "dict":
+                sub_tag = ET.SubElement(
+                    output_xml, "pair", {
+                        "key": field_name})
+
+            if not type_str:
+                xx = str(xx)
+                sub_tag.text = xx
+            else:
+                if type_str == "msg":
+                    xx = ET.XML(xx)
+                    sub_tag.set("type", "list")
+                else:
+                    sub_tag.set("type", type_str)
+                sub_tag.append(xx)
+            i += 1
+        return output_xml
+
+    @classmethod
+    def _parse_internal_list_old(cls, out_type, decoded_list):
+        """
+        DEPRECIATED. DO NOT CALL THIS FUNCTION since it is very slow.
+        """
 
         if out_type == "dict":
             output_d = dict()
@@ -229,7 +314,7 @@ class DMLogPacket:
                         sub_tag.set("type", type_str)
                     sub_tag.append(xx)
 
-            i = i + 1
+            i += 1
 
         if out_type == "dict":
             return output_d
@@ -261,10 +346,15 @@ class DMLogPacket:
 
         :raises FormatError: this message has an unknown type
         """
-        cls = self.__class__
+        # cls = self.__class__
 
-        d = cls._parse_internal_list("dict", self._decoded_list)
-        return d
+        # d = cls._parse_internal_list("dict", self._decoded_list)
+        # return d
+
+        if not self.decoded_cache:
+            cls = self.__class__
+            self.decoded_cache = cls._parse_internal_list("dict", self._decoded_list)
+        return self.decoded_cache
 
     def decode_xml(self):
         """
@@ -272,12 +362,13 @@ class DMLogPacket:
 
         :returns: a string that contains the converted XML document.
         """
-        cls = self.__class__
-
-        xml = cls._parse_internal_list("xml/dict", self._decoded_list)
-        # Zengwen: what about this name?
-        xml.tag = "dm_log_packet"
-        return ET.tostring(xml)
+        if not self.decoded_json_cache:
+            cls = self.__class__
+            xml = cls._parse_internal_list("xml/dict", self._decoded_list)
+            # Zengwen: what about this name?
+            xml.tag = "dm_log_packet"
+            self.decoded_json_cache = ET.tostring(xml)
+        return self.decoded_json_cache
 
     def decode_json(self):
         """
@@ -285,17 +376,20 @@ class DMLogPacket:
 
         :returns: a string that contains the converted JSON document.
         """
-        cls = self.__class__
 
-        d = self.decode()
+        if not self.decoded_json_cache:
+            cls = self.__class__
 
-        try:
-            import xmltodict
-            if "Msg" in d:
-                d["Msg"] = xmltodict.parse(d["Msg"])
-        except ImportError:
-            pass
-        return json.dumps(d, cls=SuperEncoder)
+            d = self.decode()
+
+            try:
+                import xmltodict
+                if "Msg" in d:
+                    d["Msg"] = xmltodict.parse(d["Msg"])
+            except ImportError:
+                pass
+            self.decoded_json_cache = json.dumps(d, cls=SuperEncoder)
+        return self.decoded_json_cache
 
     @classmethod
     def init(cls, prefs):

@@ -152,7 +152,7 @@ class AndroidDevDiagMonitor(Monitor):
     TMP_FIFO_FILE = os.path.join(get_cache_dir(), "diag_revealer_fifo")
     # Yuanjie: the smaller the lower latency, but maybe higher CPU
     # DO NOT CHANGE IT! This value has been optimized
-    BLOCK_SIZE = 8
+    BLOCK_SIZE = 64
 
     def __init__(self):
         """
@@ -163,7 +163,6 @@ class AndroidDevDiagMonitor(Monitor):
         self._fifo_path = self.TMP_FIFO_FILE
         self._input_dir = os.path.join(get_cache_dir(), "mi2log")
         self._log_cut_size = 0.5  # change size to 1.0 M
-        # self._skip_decoding = False
         self._type_names = []
         self._last_diag_revealer_ts = None
 
@@ -337,6 +336,7 @@ class AndroidDevDiagMonitor(Monitor):
                 self.log_warning(
                     "Monitoring daemon is terminated. Restart the daemon ...")
                 self._start_diag_revealer()
+                self.run()
 
     def _stop_collection(self):
         ANDROID_SHELL = "/system/bin/sh"
@@ -377,9 +377,11 @@ class AndroidDevDiagMonitor(Monitor):
         self.broadcast_info('STARTED',{})
 
         generate_diag_cfg = True
+        fifo = None
         if not self._type_names:
-            raise RuntimeError(
-                "Log type not specified. Please specify the log types with enable_log().")
+            # raise RuntimeError(
+            #     "Log type not specified. Please specify the log types with enable_log().")
+            self.log_error("Log type not specified. Please specify the log types with enable_log().")
             # if os.path.exists(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg")):
             #     generate_diag_cfg = False
             #     # print "AndroidDevDiagMonitor: existing Diag.cfg file will be used."
@@ -418,7 +420,7 @@ class AndroidDevDiagMonitor(Monitor):
                     # self.log_info("After os.read(fifo, self.BLOCK_SIZE)")
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
-                        # self.log_info("err.errno="+str(err.errno))
+                        self.log_error("err.errno="+str(err.errno))
                         s = None
                     else:
                         raise err  # something else has happened -- better reraise
@@ -448,10 +450,11 @@ class AndroidDevDiagMonitor(Monitor):
                                           DMLogPacket([msg]))
                             # ret_filename)
                             self.send(event)
+                            del event
+
                     elif ret_msg_type is not None:
-                        raise RuntimeError(
-                            "Unknown ret msg type: %s" %
-                            str(ret_msg_type))
+                        # raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
+                        self.log_warning("Unknown ret msg type: %s" % str(ret_msg_type))
                     s = remain
 
                 result = dm_collector_c.receive_log_packet(self._skip_decoding,
@@ -461,15 +464,11 @@ class AndroidDevDiagMonitor(Monitor):
                     try:
                         packet = DMLogPacket(result[0])
                         d = packet.decode()
-                        # print d["type_id"], d["timestamp"], result[1]
-                        # xml = packet.decode_xml()
-                        # print xml
-                        # print ""
-                        # Send event to analyzers
                         event = Event(result[1],
                                       d["type_id"],
                                       packet)
                         self.send(event)
+                        del result, packet, event, d
                     except FormatError as e:
                         # skip this packet
                         print "FormatError: ", e
@@ -484,6 +483,7 @@ class AndroidDevDiagMonitor(Monitor):
                           packet)
             self.send(event)
             import traceback
+            self.log_error(str(traceback.format_exc()))
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
         except Exception as e:
@@ -496,5 +496,6 @@ class AndroidDevDiagMonitor(Monitor):
                           packet)
             self.send(event)
             import traceback
+            self.log_error(str(traceback.format_exc()))
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)

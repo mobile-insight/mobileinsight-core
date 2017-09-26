@@ -128,20 +128,20 @@ class DMCollector(Monitor):
             # Open COM ports
             phy_ser = serial.Serial(self.phy_ser_name,
                                     baudrate=self.phy_baudrate,
-                                    timeout=.5, rtscts=True, dsrdtr=True)
-            # phy_ser = open("hahaha.txt", "r+b")
+                                    timeout=None, rtscts=True, dsrdtr=True)
 
             # Disable logs
-            print "Disable logs"
+            self.log_debug("Disable logs") 
             dm_collector_c.disable_logs(phy_ser)
 
             # Enable logs
-            print "Enable logs"
+            self.log_debug("Enable logs")
             dm_collector_c.enable_logs(phy_ser, self._type_names)
 
             # Read log packets from serial port and decode their contents
             while True:
                 s = phy_ser.read(64)
+                # s = phy_ser.read(1)
                 dm_collector_c.feed_binary(s)
 
                 decoded = dm_collector_c.receive_log_packet(self._skip_decoding,

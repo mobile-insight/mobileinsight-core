@@ -326,6 +326,7 @@ class AndroidMtkMonitor(Monitor):
                                         typeid,
                                         packet)
                         self.send(event)
+                        del event, packet, decoded
                     ##############################################
 
                 except FormatError as e:

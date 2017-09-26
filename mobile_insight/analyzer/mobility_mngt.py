@@ -932,6 +932,8 @@ class MobilityStateMachine:
                 break
         if not equal_state:
             return None  # unknown state, unpredictable
+        else:
+        	return equal_state
 
     def __merge_transition(self, transition):
         """

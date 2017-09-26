@@ -12,6 +12,7 @@ __all__ = ["OfflineReplayer"]
 import sys
 import os
 import timeit
+import time
 
 from monitor import Monitor, Event
 from dm_collector import dm_collector_c, DMLogPacket, FormatError
@@ -61,7 +62,6 @@ class OfflineReplayer(Monitor):
                     libs_path,
                     "android_pie_ws_dissector"),
                 "libwireshark_path": libs_path}
-            print prefs
         else:
             prefs = {}
 
@@ -159,7 +159,7 @@ class OfflineReplayer(Monitor):
         try:
 
             self.broadcast_info('STARTED',{})
-
+            self.log_info('STARTED: ' + str(time.time()))
             log_list = []
             if os.path.isfile(self._input_path):
                 log_list = [self._input_path]
@@ -173,8 +173,11 @@ class OfflineReplayer(Monitor):
 
             log_list.sort()  # Hidden assumption: logs follow the diag_log_TIMSTAMP_XXX format
 
+            decoding_inter = 0
+            sending_inter = 0
             for file in log_list:
                 self.log_info("Loading " + file)
+                self.log_info('Loading: ' + str(time.time()))
                 self._input_file = open(file, "rb")
                 dm_collector_c.reset()
                 while True:
@@ -183,35 +186,38 @@ class OfflineReplayer(Monitor):
                         break
 
                     dm_collector_c.feed_binary(s)
-                    # decoded = dm_collector_c.receive_log_packet()
                     decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
                                                                 True,   # include_timestamp
                                                                 )
                     if decoded:
                         try:
-                            # packet = DMLogPacket(decoded)
+                            before_decode_time = time.time()
+                            # self.log_info('Before decoding: ' + str(time.time()))
                             packet = DMLogPacket(decoded[0])
-                            # print "DMLogPacket decoded[0]:",str(decoded[0])
                             d = packet.decode()
-                            # print d["type_id"], d["timestamp"]
-                            # xml = packet.decode_xml()
-                            # print xml
-                            # print ""
-                            # Send event to analyzers
+                            after_decode_time = time.time()
+                            decoding_inter += after_decode_time - before_decode_time
 
                             if d["type_id"] in self._type_names:
                                 event = Event(timeit.default_timer(),
                                               d["type_id"],
                                               packet)
                                 self.send(event)
+                            after_sending_time = time.time()
+                            sending_inter += after_sending_time - after_decode_time
+                            # pself.log_info('After sending event: ' + str(time.time()))
 
                         except FormatError as e:
                             # skip this packet
                             print "FormatError: ", e
-
+                self.log_info('Decoding_inter: ' + str(decoding_inter))
+                self.log_info('sending_inter: ' + str(sending_inter))
                 self._input_file.close()
 
         except Exception as e:
             import traceback
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
+        event = Event(timeit.default_timer(), 'Monitor.STOP', None)
+        self.send(event)
+        self.log_info("Offline replay is completed.")
