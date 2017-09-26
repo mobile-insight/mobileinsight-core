@@ -226,12 +226,12 @@ class Profile(object):
 
                 sdcard_path = Environment.getExternalStorageDirectory().toString()
                 DB_PATH = os.path.join(sdcard_path, "mobileinsight/dbs")
-                activity = autoclass('org.renpy.android.PythonActivity')
+                activity = autoclass('org.kivy.android.PythonActivity')
                 if activity.mActivity:
                     self.__db = activity.mActivity.openOrCreateDatabase(
                         os.path.join(DB_PATH, root.name + '.db'), 0, None)
                 else:
-                    service = autoclass('org.renpy.android.PythonService')
+                    service = autoclass('org.kivy.android.PythonService')
                     self.__db = service.mService.openOrCreateDatabase(
                         os.path.join(DB_PATH, root.name + '.db'), 0, None)
             else:
