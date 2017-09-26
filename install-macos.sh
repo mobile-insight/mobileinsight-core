@@ -95,12 +95,18 @@ else
 fi
 
 echo "Installing dependencies for MobileInsight GUI..."
-brew ls --versions python
+PYTHON_CMD=python
+
+brew ls --versions $PYTHON_CMD
 if [[ $? != 0 ]] ; then
     echo "Installing Python via Homebrew..."
     brew install python
 else
     echo "Python is installed on your mac by Homebrew"
+fi
+
+if [[ $(/usr/local/bin/python2) != 0 ]] ; then
+    PYTHON_CMD = python2
 fi
 
 echo "Installing wxPython..."
