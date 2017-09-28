@@ -55,7 +55,7 @@ def get_cache_dir():
 
 def get_files_dir():
     if is_android:
-        return str(service_context.getFilesDir().getAbsolutePath())
+        return str(service_context.getFilesDir().getAbsolutePath() + '/app')
     else:
         return ""
 
