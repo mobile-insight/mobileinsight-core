@@ -35,7 +35,7 @@ class OfflineReplayer(Monitor):
             #     self.service_context = autoclass("org.kivy.android.PythonActivity").mActivity
             self.is_android = True
             try:
-                import mi2app_utils
+                from service import mi2app_utils
                 self.service_context = autoclass(
                     'org.kivy.android.PythonService').mService
             except Exception as e:
@@ -72,7 +72,7 @@ class OfflineReplayer(Monitor):
     def __del__(self):
         if self.is_android and self.service_context:
             print "detaching..."
-            import mi2app_utils
+            from service import mi2app_utils
             mi2app_utils.detach_thread()
 
     # def __get_cache_dir(self):

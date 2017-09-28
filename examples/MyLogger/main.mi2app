@@ -5,7 +5,7 @@ import sys
 from mobile_insight.monitor import OnlineMonitor
 
 # A helper utilities for mobile_insight
-import mi2app_utils
+from service import mi2app_utils
 
 
 # options of enabling logs

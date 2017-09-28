@@ -16,7 +16,7 @@ try:
     from jnius import autoclass  # For Android
     IntentClass = autoclass("android.content.Intent")
     JavaString = autoclass("java.lang.String")
-    import mi2app_utils
+    from service import mi2app_utils
     is_android = True
 except Exception as e:
     is_android = False
