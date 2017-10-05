@@ -29,16 +29,16 @@ class OfflineReplayer(Monitor):
         try:
             from jnius import autoclass, cast  # For Android
             # try:
-            #     self.service_context = autoclass('org.renpy.android.PythonService').mService
+            #     self.service_context = autoclass('org.kivy.android.PythonService').mService
             #     if not self.service_context:
-            #         self.service_context = autoclass("org.renpy.android.PythonActivity").mActivity
+            #         self.service_context = autoclass("org.kivy.android.PythonActivity").mActivity
             # except Exception, e:
-            #     self.service_context = autoclass("org.renpy.android.PythonActivity").mActivity
+            #     self.service_context = autoclass("org.kivy.android.PythonActivity").mActivity
             self.is_android = True
             try:
-                import mi2app_utils
+                from service import mi2app_utils
                 self.service_context = autoclass(
-                    'org.renpy.android.PythonService').mService
+                    'org.kivy.android.PythonService').mService
             except Exception as e:
                 self.service_context = None
 
@@ -72,7 +72,7 @@ class OfflineReplayer(Monitor):
     def __del__(self):
         if self.is_android and self.service_context:
             print "detaching..."
-            import mi2app_utils
+            from service import mi2app_utils
             mi2app_utils.detach_thread()
 
     # def __get_cache_dir(self):
