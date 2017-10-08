@@ -74,12 +74,15 @@ class DMLogPacket:
         """
         cls = self.__class__
 
-        self._decoded_list = cls._preparse_internal_list(decoded_list)
+        self._decoded_list, self._type_id = cls._preparse_internal_list(decoded_list)
 
         # Optimization: Cache the decoded message. Avoid repetitive decoding
         self.decoded_cache = None
         self.decoded_xml_cache = None
         self.decoded_json_cache = None
+
+    def get_type_id(self):
+        return self._type_id
 
     @classmethod
     @static_var("wcdma_sib_types", {0: "RRC_MIB",
@@ -93,11 +96,14 @@ class DMLogPacket:
                                     })
     def _preparse_internal_list(cls, decoded_list):
         lst = []
+        type_id = ""
         try:
             # for i in range(len(decoded_list)):
             i = 0
             while i < len(decoded_list):
                 field_name, val, type_str = decoded_list[i]
+                if field_name == "type_id":
+                    type_id = val
                 if type_str.startswith("raw_msg/"):
                     msg_type = type_str[len("raw_msg/"):]
                     decoded = cls._decode_msg(msg_type, val)
@@ -155,7 +161,7 @@ class DMLogPacket:
                 else:
                     lst.append(decoded_list[i])
                 i = i + 1
-            return lst
+            return lst, type_id
 
         except Exception as e:
             print len(decoded_list)

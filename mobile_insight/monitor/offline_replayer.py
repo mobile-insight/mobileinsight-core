@@ -194,13 +194,13 @@ class OfflineReplayer(Monitor):
                             before_decode_time = time.time()
                             # self.log_info('Before decoding: ' + str(time.time()))
                             packet = DMLogPacket(decoded[0])
-                            d = packet.decode()
+                            type_id = packet.get_type_id()
                             after_decode_time = time.time()
                             decoding_inter += after_decode_time - before_decode_time
 
-                            if d["type_id"] in self._type_names:
+                            if type_id in self._type_names:
                                 event = Event(timeit.default_timer(),
-                                              d["type_id"],
+                                              type_id,
                                               packet)
                                 self.send(event)
                             after_sending_time = time.time()

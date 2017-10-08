@@ -602,7 +602,7 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     bool crc_correct = false;
     bool skip_decoding = false, include_timestamp = false;  // default values
     double posix_timestamp = (include_timestamp? get_posix_timestamp(): -1.0);
-    
+
     bool success = get_next_frame(frame, crc_correct);
     // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
     // if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
@@ -623,7 +623,8 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
                 Py_DECREF(arg_include_timestamp);
             }
 
-        manager_export_binary(&g_emanager, frame.c_str(), frame.size());
+        if (!manager_export_binary(&g_emanager, frame.c_str(), frame.size()))
+            Py_RETURN_NONE;
         if(is_log_packet(frame.c_str(), frame.size())){
             const char *s = frame.c_str();
             PyObject *decoded = decode_log_packet(s + 2,  // skip first two bytes
