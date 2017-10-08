@@ -468,7 +468,7 @@ class AndroidDevDiagMonitor(Monitor):
                                       type_id,
                                       packet)
                         self.send(event)
-                        del result, packet, event, d
+                        del result, packet, event
                     except FormatError as e:
                         # skip this packet
                         print "FormatError: ", e
