@@ -463,9 +463,9 @@ class AndroidDevDiagMonitor(Monitor):
                 if result:     # result = (decoded, posix_timestamp)
                     try:
                         packet = DMLogPacket(result[0])
-                        d = packet.decode()
+                        type_id = packet.get_type_id()
                         event = Event(result[1],
-                                      d["type_id"],
+                                      type_id,
                                       packet)
                         self.send(event)
                         del result, packet, event, d
