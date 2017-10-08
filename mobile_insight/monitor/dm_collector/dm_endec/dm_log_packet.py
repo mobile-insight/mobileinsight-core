@@ -357,10 +357,13 @@ class DMLogPacket:
         # d = cls._parse_internal_list("dict", self._decoded_list)
         # return d
 
-        if not self.decoded_cache:
-            cls = self.__class__
-            self.decoded_cache = cls._parse_internal_list("dict", self._decoded_list)
-        return self.decoded_cache
+        # if not self.decoded_cache:
+        #     cls = self.__class__
+        #     self.decoded_cache = cls._parse_internal_list("dict", self._decoded_list)
+        # return self.decoded_cache
+
+        cls = self.__class__
+        return cls._parse_internal_list("dict", self._decoded_list)
 
     def decode_xml(self):
         """
@@ -368,13 +371,19 @@ class DMLogPacket:
 
         :returns: a string that contains the converted XML document.
         """
-        if not self.decoded_json_cache:
-            cls = self.__class__
-            xml = cls._parse_internal_list("xml/dict", self._decoded_list)
-            # Zengwen: what about this name?
-            xml.tag = "dm_log_packet"
-            self.decoded_json_cache = ET.tostring(xml)
-        return self.decoded_json_cache
+        # if not self.decoded_json_cache:
+        #     cls = self.__class__
+        #     xml = cls._parse_internal_list("xml/dict", self._decoded_list)
+        #     # Zengwen: what about this name?
+        #     xml.tag = "dm_log_packet"
+        #     self.decoded_json_cache = ET.tostring(xml)
+        # return self.decoded_json_cache
+
+        cls = self.__class__
+        xml = cls._parse_internal_list("xml/dict", self._decoded_list)
+        # Zengwen: what about this name?
+        xml.tag = "dm_log_packet"
+        return ET.tostring(xml)
 
     def decode_json(self):
         """
@@ -383,19 +392,31 @@ class DMLogPacket:
         :returns: a string that contains the converted JSON document.
         """
 
-        if not self.decoded_json_cache:
-            cls = self.__class__
+        # if not self.decoded_json_cache:
+        #     cls = self.__class__
 
-            d = self.decode()
+        #     d = self.decode()
 
-            try:
-                import xmltodict
-                if "Msg" in d:
-                    d["Msg"] = xmltodict.parse(d["Msg"])
-            except ImportError:
-                pass
-            self.decoded_json_cache = json.dumps(d, cls=SuperEncoder)
-        return self.decoded_json_cache
+        #     try:
+        #         import xmltodict
+        #         if "Msg" in d:
+        #             d["Msg"] = xmltodict.parse(d["Msg"])
+        #     except ImportError:
+        #         pass
+        #     self.decoded_json_cache = json.dumps(d, cls=SuperEncoder)
+        # return self.decoded_json_cache
+
+        cls = self.__class__
+
+        d = self.decode()
+
+        try:
+            import xmltodict
+            if "Msg" in d:
+                d["Msg"] = xmltodict.parse(d["Msg"])
+        except ImportError:
+            pass
+        return json.dumps(d, cls=SuperEncoder)
 
     @classmethod
     def init(cls, prefs):
