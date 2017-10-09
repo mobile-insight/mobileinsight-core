@@ -97,14 +97,19 @@ class LtePhyAnalyzer(Analyzer):
         """
         log_item = msg.data.decode()
         # print log_item
-        # records = log_item['Records']
+        records = log_item['Records']
         timestamp = str(log_item['timestamp'])
 
         # TODO: Extract PUSCH tx power information and add broadcast to it
 
-        # for record in records:
+        for record in records:
         #     print record
-            # pusch_tx_power = record['PUSCH Tx Power (dBm)']
+            pusch_tx_power = record['PUSCH Tx Power (dBm)']
+            bcast_dict = {}
+            bcast_dict['tx power'] = pusch_tx_power
+            bcast_dict['timestamp'] = timestamp
+            self.broadcast_info("PUSCH_TX_POWER", bcast_dict)
+            self.log_info("PUSCH_TX_POWER: " + str(bcast_dict))
 
     def callback_pucch(self, msg):
         """
@@ -133,7 +138,7 @@ class LtePhyAnalyzer(Analyzer):
                 sr_dict['timestamp'] = timestamp
                 sr_dict['fn and subfn'] = record['Current SFN SF']
                 self.broadcast_info("SR_EVENT", sr_dict)
-                self.log_info("SR_EVENT" + str(sr_dict))
+                self.log_info("SR_EVENT: " + str(sr_dict))
             elif uciformat == 'Format 1B' or uciformat == 'Format 1A':
                 # TODO: reset init_flag for new logs
                 if self.init_flag:
@@ -195,7 +200,7 @@ class LtePhyAnalyzer(Analyzer):
                 bcast_dict = {}
                 bandwidth = self.lte_dl_bw / \
                     ((log_item['timestamp'] - self.prev_timestamp_dl).total_seconds() * 1000000.0)
-                pred_bandwidth = self.predict_bw()
+                pred_bandwidth = self.predict_bw(log_item['timestamp'])
                 bcast_dict['Bandwidth (Mbps)'] = str(round(bandwidth, 2))
 
                 # """
@@ -332,14 +337,17 @@ class LtePhyAnalyzer(Analyzer):
             self.lte_ul_bw = 0
             self.lte_ul_grant_utilized = 0
 
-    def predict_bw(self):
+    def predict_bw(self, timestamp):
         """
         Predict bandwidth based on CQI
         Currently it implements a naive solution based on pre-trained CQI->BW table
 
         """
         if self.cur_cqi0 in cqi_to_bw:
-            self.broadcast_info('PREDICTED_DL_BW', str(cqi_to_bw[self.cur_cqi0]))
+            bcast_dict = {}
+            bcast_dict['bandwidth'] = str(cqi_to_bw[self.cur_cqi0])
+            bcast_dict['timestamp'] = str(timestamp)
+            self.broadcast_info('PREDICTED_DL_BW', bcast_dict)
             self.log_info('PREDICTED_DL_BW: ' + str(cqi_to_bw[self.cur_cqi0]) + 'Mbps')
             return cqi_to_bw[self.cur_cqi0]
         else:

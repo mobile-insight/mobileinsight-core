@@ -350,10 +350,10 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 meas_report['timestamp'] = str(msg.timestamp)
                 for val in field.iter('field'):
                     if val.get('name') == 'lte-rrc.rsrpResult':
-                        meas_report['rsrp'] = int(val.get('show'))
-                        meas_report['rssi'] = meas_report['rsrp'] - 141 # map rsrp to rssi
+                        meas_report['rsrp'] = val.get('show')
+                        meas_report['rssi'] = str(int(meas_report['rsrp']) - 141) # map rsrp to rssi
                     elif val.get('name') == 'lte-rrc.rsrqResult':
-                        meas_report['rsrq'] = int(val.get('show'))
+                        meas_report['rsrq'] = val.get('show')
                 self.broadcast_info('MEAR_PCELL', meas_report)
                 self.log_info('MEAR_PCELL: ' + str(meas_report))
 
@@ -888,7 +888,6 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 obj_id = int(field_val['lte-rrc.measObjectId'])
                 config_id = int(field_val['lte-rrc.reportConfigId'])
                 self.__config[cur_pair].active.measid_list[meas_id] = (obj_id,config_id)
-
 
 
     def __callback_rrc_conn(self,msg):

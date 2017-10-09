@@ -395,7 +395,10 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                     if val.get('name') == 'nas_eps.emm.acc_csfb_cap':
                         csfb_cap = True if val.get('show') == '1' else False
                         self.log_info("CSFB Capbility: " + str(csfb_cap))
-                        self.broadcast_info('CSFB_CAP', str(csfb_cap))
+                        bcast_dict = {}
+                        bcast_dict['cafb cap'] = str(csfb_cap)
+                        bcast_dict['timestamp'] = str(msg.timestamp)
+                        self.broadcast_info('CSFB_CAP', bcast_dict)
 
 
             if field.get('show')=="EPS mobile identity - GUTI":
