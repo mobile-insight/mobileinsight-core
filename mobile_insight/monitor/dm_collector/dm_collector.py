@@ -151,14 +151,14 @@ class DMCollector(Monitor):
                     try:
                         # packet = DMLogPacket(decoded)
                         packet = DMLogPacket(decoded[0])
-                        d = packet.decode()
+                        type_id = packet.get_type_id()
                         # print d["type_id"], d["timestamp"]
                         # xml = packet.decode_xml()
                         # print xml
                         # print ""
                         # Send event to analyzers
                         event = Event(timeit.default_timer(),
-                                      d["type_id"],
+                                      type_id,
                                       packet)
                         self.send(event)
                     except FormatError as e:
