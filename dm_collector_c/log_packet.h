@@ -84,6 +84,7 @@ const ValueName WcdmaSignalingMsgChannelType [] = {
     {0x04, "RRC_DL_BCCH_BCH"},
     {0x06, "RRC_DL_PCCH"},
     {0x09, "Extension SIB"},
+    {0x84, "RRC_DL_BCCH_BCH"},  // Qualcom makes duplicate constant?
     {0xfe, "RRC_COMPLETE_SIB"},
 };
 
