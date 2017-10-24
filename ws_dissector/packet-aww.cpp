@@ -36,6 +36,7 @@ static void init_proto_names (const char *protos []) {
     protos[153] = "rrc.si.sib3";
     protos[155] = "rrc.si.sib5";
     protos[157] = "rrc.si.sib7";
+    protos[161] = "rrc.si.sib11";
     protos[162] = "rrc.si.sib12";
     protos[169] = "rrc.si.sib19";
 

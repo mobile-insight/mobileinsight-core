@@ -91,6 +91,7 @@ class DMLogPacket:
                                     3: "RRC_SIB3",
                                     7: "RRC_SIB7",
                                     12: "RRC_SIB12",
+                                    22: "RRC_SIB15-3",
                                     27: "RRC_SB1",
                                     31: "RRC_SIB19",
                                     })
@@ -127,10 +128,14 @@ class DMLogPacket:
                             for complete_sib in sibs:
                                 field = complete_sib.find(
                                     "field[@name='rrc.sib_Type']")
+                                if field is None:
+                                    continue
                                 sib_id = int(field.get("show"))
                                 sib_name = field.get("showname")
                                 field = complete_sib.find(
                                     "field[@name='rrc.sib_Data_variable']")
+                                if field is None:
+                                    continue
                                 sib_msg = binascii.a2b_hex(field.get("value"))
                                 if sib_id in sib_types:
                                     decoded = cls._decode_msg(
@@ -138,7 +143,7 @@ class DMLogPacket:
                                     xmls.append(decoded)
                                     # print sib_types[sib_id]
                                 else:
-                                    print "Unknown RRC SIB Type: %d" % sib_id
+                                    print "(MI)Unknown RRC SIB Type: %d" % sib_id
                         else:
                             # deal with a segmented SIB
                             sib_segment = xml.find(

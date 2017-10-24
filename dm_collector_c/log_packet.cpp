@@ -5,41 +5,42 @@
 
 #include <Python.h>
 #include <datetime.h>
-#include <map>
-#include <string>
-#include <sstream>
 #include <fstream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <cstring>
 
-#include "consts.h"
-#include "log_packet.h"
-#include "log_packet_helper.h"
-#include "1xev_rx_partial_multirlp_packet.h"
 #include "1xev_connected_state_search_info.h"
 #include "1xev_connection_attempt.h"
 #include "1xev_connection_release.h"
-#include "lte_pdsch_stat_indication.h"
-#include "lte_phy_system_scan_results.h"
-#include "lte_phy_bplmn_cell_request.h"
-#include "lte_phy_bplmn_cell_confirm.h"
-#include "lte_phy_serving_cell_com_loop.h"
-#include "lte_phy_pdcch_decoding_result.h"
-#include "lte_phy_pdsch_decoding_result.h"
-#include "lte_phy_pusch_tx_report.h"
-#include "lte_phy_pucch_tx_report.h"
-#include "lte_phy_rlm_report.h"
-#include "lte_phy_pusch_csf.h"
-#include "lte_phy_cdrx_events_info.h"
-#include "wcdma_rrc_states.h"
-#include "lte_phy_idle_neighbor_cell_meas.h"
-#include "wcdma_search_cell_reselection_rank.h"
-#include "gsm_rr_cell_information.h"
-#include "gsm_surround_cell_ba_list.h"
-#include "gsm_rr_cell_reselection_meas.h"
-#include "srch_tng_1x_searcher_dump.h"
+#include "1xev_rx_partial_multirlp_packet.h"
 #include "1xevdo_multi_carrier_pilot_sets.h"
+#include "consts.h"
+#include "gsm_rr_cell_information.h"
+#include "gsm_rr_cell_reselection_meas.h"
+#include "gsm_surround_cell_ba_list.h"
+#include "log_packet.h"
+#include "log_packet_helper.h"
 #include "lte_pdcp_dl_cipher_data_pdu.h"
 #include "lte_pdcp_ul_cipher_data_pdu.h"
+#include "lte_pdsch_stat_indication.h"
+#include "lte_phy_bplmn_cell_confirm.h"
+#include "lte_phy_bplmn_cell_request.h"
+#include "lte_phy_cdrx_events_info.h"
+#include "lte_phy_idle_neighbor_cell_meas.h"
+#include "lte_phy_pdcch_decoding_result.h"
+#include "lte_phy_pdsch_decoding_result.h"
 #include "lte_phy_pucch_csf.h"
+#include "lte_phy_pucch_tx_report.h"
+#include "lte_phy_pusch_csf.h"
+#include "lte_phy_pusch_tx_report.h"
+#include "lte_phy_rlm_report.h"
+#include "lte_phy_serving_cell_com_loop.h"
+#include "lte_phy_system_scan_results.h"
+#include "srch_tng_1x_searcher_dump.h"
+#include "wcdma_rrc_states.h"
+#include "wcdma_search_cell_reselection_rank.h"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -81,10 +82,11 @@ static int
 _decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
                                     PyObject *result) {
     (void)length;
+    int start = offset;
     int ch_num = _search_result_int(result, "Channel Type");
     const char *ch_name = search_name(WcdmaSignalingMsgChannelType,
-                                        ARRAY_SIZE(WcdmaSignalingMsgChannelType, ValueName),
-                                        ch_num);
+            ARRAY_SIZE(WcdmaSignalingMsgChannelType, ValueName),
+            ch_num);
 
     if (ch_name == NULL) {  // not found
         printf("(MI)Unknown WCDMA Signalling Messages Channel Type: 0x%x\n", ch_num);
@@ -93,13 +95,41 @@ _decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
 
     int pdu_length = _search_result_int(result, "Message Length");
 
+    if (0 == strncmp(ch_name, "RRC_COMPLETE_SIB", 16)) {
+        offset += _decode_by_fmt(WcdmaSignalingMessagesFmtExtraSIBType,
+                ARRAY_SIZE(WcdmaSignalingMessagesFmtExtraSIBType, Fmt),
+                b, offset, length, result);
+        pdu_length--;
+        int ch_num = _search_result_int(result, "Extra SIB Type");
+        ch_name = search_name(ValueNameWcdmaExtraSIBType,
+                ARRAY_SIZE(ValueNameWcdmaExtraSIBType, ValueName),
+                ch_num);
+        if (ch_name == NULL) {  // not found
+            printf("(MI)Unknown WCDMA Signalling Messages RRC Complete SIB Type: 0x%x\n", ch_num);
+            return 0;
+        }
+    } else if (0 == strncmp(ch_name, "Extension SIB", 13)) {
+        offset += _decode_by_fmt(WcdmaSignalingMessagesFmtExtensionSIBType,
+                ARRAY_SIZE(WcdmaSignalingMessagesFmtExtensionSIBType, Fmt),
+                b, offset, length, result);
+        pdu_length--;
+        int ch_num = _search_result_int(result, "Extension SIB Type");
+        ch_name = search_name(ValueNameWcdmaExtensionSIBType,
+                ARRAY_SIZE(ValueNameWcdmaExtensionSIBType, ValueName),
+                ch_num);
+        if (ch_name == NULL) {  // not found
+            printf("(MI)Unknown WCDMA Signalling Messages RRC Extension SIB Type: 0x%x\n", ch_num);
+            return 0;
+        }
+    }
+
     std::string type_str = "raw_msg/";
     type_str += ch_name;
     PyObject *t = Py_BuildValue("(ss#s)",
                                 "Msg", b + offset, pdu_length, type_str.c_str());
     PyList_Append(result, t);
     Py_DECREF(t);
-    return pdu_length;
+    return offset - start;
 }
 
 static int

@@ -141,3 +141,11 @@ get_next_frame (std::string& output_frame, bool& crc_correct) {
     crc_correct = (frame_crc16 == crc16);
     return true;
 }
+
+void
+check_frame_format (std::string& output_frame) {
+    size_t delim = output_frame.find("\x98\x01\x00\x00\x01\00\x00\x00");
+    if (delim == 0) {
+        output_frame.erase(0, 8);
+    }
+}
