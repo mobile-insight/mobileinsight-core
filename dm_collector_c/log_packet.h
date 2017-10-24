@@ -92,6 +92,14 @@ const ValueName ValueNameWcdmaExtraSIBType [] = {
     {19, "RRC_SIB19"},
 };
 
+const Fmt WcdmaSignalingMessagesFmtExtensionSIBType [] = {
+    {UINT, "Extension SIB Type", 1},
+};
+
+const ValueName ValueNameWcdmaExtensionSIBType [] = {
+    {0x43, "RRC_SIB19"},    // Need more items here
+};
+
 const ValueName WcdmaSignalingMsgChannelType [] = {
     {0x00, "RRC_UL_CCCH"},
     {0x01, "RRC_UL_DCCH"},

@@ -105,7 +105,20 @@ _decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
                 ARRAY_SIZE(ValueNameWcdmaExtraSIBType, ValueName),
                 ch_num);
         if (ch_name == NULL) {  // not found
-            printf("(MI)Unknown WCDMA Signalling Messages Extra Channel Type: 0x%x\n", ch_num);
+            printf("(MI)Unknown WCDMA Signalling Messages RRC Complete SIB Type: 0x%x\n", ch_num);
+            return 0;
+        }
+    } else if (0 == strncmp(ch_name, "Extension SIB", 13)) {
+        offset += _decode_by_fmt(WcdmaSignalingMessagesFmtExtensionSIBType,
+                ARRAY_SIZE(WcdmaSignalingMessagesFmtExtensionSIBType, Fmt),
+                b, offset, length, result);
+        pdu_length--;
+        int ch_num = _search_result_int(result, "Extension SIB Type");
+        ch_name = search_name(ValueNameWcdmaExtensionSIBType,
+                ARRAY_SIZE(ValueNameWcdmaExtensionSIBType, ValueName),
+                ch_num);
+        if (ch_name == NULL) {  // not found
+            printf("(MI)Unknown WCDMA Signalling Messages RRC Extension SIB Type: 0x%x\n", ch_num);
             return 0;
         }
     }
