@@ -128,13 +128,13 @@ class DMLogPacket:
                             for complete_sib in sibs:
                                 field = complete_sib.find(
                                     "field[@name='rrc.sib_Type']")
-                                if not field:
+                                if field is None:
                                     continue
                                 sib_id = int(field.get("show"))
                                 sib_name = field.get("showname")
                                 field = complete_sib.find(
                                     "field[@name='rrc.sib_Data_variable']")
-                                if not field:
+                                if field is None:
                                     continue
                                 sib_msg = binascii.a2b_hex(field.get("value"))
                                 if sib_id in sib_types:

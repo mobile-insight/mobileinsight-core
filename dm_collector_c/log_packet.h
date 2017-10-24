@@ -76,6 +76,22 @@ const Fmt WcdmaSignalingMessagesFmt [] = {
     {UINT, "Message Length", 2}
 };
 
+const Fmt WcdmaSignalingMessagesFmtExtraSIBType [] = {
+    {UINT, "Extra SIB Type", 1},
+};
+
+const ValueName ValueNameWcdmaExtraSIBType [] = {
+    {0, "RRC_MIB"},
+    {1, "RRC_SIB1"},
+    {2, "RRC_SIB2"},
+    {3, "RRC_SIB3"},
+    {5, "RRC_SIB5"},
+    {7, "RRC_SIB7"},
+    {11, "RRC_SIB11"},
+    {12, "RRC_SIB12"},
+    {19, "RRC_SIB19"},
+};
+
 const ValueName WcdmaSignalingMsgChannelType [] = {
     {0x00, "RRC_UL_CCCH"},
     {0x01, "RRC_UL_DCCH"},
