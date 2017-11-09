@@ -137,6 +137,43 @@ class ChronicleProcessor(object):
         remain = b
         return ret_msg_type, ret_ts, ret_payload, ret_filename, remain
 
+class DiagRevealerDaemon(threading.Thread):
+    """
+    A daemon to monitor the liveness of diag_revealer,
+    and restart if diag_revealer crashes
+    """
+    def __init__(self, monitor):
+        self.running = False
+        self.monitor = monitor
+        self.stopped = False
+        super(DiagRevealerDaemon, self).__init__()
+
+    def start(self):
+        self.running = True
+        super(DiagRevealerDaemon, self).start()
+
+    def run(self):
+        cmd = "ps | grep diag_revealer\n"
+        while True:
+            time.sleep(5)
+            if not self.running:
+                break;
+            res = self.monitor._run_shell_cmd(cmd)
+            # proc = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            # if not proc.stdout.read():
+            if not res:
+                # diag_revealer is not alive
+                self.monitor.log_warning(
+                    "Monitoring daemon is terminated. Restart the daemon ...")
+                self.monitor._start_diag_revealer()
+        self.stopped = True
+
+    def stop(self):
+        self.running = False
+        self.monitor.log_info("DiagRevealerDaemon is stopped.")
+
+    def isStopped(self):
+        return self.stopped
 
 class AndroidDevDiagMonitor(Monitor):
     """
@@ -165,6 +202,7 @@ class AndroidDevDiagMonitor(Monitor):
         self._log_cut_size = 0.5  # change size to 1.0 M
         self._type_names = []
         self._last_diag_revealer_ts = None
+        self.running = False
 
         """
         Exec/lib initialization path
@@ -364,6 +402,23 @@ class AndroidDevDiagMonitor(Monitor):
             cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
             self._run_shell_cmd(cmd2)
 
+    def _pause_collection(self):
+        if self.diag_revealer_daemon:
+            self.diag_revealer_daemon.stop()
+            while not self.diag_revealer_daemon.isStopped():
+                pass
+        res = self._run_shell_cmd("ps").split('\n')
+        for item in res:
+            if item.find('diag_revealer') != -1:
+                pid = item.split()[1]
+                cmd = "kill " + pid
+                self._run_shell_cmd(cmd)
+        self.log_info("diag_revealer is stopped")
+        self.running = False
+
+    def _resume_collection(self):
+        self.run()
+
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.
@@ -379,14 +434,11 @@ class AndroidDevDiagMonitor(Monitor):
         generate_diag_cfg = True
         fifo = None
         if not self._type_names:
-            # raise RuntimeError(
-            #     "Log type not specified. Please specify the log types with enable_log().")
-            self.log_error("Log type not specified. Please specify the log types with enable_log().")
-            # if os.path.exists(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg")):
-            #     generate_diag_cfg = False
-            #     # print "AndroidDevDiagMonitor: existing Diag.cfg file will be used."
-            # else:
-            #     raise RuntimeError("Log type not specified. Please call enable_log() first.")
+            if os.path.exists(os.path.join(self.DIAG_CFG_DIR, "Diag.cfg")):
+                generate_diag_cfg = False
+                self.log_info("AndroidDevDiagMonitor: existing Diag.cfg file will be used.")
+            else:
+                self.log_error("Log type not specified. Please call enable_log() first.")
 
         try:
             if generate_diag_cfg:
@@ -403,8 +455,7 @@ class AndroidDevDiagMonitor(Monitor):
 
             # Launch diag_revealer, and protection daemon
             self._start_diag_revealer()
-            self.diag_revealer_daemon = threading.Thread(
-                target=self._protect_diag_revealer)
+            self.diag_revealer_daemon = DiagRevealerDaemon(monitor = self)
             self.diag_revealer_daemon.start()
 
             # fifo = os.open(self._fifo_path, os.O_RDONLY | os.O_NONBLOCK)
@@ -413,7 +464,8 @@ class AndroidDevDiagMonitor(Monitor):
 
             # Read log packets from diag_revealer
             chproc = ChronicleProcessor()
-            while True:
+            self.running = True
+            while self.running:
                 try:
                     # self.log_info("Before os.read(fifo, self.BLOCK_SIZE)")
                     s = os.read(fifo, self.BLOCK_SIZE)
@@ -451,7 +503,6 @@ class AndroidDevDiagMonitor(Monitor):
                             # ret_filename)
                             self.send(event)
                             del event
-
                     elif ret_msg_type is not None:
                         # raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
                         self.log_warning("Unknown ret msg type: %s" % str(ret_msg_type))
