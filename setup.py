@@ -113,9 +113,10 @@ else:
 
 setup(
     name         = 'MobileInsight',
-    version      = '3.1.0',
+    version      = '3.2.2',
     description  = 'Mobile network monitoring and analysis',
     author       = 'UCLA Wireless Networking Group and Purdue Peng Group',
+    author_email = 'support@mobileinsight.net',
     url          = 'http://www.mobileinsight.net',
     license      = 'Apache License 2.0',
     packages     = ['mobile_insight',
