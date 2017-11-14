@@ -3,10 +3,10 @@
 # It deletes old libraries installed and use standard
 # installation location /usr/local/lib
 # Author  : Haotian Deng
-# Date    : 2017-6-24
-# Version : 2.0
+# Date    : 2017-11-13
+# Version : 2.1
 
-./uninstall.sh
+yes | ./uninstall.sh
 
 # set -e
 # set -u

@@ -12,14 +12,11 @@ MOBILEINSIGHT_PATH=$(pwd)
 mi_dir=$(python -c "import sys; print sys.exec_prefix + '/mobile_insight'")
 mi_dir2=$(python2 -c "import sys; print sys.exec_prefix + '/mobile_insight'")
 
-if [[ ! ${mi_dir} == ${mi_dir2} ]]; then
-  midir+=' 'mi_dir2
-  echo "Old MobileInsight installed in Python path is "midir
-fi
-
 delete () {
-    echo "deleting $1"
-    sudo rm -rf $1 > /dev/null 2>&1
+    if [[ -e $1 ]]; then
+        echo "deleting $1"
+        sudo rm -rf $1
+    fi
 }
 
 uninstall() {
@@ -48,6 +45,7 @@ uninstall() {
 
     # Clean up old MobileInsight-2.x installed binary
     delete ${mi_dir}
+    delete ${mi_dir2}
 }
 
 readme() {
@@ -72,15 +70,18 @@ readme() {
     echo "/usr/lib/libwsutil.6.dylib"
     echo "/usr/lib/libwsutil.dylib"
     echo ${mi_dir}
+    echo " "
 }
 
 readme
 read -p "Do you wish to proceed to uninstall the listed files? (y/n) " answer
 case ${answer:0:1} in
     y|Y )
+        echo " "
         echo "Uninstalling old MobileInsight build files and libs..."
         uninstall
         echo "Uninstallation finished."
+        echo " "
     ;;
     * )
         echo "Abort uninstallation. Exiting."
