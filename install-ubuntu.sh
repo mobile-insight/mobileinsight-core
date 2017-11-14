@@ -1,46 +1,55 @@
 #!/bin/bash
-# Migration script for mobileInsight desktop version on Ubuntu
-# It deletes old libraries installed and use standard
-# installation location /usr/local/lib
-# Author  : Haotian Deng
+# Installation script for mobileinsight-core on Ubuntu
+# It installs package under /usr/local folder
+# Author  : Zengwen Yuan, Haotian Deng
 # Date    : 2017-11-13
-# Version : 2.1
-
-yes | ./uninstall.sh
+# Version : 3.0
 
 # set -e
 # set -u
 
+echo "** Installer Script for mobileinsight-core on Ubuntu **"
+echo " "
+echo "  Author : Zengwen Yuan (zyuan [at] cs.ucla.edu), Haotian Deng (deng164 [at] purdue.edu)"
+echo "  Date   : 2017-11-13"
+echo "  Rev    : 3.0"
+echo "  Usage  : ./install-ubuntu.sh"
+echo " "
+
+echo "Upgrading MobileInsight..."
+yes | ./uninstall.sh
+
 # Wireshark version to install
 ws_ver=2.0.13
 
-# Use your local library path
-LD_LIBRARY_PATH=/usr/local/lib
-# A copy of Wireshark sources will be put inside the MobileInsight source folder
-WIRESHARK_SRC_PATH=$(pwd)/wireshark-${ws_ver}
-
+# Use local library path
+#TODO
+PREFIX=/usr/local
 MOBILEINSIGHT_PATH=$(pwd)
+WIRESHARK_SRC_PATH=${MOBILEINSIGHT_PATH}/wireshark-${ws_ver}
 
-echo "Make sure compile environment and other dependencies are installed"
+PYTHON=python2
+PIP=pip2
+
+echo "Installing dependencies for compiling Wireshark libraries"
 sudo apt-get -y install pkg-config wget libglib2.0-dev bison flex libpcap-dev
 
-# Download necessary source files to compile ws_dissector
+echo "Checking Wireshark sources to compile ws_dissector"
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
-    echo "Downloading source code of wireshark-${ws_ver}..."
+    echo "You do not have source codes for Wireshark version ${ws_ver}, downloading..."
     wget https://www.wireshark.org/download/src/all-versions/wireshark-${ws_ver}.tar.bz2
     tar -xjvf wireshark-${ws_ver}.tar.bz2
     rm wireshark-${ws_ver}.tar.bz2
 fi
 
-# read -p "We will try to config wireshark-${ws_ver} and it may takes a few seconds, do you want to continue? [Yy] " -r
-# if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
-#     echo "Not positive input"
-#     echo "The installation is aborted."
-#     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
-# fi
-echo "Generating config.h of wireshark-${ws_ver}..."
+echo "Configuring Wireshark sources for ws_dissector compilation..."
 cd ${WIRESHARK_SRC_PATH}
-./configure --disable-wireshark
+./configure --disable-wireshark > /dev/null 2>&1
+if [[ $? != 0 ]]; then
+    echo "Error when executing '${WIRESHARK_SRC_PATH}/configure --disable-wireshark'."
+    echo "You need to manually fix it before continuation. Exiting with status 3"
+    exit 3
+fi
 
 echo "Check if proper version of wireshark dynamic library exists in system path..."
 
@@ -68,17 +77,21 @@ else
 fi
 
 if [ "$FindWiresharkLibrary" = false ] ; then
-    # read -p "Could not find necessary wireshark library, we will try to compile wireshark-${ws_ver} from source code and it may takes a few minutes, do you want to continue? [Yy] " -r
-    # if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
-    #     echo "Not positive input"
-    #     echo "The installation is aborted."
-    #     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
-    # fi
-    # echo "Yes"
     echo "Compiling wireshark-${ws_ver} from source code, it may take a few minutes..."
-    make || exit 1
+    make > /dev/null 2>&1
+    if [[ $? != 0 ]]; then
+        echo "Error when compiling wireshark-${ws_ver} from source code'."
+        echo "You need to manually fix it before continuation. Exiting with status 2"
+        exit 2
+    fi
     echo "Installing wireshark-${ws_ver}"
-    sudo make install
+    sudo make install > /dev/null 2>&1
+    if [[ $? != 0 ]]; then
+        echo "Error when installing wireshark-${ws_ver} compiled from source code'."
+        echo "You need to manually fix it before continuation. Exiting with status 2"
+        exit 2
+    fi
+
 fi
 
 echo "Reload ldconfig cache, your password may be required..."
@@ -86,73 +99,60 @@ sudo rm /etc/ld.so.cache
 sudo ldconfig
 
 echo "Compiling Wireshark dissector for mobileinsight..."
-# Compile ws_dissector
 cd ${MOBILEINSIGHT_PATH}/ws_dissector
 if [ -e "ws_dissector" ]; then
-    echo "Removing old ws_dissector"
     rm -f ws_dissector
 fi
 g++ ws_dissector.cpp packet-aww.cpp -o ws_dissector `pkg-config --libs --cflags glib-2.0` \
-    -I"${WIRESHARK_SRC_PATH}" -L"${LD_LIBRARY_PATH}" -lwireshark -lwsutil -lwiretap
+    -I"${WIRESHARK_SRC_PATH}" -L"${PREFIX}/lib" -lwireshark -lwsutil -lwiretap
 strip ws_dissector
 
-echo "Installing Wireshark dissector to /usr/local/bin"
-if cp ws_dissector /usr/local/bin/ > /dev/null; then
-    chmod 755 /usr/local/bin/ws_dissector
-else
-    echo "Installing Wireshark dissector using sudo, your password may be required..."
-    sudo cp ws_dissector /usr/local/bin/
-    sudo chmod 755 /usr/local/bin/ws_dissector
-fi
+echo "Installing Wireshark dissector to ${PREFIX}/bin"
+sudo cp ws_dissector ${PREFIX}/bin/
+sudo chmod 755 ${PREFIX}/bin/ws_dissector
 
-echo "Installing dependencies for mobileinsight for GUI..."
+echo "Installing dependencies for mobileinsight GUI..."
 sudo apt-get -y install python-wxgtk3.0
 which pip
 if [[ $? != 0 ]] ; then
     sudo apt-get -y install python-pip
 fi
-if python -m pip install matplotlib pyserial > /dev/null; then
+if ${PIP} install matplotlib pyserial > /dev/null; then
     echo "pyserial and matplotlib are successfully installed!"
 else
     echo "Installing pyserial and matplotlib using sudo, your password may be required..."
-    sudo python -m pip install pyserial matplotlib
+    sudo ${PIP} install pyserial matplotlib
     echo "pyserial and matplotlib are successfully installed!"
 fi
 
-
 echo "Installing mobileinsight-core..."
 cd ${MOBILEINSIGHT_PATH}
-sudo python setup.py install
+echo "Installing mobileinsight-core using sudo, your password may be required..."
+sudo ${PYTHON} setup.py install
 
 echo "Installing GUI for MobileInsight..."
 cd ${MOBILEINSIGHT_PATH}
-if mkdir -p /usr/local/share/mobileinsight/ > /dev/null; then
-    cp -r gui/* /usr/local/share/mobileinsight/
-    ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
-else
-    echo "Installing GUI for MobileInsight using sudo, your password may be required..."
-    sudo mkdir -p /usr/local/share/mobileinsight/
-    sudo cp -r gui/* /usr/local/share/mobileinsight/
-    sudo ln -s /usr/local/share/mobileinsight/mi-gui /usr/local/bin/mi-gui
-fi
+sudo mkdir -p ${PREFIX}/share/mobileinsight/
+sudo cp -r gui/* ${PREFIX}/share/mobileinsight/
+sudo ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
 
-# Run example
-echo ""
-echo "Testing the offline analysis example."
+echo "Testing the MobileInsight offline analysis example."
 cd ${MOBILEINSIGHT_PATH}/examples
-python offline-analysis-example.py
-if [[ $? != 0 ]] ; then
-    echo ""
+${PYTHON} offline-analysis-example.py
+if [[ $? == 0 ]] ; then
     echo "Successfully ran the offline analysis example!"
 else
     echo "Failed to run offline analysis example!"
+    echo "Exiting with status 4."
+    exit 4
 fi
 
 echo "Testing MobileInsight GUI (you need to be in a graphic session)..."
 mi-gui
-if [[ $? != 0 ]] ; then
-    echo ""
+if [[ $? == 0 ]] ; then
     echo "Successfully ran MobileInsight GUI!"
     echo "The installation of mobileinsight-core is finished!"
+else
+    echo "There are issues running MobileInsight GUI, you need to fix them manually"
+    echo "The installation of mobileinsight-core is finished!"
 fi
-
