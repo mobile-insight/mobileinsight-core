@@ -1,15 +1,20 @@
-include install-macos.sh
-include install-ubuntu.sh
 include LICENSE
 include README.md
-include setup.py
-include wireshark.rb
-exclude mobile_insight/analyzer/handoff_loop_analyzer.py
-recursive-include GUI *
-recursive-include examples *.json *.py *.mi2log *.mi2app *.txt
+prune build
+prune dist
 recursive-include dm_collector_c *.cpp *.h
-recursive-include mobile_insight *.py *.m *.pyd README
-recursive-include ws_dissector Makefile *.cpp *.h
+recursive-include examples *.json *.py *.mi2log *.mi2app *.txt
 recursive-exclude examples *.db *.pyo
+recursive-include gui *
+include install-macos.sh
+include install-ubuntu.sh
+recursive-include mobile_insight *.py *.m *.pyd README
 recursive-exclude mobile_insight *.db *.pyo
+exclude mobile_insight/analyzer/handoff_loop_analyzer.py
+include setup.py
+include uninstall.sh
+prune unit-test
+prune wireshark-2.0.13
+include wireshark.rb
+recursive-include ws_dissector Makefile *.cpp *.h
 prune docs/docs
