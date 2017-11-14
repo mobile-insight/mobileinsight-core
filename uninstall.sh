@@ -2,8 +2,8 @@
 # Uninstallation script for mobileinsight-core
 # It cleans up the installed libraries
 # Author  : Zengwen Yuan
-# Date    : 2017-06-26
-# Version : 1.0
+# Date    : 2017-11-13
+# Version : 2.0
 
 # Wireshark version to install
 WS_VER=2.0.*
