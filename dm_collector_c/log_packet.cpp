@@ -212,6 +212,11 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
                                     ARRAY_SIZE(LteRrcOtaPacketFmt_v2, Fmt),
                                     b, offset, length, result);
         break;
+    case 4:
+        offset += _decode_by_fmt(LteRrcOtaPacketFmt_v4,
+                                    ARRAY_SIZE(LteRrcOtaPacketFmt_v4, Fmt),
+                                    b, offset, length, result);
+        break;
     case 7:
         offset += _decode_by_fmt(LteRrcOtaPacketFmt_v7,
                                     ARRAY_SIZE(LteRrcOtaPacketFmt_v7, Fmt),
