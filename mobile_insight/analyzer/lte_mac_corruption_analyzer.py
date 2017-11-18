@@ -71,7 +71,7 @@ class LteMacCorruptAnalyzer(Analyzer):
 				if old == 'Yes' and crc == 'Pass' and status[harq_id][tb_id] != None:
 					delay = (sys_time - status[harq_id][tb_id] + 10240) % 10240
 					self.mac_retx_delay[cell].append(delay)
-					self.log_info("MAC HARQ retransmission delay: %d".format(delay))
+					self.log_info("MAC HARQ retransmission delay: {}".format(delay))
 
 				if old == 'No':
 					if status[harq_id][tb_id] != None:

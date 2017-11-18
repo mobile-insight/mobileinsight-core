@@ -20,19 +20,14 @@ class RadioBearerEntity():
 
 		self.res 			= []
 
-	def print_log(self, timestamp, sn, detected, nack, retx, timer):
-		overall_delay	= (retx - detected + 10240) % 10240
-		nack_delay 		= (nack - detected + 10240) % 10240
-		self.log_info("Retransmission. time : %s, sequence number : %d, reordering time : %d (ms), scheduling before nack : %d (ms), nack to retransmission : %d (ms), overall retransmission delay : %d (ms)".format(str(timestamp), sn, timer, nack_delay - timer, overall_delay - nack_delay, overall_delay))
-
-
-
 	def recv_rlc_data(self, pdu, timestamp):
 		if 'LSF' in pdu and pdu['LSF'] == 0:
 			return
 		
 		sys_time = pdu['sys_fn'] * 10 + pdu['sub_fn']
 		sn = pdu['SN']
+
+		array = []
 
 		if (sn > self.max_sn and sn - self.max_sn < 900) or (sn < self.max_sn and sn < 5 and self.max_sn >500):
 			self.max_sn = sn
@@ -43,16 +38,19 @@ class RadioBearerEntity():
 				if (timestamp - self.start_time[sn][1]).total_seconds() < 1:
 					# self.res.append([timestamp, sn, self.start_time[sn][0], self.nack_dict[sn][0], sys_time])
 					self.res.append({'timestamp':timestamp, 'sequence number':sn, 'gap detected at':self.start_time[sn][0], 'NACK sent at':self.nack_dict[sn][0], 'packet retransmission at':sys_time, 't-reordering':self.t_reordering})
-					self.print_log(timestamp, sn, self.start_time[sn][0], self.nack_dict[sn][0], sys_time, self.t_reordering)
+					array = [timestamp, sn, self.start_time[sn][0], self.nack_dict[sn][0], sys_time, self.t_reordering]
 
 					# self.log_info("Retransmission. time: %s, sequence number: %d, ")
 				self.start_time.pop(sn)
 
 			self.pkt_disorder.append([sn, sys_time, timestamp])
 
+		return array
+
 
 	def recv_rlc_ctrl(self, pdu, timestamp):
 		lst = []
+		array = []
 		pdu_sys_time = pdu['sys_fn'] * 10 + pdu['sub_fn']
 		for nackItem in pdu['RLC CTRL NACK']:
 			sn = nackItem['NACK_SN']
@@ -102,12 +100,15 @@ class RadioBearerEntity():
 			if pkt[0] in self.start_time:
 				# self.res.append([pkt[2], pkt[0], self.start_time[pkt[0]][0], self.nack_dict[pkt[0]][0], pkt[1]])
 				self.res.append({'timestamp':pkt[2], 'sequence number':pkt[0], 'gap detected at':self.start_time[pkt[0]][0], 'NACK sent at':self.nack_dict[pkt[0]][0], 'packet retransmission at':pkt[1], 't-reordering':self.t_reordering})
-				self.print_log(pkt[2], pkt[0], self.start_time[pkt[0]][0], self.nack_dict[pkt[0]][0], pkt[1], self.t_reordering)
+				array = [pkt[2], pkt[0], self.start_time[pkt[0]][0], self.nack_dict[pkt[0]][0], pkt[1], self.t_reordering]
+			
 				self.start_time.pop(pkt[0])
 				self.nack_dict.pop(pkt[0])
 
 		if idx >= 0:
 			del self.pkt_disorder[:idx + 1]
+
+		return array
 
 
 
@@ -131,6 +132,12 @@ class LteRlcRetxAnalyzer(Analyzer):
 		# enable RLC config message:
 		source.enable_log("LTE_RLC_DL_Config_Log_Packet")
 
+	def print_log(self, timestamp, sn, detected, nack, retx, timer):
+		overall_delay	= (retx - detected + 10240) % 10240
+		nack_delay 		= (nack - detected + 10240) % 10240
+		nack_to_retx 	= (retx - nack + 10240) % 10240
+		self.log_info("Retransmission. time : {}, sequence number : {}, reordering time : {} (ms), scheduling before nack : {} (ms), nack to retransmission : {} (ms), overall retransmission delay : {} (ms)".format(str(timestamp), sn, timer, nack_delay - timer, nack_to_retx, overall_delay))
+
 	def __msg_callback(self, msg):
 		if msg.type_id == "LTE_RLC_UL_AM_All_PDU":
 			self.__msg_rlc_ul_callback(msg)
@@ -139,7 +146,7 @@ class LteRlcRetxAnalyzer(Analyzer):
 			self.__msg_rlc_dl_callback(msg)
 
 		if msg.type_id == "LTE_RLC_DL_Config_Log_Packet":
-			self.__msg_rlccfg_callback(msg)
+			self.__msg_rlc_cfg_callback(msg)
 
 
 	def __msg_rlc_cfg_callback(self, msg):
@@ -148,7 +155,7 @@ class LteRlcRetxAnalyzer(Analyzer):
 		for srb in records['Active RBs']:
 			if srb['RB Cfg Idx'] >= 30:
 				continue
-			cfg = srb['RB Cfg Idx']
+			cfg_idx = srb['RB Cfg Idx']
 
 			if cfg_idx not in self.bearer_entity:
 				self.bearer_entity[cfg_idx] = RadioBearerEntity(cfg_idx)
@@ -173,7 +180,9 @@ class LteRlcRetxAnalyzer(Analyzer):
 
 		for pdu in subpkt['RLCUL PDUs']:
 			if pdu['PDU TYPE'] == 'RLCUL CTRL' and 'RLC CTRL NACK' in pdu:
-				self.bearer_entity[cfg_idx].recv_rlc_ctrl(pdu, timestamp)
+				array = self.bearer_entity[cfg_idx].recv_rlc_ctrl(pdu, timestamp)
+				if array != [] and array!=None:
+					self.print_log(array[0], array[1], array[2], array[3], array[4], array[5])
 
 	def __msg_rlc_dl_callback(self, msg):
 		log_item = msg.data.decode()
@@ -190,4 +199,6 @@ class LteRlcRetxAnalyzer(Analyzer):
 		records = subpkt['RLCDL PDUs']
 		for pdu in records:
 			if pdu['PDU TYPE'] == 'RLCDL DATA':
-				self.bearer_entity[cfg_idx].recv_rlc_data(pdu, timestamp)
+				array = self.bearer_entity[cfg_idx].recv_rlc_data(pdu, timestamp)
+				if array != [] and array != None:
+					self.print_log(array[0], array[1], array[2], array[3], array[4], array[5])
