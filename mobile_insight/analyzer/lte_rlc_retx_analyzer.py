@@ -20,6 +20,12 @@ class RadioBearerEntity():
 
 		self.res 			= []
 
+	def print_log(self, timestamp, sn, detected, nack, retx, timer):
+		overall_delay	= (retx - detected + 10240) % 10240
+		nack_delay 		= (nack - detected + 10240) % 10240
+		self.log_info("Retransmission. time : %s, sequence number : %d, reordering time : %d (ms), scheduling before nack : %d (ms), nack to retransmission : %d (ms), overall retransmission delay : %d (ms)".format(str(timestamp), sn, timer, nack_delay - timer, overall_delay - nack_delay, overall_delay))
+
+
 
 	def recv_rlc_data(self, pdu, timestamp):
 		if 'LSF' in pdu and pdu['LSF'] == 0:
@@ -37,6 +43,9 @@ class RadioBearerEntity():
 				if (timestamp - self.start_time[sn][1]).total_seconds() < 1:
 					# self.res.append([timestamp, sn, self.start_time[sn][0], self.nack_dict[sn][0], sys_time])
 					self.res.append({'timestamp':timestamp, 'sequence number':sn, 'gap detected at':self.start_time[sn][0], 'NACK sent at':self.nack_dict[sn][0], 'packet retransmission at':sys_time, 't-reordering':self.t_reordering})
+					self.print_log(timestamp, sn, self.start_time[sn][0], self.nack_dict[sn][0], sys_time, self.t_reordering)
+
+					# self.log_info("Retransmission. time: %s, sequence number: %d, ")
 				self.start_time.pop(sn)
 
 			self.pkt_disorder.append([sn, sys_time, timestamp])
@@ -93,6 +102,7 @@ class RadioBearerEntity():
 			if pkt[0] in self.start_time:
 				# self.res.append([pkt[2], pkt[0], self.start_time[pkt[0]][0], self.nack_dict[pkt[0]][0], pkt[1]])
 				self.res.append({'timestamp':pkt[2], 'sequence number':pkt[0], 'gap detected at':self.start_time[pkt[0]][0], 'NACK sent at':self.nack_dict[pkt[0]][0], 'packet retransmission at':pkt[1], 't-reordering':self.t_reordering})
+				self.print_log(pkt[2], pkt[0], self.start_time[pkt[0]][0], self.nack_dict[pkt[0]][0], pkt[1], self.t_reordering)
 				self.start_time.pop(pkt[0])
 				self.nack_dict.pop(pkt[0])
 

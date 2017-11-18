@@ -46,9 +46,9 @@ class LteMacCorruptAnalyzer(Analyzer):
 					continue
 
 				harq_id = block['HARQ ID']
-				tb_id = block['TB Index']
-				crc = block['CRC Result'] 		# 'Pass', 'Fail'
-				old = block['Did Recombining'] 	# 'Yes', 'No'
+				tb_id 	= block['TB Index']
+				crc 	= block['CRC Result'] 		# 'Pass', 'Fail'
+				old 	= block['Did Recombining'] 	# 'Yes', 'No'
 
 				if block['Discarded reTx Present'] == 'Present':
 					status[harq_id][tb_id] = None
@@ -57,9 +57,9 @@ class LteMacCorruptAnalyzer(Analyzer):
 				self.total_blocks[cell] += 1
 
 				harq_id = block['HARQ ID']
-				tb_id = block['TB Index']
-				crc = block['CRC Result'] 		# 'Pass', 'Fail'
-				old = block['Did Recombining'] 	# 'Yes', 'No'
+				tb_id 	= block['TB Index']
+				crc 	= block['CRC Result'] 		# 'Pass', 'Fail'
+				old 	= block['Did Recombining'] 	# 'Yes', 'No'
 
 				if crc == 'Fail':
 					self.corrupt_blocks[cell] += 1
@@ -67,8 +67,11 @@ class LteMacCorruptAnalyzer(Analyzer):
 				if old == 'No':
 					self.total_new_blocks[cell] += 1
 
+				# detect MAC HARQ retransmission success
 				if old == 'Yes' and crc == 'Pass' and status[harq_id][tb_id] != None:
-					self.mac_retx_delay[cell].append[(sys_time - status[harq_id][tb_id] + 10240) % 10240]
+					delay = (sys_time - status[harq_id][tb_id] + 10240) % 10240
+					self.mac_retx_delay[cell].append(delay)
+					self.log_info("MAC HARQ retransmission delay: %d".format(delay))
 
 				if old == 'No':
 					if status[harq_id][tb_id] != None:

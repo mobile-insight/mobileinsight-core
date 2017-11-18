@@ -226,6 +226,7 @@ class LteMacLossCauseAnalyzer(Analyzer):
 									# 	self.t_reordering[cfg_idx] = 60
 									# self.rlc_reorder_list.append([sn, after, key, systime, timestamp, self.t_reordering[cfg_idx]])
 									self.rlc_reorder_list.append({'timestamp':timestamp, 'sequence number':sn, 'loss detected at':after, 'loss cause':'HARQ failure'})
+									self.log_info("HARQ failure. time: %s, packet sequence number at RLC: %d".format(str(timestamp), sn))
 									self.mac_fail[i][1][key] -= 1
 
 									if self.mac_fail[i][1][key] ==0:
@@ -249,7 +250,7 @@ class LteMacLossCauseAnalyzer(Analyzer):
 									# 	self.t_reordering[cfg_idx] = 60
 									# self.rlc_reorder_list.append([sn, after, self.mac_success[i][1], systime, timestamp, self.t_reordering[cfg_idx]])
 									self.rlc_reorder_list.append({'timestamp':timestamp, 'sequence number':sn, 'loss detected at':after, 'loss cause':'MAC loss'})
-									self.log_info("loss and corruption: {},{}".format(sn, after, timestamp))
+									self.log_info("MAC loss. time: %s, packet sequence number (RLC): %d".format(str(timestamp), sn))
 									break
 								i -= 1
 
@@ -258,5 +259,6 @@ class LteMacLossCauseAnalyzer(Analyzer):
 								# 	self.t_reordering[cfg_idx] = 60
 								# self.rlc_reorder_list.append([sn, after, after, systime, timestamp, self.t_reordering[cfg_idx]])
 								self.rlc_reorder_list.append({'timestamp':timestamp, 'sequence number':sn, 'loss detected at':after, 'loss cause':'MAC loss'})
+								self.log_info("MAC loss. time: %s, packet sequence number (RLC): %d".format(str(timestamp), sn))
 
 				self.last_nack = lst
