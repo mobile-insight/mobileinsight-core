@@ -38,6 +38,7 @@ class Analyzer(Element):
         # callback when source pushes messages
         # FIXME: looks redundant with the from_list
         self.source_callback = []
+        self.coordinator_callbacks = []
 
         # #setup the logs
         # self.set_log("",logging.INFO)
@@ -189,6 +190,7 @@ class Analyzer(Element):
                 and self in Analyzer.__analyzer_array:
             del self.from_list[Analyzer.__analyzer_array[analyzer_name]]
             Analyzer.__analyzer_array[analyzer_name].to_list.remove(self)
+            # TODO: what's this?
             analyzer.to_list.remove(self)
 
             self.__parent_analyzer.remove(analyzer_name)
@@ -229,3 +231,12 @@ class Analyzer(Element):
             map(G, self.source_callback)
         else:
             map(G, self.from_list[module])
+
+    def register_coordinator_cb(self, plugin_cb):
+        self.coordinator_callbacks.append(plugin_cb)
+
+    def send_to_coordinator(self, event):
+        if not event.data:
+            return
+        def G(f): return f(str(event))
+        map(G, self.coordinator_callbacks)
