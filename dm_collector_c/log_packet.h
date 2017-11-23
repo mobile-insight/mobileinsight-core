@@ -2605,8 +2605,25 @@ const ValueName ValueNamePdcpCipherDataPduMode [] = {
 };
 
 const ValueName ValueNameGSMRxLevMin [] = {
+    {0, "-111 dBm to -110 dBm"},
+    {1, "-110 dBm to -109 dBm"},
+    {2, "-109 dBm to -108 dBm"},
+    {3, "-108 dBm to -107 dBm"},
     {4, "-107 dBm to -106 dBm"},
+    {5, "-106 dBm to -105 dBm"},
     {6, "-105 dBm to -104 dBm"},
+    {7, "-104 dBm to -103 dBm"},
+    {8, "-103 dBm to -102 dBm"},
+    {9, "-102 dBm to -101 dBm"},
+    // Not sure about following lines
+    {10, "-101 dBm to -100 dBm"},
+    {11, "-100 dBm to -99 dBm"},
+    {12, "-99 dBm to -98 dBm"},
+    {13, "-98 dBm to -97 dBm"},
+    {14, "-97 dBm to -96 dBm"},
+    {15, "-96 dBm to -95 dBm"},
+    {16, "-95 dBm to -94 dBm"},
+    {17, "-94 dBm to -93 dBm"},
 };
 
 const ValueName ValueNameGSMAdditionalParam [] = {
