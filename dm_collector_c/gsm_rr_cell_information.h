@@ -7,7 +7,7 @@
 #include "log_packet_helper.h"
 
 const Fmt GsmRrCellInfo_Fmt [] = {
-    {UINT, "BCCH ARFCN", 2},
+    {UINT, "BCCH ARFCN", 2},    // 12 bits
     {UINT, "BSIC-NCC", 1},
     {UINT, "BSIC-BCC", 1},
     {UINT, "Cell ID", 2},
@@ -20,11 +20,11 @@ const Fmt GsmRrCellInfo_Fmt [] = {
 
 static int _decode_gsm_rci_payload (const char *b,
         int offset, size_t length, PyObject *result) {
-    // int temp = _search_result_int(result, "BCCH ARFCN");
-    // int iArfcn = temp & 4095;
-    // PyObject *old_object = _replace_result_int(result, "BCCH ARFCN", iArfcn);
-    // Py_DECREF(old_object);
-    int temp = _search_result_int(result, "MCC");
+    int temp = _search_result_int(result, "BCCH ARFCN");
+    int iArfcn = temp & 4095;
+    PyObject *old_object = _replace_result_int(result, "BCCH ARFCN", iArfcn);
+    Py_DECREF(old_object);
+    temp = _search_result_int(result, "MCC");
     int mcc_3 = temp & 15;
     int mcc_2 = (temp >> 4) & 15;
     int mcc_1 = (temp >> 8) & 15;
@@ -34,7 +34,7 @@ static int _decode_gsm_rci_payload (const char *b,
     int mnc_2 = (temp >> 4) & 15;
     int mcc = mcc_3 * 100 + mcc_2 * 10 + mcc_1;
     int mnc = mnc_3 * 100 + mnc_2 * 10 + mnc_1;
-    PyObject *old_object = _replace_result_int(result, "MCC", mcc);
+    old_object = _replace_result_int(result, "MCC", mcc);
     Py_DECREF(old_object);
     old_object = _replace_result_int(result, "MNC", mnc);
     Py_DECREF(old_object);
