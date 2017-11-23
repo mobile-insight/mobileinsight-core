@@ -190,7 +190,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         """
         Determine RRC state at bootstrap
 
-        :returns: current RRC state, or None if not determinable 
+        :returns: current RRC state, or None if not determinable
         """
         if msg.type_id == "LTE_RRC_OTA_Packet":
             for field in msg.data.iter('field'):
@@ -219,6 +219,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         log_item = msg.data.decode()
         log_item_dict = dict(log_item)
 
+        self.send_to_coordinator(Event(msg.timestamp, msg.type_id, str(log_item)))
 
         # Calllbacks triggering
         if msg.type_id == "LTE_RRC_OTA_Packet":
@@ -236,6 +237,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
             if self.state_machine.update_state(xml_msg):
                 self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
+                event = Event(msg.timestamp, 'rrc state', str(self.state_machine.get_current_state()))
+                self.send_to_coordinator(event)
 
             tic = time.clock()
             self.__callback_rrc_conn(xml_msg)
@@ -276,6 +279,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 raw_msg = Event(' '.join(map(str, [log_item_dict['timestamp'], item['SFN'], item['Sub-FN']])), msg.type_id, item)
                 if self.state_machine.update_state(raw_msg):
                     self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
+                    event = Event(msg.timestamp, 'rrc state', str(self.state_machine.get_current_state()))
+                    self.send_to_coordinator(event)
                     # self.log_info("rrc state history: " + str(self.state_machine.state_history))
             self.__callback_drx(log_item_dict)
 
@@ -337,7 +342,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
     def __callback_sib_config(self,msg):
         """
-        A callback to extract configurations from System Information Blocks (SIBs), 
+        A callback to extract configurations from System Information Blocks (SIBs),
         including the radio asssement thresholds, the preference settings, etc.
 
         :param msg: RRC SIB messages
@@ -350,12 +355,14 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 meas_report['timestamp'] = str(msg.timestamp)
                 for val in field.iter('field'):
                     if val.get('name') == 'lte-rrc.rsrpResult':
-                        meas_report['rsrp'] = val.get('show')
-                        meas_report['rssi'] = str(int(meas_report['rsrp']) - 141) # map rsrp to rssi
+                        meas_report['rsrp'] = int(val.get('show'))
+                        meas_report['rssi'] = meas_report['rsrp'] - 141 # map rsrp to rssi
                     elif val.get('name') == 'lte-rrc.rsrqResult':
-                        meas_report['rsrq'] = val.get('show')
+                        meas_report['rsrq'] = int(val.get('show'))
                 self.broadcast_info('MEAR_PCELL', meas_report)
                 self.log_info('MEAR_PCELL: ' + str(meas_report))
+                self.send_to_coordinator(msg.timestamp, 'rsrp', meas_report['rsrp'])
+                self.send_to_coordinator(msg.timestamp, 'rsrq', meas_report['rsrq'])
 
             #TODO: use MIB, not lte-rrc.trackingAreaCode
             if field.get('name') == "lte-rrc.trackingAreaCode": #tracking area code
@@ -634,7 +641,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
     def __callback_rrc_reconfig(self,msg):
 
         """
-        Extract configurations from RRCReconfiguration Message, 
+        Extract configurations from RRCReconfiguration Message,
         including the measurement profiles, the MAC/RLC/PDCP configurations, etc.
 
         :param msg: LTE RRC reconfiguration messages
@@ -890,6 +897,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 self.__config[cur_pair].active.measid_list[meas_id] = (obj_id,config_id)
 
 
+
     def __callback_rrc_conn(self,msg):
         """
         Update RRC connectivity status
@@ -946,7 +954,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
     def get_cell_config(self,cell):
         """
         Return a cell's active/idle-state configuration.
-        
+
         :param cell:  a cell identifier
         :type cell: a (cell_id,freq) pair
         :returns: this cell's active/idle-state configurations
@@ -962,7 +970,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         Get current cell's status
 
         :returns: current cell's status
-        :rtype: LteRrcStatus      
+        :rtype: LteRrcStatus
         """
         return self.__status
 
@@ -991,7 +999,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
 class LteRrcStatus:
     """
-    The metadata of a cell, including its ID, frequency band, tracking area code, 
+    The metadata of a cell, including its ID, frequency band, tracking area code,
     bandwidth, connectivity status, etc.
     """
     def __init__(self):
@@ -1035,7 +1043,7 @@ class LteRrcStatus:
 
 
 class LteRrcConfig:
-    """ 
+    """
     Per-cell RRC configurations
 
     The following configurations are supported
@@ -1095,7 +1103,7 @@ class LteRrcConfig:
         cell = cell_meta.id
         freq = cell_meta.freq
         if freq == self.status.freq:
-            #intra-frequency 
+            #intra-frequency
             offset = self.sib.serv_config.q_hyst
             if cell in self.sib.intra_freq_cell_config:
                 offset += self.sib.intra_freq_cell_config[cell]
@@ -1529,7 +1537,7 @@ class LteRportEvent:
     def __init__(self,event_type,threshold1,threshold2=None):
         self.type = event_type
         self.threshold1 = threshold1
-        self.threshold2 = threshold2    
+        self.threshold2 = threshold2
 
 #class Event:
 #    """
