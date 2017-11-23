@@ -1,12 +1,13 @@
 /*
- * GSM_RR_Cell_Information
+ * GSM_DSDS_RR_Cell_Information
  */
 
 #include "consts.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 
-const Fmt GsmRrCellInfo_Fmt [] = {
+const Fmt GsmDsdsRrCellInfo_Fmt [] = {
+    {UINT, "Subscription ID", 1},
     {UINT, "BCCH ARFCN", 2},
     {UINT, "BSIC-NCC", 1},
     {UINT, "BSIC-BCC", 1},
@@ -18,7 +19,7 @@ const Fmt GsmRrCellInfo_Fmt [] = {
     {BYTE_STREAM, "NCC Permitted", 1},
 };
 
-static int _decode_gsm_rci_payload (const char *b,
+static int _decode_gsm_drci_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     // int temp = _search_result_int(result, "BCCH ARFCN");
     // int iArfcn = temp & 4095;

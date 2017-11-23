@@ -2604,6 +2604,24 @@ const ValueName ValueNamePdcpCipherDataPduMode [] = {
     {0, "AM"},
 };
 
+const ValueName ValueNameGSMRxLevMin [] = {
+    {4, "-107 dBm to -106 dBm"},
+    {6, "-105 dBm to -104 dBm"},
+};
+
+const ValueName ValueNameGSMAdditionalParam [] = {
+    {0, "SysInfo 16/17 not supported"},
+};
+
+const ValueName ValueNameGSMPenaltyTime [] = {
+    {0, "20 sec"},
+};
+
+const ValueName ValueNameSupportedOrNot [] = {
+    {0, "Not Supported"},
+    {1, "Supported"},
+};
+
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},

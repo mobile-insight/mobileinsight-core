@@ -19,7 +19,10 @@
 #include "consts.h"
 #include "gsm_rr_cell_information.h"
 #include "gsm_rr_cell_reselection_meas.h"
+#include "gsm_rr_cell_reselection_param.h"
 #include "gsm_surround_cell_ba_list.h"
+#include "gsm_dsds_rr_cell_information.h"
+#include "gsm_dsds_rr_cell_reselection_param.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 #include "lte_pdcp_dl_cipher_data_pdu.h"
@@ -5597,6 +5600,12 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     b, offset, length, result);
             offset += _decode_gsm_rci_payload(b, offset, length, result);
             break;
+        case GSM_RR_Cell_Reselection_Parameters:
+            offset += _decode_by_fmt(GsmRrCellResParm_Fmt,
+                    ARRAY_SIZE(GsmRrCellResParm_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_rcrp_payload(b, offset, length, result);
+            break;
         case GSM_Surround_Cell_BA_List:
             offset += _decode_by_fmt(GsmScbl_Fmt,
                     ARRAY_SIZE(GsmScbl_Fmt, Fmt),
@@ -5609,6 +5618,19 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     b, offset, length, result);
             offset += _decode_gsm_rcrm_payload(b, offset, length, result);
             break;
+        case GSM_DSDS_RR_Cell_Information:
+            offset += _decode_by_fmt(GsmDsdsRrCellInfo_Fmt,
+                    ARRAY_SIZE(GsmDsdsRrCellInfo_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_drci_payload(b, offset, length, result);
+            break;
+        case GSM_DSDS_RR_Cell_Reselection_Parameters:
+            offset += _decode_by_fmt(GsmDsdsRrCellResParm_Fmt,
+                    ARRAY_SIZE(GsmDsdsRrCellResParm_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_drcrp_payload(b, offset, length, result);
+            break;
+
         case Srch_TNG_1x_Searcher_Dump:
             offset += _decode_by_fmt(SrchTng1xsd_Fmt,
                     ARRAY_SIZE(SrchTng1xsd_Fmt, Fmt),
