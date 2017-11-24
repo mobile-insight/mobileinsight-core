@@ -17,6 +17,7 @@
 #include "1xev_rx_partial_multirlp_packet.h"
 #include "1xevdo_multi_carrier_pilot_sets.h"
 #include "consts.h"
+#include "cdma_paging_channel_msg.h"
 #include "gsm_rr_cell_information.h"
 #include "gsm_rr_cell_reselection_meas.h"
 #include "gsm_rr_cell_reselection_param.h"
@@ -5194,7 +5195,11 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
     int offset = 0;
     switch (type_id) {
         case CDMA_Paging_Channel_Message:
-            // Not decoded yet.
+            // Not fully support.
+            offset += _decode_by_fmt(CdmaPagingChannelMsg_Fmt,
+                    ARRAY_SIZE(CdmaPagingChannelMsg_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_cdma_paging_channel_msg(b, offset, length, result);
             break;
 
         // // Yuanjie: Incomplete support. Disable it temporarily

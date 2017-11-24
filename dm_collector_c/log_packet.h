@@ -15,6 +15,7 @@
 // Field types
 enum FmtType {
     UINT,       // Little endian. len = 1, 2, 4, 8
+    UINT_BIG_ENDIAN,    // Big endian uint
     BYTE_STREAM,    // A stream of bytes.
     BYTE_STREAM_LITTLE_ENDIAN,  // a stream of bytes in little endian
     QCDM_TIMESTAMP, // Timestamp in all messages. len = 8
