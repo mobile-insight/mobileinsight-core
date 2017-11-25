@@ -96,14 +96,26 @@ static int _decode_cdma_paging_channel_msg (const char *b,
 
     utemp = _search_result_uint(result, "Base Latitude");
     int iBaseLatitude = (utemp >> 1) & 4194303;
-    old_object = _replace_result_int(result, "Base Latitude", iBaseLatitude);
+    if (((iBaseLatitude >> 21) & 1) == 1) {
+        iBaseLatitude = iBaseLatitude - 4194304;
+    }
+    float fBaseLatitude = iBaseLatitude * 1.0 / 14400;
+    PyObject *pyfloat = Py_BuildValue("f", fBaseLatitude);
+    old_object = _replace_result(result, "Base Latitude", pyfloat);
     Py_DECREF(old_object);
+    Py_DECREF(pyfloat);
 
     int iBaseLongitude = (utemp & 1) * 4194304;
     utemp = _search_result_uint(result, "Base Longitude");
     iBaseLongitude += (utemp >> 10) & 4194303;
-    old_object = _replace_result_int(result, "Base Longitude", iBaseLongitude);
+    if (((iBaseLongitude >> 22) & 1) == 1) {
+        iBaseLongitude = iBaseLongitude - 8388608;
+    }
+    float fBaseLongitude = iBaseLongitude * 1.0 / 14400;
+    pyfloat = Py_BuildValue("f", fBaseLongitude);
+    old_object = _replace_result(result, "Base Longitude", pyfloat);
     Py_DECREF(old_object);
+    Py_DECREF(pyfloat);
 
     utemp = _search_result_uint(result, "T_Add");
     int iTAdd = (utemp >> 24) & 63;
