@@ -97,6 +97,7 @@ class DumpAnalyzer(Analyzer):
         source.enable_log("LTE_RRC_CDRX_Events_Info")
         source.enable_log("WCDMA_RRC_States")
 
+        source.enable_log("CDMA_Paging_Channel_Message")
 
         source.enable_log("1xEV_Rx_Partial_MultiRLP_Packet")
         source.enable_log("1xEV_Connected_State_Search_Info")
