@@ -313,6 +313,15 @@ const ValueName LteRrcOtaPduType [] = {
     {0x08, "LTE-RRC_UL_DCCH"},
 };
 
+const ValueName LteRrcOtaPduType_v15 [] = {
+    {0x02, "LTE-RRC_BCCH_DL_SCH"},
+    {0x05, "LTE-RRC_PCCH"},
+    {0x06, "LTE-RRC_DL_CCCH"},
+    {0x07, "LTE-RRC_DL_DCCH"},
+    {0x08, "LTE-RRC_UL_CCCH"},
+    {0x09, "LTE-RRC_UL_DCCH"},
+};
+
 // ------------------------------------------------------------
 // LTE NAS Plain
 const Fmt LteNasPlainFmt [] = {

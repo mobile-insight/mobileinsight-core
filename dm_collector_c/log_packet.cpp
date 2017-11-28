@@ -256,26 +256,47 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
         return 0;
     }
 
-    int pdu_number = _search_result_int(result, "PDU Number");
-    int pdu_length = _search_result_int(result, "Msg Length");
-    if (pdu_number > 8) {   // Hack. This is not confirmed.
-        pdu_number -= 7;
-    }
-    const char *type_name = search_name(LteRrcOtaPduType,
-                                        ARRAY_SIZE(LteRrcOtaPduType, ValueName),
-                                        pdu_number);
+    if (pkt_ver >= 15) {
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+        const char *type_name = search_name(LteRrcOtaPduType_v15,
+                                            ARRAY_SIZE(LteRrcOtaPduType_v15, ValueName),
+                                            pdu_number);
 
-    if (type_name == NULL) {    // not found
-        printf("(MI)Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
-        return 0;
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t = Py_BuildValue("(ss#s)",
+                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
     } else {
-        std::string type_str = "raw_msg/";
-        type_str += type_name;
-        PyObject *t = Py_BuildValue("(ss#s)",
-                                    "Msg", b + offset, pdu_length, type_str.c_str());
-        PyList_Append(result, t);
-        Py_DECREF(t);
-        return (offset - start) + pdu_length;
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+        if (pdu_number > 8) {   // Hack. This is not confirmed.
+            pdu_number -= 7;
+        }
+        const char *type_name = search_name(LteRrcOtaPduType,
+                                            ARRAY_SIZE(LteRrcOtaPduType, ValueName),
+                                            pdu_number);
+
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t = Py_BuildValue("(ss#s)",
+                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
     }
 }
 
