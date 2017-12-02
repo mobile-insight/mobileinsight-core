@@ -214,6 +214,44 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                     break;
                 }
                 // Convert to a Python integer object or a Python long integer object
+                if (fmt[i].len <= 4)
+                    decoded = Py_BuildValue("I", ii);
+                else
+                    decoded = Py_BuildValue("K", iiii);
+                n_consumed += fmt[i].len;
+                break;
+            }
+        case UINT_BIG_ENDIAN:
+            {
+                unsigned int ii = 0;
+                unsigned long long iiii = -1LL;
+                char p_reverse[8];
+                for (int j = 0; j < fmt[i].len; j++) {
+                    p_reverse[j] = p[fmt[i].len - 1 - j];
+                }
+                switch (fmt[i].len) {
+                case 1:
+                    ii = *((unsigned char *) p_reverse);
+                    break;
+                case 2:
+                    ii = *((unsigned short *) p_reverse);
+                    break;
+                case 4:
+                    ii = *((unsigned int *) p_reverse);
+                    break;
+                case 8:
+                {
+                    // iiii = *((unsigned long long *) p);
+                    unsigned char buffer64[256] = {0};
+                    memcpy(buffer64, p, sizeof(unsigned long long));
+                    iiii = *reinterpret_cast<unsigned long long *>(buffer64);
+                    break;
+                }
+                default:
+                    assert(false);
+                    break;
+                }
+                // Convert to a Python integer object or a Python long integer object
                 // TODO: make it little endian
                 if (fmt[i].len <= 4)
                     decoded = Py_BuildValue("I", ii);

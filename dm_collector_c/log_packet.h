@@ -15,6 +15,7 @@
 // Field types
 enum FmtType {
     UINT,       // Little endian. len = 1, 2, 4, 8
+    UINT_BIG_ENDIAN,    // Big endian uint
     BYTE_STREAM,    // A stream of bytes.
     BYTE_STREAM_LITTLE_ENDIAN,  // a stream of bytes in little endian
     QCDM_TIMESTAMP, // Timestamp in all messages. len = 8
@@ -43,18 +44,6 @@ const Fmt LogPacketHeaderFmt [] = {
 
 //Yuanjie: the following comments are my suggestions for field name replacement
 //No change if the comments are missing
-
-const Fmt _1xEVSignalingFmt [] = {
-    {UINT, "Band", 1},
-    {UINT, "Channel Number", 2},
-    {UINT, "Pilot PN", 2},
-    {UINT, "HSTR", 2},
-    {UINT, "Flags", 1}, // Unknown
-    {UINT, "Seq No", 1},
-    {UINT, "Ack Seq No", 1},
-    {UINT, "SyncCCFlag", 1}
-    // Unknown from here
-};
 
 const Fmt WcdmaCellIdFmt [] = {
     {UINT, "Uplink RF channel number", 4},    //Uplink RF channel number
@@ -310,6 +299,15 @@ const ValueName LteRrcOtaPduType [] = {
     {0x06, "LTE-RRC_DL_DCCH"},
     {0x07, "LTE-RRC_UL_CCCH"},
     {0x08, "LTE-RRC_UL_DCCH"},
+};
+
+const ValueName LteRrcOtaPduType_v15 [] = {
+    {0x02, "LTE-RRC_BCCH_DL_SCH"},
+    {0x05, "LTE-RRC_PCCH"},
+    {0x06, "LTE-RRC_DL_CCCH"},
+    {0x07, "LTE-RRC_DL_DCCH"},
+    {0x08, "LTE-RRC_UL_CCCH"},
+    {0x09, "LTE-RRC_UL_DCCH"},
 };
 
 // ------------------------------------------------------------
@@ -2602,6 +2600,41 @@ const ValueName ValueNamePdcpSNLength [] = {
 
 const ValueName ValueNamePdcpCipherDataPduMode [] = {
     {0, "AM"},
+};
+
+const ValueName ValueNameGSMRxLevMin [] = {
+    {0, "-111 dBm to -110 dBm"},
+    {1, "-110 dBm to -109 dBm"},
+    {2, "-109 dBm to -108 dBm"},
+    {3, "-108 dBm to -107 dBm"},
+    {4, "-107 dBm to -106 dBm"},
+    {5, "-106 dBm to -105 dBm"},
+    {6, "-105 dBm to -104 dBm"},
+    {7, "-104 dBm to -103 dBm"},
+    {8, "-103 dBm to -102 dBm"},
+    {9, "-102 dBm to -101 dBm"},
+    // Not sure about following lines
+    {10, "-101 dBm to -100 dBm"},
+    {11, "-100 dBm to -99 dBm"},
+    {12, "-99 dBm to -98 dBm"},
+    {13, "-98 dBm to -97 dBm"},
+    {14, "-97 dBm to -96 dBm"},
+    {15, "-96 dBm to -95 dBm"},
+    {16, "-95 dBm to -94 dBm"},
+    {17, "-94 dBm to -93 dBm"},
+};
+
+const ValueName ValueNameGSMAdditionalParam [] = {
+    {0, "SysInfo 16/17 not supported"},
+};
+
+const ValueName ValueNameGSMPenaltyTime [] = {
+    {0, "20 sec"},
+};
+
+const ValueName ValueNameSupportedOrNot [] = {
+    {0, "Not Supported"},
+    {1, "Supported"},
 };
 
 // ----------------------------------------------------------------------------

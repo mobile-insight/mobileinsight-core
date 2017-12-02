@@ -15,11 +15,16 @@
 #include "1xev_connection_attempt.h"
 #include "1xev_connection_release.h"
 #include "1xev_rx_partial_multirlp_packet.h"
+#include "1xev_signaling_control_channel_broadcast.h"
 #include "1xevdo_multi_carrier_pilot_sets.h"
 #include "consts.h"
+#include "cdma_paging_channel_msg.h"
 #include "gsm_rr_cell_information.h"
 #include "gsm_rr_cell_reselection_meas.h"
+#include "gsm_rr_cell_reselection_param.h"
 #include "gsm_surround_cell_ba_list.h"
+#include "gsm_dsds_rr_cell_information.h"
+#include "gsm_dsds_rr_cell_reselection_param.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 #include "lte_pdcp_dl_cipher_data_pdu.h"
@@ -252,26 +257,47 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
         return 0;
     }
 
-    int pdu_number = _search_result_int(result, "PDU Number");
-    int pdu_length = _search_result_int(result, "Msg Length");
-    if (pdu_number > 8) {   // Hack. This is not confirmed.
-        pdu_number -= 7;
-    }
-    const char *type_name = search_name(LteRrcOtaPduType,
-                                        ARRAY_SIZE(LteRrcOtaPduType, ValueName),
-                                        pdu_number);
+    if (pkt_ver >= 15) {
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+        const char *type_name = search_name(LteRrcOtaPduType_v15,
+                                            ARRAY_SIZE(LteRrcOtaPduType_v15, ValueName),
+                                            pdu_number);
 
-    if (type_name == NULL) {    // not found
-        printf("(MI)Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
-        return 0;
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t = Py_BuildValue("(ss#s)",
+                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
     } else {
-        std::string type_str = "raw_msg/";
-        type_str += type_name;
-        PyObject *t = Py_BuildValue("(ss#s)",
-                                    "Msg", b + offset, pdu_length, type_str.c_str());
-        PyList_Append(result, t);
-        Py_DECREF(t);
-        return (offset - start) + pdu_length;
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+        if (pdu_number > 8) {   // Hack. This is not confirmed.
+            pdu_number -= 7;
+        }
+        const char *type_name = search_name(LteRrcOtaPduType,
+                                            ARRAY_SIZE(LteRrcOtaPduType, ValueName),
+                                            pdu_number);
+
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t = Py_BuildValue("(ss#s)",
+                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
     }
 }
 
@@ -5191,15 +5217,21 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
     int offset = 0;
     switch (type_id) {
         case CDMA_Paging_Channel_Message:
-            // Not decoded yet.
+            // Not fully support.
+            offset += _decode_by_fmt(CdmaPagingChannelMsg_Fmt,
+                    ARRAY_SIZE(CdmaPagingChannelMsg_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_cdma_paging_channel_msg(b, offset, length, result);
             break;
 
-        // // Yuanjie: Incomplete support. Disable it temporarily
-        // case _1xEV_Signaling_Control_Channel_Broadcast:
-        //     offset += _decode_by_fmt(_1xEVSignalingFmt,
-        //                                 ARRAY_SIZE(_1xEVSignalingFmt, Fmt),
-        //                                 b, offset, length, result);
-        //     break;
+        // Yuanjie: Incomplete support. Disable it temporarily
+        case _1xEV_Signaling_Control_Channel_Broadcast:
+            offset += _decode_by_fmt(_1xEVSignalingFmt,
+                    ARRAY_SIZE(_1xEVSignalingFmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_1xev_signaling_control_channel_broadcast(
+                    b, offset, length, result);
+            break;
 
         case WCDMA_CELL_ID:
             offset += _decode_by_fmt(WcdmaCellIdFmt,
@@ -5597,6 +5629,12 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     b, offset, length, result);
             offset += _decode_gsm_rci_payload(b, offset, length, result);
             break;
+        case GSM_RR_Cell_Reselection_Parameters:
+            offset += _decode_by_fmt(GsmRrCellResParm_Fmt,
+                    ARRAY_SIZE(GsmRrCellResParm_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_rcrp_payload(b, offset, length, result);
+            break;
         case GSM_Surround_Cell_BA_List:
             offset += _decode_by_fmt(GsmScbl_Fmt,
                     ARRAY_SIZE(GsmScbl_Fmt, Fmt),
@@ -5609,6 +5647,19 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     b, offset, length, result);
             offset += _decode_gsm_rcrm_payload(b, offset, length, result);
             break;
+        case GSM_DSDS_RR_Cell_Information:
+            offset += _decode_by_fmt(GsmDsdsRrCellInfo_Fmt,
+                    ARRAY_SIZE(GsmDsdsRrCellInfo_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_drci_payload(b, offset, length, result);
+            break;
+        case GSM_DSDS_RR_Cell_Reselection_Parameters:
+            offset += _decode_by_fmt(GsmDsdsRrCellResParm_Fmt,
+                    ARRAY_SIZE(GsmDsdsRrCellResParm_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_drcrp_payload(b, offset, length, result);
+            break;
+
         case Srch_TNG_1x_Searcher_Dump:
             offset += _decode_by_fmt(SrchTng1xsd_Fmt,
                     ARRAY_SIZE(SrchTng1xsd_Fmt, Fmt),

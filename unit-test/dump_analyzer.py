@@ -97,10 +97,11 @@ class DumpAnalyzer(Analyzer):
         source.enable_log("LTE_RRC_CDRX_Events_Info")
         source.enable_log("WCDMA_RRC_States")
 
+        source.enable_log("CDMA_Paging_Channel_Message")
 
         source.enable_log("1xEV_Rx_Partial_MultiRLP_Packet")
         source.enable_log("1xEV_Connected_State_Search_Info")
-        # source.enable_log("1xEV_Signaling_Control_Channel_Broadcast")
+        source.enable_log("1xEV_Signaling_Control_Channel_Broadcast")
         source.enable_log("1xEV_Connection_Attempt")
         source.enable_log("1xEV_Connection_Release")
 
@@ -116,6 +117,10 @@ class DumpAnalyzer(Analyzer):
         source.enable_log("GSM_RR_Cell_Information")
         source.enable_log("GSM_Surround_Cell_BA_List");
         source.enable_log("GSM_RR_Cell_Reselection_Meas");
+        source.enable_log("GSM_RR_Cell_Reselection_Parameters");
+
+        source.enable_log("GSM_DSDS_RR_Cell_Information")
+        source.enable_log("GSM_DSDS_RR_Cell_Reselection_Parameters");
 
         source.enable_log("Srch_TNG_1x_Searcher_Dump");
         source.enable_log("_1xEVDO_Multi_Carrier_Pilot_Sets");
