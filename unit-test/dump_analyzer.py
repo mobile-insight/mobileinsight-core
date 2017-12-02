@@ -101,7 +101,7 @@ class DumpAnalyzer(Analyzer):
 
         source.enable_log("1xEV_Rx_Partial_MultiRLP_Packet")
         source.enable_log("1xEV_Connected_State_Search_Info")
-        # source.enable_log("1xEV_Signaling_Control_Channel_Broadcast")
+        source.enable_log("1xEV_Signaling_Control_Channel_Broadcast")
         source.enable_log("1xEV_Connection_Attempt")
         source.enable_log("1xEV_Connection_Release")
 

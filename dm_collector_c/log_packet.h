@@ -45,18 +45,6 @@ const Fmt LogPacketHeaderFmt [] = {
 //Yuanjie: the following comments are my suggestions for field name replacement
 //No change if the comments are missing
 
-const Fmt _1xEVSignalingFmt [] = {
-    {UINT, "Band", 1},
-    {UINT, "Channel Number", 2},
-    {UINT, "Pilot PN", 2},
-    {UINT, "HSTR", 2},
-    {UINT, "Flags", 1}, // Unknown
-    {UINT, "Seq No", 1},
-    {UINT, "Ack Seq No", 1},
-    {UINT, "SyncCCFlag", 1}
-    // Unknown from here
-};
-
 const Fmt WcdmaCellIdFmt [] = {
     {UINT, "Uplink RF channel number", 4},    //Uplink RF channel number
     {UINT, "Download RF channel number", 4},    //Download RF channel number

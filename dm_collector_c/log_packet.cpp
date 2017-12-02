@@ -15,6 +15,7 @@
 #include "1xev_connection_attempt.h"
 #include "1xev_connection_release.h"
 #include "1xev_rx_partial_multirlp_packet.h"
+#include "1xev_signaling_control_channel_broadcast.h"
 #include "1xevdo_multi_carrier_pilot_sets.h"
 #include "consts.h"
 #include "cdma_paging_channel_msg.h"
@@ -5223,12 +5224,14 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             offset += _decode_cdma_paging_channel_msg(b, offset, length, result);
             break;
 
-        // // Yuanjie: Incomplete support. Disable it temporarily
-        // case _1xEV_Signaling_Control_Channel_Broadcast:
-        //     offset += _decode_by_fmt(_1xEVSignalingFmt,
-        //                                 ARRAY_SIZE(_1xEVSignalingFmt, Fmt),
-        //                                 b, offset, length, result);
-        //     break;
+        // Yuanjie: Incomplete support. Disable it temporarily
+        case _1xEV_Signaling_Control_Channel_Broadcast:
+            offset += _decode_by_fmt(_1xEVSignalingFmt,
+                    ARRAY_SIZE(_1xEVSignalingFmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_1xev_signaling_control_channel_broadcast(
+                    b, offset, length, result);
+            break;
 
         case WCDMA_CELL_ID:
             offset += _decode_by_fmt(WcdmaCellIdFmt,

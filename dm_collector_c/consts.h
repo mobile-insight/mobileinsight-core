@@ -16,7 +16,7 @@ enum LogPacketType {
 
     _1xEV_Connection_Attempt = 0x106E,
     _1xEV_Connection_Release = 0x1071,
-    // _1xEV_Signaling_Control_Channel_Broadcast = 0x107C,
+    _1xEV_Signaling_Control_Channel_Broadcast = 0x107C,
     _1xEV_Connected_State_Search_Info = 0x118A,
     Srch_TNG_1x_Searcher_Dump = 0x119B,
     _1xEV_Rx_Partial_MultiRLP_Packet = 0x1277,
@@ -118,9 +118,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "1xEV_Connection_Attempt", true},
     {_1xEV_Connection_Release,
         "1xEV_Connection_Release", true},
-    // Yuanjie: Buggy parsing!!! Disable _1xEV_Signaling_Control_Channel_Broadcast temporarily
-    // {_1xEV_Signaling_Control_Channel_Broadcast,
-    //     "1xEV_Signaling_Control_Channel_Broadcast",false},
+    {_1xEV_Signaling_Control_Channel_Broadcast,
+        "1xEV_Signaling_Control_Channel_Broadcast",false},
     {_1xEV_Connected_State_Search_Info,
         "1xEV_Connected_State_Search_Info", true},
     {Srch_TNG_1x_Searcher_Dump,
