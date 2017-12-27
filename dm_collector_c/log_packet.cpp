@@ -548,10 +548,10 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
 
             // modulation & ratio
             tmp = _search_result_int(result, "MCS 0");
-            int mod_stream0 = (tmp >> 1) & 0x3;
-            float ratio = float((tmp >> 3) & 0x1fff) / 256.0;
+            int mod_stream0 = (tmp >> 2) & 0x3;
+            float ratio = float((tmp >> 4) & 4095) / 256.0;
             tmp = _search_result_int(result, "MCS 1");
-            int mod_stream1 = (tmp >> 1) & 0x3;
+            int mod_stream1 = (tmp >> 2) & 0x3;
             int carrier_index = (tmp >> 9) & 0xf;
 
             old_object = _replace_result_int(result, "MCS 0", mod_stream0);
@@ -586,9 +586,7 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "(MI)Unknown");
             break;
         }
-    
     case 103:
-
     	{
             offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v103,
                                         ARRAY_SIZE(LtePhyPdschDemapperConfigFmt_v103, Fmt),
@@ -662,10 +660,10 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
 
             // modulation & ratio
             tmp = _search_result_int(result, "MCS 0");
-            int mod_stream0 = (tmp >> 1) & 0x3;
-            float ratio = float((tmp >> 3) & 0x1fff) / 256.0;
+            int mod_stream0 = (tmp >> 2) & 0x3;
+            float ratio = float((tmp >> 4) & 0x1fff) / 256.0;
             tmp = _search_result_int(result, "MCS 1");
-            int mod_stream1 = (tmp >> 1) & 0x3;
+            int mod_stream1 = (tmp >> 2) & 0x3;
             int carrier_index = (tmp >> 9) & 0xf;
 
             old_object = _replace_result_int(result, "MCS 0", mod_stream0);
@@ -2229,7 +2227,7 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, size_t length,
                 } else {
                     bool success = false;
                     switch (subpkt_ver) {
-                        case 1: // UL Tx Stats SubPacket
+                        case 1: // UL Tx Stats SubPacket version 1
                             {
                                 PyObject *result_subpkt_sample = PyList_New(0);
                                 offset += _decode_by_fmt(LteMacULTxStatistics_ULTxStatsSubPacketFmt,
@@ -2243,6 +2241,21 @@ _decode_lte_mac_ul_txstatistics_subpkt(const char *b, int offset, size_t length,
                                 success = true;
                                 break;
                             }
+                        case 2: // UL Tx Stats SubPacket version 2
+                            {
+                                PyObject *result_subpkt_sample = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacULTxStatistics_ULTxStatsSubPacketFmtV2,
+                                        ARRAY_SIZE(LteMacULTxStatistics_ULTxStatsSubPacketFmtV2, Fmt),
+                                        b, offset, length, result_subpkt_sample);
+
+                                PyObject *t = Py_BuildValue("(sOs)",
+                                                            "Sample", result_subpkt_sample, "dict");
+                                PyList_Append(result_subpkt, t);
+                                Py_DECREF(result_subpkt_sample);
+                                success = true;
+                                break;
+                            }
+
                         default:
                             break;
                     }
