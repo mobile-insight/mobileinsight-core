@@ -448,14 +448,10 @@ const Fmt LtePhyPdschDemapperConfigFmt_v103 [] = {
     {PLACEHOLDER, "PMI Index", 0},  // 4 bits
     {UINT, "Transmission Scheme", 1},   // 4 bits
     {SKIP, NULL, 2},
-    // {UINT, "Transport Block Size Stream 0", 2},
     {UINT, "TBS 0", 2},
-    // {UINT, "Modulation Stream 0", 2},
     {UINT, "MCS 0", 2},
-    {UINT, "Traffic to Pilot Ratio", 2},
-    // {UINT, "Transport Block Size Stream 1", 2},
+    {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
     {UINT, "TBS 1", 2},
-    // {UINT, "Modulation Stream 1", 2},
     {UINT, "MCS 1", 2},
     {PLACEHOLDER, "Carrier Index", 0},
     {SKIP, NULL, 4},
@@ -1034,6 +1030,18 @@ const Fmt LteMacULTxStatistics_ULTxStatsSubPacketFmt [] = {
     {UINT, "Grant received", 4},
     {UINT, "Grant utilized", 4},
     {SKIP, NULL, 3}
+};
+
+const Fmt LteMacULTxStatistics_ULTxStatsSubPacketFmtV2 [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Number of samples", 1},
+    {UINT, "Number of padding BSR", 1},
+    {UINT, "Number of regular BSR", 1},
+    {UINT, "Number of periodic BSR", 1},
+    {UINT, "Number of cancel BSR", 1},
+    {UINT, "Grant received", 4},
+    {UINT, "Grant utilized", 4},
+    {SKIP, NULL, 2}
 };
 
 // ----------------------------------------------------------
