@@ -475,15 +475,10 @@ const Fmt LtePhyPdschDemapperConfigFmt_v104 [] = {
     {UINT, "Frequency Selective PMI", 1},   // right shift 1 bit, 2 bits
     {PLACEHOLDER, "PMI Index", 0},  // 4 bits
     {UINT, "Transmission Scheme", 1},   // 4 bits
-    // {SKIP, NULL, 2},
-    // {UINT, "Transport Block Size Stream 0", 2},
     {UINT, "TBS 0", 2},
-    // {UINT, "Modulation Stream 0", 2},
     {UINT, "MCS 0", 2},
     {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
-    // {UINT, "Transport Block Size Stream 1", 2},
     {UINT, "TBS 1", 2},
-    // {UINT, "Modulation Stream 1", 2},
     {UINT, "MCS 1", 2},
     {PLACEHOLDER, "Carrier Index", 0},
     {SKIP, NULL, 4},

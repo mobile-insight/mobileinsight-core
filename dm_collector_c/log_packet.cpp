@@ -548,10 +548,10 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
 
             // modulation & ratio
             tmp = _search_result_int(result, "MCS 0");
-            int mod_stream0 = (tmp >> 2) & 0x3;
-            float ratio = float((tmp >> 4) & 4095) / 256.0;
+            int mod_stream0 = (tmp >> 1) & 0x3;
+            float ratio = float((tmp >> 3) & 4095) / 256.0;
             tmp = _search_result_int(result, "MCS 1");
-            int mod_stream1 = (tmp >> 2) & 0x3;
+            int mod_stream1 = (tmp >> 1) & 0x3;
             int carrier_index = (tmp >> 9) & 0xf;
 
             old_object = _replace_result_int(result, "MCS 0", mod_stream0);
@@ -697,8 +697,6 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "(MI)Unknown");
             break;
         }
-
-
     case 104:
         {
             offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v104,
@@ -773,10 +771,10 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
 
             // modulation & ratio
             tmp = _search_result_int(result, "MCS 0");
-            int mod_stream0 = (tmp >> 1) & 0x3;
-            float ratio = float((tmp >> 3) & 0x1fff) / 256.0;
+            int mod_stream0 = (tmp >> 2) & 0x3;
+            float ratio = float((tmp >> 4) & 0x1fff) / 256.0;
             tmp = _search_result_int(result, "MCS 1");
-            int mod_stream1 = (tmp >> 1) & 0x3;
+            int mod_stream1 = (tmp >> 2) & 0x3;
             int carrier_index = (tmp >> 9) & 0xf;
 
             old_object = _replace_result_int(result, "MCS 0", mod_stream0);
