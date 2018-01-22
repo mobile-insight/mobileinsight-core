@@ -12,6 +12,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <cmath>
 
 #ifdef __ANDROID__
 #include <android/log.h>
@@ -163,6 +164,44 @@ _map_result_field_to_name(PyObject *result, const char *target,
     } else {
         return -1;
     }
+}
+
+static unsigned int _decode_by_bit (
+        int start,
+        int bitlength,
+        const char *b)
+    __attribute__ ((unused));
+static unsigned int
+_decode_by_bit (int start, int bitlength, const char *b) {
+    unsigned int rt = 0;
+    int temp = 0;
+    assert(bitlength <= 32);
+    const char *p = b + start / 8;
+    int usedByte = (start + bitlength + 8 - 1) / 8 - start / 8;
+    unsigned char buffer[5] = {0};
+    memcpy(buffer, p, sizeof(char) * usedByte);
+
+    int left_remaining = 8 - start % 8;
+    int right_drop = 8 - (start + bitlength) % 8;
+    if (right_drop == 8) {
+        right_drop = 0;
+    }
+
+    if (usedByte > 1) {
+        temp = (int)buffer[0] & ((int)std::pow(2, left_remaining) - 1);
+        rt += temp * std::pow(2, bitlength - left_remaining);
+        for (int i = 1; i < usedByte - 1; i++) {
+            temp = (int)buffer[i];
+            rt += temp * pow(2, bitlength - left_remaining - 8 * i);
+        }
+        temp = (int)buffer[usedByte - 1] >> right_drop;
+        rt += temp;
+    } else {
+        temp = ((int)buffer[0] >> right_drop);
+        temp = temp & ((int)std::pow(2, bitlength) - 1);
+        rt = temp;
+    }
+    return rt;
 }
 
 // Decode a binary string according to an array of field description (fmt[]).
