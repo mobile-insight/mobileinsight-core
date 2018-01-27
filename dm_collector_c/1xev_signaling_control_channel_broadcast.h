@@ -256,13 +256,13 @@ static int _decode_1xev_signaling_control_channel_broadcast (const char *b,
                 if (iSearchBackOffTimerIncluded == 1) {
                     pystr = Py_BuildValue("s", "MI(Unknown)");
                     old_object = _replace_result(result_otherRAT_item,
-                            "MaxReselectionTimer", pystr);
+                            "SearchBackOffTimer", pystr);
                     Py_DECREF(old_object);
                     Py_DECREF(pystr);
                 } else {
                     pystr = Py_BuildValue("s", "Not Present");
                     old_object = _replace_result(result_otherRAT_item,
-                            "MaxReselectionTimer", pystr);
+                            "SearchBackOffTimer", pystr);
                     Py_DECREF(old_object);
                     Py_DECREF(pystr);
                 }
