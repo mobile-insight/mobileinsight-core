@@ -22,6 +22,7 @@ const Fmt _1xEVSignalingFmt [] = {
     {SKIP, NULL, 4}, // Unknown
     {UINT, "Protocol Type", 1},
     {UINT, "Message ID", 1},
+    // Total 13 bytes
 };
 
 const Fmt _1xEVSignaling_SectorParameters [] = {
@@ -40,6 +41,39 @@ const Fmt _1xEVSignaling_SectorParameters [] = {
     // 14 bits remaining
     {UINT_BIG_ENDIAN, "Longitude", 2},  // 14 + 9 bits
     // 7 bits remaining
+};
+
+const Fmt _1xEVSignaling_OtherRATNeighborList [] = {
+    {PLACEHOLDER, "Other RAT Signature", 0},    // 6 bits
+    {PLACEHOLDER, "Num Other RAT", 0},          // 4 bits
+};
+
+const Fmt _1xEVSignaling_RATFmt [] = {
+    {PLACEHOLDER, "RAT Type", 0},               // 6 bits
+    {PLACEHOLDER, "RAT Record Length", 0},      // 8 bits
+};
+
+const Fmt _1xEVSignaling_LteFmt [] = {
+    // ServPriorityIncluded 1 bit
+    {PLACEHOLDER, "Serv Priority", 0},          // 3 bits
+    {PLACEHOLDER, "ThreshServ", 0},             // 6 bits
+    // perEarfcnParamsIncluded 1 bit
+    // maxReselectionTimerIncluded 1 bit
+    {PLACEHOLDER, "MaxReselectionTimer", 0},    // 4 bits
+    // SearchBackOffTimerIncluded 1 bit
+    {PLACEHOLDER, "SearchBackOffTimer", 0},     // Unknown
+    // PLMNIDIncluded 1 bit
+    {PLACEHOLDER, "NumEUTRAFreq", 0},           // 3 bits
+};
+
+const Fmt _1xEVSignaling_EUTRAFreqFmt [] = {
+    {PLACEHOLDER, "EARFCN", 0},                 // 16 bits
+    {PLACEHOLDER, "EARFCNPriority", 0},         // 3 bits
+    {PLACEHOLDER, "ThreshX", 0},                // 4 bits
+    {PLACEHOLDER, "RxLevMinEUTRA", 0},          // 8 bits
+    {PLACEHOLDER, "PeMax", 0},                  // 6 bits
+    {PLACEHOLDER, "RxLevMinOffset", 0},         // Unknown
+    {PLACEHOLDER, "MeasurementBandWidth", 0},   // 3 bits
 };
 
 static int _decode_1xev_signaling_control_channel_broadcast (const char *b,
@@ -131,6 +165,215 @@ static int _decode_1xev_signaling_control_channel_broadcast (const char *b,
         Py_DECREF(pyfloat);
 
         return offset;
+
+    } else if (iProtocolType == 15 && iMessageID == 3) {
+        // OtherRATNeighborList
+        _decode_by_fmt(_1xEVSignaling_OtherRATNeighborList,
+                ARRAY_SIZE(_1xEVSignaling_OtherRATNeighborList, Fmt),
+                b, offset, length, result);
+        PyObject *old_object;
+        PyObject *pystr;
+        const char *p = b + offset;
+        int bitOffset = 0;
+        int iOtherRATSignature = _decode_by_bit(bitOffset, 6, p);
+        bitOffset += 6;
+        old_object = _replace_result_int(result, "Other RAT Signature",
+                iOtherRATSignature);
+        Py_DECREF(old_object);
+        int iNumOtherRAT = _decode_by_bit(bitOffset, 4, p);
+        bitOffset += 4;
+        old_object = _replace_result_int(result, "Num Other RAT",
+                iNumOtherRAT);
+        Py_DECREF(old_object);
+
+        PyObject *result_otherRATs = PyList_New(0);
+        for (int i = 0; i < iNumOtherRAT; i++) {
+            PyObject *result_otherRAT_item = PyList_New(0);
+            _decode_by_fmt(_1xEVSignaling_RATFmt,
+                    ARRAY_SIZE(_1xEVSignaling_RATFmt, Fmt),
+                    b, offset, length, result_otherRAT_item);
+
+            int iRATType = _decode_by_bit(bitOffset, 6, p);
+            bitOffset += 6;
+            int iRATRecordLength = _decode_by_bit(bitOffset, 8, p);
+            bitOffset += 8;
+            old_object = _replace_result_int(result_otherRAT_item, "RAT Type",
+                    iRATType);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result_otherRAT_item,
+                    "RAT Record Length", iRATRecordLength);
+            Py_DECREF(old_object);
+            int bitOffsetSave = bitOffset;
+
+            if (iRATType == 0) {
+                _decode_by_fmt(_1xEVSignaling_LteFmt,
+                        ARRAY_SIZE(_1xEVSignaling_LteFmt, Fmt),
+                        b, offset, length, result_otherRAT_item);
+
+                int iServPriorityIncluded = _decode_by_bit(bitOffset, 1, p);
+                bitOffset += 1;
+                if (iServPriorityIncluded == 1) {
+                    int iServPriority = _decode_by_bit(bitOffset, 3, p);
+                    bitOffset += 3;
+                    old_object = _replace_result_int(result_otherRAT_item,
+                            "Serv Priority", iServPriority);
+                    Py_DECREF(old_object);
+                } else {
+                    pystr = Py_BuildValue("s", "Not Present");
+                    old_object = _replace_result(result_otherRAT_item,
+                            "Serv Priority", pystr);
+                    Py_DECREF(old_object);
+                    Py_DECREF(pystr);
+                }
+
+                int iThreshServ = _decode_by_bit(bitOffset, 6, p);
+                bitOffset += 6;
+                old_object = _replace_result_int(result_otherRAT_item,
+                        "ThreshServ", iThreshServ);
+                Py_DECREF(old_object);
+
+                int iPerEarfcnParamsIncluded = _decode_by_bit(bitOffset, 1, p);
+                bitOffset += 1;
+
+                int iMaxReselectionTimerIncluded = _decode_by_bit(bitOffset, 1, p);
+                bitOffset += 1;
+                if (iMaxReselectionTimerIncluded == 1) {
+                    int iMaxReselectionTimer = _decode_by_bit(bitOffset, 4, p);
+                    bitOffset += 4;
+                    old_object = _replace_result_int(result_otherRAT_item,
+                            "MaxReselectionTimer", iMaxReselectionTimer);
+                    Py_DECREF(old_object);
+                } else {
+                    pystr = Py_BuildValue("s", "Not Present");
+                    old_object = _replace_result(result_otherRAT_item,
+                            "MaxReselectionTimer", pystr);
+                    Py_DECREF(old_object);
+                    Py_DECREF(pystr);
+                }
+
+                int iSearchBackOffTimerIncluded = _decode_by_bit(bitOffset, 1, p);
+                bitOffset += 1;
+                if (iSearchBackOffTimerIncluded == 1) {
+                    pystr = Py_BuildValue("s", "MI(Unknown)");
+                    old_object = _replace_result(result_otherRAT_item,
+                            "SearchBackOffTimer", pystr);
+                    Py_DECREF(old_object);
+                    Py_DECREF(pystr);
+                } else {
+                    pystr = Py_BuildValue("s", "Not Present");
+                    old_object = _replace_result(result_otherRAT_item,
+                            "SearchBackOffTimer", pystr);
+                    Py_DECREF(old_object);
+                    Py_DECREF(pystr);
+                }
+
+                int iPLMNIDIncluded = _decode_by_bit(bitOffset, 1, p);
+                bitOffset += 1;
+
+                if (iPerEarfcnParamsIncluded == 1) {
+
+                    int iNumEUTRAFreq = _decode_by_bit(bitOffset, 3, p);
+                    bitOffset += 3;
+                    old_object = _replace_result_int(result_otherRAT_item,
+                            "NumEUTRAFreq", iNumEUTRAFreq);
+                    Py_DECREF(old_object);
+
+                    PyObject *result_EUTRAFreqs = PyList_New(0);
+                    for (int j = 0; j < iNumEUTRAFreq; j++) {
+                        PyObject *result_EUTRAFreq_item = PyList_New(0);
+                        _decode_by_fmt(_1xEVSignaling_EUTRAFreqFmt,
+                                ARRAY_SIZE(_1xEVSignaling_EUTRAFreqFmt, Fmt),
+                                b, offset, length, result_EUTRAFreq_item);
+
+                        int iEARFCN = _decode_by_bit(bitOffset, 16, p);
+                        bitOffset += 16;
+                        old_object = _replace_result_int(result_EUTRAFreq_item,
+                                "EARFCN", iEARFCN);
+                        Py_DECREF(old_object);
+
+                        int iEarfcnPriority = _decode_by_bit(bitOffset, 3, p);
+                        bitOffset += 3;
+                        old_object = _replace_result_int(result_EUTRAFreq_item,
+                                "EARFCNPriority", iEarfcnPriority);
+                        Py_DECREF(old_object);
+
+                        int iThreshX = _decode_by_bit(bitOffset, 4, p);
+                        bitOffset += 4;
+                        old_object = _replace_result_int(result_EUTRAFreq_item,
+                                "ThreshX", iThreshX);
+                        Py_DECREF(old_object);
+
+                        int iRxLevMin = _decode_by_bit(bitOffset, 8, p);
+                        bitOffset += 8;
+                        old_object = _replace_result_int(result_EUTRAFreq_item,
+                                "RxLevMinEUTRA", iRxLevMin);
+                        Py_DECREF(old_object);
+
+                        int iPeMax = _decode_by_bit(bitOffset, 6, p);
+                        bitOffset += 6;
+                        old_object = _replace_result_int(result_EUTRAFreq_item,
+                                "PeMax", iPeMax);
+                        Py_DECREF(old_object);
+
+                        int iRxLevMinOffsetIncluded = _decode_by_bit(bitOffset, 1, p);
+                        bitOffset += 1;
+                        if (iRxLevMinOffsetIncluded == 1) {
+                            pystr = Py_BuildValue("s", "MI(Unknown)");
+                            old_object = _replace_result(result_EUTRAFreq_item,
+                                    "RxLevMinOffset", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                        } else {
+                            pystr = Py_BuildValue("s", "Not Present");
+                            old_object = _replace_result(result_EUTRAFreq_item,
+                                    "RxLevMinOffset", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                        }
+
+                        int iMeasurementBandWidth = _decode_by_bit(bitOffset, 3, p);
+                        bitOffset += 3;
+                        old_object = _replace_result_int(result_EUTRAFreq_item,
+                                "MeasurementBandWidth", iMeasurementBandWidth);
+                        Py_DECREF(old_object);
+
+                        // PLMNAMWaPrevChannel
+                        bitOffset += 2;
+                        // NumPLMNIDs and PLMNID
+                        if (iPLMNIDIncluded == 1) {
+                            bitOffset += (4 + 22);
+                        }
+
+                        PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                result_EUTRAFreq_item, "dict");
+                        PyList_Append(result_EUTRAFreqs, t3);
+                        Py_DECREF(t3);
+                        Py_DECREF(result_EUTRAFreq_item);
+                    }
+                    PyObject *t2 = Py_BuildValue("(sOs)", "EUTRAFreqs",
+                            result_EUTRAFreqs, "list");
+                    PyList_Append(result_otherRAT_item, t2);
+                    Py_DECREF(t2);
+                    Py_DECREF(result_EUTRAFreqs);
+                }
+            }
+            else {
+                // Unknown RAT Type
+            }
+
+            bitOffset = bitOffsetSave + iRATRecordLength * 8;
+            PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                    result_otherRAT_item, "dict");
+            PyList_Append(result_otherRATs, t1);
+            Py_DECREF(t1);
+            Py_DECREF(result_otherRAT_item);
+        }
+        PyObject *t = Py_BuildValue("(sOs)", "Other RATs",
+                result_otherRATs, "list");
+        PyList_Append(result, t);
+        Py_DECREF(t);
+        Py_DECREF(result_otherRATs);
+        return length;
     } else {
         return offset;
     }

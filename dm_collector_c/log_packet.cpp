@@ -22,9 +22,11 @@
 #include "gsm_rr_cell_information.h"
 #include "gsm_rr_cell_reselection_meas.h"
 #include "gsm_rr_cell_reselection_param.h"
+#include "gsm_rr_signaling_message.h"
 #include "gsm_surround_cell_ba_list.h"
 #include "gsm_dsds_rr_cell_information.h"
 #include "gsm_dsds_rr_cell_reselection_param.h"
+#include "gsm_dsds_rr_signaling_message.h"
 #include "log_packet.h"
 #include "log_packet_helper.h"
 #include "lte_pdcp_dl_cipher_data_pdu.h"
@@ -5774,6 +5776,13 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     b, offset, length, result);
             offset += _decode_gsm_rcrm_payload(b, offset, length, result);
             break;
+        case GSM_RR_Signaling_Message:
+            offset += _decode_by_fmt(GsmRrSignalingMsg_Fmt,
+                    ARRAY_SIZE(GsmRrSignalingMsg_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_rr_signaling_msg_payload(
+                    b, offset, length, result);
+            break;
         case GSM_DSDS_RR_Cell_Information:
             offset += _decode_by_fmt(GsmDsdsRrCellInfo_Fmt,
                     ARRAY_SIZE(GsmDsdsRrCellInfo_Fmt, Fmt),
@@ -5785,6 +5794,13 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     ARRAY_SIZE(GsmDsdsRrCellResParm_Fmt, Fmt),
                     b, offset, length, result);
             offset += _decode_gsm_drcrp_payload(b, offset, length, result);
+            break;
+        case GSM_DSDS_RR_Signaling_Message:
+            offset += _decode_by_fmt(GsmDsdsRrSignalingMsg_Fmt,
+                    ARRAY_SIZE(GsmDsdsRrSignalingMsg_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_gsm_dsds_rr_signaling_msg_payload(
+                    b, offset, length, result);
             break;
 
         case Srch_TNG_1x_Searcher_Dump:

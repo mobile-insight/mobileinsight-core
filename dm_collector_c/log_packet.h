@@ -2672,6 +2672,32 @@ const ValueName ValueNameSupportedOrNot [] = {
     {1, "Supported"},
 };
 
+const ValueName ValueNameGSMChannelType [] = {
+    {0, "DCCH"},
+    {1, "BCCH"},
+    {3, "CCCH"},
+    {4, "SACCH"},
+};
+
+const ValueName ValueNameGSMSignalingMessageType [] = {
+    {0, "System Information Type 13"},
+    {7, "System Information Type 2quater"},
+    {13, "Channel Release"},
+    {21, "Measurement Report"},
+    {22, "Classmark Change"},
+    {25, "System Information Type 1"},
+    {26, "System Information Type 2"},
+    {27, "System Information Type 3"},
+    {28, "System Information Type 4"},
+    {29, "System Information Type 5"},
+    {63, "Immediate Assignment"},
+};
+
+const ValueName ValueNameDirection [] = {
+    {0, "Uplink"},
+    {1, "Downlink"},
+};
+
 // ----------------------------------------------------------------------------
 const Fmt ModemDebug_Fmt [] = {
     {UINT, "Version", 1},

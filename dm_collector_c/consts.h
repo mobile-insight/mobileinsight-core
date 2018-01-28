@@ -99,10 +99,12 @@ enum LogPacketType {
     LTE_PHY_PUSCH_CSF = 0xB14E,
 
     GSM_Surround_Cell_BA_List = 0x5071,
+    GSM_RR_Signaling_Message = 0x512F,
     GSM_RR_Cell_Reselection_Parameters = 0x5130,
     GSM_RR_Cell_Information = 0x5134,
     GSM_RR_Cell_Reselection_Meas = 0x51FC,
 
+    GSM_DSDS_RR_Signaling_Message = 0x5B2F,
     GSM_DSDS_RR_Cell_Reselection_Parameters = 0x5B30,
     GSM_DSDS_RR_Cell_Information = 0x5B34,
 
@@ -281,11 +283,15 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "GSM_RR_Cell_Information", false},
     {GSM_RR_Cell_Reselection_Meas,
         "GSM_RR_Cell_Reselection_Meas", false},
+    {GSM_RR_Signaling_Message,
+        "GSM_RR_Signaling_Message", false},
 
     {GSM_DSDS_RR_Cell_Reselection_Parameters,
         "GSM_DSDS_RR_Cell_Reselection_Parameters", false},
     {GSM_DSDS_RR_Cell_Information,
         "GSM_DSDS_RR_Cell_Information", false},
+    {GSM_DSDS_RR_Signaling_Message,
+        "GSM_DSDS_RR_Signaling_Message", false},
 
     {Modem_debug_message,
         "Modem_debug_message", false},
