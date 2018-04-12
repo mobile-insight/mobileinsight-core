@@ -963,6 +963,155 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                                 success = true;
                                 break;
                             }
+                        case 7:
+                            {
+                                offset += _decode_by_fmt(
+                                        LtePhySubpktFmt_v1_Scmr_v7,
+                                        ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v7,
+                                            Fmt),
+                                        b, offset, length, result_subpkt);
+                                int temp = _search_result_int(result_subpkt,
+                                        "Physical Cell ID");
+                                int iPhyCellId = temp & 511;   // 9 bits
+                                int iServingCellIdx = (temp >> 9) & 7; // 3 bits
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Physical Cell ID", iPhyCellId);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Serving Cell Index", iServingCellIdx);
+                                Py_DECREF(old_object);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt,
+                                        "Serving Cell Index",
+                                        ValueNameCellIndex,
+                                        ARRAY_SIZE(ValueNameCellIndex,
+                                            ValueName),
+                                        "(MI)Unknown");
+
+                                temp = _search_result_int(result_subpkt,
+                                        "Current SFN");
+                                int iSysFN = temp & 1023;   // 10 bits
+                                int iSubFN = (temp >> 10) & 15; // 4 bits
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current SFN", iSysFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current Subframe Number", iSubFN);
+                                Py_DECREF(old_object);
+
+                                unsigned int utemp;
+                                PyObject *pyfloat;
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP Rx[0]");
+                                float RSRP0 = float((utemp >> 10) & 4095);
+                                RSRP0 = RSRP0 * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP Rx[1]");
+                                float RSRP1 = float((utemp >> 12) & 4095);
+                                RSRP1 = RSRP1 * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP");
+                                float RSRP = float((utemp >> 12) & 4095);
+                                RSRP = RSRP * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRQ Rx[0]");
+                                float RSRQ0 = float((utemp >> 12) & 1023);
+                                RSRQ0 = RSRQ0 * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRQ Rx[1]");
+                                float RSRQ1 = float(utemp & 1023);
+                                RSRQ1 = RSRQ1 * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float RSRQ = float((utemp >> 20) & 1023);
+                                RSRQ = RSRQ * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSSI Rx[0]");
+                                float RSSI0 = float((utemp >> 10) & 2047);
+                                RSSI0 = RSSI0 * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float RSSI1 = float((utemp >> 21) & 2047);
+                                RSSI1 = RSSI1 * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSSI");
+                                float RSSI = float(utemp & 2047);
+                                RSSI = RSSI * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "FTL SNR Rx[0]");
+                                float SNR0 = float(utemp & 511);
+                                SNR0 = SNR0 * 0.1 - 20.0;
+                                pyfloat = Py_BuildValue("f", SNR0);
+                                old_object = _replace_result(result_subpkt,
+                                        "FTL SNR Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float SNR1 = float((utemp >> 9) & 511);
+                                SNR1 = SNR1 * 0.1 - 20.0;
+                                pyfloat = Py_BuildValue("f", SNR1);
+                                old_object = _replace_result(result_subpkt,
+                                        "FTL SNR Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                success = true;
+                                break;
+                            }
+
                         case 19:
                             {
                                 offset += _decode_by_fmt(
@@ -5215,6 +5364,395 @@ static int _decode_lte_pdcch_phich_indication_report_payload (const char *b,
             Py_DECREF(result_record);
             return offset - start;
         }
+    case 25:
+        {
+            offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Fmt_v25,
+                    ARRAY_SIZE(LtePdcchPhichIndicationReport_Fmt_v25, Fmt),
+                    b, offset, length, result);
+            int iNonDecodeDuplexMode = _search_result_int(result,
+                    "Duplex Mode");
+            int iDuplexMode = iNonDecodeDuplexMode & 3; // last 2 bits
+            PyObject *old_object = _replace_result_int(result, "Duplex Mode",
+                    iDuplexMode);
+            Py_DECREF(old_object);
+            int num_record = _search_result_int(result, "Number of Records");
+
+            PyObject *result_record = PyList_New(0);
+            for (int i = 0; i < num_record; i++) {
+                PyObject *result_record_item = PyList_New(0);
+                offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Record_v25_p1,
+                        ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v25_p1, Fmt),
+                        b, offset, length, result_record_item);
+                unsigned int iNonDecodeP1_1 = _search_result_uint(result_record_item,
+                        "Num PDCCH Results");
+                int iNumPdcch = iNonDecodeP1_1 & 7; // last 3 bits
+                int iNumPhich = (iNonDecodeP1_1 >> 3) & 7;  // next 3 bits
+                int iPdcchSFN = (iNonDecodeP1_1 >> 6) & 1023; // next 10 bits
+                int iPdcchSubFN = (iNonDecodeP1_1 >> 16) & 15; // next 4 bits
+                old_object = _replace_result_int(result_record_item,
+                        "Num PDCCH Results", iNumPdcch);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "Num PHICH Results", iNumPhich);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "PDCCH Timing SFN", iPdcchSFN);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "PDCCH Timing Sub-FN", iPdcchSubFN);
+                Py_DECREF(old_object);
+
+                PyObject *result_phich = PyList_New(0);
+                for (int j = 0; j < iNumPhich; j++) {
+                    PyObject *result_phich_item = PyList_New(0);
+                    offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Record_v25_phich,
+                            ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v25_phich,
+                                Fmt),
+                            b, offset, length, result_phich_item);
+                    unsigned int iNonDecode_phich = _search_result_uint(
+                            result_phich_item, "Cell Index");
+                    int iCellIndex = iNonDecode_phich & 7;    // 3 bits
+                    int iPhichIncluded = (iNonDecode_phich >> 3) & 1; // next 1 bit
+                    int iPhich1Included = (iNonDecode_phich >> 4) & 1; // next 1 bit
+                    int iPhichValue = (iNonDecode_phich >> 5) & 1; // next 1 bit
+                    int iPhich1Value = (iNonDecode_phich >> 6) & 1; // next 1 bit
+
+                    old_object = _replace_result_int(result_phich_item,
+                            "Cell Index", iCellIndex);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_phich_item,
+                            "PHICH Included", iPhichIncluded);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_phich_item,
+                            "PHICH Included",
+                            ValueNameYesOrNo,
+                            ARRAY_SIZE(ValueNameYesOrNo, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_phich_item,
+                            "PHICH 1 Included", iPhich1Included);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_phich_item,
+                            "PHICH 1 Included",
+                            ValueNameYesOrNo,
+                            ARRAY_SIZE(ValueNameYesOrNo, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_phich_item,
+                            "PHICH Value", iPhichValue);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_phich_item,
+                            "PHICH Value",
+                            ValueNameAckOrNack,
+                            ARRAY_SIZE(ValueNameAckOrNack, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_phich_item,
+                            "PHICH 1 Value", iPhich1Value);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_phich_item,
+                            "PHICH 1 Value",
+                            ValueNameAckOrNack,
+                            ARRAY_SIZE(ValueNameAckOrNack, ValueName),
+                            "(MI)Unknown");
+
+                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                            result_phich_item, "dict");
+                    PyList_Append(result_phich, t3);
+                    Py_DECREF(t3);
+                    Py_DECREF(result_phich_item);
+                }
+                PyObject *t2_phich = Py_BuildValue("(sOs)", "PHICH",
+                        result_phich, "list");
+                PyList_Append(result_record_item, t2_phich);
+                Py_DECREF(t2_phich);
+                Py_DECREF(result_phich);
+
+                // totally 12 bytes for all phich
+                offset += 12 - iNumPhich * 4;
+
+                PyObject *result_pdcch = PyList_New(0);
+                for (int j = 0; j < iNumPdcch; j++) {
+                    PyObject *result_pdcch_item = PyList_New(0);
+                    offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Record_v25_pdcch,
+                            ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v25_pdcch,
+                                Fmt),
+                            b, offset, length, result_pdcch_item);
+                    int iNonDecodePdcch_1 = _search_result_int(result_pdcch_item,
+                            "Serv Cell Idx");
+                    int iServCellIdx = iNonDecodePdcch_1 & 7; // last 3 bits
+                    int iRNTI = (iNonDecodePdcch_1 >> 3) & 15; // next 4 bits
+                    int iPayloadSize = (iNonDecodePdcch_1 >> 7) & 127; // next 7 bits
+                    int iAggLv = (iNonDecodePdcch_1 >> 14) & 3; // next 2 bits
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "Serv Cell Idx", iServCellIdx);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "RNTI Type", iRNTI);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_pdcch_item,
+                            "RNTI Type",
+                            ValueNameRNTIType,
+                            ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "Payload Size", iPayloadSize);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "Aggregation Level", iAggLv);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_pdcch_item,
+                            "Aggregation Level",
+                            ValueNameAggregationLevel,
+                            ARRAY_SIZE(ValueNameAggregationLevel, ValueName),
+                            "(MI)Unknown");
+
+                    int iNonDecodePdcch_2 = _search_result_int(result_pdcch_item,
+                            "Search Space");
+                    int iSearchSpace = iNonDecodePdcch_2 & 1; // last 1 bit
+                    // SPS Grant Type should take this 3 bits
+                    int iNewDLTx = (iNonDecodePdcch_2 >> 4) & 1; // next 1 bit
+                    int iNumDLTrblks = (iNonDecodePdcch_2 >> 5) & 3; // next 2 bits
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "Search Space", iSearchSpace);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_pdcch_item,
+                            "Search Space",
+                            ValueNameSearchSpaceType,
+                            ARRAY_SIZE(ValueNameSearchSpaceType, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "New DL Tx", iNewDLTx);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_pdcch_item,
+                            "New DL Tx",
+                            ValueNameTrueOrFalse,
+                            ARRAY_SIZE(ValueNameTrueOrFalse, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "Num DL Trblks", iNumDLTrblks);
+                    Py_DECREF(old_object);
+
+                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                            result_pdcch_item, "dict");
+                    PyList_Append(result_pdcch, t3);
+                    Py_DECREF(t3);
+                    Py_DECREF(result_pdcch_item);
+                }
+                PyObject *t2_pdcch = Py_BuildValue("(sOs)", "PDCCH Info",
+                        result_pdcch, "list");
+                PyList_Append(result_record_item, t2_pdcch);
+                Py_DECREF(t2_pdcch);
+                Py_DECREF(result_pdcch);
+
+                // at most 64 bytes for all pdcch
+                offset += 64 - iNumPdcch * 8;
+
+                PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                        result_record_item, "dict");
+                PyList_Append(result_record, t1);
+                Py_DECREF(t1);
+                Py_DECREF(result_record_item);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Records",
+                    result_record, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_record);
+            return offset - start;
+        }
+    case 33:
+        {
+            offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Fmt_v33,
+                    ARRAY_SIZE(LtePdcchPhichIndicationReport_Fmt_v33, Fmt),
+                    b, offset, length, result);
+            int iNonDecodeDuplexMode = _search_result_int(result,
+                    "Duplex Mode");
+            int iDuplexMode = iNonDecodeDuplexMode & 3; // last 2 bits
+            PyObject *old_object = _replace_result_int(result, "Duplex Mode",
+                    iDuplexMode);
+            Py_DECREF(old_object);
+            int num_record = _search_result_int(result, "Number of Records");
+
+            PyObject *result_record = PyList_New(0);
+            for (int i = 0; i < num_record; i++) {
+                PyObject *result_record_item = PyList_New(0);
+                offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Record_v33_p1,
+                        ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v33_p1, Fmt),
+                        b, offset, length, result_record_item);
+                unsigned int iNonDecodeP1_1 = _search_result_uint(result_record_item,
+                        "Num PDCCH Results");
+                int iNumPdcch = iNonDecodeP1_1 & 7; // last 3 bits
+                int iNumPhich = (iNonDecodeP1_1 >> 3) & 7;  // next 3 bits
+                int iPdcchSFN = (iNonDecodeP1_1 >> 6) & 1023; // next 10 bits
+                int iPdcchSubFN = (iNonDecodeP1_1 >> 16) & 15; // next 4 bits
+                old_object = _replace_result_int(result_record_item,
+                        "Num PDCCH Results", iNumPdcch);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "Num PHICH Results", iNumPhich);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "PDCCH Timing SFN", iPdcchSFN);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "PDCCH Timing Sub-FN", iPdcchSubFN);
+                Py_DECREF(old_object);
+
+                PyObject *result_phich = PyList_New(0);
+                for (int j = 0; j < iNumPhich; j++) {
+                    PyObject *result_phich_item = PyList_New(0);
+                    offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Record_v25_phich,
+                            ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v25_phich,
+                                Fmt),
+                            b, offset, length, result_phich_item);
+                    unsigned int iNonDecode_phich = _search_result_uint(
+                            result_phich_item, "Cell Index");
+                    int iCellIndex = iNonDecode_phich & 7;    // 3 bits
+                    int iPhichIncluded = (iNonDecode_phich >> 3) & 1; // next 1 bit
+                    int iPhich1Included = (iNonDecode_phich >> 4) & 1; // next 1 bit
+                    int iPhichValue = (iNonDecode_phich >> 5) & 1; // next 1 bit
+                    int iPhich1Value = (iNonDecode_phich >> 6) & 1; // next 1 bit
+
+                    old_object = _replace_result_int(result_phich_item,
+                            "Cell Index", iCellIndex);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_phich_item,
+                            "PHICH Included", iPhichIncluded);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_phich_item,
+                            "PHICH Included",
+                            ValueNameYesOrNo,
+                            ARRAY_SIZE(ValueNameYesOrNo, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_phich_item,
+                            "PHICH 1 Included", iPhich1Included);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_phich_item,
+                            "PHICH 1 Included",
+                            ValueNameYesOrNo,
+                            ARRAY_SIZE(ValueNameYesOrNo, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_phich_item,
+                            "PHICH Value", iPhichValue);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_phich_item,
+                            "PHICH Value",
+                            ValueNameAckOrNack,
+                            ARRAY_SIZE(ValueNameAckOrNack, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_phich_item,
+                            "PHICH 1 Value", iPhich1Value);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_phich_item,
+                            "PHICH 1 Value",
+                            ValueNameAckOrNack,
+                            ARRAY_SIZE(ValueNameAckOrNack, ValueName),
+                            "(MI)Unknown");
+
+                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                            result_phich_item, "dict");
+                    PyList_Append(result_phich, t3);
+                    Py_DECREF(t3);
+                    Py_DECREF(result_phich_item);
+                }
+                PyObject *t2_phich = Py_BuildValue("(sOs)", "PHICH",
+                        result_phich, "list");
+                PyList_Append(result_record_item, t2_phich);
+                Py_DECREF(t2_phich);
+                Py_DECREF(result_phich);
+
+                // totally 20 bytes for all phich
+                offset += 20 - iNumPhich * 4;
+
+                PyObject *result_pdcch = PyList_New(0);
+                for (int j = 0; j < iNumPdcch; j++) {
+                    PyObject *result_pdcch_item = PyList_New(0);
+                    offset += _decode_by_fmt(LtePdcchPhichIndicationReport_Record_v33_pdcch,
+                            ARRAY_SIZE(LtePdcchPhichIndicationReport_Record_v33_pdcch,
+                                Fmt),
+                            b, offset, length, result_pdcch_item);
+                    int iNonDecodePdcch_1 = _search_result_int(result_pdcch_item,
+                            "Serv Cell Idx");
+                    int iServCellIdx = iNonDecodePdcch_1 & 7; // last 3 bits
+                    int iRNTI = (iNonDecodePdcch_1 >> 3) & 15; // next 4 bits
+                    int iPayloadSize = (iNonDecodePdcch_1 >> 7) & 127; // next 7 bits
+                    int iAggLv = (iNonDecodePdcch_1 >> 14) & 3; // next 2 bits
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "Serv Cell Idx", iServCellIdx);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "RNTI Type", iRNTI);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_pdcch_item,
+                            "RNTI Type",
+                            ValueNameRNTIType,
+                            ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "Payload Size", iPayloadSize);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "Aggregation Level", iAggLv);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_pdcch_item,
+                            "Aggregation Level",
+                            ValueNameAggregationLevel,
+                            ARRAY_SIZE(ValueNameAggregationLevel, ValueName),
+                            "(MI)Unknown");
+
+                    int iNonDecodePdcch_2 = _search_result_int(result_pdcch_item,
+                            "Search Space");
+                    int iSearchSpace = iNonDecodePdcch_2 & 1; // last 1 bit
+                    // SPS Grant Type should take this 3 bits
+                    int iNewDLTx = (iNonDecodePdcch_2 >> 4) & 1; // next 1 bit
+                    int iNumDLTrblks = (iNonDecodePdcch_2 >> 5) & 3; // next 2 bits
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "Search Space", iSearchSpace);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_pdcch_item,
+                            "Search Space",
+                            ValueNameSearchSpaceType,
+                            ARRAY_SIZE(ValueNameSearchSpaceType, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "New DL Tx", iNewDLTx);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_pdcch_item,
+                            "New DL Tx",
+                            ValueNameTrueOrFalse,
+                            ARRAY_SIZE(ValueNameTrueOrFalse, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_pdcch_item,
+                            "Num DL Trblks", iNumDLTrblks);
+                    Py_DECREF(old_object);
+
+                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                            result_pdcch_item, "dict");
+                    PyList_Append(result_pdcch, t3);
+                    Py_DECREF(t3);
+                    Py_DECREF(result_pdcch_item);
+                }
+                PyObject *t2_pdcch = Py_BuildValue("(sOs)", "PDCCH Info",
+                        result_pdcch, "list");
+                PyList_Append(result_record_item, t2_pdcch);
+                Py_DECREF(t2_pdcch);
+                Py_DECREF(result_pdcch);
+
+                // at most 64 bytes for all pdcch
+                offset += 64 - iNumPdcch * 8;
+
+                PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                        result_record_item, "dict");
+                PyList_Append(result_record, t1);
+                Py_DECREF(t1);
+                Py_DECREF(result_record_item);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Records",
+                    result_record, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_record);
+            return offset - start;
+        }
+
     default:
         printf("(MI)Unknown LTE PDCCH-PHICH Indication Report version: 0x%x\n", pkt_ver);
         return 0;

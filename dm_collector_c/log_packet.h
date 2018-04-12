@@ -585,6 +585,30 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v4 [] = {
     {UINT, "Physical Cell ID", 2}   //cell ID
 };
 
+const Fmt LtePhySubpktFmt_v1_Scmr_v7 [] = {
+    {UINT, "E-ARFCN", 4},
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 4},    // Is Restricted, Cell Timing [0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP", 4},          // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
+    {PLACEHOLDER, "RSRQ", 0},   // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
+    {UINT, "RSSI", 4},    // 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 12},
+};
+
 const Fmt LtePhySubpktFmt_v1_Scmr_v19 [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Num-of-cells", 2},
@@ -2270,6 +2294,16 @@ const Fmt LtePdcchPhichIndicationReport_Fmt_v5 [] = {
     {UINT, "Number of Records", 1},
 };
 
+const Fmt LtePdcchPhichIndicationReport_Fmt_v25 [] = {
+    {UINT, "Duplex Mode", 2},
+    {UINT, "Number of Records", 1},
+};
+
+const Fmt LtePdcchPhichIndicationReport_Fmt_v33 [] = {
+    {UINT, "Duplex Mode", 2},
+    {UINT, "Number of Records", 1},
+};
+
 const Fmt LtePdcchPhichIndicationReport_Record_v5_p1 [] = {
     {UINT, "Num PDCCH Results", 4},
     {PLACEHOLDER, "PDCCH Timing SFN", 0},
@@ -2280,6 +2314,39 @@ const Fmt LtePdcchPhichIndicationReport_Record_v5_p1 [] = {
     {UINT, "PHICH Timing Sub-FN", 4},
     {PLACEHOLDER, "PHICH Value", 0},
     {PLACEHOLDER, "PHICH 1 Value", 0},
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v25_p1 [] = {
+    {UINT, "Num PDCCH Results", 4},             // 3 bits
+    {PLACEHOLDER, "Num PHICH Results", 0},      // 3 bits
+    {PLACEHOLDER, "PDCCH Timing SFN", 0},       // 10 bits
+    {PLACEHOLDER, "PDCCH Timing Sub-FN", 0},    // 4 bits
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v33_p1 [] = {
+    {UINT, "Num PDCCH Results", 4},             // 3 bits
+    {PLACEHOLDER, "Num PHICH Results", 0},      // 3 bits
+    {PLACEHOLDER, "PDCCH Timing SFN", 0},       // 10 bits
+    {PLACEHOLDER, "PDCCH Timing Sub-FN", 0},    // 4 bits
+    {SKIP, NULL, 8},
+};
+
+// totally 12 bytes for all phich
+const Fmt LtePdcchPhichIndicationReport_Record_v25_phich [] = {
+    {UINT, "Cell Index", 4},                    // 3 bits
+    {PLACEHOLDER, "PHICH Included", 0},         // 1 bit
+    {PLACEHOLDER, "PHICH 1 Included", 0},       // 1 bit
+    {PLACEHOLDER, "PHICH Value", 0},            // 1 bit
+    {PLACEHOLDER, "PHICH 1 Value", 0},          // 1 bit
+};
+
+// totally 20 bytes for all phich
+const Fmt LtePdcchPhichIndicationReport_Record_v33_phich [] = {
+    {UINT, "Cell Index", 4},                    // 3 bits
+    {PLACEHOLDER, "PHICH Included", 0},         // 1 bit
+    {PLACEHOLDER, "PHICH 1 Included", 0},       // 1 bit
+    {PLACEHOLDER, "PHICH Value", 0},            // 1 bit
+    {PLACEHOLDER, "PHICH 1 Value", 0},          // 1 bit
 };
 
 // totally number of pdcch info + number of pdcch hidden info = 8
@@ -2294,6 +2361,35 @@ const Fmt LtePdcchPhichIndicationReport_Record_v5_p2 [] = {
     {PLACEHOLDER, "New DL Tx", 0},
     {PLACEHOLDER, "Num DL Trblks", 0},
 };
+
+// totally 64 bytes for all pdcch
+const Fmt LtePdcchPhichIndicationReport_Record_v25_pdcch [] = {
+    // PDCCH Info
+    {UINT, "Serv Cell Idx", 2},                 // 3 bits
+    {PLACEHOLDER, "RNTI Type", 0},              // 4 bits
+    {PLACEHOLDER, "Payload Size", 0},           // 7 bits
+    {PLACEHOLDER, "Aggregation Level", 0},      // 2 bits
+    {UINT, "Search Space", 2},                  // 1 bit
+    {PLACEHOLDER, "SPS Grant Type", 0},         // 3 bits
+    {PLACEHOLDER, "New DL Tx", 0},              // 1 bit
+    {PLACEHOLDER, "Num DL Trblks", 0},          // 2 bits
+    {SKIP, NULL, 4},
+};
+
+// totally 64 bytes for all pdcch
+const Fmt LtePdcchPhichIndicationReport_Record_v33_pdcch [] = {
+    // PDCCH Info
+    {UINT, "Serv Cell Idx", 2},                 // 3 bits
+    {PLACEHOLDER, "RNTI Type", 0},              // 4 bits
+    {PLACEHOLDER, "Payload Size", 0},           // 7 bits
+    {PLACEHOLDER, "Aggregation Level", 0},      // 2 bits
+    {UINT, "Search Space", 2},                  // 1 bit
+    {PLACEHOLDER, "SPS Grant Type", 0},         // 3 bits
+    {PLACEHOLDER, "New DL Tx", 0},              // 1 bit
+    {PLACEHOLDER, "Num DL Trblks", 0},          // 2 bits
+    {SKIP, NULL, 4},
+};
+
 const Fmt LtePdcchPhichIndicationReport_Record_v5_p3 [] = {
     // PDCCH Hidden Info
     {SKIP, NULL, 4},
@@ -2466,6 +2562,11 @@ const ValueName ValueNameEnableOrDisable [] = {
 const ValueName ValueNameYesOrNo [] = {
     {0, "No"},
     {1, "Yes"},
+};
+
+const ValueName ValueNameAckOrNack [] = {
+    {0, "NACK"},
+    {1, "ACK"},
 };
 
 const ValueName ValueNameModulation [] = {
