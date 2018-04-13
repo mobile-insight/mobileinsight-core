@@ -69,6 +69,20 @@ else
     echo "All clear."
 fi
 
+echo -e "${GREEN}[INFO]${NC} Checking Python 2.7 environment..."
+if [[ $(brew ls --versions ${PYTHON}) ]] ; then
+    echo "Python 2.7 is installed by Homebrew and ready."
+else
+    echo -e "${YELLOW}[WARNING]${NC} It appears that you do not have a Python 2.7 version installed via Homebrew."
+    echo "Installing formulae python@2 via Homebrew."
+    brew install python@2
+fi
+
+if [[ $(which -s ${PIP}) ]] ; then
+    echo -e "${YELLOW}[WARNING]${NC} It appears that pip2 is not installed on your computer, installing it..."
+    brew install python
+fi
+
 # Check if Wireshark is installed
 brew_ws_ver=$(brew ls --versions wireshark)
 if [[ $? != 0 ]]; then
@@ -127,37 +141,6 @@ else
     sudo chmod 755 ${PREFIX}/bin/ws_dissector
 fi
 
-echo -e "${GREEN}[INFO]${NC} Installing dependencies for MobileInsight GUI..."
-if [[ $(brew ls --versions ${PYTHON}) ]] ; then
-    echo "Python 2.7 is installed by Homebrew and ready."
-else
-    echo -e "${YELLOW}[WARNING]${NC} It appears that you do not have a Python 2.7 version installed via Homebrew."
-    echo "Installing formula python@2 via Homebrew."
-    brew install python@2
-fi
-
-if [[ ! -f ${PREFIX}/bin/${PYTHON} ]] ; then
-    echo -e "${YELLOW}[WARNING]${NC} Cannot find python installed by Homebrew under /usr/local"
-    echo "Your Homebrew prefix is:"
-    echo $(brew config | grep -i prefix)
-    echo -e "${YELLOW}[WARNING]${NC} The MobileInsight GUI will likely not functioning if you do not use the default /usr/local prefix."
-fi
-
-echo -e "${GREEN}[INFO]${NC} Installing wxPython..."
-brew install wxpython
-
-if [[ $(which -s ${PIP}) ]] ; then
-    echo -e "${YELLOW}[WARNING]${NC} It appears that pip2 is not installed on your computer, installing it..."
-    brew install python
-fi
-
-if [[ $(${PIP} install pyserial matplotlib) ]] ; then
-    echo "pyserial and matplotlib are successfully installed!"
-else
-    echo "Installing pyserial and matplotlib using sudo, your password may be required..."
-    sudo ${PIP} install pyserial matplotlib
-fi
-
 echo -e "${GREEN}[INFO]${NC} Installing mobileinsight-core..."
 cd ${MOBILEINSIGHT_PATH}
 if [[ $(${PYTHON} setup.py install) ]] ; then
@@ -176,6 +159,24 @@ else
     sudo mkdir -p ${PREFIX}/share/mobileinsight/
     sudo cp -r gui/* ${PREFIX}/share/mobileinsight/
     sudo ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
+fi
+
+echo -e "${GREEN}[INFO]${NC} Installing dependencies for MobileInsight GUI..."
+echo -e "${GREEN}[INFO]${NC} Installing wxPython..."
+brew install wxpython
+
+if [[ ! -f ${PREFIX}/bin/${PYTHON} ]] ; then
+    echo -e "${YELLOW}[WARNING]${NC} Cannot find python installed by Homebrew under /usr/local"
+    echo "Your Homebrew prefix is:"
+    echo $(brew config | grep -i prefix)
+    echo -e "${YELLOW}[WARNING]${NC} The MobileInsight GUI will likely not functioning if you do not use the default /usr/local prefix."
+fi
+
+if [[ $(${PIP} install pyserial matplotlib) ]] ; then
+    echo "PySerial and matplotlib are successfully installed!"
+else
+    echo "Installing PySerial and matplotlib using sudo, your password may be required..."
+    sudo ${PIP} install pyserial matplotlib
 fi
 
 echo -e "${GREEN}[INFO]${NC} Testing the MobileInsight offline analysis example."
