@@ -582,7 +582,25 @@ const ValueName LtePhySubpkt_SubpktType [] = {
 // Serving_Cell_Measurement_Result
 const Fmt LtePhySubpktFmt_v1_Scmr_v4 [] = {
     {UINT, "E-ARFCN", 2},
-    {UINT, "Physical Cell ID", 2}   //cell ID
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 4},    // Is Restricted, Cell Timing [0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP", 4},          // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
+    {PLACEHOLDER, "RSRQ", 0},   // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
+    {UINT, "RSSI", 4},    // 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 12},
 };
 
 const Fmt LtePhySubpktFmt_v1_Scmr_v7 [] = {
