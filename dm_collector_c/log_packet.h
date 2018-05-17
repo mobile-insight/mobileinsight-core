@@ -693,6 +693,31 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v22 [] = {
     {UINT, "CINR Rx[1]", 4},
 };
 
+const Fmt LtePhySubpktFmt_v1_Scmr_v35 [] = {
+    {UINT, "E-ARFCN", 4},
+    {UINT, "Num-of-cells", 2},
+    {SKIP, NULL, 2},
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 4},    // Cell Timing [0]
+    {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN [0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {UINT, "RSRP", 4},    // 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // 10 bits, (0.0625 * x - 30) dB
+    {PLACEHOLDER, "RSRQ Rx[1]", 0},    // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {SKIP, NULL, 4},
+    {UINT, "RSRQ", 4},    // 10 bits, (0.0625 * x - 30) dB
+    // Unknown
+};
+
 // ------------------------------------------------------------
 // LTE PHY IRAT MDB
 
