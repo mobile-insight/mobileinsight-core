@@ -36,6 +36,7 @@
 #include "lte_phy_bplmn_cell_request.h"
 #include "lte_phy_cdrx_events_info.h"
 #include "lte_phy_idle_neighbor_cell_meas.h"
+#include "lte_phy_connected_neighbor_cell_meas.h"
 #include "lte_phy_pdcch_decoding_result.h"
 #include "lte_phy_pdsch_decoding_result.h"
 #include "lte_phy_pucch_csf.h"
@@ -6619,6 +6620,12 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     ARRAY_SIZE(LtePhyPucchCsf_Fmt, Fmt),
                     b, offset, length, result);
             offset += _decode_lte_phy_pucch_csf_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_Connected_Mode_Neighbor_Meas_Req_Resp:
+            offset += _decode_by_fmt(LtePhyCncm_Fmt,
+                    ARRAY_SIZE(LtePhyCncm_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_connected_neighbor_cell_meas_payload(b, offset, length, result);
             break;
         default:
             break;

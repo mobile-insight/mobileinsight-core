@@ -459,7 +459,7 @@ static int _decode_lte_phy_idle_neighbor_cell_meas_payload (const char *b,
 
                 } else {
                     printf("(MI)Unknown LTE PHY Idle Neighbor Cell Meas subpkt"
-                            " id and version: 0x%x - %d\n", subpkt_id,
+                            " id and version: %d - %d\n", subpkt_id,
                             subpkt_ver);
                 }
 

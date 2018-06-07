@@ -79,6 +79,7 @@ class DumpAnalyzer(Analyzer):
         source.enable_log("LTE_PHY_Inter_RAT_Measurement")
         source.enable_log("LTE_PHY_Inter_RAT_CDMA_Measurement")
         source.enable_log("LTE_PHY_Idle_Neighbor_Cell_Meas")
+        source.enable_log("LTE_PHY_Connected_Mode_Neighbor_Measurement")
 
         source.enable_log("LTE_PHY_PUCCH_Power_Control")
         source.enable_log("LTE_PHY_PUSCH_Power_Control")
