@@ -1,1 +1,1 @@
-$(which python) /usr/local/share/mobileinsight/mobile_insight_gui.py
+python2 /usr/local/share/mobileinsight/mobile_insight_gui.py

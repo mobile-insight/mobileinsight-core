@@ -122,7 +122,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
 
         if msg.type_id == "WCDMA_RRC_Serv_Cell_Info":
 
-            self.log_info("Find One WCDMA_RRC_Serv_Cell_Info")
+            # self.log_info("Find One WCDMA_RRC_Serv_Cell_Info")
 
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
@@ -131,7 +131,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
 
         elif msg.type_id == "WCDMA_RRC_States":
 
-            self.log_info("Find One WCDMA_RRC_States")
+            # self.log_info("Find One WCDMA_RRC_States")
 
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
@@ -142,7 +142,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
 
         elif msg.type_id == "WCDMA_RRC_OTA_Packet":
 
-            self.log_info("Find One WCDMA_RRC_OTA_Packet")
+            # self.log_info("Find One WCDMA_RRC_OTA_Packet")
 
             log_item = msg.data.decode()
             log_item_dict = dict(log_item) 
@@ -317,9 +317,20 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
 
+                #TS25.331: if missing, the default value is 4dB (2 here)
+                if not field_val['rrc.q_Hyst_l_S']:
+                    field_val['rrc.q_Hyst_l_S'] = 2
+
                 #TS25.331: if qHyst-2s is missing, the default is qHyst-1s
                 if not field_val['rrc.q_HYST_2_S']:
                     field_val['rrc.q_HYST_2_S'] = field_val['rrc.q_Hyst_l_S']
+
+                if not field_val['rrc.t_Reselection_S']:
+                    field_val['rrc.t_Reselection_S'] = 0
+
+                if not field_val['rrc.q_RxlevMin']:
+                    field_val['rrc.q_RxlevMin'] = 0
+
 
                 intra_freq_config = WcdmaRrcSibIntraFreqConfig(
                         int(field_val['rrc.t_Reselection_S']),
