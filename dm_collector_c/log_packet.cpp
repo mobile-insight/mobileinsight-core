@@ -36,6 +36,7 @@
 #include "lte_phy_bplmn_cell_request.h"
 #include "lte_phy_cdrx_events_info.h"
 #include "lte_phy_idle_neighbor_cell_meas.h"
+#include "lte_phy_connected_neighbor_cell_meas.h"
 #include "lte_phy_pdcch_decoding_result.h"
 #include "lte_phy_pdsch_decoding_result.h"
 #include "lte_phy_pucch_csf.h"
@@ -960,6 +961,144 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                                         ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v4,
                                             Fmt),
                                         b, offset, length, result_subpkt);
+                                int temp = _search_result_int(result_subpkt,
+                                        "Physical Cell ID");
+                                int iPhyCellId = temp & 511;   // 9 bits
+                                int iServingCellIdx = (temp >> 9) & 7; // 3 bits
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Physical Cell ID", iPhyCellId);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Serving Cell Index", iServingCellIdx);
+                                Py_DECREF(old_object);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt,
+                                        "Serving Cell Index",
+                                        ValueNameCellIndex,
+                                        ARRAY_SIZE(ValueNameCellIndex,
+                                            ValueName),
+                                        "(MI)Unknown");
+
+                                temp = _search_result_int(result_subpkt,
+                                        "Current SFN");
+                                int iSysFN = temp & 1023;   // 10 bits
+                                int iSubFN = (temp >> 10) & 15; // 4 bits
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current SFN", iSysFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current Subframe Number", iSubFN);
+                                Py_DECREF(old_object);
+
+                                unsigned int utemp;
+                                PyObject *pyfloat;
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP Rx[0]");
+                                float RSRP0 = float((utemp >> 10) & 4095);
+                                RSRP0 = RSRP0 * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP Rx[1]");
+                                float RSRP1 = float((utemp >> 12) & 4095);
+                                RSRP1 = RSRP1 * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP");
+                                float RSRP = float((utemp >> 12) & 4095);
+                                RSRP = RSRP * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRQ Rx[0]");
+                                float RSRQ0 = float((utemp >> 12) & 1023);
+                                RSRQ0 = RSRQ0 * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRQ Rx[1]");
+                                float RSRQ1 = float(utemp & 1023);
+                                RSRQ1 = RSRQ1 * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float RSRQ = float((utemp >> 20) & 1023);
+                                RSRQ = RSRQ * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSSI Rx[0]");
+                                float RSSI0 = float((utemp >> 10) & 2047);
+                                RSSI0 = RSSI0 * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float RSSI1 = float((utemp >> 21) & 2047);
+                                RSSI1 = RSSI1 * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "RSSI");
+                                float RSSI = float(utemp & 2047);
+                                RSSI = RSSI * 0.0625 - 110.0;
+                                pyfloat = Py_BuildValue("f", RSSI);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSSI", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(result_subpkt,
+                                        "FTL SNR Rx[0]");
+                                float SNR0 = float(utemp & 511);
+                                SNR0 = SNR0 * 0.1 - 20.0;
+                                pyfloat = Py_BuildValue("f", SNR0);
+                                old_object = _replace_result(result_subpkt,
+                                        "FTL SNR Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float SNR1 = float((utemp >> 9) & 511);
+                                SNR1 = SNR1 * 0.1 - 20.0;
+                                pyfloat = Py_BuildValue("f", SNR1);
+                                old_object = _replace_result(result_subpkt,
+                                        "FTL SNR Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
                                 success = true;
                                 break;
                             }
@@ -1458,6 +1597,111 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                                 old_object = _replace_result_int(result_subpkt,
                                         "Projected SIR", SIR);
                                 Py_DECREF(old_object);
+
+                                success = true;
+                                break;
+                            }
+                            case 35:
+                            {
+                                offset += _decode_by_fmt(
+                                        LtePhySubpktFmt_v1_Scmr_v35,
+                                        ARRAY_SIZE(LtePhySubpktFmt_v1_Scmr_v35,
+                                            Fmt),
+                                        b, offset, length, result_subpkt);
+                                int temp = _search_result_int(result_subpkt,
+                                        "Physical Cell ID");
+                                int iPhyCellId = temp & 511;   // 9 bits
+                                int iServingCellIdx = (temp >> 9) & 7; // 3 bits
+                                int iIsServingCell = (temp >> 12) & 1;  // 1 bit
+                                PyObject *old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Physical Cell ID", iPhyCellId);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Serving Cell Index", iServingCellIdx);
+                                Py_DECREF(old_object);
+                                (void) _map_result_field_to_name(
+                                        result_subpkt,
+                                        "Serving Cell Index",
+                                        ValueNameCellIndex,
+                                        ARRAY_SIZE(ValueNameCellIndex,
+                                            ValueName),
+                                        "(MI)Unknown");
+                                old_object = _replace_result_int(
+                                        result_subpkt,
+                                        "Is Serving Cell", iIsServingCell);
+                                Py_DECREF(old_object);
+
+                                temp = _search_result_int(result_subpkt,
+                                        "Current SFN");
+                                int iSysFN = temp & 1023;   // 10 bits
+                                int iSubFN = (temp >> 10) & 15; // 4 bits
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current SFN", iSysFN);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(result_subpkt,
+                                        "Current Subframe Number", iSubFN);
+                                Py_DECREF(old_object);
+
+                                unsigned int utemp;
+                                PyObject *pyfloat;
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP Rx[0]");
+                                float RSRP0 = float((utemp >> 10) & 4095);
+                                RSRP0 = RSRP0 * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP Rx[1]");
+                                float RSRP1 = float((utemp >> 12) & 4095);
+                                RSRP1 = RSRP1 * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRP");
+                                float RSRP = float((utemp) & 4095);
+                                RSRP = RSRP * 0.0625 - 180.0;
+                                pyfloat = Py_BuildValue("f", RSRP);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRP", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                utemp = _search_result_uint(
+                                        result_subpkt, "RSRQ Rx[0]");
+                                float RSRQ0 = float((utemp) & 1023);
+                                RSRQ0 = RSRQ0 * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ0);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ Rx[0]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float RSRQ1 = float((utemp >> 20) & 1023);
+                                RSRQ1 = RSRQ1 * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ1);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ Rx[1]", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
+
+                                float RSRQ = float((utemp) & 1023);
+                                RSRQ = RSRQ * 0.0625 - 30.0;
+                                pyfloat = Py_BuildValue("f", RSRQ);
+                                old_object = _replace_result(result_subpkt,
+                                        "RSRQ", pyfloat);
+                                Py_DECREF(old_object);
+                                Py_DECREF(pyfloat);
 
                                 success = true;
                                 break;
@@ -6376,6 +6620,12 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     ARRAY_SIZE(LtePhyPucchCsf_Fmt, Fmt),
                     b, offset, length, result);
             offset += _decode_lte_phy_pucch_csf_payload(b, offset, length, result);
+            break;
+        case LTE_PHY_Connected_Mode_Neighbor_Meas_Req_Resp:
+            offset += _decode_by_fmt(LtePhyCncm_Fmt,
+                    ARRAY_SIZE(LtePhyCncm_Fmt, Fmt),
+                    b, offset, length, result);
+            offset += _decode_lte_phy_connected_neighbor_cell_meas_payload(b, offset, length, result);
             break;
         default:
             break;
