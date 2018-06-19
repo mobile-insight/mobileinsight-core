@@ -825,6 +825,10 @@ _decode_lte_phy_cmlifmr(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
+    (void) _map_result_field_to_name(
+            result, "Serving Cell Index",
+            ValueNameCellIndex, ARRAY_SIZE(ValueNameCellIndex, ValueName),
+            "(MI)Unknown");
 
     switch (pkt_ver) {
     case 3:
