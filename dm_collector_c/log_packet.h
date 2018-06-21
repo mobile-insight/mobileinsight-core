@@ -2713,7 +2713,8 @@ const ValueName ValueNameWcdmaRrcStates [] = {
 const ValueName ValueNameCellIndex [] = {
     // 4 bits
     {0, "PCell"},
-    {1, "SCell"},
+    {1, "1_SCell"},
+    {2, "2_SCell"},
 };
 
 const ValueName ValueNameBandClassGSM [] = {

@@ -73,9 +73,9 @@ static int _decode_lte_phy_connected_neighbor_cell_meas_payload (const char *b,
                 int subpkt_size = _search_result_int(result_subpkt,
                         "SubPacket Size");
 
-                if (subpkt_id == 30 && subpkt_ver == 3) {
+                if (subpkt_id == 30) {
                     // this is connected mode neighbor cell measurement
-                    // request v3
+                    // request
                 } else if (subpkt_id == 31 && subpkt_ver == 4) {
                     // this is connected mode neighbor cell measurement
                     // response v4
