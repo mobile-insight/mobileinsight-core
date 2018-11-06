@@ -113,7 +113,7 @@ else:
 
 setup(
     name         = 'MobileInsight',
-    version      = '3.2.2',
+    version      = '3.4.0',
     description  = 'Mobile network monitoring and analysis',
     author       = 'UCLA Wireless Networking Group and Purdue Peng Group',
     author_email = 'support@mobileinsight.net',
