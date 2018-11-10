@@ -428,10 +428,10 @@ static int _decode_lte_phy_pdcch_decoding_result_payload (const char *b,
                         ARRAY_SIZE(ValueNameDCIFormat, ValueName),
                         "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
-                        "DCI Format", iDecodeStatus);
+                        "Decode States", iDecodeStatus);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item,
-                        "DCI Format",
+                        "Decode States",
                         ValueNameRNTIType,
                         ARRAY_SIZE(ValueNameRNTIType, ValueName),
                         "(MI)Unknown");
@@ -639,10 +639,10 @@ static int _decode_lte_phy_pdcch_decoding_result_payload (const char *b,
                             ARRAY_SIZE(ValueNameDCIFormat, ValueName),
                             "(MI)Unknown");
                     old_object = _replace_result_int(result_record_hypothesis_item,
-                            "DCI Format", iDecodeStatus);
+                            "Decode States", iDecodeStatus);
                     Py_DECREF(old_object);
                     (void) _map_result_field_to_name(result_record_hypothesis_item,
-                            "DCI Format",
+                            "Decode States",
                             ValueNameRNTIType,
                             ARRAY_SIZE(ValueNameRNTIType, ValueName),
                             "(MI)Unknown");
@@ -866,10 +866,10 @@ static int _decode_lte_phy_pdcch_decoding_result_payload (const char *b,
                         ARRAY_SIZE(ValueNameDCIFormat, ValueName),
                         "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item,
-                        "DCI Format", iDecodeStatus);
+                        "Decode States", iDecodeStatus);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item,
-                        "DCI Format",
+                        "Decode States",
                         ValueNameRNTIType,
                         ARRAY_SIZE(ValueNameRNTIType, ValueName),
                         "(MI)Unknown");
