@@ -706,6 +706,7 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
             break;
         }
     case 104:
+    case 123:
         {
             offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v104,
                                         ARRAY_SIZE(LtePhyPdschDemapperConfigFmt_v104, Fmt),
