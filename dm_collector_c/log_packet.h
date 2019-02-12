@@ -2256,7 +2256,7 @@ const Fmt LtePucchPowerControl_Record_Fmt_v4 [] = {
     {UINT, "TPC Command", 4},
     // include N_CQI, DL Pass Loss,
     {PLACEHOLDER, "N_CQI", 0},
-    {PLACEHOLDER, "DL Pass Loss", 0},
+    {PLACEHOLDER, "DL Path Loss", 0},
 
     {UINT, "g(i)", 2},
     {UINT, "PUCCH Actual Tx Power", 1},
@@ -2310,6 +2310,11 @@ const Fmt LtePuschPowerControl_Fmt_v5 [] = {
     {UINT, "Number of Records", 1},
 };
 
+const Fmt LtePuschPowerControl_Fmt_v25 [] = {
+    {SKIP, NULL, 2},
+    {UINT, "Number of Records", 1},
+};
+
 const Fmt LtePuschPowerControl_Record_Fmt_v4 [] = {
     {UINT, "SFN", 4},
     {PLACEHOLDER, "Sub-FN", 0},
@@ -2335,6 +2340,21 @@ const Fmt LtePuschPowerControl_Record_Fmt_v5 [] = {
     {PLACEHOLDER, "TPC", 0},
     {PLACEHOLDER, "PUSCH Actual Tx Power", 0},
 };
+const Fmt LtePuschPowerControl_Record_Fmt_v25 [] = {
+    {UINT, "SFN", 4},
+    {PLACEHOLDER, "Sub-FN", 0},
+    {PLACEHOLDER, "PUSCH Tx Power (dBm)", 0},
+    {PLACEHOLDER, "DCI Format", 0},
+    {PLACEHOLDER, "Tx Type", 0},
+    {PLACEHOLDER, "TPC Frozen", 0},
+    {UINT, "Num RBs", 4},
+    {PLACEHOLDER, "Transport Block Size", 0},
+    {PLACEHOLDER, "DL Path Loss", 0},
+    {UINT, "F(i)", 4},
+    {PLACEHOLDER, "TPC", 0},
+    {PLACEHOLDER, "PUSCH Actual Tx Power", 0},
+};
+
 const ValueName LtePuschPowerControl_Record_v5_TxType [] = {
     {1, "Dynamic"},
     {2, "RACH MSG3"},
