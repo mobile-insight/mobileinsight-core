@@ -817,6 +817,8 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
             break;
         }
 
+
+
     default:
         printf("(MI)Unknown LTE PHY PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
         return 0;
@@ -2322,6 +2324,19 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                                 b, offset, length, result_subpkt);
                         success = true;
                         break;
+                    case 14:
+                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_All_Rach_Config,
+                                                ARRAY_SIZE(LteMacConfigurationSubpkt_All_Rach_Config, Fmt),
+                                                b, offset, length, result_subpkt);
+                        success=true;
+                        break;
+
+                    case 18:
+                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_ELS,
+                                                ARRAY_SIZE(LteMacConfigurationSubpkt_ELS, Fmt),
+                                                b, offset, length, result_subpkt);
+                        success = true;
+                        break;
                     default:
                         break;
                     }
@@ -2333,7 +2348,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x a - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
                 offset += subpkt_size - (offset - start_subpkt);
@@ -4333,7 +4348,7 @@ static int _decode_lte_pdcp_dl_config_subpkt (const char *b, int offset,
                         "Subpacket Version");
                 int subpkt_size = _search_result_int(result_subpkt,
                         "Subpacket Size");
-                if (subpkt_id == 192 && subpkt_ver == 2) {
+                if ((subpkt_id == 192 && subpkt_ver == 2) || (subpkt_id==192 && subpkt_ver == 24)) {
                     // PDCP DL Config 0xC0
                     offset += _decode_by_fmt(
                             LtePdcpDlConfig_SubpktPayload,
@@ -4517,7 +4532,7 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
                         "Subpacket Version");
                 int subpkt_size = _search_result_int(result_subpkt,
                         "Subpacket Size");
-                if (subpkt_id == 193 && subpkt_ver == 2) {
+                if ((subpkt_id == 193 && subpkt_ver == 2) || (subpkt_id == 193 && subpkt_ver == 24)) {
                     // PDCP UL Config 0xC1
                     offset += _decode_by_fmt(
                             LtePdcpUlConfig_SubpktPayload,

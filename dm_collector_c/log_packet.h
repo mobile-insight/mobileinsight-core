@@ -493,6 +493,8 @@ const Fmt LtePhyPdschDemapperConfigFmt_v104 [] = {
     {SKIP, NULL, 4},
 };
 
+
+
 const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
     {0, "QPSK"},
     {1, "16QAM"},
@@ -933,7 +935,9 @@ const ValueName LteMacConfigurationSubpkt_SubpktType [] = {
     {8, "UL Transport Block"},
     {10, "UL Buffer Status SubPacket"},
     {11, "UL Tx Statistics SubPacket"},
-    {13, "eMBMS Config SubPacket"}
+    {13, "eMBMS Config SubPacket"},
+    {14, "All Rach Config SubPacket"},
+    {18, "ELS SubPacket"}
 };
 
 const Fmt LteMacConfigurationFmt [] = {
@@ -1006,6 +1010,27 @@ const Fmt LteMacConfiguration_LCConfig_LC [] = {
 const Fmt LteMacConfigurationSubpkt_eMBMSConfig [] = {
     {UINT, "Num eMBMS Active LCs", 2}, // Not sure if this offset and length of this field is correct
     {SKIP, "NULL", 98}
+};
+
+const Fmt LteMacConfigurationSubpkt_ELS [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "ELS UL LC Id", 1},
+    {UINT, "ELS DL LC Id", 1},
+    {UINT, "ELS MCE ReTx TMR Length", 1}
+};
+
+const Fmt LteMacConfigurationSubpkt_All_Rach_Config [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Valid Cell Cfg Mask", 1},
+    {UINT, "New Cell Cfg Mask", 1},
+    {UINT, "Cell Rach Info[0]", 24},
+    {UINT, "Cell Rach Info[1]", 24},
+    {UINT, "Cell Rach Info[2]", 24},
+    {UINT, "Cell Rach Info[3]", 24},
+    {UINT, "Cell Rach Info[4]", 24},
+    {UINT, "Cell Rach Info[5]", 24},
+    {UINT, "Cell Rach Info[6]", 24},
+    {UINT, "Cell Rach Info[7]", 24}
 };
 
 // ----------------------------------------------------------
