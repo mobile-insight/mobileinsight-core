@@ -719,14 +719,34 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v35 [] = {
     {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN [0]
     {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
     {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
-    {SKIP, NULL, 4},
-    {SKIP, NULL, 4},
-    {UINT, "RSRP", 4},    // 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[2]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[3]", 4},    // 12 bits (0.0625 * x - 180) dBm
+    {PLACEHOLDER, "RSRP", 0},    // skip 12 bits, then 12 bits, (0.0625 * (x + 640) - 180) dB
+    {UINT, "Filtered RSRP", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
     {UINT, "RSRQ Rx[0]", 4},    // 10 bits, (0.0625 * x - 30) dB
     {PLACEHOLDER, "RSRQ Rx[1]", 0},    // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
-    {SKIP, NULL, 4},
+    {UINT, "RSRQ Rx[2]", 4},    // skip 10 bits, then 10 bits, (0.0625 * x - 30) dB
+    {PLACEHOLDER, "RSRQ Rx[3]", 0},    // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
     {UINT, "RSRQ", 4},    // 10 bits, (0.0625 * x - 30) dB
-    // Unknown
+    {PLACEHOLDER, "Filtered RSRQ", 0},    // skip 20 bits, then 12 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0},    // skip 11 bits, then 11 bits (0.0625 * x - 110) dBm
+    {UINT, "RSSI Rx[2]", 4},    // 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[3]", 0},    // skip 11 bits, then 11 bits (0.0625 * x - 110) dBm
+    {UINT, "RSSI", 4},    // 11 bits (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {UINT, "FTL SNR Rx[2]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[3]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 12},
+    {UINT, "Projected SIR", 4}, // Projected Sir, if x & 1<<31: x -= 4294967296
+                                // x /= 16
+    {UINT, "Post IC RSRQ", 4},  // (0.0625 * x - 30) dB
+    {UINT, "CINR Rx[0]", 4},
+    {UINT, "CINR Rx[1]", 4},
+    {UINT, "CINR Rx[2]", 4},
+    {UINT, "CINR Rx[3]", 4},
 };
 
 const Fmt LtePhySubpktFmt_v1_Scmr_v36 [] = {
