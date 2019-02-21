@@ -385,6 +385,7 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
             return offset - start;
         }
     case 44:
+    case 126:
         {
             offset += _decode_by_fmt(LtePhyPdschDecodingResult_Payload_v44,
                     ARRAY_SIZE(LtePhyPdschDecodingResult_Payload_v44, Fmt),
@@ -655,7 +656,7 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
             return offset - start;
         }
     default:
-        printf("(MI)Unknown LTE PHY PDCCH Decoding Result version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown LTE PHY PDSCH Decoding Result version: 0x%x\n", pkt_ver);
         return 0;
     }
 }
