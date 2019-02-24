@@ -43,11 +43,10 @@ const Fmt LogPacketHeaderFmt [] = {
 };
 
 const Fmt CustomPacketHeaderFmt [] = {
-    {SKIP, NULL, 2},
     {UINT, "log_msg_len", 2},
     {UINT, "type_id", 2},
     {QCDM_TIMESTAMP, "timestamp", 8},
-    {SKIP, "Msg", 0},
+    {PLACEHOLDER, "Msg", 0},
 };
 
 //Yuanjie: the following comments are my suggestions for field name replacement

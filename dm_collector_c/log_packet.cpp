@@ -6600,7 +6600,7 @@ is_debug_packet (const char *b, size_t length) {
 
 bool
 is_custom_packet (const char *b, size_t length) {
-    return length >= 2 && b[0] == '\xee';
+    return length >= 2 && b[0] == '\xee' && b[1] == '\xee';
 }
 
 void
@@ -7171,21 +7171,20 @@ decode_custom_packet (const char *b, size_t length) {
     offset += _decode_by_fmt(CustomPacketHeaderFmt, ARRAY_SIZE(LogPacketHeaderFmt, Fmt),
                                 b, offset, length, result);
 
-    std::string strTypeId = "Custom Packet";
+    std::string strTypeId = "Custom_Packet";
     PyObject *pystr = Py_BuildValue("s", strTypeId.c_str());
     PyObject *old_object = _replace_result(result, "type_id", pystr);
     Py_DECREF(old_object);
     Py_DECREF(pystr);
 
-    decode_custom_packet_payload(b+offset, length-offset, result);
+    decode_custom_packet_payload(b + offset, length - offset, result);
     return result;
 }
 
 void
 decode_custom_packet_payload (const char *b, size_t length, PyObject* result)
 {
-    std::string strPayload = "Custom Packet Payload";
-    PyObject *pystr = Py_BuildValue("s", strPayload.c_str());
+    PyObject *pystr = Py_BuildValue("s#", b, length);
     PyObject *old_object = _replace_result(result, "Msg", pystr);
     Py_DECREF(old_object);
     Py_DECREF(pystr);

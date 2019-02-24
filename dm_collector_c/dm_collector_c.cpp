@@ -190,6 +190,22 @@ get_posix_timestamp () {
 }
 #endif
 
+#ifndef _WIN32
+static unsigned long long
+get_qcdm_timestamp () {
+    struct timeval tv;
+    (void) gettimeofday(&tv, NULL);
+    const double PER_SECOND = 52428800.0;
+    const double PER_USECOND = 52428800.0 / 1.0e6;
+    return (tv.tv_sec - 3657 * 24 * 60 * 60) * PER_SECOND + tv.tv_usec * PER_USECOND;
+}
+#else
+static unsigned long long
+get_qcdm_timestamp () {
+    return 0;
+}
+#endif
+
 // Return: successful or not
 static PyObject *
 dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
@@ -635,6 +651,23 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
 
         check_frame_format(frame);
 
+        // Check if it is custom packet
+        if(is_custom_packet(frame.c_str(), frame.size())){
+            if (skip_decoding) {
+                Py_RETURN_NONE;
+            }
+            const char *s = frame.c_str();
+            PyObject *decoded = decode_custom_packet(s + 2,  // skip first two bytes
+                                                  frame.size() - 2);
+            if (include_timestamp) {
+                PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+                Py_DECREF(decoded);
+                return ret;
+            } else {
+                return decoded;
+            }
+        }
+
         if (!manager_export_binary(&g_emanager, frame.c_str(), frame.size()))
             Py_RETURN_NONE;
         if(is_log_packet(frame.c_str(), frame.size())){
@@ -696,22 +729,7 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
                 // delete [] s; //Yuanjie: bug for it on Android, but no problem on laptop
                 return decoded;
             }
-        } else if(is_custom_packet(frame.c_str(), frame.size())){
-            if (skip_decoding) {
-                Py_RETURN_NONE;
-            }
-            const char *s = frame.c_str();
-            PyObject *decoded = decode_custom_packet(s + 2,  // skip first two bytes
-                                                  frame.size() - 2);
-            if (include_timestamp) {
-                PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
-                Py_DECREF(decoded);
-                return ret;
-            } else {
-                return decoded;
-            }
-        }
-        else {
+        } else {
             Py_RETURN_NONE;
         }
 
@@ -741,21 +759,26 @@ dm_collector_c_generate_custom_packet (PyObject *self, PyObject *args) {
     int length = strlen(msg);
     char *b = new char[length + 14 + 1];
     b[length + 14] = '\0';
-    // pre-head
+
+    // pre-head: 2 bytes
     b[0] = '\xee';
     b[1] = '\xee';
-    // log_msg_len
-    *(unsigned short *)(b+2) = (unsigned short)length;
-    // timestamp
-    for (int i = 6; i < 14; i++) {
+    // log_msg_len: 2 bytes
+    *((unsigned short *)(b+2)) = (unsigned short)length;
+    // type_id: 2 bytes
+    for (int i = 4; i < 6; i++) {
         b[i] = '\x00';
     }
-    memcpy(b+14, msg, sizeof(char) * length);
+    // timestamp: 8 bytes
+    unsigned long long qcdm_timestamp = get_qcdm_timestamp();
+    memcpy(b + 6, &qcdm_timestamp, sizeof(char) * 8);
 
+    memcpy(b + 14, msg, sizeof(char) * length);
     std::string frame = encode_hdlc_frame(b, length + 14);
+
     delete(b);
 
-    PyObject *rt = Py_BuildValue("s", frame.c_str());
+    PyObject *rt = Py_BuildValue("s#", frame.c_str(), frame.size());
 
     Py_DECREF(feeded_data);
     return rt;

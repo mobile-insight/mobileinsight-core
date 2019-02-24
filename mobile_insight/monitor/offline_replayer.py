@@ -198,7 +198,7 @@ class OfflineReplayer(Monitor):
                             after_decode_time = time.time()
                             decoding_inter += after_decode_time - before_decode_time
 
-                            if type_id in self._type_names:
+                            if type_id in self._type_names or type_id == "Custom_Packet":
                                 event = Event(timeit.default_timer(),
                                               type_id,
                                               packet)
