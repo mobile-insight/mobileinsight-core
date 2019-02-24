@@ -41,6 +41,7 @@ static PyObject *dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *arg
 static PyObject *dm_collector_c_feed_binary (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_reset (PyObject *self, PyObject *args);
 static PyObject *dm_collector_c_receive_log_packet (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_generate_custom_packet (PyObject *self, PyObject *args);
 
 static PyMethodDef DmCollectorCMethods[] = {
     {"disable_logs", dm_collector_c_disable_logs, METH_VARARGS,
@@ -116,6 +117,15 @@ static PyMethodDef DmCollectorCMethods[] = {
         "Returns:\n"
         "    If include_timestamp is True, return (decoded, posix_timestamp);\n"
         "    otherwise only return decoded message.\n"
+    },
+    {"generate_custom_packet", dm_collector_c_generate_custom_packet, METH_VARARGS,
+        "Generate a custom packet based on feeded data.\n"
+        "\n"
+        "Args:\n"
+        "    feeded_data: Message to be encoded within hdlc frame.\n"
+        "\n"
+        "Returns:\n"
+        "    Encoded binary stream.\n"
     },
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
@@ -686,6 +696,20 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
                 // delete [] s; //Yuanjie: bug for it on Android, but no problem on laptop
                 return decoded;
             }
+        } else if(is_custom_packet(frame.c_str(), frame.size())){
+            if (skip_decoding) {
+                Py_RETURN_NONE;
+            }
+            const char *s = frame.c_str();
+            PyObject *decoded = decode_custom_packet(s + 2,  // skip first two bytes
+                                                  frame.size() - 2);
+            if (include_timestamp) {
+                PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+                Py_DECREF(decoded);
+                return ret;
+            } else {
+                return decoded;
+            }
         }
         else {
             Py_RETURN_NONE;
@@ -694,6 +718,47 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     } else {
         Py_RETURN_NONE;
     }
+}
+
+static PyObject *
+dm_collector_c_generate_custom_packet (PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *feeded_data = NULL;
+
+    if (!PyArg_ParseTuple(args, "O", &feeded_data)) {
+        return NULL;
+    }
+    Py_INCREF(feeded_data);
+
+    // Check arguments
+    if (!PyString_Check(feeded_data)) {
+        PyErr_SetString(PyExc_TypeError, "\'feeded_data\' is not a string.");
+        Py_DECREF(feeded_data);
+        return NULL;
+    }
+
+    const char *msg = PyString_AsString(feeded_data);
+    int length = strlen(msg);
+    char *b = new char[length + 14 + 1];
+    b[length + 14] = '\0';
+    // pre-head
+    b[0] = '\xee';
+    b[1] = '\xee';
+    // log_msg_len
+    *(unsigned short *)(b+2) = (unsigned short)length;
+    // timestamp
+    for (int i = 6; i < 14; i++) {
+        b[i] = '\x00';
+    }
+    memcpy(b+14, msg, sizeof(char) * length);
+
+    std::string frame = encode_hdlc_frame(b, length + 14);
+    delete(b);
+
+    PyObject *rt = Py_BuildValue("s", frame.c_str());
+
+    Py_DECREF(feeded_data);
+    return rt;
 }
 
 // Init the module

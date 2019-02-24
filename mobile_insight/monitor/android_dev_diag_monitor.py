@@ -203,6 +203,7 @@ class AndroidDevDiagMonitor(Monitor):
         self._type_names = []
         self._last_diag_revealer_ts = None
         self.running = False
+        self._mi3log_index = 0
 
         """
         Exec/lib initialization path
@@ -402,6 +403,9 @@ class AndroidDevDiagMonitor(Monitor):
             cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
             self._run_shell_cmd(cmd2)
 
+        if self._mi3log_fd:
+            os.close(self._mi3log_fd)
+
     def _pause_collection(self):
         if self.diag_revealer_daemon:
             self.diag_revealer_daemon.stop()
@@ -418,6 +422,10 @@ class AndroidDevDiagMonitor(Monitor):
 
     def _resume_collection(self):
         self.run()
+
+    def _create_mi3log(self):
+        path = os.path.join(get_cache_dir(), str(self._mi3log_index) + ".mi3log")
+        return os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND)
 
     def run(self):
         """
@@ -465,6 +473,10 @@ class AndroidDevDiagMonitor(Monitor):
             # Read log packets from diag_revealer
             chproc = ChronicleProcessor()
             self.running = True
+
+            self._mi3log_fd = self._create_mi3log()
+            os.write(self._mi3log_fd, dm_collector_c.generate_custom_packet("Test"))
+
             while self.running:
                 try:
                     # self.log_info("Before os.read(fifo, self.BLOCK_SIZE)")
@@ -487,6 +499,7 @@ class AndroidDevDiagMonitor(Monitor):
                             self._last_diag_revealer_ts = ret_ts
                         if ret_payload:
                             dm_collector_c.feed_binary(ret_payload)
+                            os.write(self._mi3log_fd, ret_payload)
                     elif ret_msg_type == ChronicleProcessor.TYPE_START_LOG_FILE:
                         if ret_filename:
                             pass
@@ -503,6 +516,10 @@ class AndroidDevDiagMonitor(Monitor):
                             # ret_filename)
                             self.send(event)
                             del event
+
+                            os.close(self._mi3log_fd)
+                            self._mi3log_index += 1
+                            self._mi3log_fd = self._create_mi3log()
                     elif ret_msg_type is not None:
                         # raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
                         self.log_warning("Unknown ret msg type: %s" % str(ret_msg_type))
