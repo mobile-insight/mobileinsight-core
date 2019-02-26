@@ -182,13 +182,15 @@ class OfflineReplayer(Monitor):
                 dm_collector_c.reset()
                 while True:
                     s = self._input_file.read(64)
-                    if not s:   # EOF encountered
-                        break
 
-                    dm_collector_c.feed_binary(s)
+                    if s:
+                        dm_collector_c.feed_binary(s)
                     decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
                                                                 True,   # include_timestamp
                                                                 )
+                    if not s and not decoded:   # EOF encountered and no message can be received any more
+                        break
+
                     if decoded:
                         try:
                             before_decode_time = time.time()

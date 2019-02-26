@@ -628,114 +628,128 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
     bool crc_correct = false;
     bool skip_decoding = false, include_timestamp = false;  // default values
     double posix_timestamp = (include_timestamp? get_posix_timestamp(): -1.0);
-
-    bool success = get_next_frame(frame, crc_correct);
-    // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
-    // if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
-    if (success && crc_correct) {
-        PyObject *arg_skip_decoding = NULL;
-        PyObject *arg_include_timestamp = NULL;
-        if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
-                                    &arg_skip_decoding, &arg_include_timestamp))
-            return NULL;
-        if (arg_skip_decoding != NULL) {
-            Py_INCREF(arg_skip_decoding);
-            skip_decoding = (PyObject_IsTrue(arg_skip_decoding) == 1);
-            Py_DECREF(arg_skip_decoding);
-        }
-        if (arg_include_timestamp != NULL) {
-            Py_INCREF(arg_include_timestamp);
-            include_timestamp = (PyObject_IsTrue(arg_include_timestamp) == 1);
-            Py_DECREF(arg_include_timestamp);
-        }
-
-        check_frame_format(frame);
-
-        // Check if it is custom packet
-        if(is_custom_packet(frame.c_str(), frame.size())){
-            if (skip_decoding) {
-                Py_RETURN_NONE;
-            }
-            const char *s = frame.c_str();
-            PyObject *decoded = decode_custom_packet(s + 2,  // skip first two bytes
-                                                  frame.size() - 2);
-            if (include_timestamp) {
-                PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
-                Py_DECREF(decoded);
-                return ret;
-            } else {
-                return decoded;
-            }
-        }
-
-        if (!manager_export_binary(&g_emanager, frame.c_str(), frame.size()))
-            Py_RETURN_NONE;
-        if(is_log_packet(frame.c_str(), frame.size())){
-            const char *s = frame.c_str();
-            PyObject *decoded = decode_log_packet(s + 2,  // skip first two bytes
-                                                  frame.size() - 2,
-                                                  skip_decoding);
-            if (include_timestamp) {
-                PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
-                Py_DECREF(decoded);
-                return ret;
-            } else {
-                return decoded;
-            }
-        }
-        else if(is_debug_packet(frame.c_str(), frame.size())){
-            //Yuanjie: the original debug msg does not have header...
-
-            unsigned short n_size = frame.size()+sizeof(char)*14;
-
-            unsigned char tmp[14]={
-                0xFF, 0xFF,
-                0x00, 0x00, 0xeb, 0x1f,
-                0x00, 0x00, 0x73, 0xB7,
-                0xB8, 0x65, 0xDD, 0x00
-            };
-            // tmp[2]=(char)(n_size);
-            *(tmp+2)=n_size;
-            *(tmp)=n_size;
-            char *s = new char[n_size];
-            memmove(s,tmp,sizeof(char)*14);
-            memmove(s+sizeof(char)*14,frame.c_str(),frame.size());
-            PyObject *decoded = decode_log_packet_modem(s, n_size, skip_decoding);
-
-            // char *s = new char[n_size];
-            // memset(s,0,sizeof(char)*n_size);
-            // *s = n_size;
-            // *(s+2) = n_size;
-            // *(s+4) = 0xeb;
-            // *(s+5) = 0x1f;
-            // memmove(s+sizeof(char)*14,frame.c_str(),frame.size());
-            // PyObject *decoded = decode_log_packet(s, n_size, skip_decoding);
+    bool success = true;
+    PyObject *arg_skip_decoding = NULL;
+    PyObject *arg_include_timestamp = NULL;
 
 
-
-            // // The following code does not crash on Android.
-            // // But if use s and frame.size(), it crashes
-            // const char *s = frame.c_str();
-            // PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
-            //                                         frame.size() - 2,
-            //                                         skip_decoding);
-
-            if (include_timestamp) {
-                PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
-                Py_DECREF(decoded);
-                // delete [] s; //Yuanjie: bug for it on Android, but no problem on laptop
-                return ret;
-            } else {
-                // delete [] s; //Yuanjie: bug for it on Android, but no problem on laptop
-                return decoded;
-            }
-        } else {
-            Py_RETURN_NONE;
-        }
-
-    } else {
-        Py_RETURN_NONE;
+    if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
+                                &arg_skip_decoding, &arg_include_timestamp))
+        return NULL;
+    if (arg_skip_decoding != NULL) {
+        Py_INCREF(arg_skip_decoding);
+        skip_decoding = (PyObject_IsTrue(arg_skip_decoding) == 1);
+        Py_DECREF(arg_skip_decoding);
     }
+    if (arg_include_timestamp != NULL) {
+        Py_INCREF(arg_include_timestamp);
+        include_timestamp = (PyObject_IsTrue(arg_include_timestamp) == 1);
+        Py_DECREF(arg_include_timestamp);
+    }
+
+    while (success) {
+        // keep reading the buffer if no message has been sent out and there
+        // are any frames remain.
+
+        success = get_next_frame(frame, crc_correct);
+        // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
+        // if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
+        //
+
+        if (success && crc_correct) {
+
+            check_frame_format(frame);
+
+            // Check if it is custom packet
+            if(is_custom_packet(frame.c_str(), frame.size())) {
+                if (skip_decoding) {
+                    Py_RETURN_NONE;
+                }
+                const char *s = frame.c_str();
+                PyObject *decoded = decode_custom_packet(s + 2,  // skip first two bytes
+                                                      frame.size() - 2);
+                if (include_timestamp) {
+                    PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+                    Py_DECREF(decoded);
+                    return ret;
+                } else {
+                    return decoded;
+                }
+            }
+
+            if (!manager_export_binary(&g_emanager, frame.c_str(), frame.size()))
+                continue;
+                // Py_RETURN_NONE;
+            if (is_log_packet(frame.c_str(), frame.size())) {
+                const char *s = frame.c_str();
+                PyObject *decoded = decode_log_packet(s + 2,  // skip first two bytes
+                                                      frame.size() - 2,
+                                                      skip_decoding);
+                if (include_timestamp) {
+                    PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+                    Py_DECREF(decoded);
+                    return ret;
+                } else {
+                    return decoded;
+                }
+            }
+            else if (is_debug_packet(frame.c_str(), frame.size())) {
+                //Yuanjie: the original debug msg does not have header...
+
+                unsigned short n_size = frame.size()+sizeof(char)*14;
+
+                unsigned char tmp[14]={
+                    0xFF, 0xFF,
+                    0x00, 0x00, 0xeb, 0x1f,
+                    0x00, 0x00, 0x73, 0xB7,
+                    0xB8, 0x65, 0xDD, 0x00
+                };
+                // tmp[2]=(char)(n_size);
+                *(tmp+2)=n_size;
+                *(tmp)=n_size;
+                char *s = new char[n_size];
+                memmove(s,tmp,sizeof(char)*14);
+                memmove(s+sizeof(char)*14,frame.c_str(),frame.size());
+                PyObject *decoded = decode_log_packet_modem(s, n_size, skip_decoding);
+
+                // char *s = new char[n_size];
+                // memset(s,0,sizeof(char)*n_size);
+                // *s = n_size;
+                // *(s+2) = n_size;
+                // *(s+4) = 0xeb;
+                // *(s+5) = 0x1f;
+                // memmove(s+sizeof(char)*14,frame.c_str(),frame.size());
+                // PyObject *decoded = decode_log_packet(s, n_size, skip_decoding);
+
+
+
+                // // The following code does not crash on Android.
+                // // But if use s and frame.size(), it crashes
+                // const char *s = frame.c_str();
+                // PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
+                //                                         frame.size() - 2,
+                //                                         skip_decoding);
+
+                if (include_timestamp) {
+                    PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+                    Py_DECREF(decoded);
+                    // delete [] s; //Yuanjie: bug for it on Android, but no problem on laptop
+                    return ret;
+                } else {
+                    // delete [] s; //Yuanjie: bug for it on Android, but no problem on laptop
+                    return decoded;
+                }
+            } else {
+                continue;
+                // Py_RETURN_NONE;
+            }
+
+        } else {
+            continue;
+            // Py_RETURN_NONE;
+        }
+    }
+    Py_RETURN_NONE;
 }
 
 static PyObject *
