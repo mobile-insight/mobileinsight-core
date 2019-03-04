@@ -4138,6 +4138,37 @@ static int _decode_lte_mac_rach_trigger_subpkt (const char *b, int offset,
                     PyObject *old_object = _replace_result_int(result_subpkt,
                             "Preamble Format", 0);
                     Py_DECREF(old_object);
+                } else if (subpkt_id == 3 && subpkt_ver == 4) {
+                    offset += _decode_by_fmt(
+                            LteMacRachTrigger_RachConfigSubpktPayload_v4,
+                            ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_v4,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    int num_Cells = _search_result_int(result_subpkt,
+                            "Num Active Cells");
+
+                    PyObject *result_Cells = PyList_New(0);
+                    for (int j = 0; j < num_Cells; j++) {
+                        PyObject *result_Cell_item = PyList_New(0);
+                        offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_v4_cell,
+                                ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_v4_cell, Fmt),
+                                b, offset, length, result_Cell_item);
+                        PyObject *old_object = _replace_result_int(result_Cell_item,
+                                "Preamble Format", 0);
+                        Py_DECREF(old_object);
+
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                                result_Cell_item, "dict");
+                        PyList_Append(result_Cells, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_Cell_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "Cells",
+                            result_Cells, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_Cells);
+
                 } else if (subpkt_id == 5 && subpkt_ver == 1) {
                     offset += _decode_by_fmt(
                             LteMacRachTrigger_RachReasonSubpktPayload,
@@ -4155,6 +4186,21 @@ static int _decode_lte_mac_rach_trigger_subpkt (const char *b, int offset,
                             "RACH Contention", pystr);
                     Py_DECREF(old_object);
                     Py_DECREF(pystr);
+                } else if (subpkt_id == 5 && subpkt_ver == 2) {
+                    offset += _decode_by_fmt(
+                            LteMacRachTrigger_RachReasonSubpktPayload_v2,
+                            ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpktPayload_v2,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    (void) _map_result_field_to_name(result_subpkt, "Rach reason",
+                            LteMacRachTrigger_RachReasonSubpkt_RachReason,
+                            ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpkt_RachReason,
+                                ValueName),
+                            "(MI)Unknown");
+                    (void) _map_result_field_to_name(result_subpkt, "RACH Contention",
+                            ValueNameRachContention,
+                            ARRAY_SIZE(ValueNameRachContention, ValueName),
+                            "(MI)Unknown");
                 } else {
                     printf("(MI)Unknown LTE MAC RACH Trigger subpkt id and "
                             "version: 0x%x - %d\n", subpkt_id, subpkt_ver);
