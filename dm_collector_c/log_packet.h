@@ -493,6 +493,8 @@ const Fmt LtePhyPdschDemapperConfigFmt_v104 [] = {
     {SKIP, NULL, 4},
 };
 
+
+
 const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
     {0, "QPSK"},
     {1, "16QAM"},
@@ -933,7 +935,9 @@ const ValueName LteMacConfigurationSubpkt_SubpktType [] = {
     {8, "UL Transport Block"},
     {10, "UL Buffer Status SubPacket"},
     {11, "UL Tx Statistics SubPacket"},
-    {13, "eMBMS Config SubPacket"}
+    {13, "eMBMS Config SubPacket"},
+    {14, "All Rach Config SubPacket"},
+    {18, "ELS SubPacket"}
 };
 
 const Fmt LteMacConfigurationFmt [] = {
@@ -1006,6 +1010,27 @@ const Fmt LteMacConfiguration_LCConfig_LC [] = {
 const Fmt LteMacConfigurationSubpkt_eMBMSConfig [] = {
     {UINT, "Num eMBMS Active LCs", 2}, // Not sure if this offset and length of this field is correct
     {SKIP, "NULL", 98}
+};
+
+const Fmt LteMacConfigurationSubpkt_ELS [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "ELS UL LC Id", 1},
+    {UINT, "ELS DL LC Id", 1},
+    {UINT, "ELS MCE ReTx TMR Length", 1}
+};
+
+const Fmt LteMacConfigurationSubpkt_All_Rach_Config [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Valid Cell Cfg Mask", 1},
+    {UINT, "New Cell Cfg Mask", 1},
+    {UINT, "Cell Rach Info[0]", 24},
+    {UINT, "Cell Rach Info[1]", 24},
+    {UINT, "Cell Rach Info[2]", 24},
+    {UINT, "Cell Rach Info[3]", 24},
+    {UINT, "Cell Rach Info[4]", 24},
+    {UINT, "Cell Rach Info[5]", 24},
+    {UINT, "Cell Rach Info[6]", 24},
+    {UINT, "Cell Rach Info[7]", 24}
 };
 
 // ----------------------------------------------------------
@@ -1955,7 +1980,10 @@ const Fmt LtePdcpUlStats_SubpktPayload_v2 [] = {
     {UINT, "Num RBs", 1},
     {UINT, "PDCPUL Errors", 4},
 };
-
+const Fmt LtePdcpUlStats_SubpktPayload_v26 [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "PDCPUL Errors", 4},
+};
 const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v1 [] = {
     {UINT, "Rb Cfg Idx", 1},
     {UINT, "Mode", 1},
@@ -2031,8 +2059,89 @@ const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v2 [] = {
 
 };
 
+const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v26 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "PDCP Hdr Len", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Pdcp Ul Buffer Pkt", 2},
+    {UINT, "Num Pdcp Ul Buffer Pkt Bytes", 4},
+    {UINT, "UDC Comp State",4},
+    {UINT, "Num Flow Ctrl Trigger", 4},
+    {UINT, "Num Data PDU Tx", 4},
+    {UINT, "Num Data PDU Tx Bytes", 8},
+    {UINT, "Num Data Bytes from Ps", 8},
+    {UINT, "Num Control PDU Tx", 4},
+    {UINT, "Num Control PDU Tx Bytes", 4},
+    {UINT, "Num Status Report", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx", 4},
+    {UINT, "Num ROHC Fail", 4},
+    {UINT, "Num Discard SDU", 4},
+    {UINT, "Num Discard SDU Bytes", 4},
+    {UINT, "Num PDU HO ReTx", 4},
+    {UINT, "Num PDU HO ReTx Bytes", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd", 4},
+    {UINT, "Num Rohc Pdu Drop Ho", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes", 4},
+
+    {UINT, "Num Udc Comp Pkt", 4},
+    {UINT, "Num Udc Comp Pkt Bytes", 4},
+    {UINT, "Num Uncomp Pkts Udc Off", 4},
+    {UINT, "Num Uncomp Bytes Udc Off", 4},
+    {UINT, "Num Uncomp Pkts Udc on", 4},
+    {UINT, "Num Uncomp Bytes Udc on", 8},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 2},
+    //unsure about exact location of "Num ue Udc Ctrl Pdus",skip at first
+    {SKIP, NULL, 4},
+    {UINT, "Num Enb Udc Ctrl Pdus", 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Enb Trigg Udc Reset", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Flow Ctrl Trigger Rst", 4},
+    {UINT, "Num Data PDU Tx Rst", 4},
+    {UINT, "Num Data PDU Tx Bytes Rst", 8},
+    {UINT, "Num Data Bytes from Ps Rst", 8},
+    {UINT, "Num Control PDU Tx Rst", 4},
+    {UINT, "Num Control PDU Tx Bytes Rst", 4},
+    {UINT, "Num Status Report Rst", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx Rst", 4},
+    {UINT, "Num ROHC Fail Rst", 4},
+    {UINT, "Num Discard SDU Rst", 4},
+    {UINT, "Num Discard SDU Bytes Rst", 4},
+    {UINT, "Num PDU HO ReTx Rst", 4},
+    {UINT, "Num PDU HO ReTx Bytes Rst", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes Rst", 4},
+
+    {UINT, "Num Udc Comp Pkt Rst", 4},
+    {UINT, "Num Udc Comp Pkt Bytes Rst", 4},
+    {UINT, "Num Uncomp Pkts Udc Off Rst", 4},
+    {UINT, "Num Uncomp Bytes Udc Off Rst", 4},
+    {UINT, "Num Uncomp Pkts Udc on Rst", 4},
+    {UINT, "Num Uncomp Bytes Udc on Rst", 8},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 2},
+    {UINT, "Num ue Udc Ctrl Pdus Rst", 4},
+    {UINT, "Num Enb Udc Ctrl Pdus Rst", 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Enb Trigg Udc Reset Rst", 4},
+    {SKIP, NULL, 4},
+};
+
 const ValueName LtePdcpUlStats_Subpkt_RB_Mode [] = {
     {1, "AM"},
+};
+
+const ValueName LtePdcpUlStats_Subpkt_UDC_Comp_state [] = {
+    {0, "DISABLE COMP"},
 };
 
 // ----------------------------------------------------------------------------
@@ -2312,29 +2421,6 @@ const Fmt LtePucchPowerControl_Fmt_v4 [] = {
     {SKIP, NULL, 2},
     {UINT, "Number of Records", 1},
 };
-const Fmt LtePucchPowerControl_Fmt_v24 [] = {
-    {SKIP, NULL, 2},
-    {UINT, "Number of Records", 1},
-};
-
-const Fmt LtePucchPowerControl_Record_Fmt_v24 [] = {
-    {UINT, "SFN", 4},
-    // include Sub-FN,  Tx Power, DCI Format, PUCCH Format, N_HARQ
-    {PLACEHOLDER, "Sub-FN", 0},
-    {PLACEHOLDER, "PUCCH Tx Power (dBm)", 0},
-    {PLACEHOLDER, "DCI Format", 0},
-    {PLACEHOLDER, "PUCCH Format", 0},
-    {PLACEHOLDER, "N_HARQ", 0},
-
-    {UINT, "TPC Command", 4},
-    // include N_CQI, DL Pass Loss,
-    {PLACEHOLDER, "N_CQI", 0},
-    {PLACEHOLDER, "DL Path Loss", 0},
-
-    {UINT, "g(i)", 2},
-    {UINT, "PUCCH Actual Tx Power", 1},
-    {SKIP, NULL, 1},
-};
 
 const Fmt LtePucchPowerControl_Record_Fmt_v4 [] = {
     {UINT, "SFN", 4},
@@ -2380,11 +2466,70 @@ const ValueName LtePucchPowerControl_Record_v4_PUCCH_Format [] = {
     {5, "Format 2B"},
     {6, "Format 3"},
 };
+
+
 const ValueName LtePucchPowerControl_Record_v4_TPC [] = {
     {31, "Not present"},
     {63, "-1"},
 };
 
+
+const Fmt LtePucchPowerControl_Fmt_v24 [] = {
+    {SKIP, NULL, 2},
+    {UINT, "Number of Records", 1},
+};
+
+
+const Fmt LtePucchPowerControl_Record_Fmt_v24 [] = {
+    {UINT, "SFN", 4},
+    // include Sub-FN,  Tx Power, DCI Format, PUCCH Format, N_HARQ
+    {PLACEHOLDER, "Sub-FN", 0},
+    {PLACEHOLDER, "PUCCH Tx Power (dBm)", 0},
+    {PLACEHOLDER, "DCI Format", 0},
+    {PLACEHOLDER, "PUCCH Format", 0},
+    {PLACEHOLDER, "N_HARQ", 0},
+
+    {UINT, "TPC Command", 4},
+    // include N_CQI, DL Pass Loss,
+    {PLACEHOLDER, "N_CQI", 0},
+    {PLACEHOLDER, "DL Path Loss", 0},
+
+    {UINT, "g(i)", 2},
+    {UINT, "PUCCH Actual Tx Power", 1},
+    {SKIP, NULL, 1},
+};
+
+const ValueName LtePucchPowerControl_Record_v24_DCI_Format [] = {
+    // Release 8
+    // http://www.sharetechnote.com/html/LTE_Advanced_DCI.html
+    {0, "Format 0"},
+    {1, "Format 1"},
+    {2, "Format 1A"},
+    {3, "Format 1B"},
+    {4, "Format 1C"},
+    {5, "Format 1D"},
+    {6, "Format 2"},
+    {7, "Format 2A"},
+    // {8, "Format 2B"},
+    // {9, "Format 2C"},
+    {10, "Format 3"},
+    {11, "Format 3A"},
+    // {12, "Format 4"},
+};
+const ValueName LtePucchPowerControl_Record_v24_PUCCH_Format [] = {
+    {0, "Format 1"},
+    {1, "Format 1A"},
+    {2, "Format 1B"},
+    {3, "Format 2"},
+    {4, "Format 2A"},
+    {5, "Format 2B"},
+
+    {6, "Format 1bcs"},//diff from v2
+};
+const ValueName LtePucchPowerControl_Record_v24_TPC [] = {
+    {31, "Not present"},
+    {63, "-1"},
+};
 // ----------------------------------------------------------------------------
 // LTE PUSCH Power Control
 

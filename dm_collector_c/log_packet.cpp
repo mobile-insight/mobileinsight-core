@@ -51,6 +51,7 @@
 #include "wcdma_rrc_states.h"
 #include "wcdma_search_cell_reselection_rank.h"
 
+
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
@@ -706,6 +707,8 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "(MI)Unknown");
             break;
         }
+
+
     case 104:
     case 123:
         {
@@ -818,6 +821,8 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "(MI)Unknown");
             break;
         }
+
+
 
     default:
         printf("(MI)Unknown LTE PHY PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
@@ -2012,6 +2017,7 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
     }
 }
 
+
 static int
 _decode_lte_phy_irat_cdma_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
@@ -2324,6 +2330,19 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                                 b, offset, length, result_subpkt);
                         success = true;
                         break;
+                    case 14:
+                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_All_Rach_Config,
+                                                ARRAY_SIZE(LteMacConfigurationSubpkt_All_Rach_Config, Fmt),
+                                                b, offset, length, result_subpkt);
+                        success=true;
+                        break;
+
+                    case 18:
+                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_ELS,
+                                                ARRAY_SIZE(LteMacConfigurationSubpkt_ELS, Fmt),
+                                                b, offset, length, result_subpkt);
+                        success = true;
+                        break;
                     default:
                         break;
                     }
@@ -2335,7 +2354,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
+                        printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x a - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
                 offset += subpkt_size - (offset - start_subpkt);
@@ -4381,7 +4400,7 @@ static int _decode_lte_pdcp_dl_config_subpkt (const char *b, int offset,
                         "Subpacket Version");
                 int subpkt_size = _search_result_int(result_subpkt,
                         "Subpacket Size");
-                if (subpkt_id == 192 && subpkt_ver == 2) {
+                if ((subpkt_id == 192 && subpkt_ver == 2) || (subpkt_id==192 && subpkt_ver == 24)) {
                     // PDCP DL Config 0xC0
                     offset += _decode_by_fmt(
                             LtePdcpDlConfig_SubpktPayload,
@@ -4565,7 +4584,7 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
                         "Subpacket Version");
                 int subpkt_size = _search_result_int(result_subpkt,
                         "Subpacket Size");
-                if (subpkt_id == 193 && subpkt_ver == 2) {
+                if ((subpkt_id == 193 && subpkt_ver == 2) || (subpkt_id == 193 && subpkt_ver == 24)) {
                     // PDCP UL Config 0xC1
                     offset += _decode_by_fmt(
                             LtePdcpUlConfig_SubpktPayload,
@@ -4989,7 +5008,46 @@ static int _decode_lte_pdcp_ul_stats_subpkt (const char *b, int offset,
                     PyList_Append(result_subpkt, t1);
                     Py_DECREF(t1);
                     Py_DECREF(result_RB);
-                } else {
+                }else if(subpkt_id == 197 && subpkt_ver == 26){
+                    // PDCP UL Stats: 0xC5
+                    offset += _decode_by_fmt(
+                            LtePdcpUlStats_SubpktPayload_v26,
+                            ARRAY_SIZE(LtePdcpUlStats_SubpktPayload_v26, Fmt),
+                            b, offset, length, result_subpkt);
+                    // RBs
+                    int num_RB = _search_result_int(result_subpkt,
+                            "Num RBs");
+                    PyObject *result_RB = PyList_New(0);
+                    for (int j = 0; j < num_RB; j++) {
+                        PyObject *result_RB_item = PyList_New(0);
+                        offset += _decode_by_fmt(LtePdcpUlStats_Subpkt_RB_Fmt_v26,
+                                ARRAY_SIZE(LtePdcpUlStats_Subpkt_RB_Fmt_v26, Fmt),
+                                b, offset, length, result_RB_item);
+
+                        (void) _map_result_field_to_name(result_RB_item,
+                                "Mode",
+                                LtePdcpUlStats_Subpkt_RB_Mode,
+                                ARRAY_SIZE(LtePdcpUlStats_Subpkt_RB_Mode, ValueName),
+                                "(MI)Unknown");
+
+                        (void) _map_result_field_to_name(result_RB_item,
+                                "UDC Comp State",
+                                LtePdcpUlStats_Subpkt_UDC_Comp_state,
+                                ARRAY_SIZE(LtePdcpUlStats_Subpkt_UDC_Comp_state, ValueName),
+                                "(MI)Unknown");
+
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                                result_RB_item, "dict");
+                        PyList_Append(result_RB, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_RB_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "RBs",
+                            result_RB, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_RB);
+                }else {
                     printf("(MI)Unknown LTE PDCP UL Stats subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
@@ -5426,14 +5484,15 @@ static int _decode_lte_pdcp_ul_ctrl_pdu_subpkt (const char *b, int offset,
     }
 }
 
+
 // ----------------------------------------------------------------------------
 static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
         size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 
-    switch (pkt_ver) {
 
+    switch (pkt_ver) {
     case 24:
         {
             offset += _decode_by_fmt(LtePucchPowerControl_Fmt_v24,
@@ -5450,7 +5509,13 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                         "SFN");
                 int iSFN = iNonDecodeSFN & 1023; // last 10 bits
                 int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
+
                 int iPower = (iNonDecodeSFN >> 14) & 255; // next 8 bits
+
+                if ( (iPower & 0x80) !=0){
+                    iPower=iPower | 0xffffff00;
+                }
+
                 int iDCI = (iNonDecodeSFN >> 22) & 15; // next 4 bits
                 int iPUCCH = (iNonDecodeSFN >> 26) & 7; // next 3 bits
                 int iN_HARQ = (iNonDecodeSFN >> 29) & 1; // next 1 bit
@@ -5516,6 +5581,17 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                         "g(i)", iGi);
                 Py_DECREF(old_object);
 
+                int iPucchActualTxPower = _search_result_int(result_record_item,
+                        "PUCCH Actual Tx Power");
+
+                if ( (iPucchActualTxPower & 0x80) !=0){
+                    iPucchActualTxPower=iPucchActualTxPower | 0xffffff00;
+                }
+
+                old_object = _replace_result_int(result_record_item,
+                        "PUCCH Actual Tx Power", iPucchActualTxPower);
+                Py_DECREF(old_object);
+
                 PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
                         result_record_item, "dict");
                 PyList_Append(result_record, t1);
@@ -5528,7 +5604,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
             Py_DECREF(t);
             Py_DECREF(result_record);
             return offset - start;
-        }     
+        }
     case 4:
         {
             offset += _decode_by_fmt(LtePucchPowerControl_Fmt_v4,
