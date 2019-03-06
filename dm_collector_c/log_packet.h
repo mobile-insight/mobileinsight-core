@@ -2372,29 +2372,6 @@ const Fmt LtePucchPowerControl_Fmt_v4 [] = {
     {SKIP, NULL, 2},
     {UINT, "Number of Records", 1},
 };
-const Fmt LtePucchPowerControl_Fmt_v24 [] = {
-    {SKIP, NULL, 2},
-    {UINT, "Number of Records", 1},
-};
-
-const Fmt LtePucchPowerControl_Record_Fmt_v24 [] = {
-    {UINT, "SFN", 4},
-    // include Sub-FN,  Tx Power, DCI Format, PUCCH Format, N_HARQ
-    {PLACEHOLDER, "Sub-FN", 0},
-    {PLACEHOLDER, "PUCCH Tx Power (dBm)", 0},
-    {PLACEHOLDER, "DCI Format", 0},
-    {PLACEHOLDER, "PUCCH Format", 0},
-    {PLACEHOLDER, "N_HARQ", 0},
-
-    {UINT, "TPC Command", 4},
-    // include N_CQI, DL Pass Loss,
-    {PLACEHOLDER, "N_CQI", 0},
-    {PLACEHOLDER, "DL Path Loss", 0},
-
-    {UINT, "g(i)", 2},
-    {UINT, "PUCCH Actual Tx Power", 1},
-    {SKIP, NULL, 1},
-};
 
 const Fmt LtePucchPowerControl_Record_Fmt_v4 [] = {
     {UINT, "SFN", 4},
