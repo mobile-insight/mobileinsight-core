@@ -2443,7 +2443,7 @@ const Fmt LtePucchPowerControl_Record_Fmt_v24 [] = {
     {UINT, "TPC Command", 4},
     // include N_CQI, DL Pass Loss,
     {PLACEHOLDER, "N_CQI", 0},
-    {PLACEHOLDER, "DL Pass Loss", 0},
+    {PLACEHOLDER, "DL Path Loss", 0},
 
     {UINT, "g(i)", 2},
     {UINT, "PUCCH Actual Tx Power", 1},
