@@ -50,6 +50,7 @@
 #include "wcdma_rrc_states.h"
 #include "wcdma_search_cell_reselection_rank.h"
 
+
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
@@ -705,6 +706,8 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "(MI)Unknown");
             break;
         }
+
+
     case 104:
         {
             offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v104,
@@ -2011,6 +2014,7 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
         return 0;
     }
 }
+
 
 static int
 _decode_lte_phy_irat_cdma_subpkt(const char *b, int offset, size_t length,
@@ -4956,7 +4960,46 @@ static int _decode_lte_pdcp_ul_stats_subpkt (const char *b, int offset,
                     PyList_Append(result_subpkt, t1);
                     Py_DECREF(t1);
                     Py_DECREF(result_RB);
-                } else {
+                }else if(subpkt_id == 197 && subpkt_ver == 26){
+                    // PDCP UL Stats: 0xC5
+                    offset += _decode_by_fmt(
+                            LtePdcpUlStats_SubpktPayload_v26,
+                            ARRAY_SIZE(LtePdcpUlStats_SubpktPayload_v26, Fmt),
+                            b, offset, length, result_subpkt);
+                    // RBs
+                    int num_RB = _search_result_int(result_subpkt,
+                            "Num RBs");
+                    PyObject *result_RB = PyList_New(0);
+                    for (int j = 0; j < num_RB; j++) {
+                        PyObject *result_RB_item = PyList_New(0);
+                        offset += _decode_by_fmt(LtePdcpUlStats_Subpkt_RB_Fmt_v26,
+                                ARRAY_SIZE(LtePdcpUlStats_Subpkt_RB_Fmt_v26, Fmt),
+                                b, offset, length, result_RB_item);
+
+                        (void) _map_result_field_to_name(result_RB_item,
+                                "Mode",
+                                LtePdcpUlStats_Subpkt_RB_Mode,
+                                ARRAY_SIZE(LtePdcpUlStats_Subpkt_RB_Mode, ValueName),
+                                "(MI)Unknown");
+
+                        (void) _map_result_field_to_name(result_RB_item,
+                                "UDC Comp State",
+                                LtePdcpUlStats_Subpkt_UDC_Comp_state,
+                                ARRAY_SIZE(LtePdcpUlStats_Subpkt_UDC_Comp_state, ValueName),
+                                "(MI)Unknown");
+
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                                result_RB_item, "dict");
+                        PyList_Append(result_RB, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_RB_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "RBs",
+                            result_RB, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_RB);
+                }else {
                     printf("(MI)Unknown LTE PDCP UL Stats subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
@@ -5464,6 +5507,101 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                             "TPC Command",
                             LtePucchPowerControl_Record_v4_TPC,
                             ARRAY_SIZE(LtePucchPowerControl_Record_v4_TPC,
+                                ValueName),
+                            "(MI)Unknown");
+                }
+                old_object = _replace_result_int(result_record_item,
+                        "N_CQI", iN_CQI);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "DL Pass Loss", iLoss);
+                Py_DECREF(old_object);
+
+                int iNonDecodeGi = _search_result_int(result_record_item,
+                        "g(i)");
+                int iGi = iNonDecodeGi - 65535;
+                old_object = _replace_result_int(result_record_item,
+                        "g(i)", iGi);
+                Py_DECREF(old_object);
+
+                PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                        result_record_item, "dict");
+                PyList_Append(result_record, t1);
+                Py_DECREF(t1);
+                Py_DECREF(result_record_item);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Records",
+                    result_record, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_record);
+            return offset - start;
+        }
+    case 24:
+        {
+            offset += _decode_by_fmt(LtePucchPowerControl_Fmt_v24,
+                    ARRAY_SIZE(LtePucchPowerControl_Fmt_v24, Fmt),
+                    b, offset, length, result);
+            int num_record = _search_result_int(result, "Number of Records");
+            PyObject *result_record = PyList_New(0);
+            for (int i = 0; i < num_record; i++) {
+                PyObject *result_record_item = PyList_New(0);
+                offset += _decode_by_fmt(LtePucchPowerControl_Record_Fmt_v24,
+                        ARRAY_SIZE(LtePucchPowerControl_Record_Fmt_v24, Fmt),
+                        b, offset, length, result_record_item);
+                unsigned int iNonDecodeSFN = _search_result_uint(result_record_item,
+                        "SFN");
+                int iSFN = iNonDecodeSFN & 1023; // last 10 bits
+                int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
+                int iPower = (iNonDecodeSFN >> 14) & 255; // next 8 bits
+                int iDCI = (iNonDecodeSFN >> 22) & 15; // next 4 bits
+                int iPUCCH = (iNonDecodeSFN >> 26) & 7; // next 3 bits
+
+                int iN_HARQ = (iNonDecodeSFN >> 29) & 3; // next 2 bit diff from 2
+                PyObject *old_object = _replace_result_int(result_record_item,
+                        "SFN", iSFN);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item, "Sub-FN",
+                        iSubFN);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "PUCCH Tx Power (dBm)", iPower);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "DCI Format", iDCI);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "DCI Format",
+                        LtePucchPowerControl_Record_v24_DCI_Format,
+                        ARRAY_SIZE(LtePucchPowerControl_Record_v24_DCI_Format,
+                            ValueName),
+                        "(MI)Unknown");
+                old_object = _replace_result_int(result_record_item,
+                        "PUCCH Format", iPUCCH);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "PUCCH Format",
+                        LtePucchPowerControl_Record_v24_PUCCH_Format,
+                        ARRAY_SIZE(LtePucchPowerControl_Record_v24_PUCCH_Format,
+                            ValueName),
+                        "(MI)Unknown");
+                old_object = _replace_result_int(result_record_item,
+                        "N_HARQ", iN_HARQ);
+                Py_DECREF(old_object);
+
+                unsigned int iNonDecodeTPC = _search_result_uint(result_record_item,
+                        "TPC Command");
+                int iTPC = iNonDecodeTPC & 63; // last 6 bits
+                int iN_CQI = (iNonDecodeTPC >> 6) & 31; // next 5 bits
+                int iLoss = (iNonDecodeTPC >> 11) & 127; // next 8 bits
+                old_object = _replace_result_int(result_record_item,
+                        "TPC Command", iTPC);
+                Py_DECREF(old_object);
+                if (iTPC == 31 || iTPC == 63) {
+                    (void) _map_result_field_to_name(result_record_item,
+                            "TPC Command",
+                            LtePucchPowerControl_Record_v24_TPC,
+                            ARRAY_SIZE(LtePucchPowerControl_Record_v24_TPC,
                                 ValueName),
                             "(MI)Unknown");
                 }
