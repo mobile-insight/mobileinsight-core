@@ -54,6 +54,7 @@ class LteMeasurementAnalyzer(Analyzer):
 
     def serving_cell_rsrp(self, msg):
         if msg.type_id == "LTE_PHY_Connected_Mode_Intra_Freq_Meas":
+
             msg_dict = dict(msg.data.decode())
             date = datetime.datetime.fromtimestamp(
                 msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -80,7 +81,7 @@ class LteMeasurementAnalyzer(Analyzer):
             self.log_info(rsrp_log)
 
             self.serv_cell_rsrp.append(msg_dict['RSRP(dBm)'])
-            self.serv_cell_rsrq.append(msg_dict['RSRP(dBm)'])
+            self.serv_cell_rsrq.append(msg_dict['RSRQ(dB)'])
 
         # if msg.type_id == "LTE_PHY_Inter_RAT_Measurement":
         #     msg_dict=dict(msg.data.decode())

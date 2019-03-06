@@ -450,6 +450,7 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
             return offset - start;
         }
     case 44:
+    case 126:
         {
             offset += _decode_by_fmt(LtePhyPdschDecodingResult_Payload_v44,
                     ARRAY_SIZE(LtePhyPdschDecodingResult_Payload_v44, Fmt),
