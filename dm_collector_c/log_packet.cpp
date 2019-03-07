@@ -5605,6 +5605,7 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
             Py_DECREF(result_record);
             return offset - start;
         }
+
     case 4:
         {
             offset += _decode_by_fmt(LtePucchPowerControl_Fmt_v4,
@@ -7230,6 +7231,7 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
     };
 
 }
+
 
 PyObject *
 decode_log_packet (const char *b, size_t length, bool skip_decoding) {
