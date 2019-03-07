@@ -768,7 +768,7 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                 temp = _search_result_int(result_record_item, "HARQ ID");
                 int iHarqId = temp & 15;    // 4 bits
                 int iRNTIType = (temp >> 4) & 15;   // 4 bits
-                
+
                 temp = _search_result_int(result_record_item,
                         "Codeword Swap");
                 int iCodewordSwap = temp & 1;    // 1 bits
@@ -913,7 +913,7 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                     }
 
                     int count_temp=0;
-                    while(offset-start<length){
+                    while ((unsigned int)(offset - start) < length) {
                         PyObject *result_hidden_record = PyList_New(0);
                         offset += _decode_by_fmt(LtePhyPdschDecodingResult_Hidden_Energy_Metrics_v126,
                                 ARRAY_SIZE(LtePhyPdschDecodingResult_Hidden_Energy_Metrics_v126, Fmt),
