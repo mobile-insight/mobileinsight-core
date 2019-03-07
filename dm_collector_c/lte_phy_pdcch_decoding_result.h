@@ -997,7 +997,7 @@ static int _decode_lte_phy_pdcch_decoding_result_payload (const char *b,
             int iCAFDDTDD = (temp >> 28) & 3;   // 2 bits
 
             unsigned int __pad = _search_result_uint(result, "__pad");
-            __pad=(__pad<<1)+(temp>>31)&1;
+            __pad = ((__pad<<1) + (temp>>31)) & 1;
 
             old_object = _replace_result_int(result, "__pad", __pad);
             Py_DECREF(old_object);

@@ -120,7 +120,7 @@ static int _decode_lte_phy_pusch_csf_payload (const char *b,
             temp = _search_result_int(result, "PUSCH Reporting Mode");
 
             //int iPuschReportingMode = (temp >> 1) & 7;
-            int iPuschReportingMode = (temp & 1)<<2+before_temp;
+            int iPuschReportingMode = ((temp & 1) << 2) + before_temp;
 
             //int iRankIndex = (temp >> 4) & 1;
             int iRankIndex = (temp >> 2) & 1;
