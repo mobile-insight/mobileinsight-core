@@ -1551,6 +1551,35 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload [] = {
     {UINT, "RA rsp win size", 1},
 };
 
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v4 [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Num Active Cells", 1},
+
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v4_cell [] = {
+    {UINT, "Cell Id", 1},
+    {WCDMA_MEAS, "Preamble initial power (dB)", 1}, // Note sure if it is correct
+    {SKIP, NULL, 1},
+    {UINT, "Power ramping step (dB)", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer (ms)", 2},
+    {UINT, "Message size Group_A", 2},
+    {UINT, "Power offset Group_B", 1},
+    {UINT, "PMax (dBm)", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 1},
+    {PLACEHOLDER, "Preamble Format", 0},
+    {UINT, "High speed flag", 1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+};
+
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload [] = {
     // Version 1
     {UINT, "Rach reason", 1},
@@ -1564,8 +1593,28 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload [] = {
     {UINT, "Radio condn (dB)", 1},
     {BYTE_STREAM, "CRNTI", 2},
 };
+
+const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2 [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Cell Id", 1},
+    {UINT, "Rach reason", 1},
+    {BYTE_STREAM, "Maching ID", 6},
+    {UINT, "RACH Contention", 1},
+    {UINT, "Preamble", 1},
+    {BYTE_STREAM, "Preamble RA mask", 1},
+    {UINT, "Msg3 size", 1},
+    {UINT, "Group chosen", 1},
+    {UINT, "Radio condn (dB)", 1},
+    {BYTE_STREAM, "CRNTI", 2},
+};
+
 const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason [] = {
     {0, "CONNECTION_REQ"},
+};
+
+const ValueName ValueNameRachContention [] = {
+    {0, "NonContention Based RACH procedure"},  // not confirmed
+    {1, "Contention Based RACH procedure"},
 };
 
 // ----------------------------------------------------------------------------
