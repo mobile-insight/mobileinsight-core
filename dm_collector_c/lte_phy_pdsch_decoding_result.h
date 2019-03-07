@@ -76,8 +76,6 @@ const Fmt LtePhyPdschDecodingResult_Record_v44 [] = {
 
 const Fmt LtePhyPdschDecodingResult_Record_v126 [] = {
     {UINT, "Subframe Offset", 2},
-    {PLACEHOLDER, "Sub-frame Number", 0},  // 4 bits
-    {PLACEHOLDER, "Sys Frame Number", 0},  // 4 bits
     {UINT, "HARQ ID", 1},   // 4 bits
     {PLACEHOLDER, "RNTI Type", 0},  // 4 bits
     {UINT, "Codeword Swap", 1},  // 1 bit
@@ -137,8 +135,6 @@ const Fmt LtePhyPdschDecodingResult_TBlks_v126 [] = {
     {SKIP, NULL, 3},
 
     {UINT, "HARQ Combine Enable",1},
-    {PLACEHOLDER, "Energy Metrics", 0},
-    {PLACEHOLDER, "Front Hidden Energy Metrics", 0},
 };
 
 const Fmt LtePhyPdschDecodingResult_EnergyMetric_v24 [] = {
