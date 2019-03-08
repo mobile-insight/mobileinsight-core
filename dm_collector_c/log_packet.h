@@ -1639,6 +1639,17 @@ const Fmt LteMacRachAttempt_SubpktPayload[] = {
     {UINT, "Contention procedure", 1},
     {UINT, "Rach msg bmasks", 1},
 };
+
+const Fmt LteMacRachAttempt_SubpktPayload_v3[] = {
+    // Version 3
+    {UINT,"Sub Id",1},
+    {UINT,"Cell Id",1},
+    {UINT, "Retx counter", 1},
+    {UINT, "Rach result", 1},
+    {UINT, "Contention procedure", 1},
+    {UINT, "Rach msg bmasks", 1},
+};
+
 const ValueName LteMacRachAttempt_Subpkt_RachResult [] = {
     {0, "Success"},
 };
@@ -1651,6 +1662,12 @@ const Fmt LteMacRachAttempt_Subpkt_Msg1 [] = {
     {BYTE_STREAM, "Preamble index mask", 1},
     {WCDMA_MEAS, "Preamble power offset", 1},
     {SKIP, NULL, 1},
+};
+
+const Fmt LteMacRachAttempt_Subpkt_Msg1_v3 [] = {
+    {UINT, "Preamble Index", 1},
+    {BYTE_STREAM, "Preamble index mask", 1},
+    {UINT, "Preamble power offset", 2},
 };
 
 const Fmt LteMacRachAttempt_Subpkt_Msg2 [] = {
