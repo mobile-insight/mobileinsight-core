@@ -1021,16 +1021,17 @@ const Fmt LteMacConfigurationSubpkt_ELS [] = {
 
 const Fmt LteMacConfigurationSubpkt_All_Rach_Config [] = {
     {UINT, "Sub Id", 1},
-    {UINT, "Valid Cell Cfg Mask", 1},
-    {UINT, "New Cell Cfg Mask", 1},
-    {UINT, "Cell Rach Info[0]", 24},
-    {UINT, "Cell Rach Info[1]", 24},
-    {UINT, "Cell Rach Info[2]", 24},
-    {UINT, "Cell Rach Info[3]", 24},
-    {UINT, "Cell Rach Info[4]", 24},
-    {UINT, "Cell Rach Info[5]", 24},
-    {UINT, "Cell Rach Info[6]", 24},
-    {UINT, "Cell Rach Info[7]", 24}
+    {BYTE_STREAM, "Valid Cell Cfg Mask", 1},
+    {BYTE_STREAM, "New Cell Cfg Mask", 1},
+    // TODO
+    {SKIP, "Cell Rach Info[0]", 24},
+    {SKIP, "Cell Rach Info[1]", 24},
+    {SKIP, "Cell Rach Info[2]", 24},
+    {SKIP, "Cell Rach Info[3]", 24},
+    {SKIP, "Cell Rach Info[4]", 24},
+    {SKIP, "Cell Rach Info[5]", 24},
+    {SKIP, "Cell Rach Info[6]", 24},
+    {SKIP, "Cell Rach Info[7]", 24}
 };
 
 // ----------------------------------------------------------

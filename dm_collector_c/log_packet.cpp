@@ -2273,40 +2273,48 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                     bool success = false;
                     switch (subpkt_id) {
                     case 0: //Config Type Subpacket
-                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_ConfigType,
-                                                ARRAY_SIZE(LteMacConfigurationSubpkt_ConfigType, Fmt),
-                                                b, offset, length, result_subpkt);
-                        (void) _map_result_field_to_name(
-                                result_subpkt,
-                                "Config reason",
-                                LteMacConfigurationConfigType_ConfigReason,
-                                ARRAY_SIZE(LteMacConfigurationConfigType_ConfigReason, ValueName),
-                                "NORMAL");
-                        success = true;
+                        if (subpkt_ver == 1) {
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_ConfigType,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_ConfigType, Fmt),
+                                    b, offset, length, result_subpkt);
+                            (void) _map_result_field_to_name(
+                                    result_subpkt,
+                                    "Config reason",
+                                    LteMacConfigurationConfigType_ConfigReason,
+                                    ARRAY_SIZE(LteMacConfigurationConfigType_ConfigReason, ValueName),
+                                    "NORMAL");
+                            success = true;
+                        }
                         break;
                     case 1: //DL Config Subpacket
-                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig,
-                                                ARRAY_SIZE(LteMacConfigurationSubpkt_DLConfig, Fmt),
-                                                b, offset, length, result_subpkt);
-                        success = true;
+                        if (subpkt_ver == 1) {
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_DLConfig, Fmt),
+                                    b, offset, length, result_subpkt);
+                            success = true;
+                        }
                         break;
                     case 2: //UL Config Subpacket
-                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_ULConfig,
-                                                ARRAY_SIZE(LteMacConfigurationSubpkt_ULConfig, Fmt),
-                                                b, offset, length, result_subpkt);
-                        success = true;
+                        if (subpkt_ver == 1) {
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_ULConfig,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_ULConfig, Fmt),
+                                    b, offset, length, result_subpkt);
+                            success = true;
+                        }
                         break;
                     case 3: //RACH Config Subpacket
-                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_RACHConfig,
-                                                ARRAY_SIZE(LteMacConfigurationSubpkt_RACHConfig, Fmt),
-                                                b, offset, length, result_subpkt);
-                        success = true;
+                        if (subpkt_ver == 1) {
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_RACHConfig,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_RACHConfig, Fmt),
+                                    b, offset, length, result_subpkt);
+                            success = true;
+                        }
                         break;
                     case 4: //LC Config Subpacket
-                        {
+                        if (subpkt_ver == 1) {
                             offset += _decode_by_fmt(LteMacConfigurationSubpkt_LCConfig,
-                                                ARRAY_SIZE(LteMacConfigurationSubpkt_LCConfig, Fmt),
-                                                b, offset, length, result_subpkt);
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_LCConfig, Fmt),
+                                    b, offset, length, result_subpkt);
                             int num_LC = _search_result_int(result_subpkt, "Number of added/modified LC");
                             int start_LC = offset;
 
@@ -2322,26 +2330,31 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                             }
                             offset += 290 - (offset-start_LC);
                             success = true;
-                            break;
                         }
+                        break;
                     case 13: //eMBMBS Config SubPacket
-                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_eMBMSConfig,
-                                                ARRAY_SIZE(LteMacConfigurationSubpkt_eMBMSConfig, Fmt),
-                                                b, offset, length, result_subpkt);
-                        success = true;
+                        if (subpkt_ver == 1) {
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_eMBMSConfig,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_eMBMSConfig, Fmt),
+                                    b, offset, length, result_subpkt);
+                            success = true;
+                        }
                         break;
-                    case 14:
-                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_All_Rach_Config,
-                                                ARRAY_SIZE(LteMacConfigurationSubpkt_All_Rach_Config, Fmt),
-                                                b, offset, length, result_subpkt);
-                        success=true;
+                    case 14: // All Rach Config SubPacket
+                        if (subpkt_ver == 1) {
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_All_Rach_Config,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_All_Rach_Config, Fmt),
+                                    b, offset, length, result_subpkt);
+                            success=true;
+                        }
                         break;
-
                     case 18:
-                        offset += _decode_by_fmt(LteMacConfigurationSubpkt_ELS,
-                                                ARRAY_SIZE(LteMacConfigurationSubpkt_ELS, Fmt),
-                                                b, offset, length, result_subpkt);
-                        success = true;
+                        if (subpkt_ver == 1) {
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_ELS,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_ELS, Fmt),
+                                    b, offset, length, result_subpkt);
+                            success = true;
+                        }
                         break;
                     default:
                         break;
@@ -2354,7 +2367,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(result_subpkt);
                     } else {
-                        printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x a - %d\n", subpkt_id, subpkt_ver);
+                        printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
                 }
                 offset += subpkt_size - (offset - start_subpkt);
