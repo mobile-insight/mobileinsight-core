@@ -1866,6 +1866,24 @@ const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Fmt [] = {
     {UINT, "RoHC Enabled", 1},
     {BYTE_STREAM, "RoHC Mask", 4},
 };
+
+const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Fmt_v3 [] = {
+    {UINT, "RB ID", 1},
+    {UINT, "RB-Cfg Idx", 1},
+    {UINT, "EPS ID", 1},
+    {UINT, "RB mode", 1},
+    {UINT, "RB type", 1},
+    {UINT, "SN length", 1},
+    {UINT, "Discard timer", 2},
+    {UINT, "Compression Type", 1},
+    {UINT, "RoHC Max CID", 1},
+    {BYTE_STREAM, "RoHC Mask", 4},
+    {UINT, "UDC Cfg Action", 2},
+    {UINT, "UDC Context ID", 2},
+    {UINT, "UDC Algo Ver", 1},
+    {UINT, "UDC Header Length", 1},
+};
+
 const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_RBmode [] = {
     {1, "AM"},
 };
