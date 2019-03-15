@@ -5365,7 +5365,48 @@ static int _decode_lte_pdcp_ul_stats_subpkt (const char *b, int offset,
                     PyList_Append(result_subpkt, t1);
                     Py_DECREF(t1);
                     Py_DECREF(result_RB);
-                }else if(subpkt_id == 197 && subpkt_ver == 26){
+                }else if(subpkt_id == 197 && subpkt_ver == 3){
+                    // PDCP UL Stats: 0xC5
+                    offset += _decode_by_fmt(
+                            LtePdcpUlStats_SubpktPayload_v1,
+                            ARRAY_SIZE(LtePdcpUlStats_SubpktPayload_v1, Fmt),
+                            b, offset, length, result_subpkt);
+                    // RBs
+                    int num_RB = _search_result_int(result_subpkt,
+                            "Num RBs");
+
+                    PyObject *result_RB = PyList_New(0);
+                    for (int j = 0; j < num_RB; j++) {
+                        PyObject *result_RB_item = PyList_New(0);
+                        offset += _decode_by_fmt(LtePdcpUlStats_Subpkt_RB_Fmt_v3,
+                                ARRAY_SIZE(LtePdcpUlStats_Subpkt_RB_Fmt_v3, Fmt),
+                                b, offset, length, result_RB_item);
+
+                        (void) _map_result_field_to_name(result_RB_item,
+                                "Mode",
+                                LtePdcpUlStats_Subpkt_RB_Mode,
+                                ARRAY_SIZE(LtePdcpUlStats_Subpkt_RB_Mode, ValueName),
+                                "(MI)Unknown");
+
+                        (void) _map_result_field_to_name(result_RB_item,
+                                "UDC Comp State",
+                                LtePdcpUlStats_Subpkt_UDC_Comp_state,
+                                ARRAY_SIZE(LtePdcpUlStats_Subpkt_UDC_Comp_state, ValueName),
+                                "(MI)Unknown");
+
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                                result_RB_item, "dict");
+                        PyList_Append(result_RB, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_RB_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "RBs",
+                            result_RB, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_RB);
+                }
+                else if(subpkt_id == 197 && subpkt_ver == 26){
                     // PDCP UL Stats: 0xC5
                     offset += _decode_by_fmt(
                             LtePdcpUlStats_SubpktPayload_v26,

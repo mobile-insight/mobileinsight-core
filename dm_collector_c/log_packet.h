@@ -2030,10 +2030,12 @@ const Fmt LtePdcpUlStats_SubpktPayload_v2 [] = {
     {UINT, "Num RBs", 1},
     {UINT, "PDCPUL Errors", 4},
 };
+
 const Fmt LtePdcpUlStats_SubpktPayload_v26 [] = {
     {UINT, "Num RBs", 1},
     {UINT, "PDCPUL Errors", 4},
 };
+
 const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v1 [] = {
     {UINT, "Rb Cfg Idx", 1},
     {UINT, "Mode", 1},
@@ -2108,6 +2110,82 @@ const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v2 [] = {
     {SKIP, NULL, 4},
 
 };
+
+const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v3 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "PDCP Hdr Len", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Pdcp Ul Buffer Pkt", 2},
+    {UINT, "Num Pdcp Ul Buffer Pkt Bytes", 4},
+    {UINT, "UDC Comp State",4},
+    {UINT, "Num Flow Ctrl Trigger", 4},
+    {UINT, "Num Data PDU Tx", 4},
+    {UINT, "Num Data PDU Tx Bytes", 4},
+    {UINT, "Num Data Bytes from Ps", 4},
+    {UINT, "Num Control PDU Tx", 4},
+    {UINT, "Num Control PDU Tx Bytes", 4},
+    {UINT, "Num Status Report", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx", 4},
+    {UINT, "Num ROHC Fail", 4},
+    {UINT, "Num Discard SDU", 4},
+    {UINT, "Num Discard SDU Bytes", 4},
+    {UINT, "Num PDU HO ReTx", 4},
+    {UINT, "Num PDU HO ReTx Bytes", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd", 4},
+    {UINT, "Num Rohc Pdu Drop Ho", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes", 4},
+
+    {UINT, "Num Udc Comp Pkt", 4},
+    {UINT, "Num Udc Comp Pkt Bytes", 4},
+    {UINT, "Num Udc Fc Uncomp Pkts", 4},
+    {UINT, "Num Udc Fc Uncomp Bytes", 4},
+
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 2},
+
+    {UINT, "Num ue Udc Ctrl Pdus", 4},
+    {UINT, "Num Enb Udc Ctrl Pdus", 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Enb Trigg Udc Reset", 4},
+    {SKIP, NULL, 4},
+
+    {UINT, "Num Flow Ctrl Trigger Rst", 4},
+    {UINT, "Num Data PDU Tx Rst", 4},
+    {UINT, "Num Data PDU Tx Bytes Rst", 4},
+    {UINT, "Num Data Bytes from Ps Rst", 4},
+    {UINT, "Num Control PDU Tx Rst", 4},
+    {UINT, "Num Control PDU Tx Bytes Rst", 4},
+    {UINT, "Num Status Report Rst", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx Rst", 4},
+    {UINT, "Num ROHC Fail Rst", 4},
+    {UINT, "Num Discard SDU Rst", 4},
+    {UINT, "Num Discard SDU Bytes Rst", 4},
+    {UINT, "Num PDU HO ReTx Rst", 4},
+    {UINT, "Num PDU HO ReTx Bytes Rst", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes Rst", 4},
+
+    {UINT, "Num Udc Comp Pkt Rst", 4},
+    {UINT, "Num Udc Comp Pkt Bytes Rst", 4},
+    {UINT, "Num Udc Fc Uncomp Pkt Rst", 4},
+    {UINT, "Num Udc Fc Uncomp Pkt Bytes Rst", 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 2},
+    {UINT, "Num ue Udc Ctrl Pdus Rst", 4},
+    {UINT, "Num Enb Udc Ctrl Pdus Rst", 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Enb Trigg Udc Reset Rst", 4},
+    {SKIP, NULL, 4},
+};
+
 
 const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v26 [] = {
     {UINT, "Rb Cfg Idx", 1},
