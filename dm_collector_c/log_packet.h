@@ -991,6 +991,26 @@ const Fmt LteMacConfigurationSubpkt_RACHConfig [] = {
     {UINT, "RA rsp win size", 1},
     {SKIP, "NULL", 1},
 };
+const Fmt LteMacConfigurationSubpkt_RACHConfig_v5 [] = {
+    {RSRQ, "Preamble initial power", 2},
+    {UINT, "Power ramping step", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer", 2},
+    {UINT, "Message size Group_A",2},
+    {UINT, "Power offset Group_B",1},
+    {UINT, "PMax", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 2},
+    {UINT,"High speed flag",1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+    {UINT, "PRACH Cfg R13 Present",1},
+};
 
 const Fmt LteMacConfigurationSubpkt_LCConfig [] = {
     {UINT, "Number of deleted LC", 1},
@@ -1581,6 +1601,28 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v4_cell [] = {
     {UINT, "RA rsp win size", 1},
 };
 
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v5 [] = {
+    {WCDMA_MEAS, "Preamble initial power (dB)", 2}, // Note sure if it is correct
+    {UINT, "Power ramping step (dB)", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer (ms)", 2},
+    {UINT, "Message size Group_A", 2},
+    {UINT, "Power offset Group_B", 1},
+    {UINT, "PMax (dBm)", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 1},
+    {PLACEHOLDER, "Preamble Format", 0},
+    {UINT, "High speed flag", 1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+    {UINT, "PRACH Cfg R13 Present",1},
+};
+
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload [] = {
     // Version 1
     {UINT, "Rach reason", 1},
@@ -1651,8 +1693,17 @@ const Fmt LteMacRachAttempt_SubpktPayload_v3[] = {
     {UINT, "Rach msg bmasks", 1},
 };
 
+const Fmt LteMacRachAttempt_SubpktPayload_v4[] = {
+    // Version 2
+    {UINT, "Retx counter", 1},
+    {UINT, "Rach result", 1},
+    {UINT, "Contention procedure", 1},
+    {UINT, "Rach msg bmasks", 1},
+};
+
 const ValueName LteMacRachAttempt_Subpkt_RachResult [] = {
     {0, "Success"},
+    {1, "Failure at MSG2"},
 };
 const ValueName LteMacRachAttempt_Subpkt_ContentionProcedure [] = {
     {1, "Contention Based RACH procedure"},
@@ -1669,6 +1720,13 @@ const Fmt LteMacRachAttempt_Subpkt_Msg1_v3 [] = {
     {UINT, "Preamble Index", 1},
     {BYTE_STREAM, "Preamble index mask", 1},
     {UINT, "Preamble power offset", 2},
+};
+
+const Fmt LteMacRachAttempt_Subpkt_Msg1_v4 [] = {
+    {UINT, "Preamble Index", 1},
+    {BYTE_STREAM, "Preamble index mask", 1},
+    {UINT, "Preamble power offset", 2},
+    {UINT, "CE Level",1},
 };
 
 const Fmt LteMacRachAttempt_Subpkt_Msg2 [] = {
@@ -1688,6 +1746,13 @@ const Fmt LteMacRachAttempt_Subpkt_Msg3 [] = {
     {UINT, "Grant", 2},
     {UINT, "Harq ID", 1},
 };
+
+const Fmt LteMacRachAttempt_Subpkt_Msg3_v4 [] = {
+    {BYTE_STREAM, "Grant Raw", 4},
+    {UINT, "Grant", 2},
+    {UINT, "Harq ID", 1},
+};
+
 const Fmt LteMacRachAttempt_Subpkt_Msg3_MACPDU [] = {
     {BYTE_STREAM, "MAC PDU", 1},
 };

@@ -237,7 +237,6 @@ const Fmt LtePdschStatIndication_Record_v5_P2 [] = {
     {UINT, "Area ID", 1},
 };
 
-
 static int _decode_lte_pdsch_stat_indication_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
