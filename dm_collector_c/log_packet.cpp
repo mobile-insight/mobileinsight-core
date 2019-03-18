@@ -257,6 +257,11 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
                                     ARRAY_SIZE(LteRrcOtaPacketFmt_v15, Fmt),
                                     b, offset, length, result);
         break;
+    case 19:
+        offset += _decode_by_fmt(LteRrcOtaPacketFmt_v19,
+                                    ARRAY_SIZE(LteRrcOtaPacketFmt_v19, Fmt),
+                                    b, offset, length, result);
+        break;
     case 20:
         offset += _decode_by_fmt(LteRrcOtaPacketFmt_v20,
                                     ARRAY_SIZE(LteRrcOtaPacketFmt_v20, Fmt),
@@ -267,7 +272,31 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
         return 0;
     }
 
-    if (pkt_ver >= 15) {
+    //pkt_ver==19 added for
+    if (pkt_ver ==19){
+
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+
+        const char *type_name = search_name(LteRrcOtaPduType_v19,
+                                            ARRAY_SIZE(LteRrcOtaPduType_v19, ValueName),
+                                            pdu_number);
+
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t = Py_BuildValue("(ss#s)",
+                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
+
+    }
+    else if (pkt_ver >= 15) {
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
         const char *type_name = search_name(LteRrcOtaPduType_v15,
@@ -4206,7 +4235,6 @@ static int _decode_lte_mac_rach_trigger_subpkt (const char *b, int offset,
                     PyList_Append(result_subpkt, t1);
                     Py_DECREF(t1);
                     Py_DECREF(result_Cells);
-
                 }else if (subpkt_id == 3 && subpkt_ver == 5) {
                     // RACH Config Subpacket
                     offset += _decode_by_fmt(
@@ -4380,7 +4408,6 @@ static int _decode_lte_mac_rach_attempt_subpkt (const char *b, int offset,
                         Py_DECREF(t1);
                         Py_DECREF(result_subpkt_msg3);
                     }
-
                 }
                else if ( (subpkt_id == 6 && subpkt_ver == 3)) {
                     offset += _decode_by_fmt(LteMacRachAttempt_SubpktPayload_v3,

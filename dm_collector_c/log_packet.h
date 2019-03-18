@@ -292,6 +292,14 @@ const Fmt LteRrcOtaPacketFmt_v15 [] = {
     {UINT, "Msg Length", 2}
 };
 
+const Fmt LteRrcOtaPacketFmt_v19 [] = {
+    {UINT, "Freq", 4},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1},            //PDU number
+    {UINT, "SIB Mask in SI", 4},
+    {UINT, "Msg Length", 2}
+};
+
 const Fmt LteRrcOtaPacketFmt_v20 [] = {
     {UINT, "Freq", 4},                  //frequency
     {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
@@ -317,6 +325,15 @@ const ValueName LteRrcOtaPduType_v15 [] = {
     {0x07, "LTE-RRC_DL_DCCH"},
     {0x08, "LTE-RRC_UL_CCCH"},
     {0x09, "LTE-RRC_UL_DCCH"},
+};
+
+const ValueName LteRrcOtaPduType_v19 [] = {
+    {0x03, "LTE-RRC_BCCH_DL_SCH"},
+    {0x07, "LTE-RRC_PCCH"},
+    {0x08, "LTE-RRC_DL_CCCH"},
+    {0x09, "LTE-RRC_DL_DCCH"},
+    {0x0a, "LTE-RRC_UL_CCCH"},
+    {0x0b, "LTE-RRC_UL_DCCH"},
 };
 
 // ------------------------------------------------------------
