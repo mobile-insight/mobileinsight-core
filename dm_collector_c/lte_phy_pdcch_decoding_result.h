@@ -110,6 +110,30 @@ const Fmt LtePhyPdcchDecodingResult_Hypothesis_v21 [] = {
     {UINT, "Symbol Error Rate", 4}, // x/2147483648.0
 };
 
+const Fmt LtePhyPdcchDecodingResult_Hypothesis_v24 [] = {
+    {BYTE_STREAM, "Payload", 8},
+    {UINT, "Aggregation Level", 4}, // 2 bits
+    {PLACEHOLDER, "Candidate", 0},  // 3 bits
+    {PLACEHOLDER, "Search Space Type", 0},  // 1 bit
+    {PLACEHOLDER, "DCI Format", 0}, // 4 bits
+    {PLACEHOLDER, "Decode Status", 0},  // 4 bits
+    {PLACEHOLDER, "Start CCE", 0},  // 7 bits
+    {PLACEHOLDER, "Payload Size", 0},   // 8 bits
+    {PLACEHOLDER, "Tail Match", 0}, // 1 bit
+    {UINT, "Prune Status", 1},
+
+    //added fields
+    {UINT, "Rmax",1},
+    {PLACEHOLDER, "Hypothesis Repetition",0},
+    {UINT, "Decoded Repetition",1},
+    {PLACEHOLDER, "Mpdcch Group",0},
+    {UINT, "Nb",1},
+    //added fields
+
+    {UINT, "Norm Energy Metric", 4},    // x/65535.0
+    {UINT, "Symbol Error Rate", 4}, // x/2147483648.0
+};
+
 const Fmt LtePhyPdcchDecodingResult_Hypothesis_v42 [] = {
     // totally 28
     {BYTE_STREAM, "Payload", 8},
@@ -296,6 +320,164 @@ static int _decode_lte_phy_pdcch_decoding_result_payload (const char *b,
                         ValueNamePruneStatus,
                         ARRAY_SIZE(ValueNamePruneStatus, ValueName),
                         "(MI)Unknown");
+                unsigned int iNonDecode = _search_result_uint(result_record_item,
+                        "Norm Energy Metric");
+                float fNEM = iNonDecode / 65535.0;
+                pyfloat = Py_BuildValue("f", fNEM);
+                old_object = _replace_result(result_record_item,
+                        "Norm Energy Metric", pyfloat);
+                Py_DECREF(old_object);
+                Py_DECREF(pyfloat);
+                iNonDecode = _search_result_uint(result_record_item,
+                        "Symbol Error Rate");
+                float fSER = iNonDecode / 2147483648.0;
+                pyfloat = Py_BuildValue("f", fSER);
+                old_object = _replace_result(result_record_item,
+                        "Symbol Error Rate", pyfloat);
+                Py_DECREF(old_object);
+                Py_DECREF(pyfloat);
+
+                PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                        result_record_item, "dict");
+                PyList_Append(result_record, t1);
+                Py_DECREF(t1);
+                Py_DECREF(result_record_item);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Hypothesis",
+                    result_record, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_record);
+            return offset - start;
+        }
+    case 24:
+        {
+            offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Payload_v21,
+                    ARRAY_SIZE(LtePhyPdcchDecodingResult_Payload_v21, Fmt),
+                    b, offset, length, result);
+            int iNonDecodeP1 = _search_result_int(result, "Subframe Number");
+            int iSubFN = iNonDecodeP1 & 15; // 4 bits
+            int iSysFN = (iNonDecodeP1 >> 4) & 1023;
+            old_object = _replace_result_int(result, "Subframe Number", iSubFN);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "System Frame Number",
+                    iSysFN);
+            Py_DECREF(old_object);
+            int iNonDecodeP2 = _search_result_int(result, "Demback Mode Select");
+            int iDMS = iNonDecodeP2 & 15; // 4 bits
+            int iCarrierIndex = (iNonDecodeP2 >> 4) & 15;
+            old_object = _replace_result_int(result, "Demback Mode Select", iDMS);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Carrier Index", iCarrierIndex);
+            Py_DECREF(old_object);
+            (void) _map_result_field_to_name(result, "Carrier Index",
+                    ValueNameCarrierIndex,
+                    ARRAY_SIZE(ValueNameCarrierIndex, ValueName),
+                    "(MI)Unknown");
+            int num_record = _search_result_int(result, "Number of Hypothesis");
+            PyObject *result_record = PyList_New(0);
+            for (int i = 0; i < num_record; i++) {
+                PyObject *result_record_item = PyList_New(0);
+                offset += _decode_by_fmt(LtePhyPdcchDecodingResult_Hypothesis_v24,
+                        ARRAY_SIZE(LtePhyPdcchDecodingResult_Hypothesis_v24, Fmt),
+                        b, offset, length, result_record_item);
+                unsigned int iNonDecodeP3 = _search_result_uint(result_record_item,
+                        "Aggregation Level");
+
+                //modified bit length
+                int iAggLv = iNonDecodeP3 & 7;  // 3 bits
+                int iCandidate = (iNonDecodeP3 >> 3) & 7;   // 3 bits
+                int iSearchSpaceType = (iNonDecodeP3 >> 6) & 3; // 2 bit
+                int iDCIFormat = (iNonDecodeP3 >> 8) & 15; // 4 bits
+                int iDecodeStatus = (iNonDecodeP3 >> 12) & 15; // 4 bits
+                int iStartCCE = (iNonDecodeP3 >> 16) & 127;    // 7 bits
+                int iPayloadSize = (iNonDecodeP3 >> 23) & 255; // 8 bits
+                int iTailMatch = (iNonDecodeP3 >> 31) & 1; // 1 bit
+
+                old_object = _replace_result_int(result_record_item,
+                        "Aggregation Level", iAggLv);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "Aggregation Level",
+                        ValueNameAggregationLevel,
+                        ARRAY_SIZE(ValueNameAggregationLevel, ValueName),
+                        "(MI)Unknown");
+                old_object = _replace_result_int(result_record_item,
+                        "Candidate", iCandidate);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "Search Space Type", iSearchSpaceType);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "Search Space Type",
+                        ValueNameSearchSpaceType,
+                        ARRAY_SIZE(ValueNameSearchSpaceType, ValueName),
+                        "(MI)Unknown");
+                old_object = _replace_result_int(result_record_item,
+                        "DCI Format", iDCIFormat);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "DCI Format",
+                        ValueNameDCIFormat,
+                        ARRAY_SIZE(ValueNameDCIFormat, ValueName),
+                        "(MI)Unknown");
+                old_object = _replace_result_int(result_record_item,
+                        "Decode Status", iDecodeStatus);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "Decode Status",
+                        ValueNameRNTIType,
+                        ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                        "(MI)Unknown");
+                old_object = _replace_result_int(result_record_item,
+                        "Start CCE", iStartCCE);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "Payload Size", iPayloadSize);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "Tail Match", iTailMatch);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "Tail Match",
+                        ValueNameMatchOrNot,
+                        ARRAY_SIZE(ValueNameMatchOrNot, ValueName),
+                        "(MI)Unknown");
+                (void) _map_result_field_to_name(result_record_item,
+                        "Prune Status",
+                        ValueNamePruneStatus,
+                        ARRAY_SIZE(ValueNamePruneStatus, ValueName),
+                        "(MI)Unknown");
+
+                unsigned int itemp = _search_result_uint(result_record_item,
+                        "Rmax");
+                int iRmax = itemp & 0xf;
+                int iHypothesisRepetition = (itemp>>4) & 0xf;
+                old_object = _replace_result_int(result_record_item,
+                        "Rmax", iRmax);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "Hypothesis Repetition", iHypothesisRepetition);
+                Py_DECREF(old_object);
+
+                itemp = _search_result_uint(result_record_item,
+                        "Decoded Repetition");
+                int iDecodedRepetition = itemp & 0xf;
+                int iMpdcchGroup = (itemp>>4) & 0xf;
+                old_object = _replace_result_int(result_record_item,
+                        "Decoded Repetition", iDecodedRepetition);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "Mpdcch Group", iMpdcchGroup);
+                Py_DECREF(old_object);
+
+                itemp = _search_result_uint(result_record_item,
+                        "Nb");
+                int iNb = itemp & 0xf;
+                old_object = _replace_result_int(result_record_item,
+                        "Nb", iNb);
+                Py_DECREF(old_object);
+
                 unsigned int iNonDecode = _search_result_uint(result_record_item,
                         "Norm Energy Metric");
                 float fNEM = iNonDecode / 65535.0;

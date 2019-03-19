@@ -518,14 +518,12 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                         PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
-
     switch (pkt_ver) {
     case 23:
         {
             offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v23,
                                         ARRAY_SIZE(LtePhyPdschDemapperConfigFmt_v23, Fmt),
                                         b, offset, length, result);
-
             const unsigned int SFN_RSHIFT = 5, SFN_MASK = (1 << 10) - 1;
             const unsigned int SUBFRAME_RSHIFT = 1, SUBFRAME_MASK = (1 << 4) - 1;
             int tmp = _search_result_int(result, "System Frame Number");
@@ -630,6 +628,139 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             LtePhyPdschDemapperConfig_v23_Carrier_Index,
                                             ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Carrier_Index, ValueName),
                                             "(MI)Unknown");
+            break;
+        }
+
+    case 28:
+        {
+            offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v28,
+                                        ARRAY_SIZE(LtePhyPdschDemapperConfigFmt_v28, Fmt),
+                                        b, offset, length, result);
+
+            const unsigned int SFN_RSHIFT = 5, SFN_MASK = (1 << 10) - 1;
+            const unsigned int SUBFRAME_RSHIFT = 1, SUBFRAME_MASK = (1 << 4) - 1;
+            int tmp = _search_result_int(result, "System Frame Number");
+            int sfn = (tmp >> SFN_RSHIFT) & SFN_MASK;
+            int subframe = (tmp >> SUBFRAME_RSHIFT) & SUBFRAME_MASK;
+            int serv_cell = _search_result_int(result, "Serving Cell ID");
+            serv_cell += (tmp & 0x1) << 8;
+
+            PyObject *old_object = _replace_result_int(result, "Serving Cell ID", serv_cell);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "System Frame Number", sfn);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Subframe Number", subframe);
+            Py_DECREF(old_object);
+
+            // # antennas
+            tmp = _search_result_int(result, "Number of Tx Antennas(M)");
+            int iRNTIType = tmp & 15;
+            int iSpatialRank = (tmp >> 14) & 3;
+            tmp = (tmp >> 8) & 0x0f;
+            int M = tmp & 0x3;
+            M = (M != 3? (1 << M): -1);
+            int N = (tmp >> 2) & 0x1;
+            N = (1 << N);
+
+            old_object = _replace_result_int(result, "PDSCH RNTI Type", iRNTIType);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "PDSCH RNTI Type",
+                    ValueNameRNTIType,
+                    ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                    "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "Number of Tx Antennas(M)", M);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Number of Rx Antennas(N)", N);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Spatial Rank", iSpatialRank);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Spatial Rank",
+                    ValueNameRankIndex,
+                    ARRAY_SIZE(ValueNameRankIndex, ValueName),
+                    "(MI)Unknown");
+
+            tmp = _search_result_int(result, "Frequency Selective PMI");
+            int iFrequencySelectivePMI = (tmp >> 1) & 3;
+            int iPMIIndex = (tmp >> 4) & 15;
+
+            tmp = _search_result_int(result, "Transmission Scheme");
+            int iTransmissionScheme = tmp & 15;
+
+            int tmp2 = _search_result_int(result, "Repetition Index Data");
+            int iRepetionIndexData = ((tmp2&0x3ff)<<2)+((tmp>>6)&0x3);
+            old_object = _replace_result_int(result, "Repetition Index Data",
+                    iRepetionIndexData);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Frequency Selective PMI",
+                    iFrequencySelectivePMI);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Frequency Selective PMI",
+                    ValueNameFrequencySelectivePMI,
+                    ARRAY_SIZE(ValueNameFrequencySelectivePMI, ValueName),
+                    "(MI)Unknown");
+            old_object = _replace_result_int(result, "PMI Index", iPMIIndex);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Transmission Scheme",
+                    iTransmissionScheme);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Transmission Scheme",
+                    ValueNameTransmissionScheme,
+                    ARRAY_SIZE(ValueNameTransmissionScheme, ValueName),
+                    "(MI)Unknown");
+            // modulation & ratio
+            tmp = _search_result_int(result, "MCS 0");
+            int mod_stream0 = (tmp >> 1) & 0x3;
+            float ratio = float((tmp >> 3) & 4095) / 256.0;
+            tmp = _search_result_int(result, "MCS 1");
+            int mod_stream1 = (tmp >> 1) & 0x3;
+            int carrier_index = (tmp >> 9) & 0xf;
+
+            old_object = _replace_result_int(result, "MCS 0", mod_stream0);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "MCS 0",
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
+                                            "(MI)Unknown");
+
+            PyObject *pyfloat = Py_BuildValue("f", ratio);
+            //FIXME: Traffic to Pilot Ratio is incorrect. Refine its calculation
+            old_object = _replace_result(result, "Traffic to Pilot Ratio", pyfloat);
+            Py_DECREF(old_object);
+            Py_DECREF(pyfloat);
+
+            old_object = _replace_result_int(result, "MCS 1", mod_stream1);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "MCS 1",
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
+                                            "(MI)Unknown");
+
+            // carrier index
+            old_object = _replace_result_int(result, "Carrier Index", carrier_index);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "Carrier Index",
+                                            LtePhyPdschDemapperConfig_v23_Carrier_Index,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Carrier_Index, ValueName),
+                                            "(MI)Unknown");
+
+            tmp = _search_result_int(result, "Repetition Total");
+            int iRepetitionTotal = (tmp>>8) & 0xffff;
+            int iNBIndex = (tmp>>24) & 0x3f;
+            int iSIB1BRCollision = (tmp>>30) & 0x1;
+            int iSIBxCollision = (tmp>>31) & 0x1;
+            old_object = _replace_result_int(result, "Repetition Total", iRepetitionTotal);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "NB Index", iNBIndex);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "SIB1-BR Collision", iSIB1BRCollision);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "SIBx Collision", iSIBxCollision);
+            Py_DECREF(old_object);
+
             break;
         }
     case 103:
@@ -858,8 +989,6 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
             break;
         }
 
-
-
     default:
         printf("(MI)Unknown LTE PHY PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
         return 0;
@@ -980,6 +1109,7 @@ _decode_lte_phy_cmlifmr(const char *b, int offset, size_t length,
 static int
 _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                         PyObject *result) {
+
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Number of SubPackets");

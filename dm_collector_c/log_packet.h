@@ -457,6 +457,45 @@ const Fmt LtePhyPdschDemapperConfigFmt_v23 [] = {
     {PLACEHOLDER, "Carrier Index", 0}
 };
 
+const Fmt LtePhyPdschDemapperConfigFmt_v28 [] = {
+    {UINT, "Serving Cell ID", 1},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {UINT, "PDSCH RNTIl ID", 2},
+    {PLACEHOLDER, "PDSCH RNTI Type", 0},
+    {UINT, "Number of Tx Antennas(M)", 2},
+    {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
+    {PLACEHOLDER, "Spatial Rank", 0},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
+    {UINT, "Frequency Selective PMI", 1},   // right shift 1 bit, 2 bits
+    {PLACEHOLDER, "PMI Index", 0},  // 4 bits
+    {UINT, "Transmission Scheme", 1},   // 4 bits
+
+    {UINT, "Repetition Index Data", 2},
+
+    // {UINT, "Transport Block Size Stream 0", 2},
+    {UINT, "TBS 0", 2},
+    // {UINT, "Modulation Stream 0", 2},
+    {UINT, "MCS 0", 2},
+    {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
+    // {UINT, "Transport Block Size Stream 1", 2},
+    {UINT, "TBS 1", 2},
+    // {UINT, "Modulation Stream 1", 2},
+    {UINT, "MCS 1", 2},
+    {PLACEHOLDER, "Carrier Index", 0},
+
+    //skip PB,CSI_RS,ZP CSI-RS,CSI-RS
+
+    //newly added fields, Repetition Index not dessected as it is show in qcat but no corresponding byte
+    {UINT,"Repetition Total",4},
+    {PLACEHOLDER, "NB Index",0},
+    {PLACEHOLDER, "SIB1-BR Collision"},
+    {PLACEHOLDER, "SIBx Collision"},
+};
+
 const Fmt LtePhyPdschDemapperConfigFmt_v103 [] = {
     // TODO: just copy from v23.
     {UINT, "Serving Cell ID", 1},
@@ -3024,12 +3063,20 @@ const ValueName ValueNameAggregationLevel [] = {
     {1, "Agg2"},
     {2, "Agg4"},
     {3, "Agg8"},
+
+    //added for pdcch_decoding_v24
+    {6, "Agg16"},
+    {7, "Agg24"},
 };
 
 const ValueName ValueNameSearchSpaceType [] = {
     // 1 bit
     {0, "Common"},
     {1, "UE-specific"},
+
+    //added for pdcch_decoding_result
+    {3,"Common Type 2"},
+    {2,"User"},
 };
 
 const ValueName ValueNameRNTIType [] = {
@@ -3058,6 +3105,10 @@ const ValueName ValueNameDCIFormat [] = {
     {7, "Format 2A"},
     {8, "Format 3"},
     {9, "Format 3A"},
+
+    //added for PDCCH_Decoding_v24
+    {12,"Format 60A"},
+    {13,"Format 61A"},
 };
 
 const ValueName ValueNameMatchOrNot [] = {
@@ -3086,6 +3137,11 @@ const ValueName ValueNamePruneStatus [] = {
     {48, "PMI_ERROR_DCI2_2A"},
     {50, "NUM_LAYERS_ERROR_DCI2_2A_TB1"},
     {64, "FAIL_SER_ENGYMTRC_CHECK"},
+
+    //added for pdcch_decoding v24
+    {200,"PDCCH_DEBUG_SUCCESS_DCI60A"},
+    {201,"PDCCH_DEBUG_SUCCESS_DCI61A"},
+
 };
 
 const ValueName ValueNameFrameStructure [] = {
