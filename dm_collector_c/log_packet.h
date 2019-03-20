@@ -1723,6 +1723,35 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v5 [] = {
     {UINT, "PRACH Cfg R13 Present",1},
 };
 
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_rsrp_prach_list_size_v5 [] = {
+    {UINT, "RSRP Thresh PRACH List Size", 1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_rsrp_prach_list_v5 [] = {
+    {UINT, "RSRP Thresh PRACH List", 1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_hidden_rsrp_prach_list_v5 [] = {
+    {UINT, "Hidden RSRP Thresh PRACH List", 1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_param_ce_list_size_v5 [] = {
+    {UINT, "PRACH Param CE List", 1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_list_v5 [] = {
+    {BYTE_STREAM, "PRACH Param Ce", 7},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_hidden_prach_list_v5 [] = {
+    {BYTE_STREAM, "Hidden PRACH Param Ce", 7},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part [] = {
+    {UINT, "Initial CE Level", 2},
+    {UINT, "Preamble Trans Max CE", 2},
+};
+
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload [] = {
     // Version 1
     {UINT, "Rach reason", 1},
