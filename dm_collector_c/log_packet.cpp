@@ -8215,6 +8215,7 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     b, offset, length, result);
             offset += _decode_lte_phy_pdsch_decoding_result_payload(b, offset, length, result);
             break;
+
         case LTE_PHY_PUSCH_Tx_Report:
             offset += _decode_by_fmt(LtePhyPuschTxReport_Fmt,
                     ARRAY_SIZE(LtePhyPuschTxReport_Fmt, Fmt),

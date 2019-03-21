@@ -28,7 +28,7 @@ const Fmt LtePdcpDlCipherDataPdu_SubpktPayload_v24 [] = {
 
 const Fmt LtePdcpDlCipherDataPdu_SubpktPayload_v3 [] = {
     {UINT, "SRB Ciphering Keys", 16},
-    {UINT, "SRB Ciphering Keys", 16},
+    {UINT, "DRB Ciphering Keys", 16},
     {UINT, "SRB Cipher Algorithm", 1},
     {UINT, "DRB Cipher Algorithm", 1},
     {UINT, "Num PDUs", 2},
