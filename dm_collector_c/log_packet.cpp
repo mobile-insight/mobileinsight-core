@@ -2606,6 +2606,18 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                     "NORMAL");
                             success = true;
                         }
+                        else if(subpkt_ver == 2){
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_ConfigType_v2,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_ConfigType_v2, Fmt),
+                                    b, offset, length, result_subpkt);
+                            (void) _map_result_field_to_name(
+                                    result_subpkt,
+                                    "Config reason",
+                                    LteMacConfigurationConfigType_ConfigReason,
+                                    ARRAY_SIZE(LteMacConfigurationConfigType_ConfigReason, ValueName),
+                                    "NORMAL");
+                            success = true;
+                        }
                         break;
                     case 1: //DL Config Subpacket
                         if (subpkt_ver == 1) {
@@ -2613,12 +2625,50 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                     ARRAY_SIZE(LteMacConfigurationSubpkt_DLConfig, Fmt),
                                     b, offset, length, result_subpkt);
                             success = true;
+                        }else if (subpkt_ver == 2){
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig_v2,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_DLConfig_v2, Fmt),
+                                    b, offset, length, result_subpkt);
+                            int iNumActiveStag=_search_result_int(result_subpkt, "Num Active Stag");
+
+                            PyObject *result_ScellTagInfo = PyList_New(0);
+                            PyObject *t=NULL;
+                            PyObject *result_temp=NULL;
+                            for(int i=0;i<iNumActiveStag;i++){
+                                result_temp= PyList_New(0);
+                                offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig_Scell_Tag_Info_v2,
+                                        ARRAY_SIZE(LteMacConfigurationSubpkt_DLConfig_Scell_Tag_Info_v2, Fmt),
+                                        b, offset, length, result_temp);
+
+                                (void) _map_result_field_to_name(result_temp,
+                                    "TA Timer",
+                                    LteMacConfigurationConfigType_DLConfig_TA_Timer,
+                                    ARRAY_SIZE(LteMacConfigurationConfigType_DLConfig_TA_Timer, ValueName),
+                                    "MI Unknown");
+
+                                t= Py_BuildValue("(sOs)",
+                                                        "Scell Tag Info", result_temp, "dict");
+                                PyList_Append(result_ScellTagInfo, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_temp);
+                            }
+                            t= Py_BuildValue("(sOs)","Scell Tag Info", result_ScellTagInfo, "list");
+                            PyList_Append(result_subpkt, t);
+                            Py_DECREF(t);
+                            Py_DECREF(result_ScellTagInfo);
+
+                            success = true;
                         }
                         break;
                     case 2: //UL Config Subpacket
                         if (subpkt_ver == 1) {
                             offset += _decode_by_fmt(LteMacConfigurationSubpkt_ULConfig,
                                     ARRAY_SIZE(LteMacConfigurationSubpkt_ULConfig, Fmt),
+                                    b, offset, length, result_subpkt);
+                            success = true;
+                        }else if (subpkt_ver==2){
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_ULConfig_v2,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_ULConfig_v2, Fmt),
                                     b, offset, length, result_subpkt);
                             success = true;
                         }
@@ -2657,11 +2707,37 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                             offset += 290 - (offset-start_LC);
                             success = true;
                         }
+                        else if (subpkt_ver == 2) {
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_LCConfig_v2,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_LCConfig_v2, Fmt),
+                                    b, offset, length, result_subpkt);
+                            int num_LC = _search_result_int(result_subpkt, "Number of added/modified LC");
+                            int start_LC = offset;
+
+                            for (int j = 0; j < num_LC; j++) {
+                                PyObject *result_subpkt_LC = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacConfiguration_LCConfig_LC,
+                                                ARRAY_SIZE(LteMacConfiguration_LCConfig_LC, Fmt),
+                                                b, offset, length, result_subpkt_LC);
+                                PyObject *t = Py_BuildValue("(sOs)",
+                                                    "added/modified LC", result_subpkt_LC, "dict");
+                                PyList_Append(result_subpkt, t);
+                                Py_DECREF(result_subpkt_LC);
+                            }
+                            offset += 290 - (offset-start_LC);
+                            success = true;
+                        }
                         break;
                     case 13: //eMBMBS Config SubPacket
                         if (subpkt_ver == 1) {
                             offset += _decode_by_fmt(LteMacConfigurationSubpkt_eMBMSConfig,
                                     ARRAY_SIZE(LteMacConfigurationSubpkt_eMBMSConfig, Fmt),
+                                    b, offset, length, result_subpkt);
+                            success = true;
+                        }
+                        else if (subpkt_ver == 2) {
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_eMBMSConfig_v2,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_eMBMSConfig_v2, Fmt),
                                     b, offset, length, result_subpkt);
                             success = true;
                         }
@@ -5894,7 +5970,7 @@ static int _decode_lte_pdcp_ul_stats_subpkt (const char *b, int offset,
                     PyList_Append(result_subpkt, t1);
                     Py_DECREF(t1);
                     Py_DECREF(result_RB);
-                }else if(subpkt_id == 197 && subpkt_ver == 3){
+                }else if((subpkt_id == 197 && subpkt_ver == 3)||(subpkt_id == 197 && subpkt_ver == 24)){
                     // PDCP UL Stats: 0xC5
                     offset += _decode_by_fmt(
                             LtePdcpUlStats_SubpktPayload_v1,

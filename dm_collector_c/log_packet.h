@@ -1056,6 +1056,14 @@ const Fmt LteMacConfigurationSubpkt_ConfigType [] = {
     {UINT, "Config reason", 4}
 };
 
+
+const Fmt LteMacConfigurationSubpkt_ConfigType_v2 [] = {
+    {UINT, "Sub Id",1},
+    {UINT, "Config reason",1},
+    {UINT, "Config Bitmask",1},
+    {SKIP, "NULL",1},
+};
+
 const ValueName LteMacConfigurationConfigType_ConfigReason [] = {
     {2050, "CONNECTION RELEASE"}
 };
@@ -1065,12 +1073,39 @@ const Fmt LteMacConfigurationSubpkt_DLConfig [] = {
     {SKIP, "NULL", 2}
 };
 
+const Fmt LteMacConfigurationSubpkt_DLConfig_v2 [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Num Active Stag", 1},
+};
+
+const Fmt LteMacConfigurationSubpkt_DLConfig_Scell_Tag_Info_v2 [] = {
+    {UINT, "STAG Id", 1},
+    {UINT, "Scell Id Mask", 1},
+    {UINT, "Ta Timer Present", 1},
+    {UINT, "TA Timer", 2},
+    {SKIP, "NULL",1},
+};
+
+const ValueName LteMacConfigurationConfigType_DLConfig_TA_Timer [] = {
+    {0xffff, "Infinity ms"},
+};
+
 const Fmt LteMacConfigurationSubpkt_ULConfig [] = {
     {UINT, "SR periodicity", 3},
     {UINT, "BSR timer", 2},
     {UINT, "SPS Number of Tx released", 2},
     {UINT, "Retx BSR timer", 2}, // 0xFF need to be read as infinity
     {SKIP, "NULL", 3}
+};
+
+const Fmt LteMacConfigurationSubpkt_ULConfig_v2 [] = {
+    {UINT, "Sub Id",1},
+    {UINT, "SR resource present", 1},
+    {UINT, "SR periodicity", 2},
+    {UINT, "BSR timer", 2},
+    {UINT, "SPS Number of Tx released", 2},
+    {UINT, "Retx BSR timer", 2}, // 0xFF need to be read as infinity
+    {SKIP, "NULL", 2},
 };
 
 const Fmt LteMacConfigurationSubpkt_RACHConfig [] = {
@@ -1119,6 +1154,14 @@ const Fmt LteMacConfigurationSubpkt_LCConfig [] = {
 //    {SKIP, "NULL", 290}
 };
 
+const Fmt LteMacConfigurationSubpkt_LCConfig_v2 [] = {
+    {UINT, "Sub Id",1},
+    {UINT, "Number of deleted LC", 1},
+    {SKIP, "NULL", 32},
+    {UINT, "Number of added/modified LC", 1}
+//    {SKIP, "NULL", 290}
+};
+
 const Fmt LteMacConfiguration_LCConfig_LC [] = {
     {UINT, "LC ID", 1},
     {UINT, "PBR(KBytes/s)", 2},
@@ -1128,6 +1171,12 @@ const Fmt LteMacConfiguration_LCConfig_LC [] = {
 };
 
 const Fmt LteMacConfigurationSubpkt_eMBMSConfig [] = {
+    {UINT, "Num eMBMS Active LCs", 2}, // Not sure if this offset and length of this field is correct
+    {SKIP, "NULL", 98}
+};
+
+const Fmt LteMacConfigurationSubpkt_eMBMSConfig_v2 [] = {
+    {UINT, "Sub Id",1},
     {UINT, "Num eMBMS Active LCs", 2}, // Not sure if this offset and length of this field is correct
     {SKIP, "NULL", 98}
 };
