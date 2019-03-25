@@ -874,8 +874,6 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "(MI)Unknown");
             break;
         }
-
-
     case 104:
     case 123:
         {
@@ -988,7 +986,186 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             "(MI)Unknown");
             break;
         }
+    case 122:
+        {
+            offset += _decode_by_fmt(LtePhyPdschDemapperConfigFmt_v122,
+                                        ARRAY_SIZE(LtePhyPdschDemapperConfigFmt_v122, Fmt),
+                                        b, offset, length, result);
 
+            const unsigned int SFN_RSHIFT = 5, SFN_MASK = (1 << 10) - 1;
+            const unsigned int SUBFRAME_RSHIFT = 1, SUBFRAME_MASK = (1 << 4) - 1;
+            int tmp = _search_result_int(result, "System Frame Number");
+            int sfn = (tmp >> SFN_RSHIFT) & SFN_MASK;
+            int subframe = (tmp >> SUBFRAME_RSHIFT) & SUBFRAME_MASK;
+            int serv_cell = _search_result_int(result, "Serving Cell ID");
+            serv_cell += (tmp & 0x1) << 8;
+
+            PyObject *old_object = _replace_result_int(result, "Serving Cell ID", serv_cell);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "System Frame Number", sfn);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Subframe Number", subframe);
+            Py_DECREF(old_object);
+
+            // # antennas
+            tmp = _search_result_int(result, "Number of Tx Antennas(M)");
+            int iRNTIType = tmp & 15;
+            int M = (tmp>>6) & 0x3;
+            int N = (tmp>>8) & 0x3;
+            int iSpatialRank = (tmp >> 12) & 3;
+            int iFrequencySelectivePMI= (tmp>>15) & 1;
+
+            old_object = _replace_result_int(result, "PDSCH RNTI Type", iRNTIType);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "PDSCH RNTI Type",
+                    ValueNameRNTIType,
+                    ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                    "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "Number of Tx Antennas(M)", M);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Number of Tx Antennas(M)",
+                    LtePhyPdschDemapperConfig_v122_antenna,
+                    ARRAY_SIZE(LtePhyPdschDemapperConfig_v122_antenna, ValueName),
+                    "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "Number of Rx Antennas(N)", N);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Number of Rx Antennas(N)",
+                    LtePhyPdschDemapperConfig_v122_antenna,
+                    ARRAY_SIZE(LtePhyPdschDemapperConfig_v122_antenna, ValueName),
+                    "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "Spatial Rank", iSpatialRank);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Spatial Rank",
+                    ValueNameRankIndex,
+                    ARRAY_SIZE(ValueNameRankIndex, ValueName),
+                    "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "Frequency Selective PMI",
+                    iFrequencySelectivePMI);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Frequency Selective PMI",
+                    ValueNameFrequencySelectivePMI,
+                    ARRAY_SIZE(ValueNameFrequencySelectivePMI, ValueName),
+                    "(MI)Unknown");
+
+
+            tmp = _search_result_int(result, "PMI Index");
+            int iPMIIndex = (tmp >> 2) & 15;
+            int iTransmissionScheme = (tmp>>6) & 15;
+            int iBMODFMSymIndex = (tmp>>12) & 15;
+
+            old_object = _replace_result_int(result, "PMI Index", iPMIIndex);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Transmission Scheme",
+                    iTransmissionScheme);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result, "Transmission Scheme",
+                    ValueNameTransmissionScheme,
+                    ARRAY_SIZE(ValueNameTransmissionScheme, ValueName),
+                    "(MI)Unknown");
+            old_object = _replace_result_int(result, "BMOD FD Sym Index",
+                    iBMODFMSymIndex);
+            Py_DECREF(old_object);
+
+            tmp = _search_result_int(result, "MVC");
+            int iMVC = (tmp>>2) & 1;
+            int iMVCClock = (tmp>>3) & 15;
+            int iMVCRequestUp = (tmp>>7) & 1;
+
+            old_object = _replace_result_int(result, "MVC", iMVC);
+            Py_DECREF(old_object);
+
+            old_object = _replace_result_int(result, "MVC Clock",
+                    iMVCClock);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "MVC Clock",
+                                            LtePhyPdschDemapperConfig_v122_MVC_Clock,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v122_MVC_Clock, ValueName),
+                                            "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "MVC Request Up",
+                    iMVCRequestUp);
+            Py_DECREF(old_object);
+
+            // modulation & ratio
+            tmp = _search_result_int(result, "MCS 0");
+            int mod_stream0 = (tmp >> 2) & 0x3;
+            float ratio = float((tmp >> 4) & 0x1fff) / 256.0;
+
+            tmp = _search_result_int(result, "MCS 1");
+            int mod_stream1 = (tmp >> 2) & 0x3;
+            int ipb = (tmp >>4) & 0x3;
+            int carrier_index = (tmp >> 6) & 0xf;
+
+            int iCSIRSExist = (tmp>>10) & 0x1;
+            int iZPCSIRSExist = (tmp>>11) & 0x1;
+            int iCSIRSSymbolSkipped = (tmp>>12) & 0x1 ;
+
+            old_object = _replace_result_int(result, "MCS 0", mod_stream0);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "MCS 0",
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
+                                            "(MI)Unknown");
+
+            PyObject *pyfloat = Py_BuildValue("f", ratio);
+            old_object = _replace_result(result, "Traffic to Pilot Ratio", pyfloat);
+            Py_DECREF(old_object);
+            Py_DECREF(pyfloat);
+
+            old_object = _replace_result_int(result, "MCS 1", mod_stream1);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "MCS 1",
+                                            LtePhyPdschDemapperConfig_v23_Modulation,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
+                                            "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "PB", ipb);
+            Py_DECREF(old_object);
+
+            // carrier index
+            old_object = _replace_result_int(result, "Carrier Index", carrier_index);
+            Py_DECREF(old_object);
+            (void)_map_result_field_to_name(result,
+                                            "Carrier Index",
+                                            LtePhyPdschDemapperConfig_v23_Carrier_Index,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Carrier_Index, ValueName),
+                                            "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "CSI-RS Exist", iCSIRSExist);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "ZP CSI-RS Exist", iZPCSIRSExist);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "CSI-RS Symbol Skipped", iCSIRSSymbolSkipped);
+            Py_DECREF(old_object);
+
+            tmp = _search_result_int(result, "Op Mode");
+            int iOPMode = tmp & 0x15;
+            int iStrongICellID = (tmp>>4) & 0x1ff;
+            int iJointDemodSkipReason = (tmp>>13) & 0x1f;
+
+            old_object = _replace_result_int(result, "Op Mode", iOPMode);
+            Py_DECREF(old_object);
+
+            (void)_map_result_field_to_name(result,
+                                            "Op Mode",
+                                            LtePhyPdschDemapperConfig_v122_OPMode,
+                                            ARRAY_SIZE(LtePhyPdschDemapperConfig_v122_OPMode, ValueName),
+                                            "(MI)Unknown");
+
+            old_object = _replace_result_int(result, "Strong ICell ID", iStrongICellID);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Joint Demod Skip Reason",iJointDemodSkipReason );
+            Py_DECREF(old_object);
+
+            break;
+        }
     default:
         printf("(MI)Unknown LTE PHY PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
         return 0;
@@ -8291,7 +8468,6 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     b, offset, length, result);
             offset += _decode_lte_phy_pdsch_decoding_result_payload(b, offset, length, result);
             break;
-            
         case LTE_PHY_PUSCH_Tx_Report:
             offset += _decode_by_fmt(LtePhyPuschTxReport_Fmt,
                     ARRAY_SIZE(LtePhyPuschTxReport_Fmt, Fmt),

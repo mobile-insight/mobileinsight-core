@@ -550,7 +550,41 @@ const Fmt LtePhyPdschDemapperConfigFmt_v104 [] = {
     {SKIP, NULL, 4},
 };
 
-
+const Fmt LtePhyPdschDemapperConfigFmt_v122 [] = {
+    {UINT, "Serving Cell ID", 1},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {UINT, "PDSCH RNTIl ID", 2},
+    {UINT, "Number of Tx Antennas(M)", 2},
+    {PLACEHOLDER, "PDSCH RNTI Type", 0},    
+    {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
+    {PLACEHOLDER, "Spatial Rank", 0},
+    {PLACEHOLDER, "Frequency Selective PMI", 0},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
+    {UINT, "PMI Index", 2},
+    {PLACEHOLDER, "Transmission Scheme", 0},
+    {PLACEHOLDER, "BMOD FD Sym Index",0},
+    {SKIP,NULL,1},
+    {UINT,"MVC",1},
+    {PLACEHOLDER,"MVC Clock",0},
+    {PLACEHOLDER,"MVC Request Up",0},
+    {UINT, "TBS 0", 2},
+    {UINT, "MCS 0", 2},
+    {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
+    {UINT, "TBS 1", 2},
+    {UINT, "MCS 1", 2},
+    {PLACEHOLDER, "PB",0},
+    {PLACEHOLDER, "Carrier Index", 0},
+    {PLACEHOLDER, "CSI-RS Exist",0},
+    {PLACEHOLDER, "ZP CSI-RS Exist",0},
+    {PLACEHOLDER, "CSI-RS Symbol Skipped",0},
+    {UINT,"Op Mode",4},
+    {PLACEHOLDER,"Strong ICell ID",0},
+    {PLACEHOLDER,"Joint Demod Skip Reason",0},
+};
 
 const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
     {0, "QPSK"},
@@ -561,6 +595,19 @@ const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
 const ValueName LtePhyPdschDemapperConfig_v23_Carrier_Index [] = {
     {0, "PCC"},
     {1, "SCC"}
+};
+
+const ValueName LtePhyPdschDemapperConfig_v122_antenna [] = {
+    {1, "2 antennas"},
+    {2, "4 antennas"}
+};
+
+const ValueName LtePhyPdschDemapperConfig_v122_MVC_Clock [] = {
+    {0, "MIN SVS"},
+};
+
+const ValueName LtePhyPdschDemapperConfig_v122_OPMode [] = {
+    {1, "TILE0_4RX"},
 };
 
 // ------------------------------------------------------------
