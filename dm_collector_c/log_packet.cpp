@@ -2964,6 +2964,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
     }
 }
 
+
 //------------------------------------------------------
 // TODO: Jie
 static int
@@ -8474,8 +8475,6 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                     b, offset, length, result);
             offset += _decode_lte_phy_pusch_tx_report_payload(b, offset, length, result);
             break;
-
-            
         case LTE_PHY_RLM_Report:
             offset += _decode_by_fmt(LtePhyRlmReport_Fmt,
                     ARRAY_SIZE(LtePhyRlmReport_Fmt, Fmt),
