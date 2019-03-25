@@ -128,6 +128,7 @@ static int _decode_lte_phy_pucch_csf_payload (const char *b,
                     "(MI)Unknown");
             return offset - start;
         }
+    case 101:
     case 102:
         {
             offset += _decode_by_fmt(LtePhyPucchCsf_Payload_v102,
@@ -160,8 +161,9 @@ static int _decode_lte_phy_pucch_csf_payload (const char *b,
             Py_DECREF(old_object);
 
             temp = _search_result_int(result, "Csi Meas Set Index");
-            int iCsiMeasSetIndex = temp & 3;
-            int iRankIndex = (utemp >> 2) & 7;
+            int iCsiMeasSetIndex = (temp>>1) & 0x1;
+            int iRankIndex = (temp >> 2) & 0x3;
+
             old_object = _replace_result_int(result,
                     "Csi Meas Set Index", iCsiMeasSetIndex);
             Py_DECREF(old_object);
