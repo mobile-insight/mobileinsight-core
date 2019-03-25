@@ -2873,6 +2873,7 @@ const ValueName LtePucchPowerControl_Record_v4_DCI_Format [] = {
     // {9, "Format 2C"},
     {10, "Format 3"},
     {11, "Format 3A"},
+    {13, "NO DCI"},
     // {12, "Format 4"},
 };
 const ValueName LtePucchPowerControl_Record_v4_PUCCH_Format [] = {
@@ -2995,8 +2996,10 @@ const Fmt LtePuschPowerControl_Record_Fmt_v5 [] = {
     {PLACEHOLDER, "TPC", 0},
     {PLACEHOLDER, "PUSCH Actual Tx Power", 0},
 };
+
 const Fmt LtePuschPowerControl_Record_Fmt_v25 [] = {
     {UINT, "SFN", 4},
+    {PLACEHOLDER, "Cell Index",0},
     {PLACEHOLDER, "Sub-FN", 0},
     {PLACEHOLDER, "PUSCH Tx Power (dBm)", 0},
     {PLACEHOLDER, "DCI Format", 0},
@@ -3008,6 +3011,7 @@ const Fmt LtePuschPowerControl_Record_Fmt_v25 [] = {
     {UINT, "F(i)", 4},
     {PLACEHOLDER, "TPC", 0},
     {PLACEHOLDER, "PUSCH Actual Tx Power", 0},
+    {PLACEHOLDER, "Max Power", 0},
 };
 
 const ValueName LtePuschPowerControl_Record_v5_TxType [] = {

@@ -6712,12 +6712,14 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                 old_object = _replace_result_int(result_record_item,
                         "DCI Format", iDCI);
                 Py_DECREF(old_object);
+
                 (void) _map_result_field_to_name(result_record_item,
                         "DCI Format",
                         LtePucchPowerControl_Record_v4_DCI_Format,
                         ARRAY_SIZE(LtePucchPowerControl_Record_v4_DCI_Format,
                             ValueName),
                         "(MI)Unknown");
+
                 old_object = _replace_result_int(result_record_item,
                         "PUCCH Format", iPUCCH);
                 Py_DECREF(old_object);
@@ -6911,12 +6913,23 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                         "SFN");
                 // int iSFN = iNonDecodeSFN & 1023; // last 10 bits
                 // printf("iNonDecodeSFN=%#04x\n",iNonDecodeSFN);
-                int iSFN = (ntohl(iNonDecodeSFN)>>16 & 3) | (((ntohl(iNonDecodeSFN)>>20) & 255)<<2);
-                int iSubFN = (iNonDecodeSFN >> 10) & 15; // next 4 bits
-                int iPower = (ntohl(iNonDecodeSFN) >> 9) & 31; // next 8 bits
-                int iDCI = (iNonDecodeSFN >> 22) & 15; // next 4 bits
-                int iTxType = (iNonDecodeSFN >> 26) & 3; // next 3 bits
+                //int iSFN = (ntohl(iNonDecodeSFN)>>16 & 3) | (((ntohl(iNonDecodeSFN)>>20) & 255)<<2);
+                int iCellIndex = iNonDecodeSFN & 0x7;
+                int iSFN = (iNonDecodeSFN>>3) & 0x3ff;
+                int iSubFN = (iNonDecodeSFN >> 13) & 15; // next 4 bits
+                //int iPower = (ntohl(iNonDecodeSFN) >> 9) & 31; // next 8 bits
+                int iPower = (iNonDecodeSFN >> 17) & 0xff;
+
+                int iDCI = (iNonDecodeSFN >> 25) & 15; // next 4 bits
+
+                int iTxType = (iNonDecodeSFN >> 29) & 3; // next 2 bits
+                int iTPCFrozen = (iNonDecodeSFN >> 31) & 1; //next 1 bit
+
                 PyObject *old_object = _replace_result_int(result_record_item,
+                        "Cell Index", iCellIndex);
+                Py_DECREF(old_object);
+
+                old_object = _replace_result_int(result_record_item,
                         "SFN", iSFN);
                 Py_DECREF(old_object);
                 old_object = _replace_result_int(result_record_item, "Sub-FN",
@@ -6937,12 +6950,17 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                 old_object = _replace_result_int(result_record_item,
                         "Tx Type", iTxType);
                 Py_DECREF(old_object);
+
                 (void) _map_result_field_to_name(result_record_item,
                         "Tx Type",
                         LtePuschPowerControl_Record_v5_TxType,
                         ARRAY_SIZE(LtePuschPowerControl_Record_v5_TxType,
                             ValueName),
                         "(MI)Unknown");
+
+                old_object = _replace_result_int(result_record_item,
+                        "TPC Frozen", iTPCFrozen);
+                Py_DECREF(old_object);
 
                 unsigned int iNonDecodeNRB = _search_result_uint(result_record_item,
                         "Num RBs");
@@ -6967,6 +6985,8 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                 }
                 int iTPC = (iNonDecodeFi >> 10) & 31; // next 5 bits
                 int iActualPower = (iNonDecodeFi >> 15) & 255;
+                int iMAxPower = (iNonDecodeFi >> 23) & 255;
+
                 old_object = _replace_result_int(result_record_item,
                         "F(i)", iFi);
                 Py_DECREF(old_object);
@@ -6980,8 +7000,13 @@ static int _decode_lte_pusch_power_control_payload (const char *b, int offset,
                                 ValueName),
                             "(MI)Unknown");
                 }
+
                 old_object = _replace_result_int(result_record_item,
                         "PUSCH Actual Tx Power", iActualPower);
+                Py_DECREF(old_object);
+
+                old_object = _replace_result_int(result_record_item,
+                        "Max Power", iMAxPower);
                 Py_DECREF(old_object);
 
                 PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
