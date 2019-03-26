@@ -2978,6 +2978,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                             offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig_v2,
                                     ARRAY_SIZE(LteMacConfigurationSubpkt_DLConfig_v2, Fmt),
                                     b, offset, length, result_subpkt);
+
                             int iNumActiveStag=_search_result_int(result_subpkt, "Num Active Stag");
 
                             PyObject *result_ScellTagInfo = PyList_New(0);
@@ -2989,11 +2990,15 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                         ARRAY_SIZE(LteMacConfigurationSubpkt_DLConfig_Scell_Tag_Info_v2, Fmt),
                                         b, offset, length, result_temp);
 
-                                (void) _map_result_field_to_name(result_temp,
-                                    "TA Timer",
-                                    LteMacConfigurationConfigType_DLConfig_TA_Timer,
-                                    ARRAY_SIZE(LteMacConfigurationConfigType_DLConfig_TA_Timer, ValueName),
-                                    "MI Unknown");
+                                int iTaTimer= _search_result_uint(result_temp,"TA Timer");
+
+                                if(iTaTimer == 0xffff){
+                                    (void) _map_result_field_to_name(result_temp,
+                                        "TA Timer",
+                                        LteMacConfigurationConfigType_DLConfig_TA_Timer,
+                                        ARRAY_SIZE(LteMacConfigurationConfigType_DLConfig_TA_Timer, ValueName),
+                                        "MI Unknown");
+                                }
 
                                 t= Py_BuildValue("(sOs)",
                                                         "Scell Tag Info", result_temp, "dict");
