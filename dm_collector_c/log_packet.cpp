@@ -1229,6 +1229,7 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                     ARRAY_SIZE(ValueNameRankIndex, ValueName),
                     "(MI)Unknown");
 
+
             old_object = _replace_result_int(result, "Frequency Selective PMI",
                     iFrequencySelectivePMI);
             Py_DECREF(old_object);
@@ -1278,6 +1279,7 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
                                             ARRAY_SIZE(LtePhyPdschDemapperConfig_v23_Modulation, ValueName),
                                             "(MI)Unknown");
 
+
             PyObject *pyfloat = Py_BuildValue("f", ratio);
             old_object = _replace_result(result, "Traffic to Pilot Ratio", pyfloat);
             Py_DECREF(old_object);
@@ -1317,6 +1319,7 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
 
             old_object = _replace_result_int(result, "Op Mode", iOPMode);
             Py_DECREF(old_object);
+
 
             (void)_map_result_field_to_name(result,
                                             "Op Mode",
@@ -3165,6 +3168,8 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                 int subpkt_id = _search_result_int(result_subpkt, "SubPacket ID");
                 int subpkt_ver = _search_result_int(result_subpkt, "Version");
                 int subpkt_nsample = _search_result_int(result_subpkt, "Num Samples");
+                int subpkt_size = _search_result_int(result_subpkt, "SubPacket Size");
+
                 const char *type_name = search_name(LteMacConfigurationSubpkt_SubpktType,
                                                     ARRAY_SIZE(LteMacConfigurationSubpkt_SubpktType, ValueName),
                                                     subpkt_id);
@@ -3234,11 +3239,16 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                         case 2:
                             {
                                 // UL Transport Block Subpacket V2
+                                int nsample_byte_count=0;
+                                int tmp_count=0;
                                 for (int j = 0; j < subpkt_nsample; j++) {
                                     PyObject *result_subpkt_sample = PyList_New(0);
-                                    offset += _decode_by_fmt(LteMacULTransportBlock_SubpktV2_SampleFmt,
+                                    tmp_count= _decode_by_fmt(LteMacULTransportBlock_SubpktV2_SampleFmt,
                                             ARRAY_SIZE(LteMacULTransportBlock_SubpktV2_SampleFmt, Fmt),
                                             b, offset, length, result_subpkt_sample);
+                                    offset +=tmp_count;
+                                    nsample_byte_count +=tmp_count;
+
                                     (void) _map_result_field_to_name(
                                             result_subpkt_sample,
                                             "BSR event",
@@ -3258,18 +3268,22 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             ARRAY_SIZE(ValueNameRNTIType,
                                                 ValueName),
                                             "(MI)Unknown");
+
                                     int temp = _search_result_int(
                                             result_subpkt_sample, "Sub-FN");
                                     int iSubFN = temp & 15; // 4 bits
                                     int iSFN = (temp >> 4);
+
                                     PyObject *old_object = _replace_result_int(
                                             result_subpkt_sample,
                                             "Sub-FN", iSubFN);
                                     Py_DECREF(old_object);
+
                                     old_object = _replace_result_int(
                                             result_subpkt_sample,
                                             "SFN", iSFN);
                                     Py_DECREF(old_object);
+
                                     offset += _search_result_int(
                                             result_subpkt_sample, "HDR LEN");
                                     PyObject *t = Py_BuildValue("(sOs)",
@@ -3277,6 +3291,12 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                     PyList_Append(result_sample_list, t);
                                     Py_DECREF(result_subpkt_sample);
                                     Py_DECREF(t);
+
+                                    //insuffient bits
+                                    if(nsample_byte_count>subpkt_size-5){
+                                        break;
+                                    }
+
                                 }
                                 success = true;
                                 break;
@@ -5078,7 +5098,6 @@ static int _decode_lte_mac_rach_trigger_subpkt (const char *b, int offset,
                     PyList_Append(result_subpkt, t);
                     Py_DECREF(t);
                     Py_DECREF(result_prach_cfg_r13);
-
                 }else if (subpkt_id == 5 && subpkt_ver == 1) {
                     offset += _decode_by_fmt(
                             LteMacRachTrigger_RachReasonSubpktPayload,
@@ -5776,7 +5795,7 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
                         "Subpacket Version");
                 int subpkt_size = _search_result_int(result_subpkt,
                         "Subpacket Size");
-                if ((subpkt_id == 193 && subpkt_ver == 2) || (subpkt_id == 193 && subpkt_ver == 24)) {
+                if (subpkt_id == 193 && subpkt_ver == 2)  {
                     // PDCP UL Config 0xC1
                     offset += _decode_by_fmt(
                             LtePdcpUlConfig_SubpktPayload,
@@ -5906,7 +5925,8 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
                     PyList_Append(result_subpkt, t3);
                     Py_DECREF(t3);
                     Py_DECREF(result_ActiveRB);
-                }else if ((subpkt_id == 193 && subpkt_ver == 3)) {
+                }
+                else if ((subpkt_id == 193 && subpkt_ver == 3)) {
                     // PDCP UL Config 0xC1
                     offset += _decode_by_fmt(
                             LtePdcpUlConfig_SubpktPayload,
@@ -6031,7 +6051,140 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
                     Py_DECREF(t3);
                     Py_DECREF(result_ActiveRB);
                 }
-                 else {
+                else if (subpkt_id == 193 && subpkt_ver == 24) {
+                    // PDCP UL Config 0xC1
+                    offset += _decode_by_fmt(
+                            LtePdcpUlConfig_SubpktPayload,
+                            ARRAY_SIZE(LtePdcpUlConfig_SubpktPayload, Fmt),
+                            b, offset, length, result_subpkt);
+                    (void) _map_result_field_to_name(result_subpkt, "Reason",
+                            LtePdcpUlConfig_Subpkt_Reason,
+                            ARRAY_SIZE(LtePdcpUlConfig_Subpkt_Reason, ValueName),
+                            "(MI)Unknown");
+                    (void) _map_result_field_to_name(result_subpkt, "SRB Cipher Algorithm",
+                            LtePdcpUlConfig_Subpkt_CipherAlgo,
+                            ARRAY_SIZE(LtePdcpUlConfig_Subpkt_CipherAlgo, ValueName),
+                            "(MI)Unknown");
+                    (void) _map_result_field_to_name(result_subpkt, "DRB Cipher Algorithm",
+                            LtePdcpUlConfig_Subpkt_CipherAlgo,
+                            ARRAY_SIZE(LtePdcpUlConfig_Subpkt_CipherAlgo, ValueName),
+                            "(MI)Unknown");
+                    (void) _map_result_field_to_name(result_subpkt, "SRB Integrity Algorithm",
+                            LtePdcpUlConfig_Subpkt_IntegAlgo,
+                            ARRAY_SIZE(LtePdcpUlConfig_Subpkt_IntegAlgo, ValueName),
+                            "(MI)Unknown");
+                    int iArraySize = _search_result_int(result_subpkt,
+                            "Array size");
+
+
+
+                    // Released RB
+                    int start_ReleasedRBStruct = offset;
+                    offset += _decode_by_fmt(
+                            LtePdcpUlConfig_Subpkt_ReleaseRB_Header,
+                            ARRAY_SIZE(LtePdcpUlConfig_Subpkt_ReleaseRB_Header,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    int num_ReleasedRB = _search_result_int(result_subpkt,
+                            "Number of Released RBs");
+                    PyObject *result_ReleasedRB = PyList_New(0);
+                    for (int j = 0; j < num_ReleasedRB; j++) {
+                        PyObject *result_ReleasedRB_item = PyList_New(0);
+                        offset += _decode_by_fmt(LtePdcpUlConfig_Subpkt_ReleaseRB_Fmt,
+                                ARRAY_SIZE(LtePdcpUlConfig_Subpkt_ReleaseRB_Fmt, Fmt),
+                                b, offset, length, result_ReleasedRB_item);
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                                result_ReleasedRB_item, "dict");
+                        PyList_Append(result_ReleasedRB, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_ReleasedRB_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "Released RBs",
+                            result_ReleasedRB, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_ReleasedRB);
+                    offset += 1 + iArraySize * 1 -
+                        (offset - start_ReleasedRBStruct);
+
+                    // Added/Modified RB
+                    int start_AddedModifiedRBStruct = offset;
+                    offset += _decode_by_fmt(LtePdcpUlConfig_Subpkt_AddedModifiedRB_Header,
+                            ARRAY_SIZE(LtePdcpUlConfig_Subpkt_AddedModifiedRB_Header,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    int num_AddedModifiedRB = _search_result_int(result_subpkt,
+                            "Number of Added/Modified RBs");
+                    PyObject *result_AddedModifiedRB = PyList_New(0);
+                    for (int j = 0; j < num_AddedModifiedRB; j++) {
+                        PyObject *result_AddedModifiedRB_item = PyList_New(0);
+                        offset += _decode_by_fmt(LtePdcpUlConfig_Subpkt_AddedModifiedRB_Fmt,
+                                ARRAY_SIZE(LtePdcpUlConfig_Subpkt_AddedModifiedRB_Fmt, Fmt),
+                                b, offset, length, result_AddedModifiedRB_item);
+                        (void) _map_result_field_to_name(result_AddedModifiedRB_item,
+                                "Action",
+                                LtePdcpUlConfig_Subpkt_AddedModifiedRB_Action,
+                                ARRAY_SIZE(LtePdcpUlConfig_Subpkt_AddedModifiedRB_Action,
+                                    ValueName),
+                                "(MI)Unknown");
+                        PyObject *t2 = Py_BuildValue("(sOs)", "Ignored",
+                                result_AddedModifiedRB_item, "dict");
+                        PyList_Append(result_AddedModifiedRB, t2);
+                        Py_DECREF(t2);
+                        Py_DECREF(result_AddedModifiedRB_item);
+                    }
+                    PyObject *t2 = Py_BuildValue("(sOs)", "Added/Modified RBs",
+                            result_AddedModifiedRB, "list");
+                    PyList_Append(result_subpkt, t2);
+                    Py_DECREF(t2);
+                    Py_DECREF(result_AddedModifiedRB);
+                    offset += 1 + iArraySize * 2 - (offset - start_AddedModifiedRBStruct);
+
+                    // Active RB
+                    // int start_ActiveRBStruct = offset;
+                    offset += _decode_by_fmt(LtePdcpUlConfig_Subpkt_ActiveRB_Header,
+                            ARRAY_SIZE(LtePdcpUlConfig_Subpkt_ActiveRB_Header,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    int num_ActiveRB = _search_result_int(result_subpkt,
+                            "Number of active RBs");
+                    PyObject *result_ActiveRB = PyList_New(0);
+                    for (int j = 0; j < num_ActiveRB; j++) {
+                        PyObject *result_ActiveRB_item = PyList_New(0);
+                        offset += _decode_by_fmt(LtePdcpUlConfig_Subpkt_ActiveRB_Fmt_v24,
+                                ARRAY_SIZE(LtePdcpUlConfig_Subpkt_ActiveRB_Fmt_v24, Fmt),
+                                b, offset, length, result_ActiveRB_item);
+                        (void) _map_result_field_to_name(result_ActiveRB_item,
+                                "RB mode",
+                                LtePdcpUlConfig_Subpkt_ActiveRB_RBmode,
+                                ARRAY_SIZE(LtePdcpUlConfig_Subpkt_ActiveRB_RBmode,
+                                    ValueName),
+                                "(MI)Unknown");
+                        (void) _map_result_field_to_name(result_ActiveRB_item,
+                                "RB type",
+                                LtePdcpUlConfig_Subpkt_ActiveRB_RBtype,
+                                ARRAY_SIZE(LtePdcpUlConfig_Subpkt_ActiveRB_RBtype,
+                                    ValueName),
+                                "(MI)Unknown");
+                        (void) _map_result_field_to_name(result_ActiveRB_item,
+                                "RoHC Enabled",
+                                LtePdcpUlConfig_Subpkt_ActiveRB_RoHCEnabled,
+                                ARRAY_SIZE(LtePdcpUlConfig_Subpkt_ActiveRB_RoHCEnabled,
+                                    ValueName),
+                                "true");
+                        PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                result_ActiveRB_item, "dict");
+                        PyList_Append(result_ActiveRB, t3);
+                        Py_DECREF(t3);
+                        Py_DECREF(result_ActiveRB_item);
+                    }
+                    PyObject *t3 = Py_BuildValue("(sOs)", "Active RBs",
+                            result_ActiveRB, "list");
+                    PyList_Append(result_subpkt, t3);
+                    Py_DECREF(t3);
+                    Py_DECREF(result_ActiveRB);
+                }
+                else {
                     printf("(MI)Unknown LTE PDCP UL Config subpkt id and version:"
                             " 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
@@ -8760,7 +8913,6 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             offset += _decode_gsm_dsds_rr_signaling_msg_payload(
                     b, offset, length, result);
             break;
-
         case Srch_TNG_1x_Searcher_Dump:
             offset += _decode_by_fmt(SrchTng1xsd_Fmt,
                     ARRAY_SIZE(SrchTng1xsd_Fmt, Fmt),
@@ -8808,7 +8960,6 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
     };
 
 }
-
 
 PyObject *
 decode_log_packet (const char *b, size_t length, bool skip_decoding) {

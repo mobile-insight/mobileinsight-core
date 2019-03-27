@@ -192,8 +192,10 @@ const Fmt LtePhyPdschDecodingResult_TBlks_v126 [] = {
     {UINT, "First Decoded CB Index Qed Iter2 Data",4},
     {PLACEHOLDER, "Last Decoded CB Index Qed Iter2 Data", 0},  // 4 bits
     {PLACEHOLDER, "Companding Format", 0},  // 4 bits
-    {SKIP, NULL, 3},
 
+    {SKIP, NULL, 1},
+
+    {UINT,"Effective Code Rate Data",2},
     {UINT, "HARQ Combine Enable",1},
 };
 
@@ -1400,22 +1402,22 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                             "Transport Block CRC");
                     int iTransportBlockCRC = temp & 1;  // 1 bit
                     int iNDI = (temp >> 1) & 1; // 1 bit
-                    int iRetransmissionNumber = (temp >> 2) & 7;   // 3 bits
+                    int iRetransmissionNumber = (temp >> 2) & 0x3f;   // 6 bits
                     int iRVID = (temp >> 8) & 3;   // 2 bits
 
-                    int iCodeBlockSizePlus = (temp >> 10) & 16383;    // 14 bits
+                    int iCodeBlockSizePlus = (temp >> 10) & 0x1fff;    // 13 bits
 
-                    int iNumCodeBlockPlusData = (temp >> 23) & 3;  // 2 bits
+                    int iNumCodeBlockPlusData = (temp >> 23) & 0x1f;  // 5 bits
                     int iNumCodeBlockPlus = iNumCodeBlockPlusData +1;
 
                     int iMaxHalfIterData=(temp>>28) & 15;//4 bits
 
                     temp = _search_result_uint(result_record_stream_item,
                             "Num Channel Bits");
-                    int iNumChannelBits=temp & 1023;//10 bits
-                    int iCwIdx = (temp>>6)&3;//2 bits
-                    int iLlrBufValid=(temp>>9)&3;//2 bits
-                    int iFirstDecodedCBIndex=(temp>>11)&7;//2 bits
+                    int iNumChannelBits=temp & 0x7ffff;//19 bits
+                    int iCwIdx = (temp>>19)&1;//1 bits
+                    int iLlrBufValid=(temp>>20)&1;//2 bits
+                    int iFirstDecodedCBIndex=(temp>>21)&0x3f;//6 bits
 
                     temp = _search_result_uint(result_record_stream_item,
                             "First Decoded CB Index Qed Iter2 Data");
@@ -1424,6 +1426,12 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                     int iLastDecodedCBIndexQedIter2Data=(temp>>12)&63;
 
                     int iCompandingFormat=(temp>>18)&31;//4 bits
+
+
+                    temp = _search_result_uint(result_record_stream_item,
+                            "Effective Code Rate Data");
+
+                    int iEffectiveCodeRateData=(temp>>5) & 0x7ff;
 
                     temp = _search_result_uint(result_record_stream_item,
                             "HARQ Combine Enable");
@@ -1498,6 +1506,11 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                             ValueNameCompandingStats,
                             ARRAY_SIZE(ValueNameCompandingStats, ValueName),
                             "(MI)Unknown");
+
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Effective Code Rate Data", iEffectiveCodeRateData);
+                    Py_DECREF(old_object);
+
                     old_object = _replace_result_int(result_record_stream_item,
                             "HARQ Combine Enable", iHarqCombineEnable);
                     Py_DECREF(old_object);

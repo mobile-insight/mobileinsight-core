@@ -174,24 +174,28 @@ const ValueName LtePdschStatIndication_Record_TB_Modulation [] = {
     {0, "QPSK"},
     {1, "16QAM"},
     {2, "64QAM"},
+    {8, "256QAM"},
 };
 
 const ValueName LtePdschStatIndication_Record_TB_Modulation_v24 [] = {
     {2, "QPSK"},
     {4, "16QAM"},
     {6, "64QAM"},
+    {8, "256QAM"},
 };
 
 const ValueName LtePdschStatIndication_Record_TB_Modulation_v32 [] = {
     {2, "QPSK"},
     {4, "16QAM"},
     {6, "64QAM"},
+    {8, "256QAM"},
 };
 
 const ValueName LtePdschStatIndication_Record_TB_Modulation_v36 [] = {
     {2, "QPSK"},
     {4, "16QAM"},
     {6, "64QAM"},
+    {8, "256QAM"},
 };
 
 const ValueName LtePdschStatIndication_Record_TB_CrcResult [] = {

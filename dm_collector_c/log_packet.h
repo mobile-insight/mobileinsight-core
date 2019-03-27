@@ -622,7 +622,8 @@ const Fmt LtePhyPdschDemapperConfigFmt_v123 [] = {
 const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
     {0, "QPSK"},
     {1, "16QAM"},
-    {2, "64QAM"}
+    {2, "64QAM"},
+    {3, "256QAM"},
 };
 
 const ValueName LtePhyPdschDemapperConfig_v23_Carrier_Index [] = {
@@ -631,8 +632,10 @@ const ValueName LtePhyPdschDemapperConfig_v23_Carrier_Index [] = {
 };
 
 const ValueName LtePhyPdschDemapperConfig_v122_antenna [] = {
+    {0, "1 antenna"},
     {1, "2 antennas"},
-    {2, "4 antennas"}
+    {2, "4 antennas"},
+    {3, "4 antennas"},
 };
 
 const ValueName LtePhyPdschDemapperConfig_v122_MVC_Clock [] = {
@@ -644,6 +647,7 @@ const ValueName LtePhyPdschDemapperConfig_v122_OPMode [] = {
 };
 
 const ValueName LtePhyPdschDemapperConfig_Joint_Demod_Skip_Reason [] = {
+    {0, "NO_SKIP"},
     {1, "SW_DISABLE"},
 };
 
@@ -1915,6 +1919,8 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2 [] = {
 
 const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason [] = {
     {0, "CONNECTION_REQ"},
+    {2, "UL_DATA"},
+    {3, "DL_DATA"},
 };
 
 const ValueName ValueNameRachContention [] = {
@@ -1968,6 +1974,7 @@ const ValueName LteMacRachAttempt_Subpkt_RachResult [] = {
     {1, "Failure at MSG2"},
 };
 const ValueName LteMacRachAttempt_Subpkt_ContentionProcedure [] = {
+    {0,"Contention Free RACH Procedure"},
     {1, "Contention Based RACH procedure"},
 };
 
@@ -2046,10 +2053,12 @@ const Fmt LtePdcpDlConfig_SubpktPayload [] = {
 };
 const ValueName LtePdcpDlConfig_Subpkt_Reason [] = {
     {1, "Configuration"},
+    {2, "Handover"},
     {4, "RB Release"},
 };
 const ValueName LtePdcpDlConfig_Subpkt_CipherAlgo [] = {
     {2, "Snow3G"},
+    {3, "AES"},
     {7, "None"},
 };
 const ValueName LtePdcpDlConfig_Subpkt_IntegAlgo [] = {
@@ -2148,10 +2157,12 @@ const Fmt LtePdcpUlConfig_SubpktPayload [] = {
 };
 const ValueName LtePdcpUlConfig_Subpkt_Reason [] = {
     {1, "Configuration"},
+    {2, "Handover"},
     {4, "RB Release"},
 };
 const ValueName LtePdcpUlConfig_Subpkt_CipherAlgo [] = {
     {2, "Snow3G"},
+    {3, "AES"},
     {7, "None"},
 };
 const ValueName LtePdcpUlConfig_Subpkt_IntegAlgo [] = {
@@ -2195,6 +2206,23 @@ const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Fmt [] = {
 };
 
 const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Fmt_v3 [] = {
+    {UINT, "RB ID", 1},
+    {UINT, "RB-Cfg Idx", 1},
+    {UINT, "EPS ID", 1},
+    {UINT, "RB mode", 1},
+    {UINT, "RB type", 1},
+    {UINT, "SN length", 1},
+    {UINT, "Discard timer", 2},
+    {UINT, "Compression Type", 1},
+    {UINT, "RoHC Max CID", 1},
+    {BYTE_STREAM, "RoHC Mask", 4},
+    {UINT, "UDC Cfg Action", 2},
+    {UINT, "UDC Context ID", 2},
+    {UINT, "UDC Algo Ver", 1},
+    {UINT, "UDC Header Length", 1},
+};
+
+const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Fmt_v24 [] = {
     {UINT, "RB ID", 1},
     {UINT, "RB-Cfg Idx", 1},
     {UINT, "EPS ID", 1},
@@ -3275,6 +3303,7 @@ const ValueName ValueNameDCIFormat [] = {
     //added for PDCCH_Decoding_v24
     {12,"Format 60A"},
     {13,"Format 61A"},
+    {15,"Reserved"},
 };
 
 const ValueName ValueNameMatchOrNot [] = {
@@ -3300,9 +3329,12 @@ const ValueName ValueNamePruneStatus [] = {
     {26, "INVALID_RB_NUM_DCI0"},
     {33, "RB_ALLOC_ERROR_DCI1A"},
     {34, "INVALID_RB_NUM_DCI1A"},
+    {36, "RETURN_DL_DATA_ARRIVAL_DCI1A"},
     {48, "PMI_ERROR_DCI2_2A"},
     {50, "NUM_LAYERS_ERROR_DCI2_2A_TB1"},
     {64, "FAIL_SER_ENGYMTRC_CHECK"},
+
+    {70, "NUM_LAYERS_EXCEED_NUM_RX"},
 
     //added for pdcch_decoding v24
     {200,"PDCCH_DEBUG_SUCCESS_DCI60A"},
@@ -3412,6 +3444,8 @@ const ValueName ValueNameCSFTxMode [] = {
 const ValueName ValueNameRankIndex [] = {
     {0, "Rank 1"},
     {1, "Rank 2"},
+    {2, "Rank 3"},
+    {3, "Rank 4"},
 };
 
 const ValueName ValueNameCsiMeasSetIndex [] = {
