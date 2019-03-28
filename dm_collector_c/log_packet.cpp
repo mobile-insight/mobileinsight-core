@@ -3023,7 +3023,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                             success = true;
                         }
                         break;
-                        
+
                     case 3: //RACH Config Subpacket
                         if (subpkt_ver == 1) {
                             offset += _decode_by_fmt(LteMacConfigurationSubpkt_RACHConfig,

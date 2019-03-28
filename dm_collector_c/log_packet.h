@@ -2951,6 +2951,8 @@ const ValueName LtePucchPowerControl_Record_v4_DCI_Format [] = {
     // {9, "Format 2C"},
     {10, "Format 3"},
     {11, "Format 3A"},
+
+    {12, "NO DCI"},
     {13, "NO DCI"},
     // {12, "Format 4"},
 };
@@ -3340,6 +3342,7 @@ const ValueName ValueNamePruneStatus [] = {
     {24, "BAD_RIV_DCI0"},
     {25, "RB_ALLOC_ERROR_DCI0"},
     {26, "INVALID_RB_NUM_DCI0"},
+    {32, "BAD_RIV_DCI1A"},
     {33, "RB_ALLOC_ERROR_DCI1A"},
     {34, "INVALID_RB_NUM_DCI1A"},
     {36, "RETURN_DL_DATA_ARRIVAL_DCI1A"},
