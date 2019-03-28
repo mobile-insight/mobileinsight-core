@@ -34,6 +34,19 @@ const Fmt LtePhyPdschDecodingResult_Payload_v44 [] = {
     {PLACEHOLDER, "Number of Records", 0},  // 5 bits
 };
 
+const Fmt LtePhyPdschDecodingResult_Payload_v106 [] = {
+    {UINT, "Serving Cell ID", 4},   // 9 btis
+    {PLACEHOLDER, "Starting Subframe Number", 0},   // 4 bits
+    {PLACEHOLDER, "Starting System Frame Number", 0},   // 10 bits
+    {PLACEHOLDER, "UE Category", 0},    // right shift 1 bit, 4 bits
+    {PLACEHOLDER, "Num DL HARQ", 0},    // 4 bits
+    {UINT, "TM Mode", 1},   // right shift 4 bits, 4 bits
+    {SKIP,NULL,2},
+    {UINT, "Nir",4},
+    {PLACEHOLDER, "Carrier Index", 2}, //  right shift 7 bits, 4 bits
+    {PLACEHOLDER, "Number of Records", 0},  // 5 bits
+};
+
 const Fmt LtePhyPdschDecodingResult_Payload_v124 [] = {
     {UINT, "Serving Cell ID", 4},   // 9 btis
     {PLACEHOLDER, "Starting Subframe Number", 0},   // 4 bits
@@ -86,6 +99,23 @@ const Fmt LtePhyPdschDecodingResult_Record_v44 [] = {
     {PLACEHOLDER, "Number of Streams", 0},  // 2 bits
     {BYTE_STREAM, "Demap Sic Status", 2},
     {SKIP, NULL, 2},
+};
+
+const Fmt LtePhyPdschDecodingResult_Record_v106 [] = {
+    {UINT, "Subframe Offset", 2},
+    {UINT, "PDSCH Channel ID",2},
+    {UINT, "HARQ ID", 1},   // 4 bits
+    {PLACEHOLDER, "RNTI Type", 0},  // 4 bits
+    {UINT, "System Information Msg Number",2},
+    {PLACEHOLDER,"System Information Mask",0},
+    {UINT, "HARQ Log Status",1},
+    {PLACEHOLDER,"Codeword Swap",0},
+    {PLACEHOLDER, "Number of Streams", 0},  // 2 bits
+    {UINT, "Demap Sic Status",2},
+    {PLACEHOLDER, "MVC Status",0},
+    {PLACEHOLDER, "MVC Clock Request",0},
+    {UINT, "MVC Req Margin Data",1},
+    {UINT, "MVC Rsp Margin",1},
 };
 
 const Fmt LtePhyPdschDecodingResult_Record_v124 [] = {
@@ -147,6 +177,24 @@ const Fmt LtePhyPdschDecodingResult_Stream_v44 [] = {
     {PLACEHOLDER, "Decob TB CRC", 0},   // 1 bit
     {UINT, "Num RE", 4},    // right shift 10 bits, 16 bits
     {PLACEHOLDER, "Codeword Index", 0}, // right shift 27 bits, 1 bits
+    {UINT, "LLR Scale", 1}, // 4 bits
+    {SKIP, NULL, 3},
+};
+
+const Fmt LtePhyPdschDecodingResult_Stream_v106 [] = {
+    {UINT, "Transport Block CRC", 4},   // 1 bit
+    {PLACEHOLDER, "NDI", 0},    // 1 bit
+    {PLACEHOLDER, "Code Block Size Plus", 0},   // 13 bits
+    {PLACEHOLDER, "Num Code Block Plus", 0},    // 4 bits
+    {PLACEHOLDER, "Max TDEC Iter", 0},  // 4 bits
+    {PLACEHOLDER, "Retransmission Number", 0},  // 3 bits
+    {PLACEHOLDER, "RVID", 0},   // 2 bits
+    {UINT, "Companding Stats", 4},   // 2 bits
+    {PLACEHOLDER, "HARQ Combining", 0}, // 1 bit
+    {PLACEHOLDER, "Decob TB CRC", 0},   // 1 bit
+    {PLACEHOLDER, "Effective Code Rate Data"},
+    {PLACEHOLDER, "Num RE", 0},    // 15 bits
+    {PLACEHOLDER, "Codeword Index", 0}, //  1 bits
     {UINT, "LLR Scale", 1}, // 4 bits
     {SKIP, NULL, 3},
 };
@@ -217,6 +265,20 @@ const Fmt LtePhyPdschDecodingResult_EnergyMetric_v44 [] = {
     {PLACEHOLDER, "Early Termination", 0},  // 1 bit
     {PLACEHOLDER, "HARQ Combine Enable", 0},    // 1 bit
     {PLACEHOLDER, "Deint Decode Bypass", 0},    // 1 bit
+};
+
+const Fmt LtePhyPdschDecodingResult_EnergyMetric_v106 [] = {
+    // totally 13
+    {UINT, "Energy Metric", 4},
+    {PLACEHOLDER, "Iteration Num", 0},
+    {PLACEHOLDER, "Code Block CRC Pass", 0},
+    {PLACEHOLDER, "Early Termination", 0},
+    {PLACEHOLDER, "HARQ Combine Enable", 0},
+    {PLACEHOLDER, "Deint Decode Bypass", 0},
+};
+
+const Fmt LtePhyPdschDecodingResult_Hidden_Energy_Metrics_v106 [] = {
+    {UINT, "Hidden Energy Metric First Half", 4},
 };
 
 const Fmt LtePhyPdschDecodingResult_EnergyMetric_v124 [] = {
@@ -1043,6 +1105,303 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                     Py_DECREF(result_record_stream_item);
                 }
 
+                PyObject *t2 = Py_BuildValue("(sOs)", "Streams",
+                        result_record_stream, "list");
+                PyList_Append(result_record_item, t2);
+                Py_DECREF(t2);
+                Py_DECREF(result_record_stream);
+
+                PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                        result_record_item, "dict");
+                PyList_Append(result_record, t1);
+                Py_DECREF(t1);
+                Py_DECREF(result_record_item);
+            }
+            PyObject *t = Py_BuildValue("(sOs)", "Records",
+                    result_record, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_record);
+            return offset - start;
+        }
+    case 106:
+        {
+            offset += _decode_by_fmt(LtePhyPdschDecodingResult_Payload_v106,
+                    ARRAY_SIZE(LtePhyPdschDecodingResult_Payload_v106, Fmt),
+                    b, offset, length, result);
+            int temp = _search_result_uint(result, "Serving Cell ID");
+            int iServingCellId = temp & 511;    // 9 bits
+            int iStartingSubframeNumber = (temp >> 9) & 15; // 4 bits
+            int iStartingSystemFrameNumber = (temp >> 13) & 1023;   // 10 bits
+            int iUECategory = (temp >> 24) & 15;    // 4 bits
+            int iNumDlHarq = (temp >> 28) & 15; // 4 bits
+            temp = _search_result_int(result, "TM Mode");
+            int iTmMode = (temp >> 4) & 15;//4 bit
+
+            temp = _search_result_int(result, "Nir");
+            int iNir = (temp) & 0x7fffff;//23 bit
+            int iCarrierIndex = (temp >> 23) & 15;//4 bit
+            int num_record = (temp >> 27) & 31;// 5 bit
+
+            old_object = _replace_result_int(result, "Serving Cell ID",
+                    iServingCellId);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Starting Subframe Number",
+                    iStartingSubframeNumber);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result,
+                    "Starting System Frame Number", iStartingSystemFrameNumber);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "UE Category",
+                    iUECategory);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Num DL HARQ",
+                    iNumDlHarq);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "TM Mode",
+                    iTmMode);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Nir", iNir);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Carrier Index", iCarrierIndex);
+            Py_DECREF(old_object);
+            (void) _map_result_field_to_name(result, "Carrier Index",
+                    ValueNameCarrierIndex,
+                    ARRAY_SIZE(ValueNameCarrierIndex, ValueName),
+                    "(MI)Unknown");
+            old_object = _replace_result_int(result, "Number of Records", num_record);
+            Py_DECREF(old_object);
+            PyObject *result_record = PyList_New(0);
+            for (int i = 0; i < num_record; i++) {
+                PyObject *result_record_item = PyList_New(0);
+                offset += _decode_by_fmt(LtePhyPdschDecodingResult_Record_v106,
+                        ARRAY_SIZE(LtePhyPdschDecodingResult_Record_v106, Fmt),
+                        b, offset, length, result_record_item);
+
+                temp = _search_result_int(result_record_item, "HARQ ID");
+                int iHarqId = temp & 15;    // 4 bits
+                int iRNTIType = (temp >> 4) & 15;   // 4 bits
+
+                temp = _search_result_int(result_record_item,
+                        "System Information Msg Number");
+                int iSystemInformationMsgNumber = temp & 15;    // 4 bits
+                int iSystemInformationMask = (temp >> 4) & 4095;    // 12 bits
+
+                temp = _search_result_int(result_record_item, "HARQ Log Status");
+                int iHarqLogStatus = (temp >> 3) & 3;  // 3 + 2 bits
+                int iCodewordSwap = (temp >> 5) & 1;    // 1 bit
+                int num_stream = (temp >> 6) & 3;   // 2 bit
+
+                temp = _search_result_int(result_record_item, "Demap Sic Status");
+                int iDemapSicStatus = temp & 0x1fff; //13 bit
+                int iMVCStatus = (temp>>13) & 0x1; //1 bit
+                int iMVCClockRequest = (temp>>14) & 0x3; //2 bit
+
+                old_object = _replace_result_int(result_record_item,
+                        "HARQ ID", iHarqId);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "RNTI Type", iRNTIType);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "RNTI Type",
+                        ValueNameRNTIType,
+                        ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                        "(MI)Unknown");
+                old_object = _replace_result_int(result_record_item,
+                        "System Information Msg Number", iSystemInformationMsgNumber);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "System Information Mask", iSystemInformationMask);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "HARQ Log Status", iHarqLogStatus);
+                Py_DECREF(old_object);
+                (void) _map_result_field_to_name(result_record_item,
+                        "HARQ Log Status",
+                        ValueNameHARQLogStatus,
+                        ARRAY_SIZE(ValueNameHARQLogStatus, ValueName),
+                        "(MI)Unknown");
+                old_object = _replace_result_int(result_record_item,
+                        "Codeword Swap", iCodewordSwap);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "Number of Streams", num_stream);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "Demap Sic Status",iDemapSicStatus);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "MVC Status",iMVCStatus);
+                Py_DECREF(old_object);
+                old_object = _replace_result_int(result_record_item,
+                        "MVC Clock Request",iMVCClockRequest);
+                Py_DECREF(old_object);
+                //iNumofTBlks=0;
+                PyObject *result_record_stream = PyList_New(0);
+                for (int j = 0; j < num_stream; j++) {
+                    PyObject *result_record_stream_item = PyList_New(0);
+                    offset += _decode_by_fmt(LtePhyPdschDecodingResult_Stream_v106,
+                            ARRAY_SIZE(LtePhyPdschDecodingResult_Stream_v106, Fmt),
+                            b, offset, length, result_record_stream_item);
+
+                    temp = _search_result_uint(result_record_stream_item,
+                            "Transport Block CRC");
+                    int iTransportBlockCRC = temp & 1;  // 1 bit
+                    int iNDI = (temp >> 1) & 1; // 1 bit
+                    int iCodeBlockSizePlus = (temp >> 2) & 8191 ;    // 13 bits
+                    int iNumCodeBlockPlus = ((temp >> 15) & 0x1f) +1;  // 5 bits
+                    int iMaxTdecIter = (temp >> 20) & 15;   // 4 bits
+                    int iRetransmissionNumber = (temp >> 24) & 0x3f;   // 6 bits
+                    int iRVID = (temp >> 30) & 3;   // 2 bits
+
+                    temp = _search_result_uint(result_record_stream_item,
+                            "Companding Stats");
+                    int iCompandingStats = (temp) & 3;    // 2 bits
+                    int iHarqCombining = (temp >> 2) & 1;  // 1 bit
+                    int iDecobTbCRC = (temp >> 3) & 1; // 1 bit
+                    int iEffectiveCodeRateData = (temp>>4) & 0x3ff;//10 bit
+
+                    int iNumRE = (temp >> 14) & 0x7fff;  // 15 bits
+                    int iCodewordIndex = (temp >> 30) & 1; //1 bit
+
+                    temp = _search_result_uint(result_record_stream_item,
+                            "LLR Scale");
+                    int iLLRScale = (temp>>6) & 3;  // 2 bits
+
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Transport Block CRC", iTransportBlockCRC);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_record_stream_item,
+                            "Transport Block CRC",
+                            ValueNamePassOrFail,
+                            ARRAY_SIZE(ValueNamePassOrFail, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "NDI", iNDI);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Code Block Size Plus", iCodeBlockSizePlus);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Num Code Block Plus", iNumCodeBlockPlus);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Max TDEC Iter", iMaxTdecIter);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Retransmission Number", iRetransmissionNumber);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_record_stream_item,
+                            "Retransmission Number",
+                            ValueNameNumber,
+                            ARRAY_SIZE(ValueNameNumber, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "RVID", iRVID);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Companding Stats", iCompandingStats);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_record_stream_item,
+                            "Companding Stats",
+                            ValueNameCompandingStats,
+                            ARRAY_SIZE(ValueNameCompandingStats, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "HARQ Combining", iHarqCombining);
+                    Py_DECREF(old_object);
+                    (void) _map_result_field_to_name(result_record_stream_item,
+                            "HARQ Combining",
+                            ValueNameEnableOrDisable,
+                            ARRAY_SIZE(ValueNameEnableOrDisable, ValueName),
+                            "(MI)Unknown");
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Decob TB CRC", iDecobTbCRC);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Effective Code Rate Data", iEffectiveCodeRateData);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Num RE", iNumRE);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "Codeword Index", iCodewordIndex);
+                    Py_DECREF(old_object);
+                    old_object = _replace_result_int(result_record_stream_item,
+                            "LLR Scale", iLLRScale);
+                    Py_DECREF(old_object);
+
+                    int num_energy_metric = iNumCodeBlockPlus;
+
+                    PyObject *result_energy_metric = PyList_New(0);
+                    for (int k = 0; k < num_energy_metric; k++) {
+                        PyObject *result_energy_metric_item = PyList_New(0);
+                        offset += _decode_by_fmt(LtePhyPdschDecodingResult_EnergyMetric_v44,
+                                ARRAY_SIZE(LtePhyPdschDecodingResult_EnergyMetric_v44, Fmt),
+                                b, offset, length, result_energy_metric_item);
+                        temp = _search_result_uint(result_energy_metric_item,
+                                "Energy Metric");
+                        int iEnergyMetric = temp & 2097151; // 21 bits
+                        int iIterationNumber = (temp >> 21) & 15;   // 4 bits
+                        int iCodeBlockCRCPass = (temp >> 25) & 1;   // 1 bit
+                        int iEarlyTermination = (temp >> 26) & 1;   // 1 bit
+                        int iHarqCombineEnable = (temp >> 27) & 1;  // 1 bit
+                        int iDeintDecodeBypass = (temp >> 28) & 1;  // 1 bit
+                        old_object = _replace_result_int(result_energy_metric_item,
+                                "Energy Metric", iEnergyMetric);
+                        Py_DECREF(old_object);
+                        old_object = _replace_result_int(result_energy_metric_item,
+                                "Iteration Number", iIterationNumber);
+                        Py_DECREF(old_object);
+                        old_object = _replace_result_int(result_energy_metric_item,
+                                "Code Block CRC Pass", iCodeBlockCRCPass);
+                        Py_DECREF(old_object);
+                        (void) _map_result_field_to_name(result_energy_metric_item,
+                                "Code Block CRC Pass",
+                                ValueNamePassOrFail,
+                                ARRAY_SIZE(ValueNamePassOrFail, ValueName),
+                                "(MI)Unknown");
+                        old_object = _replace_result_int(result_energy_metric_item,
+                                "Early Termination", iEarlyTermination);
+                        Py_DECREF(old_object);
+                        (void) _map_result_field_to_name(result_energy_metric_item,
+                                "Early Termination",
+                                ValueNameYesOrNo,
+                                ARRAY_SIZE(ValueNameYesOrNo, ValueName),
+                                "(MI)Unknown");
+                        old_object = _replace_result_int(result_energy_metric_item,
+                                "HARQ Combine Enable", iHarqCombineEnable);
+                        Py_DECREF(old_object);
+                        (void) _map_result_field_to_name(result_energy_metric_item,
+                                "HARQ Combine Enable",
+                                ValueNameEnableOrDisable,
+                                ARRAY_SIZE(ValueNameEnableOrDisable, ValueName),
+                                "(MI)Unknown");
+                        old_object = _replace_result_int(result_energy_metric_item,
+                                "Deint Decode Bypass", iDeintDecodeBypass);
+                        Py_DECREF(old_object);
+
+                        PyObject *t5 = Py_BuildValue("(sOs)", "Ignored",
+                                result_energy_metric_item, "dict");
+                        PyList_Append(result_energy_metric, t5);
+                        Py_DECREF(t5);
+                        Py_DECREF(result_energy_metric_item);
+                    }
+                    offset += (32 - num_energy_metric) * 4;
+
+                    PyObject *t4 = Py_BuildValue("(sOs)", "Energy Metrics",
+                            result_energy_metric, "list");
+                    PyList_Append(result_record_stream_item, t4);
+                    Py_DECREF(t4);
+                    Py_DECREF(result_energy_metric);
+
+                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                            result_record_stream_item, "dict");
+                    PyList_Append(result_record_stream, t3);
+                    Py_DECREF(t3);
+                    Py_DECREF(result_record_stream_item);
+                }
                 PyObject *t2 = Py_BuildValue("(sOs)", "Streams",
                         result_record_stream, "list");
                 PyList_Append(result_record_item, t2);
