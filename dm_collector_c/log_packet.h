@@ -1205,6 +1205,27 @@ const Fmt LteMacConfigurationSubpkt_RACHConfig [] = {
     {UINT, "RA rsp win size", 1},
     {SKIP, "NULL", 1},
 };
+
+const Fmt LteMacConfigurationSubpkt_RACHConfig_v2 [] = {
+    {UINT, "Preamble initial power", 2},
+    {UINT, "Power ramping step", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer", 2},
+    {UINT, "Message size Group_A",2},
+    {UINT, "Power offset Group_B",1},
+    {UINT, "PMax", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 1},
+    {UINT,"High speed flag",1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+};
+
 const Fmt LteMacConfigurationSubpkt_RACHConfig_v5 [] = {
     {RSRQ, "Preamble initial power", 2},
     {UINT, "Power ramping step", 1},

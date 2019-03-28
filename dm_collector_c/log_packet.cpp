@@ -3023,13 +3023,20 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                             success = true;
                         }
                         break;
+                        
                     case 3: //RACH Config Subpacket
                         if (subpkt_ver == 1) {
                             offset += _decode_by_fmt(LteMacConfigurationSubpkt_RACHConfig,
                                     ARRAY_SIZE(LteMacConfigurationSubpkt_RACHConfig, Fmt),
                                     b, offset, length, result_subpkt);
                             success = true;
-                        }else if(subpkt_ver == 5){
+                        }else if(subpkt_ver == 2){
+                            offset += _decode_by_fmt(LteMacConfigurationSubpkt_RACHConfig_v2,
+                                    ARRAY_SIZE(LteMacConfigurationSubpkt_RACHConfig_v2, Fmt),
+                                    b, offset, length, result_subpkt);
+                            success = true;
+                        }
+                        else if(subpkt_ver == 5){
                             offset += _decode_by_fmt(LteMacConfigurationSubpkt_RACHConfig_v5,
                                     ARRAY_SIZE(LteMacConfigurationSubpkt_RACHConfig_v5, Fmt),
                                     b, offset, length, result_subpkt);
