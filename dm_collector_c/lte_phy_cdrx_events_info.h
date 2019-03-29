@@ -152,6 +152,10 @@ static int _decode_lte_phy_cdrx_events_info_payload (const char *b,
                     strInternalFieldMask += "RACH|";
                     count ++;
                 }
+                if (((utemp >> (12 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "T310|";
+                    count ++;
+                }
                 int check = 0;
                 for (int i = 0; i < 32; i++) {
                     if (((utemp >> i) & 1) == 1) {

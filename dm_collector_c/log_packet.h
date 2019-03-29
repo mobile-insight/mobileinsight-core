@@ -131,7 +131,8 @@ const ValueName UmtsNasGmmState_GmmSubstate [] = {
     {8, "GMM_UPDATE_NEEDED"},
     {9, "GMM_ATTEMPTING_TO_UPDATE"},
     {10, "GMM_ATTEMPTING_TO_UPDATE_MM"},
-    {11, "GMM_IMSI_DETACH_INITIATED"}
+    {11, "GMM_IMSI_DETACH_INITIATED"},
+    {12, "GMM Substate = 12"},
 };
 
 const ValueName UmtsNasGmmState_GmmUpdateStatus [] = {
@@ -406,7 +407,8 @@ const ValueName LteNasEmmState_v2_EmmSubstate_Deregistered [] = {
     {3, "EMM_DEREGISTERED_NO_CELL_AVAILABLE"},
     {4, "EMM_DEREGISTERED_ATTEMPTING_TO_ATTACH"},
     {5, "EMM_DEREGISTERED_NORMAL_SERVICE"},
-    {6, "EMM_DEREGISTERED_LIMITED_SERVICE"}
+    {6, "EMM_DEREGISTERED_LIMITED_SERVICE"},
+    {7, "EMM sub-state = 7"},
 };
 
 const ValueName LteNasEmmState_v2_EmmSubstate_Registered_Initiated [] = {
@@ -1539,6 +1541,7 @@ const Fmt LteRlcUlConfigLogPacket_SubpktPayload [] = {
 
 const ValueName LteRlcUlConfigLogPacket_Subpkt_Reason [] = {
     {1, "Configuration"},
+    {2, "Handover"},
     {4, "RB Release"},
 };
 
@@ -1607,6 +1610,7 @@ const Fmt LteRlcDlConfigLogPacket_SubpktPayload [] = {
 
 const ValueName LteRlcDlConfigLogPacket_Subpkt_Reason [] = {
     {1, "Configuration"},
+    {2, "Handover"},
     {4, "RB Release"},
 };
 
@@ -1946,6 +1950,7 @@ const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason [] = {
     {0, "CONNECTION_REQ"},
     {2, "UL_DATA"},
     {3, "DL_DATA"},
+    {4, "HO"},
 };
 
 const ValueName ValueNameRachContention [] = {
@@ -3351,6 +3356,7 @@ const ValueName ValueNamePruneStatus [] = {
     {10, "PADDING_ERROR"},
     {13, "RB_ALLOC_SET_NUM_ERROR_TYPE1"},
     {17, "DUPLICATE_HARQ_ID_ERROR"},
+    {19, "UNEXPECTED_PAYLOAD_SIZE"},
     {24, "BAD_RIV_DCI0"},
     {25, "RB_ALLOC_ERROR_DCI0"},
     {26, "INVALID_RB_NUM_DCI0"},
