@@ -3104,6 +3104,24 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                             offset += _decode_by_fmt(LteMacConfigurationSubpkt_All_Rach_Config,
                                     ARRAY_SIZE(LteMacConfigurationSubpkt_All_Rach_Config, Fmt),
                                     b, offset, length, result_subpkt);
+
+                            PyObject *result_Cells = PyList_New(0);
+                            for (int j = 0; j < 8; j++) {
+                                PyObject *result_Cell_item = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacConfigurationSubpkt_All_Rach_Config_Cell_Info,
+                                        ARRAY_SIZE(LteMacConfigurationSubpkt_All_Rach_Config_Cell_Info, Fmt),
+                                        b, offset, length, result_Cell_item);
+
+                                PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                                        result_Cell_item, "dict");
+                                PyList_Append(result_Cells, t1);
+                                Py_DECREF(t1);
+                                Py_DECREF(result_Cell_item);
+                            }
+                            PyObject *t1 = Py_BuildValue("(sOs)", "Cells",
+                                    result_Cells, "list");
+                            PyList_Append(result_subpkt, t1);
+                            Py_DECREF(t1);
                             success=true;
                         }
                         break;

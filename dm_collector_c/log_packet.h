@@ -1293,15 +1293,27 @@ const Fmt LteMacConfigurationSubpkt_All_Rach_Config [] = {
     {UINT, "Sub Id", 1},
     {BYTE_STREAM, "Valid Cell Cfg Mask", 1},
     {BYTE_STREAM, "New Cell Cfg Mask", 1},
-    // TODO
-    {SKIP, "Cell Rach Info[0]", 24},
-    {SKIP, "Cell Rach Info[1]", 24},
-    {SKIP, "Cell Rach Info[2]", 24},
-    {SKIP, "Cell Rach Info[3]", 24},
-    {SKIP, "Cell Rach Info[4]", 24},
-    {SKIP, "Cell Rach Info[5]", 24},
-    {SKIP, "Cell Rach Info[6]", 24},
-    {SKIP, "Cell Rach Info[7]", 24}
+};
+
+const Fmt LteMacConfigurationSubpkt_All_Rach_Config_Cell_Info [] = {
+    {UINT, "Scell Id", 1},
+    {WCDMA_MEAS, "Preamble initial power (dB)", 2}, // Note sure if it is correct
+    {UINT, "Power ramping step (dB)", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer (ms)", 2},
+    {UINT, "Message size Group_A", 2},
+    {UINT, "Power offset Group_B", 1},
+    {UINT, "PMax (dBm)", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 1},
+    {UINT, "High speed flag", 1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
 };
 
 // ----------------------------------------------------------
