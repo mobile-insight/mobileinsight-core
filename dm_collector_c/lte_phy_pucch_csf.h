@@ -10,6 +10,23 @@ const Fmt LtePhyPucchCsf_Fmt [] = {
     {UINT, "Version", 1},
 };
 
+const Fmt LtePhyPucchCsf_Payload_v22 [] = {
+    {UINT, "Start System Sub-frame Number", 2}, // 4 bits
+    {PLACEHOLDER, "Start System Frame Number", 0},  // 10 bits
+    {UINT, "PUCCH Reporting Mode", 1},  // last 2 bits in previous byte + 1 bit
+    {PLACEHOLDER, "PUCCH Report Type", 0},    // 4 bit
+    {PLACEHOLDER, "Size BWP",0},
+    {UINT, "Number of Subbands", 4},    // 4 bits
+    {PLACEHOLDER, "BWP Index",0},
+    {PLACEHOLDER, "Rank Index", 0}, // skip 3 bits, 1 bit
+    {PLACEHOLDER, "SubBand Label",0},
+    {PLACEHOLDER, "CQI CW0", 0},   // skip 2 bits, 4 bits
+    {PLACEHOLDER, "CQI CW1", 0},   // 4 bits
+    {PLACEHOLDER, "Wideband PMI", 0},   // 4 bits
+    {PLACEHOLDER, "Carrier Index", 0},  // 4 bits
+    {PLACEHOLDER, "CSF Tx Mode", 0},    // 4 bits
+};
+
 const Fmt LtePhyPucchCsf_Payload_v24 [] = {
     {UINT, "Start System Sub-frame Number", 2}, // 4 bits
     {PLACEHOLDER, "Start System Frame Number", 0},  // 10 bits
@@ -73,6 +90,97 @@ static int _decode_lte_phy_pucch_csf_payload (const char *b,
     int temp;
 
     switch (pkt_ver) {
+    case 22:
+        {
+            offset += _decode_by_fmt(LtePhyPucchCsf_Payload_v22,
+                    ARRAY_SIZE(LtePhyPucchCsf_Payload_v22, Fmt),
+                    b, offset, length, result);
+
+            temp = _search_result_int(result, "Start System Sub-frame Number");
+            int iSubFN = temp & 15;
+            int iSysFN = (temp >> 4) & 1023;
+
+            temp = _search_result_int(result, "PUCCH Reporting Mode");
+            int iPucchReportingMode = (temp >>1) & 0x3;
+            int iPucchReportType = (temp >> 3) & 0x3;
+            int iSizeBWP =(temp>>5) & 7;
+
+            unsigned int utemp = _search_result_uint(result, "Number of Subbands");
+            int iNumSubbands = utemp & 15;
+            int iBWPIndex = (utemp >>4) & 7;
+            int iRankIndex = (utemp >> 7) & 1;
+            int iSubBandLabel = (utemp >>8) & 3;
+            int iCQI0 = (utemp >> 10) & 15;
+            int iCQI1 = (utemp >> 14) & 15;
+            int iWidebandPMI = (utemp >> 18) & 15;
+            int iCarrierIndex = (utemp >> 22) & 15;
+            int iCSFTxMode = (utemp >> 26) & 15;
+
+            old_object = _replace_result_int(result,
+                    "Start System Sub-frame Number", iSubFN);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result,
+                    "Start System Frame Number", iSysFN);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "PUCCH Reporting Mode",
+                    iPucchReportingMode);
+            Py_DECREF(old_object);
+            (void) _map_result_field_to_name(result, "PUCCH Reporting Mode",
+                    ValueNamePucchReportingMode_v22,
+                    ARRAY_SIZE(ValueNamePucchReportingMode_v22, ValueName),
+                    "(MI)Unknown");
+            old_object = _replace_result_int(result, "PUCCH Report Type",
+                    iPucchReportType);
+            Py_DECREF(old_object);
+            (void) _map_result_field_to_name(result, "PUCCH Report Type",
+                    ValueNamePucchReportType_v22,
+                    ARRAY_SIZE(ValueNamePucchReportType_v22, ValueName),
+                    "(MI)Unknown");
+            old_object = _replace_result_int(result, "Size BWP",
+                    iSizeBWP);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Rank Index",
+                    iRankIndex);
+            Py_DECREF(old_object);
+            (void) _map_result_field_to_name(result, "Rank Index",
+                    ValueNameRankIndex,
+                    ARRAY_SIZE(ValueNameRankIndex, ValueName),
+                    "(MI)Unknown");
+            old_object = _replace_result_int(result, "Number of Subbands",
+                    iNumSubbands);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "BWP Index",
+                    iBWPIndex);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "SubBand Label",
+                    iSubBandLabel);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "CQI CW0",
+                    iCQI0);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "CQI CW1",
+                    iCQI1);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "Wideband PMI",
+                    iWidebandPMI);
+            Py_DECREF(old_object);
+            old_object = _replace_result_int(result, "CSF Tx Mode",
+                    iCSFTxMode);
+            Py_DECREF(old_object);
+            (void) _map_result_field_to_name(result, "CSF Tx Mode",
+                    ValueNameCSFTxMode,
+                    ARRAY_SIZE(ValueNameCSFTxMode, ValueName),
+                    "(MI)Unknown");
+            old_object = _replace_result_int(result, "Carrier Index",
+                    iCarrierIndex);
+            Py_DECREF(old_object);
+            (void) _map_result_field_to_name(result, "Carrier Index",
+                    ValueNameCarrierIndex,
+                    ARRAY_SIZE(ValueNameCarrierIndex, ValueName),
+                    "(MI)Unknown");
+
+            return offset - start;
+        }
     case 24:
         {
             offset += _decode_by_fmt(LtePhyPucchCsf_Payload_v24,

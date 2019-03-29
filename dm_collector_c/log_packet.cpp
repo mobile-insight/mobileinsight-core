@@ -7063,9 +7063,9 @@ static int _decode_lte_pucch_power_control_payload (const char *b, int offset,
                         "N_HARQ", iN_HARQ);
                 Py_DECREF(old_object);
 
+
                 unsigned int iNonDecodeTPC = _search_result_uint(result_record_item,
                         "TPC Command");
-
                 int iTPC = iNonDecodeTPC & 63; // last 6 bits
                 int iN_CQI = (iNonDecodeTPC >> 6) & 31; // next 5 bits
                 int iLoss = (iNonDecodeTPC >> 11) & 255; // next 8 bits

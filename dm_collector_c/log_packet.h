@@ -3476,6 +3476,15 @@ const ValueName ValueNamePuschReportingMode [] = {
     {4, "MODE_APERIODIC_RM31"},
 };
 
+const ValueName ValueNamePucchReportType_v22 [] = {
+    {1, "Type 2, Wideband CQI, PMI Feedback"},
+    {2, "Type 3, RI Feedback"},
+};
+
+const ValueName ValueNamePucchReportingMode_v22 [] = {
+    {1, "MODE_1_1"},
+};
+
 const ValueName ValueNamePucchReportType [] = {
     {2, "Type 2, Wideband CQI, PMI Feedback"},
     {3, "Type 3, RI Feedback"},
