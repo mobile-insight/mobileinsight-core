@@ -2887,6 +2887,35 @@ const Fmt LtePdcpDlCtrlPdu_Subpkt_PDU_Fmt [] = {
     {UINT, "fms", 2},
 };
 
+const Fmt LtePdcpDlCtrlPdu_SubpktPayload_v24 [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "SN Length (bit)", 1},
+};
+
+const Fmt LtePdcpDlCtrlPdu_Subpkt_PDU_Header_v24 [] = {
+    {UINT, "Num PDUs", 2},
+};
+
+const Fmt LtePdcpDlCtrlPdu_Subpkt_PDU_Fmt_v24 [] = {
+    {UINT, "PDU Size", 2},
+    {UINT, "Logged Bytes", 2},
+    {UINT, "sys fn", 2},
+    {PLACEHOLDER, "sub fn", 0},
+    {UINT, "PDU Type", 1},
+    {UINT, "fms", 2},
+    {PLACEHOLDER,"DC",0},
+    {PLACEHOLDER,"type",0},
+};
+
+const ValueName LtePdcpDlCtrlPdu_PDU_Type [] = {
+    {0, "STATUS"},
+};
+
+const ValueName LtePdcpDlCtrlPdu_Type [] = {
+    {0, "STATUS REPORT"},
+};
+
 // ----------------------------------------------------------------------------
 // LTE PDCP UL Ctrl PDU
 
@@ -2924,6 +2953,25 @@ const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Fmt [] = {
     {UINT, "fms", 2},
 };
 
+const Fmt LtePdcpUlCtrlPdu_SubpktPayload_v24 [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "SN Length (bit)", 1},
+};
+const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Header_v24 [] = {
+    {UINT, "Num PDUs", 2},
+};
+
+const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Fmt_v24 [] = {
+    {UINT, "PDU Size", 2},
+    {UINT, "Logged Bytes", 2},
+    {UINT, "sys fn", 2},
+    {PLACEHOLDER, "sub fn", 0},
+    {UINT, "PDU Type", 1},
+    {UINT, "fms", 2},
+    {PLACEHOLDER,"DC",0},
+    {PLACEHOLDER,"type",0},
+};
 // ----------------------------------------------------------------------------
 // LTE PUCCH Power Control
 
