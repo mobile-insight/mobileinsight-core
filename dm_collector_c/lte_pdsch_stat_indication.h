@@ -985,7 +985,7 @@ static int _decode_lte_pdsch_stat_indication_payload (const char *b,
                     int iMCS = _search_result_int(result_record_item_TB_item,
                             "MCS");
                     int iModulationType = -1;
-                    if (iMCS > 17) {
+                    if (iMCS >= 17) {
                         iModulationType = 2;
                     } else if (iMCS >= 10 && iMCS < 17) {
                         iModulationType = 1;

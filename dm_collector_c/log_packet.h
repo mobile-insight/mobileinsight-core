@@ -1335,6 +1335,7 @@ const ValueName BSRTrig [] = {
     {3, "S-BSR"},
     {4, "Pad L-BSR"},
     {5, "Pad S-BSR"},
+    {6, "Pad T-BSR"},
 };
 
 const Fmt LteMacULTransportBlockFmt [] = {
@@ -1543,6 +1544,7 @@ const ValueName LteRlcUlConfigLogPacket_Subpkt_Reason [] = {
     {1, "Configuration"},
     {2, "Handover"},
     {4, "RB Release"},
+    {8, "Radio Link Failure"},
 };
 
 const Fmt LteRlcUlConfigLogPacket_Subpkt_ReleasedRB_Header [] = {
@@ -1612,6 +1614,7 @@ const ValueName LteRlcDlConfigLogPacket_Subpkt_Reason [] = {
     {1, "Configuration"},
     {2, "Handover"},
     {4, "RB Release"},
+    {8, "Radio Link Failure"},
 };
 
 const Fmt LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Header [] = {
@@ -1948,6 +1951,7 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2 [] = {
 
 const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason [] = {
     {0, "CONNECTION_REQ"},
+    {1, "RLF"},
     {2, "UL_DATA"},
     {3, "DL_DATA"},
     {4, "HO"},
@@ -2002,6 +2006,7 @@ const Fmt LteMacRachAttempt_SubpktPayload_v4[] = {
 const ValueName LteMacRachAttempt_Subpkt_RachResult [] = {
     {0, "Success"},
     {1, "Failure at MSG2"},
+    {4, "Aborted"},
 };
 const ValueName LteMacRachAttempt_Subpkt_ContentionProcedure [] = {
     {0,"Contention Free RACH Procedure"},
@@ -2110,9 +2115,11 @@ const Fmt LtePdcpDlConfig_Subpkt_AddedModifiedRB_Fmt [] = {
     {UINT, "Added/Modified RB Cfg Index", 1},
     {UINT, "Action", 1},
 };
+
 const ValueName LtePdcpDlConfig_Subpkt_AddedModifiedRB_Action [] = {
     {1, "Add"},
     {2, "Modify"},
+    {4, "Resume"},
 };
 
 const Fmt LtePdcpDlConfig_Subpkt_ActiveRB_Header [] = {
@@ -2189,6 +2196,7 @@ const ValueName LtePdcpUlConfig_Subpkt_Reason [] = {
     {1, "Configuration"},
     {2, "Handover"},
     {4, "RB Release"},
+    {8, "Radio Link Failure"},
 };
 const ValueName LtePdcpUlConfig_Subpkt_CipherAlgo [] = {
     {2, "Snow3G"},
@@ -2217,6 +2225,7 @@ const Fmt LtePdcpUlConfig_Subpkt_AddedModifiedRB_Fmt [] = {
 const ValueName LtePdcpUlConfig_Subpkt_AddedModifiedRB_Action [] = {
     {1, "Add"},
     {2, "Modify"},
+    {4, "Resume"},
 };
 
 const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Header [] = {
@@ -3028,7 +3037,9 @@ const ValueName LtePucchPowerControl_Record_v4_PUCCH_Format [] = {
     {3, "Format 2"},
     {4, "Format 2A"},
     {5, "Format 2B"},
-    {6, "Format 3"},
+//    {6, "Format 3"},
+    {6, "Format 1bCS"},
+    {7, "Format 3"},
 };
 
 

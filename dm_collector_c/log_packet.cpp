@@ -6094,8 +6094,6 @@ static int _decode_lte_pdcp_ul_config_subpkt (const char *b, int offset,
                     int iArraySize = _search_result_int(result_subpkt,
                             "Array size");
 
-
-
                     // Released RB
                     int start_ReleasedRBStruct = offset;
                     offset += _decode_by_fmt(
