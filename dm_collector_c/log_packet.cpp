@@ -2893,6 +2893,7 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                                 Py_DECREF(old_object);
                                 Py_DECREF(pyfloat);
 
+
                                 float SNR3 = float((utemp >> 9) & 511);
                                 SNR3 = SNR3 * 0.1 - 20.0;
                                 pyfloat = Py_BuildValue("f", SNR3);
