@@ -310,6 +310,14 @@ const Fmt LteRrcOtaPacketFmt_v20 [] = {
     {UINT, "Msg Length", 2}
 };
 
+const Fmt LteRrcOtaPacketFmt_v24 [] = {
+    {UINT, "Freq", 4},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1},            //PDU number
+    {UINT, "SIB Mask in SI", 4},
+    {UINT, "Msg Length", 2}
+};
+
 const ValueName LteRrcOtaPduType [] = {
     {0x02, "LTE-RRC_BCCH_DL_SCH"},
     {0x04, "LTE-RRC_PCCH"},

@@ -267,6 +267,11 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
                                     ARRAY_SIZE(LteRrcOtaPacketFmt_v20, Fmt),
                                     b, offset, length, result);
         break;
+    case 24:
+        offset += _decode_by_fmt(LteRrcOtaPacketFmt_v24,
+                                    ARRAY_SIZE(LteRrcOtaPacketFmt_v24, Fmt),
+                                    b, offset, length, result);
+        break;
     default:
         printf("(MI)Unknown LTE RRC OTA packet version: %d\n", pkt_ver);
         return 0;
