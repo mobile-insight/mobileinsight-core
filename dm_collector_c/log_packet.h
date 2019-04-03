@@ -801,6 +801,30 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v7 [] = {
     {SKIP, NULL, 12},
 };
 
+const Fmt LtePhySubpktFmt_v1_Scmr_v18 [] = {
+    {UINT, "E-ARFCN", 4},
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    // {SKIP, NULL, 2},
+    {SKIP, NULL, 11},    // Is Restricted, Cell Timing [0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP", 4},          // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
+    {PLACEHOLDER, "RSRQ", 0},   // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI", 0},    // 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 23},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 20},
+};
+
 const Fmt LtePhySubpktFmt_v1_Scmr_v19 [] = {
     {UINT, "E-ARFCN", 4},
     {UINT, "Num-of-cells", 2},
@@ -867,28 +891,38 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v22 [] = {
     {UINT, "CINR Rx[1]", 4},
 };
 
-const Fmt LtePhySubpktFmt_v1_Scmr_v18 [] = {
+const Fmt LtePhySubpktFmt_v1_Scmr_v24 [] = {
     {UINT, "E-ARFCN", 4},
+    {UINT, "Num-of-cells", 2},
+    {SKIP, NULL, 2},
     {UINT, "Physical Cell ID", 2},  // 9 bits
     {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
     {SKIP, NULL, 2},
     {UINT, "Current SFN", 2},   // 10 bits
     {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
-    // {SKIP, NULL, 2},
-    {SKIP, NULL, 11},    // Is Restricted, Cell Timing [0]
-    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
-    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
-    {UINT, "RSRP", 4},          // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
-    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
-    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
-    {PLACEHOLDER, "RSRQ", 0},   // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 4},    // Cell Timing [0]
+    {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN [0]
+    {SKIP, NULL, 1},
+    {UINT, "RSRP Rx[0]", 4},    // skip 1 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 4 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP", 4},    // skip 4 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 2},    // skip 4 bits, then 10 bits, (0.0625 * x - 30) dB
+    {SKIP, NULL,1},
+    {UINT, "RSRQ Rx[1]", 2},    // 10 bits (0.0625 * x) - 30 dB
+    {UINT, "RSRQ", 2},    // skip 4 bits, then 10 bits, (0.0625 * x - 30) dB
     {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
     {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
-    {PLACEHOLDER, "RSSI", 0},    // 11 bits, (0.0625 * x - 110) dBm
-    {SKIP, NULL, 23},
+    {UINT, "RSSI", 4},    // 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
     {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
     {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
-    {SKIP, NULL, 20},
+    {SKIP, NULL, 16},
+    {SKIP, NULL, 8},
+    //{UINT, "Projected SIR", 4}, // Projected Sir, if x & 1<<31: x -= 4294967296
+                                // x /= 16
+    //{UINT, "Post IC RSRQ", 4},  // (0.0625 * x - 30) dB
 };
 
 const Fmt LtePhySubpktFmt_v1_Scmr_v35 [] = {
@@ -2458,6 +2492,68 @@ const Fmt LtePdcpDlStats_Subpkt_RB_Fmt [] = {
     {UINT, "Num PDU Invalid Bytes Rst", 4},
     {SKIP, NULL, 4},
 };
+
+
+const Fmt LtePdcpDlStats_SubpktPayload_v41 [] = {
+    {UINT,"Num RBs",1}, 	// shift 0 bits,total 8 bits
+    {UINT,"Num Errors",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Offload Q Full Count",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Packet Dropped Offload Q Full",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num IPA Commits",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Tag CB",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num IPA Exceptions",4}, 	// shift 0 bits,total 32 bits
+};
+
+const Fmt LtePdcpDlStats_Subpkt_RB_Fmt_v41 [] = {
+    {UINT,"Rb Cfg Idx",1}, 	// shift 0 bits,total 8 bits
+    {UINT,"Mode",1}, 	// shift 0 bits,total 8 bits
+    {UINT,"PDCP Hdr Len",1}, 	// shift 0 bits,total 8 bits
+    {UINT,"Num RST",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Flow Ctrl Trigger",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Data PDU Rx",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Data PDU Rx Bytes",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Control PDU Bytes Tx",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Control PDU Gen",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Control PDU Gen Bytes",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Stat Rprt Ctrl PDU Rx",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num ROHC Ctrl PDU Rx",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU ROHC Fail",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Integrity Fail",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Missing SDU To UL",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Missing SDU From LL",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU FC Drop",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU FC Drop Bytes",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Dups",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Dups Bytes",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Out of Win",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Out of Win Bytes",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Invalid",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Invalid Bytes",4}, 	// shift 0 bits,total 32 bits
+    {SKIP,NULL,4}, 	// reserved shift 0 bits,total 32 bits
+
+    {UINT,"Num Flow Ctrl Trigger Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Data PDU Rx Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Data PDU Rx Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Control PDU Bytes Rx Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Control PDU Gen Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Control PDU Gen Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Stat Rprt Ctrl PDU Rx Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num ROHC Ctrl PDU Rx Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU ROHC Fail Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Integrity Fail Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Missing SDU To UL Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Missing SDU From LL Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU FC Drop Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU FC Drop Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Dups Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Dups Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Out of Win Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Out of Win Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Invalid Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Invalid Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {SKIP,NULL,4}, 	// reserved shift 0 bits,total 32 bits
+};
+
 const ValueName LtePdcpDlStats_Subpkt_RB_Mode [] = {
     {1, "AM"},
 };
