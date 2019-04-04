@@ -3462,6 +3462,57 @@ const Fmt LtePdcchPhichIndicationReport_Record_v33_pdcch [] = {
     {SKIP, NULL, 4},
 };
 
+const Fmt LtePdcchPhichIndicationReport_Fmt_v42 [] = {
+    {UINT,"Duplex Mode",2}, 	// shift 0 bits,total 2 bits
+    {PLACEHOLDER,"UL DL Config",0}, 	// shift 2 bits,total 4 bits
+    {UINT, "Number of Records", 1},
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v42_p1 [] = {
+    {UINT, "Num PDCCH Results", 4},             // 3 bits
+    {PLACEHOLDER, "Num PHICH Results", 0},      // 3 bits
+    {PLACEHOLDER, "PDCCH Timing SFN", 0},       // 10 bits
+    {PLACEHOLDER, "PDCCH Timing Sub-FN", 0},    // 4 bits
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v42_phich [] = {
+    {UINT, "Cell Index", 4},                    // 3 bits
+    {PLACEHOLDER, "PHICH Included", 0},         // 1 bit
+    {PLACEHOLDER, "PHICH 1 Included", 0},       // 1 bit
+    {PLACEHOLDER, "PHICH Value", 0},            // 1 bit
+    {PLACEHOLDER, "PHICH 1 Value", 0},          // 1 bit
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v42_pdcch [] = {
+    // PDCCH Info
+    {UINT, "Serv Cell Idx", 2},                 // 3 bits
+    {PLACEHOLDER, "RNTI Type", 0},              // 4 bits
+    {PLACEHOLDER, "Payload Size", 0},           // 7 bits
+    {PLACEHOLDER, "Aggregation Level", 0},      // 2 bits
+    {UINT, "Search Space", 2},                  // 1 bit
+    {PLACEHOLDER, "SPS Grant Type", 0},         // 3 bits
+    {PLACEHOLDER, "New DL Tx", 0},              // 1 bit
+    {PLACEHOLDER, "Num DL Trblks", 0},          // 2 bits
+
+    {UINT,"S0 Index",4}, 	// shift 0 bits,total 5 bits
+    {PLACEHOLDER,"S1 Index",0}, 	// shift 5 bits,total 5 bits
+    {PLACEHOLDER,"S2 Index",0}, 	// shift 10 bits,total 5 bits
+    {PLACEHOLDER,"S3 Index",0}, 	// shift 15 bits,total 5 bits
+    {PLACEHOLDER,"Msleep",0}, 	// shift 20 bits,total 1 bits
+    {PLACEHOLDER,"Usleep",0}, 	// shift 21 bits,total 1 bits
+    {PLACEHOLDER,"uSleep Duration",0}, 	// shift 22 bits,total 5 bits
+    {PLACEHOLDER,"Fake Pdcch Sf",0}, 	// shift 27 bits,total 1 bits
+    {PLACEHOLDER,"Is Ul Dropped",0}, 	// shift 28 bits,total 1 bits
+    {PLACEHOLDER,"Interf Active",0}, 	// shift 29 bits,total 1 bits
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v42_p3 [] = {
+    {UINT,"Full Mode Events Mask",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Dl Subframe Count",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Force Send PDCCH Ind",4}, 	// shift 0 bits,total 1 bits
+    {SKIP,NULL,4},
+};
+
 const Fmt LtePdcchPhichIndicationReport_Record_v5_p3 [] = {
     // PDCCH Hidden Info
     {SKIP, NULL, 4},
