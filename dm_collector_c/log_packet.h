@@ -1827,6 +1827,68 @@ const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO [] = {
     {UINT, "SO", 1},    // the rest 7 bits of LSF (& 127) * 256 + this value
 };
 
+const Fmt LteRlcUlAmAllPdu_SubpktPayload_v4 [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "RB Mode", 1},
+    {UINT, "SN Length", 1},
+    {SKIP, NULL, 1},
+    {UINT, "Enabled PDU Log Packets", 2}, // need to check bit by bit
+    // this part is different from DL
+    {UINT, "VT(A)", 2},
+    {UINT, "VT(S)", 2},
+    {UINT, "PDU Without Poll", 2},
+    {UINT, "Byte Without Poll", 4},
+    {UINT, "Poll SN", 2},
+    {UINT, "Number of PDUs", 2},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Basic_v4 [] = {
+    {PLACEHOLDER, "PDU TYPE", 0},
+    {PLACEHOLDER, "rb_cfg_idx", 0},
+    {PLACEHOLDER, "SFN",0},
+    {UINT, "sys_fn", 2},
+    {PLACEHOLDER, "sub_fn", 0},
+    {UINT, "pdu_bytes", 2},
+    {UINT, "logged_bytes", 2},
+    {SKIP, NULL, 1},
+    {UINT, "D/C LookAhead", 1},
+    {UINT, "SN", 1},
+    // for control: cpt = STATUS(0)
+    // for data: RF, P, FI, E
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Control_v4 [] = {
+    {PLACEHOLDER, "cpt", 0},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN_v4 [] = {
+    {UINT, "NACK_SN", 2},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING_v4 [] = {
+    {UINT, "NACK_SN", 1},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_DATA_v4 [] = {
+    {PLACEHOLDER, "RF", 0},
+    {PLACEHOLDER, "P", 0},
+    {PLACEHOLDER, "FI", 0},
+    {PLACEHOLDER, "E", 0},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN_v4 [] = {
+    {UINT, "LI", 2}, // 0x 0011 1100
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING_v4 [] = {
+    {UINT, "LI", 1}, //
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO_v4 [] = {
+    {UINT, "LSF", 1},   // & 128
+    {UINT, "SO", 1},    // the rest 7 bits of LSF (& 127) * 256 + this value
+};
+
 // ----------------------------------------------------------------------------
 // LTE_RLC_DL_AM_All_PDU
 

@@ -4963,7 +4963,360 @@ static int _decode_lte_rlc_ul_am_all_pdu_subpkt (const char *b, int offset,
                     PyList_Append(result_subpkt, t1);
                     Py_DECREF(t1);
                     Py_DECREF(result_pdu);
-                } else {
+                }
+                else if (subpkt_id == 70 && subpkt_ver == 4) {
+                    // 70 means LTE RLC UL AM All PDU
+                    offset += _decode_by_fmt(LteRlcUlAmAllPdu_SubpktPayload_v4,
+                            ARRAY_SIZE(LteRlcUlAmAllPdu_SubpktPayload_v4, Fmt),
+                            b, offset, length, result_subpkt);
+                    int rb_cfg_idx = _search_result_int(result_subpkt,
+                            "RB Cfg Idx");
+                    (void) _map_result_field_to_name(result_subpkt, "RB Mode",
+                            LteRlcUlAmAllPdu_Subpkt_RBMode,
+                            ARRAY_SIZE(LteRlcUlAmAllPdu_Subpkt_RBMode,
+                            ValueName), "(MI)Unknown");
+                    int enabled_pdu = _search_result_int(result_subpkt,
+                            "Enabled PDU Log Packets");
+                    // Need to check bit by bit
+                    std::string strEnabledPDU = "";
+                    if ((enabled_pdu) & (1 << (1)))
+                        strEnabledPDU += "RLCUL Config (0xB091), ";
+                    if ((enabled_pdu) & (1 << (2)))
+                        strEnabledPDU += "RLCUL AM ALL PDU (0xB092), ";
+                    if ((enabled_pdu) & (1 << (3)))
+                        strEnabledPDU += "RLCUL AM CONTROL PDU (0xB093), ";
+                    if ((enabled_pdu) & (1 << (4)))
+                        strEnabledPDU += "RLCUL AM POLLING PDU (0xB094), ";
+                    if ((enabled_pdu) & (1 << (5)))
+                        strEnabledPDU += "RLCUL AM SIGNALING PDU (0xB095), ";
+                    if ((enabled_pdu) & (1 << (6)))
+                        strEnabledPDU += "RLCUL UM DATA PDU (0xB096), ";
+                    if ((enabled_pdu) & (1 << (7)))
+                        strEnabledPDU += "RLCUL STATISTICS (0xB097), ";
+                    if ((enabled_pdu) & (1 << (8)))
+                        strEnabledPDU += "RLCUL AM STATE (0xB098), ";
+                    if ((enabled_pdu) & (1 << (9)))
+                        strEnabledPDU += "RLCUL UM STATE (0xB099), ";
+                    if (strEnabledPDU.length() > 0) {
+                        strEnabledPDU = strEnabledPDU.substr(0,
+                                strEnabledPDU.length() - 2);
+                        strEnabledPDU += ".";
+                    }
+                    PyObject *pystr = Py_BuildValue("s",
+                            strEnabledPDU.c_str());
+                    PyObject *old_object = _replace_result(result_subpkt,
+                            "Enabled PDU Log Packets", pystr);
+                    Py_DECREF(old_object);
+                    Py_DECREF(pystr);
+
+                    int n_pdu = _search_result_int(result_subpkt,
+                            "Number of PDUs");
+                    PyObject *result_pdu = PyList_New(0);
+                    for (int j = 0; j < n_pdu; j++) {
+                        PyObject *result_pdu_item = PyList_New(0);
+                        offset += _decode_by_fmt(
+                                LteRlcUlAmAllPdu_Subpkt_PDU_Basic_v4, ARRAY_SIZE(
+                                    LteRlcUlAmAllPdu_Subpkt_PDU_Basic_v4, Fmt),
+                                b, offset, length, result_pdu_item);
+                        // Update rb_cfg_idx from previous content
+                        old_object = _replace_result_int(result_pdu_item,
+                                "rb_cfg_idx", rb_cfg_idx);
+                        Py_DECREF(old_object);
+                        int DCLookAhead = _search_result_int(result_pdu_item,
+                                "D/C LookAhead");
+                        int iNonDecodeFN = _search_result_int(result_pdu_item,
+                                "sys_fn");
+                        int iLoggedBytes = _search_result_int(result_pdu_item,
+                                "logged_bytes");
+                        // D/C LookAhead and SN (or Ack_SN) has already been parsed.
+                        iLoggedBytes -= 2;
+
+                        // Handle fn
+                        const unsigned int SFN_RSHIFT = 4,
+                              SFN_MASK = (1 << 12) - 1;
+                        const unsigned int SUBFRAME_RSHIFT = 0,
+                              SUBFRAME_MASK = (1 << 4) - 1;
+                        int sys_fn = (iNonDecodeFN >> SFN_RSHIFT) & SFN_MASK;
+                        int sub_fn =
+                            (iNonDecodeFN >> SUBFRAME_RSHIFT) & SUBFRAME_MASK;
+                        old_object = _replace_result_int(result_pdu_item,
+                                "sys_fn", sys_fn);
+                        Py_DECREF(old_object);
+                        old_object = _replace_result_int(result_pdu_item,
+                                "sub_fn", sub_fn);
+                        Py_DECREF(old_object);
+
+                        old_object = _replace_result_int(result_pdu_item,
+                                "SFN", iNonDecodeFN);
+                        Py_DECREF(old_object);
+
+                        // Decide PDU type
+                        int iNonDecodeSN = _search_result_int(result_pdu_item, "SN");
+                        if (DCLookAhead < 16) {
+                            // Type = Control
+                            pystr = Py_BuildValue("s", "RLCUL CTRL");
+                            old_object = _replace_result(result_pdu_item,
+                                    "PDU TYPE", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            // Modify ACK_SN
+                            std::string strAckSN = "ACK_SN = ";
+                            int iAckSN = DCLookAhead * 64 + iNonDecodeSN/4;
+                            strAckSN += SSTR(iAckSN);
+                            int iHeadFromPadding = (iNonDecodeSN & 1) * 512;
+                            pystr = Py_BuildValue("s", strAckSN.c_str());
+                            old_object = _replace_result(result_pdu_item,
+                                    "SN", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            // Update other info
+                            offset += _decode_by_fmt(
+                                    LteRlcUlAmAllPdu_Subpkt_PDU_Control_v4,
+                                    ARRAY_SIZE(
+                                        LteRlcUlAmAllPdu_Subpkt_PDU_Control_v4,
+                                        Fmt),
+                                    b, offset, length, result_pdu_item);
+                            pystr = Py_BuildValue("s", "STATUS(0)");
+                            old_object = _replace_result(result_pdu_item,
+                                    "cpt", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+
+                            if (iLoggedBytes > 0) {
+                                // Decode NACK
+                                int numNack = iLoggedBytes / 1.5;
+                                int iAllign = 0;
+                                int iHeadFromAllign = 0;
+
+                                PyObject *result_pdu_nack = PyList_New(0);
+                                for (int indexNack = 0; indexNack < numNack; indexNack++) {
+                                    PyObject *result_pdu_nack_item = PyList_New(0);
+                                    if (iAllign == 0) {
+                                        iAllign = 1;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN_v4,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN_v4,
+                                                Fmt),
+                                                b, offset, length, result_pdu_nack_item);
+                                        iLoggedBytes -= 2;
+                                        int iNonDecodeNACK = _search_result_int(
+                                                result_pdu_nack_item, "NACK_SN");
+                                        int iPart3 = iNonDecodeNACK / 4096;
+                                        int iPart4 = (iNonDecodeNACK - iPart3 * 4096) / 256;
+                                        int iPart1 = (iNonDecodeNACK - iPart3 * 4096 - iPart4 * 256) / 16;
+                                        int iPart2 = iNonDecodeNACK - iPart3 * 4096 - iPart4 * 256 - iPart1 * 16;
+                                        int iNack = iPart1 * 32 + iPart2 * 2 + iPart3 / 8 + iHeadFromPadding;
+                                        iHeadFromAllign = iPart4 + (iPart3 & 1) * 16;
+                                        int iE2 = iPart3 & 2;
+                                        if (iE2 == 2) {
+                                            indexNack = numNack - 1;
+                                        }
+                                        old_object = _replace_result_int(
+                                                result_pdu_nack_item, "NACK_SN", iNack);
+                                        Py_DECREF(old_object);
+                                    } else {
+                                        iAllign = 0;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING_v4,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING_v4,
+                                                Fmt),
+                                                b, offset, length, result_pdu_nack_item);
+                                        iLoggedBytes -= 1;
+                                        int iNonDecodeNACK = _search_result_int(
+                                                result_pdu_nack_item, "NACK_SN");
+                                        int iNack = iHeadFromAllign * 32 + iNonDecodeNACK / 8;
+                                        int iE2 = iNonDecodeNACK & 2;
+                                        if (iE2 == 2) {
+                                            indexNack = numNack - 1;
+                                        }
+                                        iHeadFromPadding = (iNonDecodeNACK & 1) * 512;
+                                        old_object = _replace_result_int(
+                                                result_pdu_nack_item, "NACK_SN", iNack);
+                                        Py_DECREF(old_object);
+                                    }
+                                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                            result_pdu_nack_item, "dict");
+                                    PyList_Append(result_pdu_nack, t3);
+                                    Py_DECREF(t3);
+                                    Py_DECREF(result_pdu_nack_item);
+                                }
+                                PyObject *t2 = Py_BuildValue("(sOs)", "RLC CTRL NACK",
+                                        result_pdu_nack, "list");
+                                PyList_Append(result_pdu_item, t2);
+                                Py_DECREF(t2);
+                                Py_DECREF(result_pdu_nack);
+                            }
+                        } else {
+                            // Type = DATA
+                            pystr = Py_BuildValue("s", "RLCUL DATA");
+                            old_object = _replace_result(result_pdu_item,
+                                    "PDU TYPE", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            // Update other info
+                            std::string strRF = "", strP = "", strFI = "",
+                                strE = "";
+                            if ((DCLookAhead) & (1 << (6))) {
+                                strRF += "1";
+                            } else {
+                                strRF += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (5))) {
+                                strP += "1";
+                            } else {
+                                strP += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (4))) {
+                                strFI += "1";
+                            } else {
+                                strFI += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (3))) {
+                                strFI += "1";
+                            } else {
+                                strFI += "0";
+                            }
+                            if ((DCLookAhead) & (1 << (2))) {
+                                strE += "1";
+                            } else {
+                                strE += "0";
+                            }
+                            // update SN (need to check last two bits in
+                            // DCLookAhead)
+                            if ((DCLookAhead) & (1 << (1))) {
+                                iNonDecodeSN += 512;
+                            }
+                            if ((DCLookAhead) & (1)) {
+                                iNonDecodeSN += 256;
+                            }
+                            old_object = _replace_result_int(result_pdu_item,
+                                    "SN", iNonDecodeSN);
+                            Py_DECREF(old_object);
+
+                            offset += _decode_by_fmt(
+                                    LteRlcUlAmAllPdu_Subpkt_PDU_DATA_v4,
+                                    ARRAY_SIZE(
+                                        LteRlcUlAmAllPdu_Subpkt_PDU_DATA_v4, Fmt),
+                                    b, offset, length, result_pdu_item);
+                            pystr = Py_BuildValue("s", (strRF.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "RF", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", (strP.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "P", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", (strFI.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "FI", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+                            pystr = Py_BuildValue("s", (strE.c_str()));
+                            old_object = _replace_result(result_pdu_item,
+                                    "E", pystr);
+                            Py_DECREF(old_object);
+                            Py_DECREF(pystr);
+
+                            if (strRF == "1") {
+                                // decode LSF and SO
+                                iLoggedBytes -= 2;
+
+                                offset += _decode_by_fmt(
+                                        LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO_v4,
+                                        ARRAY_SIZE(
+                                            LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO_v4,
+                                            Fmt),
+                                        b, offset, length, result_pdu_item);
+                                int temp = _search_result_int(result_pdu_item,
+                                        "LSF");
+                                int iLSF = temp >> 7;
+                                int iSO = _search_result_int(result_pdu_item,
+                                        "SO");
+                                iSO += (temp & 127) * 256;
+                                old_object = _replace_result_int(
+                                        result_pdu_item, "LSF", iLSF);
+                                Py_DECREF(old_object);
+                                old_object = _replace_result_int(
+                                        result_pdu_item, "SO", iSO);
+                                Py_DECREF(old_object);
+                            }
+
+                            if (strE == "1") {
+                                // Decode LI
+                                int numLI = iLoggedBytes / 1.5;
+                                iLoggedBytes = 0;
+                                int iAllign = 0;
+                                int iHeadFromAllign = 0;
+
+                                PyObject *result_pdu_li = PyList_New(0);
+                                for (int indexLI = 0; indexLI < numLI; indexLI++) {
+                                    PyObject *result_pdu_li_item = PyList_New(0);
+                                    if (iAllign == 0) {
+                                        iAllign = 1;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN_v4,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN_v4,
+                                                Fmt),
+                                                b, offset, length, result_pdu_li_item);
+                                        int iNonDecodeLI = _search_result_int(
+                                                result_pdu_li_item, "LI");
+                                        int iPart3 = iNonDecodeLI / 4096;
+                                        int iPart4 = (iNonDecodeLI - iPart3 * 4096) / 256;
+                                        int iPart1 = (iNonDecodeLI - iPart3 * 4096 - iPart4 * 256) / 16;
+                                        int iPart2 = iNonDecodeLI - iPart3 * 4096 - iPart4 * 256 - iPart1 * 16;
+                                        int iLI = (iPart1 % 8) * 256 + iPart2 * 16 + iPart3;
+                                        iHeadFromAllign = (iPart4 % 8) * 256;
+                                        old_object = _replace_result_int(
+                                                result_pdu_li_item, "LI", iLI);
+                                        Py_DECREF(old_object);
+                                    } else {
+                                        iAllign = 0;
+                                        offset += _decode_by_fmt(
+                                                LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING_v4,
+                                                ARRAY_SIZE(
+                                                    LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING_v4,
+                                                Fmt),
+                                                b, offset, length, result_pdu_li_item);
+                                        int iNonDecodeLI = _search_result_int(
+                                                result_pdu_li_item, "LI");
+                                        int iLI = iHeadFromAllign + iNonDecodeLI;
+                                        old_object = _replace_result_int(
+                                                result_pdu_li_item, "LI", iLI);
+                                        Py_DECREF(old_object);
+                                    }
+                                    PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                            result_pdu_li_item, "dict");
+                                    PyList_Append(result_pdu_li, t3);
+                                    Py_DECREF(t3);
+                                    Py_DECREF(result_pdu_li_item);
+                                }
+                                PyObject *t2 = Py_BuildValue("(sOs)", "RLC DATA LI",
+                                        result_pdu_li, "list");
+                                PyList_Append(result_pdu_item, t2);
+                                Py_DECREF(t2);
+                                Py_DECREF(result_pdu_li);
+                            }
+                        }
+                        offset += iLoggedBytes;
+                        PyObject *t1 = Py_BuildValue("(sOs)", ("RLCUL PDU["
+                                + SSTR(i) + "]").c_str(), result_pdu_item,
+                                "dict");
+                        PyList_Append(result_pdu, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_pdu_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "RLCUL PDUs",
+                            result_pdu, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_pdu);
+                }
+                else {
                     printf("Unkown LTE RLC UL AM ALL PDU subpkt id and version"
                             ": 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
