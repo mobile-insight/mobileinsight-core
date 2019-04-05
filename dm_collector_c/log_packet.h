@@ -3722,6 +3722,10 @@ const ValueName ValueNameNumNBAntennas [] = {
     {2, "4 antennas"},
 };
 
+const ValueName ValueNameNumNBAntennas_PDCCH_V141 [] = {
+    {1, "4 antennas"},
+};
+
 const ValueName ValueNameTrueOrFalse [] = {
     {0, "False"},
     {1, "True"},
