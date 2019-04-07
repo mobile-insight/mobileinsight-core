@@ -11,6 +11,7 @@
 #include <cstring>
 #include <arpa/inet.h>
 
+
 #include "1xev_connected_state_search_info.h"
 #include "1xev_connection_attempt.h"
 #include "1xev_connection_release.h"
@@ -1345,6 +1346,7 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
 
             break;
         }
+
     default:
         printf("(MI)Unknown LTE PHY PDSCH Demapper Configuration version: 0x%x\n", pkt_ver);
         return 0;
