@@ -5834,7 +5834,7 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                         "Subpacket Version");
                 int subpkt_size = _search_result_int(result_subpkt,
                         "Subpacket Size");
-                if (subpkt_id == 65 && subpkt_ver == 3) {
+                if ((subpkt_id == 65 && subpkt_ver == 3) || (subpkt_id == 65 && subpkt_ver == 4)) {
                     // 65 means LTE RLC DL AM All PDU
                     offset += _decode_by_fmt(LteRlcDlAmAllPdu_SubpktPayload,
                             ARRAY_SIZE(LteRlcDlAmAllPdu_SubpktPayload, Fmt),
@@ -6189,7 +6189,8 @@ static int _decode_lte_rlc_dl_am_all_pdu_subpkt (const char *b, int offset,
                     PyList_Append(result_subpkt, t1);
                     Py_DECREF(t1);
                     Py_DECREF(result_pdu);
-                } else {
+                }
+                else {
                     printf("Unkown LTE RLC DL AM ALL PDU subpkt id and version"
                             ": 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
