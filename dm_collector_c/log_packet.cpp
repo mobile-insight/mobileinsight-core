@@ -4570,7 +4570,136 @@ static int _decode_lte_rlc_dl_config_log_packet_subpkt (const char *b,
                     PyList_Append(result_subpkt, t3);
                     Py_DECREF(t3);
                     Py_DECREF(result_ActiveRB);
-                } else {
+                }
+                else if (subpkt_id == 64 && subpkt_ver == 2) {
+                    // 64 means lte rlc dl config log packet
+                    offset += _decode_by_fmt(
+                            LteRlcDlConfigLogPacket_SubpktPayload_v2,
+                            ARRAY_SIZE(LteRlcDlConfigLogPacket_SubpktPayload_v2,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    (void) _map_result_field_to_name(result_subpkt, "Reason",
+                            LteRlcDlConfigLogPacket_Subpkt_Reason,
+                            ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_Reason,
+                                ValueName),
+                            "(MI)Unknown");
+                    int maxSizeRbs = _search_result_int(result_subpkt,
+                            "Max Size RBs");
+
+                    // Released RB Struct
+                    int start_ReleasedRBStruct = offset;
+                    offset += _decode_by_fmt(
+                            LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Header_v2,
+                            ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Header_v2,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    int num_ReleasedRB = _search_result_int(result_subpkt,
+                            "Number of Released RBs");
+                    PyObject *result_ReleasedRB = PyList_New(0);
+                    for (int j = 0; j < num_ReleasedRB; j++) {
+                        PyObject *result_ReleasedRB_item = PyList_New(0);
+                        offset += _decode_by_fmt(LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Fmt_v2,
+                                ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Fmt_v2,
+                                    Fmt),
+                                b, offset, length, result_ReleasedRB_item);
+                        PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                                result_ReleasedRB_item, "dict");
+                        PyList_Append(result_ReleasedRB, t1);
+                        Py_DECREF(t1);
+                        Py_DECREF(result_ReleasedRB_item);
+                    }
+                    PyObject *t1 = Py_BuildValue("(sOs)", "Released RBs",
+                            result_ReleasedRB, "list");
+                    PyList_Append(result_subpkt, t1);
+                    Py_DECREF(t1);
+                    Py_DECREF(result_ReleasedRB);
+                    offset += 1 + maxSizeRbs * 1 -
+                        (offset - start_ReleasedRBStruct);
+
+                    // Added Modified RB Struct
+                    int start_AddedModifiedRBStruct = offset;
+                    offset += _decode_by_fmt(LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Header_v2,
+                            ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Header_v2,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    int num_AddedModifiedRB = _search_result_int(result_subpkt,
+                            "Number of Added/Modified RBs");
+                    PyObject *result_AddedModifiedRB = PyList_New(0);
+                    for (int j = 0; j < num_AddedModifiedRB; j++) {
+                        PyObject *result_AddedModifiedRB_item = PyList_New(0);
+                        offset += _decode_by_fmt(LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Fmt_v2,
+                                ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Fmt_v2,
+                                    Fmt),
+                                b, offset, length, result_AddedModifiedRB_item);
+                        (void) _map_result_field_to_name(result_AddedModifiedRB_item,
+                                "Action",
+                                LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Action,
+                                ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Action,
+                                    ValueName),
+                                "(MI)Unknown");
+                        PyObject *t2 = Py_BuildValue("(sOs)", "Ignored",
+                                result_AddedModifiedRB_item, "dict");
+                        PyList_Append(result_AddedModifiedRB, t2);
+                        Py_DECREF(t2);
+                        Py_DECREF(result_AddedModifiedRB_item);
+                    }
+                    PyObject *t2 = Py_BuildValue("(sOs)", "Added/Modified RBs",
+                            result_AddedModifiedRB, "list");
+                    PyList_Append(result_subpkt, t2);
+                    Py_DECREF(t2);
+                    Py_DECREF(result_AddedModifiedRB);
+                    offset += 1 + maxSizeRbs * 2 -
+                        (offset - start_AddedModifiedRBStruct);
+
+                    // Active RB info
+                    offset += _decode_by_fmt(LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Header_v2,
+                            ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Header_v2,
+                                Fmt),
+                            b, offset, length, result_subpkt);
+                    int num_ActiveRB = _search_result_int(result_subpkt,
+                            "Number of Active RBs");
+                    PyObject *result_ActiveRB = PyList_New(0);
+                    for (int j = 0; j < num_ActiveRB; j++) {
+                        PyObject *result_ActiveRB_item = PyList_New(0);
+                        offset += _decode_by_fmt(LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Fmt_v2,
+                                ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Fmt_v2,
+                                    Fmt),
+                                b, offset, length, result_ActiveRB_item);
+                        (void) _map_result_field_to_name(result_ActiveRB_item,
+                                "RB Mode",
+                                LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBMode,
+                                ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBMode,
+                                    ValueName),
+                                "(MI)Unknown");
+                        (void) _map_result_field_to_name(result_ActiveRB_item,
+                                "RB Type",
+                                LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBType,
+                                ARRAY_SIZE(LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBType,
+                                    ValueName),
+                                "(MI)Unknown");
+                        PyObject *pystr = Py_BuildValue("s", "RLCDL CFG");
+                        PyObject *old_object = _replace_result(result_ActiveRB_item,
+                                "RLCDL CFG", pystr);
+                        Py_DECREF(old_object);
+                        Py_DECREF(pystr);
+
+                        //old_object = _replace_result_int(result_ActiveRB_item,
+                        //        "SN Length", 10);
+                        //Py_DECREF(old_object);
+
+                        PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
+                                result_ActiveRB_item, "dict");
+                        PyList_Append(result_ActiveRB, t3);
+                        Py_DECREF(t3);
+                        Py_DECREF(result_ActiveRB_item);
+                    }
+                    PyObject *t3 = Py_BuildValue("(sOs)", "Active RBs",
+                            result_ActiveRB, "list");
+                    PyList_Append(result_subpkt, t3);
+                    Py_DECREF(t3);
+                    Py_DECREF(result_ActiveRB);
+                }
+                 else {
                     printf("(MI)Unknown LTE RLC DL Config Log Packet subpkt id"
                             "and version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }

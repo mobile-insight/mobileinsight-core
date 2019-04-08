@@ -1754,6 +1754,42 @@ const ValueName LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBType [] = {
     {2, "DRB"},
 };
 
+const Fmt LteRlcDlConfigLogPacket_SubpktPayload_v2 [] = {
+    {UINT, "Reason", 1},
+    {UINT, "Max Size RBs", 1},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Header_v2 [] = {
+    {UINT, "Number of Released RBs", 1},
+};
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Fmt_v2 [] = {
+    {UINT, "Released RB Cfg Index", 1},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Header_v2 [] = {
+    {UINT, "Number of Added/Modified RBs", 1},
+};
+const Fmt LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Fmt_v2 [] = {
+    {UINT, "Added/Modified RB Cfg Index", 1},
+    {UINT, "Action", 1},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Header_v2 [] = {
+    {UINT, "Number of Active RBs", 1},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Fmt_v2 [] = {
+    {PLACEHOLDER, "RLCDL CFG", 0},
+    {UINT, "RB Mode", 1},
+    {UINT, "LC ID", 1},
+    {UINT, "RB ID", 1},
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "RB Type", 1},
+    {UINT, "T Reordering (ms)", 2},
+    {UINT, "T Status Prohibit (ms)", 2},
+    {UINT, "SN Length", 1},
+};
+
 // ----------------------------------------------------------------------------
 // LTE_RLC_UL_AM_All_PDU
 
