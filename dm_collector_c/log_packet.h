@@ -630,6 +630,68 @@ const Fmt LtePhyPdschDemapperConfigFmt_v123 [] = {
     {PLACEHOLDER,"Joint Demod Skip Reason",0},
 };
 
+const Fmt LtePhyPdschDemapperConfigFmt_header_144 [] = {
+    {UINT,"Carrier Index",4}, 	// shift 0 bits,total 4 bits
+    {PLACEHOLDER,"Num of Records",0}, 	// shift 4 bits,total 8 bits
+    {SKIP,NULL,3},
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 12 bits,total 44 bits
+};
+
+const Fmt LtePhyPdschDemapperConfigFmt_v144 [] = {
+    {UINT,"Serving Cell ID",4}, 	// shift 0 bits,total 9 bits
+    {PLACEHOLDER,"Sub-frame Number",0}, 	// shift 9 bits,total 4 bits
+    {PLACEHOLDER,"System Frame Number",0}, 	// shift 13 bits,total 10 bits
+    {PLACEHOLDER,"PDSCH RNTI Type",0}, 	// shift 23 bits,total 4 bits
+    {PLACEHOLDER,"Number of Tx Antennas (M)",0}, 	// shift 27 bits,total 2 bits
+    {PLACEHOLDER,"Number of Rx Antennas (N)",0}, 	// shift 29 bits,total 2 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 31 bits,total 1 bits
+
+    {UINT,"PDSCH RNTIl ID",2}, 	// shift 0 bits,total 16 bits
+    //{UINT,"Reserved",1}, 	// shift 0 bits,total 1 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 1 bits,total 1 bits
+    {UINT,"Spatial Rank",1}, 	// shift 2 bits,total 2 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 4 bits,total 1 bits
+    {PLACEHOLDER,"Frequency Selective PMI",0}, 	// shift 5 bits,total 1 bits
+    {PLACEHOLDER,"MU Receiver Mode",0}, 	// shift 6 bits,total 2 bits
+
+    {UINT,"PMI Index",1}, 	// shift 0 bits,total 4 bits
+    {PLACEHOLDER,"Transmission Scheme",0}, 	// shift 4 bits,total 4 bits
+
+    {UINT,"RB Allocation Slot 0[0]",8}, 	// shift 0 bits,total 64 bits
+    {UINT,"RB Allocation Slot 0[1]",8}, 	// shift 0 bits,total 64 bits
+    {UINT,"RB Allocation Slot 1[0]",8}, 	// shift 0 bits,total 64 bits
+    {UINT,"RB Allocation Slot 1[1]",8}, 	// shift 0 bits,total 64 bits
+    {UINT,"UERS Port Enabled",4}, 	// shift 0 bits,total 3 bits
+    {PLACEHOLDER,"BMOD FD Sym Index",0}, 	// shift 3 bits,total 4 bits
+    {PLACEHOLDER,"Transport Block Size Stream 0",0}, 	// shift 7 bits,total 18 bits
+    {PLACEHOLDER,"Modulation Stream 0",0}, 	// shift 25 bits,total 2 bits
+    {PLACEHOLDER,"PB",0}, 	// shift 27 bits,total 2 bits
+    {PLACEHOLDER,"RhoB/RhoA",0}, 	// shift 29 bits,total 2 bits
+    {PLACEHOLDER,"CSI-RS Exist",0}, 	// shift 31 bits,total 1 bits
+
+    {UINT,"ZP CSI-RS Exist",4}, 	// shift 0 bits,total 1 bits
+    {PLACEHOLDER,"CSI-RS Symbol Skipped",0}, 	// shift 1 bits,total 1 bits
+    {PLACEHOLDER,"Traffic to Pilot Ratio Data",0}, 	// shift 2 bits,total 12 bits
+    {PLACEHOLDER,"Transport Block Size Stream 1",0}, 	// shift 14 bits,total 18 bits
+
+    {UINT,"Modulation Stream 1",4}, 	// shift 0 bits,total 2 bits
+    {PLACEHOLDER,"SCH0 Memory Map Mode",0}, 	// shift 2 bits,total 2 bits
+    {PLACEHOLDER,"SCH1 Memory Map Mode",0}, 	// shift 4 bits,total 2 bits
+    {PLACEHOLDER,"Strong ICell ID",0}, 	// shift 6 bits,total 9 bits
+    {PLACEHOLDER,"Qice Enable Mode",0}, 	// shift 15 bits,total 2 bits
+    {PLACEHOLDER,"Qice Skip Reason",0}, 	// shift 17 bits,total 3 bits
+    {PLACEHOLDER,"Csf Dual Rnn Sel",0}, 	// shift 20 bits,total 1 bits
+    {PLACEHOLDER,"Plq Num Enabled Rd Groups",0}, 	// shift 21 bits,total 5 bits
+    {PLACEHOLDER,"Plg Num Loaded Rb Groups",0}, 	// shift 26 bits,total 5 bits
+    {PLACEHOLDER,"Qed Mode",0}, 	// shift 31 bits,total 3 bits
+
+    {SKIP,NULL,4},
+    //{UINT,"Reserved",4}, 	// shift 2 bits,total 8 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 10 bits,total 8 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 18 bits,total 8 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 26 bits,total 8 bits
+};
+
 const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
     {0, "QPSK"},
     {1, "16QAM"},
