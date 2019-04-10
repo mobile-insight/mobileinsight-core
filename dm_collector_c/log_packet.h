@@ -3831,6 +3831,7 @@ const ValueName ValueNamePruneStatus [] = {
     {33, "RB_ALLOC_ERROR_DCI1A"},
     {34, "INVALID_RB_NUM_DCI1A"},
     {36, "RETURN_DL_DATA_ARRIVAL_DCI1A"},
+    {44, "RB_ALLOC_ERROR_DCI1C"},
     {48, "PMI_ERROR_DCI2_2A"},
     {50, "NUM_LAYERS_ERROR_DCI2_2A_TB1"},
     {64, "FAIL_SER_ENGYMTRC_CHECK"},
