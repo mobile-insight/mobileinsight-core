@@ -103,7 +103,7 @@ const Fmt LtePdcpDlCipherDataPdu_Data_v40 [] = {
     {PLACEHOLDER, "Sys FN", 0}, // 10 bits
     {PLACEHOLDER,"Reserved FN",0},//2 bit
     {UINT,"count(hex)",4},
-    {SKIP, NULL, 4},    // compressed pdu,buffer,log_buffer
+    {SKIP, NULL, 1},    // compressed pdu
 };
 
 static int _decode_lte_pdcp_dl_cipher_data_pdu_payload (const char *b,

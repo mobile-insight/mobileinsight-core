@@ -2048,7 +2048,7 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                 temp = _search_result_int(result_record_item,
                         "Codeword Swap");
                 int iCodewordSwap = temp & 1;    // 1 bits
-                int iNumofTBlks = (temp >> 1) & 7;    // 3 bits
+                int iNumofTBlks = (temp >> 1) & 3;    // 2 bits
 
                 old_object = _replace_result_int(result_record_item,
                         "HARQ ID", iHarqId);
