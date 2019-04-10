@@ -3860,6 +3860,7 @@ const ValueName ValueNameNumNBAntennas [] = {
 };
 
 const ValueName ValueNameNumNBAntennas_PDCCH_V141 [] = {
+    {0, "1 or 2"},
     {1, "4 antennas"},
 };
 
