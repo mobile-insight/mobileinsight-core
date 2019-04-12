@@ -214,6 +214,7 @@ const ValueName LtePdschStatIndication_Record_TB_DidRecombining [] = {
 
 const ValueName LtePdschStatIndication_Record_TB_Discarded_ReTx [] = {
     {0, "NO_DISCARD"},
+    {1, "DISCARD_AND_ACK"},
 };
 
 const ValueName LtePdschStatIndication_Record_TB_AckNackDecision [] = {
