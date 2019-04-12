@@ -4016,6 +4016,8 @@ const ValueName ValueNameCDRXEvent [] = {
     {11, "DL_DRX_RETX_TIMER_END"},
     {12, "CDRX_ON_2_OFF"},
     {13, "CDRX_OFF_2_ON"},
+    {22, "WAKEUP_MISSED_CYCLE_TIMER_START"},
+    {23, "WAKEUP_MISSED_CYCLE_TIMER_END"},
 };
 
 const ValueName ValueNameWcdmaRrcStates [] = {
