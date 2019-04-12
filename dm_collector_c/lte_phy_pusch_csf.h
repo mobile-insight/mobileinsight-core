@@ -97,6 +97,36 @@ const Fmt LtePhyPuschCsf_Payload_v102 [] = {
     {PLACEHOLDER, "Num CSIrs Ports", 0},    // 4 bits
 };
 
+const Fmt LtePhyPuschCsf_Payload_v103 [] = {
+    {UINT,"Start System Sub-frame Number",4}, 	// shift 0 bits,total 4 bits
+    {PLACEHOLDER,"Start System Frame Number",0}, 	// shift 4 bits,total 10 bits
+    {PLACEHOLDER,"PUSCH Reporting Mode",0}, 	// shift 14 bits,total 3 bits
+    {PLACEHOLDER,"Csi Meas Set Index",0}, 	// shift 17 bits,total 1 bits
+    {PLACEHOLDER,"Rank Index",0}, 	// shift 18 bits,total 2 bits
+    {PLACEHOLDER,"Wideband PMI1",0}, 	// shift 20 bits,total 4 bits
+    {PLACEHOLDER,"Number of subbands",0}, 	// shift 24 bits,total 5 bits
+    {PLACEHOLDER,"WideBand CQI CW0",0}, 	// shift 29 bits,total 4 bits
+
+    {UINT,"WideBand CQI CW1",2}, 	// shift 1 bits,total 4 bits
+    {PLACEHOLDER,"SubBand Size (k)",0}, 	// shift 5 bits,total 4 bits
+    {PLACEHOLDER,"Size M",0}, 	// shift 9 bits,total 3 bits
+    {PLACEHOLDER,"Single WB PMI",0}, 	// shift 12 bits,total 4 bits
+
+    {UINT,"Single MB PMI",1}, 	// shift 0 bits,total 4 bits
+    {PLACEHOLDER,"CSF Tx Mode",0}, 	// shift 4 bits,total 4 bits
+
+    {SKIP,NULL,14},
+
+    {UINT,"Forced Max RI",1}, 	// shift 0 bits,total 8 bits
+    {SKIP,NULL,5},
+
+    {UINT,"Alt Cqi Table Data",1}, 	// shift 1 bits,total 1 bits
+    {SKIP,NULL,7},
+
+    {UINT,"Carrier Index",1}, 	// shift 0 bits,total 4 bits
+    {PLACEHOLDER,"Num Csirs Ports",0}, 	// shift 4 bits,total 4 bits
+};
+
 const Fmt LtePhyPuschCsf_Payload_v142 [] = {
     {UINT,"Start System Sub-frame Number",4}, 	// shift 0 bits,total 4 bits
     {PLACEHOLDER,"Start System Frame Number",0}, 	// shift 4 bits,total 10 bits
@@ -689,6 +719,97 @@ static int _decode_lte_phy_pusch_csf_payload (const char *b,
             return offset - start;
         }
 
+    case 103:
+        {
+            offset += _decode_by_fmt(LtePhyPuschCsf_Payload_v103,
+                    ARRAY_SIZE(LtePhyPuschCsf_Payload_v103, Fmt),
+                    b, offset, length, result);
+
+            unsigned int utemp = _search_result_uint(result,"Start System Sub-frame Number");
+            int iresulttemp =(utemp>>0) & 0xf;
+            old_object = _replace_result_int(result, "Start System Sub-frame Number",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>4) & 0x3ff;
+            old_object = _replace_result_int(result, "Start System Frame Number",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>14) & 0x7;
+            old_object = _replace_result_int(result, "PUSCH Reporting Mode",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>17) & 0x1;
+            old_object = _replace_result_int(result, "Csi Meas Set Index",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>18) & 0x3;
+            old_object = _replace_result_int(result, "Rank Index",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>20) & 0xf;
+            old_object = _replace_result_int(result, "Wideband PMI1",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>24) & 0x1f;
+            old_object = _replace_result_int(result, "Number of subbands",iresulttemp);
+            Py_DECREF(old_object);
+
+            iresulttemp =(utemp>>29) & 0x7;
+            int iWideBandCQICW0=iresulttemp;
+
+            utemp = _search_result_uint(result,"WideBand CQI CW1");
+            iWideBandCQICW0=iWideBandCQICW0+((utemp & 1)<<3);
+
+            old_object = _replace_result_int(result, "WideBand CQI CW0",iWideBandCQICW0);
+            Py_DECREF(old_object);
+
+            iresulttemp =(utemp>>1) & 0xf;
+            old_object = _replace_result_int(result, "WideBand CQI CW1",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>5) & 0xf;
+            old_object = _replace_result_int(result, "SubBand Size (k)",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>9) & 0x7;
+            old_object = _replace_result_int(result, "Size M",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>12) & 0xf;
+            old_object = _replace_result_int(result, "Single WB PMI",iresulttemp);
+            Py_DECREF(old_object);
+
+            utemp = _search_result_uint(result,"Single MB PMI");
+            iresulttemp =(utemp>>0) & 0xf;
+            old_object = _replace_result_int(result, "Single MB PMI",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>4) & 0xf;
+            old_object = _replace_result_int(result, "CSF Tx Mode",iresulttemp);
+            Py_DECREF(old_object);
+
+            utemp = _search_result_uint(result,"Alt Cqi Table Data");
+            iresulttemp =(utemp>>1) & 0x1;
+
+            utemp = _search_result_uint(result,"Carrier Index");
+            old_object = _replace_result_int(result, "Carrier Index",iresulttemp);
+            Py_DECREF(old_object);
+            iresulttemp =(utemp>>4) & 0xf;
+            old_object = _replace_result_int(result, "Num Csirs Ports",iresulttemp);
+            Py_DECREF(old_object);
+
+            (void) _map_result_field_to_name(result, "PUSCH Reporting Mode",
+                    ValueNamePuschReportingMode,
+                    ARRAY_SIZE(ValueNamePuschReportingMode, ValueName),
+                    "(MI)Unknown");
+
+            (void) _map_result_field_to_name(result, "Rank Index",
+                    ValueNameRankIndex,
+                    ARRAY_SIZE(ValueNameRankIndex, ValueName),
+                    "(MI)Unknown");
+
+            (void) _map_result_field_to_name(result, "CSF Tx Mode",
+                    ValueNameCSFTxMode,
+                    ARRAY_SIZE(ValueNameCSFTxMode, ValueName),
+                    "(MI)Unknown");
+
+            (void) _map_result_field_to_name(result, "Carrier Index",
+                    ValueNameCarrierIndex,
+                    ARRAY_SIZE(ValueNameCarrierIndex, ValueName),
+                    "(MI)Unknown");
+
+            return offset - start;
+        }
     default:
         printf("(MI)Unknown LTE PHY PUSCH CSF version: 0x%x\n", pkt_ver);
         return 0;
