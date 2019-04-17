@@ -403,7 +403,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     self.profile.update("LteRrcProfile:"+str(self.__status.id)+"_"+str(self.__status.freq)+".idle.serv_config",
                                         {'priority':field_val['lte-rrc.cellReselectionPriority'],
                                          'threshserv_low':str(int(field_val['lte-rrc.threshServingLow'])*2),
-                                         's_nonintrasearch':str(int(field_val['lte-rrc.s_NonIntraSearch'])*2),
+                                         's_nonintrasearch':str(float(field_val['lte-rrc.s_NonIntraSearch'])*2),
                                          'q_hyst':field_val['lte-rrc.q_Hyst']})
 
                 self.__config[cur_pair].sib.intra_freq_config = LteRrcSibIntraFreqConfig(
@@ -964,6 +964,22 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             return self.__config[cell]
         else:
             return None
+
+    def get_cur_cellid(self):
+        """
+        Get current cell's ID
+
+        :return: current cell's ID
+        """
+
+        return self.__status.id if self.__status else None
+
+    def get_cur_freq(self):
+        """
+        Get current cell's EARFCN
+        """
+
+        return self.__status.freq if self.__status else None
 
     def get_cur_cell(self):
         """
