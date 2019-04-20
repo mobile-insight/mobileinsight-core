@@ -223,7 +223,7 @@ class LteMacAnalyzer(Analyzer):
                                     self.failed_harq[id][6] += 1
                                 else:
                                     self.failed_harq[id][-2] = True
-                                    rlc_retx += 1
+                                    # rlc_retx += 1
                                     delay = sn_sfn - self.failed_harq[id][-1]
                                     bcast_dict = {}
                                     bcast_dict['pkt size'] = self.failed_harq[id][4]

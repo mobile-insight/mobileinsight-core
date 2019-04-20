@@ -525,6 +525,8 @@ class AndroidDevDiagMonitor(Monitor):
                         print "FormatError: ", e
 
         except (KeyboardInterrupt, RuntimeError) as e:
+            import traceback
+            self.log_error(str(traceback.format_exc()))
             os.close(fifo)
             # proc.terminate()
             self._stop_collection()
@@ -533,11 +535,11 @@ class AndroidDevDiagMonitor(Monitor):
                           "sys_shutdown",
                           packet)
             self.send(event)
-            import traceback
-            self.log_error(str(traceback.format_exc()))
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)
         except Exception as e:
+            import traceback
+            self.log_error(str(traceback.format_exc()))
             os.close(fifo)
             # proc.terminate()
             self._stop_collection()
@@ -546,7 +548,5 @@ class AndroidDevDiagMonitor(Monitor):
                           "sys_shutdown",
                           packet)
             self.send(event)
-            import traceback
-            self.log_error(str(traceback.format_exc()))
             sys.exit(str(traceback.format_exc()))
             # sys.exit(e)

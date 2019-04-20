@@ -56,8 +56,7 @@ class LteMeasurementAnalyzer(Analyzer):
         if msg.type_id == "LTE_PHY_Connected_Mode_Intra_Freq_Meas":
 
             msg_dict = dict(msg.data.decode())
-            date = datetime.datetime.fromtimestamp(
-                msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')
+            date = msg_dict['timestamp'].strftime('%Y-%m-%d %H:%M:%S.%f')
             rsrp_log = (str(date) +
                         ":" +
                         self.__class__.__name__ +
