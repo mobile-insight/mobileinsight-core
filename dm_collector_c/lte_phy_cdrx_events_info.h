@@ -148,6 +148,18 @@ static int _decode_lte_phy_cdrx_events_info_payload (const char *b,
                     strInternalFieldMask += "PENDING_UL_RETX|";
                     count ++;
                 }
+                if (((utemp >> (9 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "RACH|";
+                    count ++;
+                }
+                if (((utemp >> (12 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "T310|";
+                    count ++;
+                }
+                if (((utemp >> (16 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "WAKEUP_MISSED_CYCLE_TIMER|";
+                    count ++;
+                }
                 int check = 0;
                 for (int i = 0; i < 32; i++) {
                     if (((utemp >> i) & 1) == 1) {

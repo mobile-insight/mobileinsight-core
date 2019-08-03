@@ -111,10 +111,13 @@ class LteMacAnalyzer(Analyzer):
                                 break
 
                             for lcid in sample['LCIDs']:
-                                idx = lcid['Ld Id']
-                                new_bytes = int(lcid['New Compressed Bytes'])
-                                ctrl_bytes = int(lcid['Ctrl bytes'])
-                                total_bytes = int(lcid['Total Bytes'])
+                                try:
+                                    idx = lcid['Ld Id']
+                                    new_bytes = int(lcid['New Compressed Bytes'])
+                                    ctrl_bytes = int(lcid['Ctrl bytes'])
+                                    total_bytes = int(lcid['Total Bytes'])
+                                except KeyError:
+                                    continue
 
                                 if idx not in self.buffer:
                                     self.buffer[idx] = []
@@ -206,6 +209,7 @@ class LteMacAnalyzer(Analyzer):
                         crc_check = True if blocks['CRC Result'][-2:] == "ss" else False
                         tb_size = int(blocks['TB Size'])
                         rv_value = int(blocks['RV'])
+                        rlc_retx = 0
 
                         id = harq_id + cell_idx * 8 + tb_idx * 24
 
