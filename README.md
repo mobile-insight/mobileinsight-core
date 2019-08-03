@@ -16,8 +16,8 @@ Currently MobileInsight supports installation on macOS and Ubuntu/Debian systems
 
 First install latest [Python 2.7](https://www.python.org/), then download MobileInsight from the [release page](https://github.com/mobile-insight/mobileinsight-core/releases):
 
-    tar -zxvf mobileinsight-3.0.tar.gz
-    cd mobileinsight-3.0
+    tar -zxvf mobileinsight-4.0.tar.gz
+    cd mobileinsight-4.0
 
 Next, run installation script (but __do not__ execute with root priviledge!):
 
