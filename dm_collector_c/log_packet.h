@@ -138,7 +138,8 @@ const ValueName UmtsNasGmmState_GmmSubstate [] = {
     {8, "GMM_UPDATE_NEEDED"},
     {9, "GMM_ATTEMPTING_TO_UPDATE"},
     {10, "GMM_ATTEMPTING_TO_UPDATE_MM"},
-    {11, "GMM_IMSI_DETACH_INITIATED"}
+    {11, "GMM_IMSI_DETACH_INITIATED"},
+    {12, "GMM Substate = 12"},
 };
 
 const ValueName UmtsNasGmmState_GmmUpdateStatus [] = {
@@ -299,12 +300,28 @@ const Fmt LteRrcOtaPacketFmt_v15 [] = {
     {UINT, "Msg Length", 2}
 };
 
+const Fmt LteRrcOtaPacketFmt_v19 [] = {
+    {UINT, "Freq", 4},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1},            //PDU number
+    {UINT, "SIB Mask in SI", 4},
+    {UINT, "Msg Length", 2}
+};
+
 const Fmt LteRrcOtaPacketFmt_v20 [] = {
     {UINT, "Freq", 4},                  //frequency
     {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
     {UINT, "PDU Number", 1},            //PDU number
     {UINT, "SIB Mask in SI", 1},
     {SKIP, NULL, 3},
+    {UINT, "Msg Length", 2}
+};
+
+const Fmt LteRrcOtaPacketFmt_v24 [] = {
+    {UINT, "Freq", 4},                  //frequency
+    {UINT, "SysFrameNum/SubFrameNum", 2},   //System/subsystem frame number
+    {UINT, "PDU Number", 1},            //PDU number
+    {UINT, "SIB Mask in SI", 4},
     {UINT, "Msg Length", 2}
 };
 
@@ -324,6 +341,16 @@ const ValueName LteRrcOtaPduType_v15 [] = {
     {0x07, "LTE-RRC_DL_DCCH"},
     {0x08, "LTE-RRC_UL_CCCH"},
     {0x09, "LTE-RRC_UL_DCCH"},
+};
+
+//added fields for version 19
+const ValueName LteRrcOtaPduType_v19 [] = {
+    {0x03, "LTE-RRC_BCCH_DL_SCH"},
+    {0x07, "LTE-RRC_PCCH"},
+    {0x08, "LTE-RRC_DL_CCCH"},
+    {0x09, "LTE-RRC_DL_DCCH"},
+    {0x0a, "LTE-RRC_UL_CCCH"},
+    {0x0b, "LTE-RRC_UL_DCCH"},
 };
 
 // ------------------------------------------------------------
@@ -395,7 +422,8 @@ const ValueName LteNasEmmState_v2_EmmSubstate_Deregistered [] = {
     {3, "EMM_DEREGISTERED_NO_CELL_AVAILABLE"},
     {4, "EMM_DEREGISTERED_ATTEMPTING_TO_ATTACH"},
     {5, "EMM_DEREGISTERED_NORMAL_SERVICE"},
-    {6, "EMM_DEREGISTERED_LIMITED_SERVICE"}
+    {6, "EMM_DEREGISTERED_LIMITED_SERVICE"},
+    {7, "EMM sub-state = 7"},
 };
 
 const ValueName LteNasEmmState_v2_EmmSubstate_Registered_Initiated [] = {
@@ -446,6 +474,45 @@ const Fmt LtePhyPdschDemapperConfigFmt_v23 [] = {
     {PLACEHOLDER, "Carrier Index", 0}
 };
 
+const Fmt LtePhyPdschDemapperConfigFmt_v28 [] = {
+    {UINT, "Serving Cell ID", 1},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {UINT, "PDSCH RNTIl ID", 2},
+    {PLACEHOLDER, "PDSCH RNTI Type", 0},
+    {UINT, "Number of Tx Antennas(M)", 2},
+    {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
+    {PLACEHOLDER, "Spatial Rank", 0},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
+    {UINT, "Frequency Selective PMI", 1},   // right shift 1 bit, 2 bits
+    {PLACEHOLDER, "PMI Index", 0},  // 4 bits
+    {UINT, "Transmission Scheme", 1},   // 4 bits
+
+    {UINT, "Repetition Index Data", 2},
+
+    // {UINT, "Transport Block Size Stream 0", 2},
+    {UINT, "TBS 0", 2},
+    // {UINT, "Modulation Stream 0", 2},
+    {UINT, "MCS 0", 2},
+    {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
+    // {UINT, "Transport Block Size Stream 1", 2},
+    {UINT, "TBS 1", 2},
+    // {UINT, "Modulation Stream 1", 2},
+    {UINT, "MCS 1", 2},
+    {PLACEHOLDER, "Carrier Index", 0},
+
+    //skip PB,CSI_RS,ZP CSI-RS,CSI-RS
+
+    //newly added fields, Repetition Index not dessected as it is show in qcat but no corresponding byte
+    {UINT,"Repetition Total",4},
+    {PLACEHOLDER, "NB Index",0},
+    {PLACEHOLDER, "SIB1-BR Collision"},
+    {PLACEHOLDER, "SIBx Collision"},
+};
+
 const Fmt LtePhyPdschDemapperConfigFmt_v103 [] = {
     // TODO: just copy from v23.
     {UINT, "Serving Cell ID", 1},
@@ -491,6 +558,7 @@ const Fmt LtePhyPdschDemapperConfigFmt_v104 [] = {
     {UINT, "Frequency Selective PMI", 1},   // right shift 1 bit, 2 bits
     {PLACEHOLDER, "PMI Index", 0},  // 4 bits
     {UINT, "Transmission Scheme", 1},   // 4 bits
+    {SKIP,NULL,2},
     {UINT, "TBS 0", 2},
     {UINT, "MCS 0", 2},
     {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
@@ -500,15 +568,167 @@ const Fmt LtePhyPdschDemapperConfigFmt_v104 [] = {
     {SKIP, NULL, 4},
 };
 
+const Fmt LtePhyPdschDemapperConfigFmt_v122 [] = {
+    {UINT, "Serving Cell ID", 1},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {UINT, "PDSCH RNTIl ID", 2},
+    {UINT, "Number of Tx Antennas(M)", 2},
+    {PLACEHOLDER, "PDSCH RNTI Type", 0},    
+    {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
+    {PLACEHOLDER, "Spatial Rank", 0},
+    {PLACEHOLDER, "Frequency Selective PMI", 0},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
+    {UINT, "PMI Index", 2},
+    {PLACEHOLDER, "Transmission Scheme", 0},
+    {PLACEHOLDER, "BMOD FD Sym Index",0},
+    {SKIP,NULL,1},
+    {UINT,"MVC",1},
+    {PLACEHOLDER,"MVC Clock",0},
+    {PLACEHOLDER,"MVC Request Up",0},
+    {UINT, "TBS 0", 2},
+    {UINT, "MCS 0", 2},
+    {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
+    {UINT, "TBS 1", 2},
+    {UINT, "MCS 1", 2},
+    {PLACEHOLDER, "PB",0},
+    {PLACEHOLDER, "Carrier Index", 0},
+    {PLACEHOLDER, "CSI-RS Exist",0},
+    {PLACEHOLDER, "ZP CSI-RS Exist",0},
+    {PLACEHOLDER, "CSI-RS Symbol Skipped",0},
+    {UINT,"Op Mode",4},
+    {PLACEHOLDER,"Strong ICell ID",0},
+    {PLACEHOLDER,"Joint Demod Skip Reason",0},
+};
+
+const Fmt LtePhyPdschDemapperConfigFmt_v123 [] = {
+    {UINT, "Serving Cell ID", 1},
+    {UINT, "System Frame Number", 2},
+    {PLACEHOLDER, "Subframe Number", 0},
+    {UINT, "PDSCH RNTIl ID", 2},
+    {UINT, "Number of Tx Antennas(M)", 2},
+    {PLACEHOLDER, "PDSCH RNTI Type", 0},
+    {PLACEHOLDER, "Number of Rx Antennas(N)", 0},
+    {PLACEHOLDER, "Spatial Rank", 0},
+    {PLACEHOLDER, "Frequency Selective PMI", 0},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 0[1]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[0]", 8},
+    {BYTE_STREAM_LITTLE_ENDIAN, "RB Allocation Slot 1[1]", 8},
+    {UINT, "PMI Index", 2},
+    {PLACEHOLDER, "Transmission Scheme", 0},
+    {PLACEHOLDER, "BMOD FD Sym Index",0},
+    {SKIP,NULL,2},
+    {UINT, "TBS 0", 2},
+    {UINT, "MCS 0", 2},
+    {PLACEHOLDER, "Traffic to Pilot Ratio", 0},
+    {UINT, "TBS 1", 2},
+    {UINT, "MCS 1", 2},
+    {PLACEHOLDER, "PB",0},
+    {PLACEHOLDER, "Carrier Index", 0},
+    {PLACEHOLDER, "CSI-RS Exist",0},
+    {PLACEHOLDER, "ZP CSI-RS Exist",0},
+    {PLACEHOLDER, "CSI-RS Symbol Skipped",0},
+    {UINT,"Op Mode",4},
+    {PLACEHOLDER,"Strong ICell ID",0},
+    {PLACEHOLDER,"Joint Demod Skip Reason",0},
+};
+
+const Fmt LtePhyPdschDemapperConfigFmt_header_144 [] = {
+    {UINT,"Carrier Index",4}, 	// shift 0 bits,total 4 bits
+    {PLACEHOLDER,"Num of Records",0}, 	// shift 4 bits,total 8 bits
+    {SKIP,NULL,3},
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 12 bits,total 44 bits
+};
+
+const Fmt LtePhyPdschDemapperConfigFmt_v144 [] = {
+    {UINT,"Serving Cell ID",4}, 	// shift 0 bits,total 9 bits
+    {PLACEHOLDER,"Sub-frame Number",0}, 	// shift 9 bits,total 4 bits
+    {PLACEHOLDER,"System Frame Number",0}, 	// shift 13 bits,total 10 bits
+    {PLACEHOLDER,"PDSCH RNTI Type",0}, 	// shift 23 bits,total 4 bits
+    {PLACEHOLDER,"Number of Tx Antennas (M)",0}, 	// shift 27 bits,total 2 bits
+    {PLACEHOLDER,"Number of Rx Antennas (N)",0}, 	// shift 29 bits,total 2 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 31 bits,total 1 bits
+
+    {UINT,"PDSCH RNTIl ID",2}, 	// shift 0 bits,total 16 bits
+    //{UINT,"Reserved",1}, 	// shift 0 bits,total 1 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 1 bits,total 1 bits
+    {UINT,"Spatial Rank",1}, 	// shift 2 bits,total 2 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 4 bits,total 1 bits
+    {PLACEHOLDER,"Frequency Selective PMI",0}, 	// shift 5 bits,total 1 bits
+    {PLACEHOLDER,"MU Receiver Mode",0}, 	// shift 6 bits,total 2 bits
+
+    {UINT,"PMI Index",1}, 	// shift 0 bits,total 4 bits
+    {PLACEHOLDER,"Transmission Scheme",0}, 	// shift 4 bits,total 4 bits
+
+    {UINT,"RB Allocation Slot 0[0]",8}, 	// shift 0 bits,total 64 bits
+    {UINT,"RB Allocation Slot 0[1]",8}, 	// shift 0 bits,total 64 bits
+    {UINT,"RB Allocation Slot 1[0]",8}, 	// shift 0 bits,total 64 bits
+    {UINT,"RB Allocation Slot 1[1]",8}, 	// shift 0 bits,total 64 bits
+    {UINT,"UERS Port Enabled",4}, 	// shift 0 bits,total 3 bits
+    {PLACEHOLDER,"BMOD FD Sym Index",0}, 	// shift 3 bits,total 4 bits
+    {PLACEHOLDER,"Transport Block Size Stream 0",0}, 	// shift 7 bits,total 18 bits
+    {PLACEHOLDER,"Modulation Stream 0",0}, 	// shift 25 bits,total 2 bits
+    {PLACEHOLDER,"PB",0}, 	// shift 27 bits,total 2 bits
+    {PLACEHOLDER,"RhoB/RhoA",0}, 	// shift 29 bits,total 2 bits
+    {PLACEHOLDER,"CSI-RS Exist",0}, 	// shift 31 bits,total 1 bits
+
+    {UINT,"ZP CSI-RS Exist",4}, 	// shift 0 bits,total 1 bits
+    {PLACEHOLDER,"CSI-RS Symbol Skipped",0}, 	// shift 1 bits,total 1 bits
+    {PLACEHOLDER,"Traffic to Pilot Ratio Data",0}, 	// shift 2 bits,total 12 bits
+    {PLACEHOLDER,"Transport Block Size Stream 1",0}, 	// shift 14 bits,total 18 bits
+
+    {UINT,"Modulation Stream 1",4}, 	// shift 0 bits,total 2 bits
+    {PLACEHOLDER,"SCH0 Memory Map Mode",0}, 	// shift 2 bits,total 2 bits
+    {PLACEHOLDER,"SCH1 Memory Map Mode",0}, 	// shift 4 bits,total 2 bits
+    {PLACEHOLDER,"Strong ICell ID",0}, 	// shift 6 bits,total 9 bits
+    {PLACEHOLDER,"Qice Enable Mode",0}, 	// shift 15 bits,total 2 bits
+    {PLACEHOLDER,"Qice Skip Reason",0}, 	// shift 17 bits,total 3 bits
+    {PLACEHOLDER,"Csf Dual Rnn Sel",0}, 	// shift 20 bits,total 1 bits
+    {PLACEHOLDER,"Plq Num Enabled Rd Groups",0}, 	// shift 21 bits,total 5 bits
+    {PLACEHOLDER,"Plg Num Loaded Rb Groups",0}, 	// shift 26 bits,total 5 bits
+    {PLACEHOLDER,"Qed Mode",0}, 	// shift 31 bits,total 3 bits
+
+    {SKIP,NULL,4},
+    //{UINT,"Reserved",4}, 	// shift 2 bits,total 8 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 10 bits,total 8 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 18 bits,total 8 bits
+    //{PLACEHOLDER,"Reserved",0}, 	// shift 26 bits,total 8 bits
+};
+
 const ValueName LtePhyPdschDemapperConfig_v23_Modulation [] = {
     {0, "QPSK"},
     {1, "16QAM"},
-    {2, "64QAM"}
+    {2, "64QAM"},
+    {3, "256QAM"},
 };
 
 const ValueName LtePhyPdschDemapperConfig_v23_Carrier_Index [] = {
     {0, "PCC"},
     {1, "SCC"}
+};
+
+const ValueName LtePhyPdschDemapperConfig_v122_antenna [] = {
+    {0, "1 antenna"},
+    {1, "2 antennas"},
+    {2, "4 antennas"},
+    {3, "4 antennas"},
+};
+
+const ValueName LtePhyPdschDemapperConfig_v122_MVC_Clock [] = {
+    {0, "MIN SVS"},
+};
+
+const ValueName LtePhyPdschDemapperConfig_v122_OPMode [] = {
+    {1, "TILE0_4RX"},
+};
+
+const ValueName LtePhyPdschDemapperConfig_Joint_Demod_Skip_Reason [] = {
+    {0, "NO_SKIP"},
+    {1, "SW_DISABLE"},
 };
 
 // ------------------------------------------------------------
@@ -597,6 +817,11 @@ const ValueName LtePhySubpkt_SubpktType [] = {
     {25, "Serving_Cell_Measurement_Result"}
 };
 
+const ValueName Valid_Rx_Data [] = {
+    {1, "RX0"},
+    {3, "RX0_RX1"},
+};
+
 // Serving_Cell_Measurement_Result
 const Fmt LtePhySubpktFmt_v1_Scmr_v4 [] = {
     {UINT, "E-ARFCN", 2},
@@ -643,6 +868,30 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v7 [] = {
     {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
     {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
     {SKIP, NULL, 12},
+};
+
+const Fmt LtePhySubpktFmt_v1_Scmr_v18 [] = {
+    {UINT, "E-ARFCN", 4},
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    // {SKIP, NULL, 2},
+    {SKIP, NULL, 11},    // Is Restricted, Cell Timing [0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP", 4},          // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
+    {PLACEHOLDER, "RSRQ", 0},   // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI", 0},    // 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 23},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 20},
 };
 
 const Fmt LtePhySubpktFmt_v1_Scmr_v19 [] = {
@@ -711,28 +960,38 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v22 [] = {
     {UINT, "CINR Rx[1]", 4},
 };
 
-const Fmt LtePhySubpktFmt_v1_Scmr_v18 [] = {
+const Fmt LtePhySubpktFmt_v1_Scmr_v24 [] = {
     {UINT, "E-ARFCN", 4},
+    {UINT, "Num-of-cells", 2},
+    {SKIP, NULL, 2},
     {UINT, "Physical Cell ID", 2},  // 9 bits
     {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
     {SKIP, NULL, 2},
     {UINT, "Current SFN", 2},   // 10 bits
     {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
-    // {SKIP, NULL, 2},
-    {SKIP, NULL, 11},    // Is Restricted, Cell Timing [0]
-    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
-    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
-    {UINT, "RSRP", 4},          // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
-    {UINT, "RSRQ Rx[0]", 4},    // skip 12 bits, then 10 bits, (0.0625 * x - 30) dB
-    {UINT, "RSRQ Rx[1]", 4},    // 10 bits, (0.0625 * x) - 30 dB
-    {PLACEHOLDER, "RSRQ", 0},   // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 4},    // Cell Timing [0]
+    {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN [0]
+    {SKIP, NULL, 1},
+    {UINT, "RSRP Rx[0]", 4},    // skip 1 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 4 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP", 4},    // skip 4 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 2},    // skip 4 bits, then 10 bits, (0.0625 * x - 30) dB
+    {SKIP, NULL,1},
+    {UINT, "RSRQ Rx[1]", 2},    // 10 bits (0.0625 * x) - 30 dB
+    {UINT, "RSRQ", 2},    // skip 4 bits, then 10 bits, (0.0625 * x - 30) dB
     {UINT, "RSSI Rx[0]", 4},    // skip 10 bits, them 11 bits (0.0625 * x - 110) dBm
     {PLACEHOLDER, "RSSI Rx[1]", 0}, // skip 21 bits, then 11 bits (0.0625 * x - 110) dBm
-    {PLACEHOLDER, "RSSI", 0},    // 11 bits, (0.0625 * x - 110) dBm
-    {SKIP, NULL, 23},
+    {UINT, "RSSI", 4},    // 11 bits, (0.0625 * x - 110) dBm
+    {SKIP, NULL, 20},
     {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
     {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
-    {SKIP, NULL, 20},
+    {SKIP, NULL, 16},
+    {SKIP, NULL, 8},
+    //{UINT, "Projected SIR", 4}, // Projected Sir, if x & 1<<31: x -= 4294967296
+                                // x /= 16
+    //{UINT, "Post IC RSRQ", 4},  // (0.0625 * x - 30) dB
 };
 
 const Fmt LtePhySubpktFmt_v1_Scmr_v35 [] = {
@@ -803,6 +1062,55 @@ const Fmt LtePhySubpktFmt_v1_Scmr_v36 [] = {
     {SKIP, NULL, 4},
     {UINT, "RSRQ", 4},    // 10 bits, (0.0625 * x - 30) dB
     // Unknown
+};
+
+const Fmt LtePhySubpktFmt_v1_Scmr_v40 [] = {
+    {UINT, "E-ARFCN", 4},
+    {UINT, "Num-of-cells", 2},
+    {UINT, "Valid Rx",2},
+    {UINT, "Physical Cell ID", 2},  // 9 bits
+    {PLACEHOLDER, "Serving Cell Index", 0},    // 3 bits
+    {PLACEHOLDER, "Is Serving Cell", 0},    // 1 bit
+    {SKIP, NULL, 2},
+    {UINT, "Current SFN", 2},   // 10 bits
+    {PLACEHOLDER, "Current Subframe Number", 0},    // 4 bits
+    {SKIP, NULL, 2},
+    {SKIP, NULL, 4},    // Cell Timing [0]
+    {SKIP, NULL, 4},    // Cell Timing [1], Cell Timing SFN [0]
+    {UINT, "RSRP Rx[0]", 4},    // skip 10 bits, then 12 bits. (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[1]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRP Rx[2]", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {SKIP,NULL,4},// skip Pathloss rsrp Rx[2],Pathloss rsrp Rx[3]
+    {UINT, "RSRP Rx[3]", 4},    // 12 bits (0.0625 * x - 180) dBm
+    {PLACEHOLDER, "RSRP", 0},    // skip 12 bits, then 12 bits, (0.0625 * (x + 640) - 180) dB
+    {UINT, "Filtered RSRP", 4},    // skip 12 bits, then 12 bits (0.0625 * x - 180) dBm
+    {UINT, "RSRQ Rx[0]", 4},    // 10 bits, (0.0625 * x - 30) dB
+    {PLACEHOLDER, "RSRQ Rx[1]", 0},    // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ Rx[2]", 4},    // skip 10 bits, then 10 bits, (0.0625 * x - 30) dB
+    {PLACEHOLDER, "RSRQ Rx[3]", 0},    // skip 20 bits, then 10 bits, (0.0625 * x - 30) dB
+    {UINT, "RSRQ", 4},    // 10 bits, (0.0625 * x - 30) dB
+    {PLACEHOLDER, "Filtered RSRQ", 0},    // skip 20 bits, then 12 bits, (0.0625 * x - 30) dB
+    {UINT, "RSSI Rx[0]", 4},    // 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[1]", 0},    // skip 11 bits, then 11 bits (0.0625 * x - 110) dBm
+    {UINT, "RSSI Rx[2]", 4},    // 11 bits (0.0625 * x - 110) dBm
+    {PLACEHOLDER, "RSSI Rx[3]", 0},    // skip 11 bits, then 11 bits (0.0625 * x - 110) dBm
+    {UINT, "RSSI", 4},    // 11 bits (0.0625 * x - 110) dBm
+    {SKIP, NULL, 10},
+    {UINT, "Residual Frequency Error",2},
+    {SKIP, NULL, 8},
+    {UINT, "FTL SNR Rx[0]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[1]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {UINT, "FTL SNR Rx[2]", 4}, // 9 bits
+    {PLACEHOLDER, "FTL SNR Rx[3]", 0},  // skip 9 bits, then 9 bits (0.1 * x - 20) dB
+    {SKIP, NULL, 12},
+    {SKIP, NULL, 4},
+    {UINT, "Projected SIR", 4}, // Projected Sir, if x & 1<<31: x -= 4294967296
+                                // x /= 16
+    {UINT, "Post IC RSRQ", 4},  // (0.0625 * x - 30) dB
+    {UINT, "CINR Rx[0]", 4},
+    {UINT, "CINR Rx[1]", 4},
+    {UINT, "CINR Rx[2]", 4},
+    {UINT, "CINR Rx[3]", 4},
 };
 
 // ------------------------------------------------------------
@@ -931,6 +1239,16 @@ const Fmt LteRrcMibMessageLogPacketFmt_v2 []  = {
     {BANDWIDTH, "DL BW", 1}     //downlink bandwidth
 };
 
+const Fmt LteRrcMibMessageLogPacketFmt_v3 []  = {
+    {UINT, "Physical Cell ID", 2},  //cell ID
+    {UINT, "Freq", 4},  //frequency
+    {UINT, "SFN", 2},
+    {UINT, "Number of Antenna", 1},
+    {BANDWIDTH, "DL BW", 1},     //downlink bandwidth
+    //added fields
+    {UINT,"Sib1 BR Sch Info",1}
+};
+
 // ----------------------------------------------------------------------------
 // Haotian
 const Fmt LtePdcpDlSrbIntegrityDataPduFmt [] = {
@@ -964,7 +1282,9 @@ const ValueName LteMacConfigurationSubpkt_SubpktType [] = {
     {8, "UL Transport Block"},
     {10, "UL Buffer Status SubPacket"},
     {11, "UL Tx Statistics SubPacket"},
-    {13, "eMBMS Config SubPacket"}
+    {13, "eMBMS Config SubPacket"},
+    {14, "All Rach Config SubPacket"},
+    {18, "ELS SubPacket"}
 };
 
 const Fmt LteMacConfigurationFmt [] = {
@@ -983,6 +1303,14 @@ const Fmt LteMacConfigurationSubpkt_ConfigType [] = {
     {UINT, "Config reason", 4}
 };
 
+
+const Fmt LteMacConfigurationSubpkt_ConfigType_v2 [] = {
+    {UINT, "Sub Id",1},
+    {UINT, "Config reason",1},
+    {UINT, "Config Bitmask",1},
+    {SKIP, "NULL",1},
+};
+
 const ValueName LteMacConfigurationConfigType_ConfigReason [] = {
     {2050, "CONNECTION RELEASE"}
 };
@@ -992,12 +1320,39 @@ const Fmt LteMacConfigurationSubpkt_DLConfig [] = {
     {SKIP, "NULL", 2}
 };
 
+const Fmt LteMacConfigurationSubpkt_DLConfig_v2 [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Num Active Stag", 1},
+};
+
+const Fmt LteMacConfigurationSubpkt_DLConfig_Scell_Tag_Info_v2 [] = {
+    {UINT, "STAG Id", 1},
+    {UINT, "Scell Id Mask", 1},
+    {UINT, "Ta Timer Present", 1},
+    {UINT, "TA Timer", 2},
+    {SKIP, "NULL",1},
+};
+
+const ValueName LteMacConfigurationConfigType_DLConfig_TA_Timer [] = {
+    {0xffff, "Infinity ms"},
+};
+
 const Fmt LteMacConfigurationSubpkt_ULConfig [] = {
     {UINT, "SR periodicity", 3},
     {UINT, "BSR timer", 2},
     {UINT, "SPS Number of Tx released", 2},
     {UINT, "Retx BSR timer", 2}, // 0xFF need to be read as infinity
     {SKIP, "NULL", 3}
+};
+
+const Fmt LteMacConfigurationSubpkt_ULConfig_v2 [] = {
+    {UINT, "Sub Id",1},
+    {UINT, "SR resource present", 1},
+    {UINT, "SR periodicity", 2},
+    {UINT, "BSR timer", 2},
+    {UINT, "SPS Number of Tx released", 2},
+    {UINT, "Retx BSR timer", 2}, // 0xFF need to be read as infinity
+    {SKIP, "NULL", 2},
 };
 
 const Fmt LteMacConfigurationSubpkt_RACHConfig [] = {
@@ -1019,7 +1374,56 @@ const Fmt LteMacConfigurationSubpkt_RACHConfig [] = {
     {SKIP, "NULL", 1},
 };
 
+const Fmt LteMacConfigurationSubpkt_RACHConfig_v2 [] = {
+    {UINT, "Preamble initial power", 2},
+    {UINT, "Power ramping step", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer", 2},
+    {UINT, "Message size Group_A",2},
+    {UINT, "Power offset Group_B",1},
+    {UINT, "PMax", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 1},
+    {UINT,"High speed flag",1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+};
+
+const Fmt LteMacConfigurationSubpkt_RACHConfig_v5 [] = {
+    {RSRQ, "Preamble initial power", 2},
+    {UINT, "Power ramping step", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer", 2},
+    {UINT, "Message size Group_A",2},
+    {UINT, "Power offset Group_B",1},
+    {UINT, "PMax", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 2},
+    {UINT,"High speed flag",1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+    {UINT, "PRACH Cfg R13 Present",1},
+};
+
 const Fmt LteMacConfigurationSubpkt_LCConfig [] = {
+    {UINT, "Number of deleted LC", 1},
+    {SKIP, "NULL", 32},
+    {UINT, "Number of added/modified LC", 1}
+//    {SKIP, "NULL", 290}
+};
+
+const Fmt LteMacConfigurationSubpkt_LCConfig_v2 [] = {
+    {UINT, "Sub Id",1},
     {UINT, "Number of deleted LC", 1},
     {SKIP, "NULL", 32},
     {UINT, "Number of added/modified LC", 1}
@@ -1039,6 +1443,46 @@ const Fmt LteMacConfigurationSubpkt_eMBMSConfig [] = {
     {SKIP, "NULL", 98}
 };
 
+const Fmt LteMacConfigurationSubpkt_eMBMSConfig_v2 [] = {
+    {UINT, "Sub Id",1},
+    {UINT, "Num eMBMS Active LCs", 2}, // Not sure if this offset and length of this field is correct
+    {SKIP, "NULL", 98}
+};
+
+const Fmt LteMacConfigurationSubpkt_ELS [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "ELS UL LC Id", 1},
+    {UINT, "ELS DL LC Id", 1},
+    {UINT, "ELS MCE ReTx TMR Length", 1}
+};
+
+const Fmt LteMacConfigurationSubpkt_All_Rach_Config [] = {
+    {UINT, "Sub Id", 1},
+    {BYTE_STREAM, "Valid Cell Cfg Mask", 1},
+    {BYTE_STREAM, "New Cell Cfg Mask", 1},
+};
+
+const Fmt LteMacConfigurationSubpkt_All_Rach_Config_Cell_Info [] = {
+    {UINT, "Scell Id", 1},
+    {WCDMA_MEAS, "Preamble initial power (dB)", 2}, // Note sure if it is correct
+    {UINT, "Power ramping step (dB)", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer (ms)", 2},
+    {UINT, "Message size Group_A", 2},
+    {UINT, "Power offset Group_B", 1},
+    {UINT, "PMax (dBm)", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 1},
+    {UINT, "High speed flag", 1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+};
+
 // ----------------------------------------------------------
 // MAC UL Transport Block
 // Jie
@@ -1056,6 +1500,7 @@ const ValueName BSRTrig [] = {
     {3, "S-BSR"},
     {4, "Pad L-BSR"},
     {5, "Pad S-BSR"},
+    {6, "Pad T-BSR"},
 };
 
 const Fmt LteMacULTransportBlockFmt [] = {
@@ -1262,7 +1707,9 @@ const Fmt LteRlcUlConfigLogPacket_SubpktPayload [] = {
 
 const ValueName LteRlcUlConfigLogPacket_Subpkt_Reason [] = {
     {1, "Configuration"},
+    {2, "Handover"},
     {4, "RB Release"},
+    {8, "Radio Link Failure"},
 };
 
 const Fmt LteRlcUlConfigLogPacket_Subpkt_ReleasedRB_Header [] = {
@@ -1308,6 +1755,45 @@ const ValueName LteRlcUlConfigLogPacket_Subpkt_ActiveRB_RBType [] = {
     {2, "DRB"},
 };
 
+const Fmt LteRlcUlConfigLogPacket_SubpktPayload_v3 [] = {
+    {UINT, "Reason", 1},
+    {UINT, "Max Size RBs", 1},
+};
+
+const Fmt LteRlcUlConfigLogPacket_Subpkt_ReleasedRB_Header_v3 [] = {
+    {UINT, "Number of Released RBs", 1},
+};
+const Fmt LteRlcUlConfigLogPacket_Subpkt_ReleasedRB_Fmt_v3 [] = {
+    {UINT, "Released RB Cfg Index", 1},
+};
+
+const Fmt LteRlcUlConfigLogPacket_Subpkt_AddedModifiedRB_Header_v3 [] = {
+    {UINT, "Number of Added/Modified RBs", 1},
+};
+const Fmt LteRlcUlConfigLogPacket_Subpkt_AddedModifiedRB_Fmt_v3 [] = {
+    {UINT, "Added/Modified RB Cfg Index", 1},
+    {UINT, "Action", 1},
+};
+
+const Fmt LteRlcUlConfigLogPacket_Subpkt_ActiveRB_Header_v3 [] = {
+    {UINT, "Number of Active RBs", 1},
+};
+
+const Fmt LteRlcUlConfigLogPacket_Subpkt_ActiveRB_Fmt_v3 [] = {
+    {PLACEHOLDER, "RLCUL CFG", 0},
+    {UINT, "RB Mode", 1},
+    {UINT, "LC ID", 1},
+    {UINT, "RB ID", 1},
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "RB Type", 1},
+    //{PLACEHOLDER, "SN Length", 0},
+    {UINT, "Poll Byte", 4},
+    {UINT, "Poll PDU", 2},
+    {UINT, "T Poll Retx (ms)", 2},
+    {UINT, "Max Retx Threshold", 1},
+    {UINT, "AM SN Length",1},
+};
+
 // ----------------------------------------------------------------------------
 // LTE_RLC_DL_Config_Log_Packet
 
@@ -1330,7 +1816,9 @@ const Fmt LteRlcDlConfigLogPacket_SubpktPayload [] = {
 
 const ValueName LteRlcDlConfigLogPacket_Subpkt_Reason [] = {
     {1, "Configuration"},
+    {2, "Handover"},
     {4, "RB Release"},
+    {8, "Radio Link Failure"},
 };
 
 const Fmt LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Header [] = {
@@ -1372,6 +1860,42 @@ const ValueName LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBMode [] = {
 const ValueName LteRlcDlConfigLogPacket_Subpkt_ActiveRB_RBType [] = {
     {1, "SRB"},
     {2, "DRB"},
+};
+
+const Fmt LteRlcDlConfigLogPacket_SubpktPayload_v2 [] = {
+    {UINT, "Reason", 1},
+    {UINT, "Max Size RBs", 1},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Header_v2 [] = {
+    {UINT, "Number of Released RBs", 1},
+};
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ReleasedRB_Fmt_v2 [] = {
+    {UINT, "Released RB Cfg Index", 1},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Header_v2 [] = {
+    {UINT, "Number of Added/Modified RBs", 1},
+};
+const Fmt LteRlcDlConfigLogPacket_Subpkt_AddedModifiedRB_Fmt_v2 [] = {
+    {UINT, "Added/Modified RB Cfg Index", 1},
+    {UINT, "Action", 1},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Header_v2 [] = {
+    {UINT, "Number of Active RBs", 1},
+};
+
+const Fmt LteRlcDlConfigLogPacket_Subpkt_ActiveRB_Fmt_v2 [] = {
+    {PLACEHOLDER, "RLCDL CFG", 0},
+    {UINT, "RB Mode", 1},
+    {UINT, "LC ID", 1},
+    {UINT, "RB ID", 1},
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "RB Type", 1},
+    {UINT, "T Reordering (ms)", 2},
+    {UINT, "T Status Prohibit (ms)", 2},
+    {UINT, "SN Length", 1},
 };
 
 // ----------------------------------------------------------------------------
@@ -1443,6 +1967,68 @@ const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING [] = {
     {UINT, "LI", 1}, //
 };
 const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO [] = {
+    {UINT, "LSF", 1},   // & 128
+    {UINT, "SO", 1},    // the rest 7 bits of LSF (& 127) * 256 + this value
+};
+
+const Fmt LteRlcUlAmAllPdu_SubpktPayload_v4 [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "RB Mode", 1},
+    {UINT, "SN Length", 1},
+    {SKIP, NULL, 1},
+    {UINT, "Enabled PDU Log Packets", 2}, // need to check bit by bit
+    // this part is different from DL
+    {UINT, "VT(A)", 2},
+    {UINT, "VT(S)", 2},
+    {UINT, "PDU Without Poll", 2},
+    {UINT, "Byte Without Poll", 4},
+    {UINT, "Poll SN", 2},
+    {UINT, "Number of PDUs", 2},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Basic_v4 [] = {
+    {PLACEHOLDER, "PDU TYPE", 0},
+    {PLACEHOLDER, "rb_cfg_idx", 0},
+    {PLACEHOLDER, "SFN",0},
+    {UINT, "sys_fn", 2},
+    {PLACEHOLDER, "sub_fn", 0},
+    {UINT, "pdu_bytes", 2},
+    {UINT, "logged_bytes", 2},
+    {SKIP, NULL, 1},
+    {UINT, "D/C LookAhead", 1},
+    {UINT, "SN", 1},
+    // for control: cpt = STATUS(0)
+    // for data: RF, P, FI, E
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_Control_v4 [] = {
+    {PLACEHOLDER, "cpt", 0},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_NACK_ALLIGN_v4 [] = {
+    {UINT, "NACK_SN", 2},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_NACK_PADDING_v4 [] = {
+    {UINT, "NACK_SN", 1},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_DATA_v4 [] = {
+    {PLACEHOLDER, "RF", 0},
+    {PLACEHOLDER, "P", 0},
+    {PLACEHOLDER, "FI", 0},
+    {PLACEHOLDER, "E", 0},
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_ALLIGN_v4 [] = {
+    {UINT, "LI", 2}, // 0x 0011 1100
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LI_PADDING_v4 [] = {
+    {UINT, "LI", 1}, //
+};
+
+const Fmt LteRlcUlAmAllPdu_Subpkt_PDU_LSF_SO_v4 [] = {
     {UINT, "LSF", 1},   // & 128
     {UINT, "SO", 1},    // the rest 7 bits of LSF (& 127) * 256 + this value
 };
@@ -1557,6 +2143,86 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload [] = {
     {UINT, "RA rsp win size", 1},
 };
 
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v4 [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Num Active Cells", 1},
+
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v4_cell [] = {
+    {UINT, "Cell Id", 1},
+    {WCDMA_MEAS, "Preamble initial power (dB)", 1}, // Note sure if it is correct
+    {SKIP, NULL, 1},
+    {UINT, "Power ramping step (dB)", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer (ms)", 2},
+    {UINT, "Message size Group_A", 2},
+    {UINT, "Power offset Group_B", 1},
+    {UINT, "PMax (dBm)", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 1},
+    {PLACEHOLDER, "Preamble Format", 0},
+    {UINT, "High speed flag", 1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v5 [] = {
+    {WCDMA_MEAS, "Preamble initial power (dB)", 2}, // Note sure if it is correct
+    {UINT, "Power ramping step (dB)", 1},
+    {UINT, "RA index1", 1},
+    {UINT, "RA index2", 1},
+    {UINT, "Preamble trans max", 1},
+    {UINT, "Contention resolution timer (ms)", 2},
+    {UINT, "Message size Group_A", 2},
+    {UINT, "Power offset Group_B", 1},
+    {UINT, "PMax (dBm)", 2},
+    {UINT, "Delta preamble Msg3", 2},
+    {UINT, "PRACH config", 1},
+    {UINT, "CS zone length", 1},
+    {UINT, "Root seq index", 2},
+    {UINT, "PRACH Freq Offset", 1},
+    {PLACEHOLDER, "Preamble Format", 0},
+    {UINT, "High speed flag", 1},
+    {UINT, "Max retx Msg3", 1},
+    {UINT, "RA rsp win size", 1},
+    {UINT, "PRACH Cfg R13 Present",1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_rsrp_prach_list_size_v5 [] = {
+    {UINT, "RSRP Thresh PRACH List Size", 1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_rsrp_prach_list_v5 [] = {
+    {UINT, "RSRP Thresh PRACH List", 1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_hidden_rsrp_prach_list_v5 [] = {
+    {UINT, "Hidden RSRP Thresh PRACH List", 1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_param_ce_list_size_v5 [] = {
+    {UINT, "PRACH Param CE List", 1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_list_v5 [] = {
+    {BYTE_STREAM, "PRACH Param Ce", 7},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_hidden_prach_list_v5 [] = {
+    {BYTE_STREAM, "Hidden PRACH Param Ce", 7},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part [] = {
+    {UINT, "Initial CE Level", 2},
+    {UINT, "Preamble Trans Max CE", 2},
+};
+
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload [] = {
     // Version 1
     {UINT, "Rach reason", 1},
@@ -1570,8 +2236,32 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload [] = {
     {UINT, "Radio condn (dB)", 1},
     {BYTE_STREAM, "CRNTI", 2},
 };
+
+const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2 [] = {
+    {UINT, "Sub Id", 1},
+    {UINT, "Cell Id", 1},
+    {UINT, "Rach reason", 1},
+    {BYTE_STREAM, "Maching ID", 6},
+    {UINT, "RACH Contention", 1},
+    {UINT, "Preamble", 1},
+    {BYTE_STREAM, "Preamble RA mask", 1},
+    {UINT, "Msg3 size", 1},
+    {UINT, "Group chosen", 1},
+    {UINT, "Radio condn (dB)", 1},
+    {BYTE_STREAM, "CRNTI", 2},
+};
+
 const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason [] = {
     {0, "CONNECTION_REQ"},
+    {1, "RLF"},
+    {2, "UL_DATA"},
+    {3, "DL_DATA"},
+    {4, "HO"},
+};
+
+const ValueName ValueNameRachContention [] = {
+    {0, "NonContention Based RACH procedure"},  // not confirmed
+    {1, "Contention Based RACH procedure"},
 };
 
 // ----------------------------------------------------------------------------
@@ -1596,10 +2286,32 @@ const Fmt LteMacRachAttempt_SubpktPayload[] = {
     {UINT, "Contention procedure", 1},
     {UINT, "Rach msg bmasks", 1},
 };
+
+const Fmt LteMacRachAttempt_SubpktPayload_v3[] = {
+    // Version 3
+    {UINT,"Sub Id",1},
+    {UINT,"Cell Id",1},
+    {UINT, "Retx counter", 1},
+    {UINT, "Rach result", 1},
+    {UINT, "Contention procedure", 1},
+    {UINT, "Rach msg bmasks", 1},
+};
+
+const Fmt LteMacRachAttempt_SubpktPayload_v4[] = {
+    // Version 2
+    {UINT, "Retx counter", 1},
+    {UINT, "Rach result", 1},
+    {UINT, "Contention procedure", 1},
+    {UINT, "Rach msg bmasks", 1},
+};
+
 const ValueName LteMacRachAttempt_Subpkt_RachResult [] = {
     {0, "Success"},
+    {1, "Failure at MSG2"},
+    {4, "Aborted"},
 };
 const ValueName LteMacRachAttempt_Subpkt_ContentionProcedure [] = {
+    {0,"Contention Free RACH Procedure"},
     {1, "Contention Based RACH procedure"},
 };
 
@@ -1608,6 +2320,19 @@ const Fmt LteMacRachAttempt_Subpkt_Msg1 [] = {
     {BYTE_STREAM, "Preamble index mask", 1},
     {WCDMA_MEAS, "Preamble power offset", 1},
     {SKIP, NULL, 1},
+};
+
+const Fmt LteMacRachAttempt_Subpkt_Msg1_v3 [] = {
+    {UINT, "Preamble Index", 1},
+    {BYTE_STREAM, "Preamble index mask", 1},
+    {UINT, "Preamble power offset", 2},
+};
+
+const Fmt LteMacRachAttempt_Subpkt_Msg1_v4 [] = {
+    {UINT, "Preamble Index", 1},
+    {BYTE_STREAM, "Preamble index mask", 1},
+    {UINT, "Preamble power offset", 2},
+    {UINT, "CE Level",1},
 };
 
 const Fmt LteMacRachAttempt_Subpkt_Msg2 [] = {
@@ -1627,6 +2352,13 @@ const Fmt LteMacRachAttempt_Subpkt_Msg3 [] = {
     {UINT, "Grant", 2},
     {UINT, "Harq ID", 1},
 };
+
+const Fmt LteMacRachAttempt_Subpkt_Msg3_v4 [] = {
+    {BYTE_STREAM, "Grant Raw", 4},
+    {UINT, "Grant", 2},
+    {UINT, "Harq ID", 1},
+};
+
 const Fmt LteMacRachAttempt_Subpkt_Msg3_MACPDU [] = {
     {BYTE_STREAM, "MAC PDU", 1},
 };
@@ -1658,10 +2390,12 @@ const Fmt LtePdcpDlConfig_SubpktPayload [] = {
 };
 const ValueName LtePdcpDlConfig_Subpkt_Reason [] = {
     {1, "Configuration"},
+    {2, "Handover"},
     {4, "RB Release"},
 };
 const ValueName LtePdcpDlConfig_Subpkt_CipherAlgo [] = {
     {2, "Snow3G"},
+    {3, "AES"},
     {7, "None"},
 };
 const ValueName LtePdcpDlConfig_Subpkt_IntegAlgo [] = {
@@ -1683,9 +2417,11 @@ const Fmt LtePdcpDlConfig_Subpkt_AddedModifiedRB_Fmt [] = {
     {UINT, "Added/Modified RB Cfg Index", 1},
     {UINT, "Action", 1},
 };
+
 const ValueName LtePdcpDlConfig_Subpkt_AddedModifiedRB_Action [] = {
     {1, "Add"},
     {2, "Modify"},
+    {4, "Resume"},
 };
 
 const Fmt LtePdcpDlConfig_Subpkt_ActiveRB_Header [] = {
@@ -1703,6 +2439,20 @@ const Fmt LtePdcpDlConfig_Subpkt_ActiveRB_Fmt [] = {
     {UINT, "RoHC Enabled", 1},
     {BYTE_STREAM, "RoHC Mask", 4},
 };
+
+const Fmt LtePdcpDlConfig_Subpkt_ActiveRB_Fmt_v4 [] = {
+    {UINT, "RB ID", 1},
+    {UINT, "RB-Cfg Idx", 1},
+    {UINT, "EPS ID", 1},
+    {UINT, "RB mode", 1},
+    {UINT, "RB type", 1},
+    {UINT, "SN length", 1},
+    {UINT, "Status report", 1},
+    {UINT,"Compression Type",1},
+    {UINT, "RoHC Max CID", 1},
+    {BYTE_STREAM, "RoHC Mask", 4},
+};
+
 const ValueName LtePdcpDlConfig_Subpkt_ActiveRB_RBmode [] = {
     {1, "AM"},
 };
@@ -1746,10 +2496,13 @@ const Fmt LtePdcpUlConfig_SubpktPayload [] = {
 };
 const ValueName LtePdcpUlConfig_Subpkt_Reason [] = {
     {1, "Configuration"},
+    {2, "Handover"},
     {4, "RB Release"},
+    {8, "Radio Link Failure"},
 };
 const ValueName LtePdcpUlConfig_Subpkt_CipherAlgo [] = {
     {2, "Snow3G"},
+    {3, "AES"},
     {7, "None"},
 };
 const ValueName LtePdcpUlConfig_Subpkt_IntegAlgo [] = {
@@ -1774,6 +2527,7 @@ const Fmt LtePdcpUlConfig_Subpkt_AddedModifiedRB_Fmt [] = {
 const ValueName LtePdcpUlConfig_Subpkt_AddedModifiedRB_Action [] = {
     {1, "Add"},
     {2, "Modify"},
+    {4, "Resume"},
 };
 
 const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Header [] = {
@@ -1791,6 +2545,41 @@ const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Fmt [] = {
     {UINT, "RoHC Enabled", 1},
     {BYTE_STREAM, "RoHC Mask", 4},
 };
+
+const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Fmt_v3 [] = {
+    {UINT, "RB ID", 1},
+    {UINT, "RB-Cfg Idx", 1},
+    {UINT, "EPS ID", 1},
+    {UINT, "RB mode", 1},
+    {UINT, "RB type", 1},
+    {UINT, "SN length", 1},
+    {UINT, "Discard timer", 2},
+    {UINT, "Compression Type", 1},
+    {UINT, "RoHC Max CID", 1},
+    {BYTE_STREAM, "RoHC Mask", 4},
+    {UINT, "UDC Cfg Action", 2},
+    {UINT, "UDC Context ID", 2},
+    {UINT, "UDC Algo Ver", 1},
+    {UINT, "UDC Header Length", 1},
+};
+
+const Fmt LtePdcpUlConfig_Subpkt_ActiveRB_Fmt_v24 [] = {
+    {UINT, "RB ID", 1},
+    {UINT, "RB-Cfg Idx", 1},
+    {UINT, "EPS ID", 1},
+    {UINT, "RB mode", 1},
+    {UINT, "RB type", 1},
+    {UINT, "SN length", 1},
+    {UINT, "Discard timer", 2},
+    {UINT, "Compression Type", 1},
+    {UINT, "RoHC Max CID", 1},
+    {BYTE_STREAM, "RoHC Mask", 4},
+    {UINT, "UDC Cfg Action", 2},
+    {UINT, "UDC Context ID", 2},
+    {UINT, "UDC Algo Ver", 1},
+    {UINT, "UDC Header Length", 1},
+};
+
 const ValueName LtePdcpUlConfig_Subpkt_ActiveRB_RBmode [] = {
     {1, "AM"},
 };
@@ -1909,6 +2698,68 @@ const Fmt LtePdcpDlStats_Subpkt_RB_Fmt [] = {
     {UINT, "Num PDU Invalid Bytes Rst", 4},
     {SKIP, NULL, 4},
 };
+
+
+const Fmt LtePdcpDlStats_SubpktPayload_v41 [] = {
+    {UINT,"Num RBs",1}, 	// shift 0 bits,total 8 bits
+    {UINT,"Num Errors",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Offload Q Full Count",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Packet Dropped Offload Q Full",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num IPA Commits",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Tag CB",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num IPA Exceptions",4}, 	// shift 0 bits,total 32 bits
+};
+
+const Fmt LtePdcpDlStats_Subpkt_RB_Fmt_v41 [] = {
+    {UINT,"Rb Cfg Idx",1}, 	// shift 0 bits,total 8 bits
+    {UINT,"Mode",1}, 	// shift 0 bits,total 8 bits
+    {UINT,"PDCP Hdr Len",1}, 	// shift 0 bits,total 8 bits
+    {UINT,"Num RST",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Flow Ctrl Trigger",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Data PDU Rx",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Data PDU Rx Bytes",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Control PDU Bytes Tx",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Control PDU Gen",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Control PDU Gen Bytes",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Stat Rprt Ctrl PDU Rx",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num ROHC Ctrl PDU Rx",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU ROHC Fail",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Integrity Fail",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Missing SDU To UL",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Missing SDU From LL",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU FC Drop",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU FC Drop Bytes",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Dups",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Dups Bytes",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Out of Win",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Out of Win Bytes",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Invalid",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Invalid Bytes",4}, 	// shift 0 bits,total 32 bits
+    {SKIP,NULL,4}, 	// reserved shift 0 bits,total 32 bits
+
+    {UINT,"Num Flow Ctrl Trigger Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Data PDU Rx Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Data PDU Rx Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Control PDU Bytes Rx Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Control PDU Gen Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Control PDU Gen Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Stat Rprt Ctrl PDU Rx Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num ROHC Ctrl PDU Rx Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU ROHC Fail Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Integrity Fail Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Missing SDU To UL Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num Missing SDU From LL Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU FC Drop Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU FC Drop Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Dups Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Dups Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Out of Win Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Out of Win Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Invalid Rst",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Num PDU Invalid Bytes Rst",4}, 	// shift 0 bits,total 32 bits
+    {SKIP,NULL,4}, 	// reserved shift 0 bits,total 32 bits
+};
+
 const ValueName LtePdcpDlStats_Subpkt_RB_Mode [] = {
     {1, "AM"},
 };
@@ -1934,6 +2785,11 @@ const Fmt LtePdcpUlStats_SubpktPayload_v1 [] = {
 };
 
 const Fmt LtePdcpUlStats_SubpktPayload_v2 [] = {
+    {UINT, "Num RBs", 1},
+    {UINT, "PDCPUL Errors", 4},
+};
+
+const Fmt LtePdcpUlStats_SubpktPayload_v26 [] = {
     {UINT, "Num RBs", 1},
     {UINT, "PDCPUL Errors", 4},
 };
@@ -2013,8 +2869,165 @@ const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v2 [] = {
 
 };
 
+const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v3 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "PDCP Hdr Len", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Pdcp Ul Buffer Pkt", 2},
+    {UINT, "Num Pdcp Ul Buffer Pkt Bytes", 4},
+    {UINT, "UDC Comp State",4},
+    {UINT, "Num Flow Ctrl Trigger", 4},
+    {UINT, "Num Data PDU Tx", 4},
+    {UINT, "Num Data PDU Tx Bytes", 4},
+    {UINT, "Num Data Bytes from Ps", 4},
+    {UINT, "Num Control PDU Tx", 4},
+    {UINT, "Num Control PDU Tx Bytes", 4},
+    {UINT, "Num Status Report", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx", 4},
+    {UINT, "Num ROHC Fail", 4},
+    {UINT, "Num Discard SDU", 4},
+    {UINT, "Num Discard SDU Bytes", 4},
+    {UINT, "Num PDU HO ReTx", 4},
+    {UINT, "Num PDU HO ReTx Bytes", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd", 4},
+    {UINT, "Num Rohc Pdu Drop Ho", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes", 4},
+
+    {UINT, "Num Udc Comp Pkt", 4},
+    {UINT, "Num Udc Comp Pkt Bytes", 4},
+    {UINT, "Num Udc Fc Uncomp Pkts", 4},
+    {UINT, "Num Udc Fc Uncomp Bytes", 4},
+
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 2},
+
+    {UINT, "Num ue Udc Ctrl Pdus", 4},
+    {UINT, "Num Enb Udc Ctrl Pdus", 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Enb Trigg Udc Reset", 4},
+    {SKIP, NULL, 4},
+
+    {UINT, "Num Flow Ctrl Trigger Rst", 4},
+    {UINT, "Num Data PDU Tx Rst", 4},
+    {UINT, "Num Data PDU Tx Bytes Rst", 4},
+    {UINT, "Num Data Bytes from Ps Rst", 4},
+    {UINT, "Num Control PDU Tx Rst", 4},
+    {UINT, "Num Control PDU Tx Bytes Rst", 4},
+    {UINT, "Num Status Report Rst", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx Rst", 4},
+    {UINT, "Num ROHC Fail Rst", 4},
+    {UINT, "Num Discard SDU Rst", 4},
+    {UINT, "Num Discard SDU Bytes Rst", 4},
+    {UINT, "Num PDU HO ReTx Rst", 4},
+    {UINT, "Num PDU HO ReTx Bytes Rst", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes Rst", 4},
+
+    {UINT, "Num Udc Comp Pkt Rst", 4},
+    {UINT, "Num Udc Comp Pkt Bytes Rst", 4},
+    {UINT, "Num Udc Fc Uncomp Pkt Rst", 4},
+    {UINT, "Num Udc Fc Uncomp Pkt Bytes Rst", 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 2},
+    {UINT, "Num ue Udc Ctrl Pdus Rst", 4},
+    {UINT, "Num Enb Udc Ctrl Pdus Rst", 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Enb Trigg Udc Reset Rst", 4},
+    {SKIP, NULL, 4},
+};
+
+
+const Fmt LtePdcpUlStats_Subpkt_RB_Fmt_v26 [] = {
+    {UINT, "Rb Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "PDCP Hdr Len", 1},
+    {UINT, "Num RST", 4},
+    {UINT, "Num Pdcp Ul Buffer Pkt", 2},
+    {UINT, "Num Pdcp Ul Buffer Pkt Bytes", 4},
+    {UINT, "UDC Comp State",4},
+    {UINT, "Num Flow Ctrl Trigger", 4},
+    {UINT, "Num Data PDU Tx", 4},
+    {UINT, "Num Data PDU Tx Bytes", 8},
+    {UINT, "Num Data Bytes from Ps", 8},
+    {UINT, "Num Control PDU Tx", 4},
+    {UINT, "Num Control PDU Tx Bytes", 4},
+    {UINT, "Num Status Report", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx", 4},
+    {UINT, "Num ROHC Fail", 4},
+    {UINT, "Num Discard SDU", 4},
+    {UINT, "Num Discard SDU Bytes", 4},
+    {UINT, "Num PDU HO ReTx", 4},
+    {UINT, "Num PDU HO ReTx Bytes", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd", 4},
+    {UINT, "Num Rohc Pdu Drop Ho", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes", 4},
+
+    {UINT, "Num Udc Comp Pkt", 4},
+    {UINT, "Num Udc Comp Pkt Bytes", 4},
+    {UINT, "Num Uncomp Pkts Udc Off", 4},
+    {UINT, "Num Uncomp Bytes Udc Off", 4},
+    {UINT, "Num Uncomp Pkts Udc on", 4},
+    {UINT, "Num Uncomp Bytes Udc on", 8},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 2},
+    //unsure about exact location of "Num ue Udc Ctrl Pdus",skip at first
+    {SKIP, NULL, 4},
+    {UINT, "Num Enb Udc Ctrl Pdus", 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Enb Trigg Udc Reset", 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Flow Ctrl Trigger Rst", 4},
+    {UINT, "Num Data PDU Tx Rst", 4},
+    {UINT, "Num Data PDU Tx Bytes Rst", 8},
+    {UINT, "Num Data Bytes from Ps Rst", 8},
+    {UINT, "Num Control PDU Tx Rst", 4},
+    {UINT, "Num Control PDU Tx Bytes Rst", 4},
+    {UINT, "Num Status Report Rst", 4},
+    {UINT, "Num ROHC Ctrl PDU Tx Rst", 4},
+    {UINT, "Num ROHC Fail Rst", 4},
+    {UINT, "Num Discard SDU Rst", 4},
+    {UINT, "Num Discard SDU Bytes Rst", 4},
+    {UINT, "Num PDU HO ReTx Rst", 4},
+    {UINT, "Num PDU HO ReTx Bytes Rst", 4},
+    {UINT, "Num Piggybk Rohc Feedbk Rcvd Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Rst", 4},
+    {UINT, "Num Rohc Pdu Drop Ho Bytes Rst", 4},
+
+    {UINT, "Num Udc Comp Pkt Rst", 4},
+    {UINT, "Num Udc Comp Pkt Bytes Rst", 4},
+    {UINT, "Num Uncomp Pkts Udc Off Rst", 4},
+    {UINT, "Num Uncomp Bytes Udc Off Rst", 4},
+    {UINT, "Num Uncomp Pkts Udc on Rst", 4},
+    {UINT, "Num Uncomp Bytes Udc on Rst", 8},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 2},
+    {UINT, "Num ue Udc Ctrl Pdus Rst", 4},
+    {UINT, "Num Enb Udc Ctrl Pdus Rst", 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {SKIP, NULL, 4},
+    {UINT, "Num Enb Trigg Udc Reset Rst", 4},
+    {SKIP, NULL, 4},
+};
+
 const ValueName LtePdcpUlStats_Subpkt_RB_Mode [] = {
     {1, "AM"},
+};
+
+const ValueName LtePdcpUlStats_Subpkt_UDC_Comp_state [] = {
+    {0, "DISABLE COMP"},
 };
 
 // ----------------------------------------------------------------------------
@@ -2247,6 +3260,35 @@ const Fmt LtePdcpDlCtrlPdu_Subpkt_PDU_Fmt [] = {
     {UINT, "fms", 2},
 };
 
+const Fmt LtePdcpDlCtrlPdu_SubpktPayload_v24 [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "SN Length (bit)", 1},
+};
+
+const Fmt LtePdcpDlCtrlPdu_Subpkt_PDU_Header_v24 [] = {
+    {UINT, "Num PDUs", 2},
+};
+
+const Fmt LtePdcpDlCtrlPdu_Subpkt_PDU_Fmt_v24 [] = {
+    {UINT, "PDU Size", 2},
+    {UINT, "Logged Bytes", 2},
+    {UINT, "sys fn", 2},
+    {PLACEHOLDER, "sub fn", 0},
+    {UINT, "PDU Type", 1},
+    {UINT, "fms", 2},
+    {PLACEHOLDER,"DC",0},
+    {PLACEHOLDER,"type",0},
+};
+
+const ValueName LtePdcpDlCtrlPdu_PDU_Type [] = {
+    {0, "STATUS"},
+};
+
+const ValueName LtePdcpDlCtrlPdu_Type [] = {
+    {0, "STATUS REPORT"},
+};
+
 // ----------------------------------------------------------------------------
 // LTE PDCP UL Ctrl PDU
 
@@ -2284,6 +3326,25 @@ const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Fmt [] = {
     {UINT, "fms", 2},
 };
 
+const Fmt LtePdcpUlCtrlPdu_SubpktPayload_v24 [] = {
+    {UINT, "RB Cfg Idx", 1},
+    {UINT, "Mode", 1},
+    {UINT, "SN Length (bit)", 1},
+};
+const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Header_v24 [] = {
+    {UINT, "Num PDUs", 2},
+};
+
+const Fmt LtePdcpUlCtrlPdu_Subpkt_PDU_Fmt_v24 [] = {
+    {UINT, "PDU Size", 2},
+    {UINT, "Logged Bytes", 2},
+    {UINT, "sys fn", 2},
+    {PLACEHOLDER, "sub fn", 0},
+    {UINT, "PDU Type", 1},
+    {UINT, "fms", 2},
+    {PLACEHOLDER,"DC",0},
+    {PLACEHOLDER,"type",0},
+};
 // ----------------------------------------------------------------------------
 // LTE PUCCH Power Control
 
@@ -2293,29 +3354,6 @@ const Fmt LtePucchPowerControl_Fmt [] = {
 const Fmt LtePucchPowerControl_Fmt_v4 [] = {
     {SKIP, NULL, 2},
     {UINT, "Number of Records", 1},
-};
-const Fmt LtePucchPowerControl_Fmt_v24 [] = {
-    {SKIP, NULL, 2},
-    {UINT, "Number of Records", 1},
-};
-
-const Fmt LtePucchPowerControl_Record_Fmt_v24 [] = {
-    {UINT, "SFN", 4},
-    // include Sub-FN,  Tx Power, DCI Format, PUCCH Format, N_HARQ
-    {PLACEHOLDER, "Sub-FN", 0},
-    {PLACEHOLDER, "PUCCH Tx Power (dBm)", 0},
-    {PLACEHOLDER, "DCI Format", 0},
-    {PLACEHOLDER, "PUCCH Format", 0},
-    {PLACEHOLDER, "N_HARQ", 0},
-
-    {UINT, "TPC Command", 4},
-    // include N_CQI, DL Pass Loss,
-    {PLACEHOLDER, "N_CQI", 0},
-    {PLACEHOLDER, "DL Path Loss", 0},
-
-    {UINT, "g(i)", 2},
-    {UINT, "PUCCH Actual Tx Power", 1},
-    {SKIP, NULL, 1},
 };
 
 const Fmt LtePucchPowerControl_Record_Fmt_v4 [] = {
@@ -2351,6 +3389,9 @@ const ValueName LtePucchPowerControl_Record_v4_DCI_Format [] = {
     // {9, "Format 2C"},
     {10, "Format 3"},
     {11, "Format 3A"},
+
+    {12, "NO DCI"},
+    {13, "NO DCI"},
     // {12, "Format 4"},
 };
 const ValueName LtePucchPowerControl_Record_v4_PUCCH_Format [] = {
@@ -2360,13 +3401,74 @@ const ValueName LtePucchPowerControl_Record_v4_PUCCH_Format [] = {
     {3, "Format 2"},
     {4, "Format 2A"},
     {5, "Format 2B"},
-    {6, "Format 3"},
+//    {6, "Format 3"},
+    {6, "Format 1bCS"},
+    {7, "Format 3"},
 };
+
+
 const ValueName LtePucchPowerControl_Record_v4_TPC [] = {
     {31, "Not present"},
     {63, "-1"},
 };
 
+
+const Fmt LtePucchPowerControl_Fmt_v24 [] = {
+    {SKIP, NULL, 2},
+    {UINT, "Number of Records", 1},
+};
+
+
+const Fmt LtePucchPowerControl_Record_Fmt_v24 [] = {
+    {UINT, "SFN", 4},
+    // include Sub-FN,  Tx Power, DCI Format, PUCCH Format, N_HARQ
+    {PLACEHOLDER, "Sub-FN", 0},
+    {PLACEHOLDER, "PUCCH Tx Power (dBm)", 0},
+    {PLACEHOLDER, "DCI Format", 0},
+    {PLACEHOLDER, "PUCCH Format", 0},
+    {PLACEHOLDER, "N_HARQ", 0},
+
+    {UINT, "TPC Command", 4},
+    // include N_CQI, DL Pass Loss,
+    {PLACEHOLDER, "N_CQI", 0},
+    {PLACEHOLDER, "DL Path Loss", 0},
+
+    {UINT, "g(i)", 2},
+    {UINT, "PUCCH Actual Tx Power", 1},
+    {SKIP, NULL, 1},
+};
+
+const ValueName LtePucchPowerControl_Record_v24_DCI_Format [] = {
+    // Release 8
+    // http://www.sharetechnote.com/html/LTE_Advanced_DCI.html
+    {0, "Format 0"},
+    {1, "Format 1"},
+    {2, "Format 1A"},
+    {3, "Format 1B"},
+    {4, "Format 1C"},
+    {5, "Format 1D"},
+    {6, "Format 2"},
+    {7, "Format 2A"},
+    // {8, "Format 2B"},
+    // {9, "Format 2C"},
+    {10, "Format 3"},
+    {11, "Format 3A"},
+    // {12, "Format 4"},
+};
+const ValueName LtePucchPowerControl_Record_v24_PUCCH_Format [] = {
+    {0, "Format 1"},
+    {1, "Format 1A"},
+    {2, "Format 1B"},
+    {3, "Format 2"},
+    {4, "Format 2A"},
+    {5, "Format 2B"},
+
+    {6, "Format 1bcs"},//diff from v2
+};
+const ValueName LtePucchPowerControl_Record_v24_TPC [] = {
+    {31, "Not present"},
+    {63, "-1"},
+};
 // ----------------------------------------------------------------------------
 // LTE PUSCH Power Control
 
@@ -2414,8 +3516,10 @@ const Fmt LtePuschPowerControl_Record_Fmt_v5 [] = {
     {PLACEHOLDER, "TPC", 0},
     {PLACEHOLDER, "PUSCH Actual Tx Power", 0},
 };
+
 const Fmt LtePuschPowerControl_Record_Fmt_v25 [] = {
     {UINT, "SFN", 4},
+    {PLACEHOLDER, "Cell Index",0},
     {PLACEHOLDER, "Sub-FN", 0},
     {PLACEHOLDER, "PUSCH Tx Power (dBm)", 0},
     {PLACEHOLDER, "DCI Format", 0},
@@ -2427,6 +3531,7 @@ const Fmt LtePuschPowerControl_Record_Fmt_v25 [] = {
     {UINT, "F(i)", 4},
     {PLACEHOLDER, "TPC", 0},
     {PLACEHOLDER, "PUSCH Actual Tx Power", 0},
+    {PLACEHOLDER, "Max Power", 0},
 };
 
 const ValueName LtePuschPowerControl_Record_v5_TxType [] = {
@@ -2563,6 +3668,57 @@ const Fmt LtePdcchPhichIndicationReport_Record_v33_pdcch [] = {
     {SKIP, NULL, 4},
 };
 
+const Fmt LtePdcchPhichIndicationReport_Fmt_v42 [] = {
+    {UINT,"Duplex Mode",2}, 	// shift 0 bits,total 2 bits
+    {PLACEHOLDER,"UL DL Config",0}, 	// shift 2 bits,total 4 bits
+    {UINT, "Number of Records", 1},
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v42_p1 [] = {
+    {UINT, "Num PDCCH Results", 4},             // 3 bits
+    {PLACEHOLDER, "Num PHICH Results", 0},      // 3 bits
+    {PLACEHOLDER, "PDCCH Timing SFN", 0},       // 10 bits
+    {PLACEHOLDER, "PDCCH Timing Sub-FN", 0},    // 4 bits
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v42_phich [] = {
+    {UINT, "Cell Index", 4},                    // 3 bits
+    {PLACEHOLDER, "PHICH Included", 0},         // 1 bit
+    {PLACEHOLDER, "PHICH 1 Included", 0},       // 1 bit
+    {PLACEHOLDER, "PHICH Value", 0},            // 1 bit
+    {PLACEHOLDER, "PHICH 1 Value", 0},          // 1 bit
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v42_pdcch [] = {
+    // PDCCH Info
+    {UINT, "Serv Cell Idx", 2},                 // 3 bits
+    {PLACEHOLDER, "RNTI Type", 0},              // 4 bits
+    {PLACEHOLDER, "Payload Size", 0},           // 7 bits
+    {PLACEHOLDER, "Aggregation Level", 0},      // 2 bits
+    {UINT, "Search Space", 2},                  // 1 bit
+    {PLACEHOLDER, "SPS Grant Type", 0},         // 3 bits
+    {PLACEHOLDER, "New DL Tx", 0},              // 1 bit
+    {PLACEHOLDER, "Num DL Trblks", 0},          // 2 bits
+
+    {UINT,"S0 Index",4}, 	// shift 0 bits,total 5 bits
+    {PLACEHOLDER,"S1 Index",0}, 	// shift 5 bits,total 5 bits
+    {PLACEHOLDER,"S2 Index",0}, 	// shift 10 bits,total 5 bits
+    {PLACEHOLDER,"S3 Index",0}, 	// shift 15 bits,total 5 bits
+    {PLACEHOLDER,"Msleep",0}, 	// shift 20 bits,total 1 bits
+    {PLACEHOLDER,"Usleep",0}, 	// shift 21 bits,total 1 bits
+    {PLACEHOLDER,"uSleep Duration",0}, 	// shift 22 bits,total 5 bits
+    {PLACEHOLDER,"Fake Pdcch Sf",0}, 	// shift 27 bits,total 1 bits
+    {PLACEHOLDER,"Is Ul Dropped",0}, 	// shift 28 bits,total 1 bits
+    {PLACEHOLDER,"Interf Active",0}, 	// shift 29 bits,total 1 bits
+};
+
+const Fmt LtePdcchPhichIndicationReport_Record_v42_p3 [] = {
+    {UINT,"Full Mode Events Mask",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Dl Subframe Count",4}, 	// shift 0 bits,total 32 bits
+    {UINT,"Force Send PDCCH Ind",4}, 	// shift 0 bits,total 1 bits
+    {SKIP,NULL,4},
+};
+
 const Fmt LtePdcchPhichIndicationReport_Record_v5_p3 [] = {
     // PDCCH Hidden Info
     {SKIP, NULL, 4},
@@ -2607,12 +3763,20 @@ const ValueName ValueNameAggregationLevel [] = {
     {1, "Agg2"},
     {2, "Agg4"},
     {3, "Agg8"},
+
+    //added for pdcch_decoding_v24
+    {6, "Agg16"},
+    {7, "Agg24"},
 };
 
 const ValueName ValueNameSearchSpaceType [] = {
     // 1 bit
     {0, "Common"},
     {1, "UE-specific"},
+
+    //added for pdcch_decoding_result
+    {3,"Common Type 2"},
+    {2,"User"},
 };
 
 const ValueName ValueNameRNTIType [] = {
@@ -2641,6 +3805,11 @@ const ValueName ValueNameDCIFormat [] = {
     {7, "Format 2A"},
     {8, "Format 3"},
     {9, "Format 3A"},
+
+    //added for PDCCH_Decoding_v24
+    {12,"Format 60A"},
+    {13,"Format 61A"},
+    {15,"Reserved"},
 };
 
 const ValueName ValueNameMatchOrNot [] = {
@@ -2661,14 +3830,25 @@ const ValueName ValueNamePruneStatus [] = {
     {10, "PADDING_ERROR"},
     {13, "RB_ALLOC_SET_NUM_ERROR_TYPE1"},
     {17, "DUPLICATE_HARQ_ID_ERROR"},
+    {19, "UNEXPECTED_PAYLOAD_SIZE"},
     {24, "BAD_RIV_DCI0"},
     {25, "RB_ALLOC_ERROR_DCI0"},
     {26, "INVALID_RB_NUM_DCI0"},
+    {32, "BAD_RIV_DCI1A"},
     {33, "RB_ALLOC_ERROR_DCI1A"},
     {34, "INVALID_RB_NUM_DCI1A"},
+    {36, "RETURN_DL_DATA_ARRIVAL_DCI1A"},
+    {44, "RB_ALLOC_ERROR_DCI1C"},
     {48, "PMI_ERROR_DCI2_2A"},
     {50, "NUM_LAYERS_ERROR_DCI2_2A_TB1"},
     {64, "FAIL_SER_ENGYMTRC_CHECK"},
+
+    {70, "NUM_LAYERS_EXCEED_NUM_RX"},
+
+    //added for pdcch_decoding v24
+    {200,"PDCCH_DEBUG_SUCCESS_DCI60A"},
+    {201,"PDCCH_DEBUG_SUCCESS_DCI61A"},
+
 };
 
 const ValueName ValueNameFrameStructure [] = {
@@ -2685,6 +3865,11 @@ const ValueName ValueNameNumNBAntennas [] = {
     {0, "1 or 2"},
     {1, "2 antennas"},
     {2, "4 antennas"},
+};
+
+const ValueName ValueNameNumNBAntennas_PDCCH_V141 [] = {
+    {0, "1 or 2"},
+    {1, "4 antennas"},
 };
 
 const ValueName ValueNameTrueOrFalse [] = {
@@ -2773,6 +3958,8 @@ const ValueName ValueNameCSFTxMode [] = {
 const ValueName ValueNameRankIndex [] = {
     {0, "Rank 1"},
     {1, "Rank 2"},
+    {2, "Rank 3"},
+    {3, "Rank 4"},
 };
 
 const ValueName ValueNameCsiMeasSetIndex [] = {
@@ -2785,6 +3972,15 @@ const ValueName ValueNamePuschReportingMode [] = {
     {2, "MODE_APERIODIC_RM22"},
     {3, "MODE_APERIODIC_RM30"},
     {4, "MODE_APERIODIC_RM31"},
+};
+
+const ValueName ValueNamePucchReportType_v22 [] = {
+    {1, "Type 2, Wideband CQI, PMI Feedback"},
+    {2, "Type 3, RI Feedback"},
+};
+
+const ValueName ValueNamePucchReportingMode_v22 [] = {
+    {1, "MODE_1_1"},
 };
 
 const ValueName ValueNamePucchReportType [] = {
@@ -2827,6 +4023,8 @@ const ValueName ValueNameCDRXEvent [] = {
     {11, "DL_DRX_RETX_TIMER_END"},
     {12, "CDRX_ON_2_OFF"},
     {13, "CDRX_OFF_2_ON"},
+    {22, "WAKEUP_MISSED_CYCLE_TIMER_START"},
+    {23, "WAKEUP_MISSED_CYCLE_TIMER_END"},
 };
 
 const ValueName ValueNameWcdmaRrcStates [] = {
