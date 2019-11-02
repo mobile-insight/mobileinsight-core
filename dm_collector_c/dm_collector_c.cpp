@@ -1,5 +1,6 @@
 /* dm_collector_c.cpp
  * Author: Jiayao Li
+ * Modified: Yunqi Guo, 2019-11-02 for python3 usage
  * This file defines dm_collector_c, a Python extension module that collects
  * and decodes diagnositic logs from Qualcomm chipsets.
  */
@@ -223,10 +224,10 @@ map_typenames_to_ids (PyObject *type_names, IdVector &type_ids) {
     bool name_error = false;
     for (Py_ssize_t i = 0; i < n; i++) {
         PyObject *item = PySequence_GetItem(type_names, i);
-        if (!PyString_Check(item)) {
+        if (!PyUnicode_Check(item)) {
             // ignore non-strings
         } else {
-            const char *name = PyString_AsString(item);
+            const char *name = PyUnicode_AsUTF8(item);
             int cnt = find_ids(LogPacketTypeID_To_Name,
                                 ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
                                 name, type_ids);
@@ -700,8 +701,17 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
 PyMODINIT_FUNC
 initdm_collector_c(void)
 {
-    PyObject *dm_collector_c = Py_InitModule3("dm_collector_c", DmCollectorCMethods,
-        "collects and decodes diagnositic logs from Qualcomm chipsets.");
+    /*
+    For python 3 usage change the Py_InitModule3 to PyModule_Create
+    */
+//    PyObject *dm_collector_c = Py_InitModule3("dm_collector_c", DmCollectorCMethods,
+//        "collects and decodes diagnositic logs from Qualcomm chipsets.");
+    static struct PyModuleDef moduledef = {
+            PyModuleDef_HEAD_INIT, "dm_collector_c",
+            "collects and decodes diagnositic logs from Qualcomm chipsets.", -1,
+            DmCollectorCMethods,
+          };
+    PyObject *dm_collector_c  = PyModule_Create(&moduledef);
 
     PyObject *log_packet_types;
 
@@ -750,7 +760,7 @@ initdm_collector_c(void)
     Py_DECREF(log_packet_types);
 
     // dm_ccllector_c.version: stores the value of DM_COLLECTOR_C_VERSION
-    PyObject *pystr = PyString_FromString(DM_COLLECTOR_C_VERSION);
+    PyObject *pystr = PyUnicode_FromString(DM_COLLECTOR_C_VERSION);
     PyObject_SetAttrString(dm_collector_c, "version", pystr);
     Py_DECREF(pystr);
 

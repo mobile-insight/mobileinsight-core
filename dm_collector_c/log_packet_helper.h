@@ -34,7 +34,7 @@ _find_result_index(PyObject *result, const char *target) {
     for (int i = 0; i < n; i++) {
         PyObject *t = PySequence_GetItem(result, i);
         PyObject *field_name = PySequence_GetItem(t, 0);
-        const char *name = PyString_AsString(field_name);
+        const char *name = PyUnicode_AsUTF8(field_name);
         if (strcmp(name, target) == 0) {
             ret = i;
             Py_DECREF(t);
@@ -75,7 +75,7 @@ static int
 _search_result_int(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
     assert(PyInt_Check(item));
-    int val = (int) PyInt_AsLong(item);
+    int val = (int) PyLong_AsLong(item);
     Py_DECREF(item);
 
     return val;
@@ -91,7 +91,7 @@ static unsigned int
 _search_result_uint(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
     assert(PyInt_Check(item));
-    unsigned int val = (unsigned int) PyInt_AsUnsignedLongMask(item);
+    unsigned int val = (unsigned int) PyLong_AsUnsignedLongLongMask(item);
     Py_DECREF(item);
 
     return val;
@@ -151,7 +151,7 @@ _map_result_field_to_name(PyObject *result, const char *target,
         PyObject *item = PySequence_GetItem(t, 1); // return new reference
         Py_DECREF(t);
         assert(PyInt_Check(item));
-        int val = (int) PyInt_AsLong(item);
+        int val = (int) PyLong_AsLong(item);
         Py_DECREF(item);
 
         const char* name = search_name(mapping, n, val);
@@ -332,7 +332,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
             {
                 assert(fmt[i].len == 6);
                 const char *plmn = p;
-                decoded = PyString_FromFormat("%d%d%d-%d%d%d",
+                decoded = PyUnicode_FromFormat("%d%d%d-%d%d%d",
                                                 plmn[0],
                                                 plmn[1],
                                                 plmn[2],
@@ -347,7 +347,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
             {
                 assert(fmt[i].len == 3);
                 const char *plmn = p;
-                decoded = PyString_FromFormat("%d%d%d-%d%d",
+                decoded = PyUnicode_FromFormat("%d%d%d-%d%d",
                                                 plmn[0] & 0x0F,
                                                 (plmn[0] >> 4) & 0x0F,
                                                 plmn[1] & 0x0F,
@@ -356,7 +356,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
                 // MNC can have two or three digits
                 int last_digit = (plmn[1] >> 4) & 0x0F;
                 if (last_digit < 10)    // last digit exists
-                    PyString_ConcatAndDel(&decoded, PyString_FromFormat("%d", last_digit));
+                    PyBytes_ConcatAndDel(&decoded, PyUnicode_FromFormat("%d", last_digit));
                 n_consumed += fmt[i].len;
                 break;
             }
@@ -383,7 +383,7 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
             {
                 assert(fmt[i].len == 1);
                 unsigned int ii = *((unsigned char *) p);
-                decoded = PyString_FromFormat("%d MHz", ii / 5);
+                decoded = PyBytes_FromFormat("%d MHz", ii / 5);
                 n_consumed += fmt[i].len;
                 break;
             }
