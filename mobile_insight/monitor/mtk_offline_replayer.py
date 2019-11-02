@@ -223,7 +223,7 @@ class MtkOfflineReplayer(Monitor):
                     if file.endswith(".muxraw"):
                         log_list.append(os.path.join(self._input_path, file))
             else:
-            	self.log_debug("No files???")
+                self.log_debug("No files???")
                 return
 
             log_list.sort()  # Hidden assumption: logs follow the diag_log_TIMSTAMP_XXX format
