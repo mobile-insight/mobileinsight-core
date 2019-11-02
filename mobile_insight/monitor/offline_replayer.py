@@ -14,8 +14,8 @@ import os
 import timeit
 import time
 
-from monitor import Monitor, Event
-from dm_collector import dm_collector_c, DMLogPacket, FormatError
+from .monitor import Monitor, Event
+from .dm_collector import dm_collector_c, DMLogPacket, FormatError
 
 
 class OfflineReplayer(Monitor):
@@ -71,7 +71,7 @@ class OfflineReplayer(Monitor):
 
     def __del__(self):
         if self.is_android and self.service_context:
-            print "detaching..."
+            print("detaching...")
             from service import mi2app_utils
             mi2app_utils.detach_thread()
 
@@ -209,7 +209,7 @@ class OfflineReplayer(Monitor):
 
                         except FormatError as e:
                             # skip this packet
-                            print "FormatError: ", e
+                            print(("FormatError: ", e))
                 self.log_info('Decoding_inter: ' + str(decoding_inter))
                 self.log_info('sending_inter: ' + str(sending_inter))
                 self._input_file.close()

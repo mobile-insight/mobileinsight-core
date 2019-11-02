@@ -1,7 +1,7 @@
 #!/bin/python
 # MobileInsight package installation script
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import re
 import os
 import platform
@@ -31,7 +31,7 @@ PY2EXE_OPTIONS = {
 # Remove the "-Wstrict-prototypes" compiler option, which isn't valid for C++.
 import distutils.sysconfig
 cfg_vars = distutils.sysconfig.get_config_vars()
-for key, value in cfg_vars.items():
+for key, value in list(cfg_vars.items()):
         if type(value) == str:
                     cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
 # =============================================================================
@@ -48,7 +48,7 @@ dm_collector_c_module = Extension('mobile_insight.monitor.dm_collector.dm_collec
 
 def parse_libs(url,suffix):
     pattern  = '<a href=".*%s.*">.*</a>' % suffix
-    response = urllib.urlopen(url).read()
+    response = urllib.request.urlopen(url).read()
     res      = []
     for item in re.findall(pattern, response):
         lib_start = item.find('href="')
@@ -60,19 +60,19 @@ def parse_libs(url,suffix):
 def download_libs(url, libs, chmod = True):
     for lib in libs:
         if not os.path.isfile("./libs/" + lib):
-            urllib.urlretrieve (url + lib, "./libs/" + lib)
+            urllib.request.urlretrieve (url + lib, "./libs/" + lib)
     if chmod:
         for lib in libs:
             os.chmod("./libs/" + lib, 0o755 | stat.S_IEXEC)
 
 def download_win(url):
     if not os.path.isfile("./ws_dissector/ws_dissector.exe"):
-            urllib.urlretrieve (url+"ws_dissector.exe", "./ws_dissector/ws_dissector.exe")
+            urllib.request.urlretrieve (url+"ws_dissector.exe", "./ws_dissector/ws_dissector.exe")
     if not os.path.isfile("./mobile_insight/monitor/dm_collector/dm_collector_c.pyd"):
-        urllib.urlretrieve (url+"dm_collector_c.pyd", "./mobile_insight/monitor/dm_collector/dm_collector_c.pyd")
+        urllib.request.urlretrieve (url+"dm_collector_c.pyd", "./mobile_insight/monitor/dm_collector/dm_collector_c.pyd")
 
 
-print "Building libraries..."
+print("Building libraries...")
 
 if platform.system() == "Darwin" or platform.system() == "Linux":
     PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
@@ -91,7 +91,7 @@ elif platform.system() == "Windows":
     elif arch[0] == '64bit':
         url = "http://www.mobileinsight.net/libs/win-32/libs/"
     else:
-        print "Unsupported operating system: " + str(arch)
+        print(("Unsupported operating system: " + str(arch)))
         sys.exit()
 
     libs = parse_libs(url,"dll")
@@ -108,7 +108,7 @@ elif platform.system() == "Windows":
     DATA_FILES   = [(sys.exec_prefix + '\\mobile_insight\\ws_dissector\\', ws_files),
                   (sys.exec_prefix + '\\mobile_insight\\ws_dissector\\', lib_list)]
 else:
-    print "Unsupported operating system: " + str(arch)
+    print(("Unsupported operating system: " + str(arch)))
     sys.exit()
 
 setup(

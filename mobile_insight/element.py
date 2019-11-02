@@ -105,7 +105,7 @@ class Element(object):
             self.log_debug(event.type_id)
 
             def G(module): return module.recv(self, event)
-            map(G, self.to_list)
+            list(map(G, self.to_list))
 
     def recv(self, module, event):
         """

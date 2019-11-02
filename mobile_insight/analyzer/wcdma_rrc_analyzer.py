@@ -10,12 +10,12 @@ try:
     import xml.etree.cElementTree as ET 
 except ImportError: 
     import xml.etree.ElementTree as ET
-from analyzer import *
-from state_machine import *
-from protocol_analyzer import *
+from .analyzer import *
+from .state_machine import *
+from .protocol_analyzer import *
 import timeit
 
-from profile import Profile,ProfileHierarchy
+from .profile import Profile,ProfileHierarchy
 
 __all__=["WcdmaRrcAnalyzer"]
 
@@ -420,7 +420,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
 
         :returns: a list of cells the device has associated with
         """
-        return self.__config.keys()
+        return list(self.__config.keys())
 
     def get_cell_config(self,cell):
         """

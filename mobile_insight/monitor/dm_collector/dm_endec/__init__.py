@@ -9,5 +9,5 @@ __all__ = ["DMLogPacket",
            "WSDissector",
            "FormatError", ]
 
-from dm_log_packet import DMLogPacket, FormatError
-from ws_dissector import WSDissector
+from .dm_log_packet import DMLogPacket, FormatError
+from .ws_dissector import WSDissector

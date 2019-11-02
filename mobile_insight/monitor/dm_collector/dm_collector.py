@@ -18,7 +18,7 @@ import serial
 import sys
 import timeit
 
-from dm_endec import *
+from .dm_endec import *
 import dm_collector_c
 
 
@@ -121,8 +121,8 @@ class DMCollector(Monitor):
         """
         assert self.phy_ser_name
 
-        print "PHY COM: %s" % self.phy_ser_name
-        print "PHY BAUD RATE: %d" % self.phy_baudrate
+        print(("PHY COM: %s" % self.phy_ser_name))
+        print(("PHY BAUD RATE: %d" % self.phy_baudrate))
 
         try:
             # Open COM ports
@@ -163,10 +163,10 @@ class DMCollector(Monitor):
                         self.send(event)
                     except FormatError as e:
                         # skip this packet
-                        print "FormatError: ", e
+                        print(("FormatError: ", e))
 
         except (KeyboardInterrupt, RuntimeError) as e:
-            print "\n\n%s Detected: Disabling all logs" % type(e).__name__
+            print(("\n\n%s Detected: Disabling all logs" % type(e).__name__))
             # Disable logs
             dm_collector_c.disable_logs(phy_ser)
             phy_ser.close()

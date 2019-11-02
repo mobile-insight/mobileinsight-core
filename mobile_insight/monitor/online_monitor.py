@@ -64,7 +64,7 @@ try:
         elif res.startswith("msm") or res.startswith("mdm") or res.startswith("sdm"):
             return ChipsetType.QUALCOMM
         else:
-            print "WARNING: Unknown type:",res
+            print(("WARNING: Unknown type:",res))
             return None
 
     
@@ -72,7 +72,7 @@ try:
     # print "chipset_type",chipset_type
 
     if chipset_type == ChipsetType.QUALCOMM:
-        from android_dev_diag_monitor import AndroidDevDiagMonitor
+        from .android_dev_diag_monitor import AndroidDevDiagMonitor
         class OnlineMonitor(AndroidDevDiagMonitor):
             def __init__(self):
                 AndroidDevDiagMonitor.__init__(self)
@@ -84,7 +84,7 @@ try:
                 :param phy_ser_name: the serial port name (path)
                 :type phy_ser_name: string
                 """
-                print "WARNING: Android version does not need to configure serial port"
+                print("WARNING: Android version does not need to configure serial port")
 
             def set_baudrate(self, rate):
                 """
@@ -93,9 +93,9 @@ try:
                 :param rate: the baudrate of the port
                 :type rate: int
                 """
-                print "WARNING: Android version does not need to configure baudrate"
+                print("WARNING: Android version does not need to configure baudrate")
     elif chipset_type == ChipsetType.MTK:
-        from android_mtk_monitor import AndroidMtkMonitor
+        from .android_mtk_monitor import AndroidMtkMonitor
         class OnlineMonitor(AndroidMtkMonitor):
             def __init__(self):
                 AndroidMtkMonitor.__init__(self)
@@ -107,7 +107,7 @@ try:
                 :param phy_ser_name: the serial port name (path)
                 :type phy_ser_name: string
                 """
-                print "WARNING: Android version does not need to configure serial port"
+                print("WARNING: Android version does not need to configure serial port")
 
             def set_baudrate(self, rate):
                 """
@@ -116,9 +116,9 @@ try:
                 :param rate: the baudrate of the port
                 :type rate: int
                 """
-                print "WARNING: Android version does not need to configure baudrate"
+                print("WARNING: Android version does not need to configure baudrate")
     else:
-        from monitor import Monitor
+        from .monitor import Monitor
         class OnlineMonitor(Monitor):
             def __init__(self):
                 Monitor.__init__(self)
@@ -131,7 +131,7 @@ try:
                 :param phy_ser_name: the serial port name (path)
                 :type phy_ser_name: string
                 """
-                print "WARNING: Android version does not need to configure serial port"
+                print("WARNING: Android version does not need to configure serial port")
 
             def set_baudrate(self, rate):
                 """
@@ -140,7 +140,7 @@ try:
                 :param rate: the baudrate of the port
                 :type rate: int
                 """
-                print "WARNING: Android version does not need to configure baudrate"
+                print("WARNING: Android version does not need to configure baudrate")
     
 
 except Exception as e:
@@ -148,7 +148,7 @@ except Exception as e:
     # print str(traceback.format_exc())
 
     # not used, but bugs may exist on laptop
-    from dm_collector.dm_collector import DMCollector
+    from .dm_collector.dm_collector import DMCollector
     is_android = False
 
     class OnlineMonitor(DMCollector):

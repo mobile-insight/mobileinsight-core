@@ -23,7 +23,7 @@ class DumpAnalyzer(Analyzer):
         self.mi2log = ""
 
     def close(self):
-        print "End"
+        print("End")
         pass
 
     def set_mi2log(self, path):
@@ -129,7 +129,7 @@ class DumpAnalyzer(Analyzer):
 
     def __msg_callback(self,msg):
         s = msg.data.decode_xml().replace("\n", "")
-        print minidom.parseString(s).toprettyxml(" ")
+        print((minidom.parseString(s).toprettyxml(" ")))
         # if "Unsupported" in s or "unsupported" in s or "(MI)Unknown" in s:
         #     print "Unsupported message or unknown message field appears.\n"
         #     print minidom.parseString(s).toprettyxml(" ")

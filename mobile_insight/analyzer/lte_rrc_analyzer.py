@@ -10,13 +10,13 @@ try:
     import xml.etree.cElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
-from analyzer import *
-from state_machine import *
-from protocol_analyzer import *
+from .analyzer import *
+from .state_machine import *
+from .protocol_analyzer import *
 import timeit
 import time
 
-from profile import Profile,ProfileHierarchy
+from .profile import Profile,ProfileHierarchy
 
 __all__=["LteRrcAnalyzer"]
 
@@ -547,7 +547,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     self.__config[cur_pair] = LteRrcConfig()
                     self.__config[cur_pair].status = self.__status
                     # return
-                for config in self.__config[cur_pair].sib.inter_freq_config.itervalues():
+                for config in list(self.__config[cur_pair].sib.inter_freq_config.values()):
                     if config.rat == "UTRA":
                         config.tReselection = float(field.get('show'))
 
@@ -606,7 +606,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 if cur_pair not in self.__config:
                     self.__config[cur_pair] = LteRrcConfig()
                     self.__config[cur_pair].status = self.__status
-                for config in self.__config[cur_pair].sib.inter_freq_config.itervalues():
+                for config in list(self.__config[cur_pair].sib.inter_freq_config.values()):
                     if config.rat == "GERAN":
                         config.tReselection = float(field.get('show'))
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
@@ -691,7 +691,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                         if 'lte-rrc.physCellId' in cell_val:
                             cell_id = int(cell_val['lte-rrc.physCellId'])
-                            if cell_val.has_key('lte-rrc.cellIndividualOffset'):
+                            if 'lte-rrc.cellIndividualOffset' in cell_val:
                                 cell_offset = q_offset_range[int(cell_val['lte-rrc.cellIndividualOffset'])]
                             else:
                                 cell_offset = 0
@@ -949,7 +949,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         :returns: a list of cells the device has associated with
         """
         #FIXME: currently only return *all* cells in the LteRrcConfig
-        return self.__config.keys()
+        return list(self.__config.keys())
 
     def get_cell_config(self,cell):
         """
@@ -1171,7 +1171,7 @@ class LteRrcConfig:
         config_id_list = []
 
         #Find the corresponding report conditions
-        for item in self.active.measid_list.itervalues():
+        for item in list(self.active.measid_list.values()):
             if item[0]==obj_id:
                 config_id_list.append(item[1])
 

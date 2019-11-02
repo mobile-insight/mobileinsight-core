@@ -9,8 +9,8 @@ try:
     import xml.etree.cElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
-from analyzer import *
-from rrc_analyzer import RrcAnalyzer
+from .analyzer import *
+from .rrc_analyzer import RrcAnalyzer
 
 
 class HandoffLoopAnalyzer(Analyzer):
@@ -77,7 +77,7 @@ class HandoffLoopAnalyzer(Analyzer):
             # because preferences are observed to be inconsistent
 
             # while False in cell_visited.itervalues():
-            while False in cell_visited.values():
+            while False in list(cell_visited.values()):
                 # some cells have not been explored yet
 
                 # In each round, we report loops with *unvisited_cell* involved
@@ -251,7 +251,7 @@ class HandoffLoopAnalyzer(Analyzer):
                                 loop_exist = True
 
                         if loop_exist:
-                            print dst_sym_list  # BUG: dst_sym_list much longer than loop
+                            print(dst_sym_list)  # BUG: dst_sym_list much longer than loop
                             loop_report = "\033[31m\033[1mPersistent loop: \033[0m\033[0m"
                             loop_report += str(dfs_stack[0])
                             prev_item = dfs_stack[0]

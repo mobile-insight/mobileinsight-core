@@ -6,7 +6,7 @@
 Author: Jiayao Li
 """
 
-from analyzer import *
+from .analyzer import *
 
 try:
     import xml.etree.cElementTree as ET
@@ -22,12 +22,12 @@ class Span(object):
     def __init__(self, start, end, **additional_info):
         self.start = start
         self.end = end
-        for k, v in additional_info.items():
+        for k, v in list(additional_info.items()):
             setattr(self, k, v)
 
     def __repr__(self):
         s = "<start=%s, end=%s" % (repr(self.start), repr(self.end))
-        for k, v in vars(self).items():
+        for k, v in list(vars(self).items()):
             if k not in {"start", "end"}:
                 s += ", %s=%s" % (k, repr(v))
         s += ">"

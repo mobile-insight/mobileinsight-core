@@ -6,7 +6,7 @@ A simple message dumper in stdio and/or file
 Author: Yuanjie Li, Zengwen Yuan
 """
 
-from analyzer import *
+from .analyzer import *
 
 try:
     import xml.etree.cElementTree as ET
