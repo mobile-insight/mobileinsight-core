@@ -80,7 +80,7 @@ def download_win(url):
 print("Building libraries...")
 
 if platform.system() == "Darwin" or platform.system() == "Linux":
-    PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.so']}
+    PACKAGE_DATA = {'mobile_insight.monitor.dm_collector': ['./dm_collector_c.cpython-37m-darwin.so']}
     DATA_FILES = []
 
 elif platform.system() == "Windows":
@@ -133,5 +133,5 @@ setup(
     package_data=PACKAGE_DATA,
     data_files=DATA_FILES,
     options={'py2exe': PY2EXE_OPTIONS},
-    ext_modules=[dm_collector_c_module],
+    ext_modules=[dm_collector_c_module], install_requires=['jnius']
 )

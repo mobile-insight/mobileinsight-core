@@ -158,7 +158,7 @@ class OfflineReplayer(Monitor):
 
         try:
 
-            self.broadcast_info('STARTED',{})
+            self.broadcast_info('STARTED', {})
             self.log_info('STARTED: ' + str(time.time()))
             log_list = []
             if os.path.isfile(self._input_path):
@@ -182,12 +182,12 @@ class OfflineReplayer(Monitor):
                 dm_collector_c.reset()
                 while True:
                     s = self._input_file.read(64)
-                    if not s:   # EOF encountered
+                    if not s:  # EOF encountered
                         break
 
                     dm_collector_c.feed_binary(s)
                     decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
-                                                                True,   # include_timestamp
+                                                                True,  # include_timestamp
                                                                 )
                     if decoded:
                         try:
