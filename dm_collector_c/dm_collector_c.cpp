@@ -699,10 +699,10 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
 
 // Init the module
 PyMODINIT_FUNC
-initdm_collector_c(void)
+PyInit_dm_collector_c(void)
 {
     /*
-    For python 3 usage change the Py_InitModule3 to PyModule_Create
+    Yunqi: change the functions for python 3
     */
 //    PyObject *dm_collector_c = Py_InitModule3("dm_collector_c", DmCollectorCMethods,
 //        "collects and decodes diagnositic logs from Qualcomm chipsets.");
@@ -765,4 +765,5 @@ initdm_collector_c(void)
     Py_DECREF(pystr);
 
     manager_init_state(&g_emanager);
+    return dm_collector_c;
 }

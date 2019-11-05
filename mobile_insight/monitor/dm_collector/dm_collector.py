@@ -19,8 +19,8 @@ import sys
 import timeit
 
 from .dm_endec import *
-import dm_collector_c
-
+# import dm_collector_c
+from . import dm_collector_c
 
 class DMCollector(Monitor):
     """
