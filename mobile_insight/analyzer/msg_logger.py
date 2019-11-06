@@ -137,7 +137,7 @@ class MsgLogger(Analyzer):
             self.log_info(decoded_msg)
         if (self._dump_type == self.FILE_ONLY or self._dump_type == self.ALL) \
                 and self._save_file:
-            self._save_file.write(decoded_msg + '\n')
+            self._save_file.write(str(decoded_msg) + '\n')
 
     # Decoding scheme
 
