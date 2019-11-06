@@ -345,6 +345,9 @@ _decode_by_fmt (const Fmt fmt [], int n_fmt,
 
         case PLMN_MK2:
             {
+                /*
+                 * TODO: For Python 3 usage, change py concat and del to string append
+                 */
                 assert(fmt[i].len == 3);
                 const char *plmn = p;
                 decoded = PyUnicode_FromFormat("%d%d%d-%d%d",
