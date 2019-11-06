@@ -186,9 +186,11 @@ class OfflineReplayer(Monitor):
                         break
 
                     dm_collector_c.feed_binary(s)
+                    # print("Test 1")
                     decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
                                                                 True,  # include_timestamp
                                                                 )
+                    print(decoded)
                     if decoded:
                         try:
                             before_decode_time = time.time()
