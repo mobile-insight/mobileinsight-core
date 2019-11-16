@@ -134,7 +134,7 @@ _decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
 
     std::string type_str = "raw_msg/";
     type_str += ch_name;
-    PyObject *t = Py_BuildValue("(ss#s)",
+    PyObject *t = Py_BuildValue("(sy#s)",
                                 "Msg", b + offset, pdu_length, type_str.c_str());
     PyList_Append(result, t);
     Py_DECREF(t);
@@ -201,7 +201,7 @@ _decode_umts_nas_ota(const char *b, int offset, size_t length,
                                      "(MI)Unknown");
 
     int pdu_length = _search_result_int(result, "Message Length");
-    PyObject *t = Py_BuildValue("(ss#s)",
+    PyObject *t = Py_BuildValue("(sy#s)",
                                 "Msg", b + offset, pdu_length,
                                 "raw_msg/NAS");
     PyList_Append(result, t);
@@ -292,7 +292,7 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
         } else {
             std::string type_str = "raw_msg/";
             type_str += type_name;
-            PyObject *t = Py_BuildValue("(ss#s)",
+            PyObject *t = Py_BuildValue("(sy#s)",
                                         "Msg", b + offset, pdu_length, type_str.c_str());
             PyList_Append(result, t);
             Py_DECREF(t);
@@ -312,7 +312,7 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
         } else {
             std::string type_str = "raw_msg/";
             type_str += type_name;
-            PyObject *t = Py_BuildValue("(ss#s)",
+            PyObject *t = Py_BuildValue("(sy#s)",
                                         "Msg", b + offset, pdu_length, type_str.c_str());
             PyList_Append(result, t);
             Py_DECREF(t);
@@ -334,7 +334,7 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
         } else {
             std::string type_str = "raw_msg/";
             type_str += type_name;
-            PyObject *t = Py_BuildValue("(ss#s)",
+            PyObject *t = Py_BuildValue("(sy#s)",
                                         "Msg", b + offset, pdu_length, type_str.c_str());
             PyList_Append(result, t);
             Py_DECREF(t);
@@ -418,7 +418,7 @@ _decode_lte_nas_plain(const char *b, int offset, size_t length,
     }
 
     size_t pdu_length = length - offset;
-    PyObject *t = Py_BuildValue("(ss#s)",
+    PyObject *t = Py_BuildValue("(sy#s)",
                                 "Msg", b + offset, pdu_length,
                                 "raw_msg/LTE-NAS_EPS_PLAIN");
     PyList_Append(result, t);
@@ -3504,7 +3504,7 @@ _decode_lte_pdcp_dl_srb_integrity_data_pdu(const char *b, int offset, size_t len
 
     int pdu_length = _search_result_int(result, "PDU Size");
 
-    PyObject *t = Py_BuildValue("(ss#s)",
+    PyObject *t = Py_BuildValue("(sy#s)",
                                 "Msg", b + offset, pdu_length, "raw_msg/LTE-PDCP_DL_SRB");
     PyList_Append(result, t);
     Py_DECREF(t);
@@ -3536,7 +3536,7 @@ _decode_lte_pdcp_ul_srb_integrity_data_pdu(const char *b, int offset, size_t len
 
     int pdu_length = _search_result_int(result, "PDU Size");
 
-    PyObject *t = Py_BuildValue("(ss#s)",
+    PyObject *t = Py_BuildValue("(sy#s)",
                                 "Msg", b + offset, pdu_length, "raw_msg/LTE-PDCP_UL_SRB");
     PyList_Append(result, t);
     Py_DECREF(t);

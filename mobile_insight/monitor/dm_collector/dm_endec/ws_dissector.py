@@ -137,7 +137,7 @@ class WSDissector:
         cls._proc.stdin.flush()
         result = []
         while True:
-            line = cls._proc.stdout.readline()
+            line = cls._proc.stdout.readline().decode("utf-8")
             if line.startswith("===___==="):
                 break
             result.append(line)
