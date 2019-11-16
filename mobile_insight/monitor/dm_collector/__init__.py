@@ -9,5 +9,4 @@ __all__ = [
 
 from .dm_collector import DMCollector  # P4A: THIS LINE WILL BE DELETED ###
 from .dm_endec import DMLogPacket, FormatError
-# import dm_collector_c
 from . import dm_collector_c
