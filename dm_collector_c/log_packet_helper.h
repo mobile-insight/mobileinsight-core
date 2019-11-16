@@ -75,7 +75,7 @@ __attribute__ ((unused));
 static int
 _search_result_int(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
-    assert(PyInt_Check(item));
+    assert(PyLong_Check(item));
     int val = (int) PyLong_AsLong(item);
     Py_DECREF(item);
 
@@ -92,7 +92,7 @@ __attribute__ ((unused));
 static unsigned int
 _search_result_uint(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
-    assert(PyInt_Check(item));
+    assert(PyLong_Check(item));
     unsigned int val = (unsigned int) PyLong_AsUnsignedLongLongMask(item);
     Py_DECREF(item);
 
@@ -154,7 +154,7 @@ _map_result_field_to_name(PyObject *result, const char *target,
         PyObject *t = PySequence_GetItem(result, i);
         PyObject *item = PySequence_GetItem(t, 1); // return new reference
         Py_DECREF(t);
-        assert(PyInt_Check(item));
+        assert(PyLong_Check(item));
         int val = (int) PyLong_AsLong(item);
         Py_DECREF(item);
 
@@ -395,7 +395,7 @@ _decode_by_fmt(const Fmt fmt[], int n_fmt,
             case BANDWIDTH: {
                 assert(fmt[i].len == 1);
                 unsigned int ii = *((unsigned char *) p);
-                decoded = PyBytes_FromFormat("%d MHz", ii / 5);
+                decoded = PyUnicode_FromFormat("%d MHz", ii / 5);
                 n_consumed += fmt[i].len;
                 break;
             }
