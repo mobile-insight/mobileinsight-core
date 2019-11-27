@@ -14,10 +14,11 @@ Using MobileInsight, users can declare a monitor to track the network status and
 
 Currently MobileInsight supports installation on macOS and Ubuntu/Debian systems. To install it on Windows, please use our all-in-one virtual machine from [`mobileinsight-dev`](https://github.com/mobile-insight/mobileinsight-dev).
 
-First install latest [Python 2.7](https://www.python.org/), then download MobileInsight from the [release page](https://github.com/mobile-insight/mobileinsight-core/releases):
 
-    tar -zxvf mobileinsight-4.0.tar.gz
-    cd mobileinsight-4.0
+
+First clone or download the git repository to user local folder.
+
+
 
 Next, run installation script (but __do not__ execute with root priviledge!):
 
