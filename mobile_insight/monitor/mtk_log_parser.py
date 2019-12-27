@@ -152,7 +152,7 @@ def feed_binary(buff):
     header = '\xac\xca\x00\xff'
     header_magic = '\x8f\x9a\x9a\x8d\x04\x00'
     
-    mtk_log_str = ''.join(map(lambda x: chr(struct.unpack('B',x)[0]), buff))
+    mtk_log_str = ''.join([chr(struct.unpack('B',x)[0]) for x in buff])
     mtk_log_str = re.sub('\xac\xca\x00\xff..','',mtk_log_str)
     new_log_len = len(mtk_log_str)
     # print len(mtk_log_str)
@@ -173,7 +173,7 @@ def feed_binary(buff):
 
         if length > 0 and length < new_log_len - loc:
             raw_bytes = mtk_log_str[12+loc:12 + length+loc]
-            raw_data = map(lambda x: x if (x != '\x00') else '\x00', raw_bytes)
+            raw_data = [x if (x != '\x00') else '\x00' for x in raw_bytes]
             raw_msg = ['\x00'] * 3 + [msg_id] + ['\x00'] * 2 + [chr(decimal_low)] + [chr(decimal_high)] + raw_data
             pstrace.append(raw_msg)
             msg_list.append(pstrace)
@@ -264,7 +264,7 @@ def seek_pstrace_magic(bytes):
         if length > 0 and length < len(bytes):
             raw_bytes = bytes[6:6 + length]
             # raw_data = map(lambda x: x if (x != '0x0') else '0x00', raw_bytes)
-            raw_data = map(lambda x: x if (x != '\x00') else '\x00', raw_bytes)
+            raw_data = [x if (x != '\x00') else '\x00' for x in raw_bytes]
             
             raw_msg = ['\x00'] * 3 + [msg_id] + ['\x00'] * 2 + [bytes[5]] + [bytes[4]] + raw_data
             pstrace.append(raw_msg)

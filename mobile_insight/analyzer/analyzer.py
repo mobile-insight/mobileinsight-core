@@ -228,9 +228,9 @@ class Analyzer(Element):
 
         if module == self.source:
             # Apply the event to all source callbacks
-            map(G, self.source_callback)
+            list(map(G, self.source_callback))
         else:
-            map(G, self.from_list[module])
+            list(map(G, self.from_list[module]))
 
     def register_coordinator_cb(self, plugin_cb):
         self.coordinator_callbacks.append(plugin_cb)
@@ -239,4 +239,4 @@ class Analyzer(Element):
         if not event.data:
             return
         def G(f): return f(str(event))
-        map(G, self.coordinator_callbacks)
+        list(map(G, self.coordinator_callbacks))

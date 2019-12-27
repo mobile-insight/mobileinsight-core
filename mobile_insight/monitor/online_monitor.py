@@ -11,24 +11,26 @@ Author: Yuanjie Li
 
 __all__ = ["OnlineMonitor"]
 
-
-
 # Test the OS version
 is_android = False
 
 try:
     from jnius import autoclass  # For Android
+
     is_android = True
 
-
     import subprocess
+
     ANDROID_SHELL = "/system/bin/sh"
+
+
     class ChipsetType:
         """
         Cellular modem type
         """
         QUALCOMM = 0
         MTK = 1
+
 
     def run_shell_cmd(cmd, wait=False):
         p = subprocess.Popen(
@@ -45,13 +47,13 @@ try:
         else:
             return res
 
+
     def get_chipset_type():
         """
         Determine the type of the chipset
 
         :returns: an enum of ChipsetType
         """
-
 
         """
         MediaTek: [ro.board.platform]: [mt6735m]
@@ -64,19 +66,21 @@ try:
         elif res.startswith("msm") or res.startswith("mdm") or res.startswith("sdm"):
             return ChipsetType.QUALCOMM
         else:
-            print "WARNING: Unknown type:",res
+            print(("WARNING: Unknown type:", res))
             return None
 
-    
+
     chipset_type = get_chipset_type()
     # print "chipset_type",chipset_type
 
     if chipset_type == ChipsetType.QUALCOMM:
-        from android_dev_diag_monitor import AndroidDevDiagMonitor
+        from .android_dev_diag_monitor import AndroidDevDiagMonitor
+
+
         class OnlineMonitor(AndroidDevDiagMonitor):
             def __init__(self):
                 AndroidDevDiagMonitor.__init__(self)
-        
+
             def set_serial_port(self, phy_ser_name):
                 """
                 NOT USED: Compatability with DMCollector
@@ -84,7 +88,7 @@ try:
                 :param phy_ser_name: the serial port name (path)
                 :type phy_ser_name: string
                 """
-                print "WARNING: Android version does not need to configure serial port"
+                print("WARNING: Android version does not need to configure serial port")
 
             def set_baudrate(self, rate):
                 """
@@ -93,13 +97,15 @@ try:
                 :param rate: the baudrate of the port
                 :type rate: int
                 """
-                print "WARNING: Android version does not need to configure baudrate"
+                print("WARNING: Android version does not need to configure baudrate")
     elif chipset_type == ChipsetType.MTK:
-        from android_mtk_monitor import AndroidMtkMonitor
+        from .android_mtk_monitor import AndroidMtkMonitor
+
+
         class OnlineMonitor(AndroidMtkMonitor):
             def __init__(self):
                 AndroidMtkMonitor.__init__(self)
-        
+
             def set_serial_port(self, phy_ser_name):
                 """
                 NOT USED: Compatability with DMCollector
@@ -107,7 +113,7 @@ try:
                 :param phy_ser_name: the serial port name (path)
                 :type phy_ser_name: string
                 """
-                print "WARNING: Android version does not need to configure serial port"
+                print("WARNING: Android version does not need to configure serial port")
 
             def set_baudrate(self, rate):
                 """
@@ -116,14 +122,16 @@ try:
                 :param rate: the baudrate of the port
                 :type rate: int
                 """
-                print "WARNING: Android version does not need to configure baudrate"
+                print("WARNING: Android version does not need to configure baudrate")
     else:
-        from monitor import Monitor
+        from .monitor import Monitor
+
+
         class OnlineMonitor(Monitor):
             def __init__(self):
                 Monitor.__init__(self)
                 self.log_warning("Unsupported chipset type")
-        
+
             def set_serial_port(self, phy_ser_name):
                 """
                 NOT USED: Compatability with DMCollector
@@ -131,7 +139,7 @@ try:
                 :param phy_ser_name: the serial port name (path)
                 :type phy_ser_name: string
                 """
-                print "WARNING: Android version does not need to configure serial port"
+                print("WARNING: Android version does not need to configure serial port")
 
             def set_baudrate(self, rate):
                 """
@@ -140,16 +148,18 @@ try:
                 :param rate: the baudrate of the port
                 :type rate: int
                 """
-                print "WARNING: Android version does not need to configure baudrate"
-    
+                print("WARNING: Android version does not need to configure baudrate")
+
 
 except Exception as e:
     # import traceback
     # print str(traceback.format_exc())
 
     # not used, but bugs may exist on laptop
-    from dm_collector.dm_collector import DMCollector
+    from .dm_collector.dm_collector import DMCollector
+
     is_android = False
+
 
     class OnlineMonitor(DMCollector):
         def __init__(self):

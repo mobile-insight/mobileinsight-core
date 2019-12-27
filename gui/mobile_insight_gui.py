@@ -286,7 +286,7 @@ class WindowClass(wx.Frame):
             wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
         if (openFileDialog.ShowModal() == wx.ID_OK):
             # print 'Selected %s' %openFileDialog.GetPath()
-            print 'Selected %s' % openFileDialog.Paths
+            print(('Selected %s' % openFileDialog.Paths))
             try:
                 self.grid.ClearGrid()
 
@@ -309,7 +309,7 @@ class WindowClass(wx.Frame):
                         openFileDialog.Directory)
 
             except e:
-                print "Error while opening file.", e
+                print(("Error while opening file.", e))
             # if (random() > 0.5):
             #    self.SetupGrid(self.data1)
             # else:

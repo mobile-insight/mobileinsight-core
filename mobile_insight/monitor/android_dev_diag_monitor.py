@@ -23,8 +23,8 @@ import timeit
 import time
 
 
-from monitor import Monitor, Event
-from dm_collector import dm_collector_c, DMLogPacket, FormatError
+from .monitor import Monitor, Event
+from .dm_collector import dm_collector_c, DMLogPacket, FormatError
 
 is_android = False
 try:
@@ -116,7 +116,7 @@ class ChronicleProcessor(object):
                         self.state = cls.READ_FILENAME
                     else:
                         # raise RuntimeError("Unknown msg type %s" % str(self.msg_type))
-                        print "Unknown msg type %s" % str(self.msg_type)
+                        print(("Unknown msg type %s" % str(self.msg_type)))
             elif self.state == cls.READ_TS:
                 if self.to_read[self.state] == 0:   # current field is complete
                     ret_ts = struct.unpack("<d", self.bytes[self.state])[0]
@@ -396,7 +396,7 @@ class AndroidDevDiagMonitor(Monitor):
             except IOError:     # proc has been terminated
                 continue
 
-        print "killing diag_revealer"
+        print("killing diag_revealer")
 
         if len(diag_procs) > 0:
             cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
@@ -522,7 +522,7 @@ class AndroidDevDiagMonitor(Monitor):
                         del result, packet, event
                     except FormatError as e:
                         # skip this packet
-                        print "FormatError: ", e
+                        print(("FormatError: ", e))
 
         except (KeyboardInterrupt, RuntimeError) as e:
             import traceback

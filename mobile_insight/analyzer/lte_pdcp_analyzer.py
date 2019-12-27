@@ -41,4 +41,4 @@ class LtePdcpAnalyzer(Analyzer):
 
     def __msg_callback(self, msg):
         s = msg.data.decode_xml().replace("\n", "")
-        print minidom.parseString(s).toprettyxml(" ")
+        print((minidom.parseString(s).toprettyxml(" ")))

@@ -84,7 +84,7 @@ if __name__ == "__main__":
     for analyzer_name in analyzers:
         for operator in operator_logs:
             test_name = 'test_%s_%s' % (operator, analyzer_name)
-            print "Add test: ",test_name
+            print(("Add test: ",test_name))
             test = test_replayer_generator(analyzer_name, operator_logs[operator])
             setattr(SingleAnalyzerTest, test_name, test)
 

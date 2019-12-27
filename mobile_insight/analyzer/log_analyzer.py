@@ -4,7 +4,7 @@
 A simple analyzer that displays retrives a list of events from log file
 
 """
-from analyzer import *
+from .analyzer import *
 
 try:
     import xml.etree.cElementTree as ET

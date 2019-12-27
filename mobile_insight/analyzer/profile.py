@@ -149,7 +149,7 @@ class ProfileHierarchy(object):
 
             match = False
             # otherwise, update the node to the one that matches the new name
-            for child in cur_node.children.values():
+            for child in list(cur_node.children.values()):
 
                 node_split = nodes[count].split(':')
 
@@ -450,13 +450,13 @@ if __name__ == "__main__":
         'LteRrc:87.Reconfig.Drx', {
             'Drx_short': '1', 'Drx_long': '5'})
 
-    print profile.query('LteRrc:87.Reconfig.Drx')
+    print((profile.query('LteRrc:87.Reconfig.Drx')))
 
     res = profile.update('LteRrc:87.Reconfig.Drx', {'Drx_long': '6'})
 
-    print profile.query('LteRrc:87.Reconfig.Drx')
+    print((profile.query('LteRrc:87.Reconfig.Drx')))
 
-    print profile.query('LteRrc:87')
+    print((profile.query('LteRrc:87')))
 
     res = profile.update(
         'LteRrc:86.Sib.Inter_freq:5780', {
@@ -465,8 +465,8 @@ if __name__ == "__main__":
         'LteRrc:86.Sib.Inter_freq:1975', {
             'ThreshXHigh': '2', 'ThreshXLow': '8'})
 
-    print profile.query('LteRrc:86.Sib')
+    print((profile.query('LteRrc:86.Sib')))
 
     profile.update('LteRrc:87', {'Root_leaf': 10})
 
-    print profile.query('LteRrc:87')
+    print((profile.query('LteRrc:87')))

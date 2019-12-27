@@ -6,9 +6,9 @@ A protocol analyzer abstraction.
 Author: Yuanjie Li
 """
 
-from analyzer import *
-from profile import Profile, ProfileHierarchy
-from state_machine import StateMachine
+from .analyzer import *
+from .profile import Profile, ProfileHierarchy
+from .state_machine import StateMachine
 try:
     import xml.etree.cElementTree as ET
 except ImportError:

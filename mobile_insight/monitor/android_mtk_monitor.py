@@ -14,9 +14,9 @@ import sys
 import timeit
 import datetime
 
-from monitor import Monitor, Event
-from dm_collector import dm_collector_c, DMLogPacket, FormatError
-import mtk_log_parser
+from .monitor import Monitor, Event
+from .dm_collector import dm_collector_c, DMLogPacket, FormatError
+from . import mtk_log_parser
 
 is_android = False
 try:

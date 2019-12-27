@@ -12,14 +12,14 @@ try:
     import xml.etree.cElementTree as ET 
 except ImportError: 
     import xml.etree.ElementTree as ET
-from analyzer import *
-from state_machine import *
+from .analyzer import *
+from .state_machine import *
 import timeit
 
-from protocol_analyzer import *
-from profile import Profile, ProfileHierarchy
+from .protocol_analyzer import *
+from .profile import Profile, ProfileHierarchy
 
-from nas_util import *
+from .nas_util import *
 # from mobile_insight.element import *
 
 

@@ -10,7 +10,7 @@ WS_VER=2.0.*
 MOBILEINSIGHT_PATH=$(pwd)
 
 mi_dir=$(python -c "import sys; print sys.exec_prefix + '/mobile_insight'")
-mi_dir2=$(python2 -c "import sys; print sys.exec_prefix + '/mobile_insight'")
+mi_dir2=$(python3 -c "import sys; print sys.exec_prefix + '/mobile_insight'")
 
 delete () {
     if [[ -e $1 ]]; then

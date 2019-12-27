@@ -14,8 +14,8 @@ import os
 import timeit
 import time
 
-from monitor import Monitor, Event
-from dm_collector import dm_collector_c, DMLogPacket, FormatError
+from .monitor import Monitor, Event
+from .dm_collector import dm_collector_c, DMLogPacket, FormatError
 
 
 class OfflineReplayer(Monitor):
@@ -71,7 +71,7 @@ class OfflineReplayer(Monitor):
 
     def __del__(self):
         if self.is_android and self.service_context:
-            print "detaching..."
+            print("detaching...")
             from service import mi2app_utils
             mi2app_utils.detach_thread()
 
@@ -158,7 +158,7 @@ class OfflineReplayer(Monitor):
 
         try:
 
-            self.broadcast_info('STARTED',{})
+            self.broadcast_info('STARTED', {})
             self.log_info('STARTED: ' + str(time.time()))
             log_list = []
             if os.path.isfile(self._input_path):
@@ -182,12 +182,12 @@ class OfflineReplayer(Monitor):
                 dm_collector_c.reset()
                 while True:
                     s = self._input_file.read(64)
-                    if not s:   # EOF encountered
+                    if not s:  # EOF encountered
                         break
 
                     dm_collector_c.feed_binary(s)
                     decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
-                                                                True,   # include_timestamp
+                                                                True,  # include_timestamp
                                                                 )
                     if decoded:
                         try:
@@ -209,7 +209,7 @@ class OfflineReplayer(Monitor):
 
                         except FormatError as e:
                             # skip this packet
-                            print "FormatError: ", e
+                            print(("FormatError: ", e))
                 self.log_info('Decoding_inter: ' + str(decoding_inter))
                 self.log_info('sending_inter: ' + str(sending_inter))
                 self._input_file.close()
