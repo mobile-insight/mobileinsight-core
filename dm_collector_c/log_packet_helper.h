@@ -19,8 +19,10 @@
 #define printf(fmt,args...) __android_log_print(ANDROID_LOG_INFO, "python", fmt, ##args);
 #endif
 
-#define SSTR(x) static_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::dec << x ) ).str()
+// #define SSTR(x) static_cast< std::ostringstream & >( \
+//         ( std::ostringstream() << std::dec << x ) ).str()
+
+#define SSTR(x) std::to_string(x)
 
 // Find a field by its name in a result list.
 // Return: i or -1
