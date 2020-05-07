@@ -51,9 +51,9 @@ def get_chipset_type():
     """
     cmd = "getprop ro.board.platform;"
     res = run_shell_cmd(cmd)
-    if res.startswith("mt"):
+    if res.startswith(b"mt"):
         return ChipsetType.MTK
-    elif res.startswith("msm") or res.startswith("mdm"):
+    elif res.startswith(b"msm") or res.startswith(b"mdm"):
         return ChipsetType.QUALCOMM
     else:
         return None
