@@ -22,6 +22,8 @@ class ChipsetType:
     MTK = 1
 
 def run_shell_cmd(cmd, wait=False):
+    if isinstance(cmd, str):
+        cmd = cmd.encode()
     p = subprocess.Popen(
         "su",
         executable=ANDROID_SHELL,
