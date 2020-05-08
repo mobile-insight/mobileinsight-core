@@ -231,13 +231,15 @@ class AndroidDevDiagMonitor(Monitor):
         return self.__class__.SUPPORTED_TYPES
 
     def _run_shell_cmd(self, cmd, wait=False):
+        if isinstance(cmd, str):
+            cmd = cmd.encode()
         p = subprocess.Popen(
             "su",
             executable=ANDROID_SHELL,
             shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE)
-        res, err = p.communicate(cmd + '\n')
+        res, err = p.communicate(cmd + b'\n')
         # p.stdin.write(cmd+'\n')
         if wait:
             p.wait()
@@ -318,7 +320,7 @@ class AndroidDevDiagMonitor(Monitor):
                 # root..."
                 retcode = self._run_shell_cmd(
                     "mknod %s p" %
-                    fifo_path, wait=True)
+                    fifo_path, wait=True).decode()
                 if retcode != 0:
                     raise RuntimeError("mknod returns %s" % str(retcode))
             else:
@@ -407,7 +409,7 @@ class AndroidDevDiagMonitor(Monitor):
             self.diag_revealer_daemon.stop()
             while not self.diag_revealer_daemon.isStopped():
                 pass
-        res = self._run_shell_cmd("ps").split('\n')
+        res = self._run_shell_cmd("ps").decode().split('\n')
         for item in res:
             if item.find('diag_revealer') != -1:
                 pid = item.split()[1]
