@@ -11,6 +11,7 @@ __all__ = ["Analyzer",
            "LogAnalyzer",
            "TrackCellInfoAnalyzer",
            "UlMacLatencyAnalyzer",
+           "UplinkLatencyAnalyzer",
            "KpiManager", 
            ]
 
