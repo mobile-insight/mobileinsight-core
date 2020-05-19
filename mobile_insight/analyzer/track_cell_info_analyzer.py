@@ -71,6 +71,7 @@ class TrackCellInfoAnalyzer(Analyzer):
             self.__status.ul_bandwidth = msg.data['Uplink bandwidth']
             self.__status.allowed_access = msg.data['Allowed Access']
             self.__status.id = msg.data['Cell ID']
+            self.__status.gid = msg.data['Cell Identity']
             self.__status.tac = msg.data['TAC']
             self.__status.band_indicator = msg.data['Band Indicator']
             mnc_value = msg.data['MNC']
@@ -98,6 +99,7 @@ class TrackCellInfoAnalyzer(Analyzer):
                 self.__status.ul_bandwidth = msg.data['Uplink bandwidth']
                 self.__status.allowed_access = msg.data['Allowed Access']
                 self.__status.id = msg.data['Cell ID']
+                self.__status.gid = msg.data['Cell Identity']
                 self.__status.tac = msg.data['TAC']
                 self.__status.band_indicator = msg.data['Band Indicator']
                 mnc_value = msg.data['MNC']
@@ -151,7 +153,7 @@ class TrackCellInfoAnalyzer(Analyzer):
         :returns: current cell's status
         :rtype: LteRrcStatus      
         """
-        return self.__status.id
+        return self.__status.gid
 
     def get_cur_cell_tac(self):
         """
@@ -202,6 +204,7 @@ class LteRrcStatus:
     """
     def __init__(self):
         self.id = None #cell ID
+        self.gid = None
         # self.freq = None #cell frequency
         self.dl_freq = None # Cell downlink frequency
         self.ul_freq = None # Cell uplink frequency
@@ -227,6 +230,7 @@ class LteRrcStatus:
         """
         return (self.__class__.__name__
                 + " cellID=" + str(self.id)
+                + " GcellID=" + str(self.gid)
                 + " DL_frequency=" + str(self.dl_freq)
                 + " UL_frequency=" + str(self.ul_freq)
                 + " DL_bandwidth=" + str(self.dl_bandwidth)
@@ -244,6 +248,7 @@ class LteRrcStatus:
         """
         dumped_dict = {}
         dumped_dict['cellID'] = str(self.id)
+        dumped_dict['GcellID'] = str(self.gid)
         dumped_dict['DL_frequency'] = str(self.dl_freq)
         dumped_dict['UL_frequency'] = str(self.ul_freq)
         dumped_dict['DL_bandwidth'] = str(self.dl_bandwidth)
