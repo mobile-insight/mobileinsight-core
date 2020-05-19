@@ -64,7 +64,7 @@ class KPIManager(Analyzer):
             self.enable_kpi(kpi_name, enable_storage)
 
 
-    def enable_kpi(self, kpi_name, periodicity='0s', enable_storage = True):
+    def enable_kpi(self, kpi_name, periodicity='0s', cell=None, enable_storage = True):
         """
         Enable the KPI monitoring
 
@@ -84,6 +84,7 @@ class KPIManager(Analyzer):
             self.include_analyzer(kpi_analyzer_name, [])
             self.get_analyzer(kpi_analyzer_name).enable_local_storage(enable_storage)
             self.get_analyzer(kpi_analyzer_name).set_periodicity(kpi_name, periodicity)
+            self.get_analyzer(kpi_analyzer_name).set_cell(kpi_name, cell)
             self.log_info("Enable KPI: "+kpi_name)
             return True
         except Exception as e:

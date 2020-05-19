@@ -63,6 +63,7 @@ class KpiAnalyzer(Analyzer):
         self.__phone_model = ""
         self.__db_enabled = False
         self.__periodicity = {}
+        self.__logcell = {}
         self.__last_updated = {}
 
         # Initialize uploading thread
@@ -223,14 +224,14 @@ class KpiAnalyzer(Analyzer):
             return None
 
 
-    def local_query_kpi(self, kpi_name, mode = 'user', timestamp = None):
+    def local_query_kpi(self, kpi_name, cell_id = None, timestamp = None):
         """
         Query the phone's locally observed KPI
 
         :param kpi_name: The KPI to be queried
         :type kpi_name: string
-        :param mode: 'cell' mode and 'user' mode
-        :type mode: string
+        :param cell_id: cell global id
+        :type cell_id: string
         :param timestamp: The timestamp of the KPI. If None, this function returns the latest KPI
         :type timestamp: datetime
         :returns: The KPI value, or None if the KPI is not available
@@ -239,15 +240,15 @@ class KpiAnalyzer(Analyzer):
             self.log_warning("Database is not enabled.")
             return None
 
-        cell_id = self.get_analyzer('TrackCellInfoAnalyzer').get_cur_cell_id()
-        cell_id = cell_id if cell_id else "None"
+        # cell_id = self.get_analyzer('TrackCellInfoAnalyzer').get_cur_cell_id()
+        # cell_id = cell_id if cell_id else None
 
         kpi_name = kpi_name.replace('.', '_')
         # print kpi_name
 
         if kpi_name.endswith('SR'):
 
-            if mode == 'cell':
+            if cell_id:
                 if 'HO' in kpi_name:
                     kpi_suc = kpi_name[:-2]+'FAILURE'
                 else:
@@ -313,7 +314,7 @@ class KpiAnalyzer(Analyzer):
 
         elif kpi_name.endswith('SUC') or kpi_name.endswith('REQ') or \
          kpi_name.endswith('TOTAL') or kpi_name.endswith('FAILURE'):
-            if mode == 'cell':
+            if cell_id:
                 if timestamp:
                     sql_cmd = "select count(*) from " + kpi_name + " where timestamp<\"" + \
                     str(timestamp) + "\" and cell_id=\"" + str(cell_id) +"\""
@@ -407,8 +408,26 @@ class KpiAnalyzer(Analyzer):
             self.log_info("Priority set failed for "+kpi_showname+': '+periodicity)
             return False
 
+    def set_cell(self, kpi_showname, cell):
+        """
+        Set periodicity of the analyzer
 
-    def store_kpi(self,kpi_name, kpi_value, timestamp, cur_location=None):
+        :param kpi_showname: The KPI to be queried, this is the showname
+        :type kpi_showname: string
+        :param cell: cell (s,m,h,d repsents scale of seconds, minutes, hours, days)
+        :type cell: string
+        """
+        try:
+            kpi_name = kpi_showname.replace('.', '_')
+            self.__logcell[kpi_name] = cell
+            self.log_info("Logging cell set for "+kpi_showname+': '+str(cell))
+            return True
+        except:
+            self.log_info("Logging cell failed for "+kpi_showname+': '+periodicity)
+            return False
+
+
+    def store_kpi(self, kpi_name, kpi_value, timestamp, cur_location=None):
         """
         Store the KPIs to the local database
 
@@ -499,46 +518,41 @@ class KpiAnalyzer(Analyzer):
             self.__db.execute(sql_cmd)
             self.__conn.commit()
 
-        
-        self.__log_kpi(kpi_name, timestamp)
+        self.__log_kpi(kpi_name, timestamp, cell_id)
         return True
         # except BaseException:  # TODO: raise warnings
             # return False
 
-    def __log_kpi(self, kpi_name, timestamp):
+    def __log_kpi(self, kpi_name, timestamp, cell_id):
         """
         :param kpi_name: The KPI to be queried
         :type kpi_name: string
         :param timestamp
         :type timestamp: datetime
+        :param cell_id: updated kpi cell id
+        :type cell_id: string
         """
 
-        if kpi_name not in self.__last_updated:
-            return
+        if kpi_name in self.__last_updated:
+            # if logging cell is specified, check whether cell id are the same
+            if not self.__logcell[kpi_name] or self.__logcell[kpi_name] and self.__logcell[kpi_name] == str(cell_id):
+                kpi_showname = kpi_name.replace('_', '.')
+                # if periodicity mode enabled, check whether time gap is longer enough
+                if not self.__last_updated[kpi_name] or (timestamp - self.__last_updated[kpi_name]).total_seconds() > self.__periodicity[kpi_name]:
+                    self.__last_updated[kpi_name] = timestamp
+                    self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(self.local_query_kpi(kpi_name)))
 
-        kpi_showname = kpi_name.replace('_', '.')
-
-        # datetimeObj = datetime.strptime('2018-09-11T15::11::45.456777', '%Y-%m-%dT%H::%M::%S.%f')
-        # if self.__last_updated[kpi_name]:
-            # self.log_info(str(kpi_name) + str(timestamp) + ' from '+ str(self.__last_updated[kpi_name]) + \
-        # ' '+str((timestamp - self.__last_updated[kpi_name]).total_seconds()) + ':' + str(self.__periodicity[kpi_name]))
-
-        if self.__last_updated[kpi_name] and (timestamp - self.__last_updated[kpi_name]).total_seconds() < self.__periodicity[kpi_name]:
-            return
-        
-        self.__last_updated[kpi_name] = timestamp
-        # if isinstance(timestamp, str):
-        #     fmt = "%Y-%m-%d %H:%M:%S"
-        #     t = datetime.datetime.fromtimestamp(float(timestamp))
-        #     self.log_info(str(t.strftime(fmt)) + ': '+ str(kpi_showname) + '=' + str(self.local_query_kpi(kpi_name)))
-        # else:
-        self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(self.local_query_kpi(kpi_name)))
-
+        # check the stats updated with instance value
         if kpi_name.endswith('SUC') or kpi_name.endswith('FAILURE'):
             kpi_name=kpi_name.replace('SUC', 'SR')
             kpi_name=kpi_name.replace('FAILURE', 'SR')
-            kpi_showname = kpi_name.replace('_', '.')
-            self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(self.local_query_kpi(kpi_name)))
+            if kpi_name in self.__last_updated:
+                if not self.__logcell[kpi_name] or self.__logcell[kpi_name] and self.__logcell[kpi_name] == str(cell_id):
+                    kpi_showname = kpi_name.replace('_', '.')
+                    if not self.__last_updated[kpi_name] or (timestamp - self.__last_updated[kpi_name]).total_seconds() > self.__periodicity[kpi_name]:
+                        self.__last_updated[kpi_name] = timestamp
+                        kpi_showname = kpi_name.replace('_', '.')
+                        self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(self.local_query_kpi(kpi_name)))
 
     def __upload_kpi_thread(self,e):
         """
