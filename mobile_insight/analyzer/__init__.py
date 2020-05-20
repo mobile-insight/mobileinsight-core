@@ -13,6 +13,7 @@ __all__ = ["Analyzer",
            "UlMacLatencyAnalyzer",
            "UplinkLatencyAnalyzer",
            "KpiManager", 
+           "LteDlRetxAnalyzer",
            ]
 
 from .analyzer import Analyzer
@@ -28,6 +29,7 @@ from .msg_statistics import MsgStatistics
 from . import kpi
 from .track_cell_info_analyzer import TrackCellInfoAnalyzer
 from .ul_mac_latency_analyzer import UlMacLatencyAnalyzer
+from .lte_dl_retx_analyzer import LteDlRetxAnalyzer
 
 # LTE
 from .lte_rrc_analyzer import LteRrcAnalyzer
