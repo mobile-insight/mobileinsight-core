@@ -26,7 +26,7 @@ except Exception as e:
 __all__ = ["KpiAnalyzer"]
 
 from ..analyzer import *
-from .track_cell_info_analyzer import TrackCellInfoAnalyzer
+# from .track_cell_info_analyzer import TrackCellInfoAnalyzer
 import os, errno
 import urllib.request, urllib.error, urllib.parse, json, time, datetime
 import threading
