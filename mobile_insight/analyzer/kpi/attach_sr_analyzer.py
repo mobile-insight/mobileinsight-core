@@ -61,6 +61,7 @@ class AttachSrAnalyzer(KpiAnalyzer):
                           list(self.kpi_measurements['total_number'].keys()))
         # self.register_kpi("Retainability", "ATTACH_REJ", self.__emm_sr_callback,
                           # self.kpi_measurements['reject_number'].keys())
+        self.register_kpi("Accessibility", "ATTACH_SR", self.__emm_sr_callback)
 
         self.type = None # record attach casue of current attach procedure
         self.attach_req_timestamp = None

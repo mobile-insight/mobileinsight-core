@@ -63,6 +63,7 @@ class ServiceReqSrAnalyzer(KpiAnalyzer):
                           list(self.kpi_measurements['total_number'].keys()))
         self.register_kpi("Retainability", "SR_REJ", self.__emm_sr_callback,
                           list(self.kpi_measurements['reject_number'].keys()))
+        self.register_kpi("Accessibility", "SR_SR", self.__emm_sr_callback)
 
         # add callback function
         self.add_source_callback(self.__emm_sr_callback)
