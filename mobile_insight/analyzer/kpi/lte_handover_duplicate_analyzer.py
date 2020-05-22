@@ -163,7 +163,7 @@ class LteHandoverDuplicateAnalyzer(KpiAnalyzer):
         self.__flag = False
         self.__print = 0
 
-        self.register_kpi("Mobility", "HOL_BLOCKING", self.__msg_callback, None)
+        self.register_kpi("Mobility", "HANDOVER_HOL", self.__msg_callback, 0)
     
     def set_source(self,source):
         """
@@ -228,10 +228,11 @@ class LteHandoverDuplicateAnalyzer(KpiAnalyzer):
                         hol_delay = self.bearer_dic[cfgIdx].add_pdcp_dl_data_pkt(record, self.pdcp_highest[cfgIdx])
                     
                     if hol_delay:
-                        self.log_info("Handover HOL delay: "+str(hol_delay))
+                        # self.log_info("Handover HOL delay: "+str(hol_delay))
                         ho_kpi = {'HOL delay (ms)': hol_delay}
-                        self.upload_kpi("KPI.Mobility.HOL_BLOCKING", ho_kpi)
-                        self.broadcast_info('HOL_BLOCKING', ho_kpi)
+                        # self.upload_kpi("KPI.Mobility.HOL_BLOCKING", ho_kpi)
+                        # self.broadcast_info('HOL_BLOCKING', ho_kpi)
+                        self.store_kpi("KPI_Mobility_HANDOVER_HOL", str(hol_delay), log_item['timestamp'])
 
         if msg.type_id == "LTE_RLC_DL_AM_All_PDU":
             records = log_item['Subpackets'][0]['RLCDL PDUs']

@@ -167,7 +167,7 @@ class LteHandoverPredictionAnalyzer(KpiAnalyzer):
         self.attributes = ["predict_condition", "handover_occurence"]
 
         #no source callbacks are included
-        self.register_kpi("Mobility", "HANDOVER_PREDICTION", self.__on_lte_rrc_msg, self.attributes)
+        self.register_kpi("Mobility", "HANDOVER_PREDICTION", self.__on_lte_rrc_msg, 0)
 
 
 
@@ -246,8 +246,8 @@ class LteHandoverPredictionAnalyzer(KpiAnalyzer):
                     bcast_dict = {}
                     bcast_dict['Timestamp'] = str(string2timestamp(msg.timestamp))
                     bcast_dict['event'] = str(handoff_state.dump())
-                    self.broadcast_info('HANDOVER_EVENT',bcast_dict)
-                    self.log_info(str(string2timestamp(msg.timestamp))+" Handoff to " + handoff_state.dump())
+                    # self.broadcast_info('HANDOVER_EVENT',bcast_dict)
+                    # self.log_info(str(string2timestamp(msg.timestamp))+" Handoff to " + handoff_state.dump())
                     # self.log_info(target_bw)
 
                     # Broadcast to apps
@@ -326,8 +326,9 @@ class LteHandoverPredictionAnalyzer(KpiAnalyzer):
                             bcast_dict = {}
                             bcast_dict['Timestamp'] = str(string2timestamp(msg.timestamp))
                             bcast_dict['event'] = str(meas_report[1].event_list[0].type)
-                            self.broadcast_info('HANDOVER_PREDICTION', bcast_dict)
-                            self.log_error(str(string2timestamp(msg.timestamp))+" Handover will occur" )
+                            self.store_kpi("KPI_Mobility_HANDOVER_PREDICTION", "1", msg.timestamp)
+                            # self.broadcast_info('HANDOVER_PREDICTION', bcast_dict)
+                            # self.log_error(str(string2timestamp(msg.timestamp))+" Handover will occur" )
                         # bcast_dict = {}
                         # bcast_dict['Timestamp']=str(msg.timestamp)
                         # bcast_dict['event'] = str(meas_report[1].event_list[0].type)

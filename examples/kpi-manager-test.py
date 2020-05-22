@@ -49,14 +49,6 @@ def kpi_manager_example(path):
     # Test Integrity KPIs
     kpi_manager.enable_kpi("KPI.Integrity.DL_TPUT") 
 
-    # Test data plane KPIs
-    # Test experimental KPIs - data plane
-    # kpi_manager.enable_kpi("KPI.Wireless.SYMBOL_ERROR_RATE")
-
-    # Test experimental KPIs - handover
-    # kpi_manager.enable_kpi("KPI.Mobility.HANDOVER_PREDICTION")
-    # kpi_manager.enable_kpi("KPI.Mobility.HANDOVER_LATENCY")
-
     kpi_manager.set_source(src)
 
     src.run()

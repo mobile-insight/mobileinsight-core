@@ -235,7 +235,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             xml_msg = Event(log_item_dict['timestamp'], msg.type_id, log_xml)
 
             if self.state_machine.update_state(xml_msg):
-                self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
+                # self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
                 event = Event(msg.timestamp, 'rrc state', str(self.state_machine.get_current_state()))
                 self.send_to_coordinator(event)
 
@@ -356,7 +356,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     elif val.get('name') == 'lte-rrc.rsrqResult':
                         meas_report['rsrq'] = int(val.get('show'))
                 self.broadcast_info('MEAR_PCELL', meas_report)
-                self.log_info('MEAR_PCELL: ' + str(meas_report))
+                # self.log_info('MEAR_PCELL: ' + str(meas_report))
                 self.send_to_coordinator(Event(msg.timestamp, 'rsrp', meas_report['rsrp']))
                 self.send_to_coordinator(Event(msg.timestamp, 'rsrq', meas_report['rsrq']))
 
@@ -418,7 +418,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          'p_Max': field_val['lte-rrc.p_Max'],
                                          's_IntraSearch': str(float(field_val['lte-rrc.s_IntraSearch']) * 2)})
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             # inter-frequency (LTE)
             if field.get('name') == "lte-rrc.interFreqCarrierFreqList":
@@ -486,7 +486,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                         self.__config[cur_pair].sib.inter_freq_cell_config[offset_pair] = q_offset_range[int(offset)]
 
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             # inter-RAT (UTRA)
             if field.get('name') == "lte-rrc.CarrierFreqUTRA_FDD_element":
@@ -537,7 +537,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          })
 
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             if field.get('name') == "lte-rrc.t_ReselectionUTRA":
                 cur_pair = (self.__status.id, self.__status.freq)
@@ -597,7 +597,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          'q_offset_freq': '0'
                                          })
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             # FIXME: t_ReselectionGERAN appears BEFORE config, so this code does not work!
             if field.get('name') == "lte-rrc.t_ReselectionGERAN":
@@ -609,7 +609,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     if config.rat == "GERAN":
                         config.tReselection = float(field.get('show'))
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             # intra-frequency cell offset
             if field.get('name') == "lte-rrc.IntraFreqNeighCellInfo_element":
@@ -630,7 +630,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 offset = int(field_val['lte-rrc.q_OffsetCell'])
                 self.__config[cur_pair].sib.intra_freq_cell_config[cell_id] = q_offset_range[int(offset)]
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
                 # TODO: RRC connection status update
 
@@ -690,7 +690,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                             self.__config[cur_pair].active.measobj[freq].add_cell(cell_id, cell_offset)
 
                 self.broadcast_info('RRC_RECONFIG', self.__config[cur_pair].dump_dict())
-                self.log_info('RRC_RECONFIG: ' + str(self.__config[cur_pair].dump()))
+                # self.log_info('RRC_RECONFIG: ' + str(self.__config[cur_pair].dump()))
 
             # Add a UTRA (3G) measurement object:
             if field.get('name') == "lte-rrc.measObjectUTRA_element":
@@ -1022,7 +1022,7 @@ class LteRrcStatus:
                 + " cellID=" + str(self.id)
                 + " frequency=" + str(self.freq)
                 + " TAC=" + str(self.tac)
-                + " connected=" + str(self.conn) + '\n')
+                + " connected=" + str(self.conn))
 
     def dump_dict(self):
         """
