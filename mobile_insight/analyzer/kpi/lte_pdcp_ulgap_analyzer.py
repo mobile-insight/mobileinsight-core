@@ -8,19 +8,18 @@ Author: Zhehui Zhang
 Output: <timestamp>    <lost pdcp pkts> <lost pdcp pkts within one msg>
 """
 
-from mobile_insight.analyzer.analyzer import *
-from xml.dom import minidom
+from .kpi_analyzer import KpiAnalyzer
 import time
 
 __all__ = ["LtePdcpUlGapAnalyzer"]
 
-class LtePdcpUlGapAnalyzer(Analyzer):
+class LtePdcpUlGapAnalyzer(KpiAnalyzer):
     def __init__(self):
-        Analyzer.__init__(self)
+        KpiAnalyzer.__init__(self)
         self.add_source_callback(self.__msg_callback)
 
         # self.time_old     = 0
-        self.time_old = time.time()
+        self.time_old = None
         self.lost_cnt     = 0
         self.lost_cnt_one_msg = 0
         # self.last_sn     = -1
@@ -30,29 +29,34 @@ class LtePdcpUlGapAnalyzer(Analyzer):
         self.lost_record = {}
 
         self.pkt_total = 0
+        self.register_kpi("Wireless", "UL_PDCP_LOSS", self.__msg_callback, 0)
 
     def set_source(self, source):
-        Analyzer.set_source(self, source)
+        KpiAnalyzer.set_source(self, source)
 
         source.enable_log("LTE_PDCP_UL_Cipher_Data_PDU")
 
 
     def __msg_callback(self, msg):
         if msg.type_id == "LTE_PDCP_UL_Cipher_Data_PDU":
-            self._callback_pdcp_dl(msg)
+            self._callback_pdcp_ul(msg)
 
 
-    def _callback_pdcp_dl(self, msg):
-        timestamp = float(msg.timestamp)
+    def _callback_pdcp_ul(self, msg):
+        log_item = msg.data.decode()
+        timestamp = log_item['timestamp'].timestamp()
+        # timestamp = float(msg.timestamp)
         # self.log_info('timestamp ' + str(msg.timestamp)
         #              +" self.time_old: " + str(self.time_old))
-        timestamp = time.time()
+        # timestamp = time.time()
         # if timestamp != self.time_old:
+        if not self.time_old:
+            self.time_old = timestamp
         if timestamp - self.time_old >= 1:
             if self.lost_cnt > 0:
                 # self.log_info(str(self.time_old) + " " + str(self.lost_cnt) + ' ' + str(self.lost_cnt_one_msg))
                 
-                self.log_info("PDCP packet loss: "+ str(self.lost_cnt_one_msg / (timestamp - self.time_old) ) + " pkt/s")
+                # self.log_info("PDCP packet loss: "+ str(self.lost_cnt_one_msg / (timestamp - self.time_old) ) + " pkt/s")
                 bcast = {}
                 bcast['PDCP gap'] = self.lost_cnt_one_msg / (timestamp - self.time_old)
 
@@ -62,7 +66,9 @@ class LtePdcpUlGapAnalyzer(Analyzer):
                     bcast_total = float(self.lost_cnt_one_msg) / self.pkt_total
                 bcast['PDCP gap ratio'] = bcast_total
 
-                self.broadcast_info('PDCP_GAP', bcast)
+                # self.broadcast_info('PDCP_GAP', bcast)
+                if bcast_total > 0:
+                    self.store_kpi("KPI_Wireless_UL_PDCP_LOSS", '{:.2f}'.format(bcast_total), log_item['timestamp'])
 
                 self.lost_record[self.time_old] = self.lost_cnt
             # self.time_old = timestamp
@@ -71,7 +77,7 @@ class LtePdcpUlGapAnalyzer(Analyzer):
             self.lost_cnt_one_msg = 0   
             self.pkt_total = 0        
 
-        log_item = msg.data.decode()
+        
         records = log_item['Subpackets'][0]['PDCPUL CIPH DATA']
         # self.log_info(str(log_item))
         for record in records:

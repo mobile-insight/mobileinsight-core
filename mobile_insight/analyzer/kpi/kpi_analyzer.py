@@ -336,7 +336,7 @@ class KpiAnalyzer(Analyzer):
             return None 
 
         elif kpi_name.endswith('TPUT'):
-            if mode == 'cell':
+            if cell_id:
                 if timestamp:
                     sql_cmd = "select value from " + kpi_name + " where timestamp<\"" + \
                     str(timestamp) + "\" and cell_id=\"" + str(cell_id) +"\" order by id desc limit 1"
@@ -511,19 +511,19 @@ class KpiAnalyzer(Analyzer):
                       + "\"," + "\"" + str(allowed_access) \
                       + "\"," + "\"" + str(band_indicator) \
                       + "\")"
-        # print sql_cmd
+        # print(sql_cmd)
         if is_android:
             self.__db.execSQL(sql_cmd)
         else:
             self.__db.execute(sql_cmd)
             self.__conn.commit()
 
-        self.__log_kpi(kpi_name, timestamp, cell_id)
+        self.__log_kpi(kpi_name, timestamp, cell_id, kpi_value)
         return True
         # except BaseException:  # TODO: raise warnings
             # return False
 
-    def __log_kpi(self, kpi_name, timestamp, cell_id):
+    def __log_kpi(self, kpi_name, timestamp, cell_id, kpi_value):
         """
         :param kpi_name: The KPI to be queried
         :type kpi_name: string
@@ -540,7 +540,12 @@ class KpiAnalyzer(Analyzer):
                 # if periodicity mode enabled, check whether time gap is longer enough
                 if not self.__last_updated[kpi_name] or (timestamp - self.__last_updated[kpi_name]).total_seconds() > self.__periodicity[kpi_name]:
                     self.__last_updated[kpi_name] = timestamp
-                    self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(self.local_query_kpi(kpi_name)))
+                    if kpi_name.endswith('_LOSS') or kpi_name.endswith('_BLER'):
+                        self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(kpi_value) + '%')
+                    elif kpi_name.endswith('_TPUT'):
+                        self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(kpi_value) + 'bps')
+                    else:
+                        self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(self.local_query_kpi(kpi_name)))
 
         # check the stats updated with instance value
         if kpi_name.endswith('SUC') or kpi_name.endswith('FAILURE'):

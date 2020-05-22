@@ -41,7 +41,7 @@ from .lte_handover_prediction_analyzer import LteHandoverPredictionAnalyzer
 from .lte_bandwidth_predictor import LteBandwidthPredictor
 from .lte_wireless_error_analyzer import LteWirelessErrorAnalyzer
 from .lte_qos_analyzer import LteQosAnalyzer
-from .lte_pdcp_gap_analyzer import LtePdcpGapAnalyzer # ql
+from .lte_pdcp_gap_analyzer import LtePdcpGapAnalyzer 
 from .lte_pdcp_ulgap_analyzer import LtePdcpUlGapAnalyzer
 from .lte_handover_duplicate_analyzer import LteHandoverDuplicateAnalyzer
 
