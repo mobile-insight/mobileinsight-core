@@ -30,6 +30,7 @@ from . import kpi
 from .track_cell_info_analyzer import TrackCellInfoAnalyzer
 from .ul_mac_latency_analyzer import UlMacLatencyAnalyzer
 from .lte_dl_retx_analyzer import LteDlRetxAnalyzer
+from .uplink_latency_analyzer import UplinkLatencyAnalyzer
 
 # LTE
 from .lte_rrc_analyzer import LteRrcAnalyzer

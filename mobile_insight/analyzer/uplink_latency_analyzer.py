@@ -1,10 +1,8 @@
-#!/usr/bin/python
-# Filename: ul_mac_latency_analyzer.py
+#!/usr/bin/python3
+# Filename: uplink_latency_analyzer.py
 """
-ul_latency_breakdown_analyzer.py
-An analyzer to monitor mac layer waiting and processing latency
-
-Author: Zhehui Zhang
+uplink_latency_analyzer.py
+An analyzer to monitor uplink packet waiting and processing latency
 """
 
 
@@ -15,7 +13,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 from mobile_insight.analyzer.analyzer import *
-from mobile_insight.analyzer import *
+
 
 import time
 import dis
@@ -112,7 +110,7 @@ class UplinkLatencyAnalyzer(Analyzer):
                         else:
                             self.tmp_dict[retx_time] = {'Retx Latency': 8}
                     
-                    for t in self.tmp_dict.keys():
+                    for t in list(self.tmp_dict):
                         # print t, retx_time
                         # print self.tmp_dict
                         if (t < retx_time or (t > 1000 and retx_time < 20)):
