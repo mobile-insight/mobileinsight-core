@@ -9,14 +9,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from mobile_insight.monitor import OfflineReplayer
-from uplink_latency_analyzer import UplinkLatencyAnalyzer
+from mobile_insight.analyzer import UplinkLatencyAnalyzer
 
 
 
 def uplink_latency_analysis():
     src = OfflineReplayer()
-    src.set_input_path(sys.argv[1])
-    print (sys.argv[1])
+    src.set_input_path("./logs/latency_sample.mi2log")
+    # src.set_input_path(sys.argv[1])
+    # print (sys.argv[1])
 
     analyzer = UplinkLatencyAnalyzer()
     analyzer.set_source(src)
