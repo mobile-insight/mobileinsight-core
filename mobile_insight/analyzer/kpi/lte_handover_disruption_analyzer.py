@@ -36,7 +36,7 @@ class LteHandoverDisruptionAnalyzer(KpiAnalyzer):
 
         self.attributes = ["handover_time", "destination_cell", "uplink_disruption", "downlink_disruption"]
 
-        self.register_kpi("Mobility", "HANDOVER_LATENCY", self.__msg_callback, self.attributes)
+        self.register_kpi("Mobility", "HANDOVER_LATENCY", self.__msg_callback, 0)
 
     def set_source(self,source):
         """
@@ -95,7 +95,7 @@ class LteHandoverDisruptionAnalyzer(KpiAnalyzer):
                 if record['Status'] == 'PDU DATA' and (systime - self.handover_time >= 20 or (systime < 100 and self.handover_time > 10140)):
                     self.dl_time = systime
                     if self.ul_time != None:
-                        self.__compute_disruption()
+                        self.__compute_disruption(log_item['timestamp'])
                     break
 
         if msg.type_id == 'LTE_PDCP_UL_Cipher_Data_PDU' and self.__handover_state == 2 and self.ul_time == None:
@@ -109,10 +109,10 @@ class LteHandoverDisruptionAnalyzer(KpiAnalyzer):
                 if cfgIdx > 30 and (systime - self.handover_time >= 10 or (systime < 100 and self.handover_time > 10150)) :
                     self.ul_time = systime
                     if self.dl_time != None:
-                        self.__compute_disruption()
+                        self.__compute_disruption(log_item['timestamp'])
                     break
 
-    def __compute_disruption(self):
+    def __compute_disruption(self, ts):
         ul_dis = (self.ul_time - self.handover_time + 10240) % 10240
         dl_dis = (self.dl_time - self.handover_time + 10240) % 10240
         # self.log_info("Handover: {},{},{},{}".format(self.destination_cell, self.handover_time, ul_dis, dl_dis)) 
@@ -124,8 +124,9 @@ class LteHandoverDisruptionAnalyzer(KpiAnalyzer):
         kpi['destination_cell'] = str(self.destination_cell)
         kpi['uplink_disruption'] = str(ul_dis)
         kpi['downlink_disruption'] = str(dl_dis)
+        latency = max(ul_dis, dl_dis)
         self.broadcast_info('HANDOVER_LATENCY', kpi)
-        self.upload_kpi("KPI.Mobility.HANDOVER_LATENCY", kpi)
+        self.store_kpi("KPI_Mobility_HANDOVER_LATENCY", str(latency), ts)
 
 
 

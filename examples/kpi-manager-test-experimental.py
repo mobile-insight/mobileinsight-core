@@ -25,13 +25,14 @@ def kpi_manager_example(path):
     # print "All supported KPIs:", str(kpi_manager.list_kpis())
 
     # Test experimental KPIs - data plane
-    kpi_manager.enable_kpi("KPI.Wireless.BLER")
-    kpi_manager.enable_kpi("KPI.Wireless.DL_PDCP_LOSS")
-    kpi_manager.enable_kpi("KPI.Wireless.UL_PDCP_LOSS")
+    # kpi_manager.enable_kpi("KPI.Wireless.BLER") # test log: bler_sample
+    # kpi_manager.enable_kpi("KPI.Wireless.DL_PDCP_LOSS") # test log: data_sample
+    # kpi_manager.enable_kpi("KPI.Wireless.UL_PDCP_LOSS")
 
     # Test experimental KPIs - handover
-    # kpi_manager.enable_kpi("KPI.Mobility.HANDOVER_PREDICTION")
-    # kpi_manager.enable_kpi("KPI.Mobility.HANDOVER_LATENCY")
+    kpi_manager.enable_kpi("KPI.Mobility.HANDOVER_PREDICTION") # test log: data_sample
+    kpi_manager.enable_kpi("KPI.Mobility.HANDOVER_LATENCY") # test log: data_sample
+    kpi_manager.enable_kpi("KPI.Mobility.HANDOVER_HOL") # test log: data_sample
 
     kpi_manager.set_source(src)
 

@@ -72,9 +72,9 @@ class LteWirelessErrorAnalyzer(KpiAnalyzer):
             if cur_time - self._sym_error_timestamp >= self._report_period:
                 kpi={}
                 kpi['Symbol Error Rate'] = self._sym_error / self._sym_error_count
-                self.upload_kpi('KPI.Wireless.SYMBOL_ERROR_RATE', kpi)
-                self.broadcast_info('SYMBOL_ERROR_RATE', kpi)
-                # self.log_info("Symbol Err Rate: "+str(round(kpi['Symbol Error Rate'],2)))
+                # self.upload_kpi('KPI.Wireless.SYMBOL_ERROR_RATE', kpi)
+                # self.broadcast_info('SYMBOL_ERROR_RATE', kpi)
+                self.log_info("Symbol Err Rate: "+str(round(kpi['Symbol Error Rate'],2)))
 
                 self._sym_error, self._sym_error_count = 0, 0
                 self._sym_error_timestamp = cur_time

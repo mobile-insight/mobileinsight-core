@@ -473,11 +473,11 @@ class KpiAnalyzer(Analyzer):
         if not cur_location:
             cur_location = ("None", "None")
 
-        if isinstance(kpi_value, str) or isinstance(kpi_value, str):
+        if isinstance(kpi_value, str) or isinstance(kpi_value, int):
             sql_cmd = "insert into " + kpi_name + "(value, timestamp," \
                       "op, phone_model, gps, cell_id, tai_id, dl_freq, ul_freq, dl_bw, ul_bw," \
                       "allowed_access, band_id) values(\"" + \
-                      kpi_value + "\"," + "\"" + str(timestamp) \
+                      str(kpi_value) + "\"," + "\"" + str(timestamp) \
                       + "\"," + "\"" + operator_info \
                       + "\"," + "\"" + phone_info \
                       + "\"," + "\"" + str(cur_location[0])+"|"+str(cur_location[1]) \
@@ -544,6 +544,10 @@ class KpiAnalyzer(Analyzer):
                         self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(kpi_value) + '%')
                     elif kpi_name.endswith('_TPUT'):
                         self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(kpi_value) + 'bps')
+                    elif kpi_name.endswith('_LATENCY') or kpi_name.endswith('_HOL'):
+                        self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(kpi_value) + 'ms')
+                    elif kpi_name.endswith('_PREDICTION'):
+                        self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=Triggered')
                     else:
                         self.log_info(str(timestamp) + ': '+ str(kpi_showname) + '=' + str(self.local_query_kpi(kpi_name)))
 
