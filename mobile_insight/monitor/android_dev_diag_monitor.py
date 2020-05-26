@@ -8,25 +8,22 @@ Author: Jiayao Li, Yuanjie Li
 
 __all__ = ["AndroidDevDiagMonitor"]
 
-import binascii
 import errno
 import os
 import stat
-import re
-import subprocess
-import threading
 import struct
-import stat
+import subprocess
 import sys
-import timeit
+import threading
 import time
+import timeit
 
-from .monitor import Monitor, Event
 from .dm_collector import dm_collector_c, DMLogPacket, FormatError
+from .monitor import Monitor, Event
 
 is_android = False
 try:
-    from jnius import autoclass, cast # For Android
+    from jnius import autoclass, cast  # For Android
 
     try:
         service_context = autoclass('org.kivy.android.PythonService').mService
