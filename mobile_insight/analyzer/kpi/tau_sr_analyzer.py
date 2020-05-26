@@ -60,6 +60,7 @@ class TauSrAnalyzer(KpiAnalyzer):
 
         self.register_kpi("Mobility", "TAU_SUC", self.__emm_sr_callback,
                           list(self.kpi_measurements['success_number'].keys()))
+        self.register_kpi("Mobility", "TAU_SR", self.__emm_sr_callback)
         self.register_kpi("Mobility", "TAU_REQ", self.__emm_sr_callback,
                           list(self.kpi_measurements['total_number'].keys()))
         self.register_kpi("Mobility", "TAU_SR_LATENCY", self.__emm_sr_callback,

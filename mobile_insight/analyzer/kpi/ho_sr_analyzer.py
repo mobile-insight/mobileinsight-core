@@ -30,6 +30,7 @@ class HoSrAnalyzer(KpiAnalyzer):
 
         self.register_kpi("Mobility","HO_FAILURE", self.__ho_sr_callback, 0)
         self.register_kpi("Mobility", "HO_TOTAL", self.__ho_sr_callback, 0)
+        self.register_kpi("Mobility", "HO_SR", self.__ho_sr_callback, 0)
 
         # add callback function
         self.add_source_callback(self.__ho_sr_callback)

@@ -35,6 +35,9 @@ class DedicatedBearerSrAnalyzer(KpiAnalyzer):
         for kpi in self.current_kpi:
             # self.register_kpi("KPI_Accessibility_DEDICATED_BEARER_SR_" + kpi, self.__esm_sr_callback)
             self.register_kpi("Accessibility", "DEDICATED_BEARER_SR_" + kpi + "_SUC", self.__esm_sr_callback)
+        for kpi in self.current_kpi:
+            # self.register_kpi("KPI_Accessibility_DEDICATED_BEARER_SR_" + kpi, self.__esm_sr_callback)
+            self.register_kpi("Accessibility", "DEDICATED_BEARER_SR_" + kpi + "_SR", self.__esm_sr_callback)
 
         self.type = None # record bearer qci for current bearer setup procedure
 
