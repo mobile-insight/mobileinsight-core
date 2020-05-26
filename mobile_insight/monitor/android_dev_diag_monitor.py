@@ -354,6 +354,8 @@ class AndroidDevDiagMonitor(Monitor):
         # os.mkdir(self._input_dir)
         # os.chmod(self._input_dir,777)
         print("Start diag revealer and running cmd", cmd)
+        # YQ: Update for python3: popen.stdin.write does not work
+        # Replaced with Popen("su -c " + command)
         subprocess.Popen(
             "su -c " + cmd,
             executable=ANDROID_SHELL,
