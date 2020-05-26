@@ -26,7 +26,7 @@ from .dm_collector import dm_collector_c, DMLogPacket, FormatError
 
 is_android = False
 try:
-    from jnius import autoclass  # For Android
+    from jnius import autoclass, cast # For Android
 
     try:
         service_context = autoclass('org.kivy.android.PythonService').mService
@@ -242,14 +242,16 @@ class AndroidDevDiagMonitor(Monitor):
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE)
         res, err = p.communicate(cmd + b'\n')
+        # print("Running CMD: ", cmd)
+        # print("RES:", res)
         # p.stdin.write(cmd+'\n')
         if wait:
             p.wait()
             # return p.returncode
-            return res
+            return res.decode()
         else:
             # return None
-            return res
+            return res.decode()
 
     def set_log_directory(self, directory):
         """
@@ -321,8 +323,8 @@ class AndroidDevDiagMonitor(Monitor):
                 # root..."
                 retcode = self._run_shell_cmd(
                     "mknod %s p" %
-                    fifo_path, wait=True).decode()
-                if retcode != 0:
+                    fifo_path, wait=True)
+                if retcode is not None:
                     raise RuntimeError("mknod returns %s" % str(retcode))
             else:
                 raise err
@@ -337,7 +339,7 @@ class AndroidDevDiagMonitor(Monitor):
         """
         Initialize diag_revealer with correct parameters
         """
-        # TODO(likayo): need to protect aganist user input
+        # TODO(likayo): need to protect against user input
         cmd = "%s %s %s" % (self._executable_path, os.path.join(
             self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
         cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
@@ -351,14 +353,13 @@ class AndroidDevDiagMonitor(Monitor):
         self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
         # os.mkdir(self._input_dir)
         # os.chmod(self._input_dir,777)
-
-        proc = subprocess.Popen(
-            "su",
+        print("Start diag revealer and running cmd", cmd)
+        subprocess.Popen(
+            "su -c " + cmd,
             executable=ANDROID_SHELL,
             shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE)
-        proc.stdin.write(cmd + '\n')
 
     def _protect_diag_revealer(self):
         """
