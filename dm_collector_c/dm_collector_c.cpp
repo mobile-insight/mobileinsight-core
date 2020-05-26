@@ -171,7 +171,7 @@ send_msg(PyObject *serial_port, const char *b, int length) {
     std::string frame = encode_hdlc_frame(b, length);
     PyObject *o = PyObject_CallMethod(serial_port,
                                       (char *) "write",
-                                      (char *) "s#", frame.c_str(), frame.size());
+                                      (char *) "y#", frame.c_str(), frame.size());
     Py_DECREF(o);
     return true;
 }
@@ -586,8 +586,8 @@ dm_collector_c_feed_binary(PyObject *self, PyObject *args) {
     (void) self;
     const char *b;
     int length;
-    if (!PyArg_ParseTuple(args, "s#", &b, &length)) {
-        // printf("dm_collector_c_feed_binary returns NULL\n");
+    if (!PyArg_ParseTuple(args, "y#", &b, &length)) {
+         printf("dm_collector_c_feed_binary returns NULL\n");
         return NULL;
     }
     feed_binary(b, length);
