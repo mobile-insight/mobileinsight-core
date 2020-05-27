@@ -239,25 +239,25 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 event = Event(msg.timestamp, 'rrc state', str(self.state_machine.get_current_state()))
                 self.send_to_coordinator(event)
 
-            tic = time.clock()
+            # tic = time.clock()
             self.__callback_rrc_conn(xml_msg)
-            toc = time.clock()
+            # toc = time.clock()
 
             # self.log_info(str(time.time()) + " "\
             #             + "CALLBK_LTE_RRC_CONN "\
             #             + str((toc - tic)*1000)) #processing latency (in ms)
 
-            tic = time.clock()
+            # tic = time.clock()
             self.__callback_sib_config(xml_msg)
-            toc = time.clock()
+            # toc = time.clock()
 
             # self.log_info(str(time.time()) + " "\
             #             + "CALLBK_LTE_RRC_SIB_CONFG "\
             #             + str((toc - tic)*1000)) #processing latency (in ms)
 
-            tic = time.clock()
+            # tic = time.clock()
             self.__callback_rrc_reconfig(xml_msg)
-            toc = time.clock()
+            # toc = time.clock()
 
             # self.log_info(str(time.time()) + " "\
             #             + "CALLBK_LTE_RRC_RECONFIG "\
