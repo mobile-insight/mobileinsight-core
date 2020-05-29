@@ -29,5 +29,5 @@ if __name__ == "__main__":
 			rlc_delay += item['rlc_retx']
 		rlc_delay_sample += len(bearer.rlc_retx)
 
-	print "Average MAC retx delay is: ", float(mac_delay) / mac_delay_sample
-	print "Average RLC retx delay is:", float(rlc_delay) / rlc_delay_sample
+	print("Average MAC retx delay is: ", float(mac_delay) / mac_delay_sample)
+	print("Average RLC retx delay is:", float(rlc_delay) / rlc_delay_sample)

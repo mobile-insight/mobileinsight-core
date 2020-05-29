@@ -75,7 +75,7 @@ class RadioBearerEntity():
 			sn = nackItem['NACK_SN']
 			lst.append(sn)
 			if sn in self.__nack_dict:
-				if (timestamp - self.__nack_dict[sn][1]).total_seconds > 1:
+				if (timestamp - self.__nack_dict[sn][1]).total_seconds() > 1:
 					self.__nack_dict[sn] = [pdu_sys_time, timestamp]
 					if sn in self.__loss_detected_time:
 						self.__loss_detected_time.pop(sn)
@@ -87,7 +87,8 @@ class RadioBearerEntity():
 
 		idx = len(self.__pkt_recv) - 1
 
-		for key in self.__nack_dict.keys():
+		original_keys = list(self.__nack_dict)
+		for key in original_keys:
 			if key not in lst:
 				self.__nack_dict.pop(key)
 				self.__loss_detected_time.pop(key, None)
