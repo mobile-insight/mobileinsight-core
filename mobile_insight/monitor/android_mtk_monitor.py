@@ -203,13 +203,15 @@ class AndroidMtkMonitor(Monitor):
         dm_collector_c.set_filtered_export(path, self._type_names)  # ???
 
     def _run_shell_cmd(self, cmd, wait=False):
+        if isinstance(cmd, str):
+            cmd = cmd.encode()
         p = subprocess.Popen(
             "su",
             executable=ANDROID_SHELL,
             shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE)
-        res, err = p.communicate(cmd + '\n')
+        res, err = p.communicate(cmd + b'\n')
         if wait:
             p.wait()
             # return p.stdout

@@ -22,14 +22,15 @@ class ChipsetType:
     MTK = 1
 
 def run_shell_cmd(cmd, wait=False):
-
+    if isinstance(cmd, str):
+        cmd = cmd.encode()
     p = subprocess.Popen(
         "su",
         executable=ANDROID_SHELL,
         shell=True,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE)
-    res, err = p.communicate(cmd + '\n')
+    res, err = p.communicate(cmd + b'\n')
 
     if wait:
         p.wait()
@@ -51,9 +52,9 @@ def get_chipset_type():
     """
     cmd = "getprop ro.board.platform;"
     res = run_shell_cmd(cmd)
-    if res.startswith("mt"):
+    if res.startswith(b"mt"):
         return ChipsetType.MTK
-    elif res.startswith("msm") or res.startswith("mdm"):
+    elif res.startswith(b"msm") or res.startswith(b"mdm"):
         return ChipsetType.QUALCOMM
     else:
         return None

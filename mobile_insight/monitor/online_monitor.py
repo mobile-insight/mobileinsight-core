@@ -33,13 +33,15 @@ try:
 
 
     def run_shell_cmd(cmd, wait=False):
+        if isinstance(cmd, str):
+            cmd = cmd.encode()
         p = subprocess.Popen(
             "su",
             executable=ANDROID_SHELL,
             shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE)
-        res, err = p.communicate(cmd + '\n')
+        res, err = p.communicate(cmd + b'\n')
 
         if wait:
             p.wait()
@@ -61,9 +63,9 @@ try:
         """
         cmd = "getprop ro.board.platform;"
         res = run_shell_cmd(cmd)
-        if res.startswith("mt"):
+        if res.startswith(b"mt"):
             return ChipsetType.MTK
-        elif res.startswith("msm") or res.startswith("mdm") or res.startswith("sdm"):
+        elif res.startswith(b"msm") or res.startswith(b"mdm") or res.startswith(b"sdm"):
             return ChipsetType.QUALCOMM
         else:
             print(("WARNING: Unknown type:", res))
@@ -71,7 +73,7 @@ try:
 
 
     chipset_type = get_chipset_type()
-    # print "chipset_type",chipset_type
+    print("Chipset Type ID: ", chipset_type)
 
     if chipset_type == ChipsetType.QUALCOMM:
         from .android_dev_diag_monitor import AndroidDevDiagMonitor
