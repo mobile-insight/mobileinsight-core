@@ -96,16 +96,12 @@ class Element(object):
     def send(self, event):
         """
         Raise an event to all Analyzers in from_analyzer_list
-
         :param event: the event to be sent
         """
-        # A lambda function: input as a callback, output as passing event to
-        # this callback
+        # passing event to the callbacks
         if isinstance(event, Event):
-            self.log_debug(event.type_id)
-
-            def G(module): return module.recv(self, event)
-            list(map(G, self.to_list))
+            for i in range(len(self.to_list)):
+                self.to_list[i].recv(self, event)
 
     def recv(self, module, event):
         """
