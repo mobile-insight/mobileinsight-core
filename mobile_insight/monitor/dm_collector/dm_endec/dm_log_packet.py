@@ -12,11 +12,11 @@ import binascii
 from datetime import *
 import json
 import struct
-#import xml.etree.ElementTree as ET
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
+# try:
+#     import xml.etree.cElementTree as ET
+# except ImportError:
+#     import xml.etree.ElementTree as ET
 
 try:
     from utils import *
@@ -388,7 +388,7 @@ class DMLogPacket:
         xml = cls._parse_internal_list("xml/dict", self._decoded_list)
         # Zengwen: what about this name?
         xml.tag = "dm_log_packet"
-        return ET.tostring(xml)
+        return ET.tostring(xml, encoding='unicode')
 
     def decode_json(self):
         """
