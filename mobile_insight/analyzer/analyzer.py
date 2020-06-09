@@ -20,8 +20,10 @@ Author: Yuanjie Li
 
 """
 
-from ..element import Element, Event
-#from profile import *
+from ..element import Element
+
+
+# from profile import *
 
 
 class Analyzer(Element):
@@ -30,6 +32,7 @@ class Analyzer(Element):
 
     # Guanratee global uniqueness of analyzer
     __analyzer_array = {}  # Analyzer name --> object address
+
     # logger=None
 
     def __init__(self):
@@ -135,7 +138,7 @@ class Analyzer(Element):
         if analyzer_name in Analyzer.__analyzer_array:
             # Analyzer has been declared. Reuse it directly
             self.from_list[Analyzer.__analyzer_array[analyzer_name]
-                           ] = callback_list
+            ] = callback_list
             if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                 Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
             self.__parent_analyzer.append(analyzer_name)
@@ -147,7 +150,7 @@ class Analyzer(Element):
                 analyzer_tmp = getattr(module_tmp.analyzer, analyzer_name)
                 Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp(*args)
                 self.from_list[Analyzer.__analyzer_array[analyzer_name]
-                               ] = callback_list
+                ] = callback_list
                 if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                     Analyzer.__analyzer_array[analyzer_name].to_list.append(
                         self)
@@ -162,7 +165,7 @@ class Analyzer(Element):
                     Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp(
                         *args)
                     self.from_list[Analyzer.__analyzer_array[analyzer_name]
-                                   ] = callback_list
+                    ] = callback_list
                     if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                         Analyzer.__analyzer_array[analyzer_name].to_list.append(
                             self)

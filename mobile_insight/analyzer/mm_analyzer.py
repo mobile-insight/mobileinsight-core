@@ -8,10 +8,7 @@ Author: Jiayao Li
 
 from .analyzer import *
 
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
 import datetime
 import re
 

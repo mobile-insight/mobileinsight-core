@@ -6,6 +6,7 @@ It defines send/receive abstractions of cellular messages,
 logging functions and interface to other applications (MI-APP, mobile-version only)
 
 Author: Yuanjie Li
+Update: Yunqi Guo, 2020/06
 """
 
 __all__ = ["Event", "Element"]
@@ -21,9 +22,8 @@ try:
 except Exception as e:
     is_android = False
 
-import logging
-import time
 import datetime as dt
+import logging
 
 
 class MyFormatter(logging.Formatter):

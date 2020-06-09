@@ -6,10 +6,7 @@ A simple analyzer that displays retrives a list of events from log file
 """
 from .analyzer import *
 
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
 import io
 import datetime
 from mobile_insight.monitor import OfflineReplayer
