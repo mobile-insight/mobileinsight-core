@@ -118,7 +118,7 @@ else:
 
 setup(
     name='MobileInsight',
-    version='4.0.0',
+    version='5.0.0',
     description='Mobile network monitoring and analysis',
     author='UCLA Wireless Networking Group and Purdue Peng Group',
     author_email='support@mobileinsight.net',

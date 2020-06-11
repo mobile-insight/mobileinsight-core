@@ -58,7 +58,8 @@ We love pull requests and discussing novel ideas. You can open issues here to re
 
 The following Slack group is used exclusively for discussions about developing the MobileInsight and its sister projects:
 
-+ Dev Slack Group: https://mobileinsight-dev.slack.com (join via this [link](https://goo.gl/htJGqT))
 + Email: support@mobileinsight.net
++ Dev Slack Group: https://mobileinsight-dev.slack.com (join via this [link](https://goo.gl/htJGqT))
+
 
 For other advanced topics, please refer to the wiki and the [MobileInsight website](http://mobileinsight.net).
