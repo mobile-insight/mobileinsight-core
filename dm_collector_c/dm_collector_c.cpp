@@ -622,7 +622,7 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
         PyObject *arg_include_timestamp = NULL;
         if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
                               &arg_skip_decoding, &arg_include_timestamp))
-            return NULL;
+            Py_RETURN_NONE;
         if (arg_skip_decoding != NULL) {
             Py_INCREF(arg_skip_decoding);
             skip_decoding = (PyObject_IsTrue(arg_skip_decoding) == 1);
@@ -645,7 +645,7 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
                                                   skip_decoding);
             if (include_timestamp) {
                 PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
-                Py_DECREF(decoded);
+                Py_XDECREF(decoded);
                 return ret;
             } else {
                 return decoded;
@@ -699,7 +699,6 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
         } else {
             Py_RETURN_NONE;
         }
-
     } else {
         Py_RETURN_NONE;
     }

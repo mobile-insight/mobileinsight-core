@@ -8,10 +8,7 @@ import struct
 import sys
 import subprocess
 import re
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 from mobile_insight.monitor.dm_collector.dm_endec.ws_dissector import *
 
@@ -151,7 +148,7 @@ def feed_binary(buff):
     # parse file into sections devided by '\0x8f\0x9a\0x9a\0x8d\0x04\0x00'
     header = '\xac\xca\x00\xff'
     header_magic = '\x8f\x9a\x9a\x8d\x04\x00'
-    
+
     mtk_log_str = ''.join([chr(struct.unpack('B',x)[0]) for x in buff])
     mtk_log_str = re.sub('\xac\xca\x00\xff..','',mtk_log_str)
     new_log_len = len(mtk_log_str)
@@ -167,7 +164,7 @@ def feed_binary(buff):
         if msg_id in type_id_mapping:
             # calculate the length of raw_data
             decimal_high    = ord(mtk_log_str[10+loc])
-            decimal_low     = ord(mtk_log_str[11+loc]) 
+            decimal_low     = ord(mtk_log_str[11+loc])
             length          = decimal_low * 256 + decimal_high
 
 
@@ -188,7 +185,7 @@ def feed_binary(buff):
     #     byte = buff[cur_index]
     #     # byte_value couldn't be print out
     #     byte_value = struct.unpack('B', byte)[0]
-        
+
     #     mtk_log_parser_buff += chr(byte_value)
     #     # print chr(byte_value),
     #     if len(mtk_log_parser_buff) > 6:
@@ -258,14 +255,14 @@ def seek_pstrace_magic(bytes):
     if msg_id in type_id_mapping:
         # calculate the length of raw_data
         decimal_high    = ord(bytes[4])
-        decimal_low     = ord(bytes[5]) 
+        decimal_low     = ord(bytes[5])
         length          = decimal_low * 256 + decimal_high
-        
+
         if length > 0 and length < len(bytes):
             raw_bytes = bytes[6:6 + length]
             # raw_data = map(lambda x: x if (x != '0x0') else '0x00', raw_bytes)
             raw_data = [x if (x != '\x00') else '\x00' for x in raw_bytes]
-            
+
             raw_msg = ['\x00'] * 3 + [msg_id] + ['\x00'] * 2 + [bytes[5]] + [bytes[4]] + raw_data
             pstrace.append(raw_msg)
             # return pstrace

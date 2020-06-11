@@ -5,17 +5,18 @@ An offline log replayer
 
 Author: Jiayao Li,
         Yuanjie Li
+Update: Yunqi Guo, 2020/06, for MI5
 """
 
 __all__ = ["OfflineReplayer"]
 
-import sys
 import os
-import timeit
+import sys
 import time
+import timeit
 
-from .monitor import Monitor, Event
 from .dm_collector import dm_collector_c, DMLogPacket, FormatError
+from .monitor import Monitor, Event
 
 
 class OfflineReplayer(Monitor):
@@ -205,7 +206,7 @@ class OfflineReplayer(Monitor):
                                 self.send(event)
                             after_sending_time = time.time()
                             sending_inter += after_sending_time - after_decode_time
-                            # pself.log_info('After sending event: ' + str(time.time()))
+                            # self.log_info('After sending event: ' + str(time.time()))
 
                         except FormatError as e:
                             # skip this packet

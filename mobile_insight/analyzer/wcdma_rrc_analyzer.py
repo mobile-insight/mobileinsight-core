@@ -6,10 +6,7 @@ A WCDMA (3G) RRC analyzer.
 Author: Yuanjie Li, Zhehui Zhang
 """
 
-try: 
-    import xml.etree.cElementTree as ET 
-except ImportError: 
-    import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
 from .analyzer import *
 from .state_machine import *
 from .protocol_analyzer import *

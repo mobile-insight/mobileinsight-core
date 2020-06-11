@@ -8,10 +8,7 @@ Author: Yuanjie Li
 Author: Zengwen Yuan
 """
 
-try: 
-    import xml.etree.cElementTree as ET 
-except ImportError: 
-    import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
 from .analyzer import *
 from .state_machine import *
 import timeit

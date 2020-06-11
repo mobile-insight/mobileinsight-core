@@ -21,7 +21,9 @@ Author: Yuanjie Li
 """
 
 from ..element import Element, Event
-#from profile import *
+
+
+# from profile import *
 
 
 class Analyzer(Element):
@@ -30,6 +32,7 @@ class Analyzer(Element):
 
     # Guanratee global uniqueness of analyzer
     __analyzer_array = {}  # Analyzer name --> object address
+
     # logger=None
 
     def __init__(self):
@@ -135,7 +138,7 @@ class Analyzer(Element):
         if analyzer_name in Analyzer.__analyzer_array:
             # Analyzer has been declared. Reuse it directly
             self.from_list[Analyzer.__analyzer_array[analyzer_name]
-                           ] = callback_list
+            ] = callback_list
             if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                 Analyzer.__analyzer_array[analyzer_name].to_list.append(self)
             self.__parent_analyzer.append(analyzer_name)
@@ -147,7 +150,7 @@ class Analyzer(Element):
                 analyzer_tmp = getattr(module_tmp.analyzer, analyzer_name)
                 Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp(*args)
                 self.from_list[Analyzer.__analyzer_array[analyzer_name]
-                               ] = callback_list
+                ] = callback_list
                 if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                     Analyzer.__analyzer_array[analyzer_name].to_list.append(
                         self)
@@ -162,7 +165,7 @@ class Analyzer(Element):
                     Analyzer.__analyzer_array[analyzer_name] = analyzer_tmp(
                         *args)
                     self.from_list[Analyzer.__analyzer_array[analyzer_name]
-                                   ] = callback_list
+                    ] = callback_list
                     if self not in Analyzer.__analyzer_array[analyzer_name].to_list:
                         Analyzer.__analyzer_array[analyzer_name].to_list.append(
                             self)
@@ -224,13 +227,14 @@ class Analyzer(Element):
 
         if not event.data:
             return
-        def G(f): return f(event)
 
         if module == self.source:
             # Apply the event to all source callbacks
-            list(map(G, self.source_callback))
+            for i in range(len(self.source_callback)):
+                self.source_callback[i](event)
         else:
-            list(map(G, self.from_list[module]))
+            for i in range(len(self.from_list[module])):
+                self.from_list[module][i](event)
 
     def register_coordinator_cb(self, plugin_cb):
         self.coordinator_callbacks.append(plugin_cb)
@@ -238,5 +242,5 @@ class Analyzer(Element):
     def send_to_coordinator(self, event):
         if not event.data:
             return
-        def G(f): return f(str(event))
-        list(map(G, self.coordinator_callbacks))
+        for i in range(len(self.coordinator_callbacks)):
+            self.coordinator_callbacks[i](str(event))
