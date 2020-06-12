@@ -20,7 +20,7 @@ Author: Yuanjie Li
 
 """
 
-from ..element import Element
+from ..element import Element, Event
 
 
 # from profile import *
