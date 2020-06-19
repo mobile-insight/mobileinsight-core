@@ -306,9 +306,9 @@ class KpiAnalyzer(Analyzer):
 
             if req_num and suc_num and int(req_num) > 0:
                 if 'HO' in kpi_name:
-                    return '{:.2f}'.format(float(req_num - suc_num)/req_num*100)+'%'
+                    return '{:.2f}'.format(float(req_num - suc_num)/int(req_num)*100)+'%'
                 else:
-                    return '{:.2f}'.format(float(suc_num)/req_num*100)+'%'
+                    return '{:.2f}'.format(float(suc_num)/int(req_num)*100)+'%'
 
             return None 
 
