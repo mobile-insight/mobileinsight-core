@@ -1,7 +1,7 @@
 # Usage: python kpi=manager-test.py [dirname]
-# Example1: python kpi-manager-test-experimental.py logs/bler_sample.qmdl 
+# Example1: python kpi-manager-test-experimental.py logs/bler_sample.mi2log 
 # (For testing KPI BLER)
-# Example2: python kpi-manager-test-experimental.py logs/data_sample.qmdl 
+# Example2: python kpi-manager-test-experimental.py logs/data_sample.mi2log 
 # (For testing KPI DL_PDCP_LOSS, HANDOVER_PREDICTION, HANDOVER_LATENCY, HANDOVER_HOL)
 # import os
 import sys

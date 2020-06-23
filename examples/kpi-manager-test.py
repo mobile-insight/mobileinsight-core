@@ -1,11 +1,11 @@
 # Usage: python kpi=manager-test.py [dirname]
-# Example1: python kpi-manager-test.py logs/volte_sample.qmdl 
+# Example1: python kpi-manager-test.py logs/volte_sample.mi2log 
 # (For testing KPI DEDICATED_BEARER_SR_QCI1)
-# Example2: python kpi-manager-test.py logs/mobility_sample.qmdl 
+# Example2: python kpi-manager-test.py logs/mobility_sample.mi2log 
 # (For testing KPI RRC, SR, TAU, HO)
-# Example3: python kpi-manager-test.py logs/attach_sample.qmdl 
+# Example3: python kpi-manager-test.py logs/attach_sample.mi2log 
 # (For testing KPI ATTACH)
-# Example4: python kpi-manager-test.py logs/data_sample.qmdl 
+# Example4: python kpi-manager-test.py logs/data_sample.mi2log 
 # (For testing KPI DL_TPUT)
 # import os
 import sys
