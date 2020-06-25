@@ -116,7 +116,7 @@ class ServiceReqSrAnalyzer(KpiAnalyzer):
                 upload_dict = {
                     'total_number': self.kpi_measurements['total_number']['TOTAL'],
                     'success_number': self.kpi_measurements['success_number']['TOTAL']}
-                self.upload_kpi('KPI.Accessibility.SR_SR', upload_dict)
+                # self.upload_kpi('KPI.Accessibility.SR_SR', upload_dict)
                 # self.log_info("SR_SR: " + str(self.kpi_measurements))
                 self.store_kpi("KPI_Accessibility_SR_SUC", self.kpi_measurements['success_number'], log_item_dict['timestamp'])
                                # '{:.2f}'.format(self.current_kpi['TOTAL']), msg.timestamp)
@@ -144,7 +144,7 @@ class ServiceReqSrAnalyzer(KpiAnalyzer):
                                             upload_dict = {
                                                 'total_number': self.kpi_measurements['total_number']['TOTAL'],
                                                 'reject_number': self.kpi_measurements['reject_number']}
-                                            self.upload_kpi('KPI.Retainability.SR_REJ', upload_dict)
+                                            # self.upload_kpi('KPI.Retainability.SR_REJ', upload_dict)
                                             # self.log_info("SR_REJ: " + str(self.kpi_measurements))
                                         else:
                                             self.log_warning("Unknown EMM cause for SR reject: " + cause_idx)
