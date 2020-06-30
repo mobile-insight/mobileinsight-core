@@ -14,10 +14,10 @@ import os
 import timeit
 import datetime
 
-from monitor import Monitor, Event
-from dm_collector import dm_collector_c, DMLogPacket, FormatError
+from .monitor import Monitor, Event
+from .dm_collector import dm_collector_c, DMLogPacket, FormatError
 # from monitor.dm_collector.dm_endec.ws_dissector import *
-import mtk_log_parser
+from . import mtk_log_parser
 
 
 msg_type = ["UMTS_NAS_OTA_Packet", "LTE_NAS_ESM_OTA_Incoming_Packet", "WCDMA_RRC_OTA_Packet", "LTE_RRC_OTA_Packet"]
@@ -77,7 +77,7 @@ class MtkOfflineReplayer(Monitor):
         else:
             prefs = {}
 
-        print prefs
+        print(prefs)
 
         DMLogPacket.init(prefs)
 
@@ -85,7 +85,7 @@ class MtkOfflineReplayer(Monitor):
 
     def __del__(self):
         if self.is_android and self.service_context:
-            print "detaching..."
+            print("detaching...")
             from service import mi2app_utils
             mi2app_utils.detach_thread()
 
@@ -223,7 +223,7 @@ class MtkOfflineReplayer(Monitor):
                     if file.endswith(".muxraw"):
                         log_list.append(os.path.join(self._input_path, file))
             else:
-            	self.log_debug("No files???")
+                self.log_debug("No files???")
                 return
 
             log_list.sort()  # Hidden assumption: logs follow the diag_log_TIMSTAMP_XXX format
@@ -272,10 +272,10 @@ class MtkOfflineReplayer(Monitor):
                     ##############################################
 
                         except FormatError as e:
-                            print "FormatError: ", e  # skip this packet
+                            print(("FormatError: ", e))  # skip this packet
                 self._input_file.close()
 
 
         except Exception as e:
             import traceback
-            print str(traceback.format_exc())
+            print((str(traceback.format_exc())))

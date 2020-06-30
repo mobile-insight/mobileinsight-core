@@ -8,27 +8,23 @@ Author: Jiayao Li, Yuanjie Li
 
 __all__ = ["AndroidDevDiagMonitor"]
 
-
-import binascii
 import errno
 import os
 import stat
-import re
-import subprocess
-import threading
 import struct
-import stat
+import subprocess
 import sys
-import timeit
+import threading
 import time
+import timeit
 
-
-from monitor import Monitor, Event
-from dm_collector import dm_collector_c, DMLogPacket, FormatError
+from .dm_collector import dm_collector_c, DMLogPacket, FormatError
+from .monitor import Monitor, Event
 
 is_android = False
 try:
-    from jnius import autoclass  # For Android
+    from jnius import autoclass, cast  # For Android
+
     try:
         service_context = autoclass('org.kivy.android.PythonService').mService
         if not service_context:
@@ -77,7 +73,7 @@ class ChronicleProcessor(object):
         cls = self.__class__
         self.state = cls.READ_TYPE
         self.msg_type = None
-        self.bytes = ["", "", "", "", ""]
+        self.bytes = [b"", b"", b"", b"", b""]
         # short, short, double, varstring, varstring
         self.to_read = [2, 2, 8, None, None]
 
@@ -92,7 +88,7 @@ class ChronicleProcessor(object):
             if len(b) <= self.to_read[self.state]:
                 self.bytes[self.state] += b
                 self.to_read[self.state] -= len(b)
-                b = ""
+                b = b""
             else:
                 idx = self.to_read[self.state]
                 self.bytes[self.state] += b[0:idx]
@@ -100,13 +96,13 @@ class ChronicleProcessor(object):
                 b = b[idx:]
             # Process input data
             if self.state == cls.READ_TYPE:
-                if self.to_read[self.state] == 0:   # current field is complete
+                if self.to_read[self.state] == 0:  # current field is complete
                     self.msg_type = struct.unpack(
                         "<h", self.bytes[self.state])[0]
                     ret_msg_type = self.msg_type
                     self.state = cls.READ_MSG_LEN
             elif self.state == cls.READ_MSG_LEN:
-                if self.to_read[self.state] == 0:   # current field is complete
+                if self.to_read[self.state] == 0:  # current field is complete
                     msg_len = struct.unpack("<h", self.bytes[self.state])[0]
                     if self.msg_type == cls.TYPE_LOG:
                         self.to_read[cls.READ_PAYLOAD] = msg_len - 8
@@ -116,32 +112,34 @@ class ChronicleProcessor(object):
                         self.state = cls.READ_FILENAME
                     else:
                         # raise RuntimeError("Unknown msg type %s" % str(self.msg_type))
-                        print "Unknown msg type %s" % str(self.msg_type)
+                        print(("Unknown msg type %s" % str(self.msg_type)))
             elif self.state == cls.READ_TS:
-                if self.to_read[self.state] == 0:   # current field is complete
+                if self.to_read[self.state] == 0:  # current field is complete
                     ret_ts = struct.unpack("<d", self.bytes[self.state])[0]
                     self.state = cls.READ_PAYLOAD
             elif self.state == cls.READ_PAYLOAD:
                 if len(self.bytes[self.state]
                        ) > 0:  # don't need to wait for complete field
                     ret_payload = self.bytes[self.state]
-                    self.bytes[self.state] = ""
-                if self.to_read[self.state] == 0:   # current field is complete
+                    self.bytes[self.state] = b""
+                if self.to_read[self.state] == 0:  # current field is complete
                     self._init_state()
                     break
-            else:   # READ_FILENAME
-                if self.to_read[self.state] == 0:   # current field is complete
+            else:  # READ_FILENAME
+                if self.to_read[self.state] == 0:  # current field is complete
                     ret_filename = self.bytes[self.state]
                     self._init_state()
                     break
         remain = b
         return ret_msg_type, ret_ts, ret_payload, ret_filename, remain
 
+
 class DiagRevealerDaemon(threading.Thread):
     """
     A daemon to monitor the liveness of diag_revealer,
     and restart if diag_revealer crashes
     """
+
     def __init__(self, monitor):
         self.running = False
         self.monitor = monitor
@@ -157,7 +155,7 @@ class DiagRevealerDaemon(threading.Thread):
         while True:
             time.sleep(5)
             if not self.running:
-                break;
+                break
             res = self.monitor._run_shell_cmd(cmd)
             # proc = subprocess.Popen(cmd, executable=ANDROID_SHELL, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             # if not proc.stdout.read():
@@ -174,6 +172,7 @@ class DiagRevealerDaemon(threading.Thread):
 
     def isStopped(self):
         return self.stopped
+
 
 class AndroidDevDiagMonitor(Monitor):
     """
@@ -220,7 +219,7 @@ class AndroidDevDiagMonitor(Monitor):
                 "android_pie_ws_dissector"),
             "libwireshark_path": libs_path}
 
-        DMLogPacket.init(prefs)     # Initialize Wireshark dissector
+        DMLogPacket.init(prefs)  # Initialize Wireshark dissector
 
     def available_log_types(self):
         """
@@ -231,21 +230,25 @@ class AndroidDevDiagMonitor(Monitor):
         return self.__class__.SUPPORTED_TYPES
 
     def _run_shell_cmd(self, cmd, wait=False):
+        if isinstance(cmd, str):
+            cmd = cmd.encode()
         p = subprocess.Popen(
             "su",
             executable=ANDROID_SHELL,
             shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE)
-        res, err = p.communicate(cmd + '\n')
+        res, err = p.communicate(cmd + b'\n')
+        # print("Running CMD: ", cmd)
+        # print("RES:", res)
         # p.stdin.write(cmd+'\n')
         if wait:
             p.wait()
             # return p.returncode
-            return res
+            return res.decode()
         else:
             # return None
-            return res
+            return res.decode()
 
     def set_log_directory(self, directory):
         """
@@ -274,6 +277,7 @@ class AndroidDevDiagMonitor(Monitor):
         cls = self.__class__
         if isinstance(type_name, str):
             type_name = [type_name]
+
         for n in type_name:
             if n not in cls.SUPPORTED_TYPES:
                 self.log_warning("Unsupported log message type: %s" % n)
@@ -287,7 +291,7 @@ class AndroidDevDiagMonitor(Monitor):
         Enable all supported logs
         """
         cls = self.__class__
-        self.enable_log(cls.SUPPORTED_TYPES)
+        self.enable_log(list(cls.SUPPORTED_TYPES))
 
     def save_log_as(self, path):
         """
@@ -295,8 +299,6 @@ class AndroidDevDiagMonitor(Monitor):
 
         :param path: the file name to be saved
         :type path: string
-        :param log_types: a filter of message types to be saved
-        :type log_types: list of string
         """
         dm_collector_c.set_filtered_export(path, self._type_names)
 
@@ -310,7 +312,7 @@ class AndroidDevDiagMonitor(Monitor):
                 os.remove(fifo_path)
             os.mknod(fifo_path, 0o666 | stat.S_IFIFO)
         except OSError as err:
-            if err.errno == errno.EEXIST:   # if already exists, skip this step
+            if err.errno == errno.EEXIST:  # if already exists, skip this step
                 pass
                 # print "Fifo file already exists, skipping..."
             elif err.errno == errno.EPERM:  # not permitted, try shell command
@@ -319,7 +321,7 @@ class AndroidDevDiagMonitor(Monitor):
                 retcode = self._run_shell_cmd(
                     "mknod %s p" %
                     fifo_path, wait=True)
-                if retcode != 0:
+                if retcode is not None:
                     raise RuntimeError("mknod returns %s" % str(retcode))
             else:
                 raise err
@@ -334,7 +336,7 @@ class AndroidDevDiagMonitor(Monitor):
         """
         Initialize diag_revealer with correct parameters
         """
-        # TODO(likayo): need to protect aganist user input
+        # TODO(likayo): need to protect against user input
         cmd = "%s %s %s" % (self._executable_path, os.path.join(
             self.DIAG_CFG_DIR, "Diag.cfg"), self._fifo_path)
         cmd += " %s %.6f" % (self._input_dir, self._log_cut_size)
@@ -348,14 +350,15 @@ class AndroidDevDiagMonitor(Monitor):
         self._run_shell_cmd("chmod -R 777 \"%s\"" % self._input_dir, wait=True)
         # os.mkdir(self._input_dir)
         # os.chmod(self._input_dir,777)
-
-        proc = subprocess.Popen(
-            "su",
+        print("Start diag revealer and running cmd", cmd)
+        # YQ: Update for python3: popen.stdin.write does not work
+        # Replaced with Popen("su -c " + command)
+        subprocess.Popen(
+            "su -c " + cmd,
             executable=ANDROID_SHELL,
             shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE)
-        proc.stdin.write(cmd + '\n')
 
     def _protect_diag_revealer(self):
         """
@@ -391,12 +394,12 @@ class AndroidDevDiagMonitor(Monitor):
                         pid,
                         "cmdline"),
                     "rb").read()
-                if cmdline.startswith("/system/bin/diag_revealer"):
+                if cmdline.startswith(b"/system/bin/diag_revealer"):
                     diag_procs.append(int(pid))
-            except IOError:     # proc has been terminated
+            except IOError:  # proc has been terminated
                 continue
 
-        print "killing diag_revealer"
+        print("killing diag_revealer")
 
         if len(diag_procs) > 0:
             cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
@@ -407,7 +410,7 @@ class AndroidDevDiagMonitor(Monitor):
             self.diag_revealer_daemon.stop()
             while not self.diag_revealer_daemon.isStopped():
                 pass
-        res = self._run_shell_cmd("ps").split('\n')
+        res = self._run_shell_cmd("ps").decode().split('\n')
         for item in res:
             if item.find('diag_revealer') != -1:
                 pid = item.split()[1]
@@ -429,7 +432,7 @@ class AndroidDevDiagMonitor(Monitor):
         # Stop running loggers
         # self._stop_collection()
 
-        self.broadcast_info('STARTED',{})
+        self.broadcast_info('STARTED', {})
 
         generate_diag_cfg = True
         fifo = None
@@ -455,7 +458,7 @@ class AndroidDevDiagMonitor(Monitor):
 
             # Launch diag_revealer, and protection daemon
             self._start_diag_revealer()
-            self.diag_revealer_daemon = DiagRevealerDaemon(monitor = self)
+            self.diag_revealer_daemon = DiagRevealerDaemon(monitor=self)
             self.diag_revealer_daemon.start()
 
             # fifo = os.open(self._fifo_path, os.O_RDONLY | os.O_NONBLOCK)
@@ -472,12 +475,12 @@ class AndroidDevDiagMonitor(Monitor):
                     # self.log_info("After os.read(fifo, self.BLOCK_SIZE)")
                 except OSError as err:
                     if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
-                        self.log_error("err.errno="+str(err.errno))
+                        self.log_error("err.errno=" + str(err.errno))
                         s = None
                     else:
                         raise err  # something else has happened -- better reraise
 
-                while s:   # preprocess metadata
+                while s:  # preprocess metadata
                     # self.log_info("Before chproc.process: %s" % s)
                     ret_msg_type, ret_ts, ret_payload, ret_filename, remain = chproc.process(
                         s)
@@ -509,9 +512,9 @@ class AndroidDevDiagMonitor(Monitor):
                     s = remain
 
                 result = dm_collector_c.receive_log_packet(self._skip_decoding,
-                                                           True,   # include_timestamp
+                                                           True,  # include_timestamp
                                                            )
-                if result:     # result = (decoded, posix_timestamp)
+                if result:  # result = (decoded, posix_timestamp)
                     try:
                         packet = DMLogPacket(result[0])
                         type_id = packet.get_type_id()
@@ -522,7 +525,7 @@ class AndroidDevDiagMonitor(Monitor):
                         del result, packet, event
                     except FormatError as e:
                         # skip this packet
-                        print "FormatError: ", e
+                        print(("FormatError: ", e))
 
         except (KeyboardInterrupt, RuntimeError) as e:
             import traceback

@@ -14,7 +14,7 @@ import binascii
 
 try:
     from utils import *
-except ImportError, e:
+except ImportError as e:
     # TODO: WTF can I do to remove this dependence ..?
     def static_var(varname, value):
         def decorate(func):
@@ -81,5 +81,5 @@ if __name__ == '__main__':
     for payld, frame in tests:
         payld = binascii.a2b_hex(payld)
         frame = binascii.a2b_hex(frame)
-        print "Correct answer: " + binascii.b2a_hex(frame)
-        print "Construct: " + binascii.b2a_hex(HdlcFrame(payld).binary())
+        print(("Correct answer: " + binascii.b2a_hex(frame)))
+        print(("Construct: " + binascii.b2a_hex(HdlcFrame(payld).binary())))

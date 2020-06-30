@@ -8,18 +8,15 @@ Author: Yuanjie Li
         Zengwen Yuan
 """
 
-try: 
-    import xml.etree.cElementTree as ET 
-except ImportError: 
-    import xml.etree.ElementTree as ET
-from analyzer import *
-from state_machine import *
+import xml.etree.ElementTree as ET
+from .analyzer import *
+from .state_machine import *
 import timeit
 
-from protocol_analyzer import *
-from profile import Profile, ProfileHierarchy
+from .protocol_analyzer import *
+from .profile import Profile, ProfileHierarchy
 
-from nas_util import *
+from .nas_util import *
 
 __all__=["LteNasAnalyzer"]
 
@@ -450,57 +447,57 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                     field_val[val.get('name')]=val.get('show')
 
                 self.__esm_status[self.__cur_eps_id].eps_id = int(self.__cur_eps_id)
-                if field_val.has_key('gsm_a.gm.sm.qos.delay_cls'):
+                if 'gsm_a.gm.sm.qos.delay_cls' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.delay_class=int(field_val['gsm_a.gm.sm.qos.delay_cls'])
 
-                if field_val.has_key('gsm_a.gm.sm.qos.reliability_cls'):
+                if 'gsm_a.gm.sm.qos.reliability_cls' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.reliability_class=int(field_val['gsm_a.gm.sm.qos.reliability_cls'])
 
-                if field_val.has_key('gsm_a.gm.sm.qos.prec_class'):
+                if 'gsm_a.gm.sm.qos.prec_class' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.precedence_class=int(field_val['gsm_a.gm.sm.qos.prec_class'])
 
-                if field_val.has_key('gsm_a.gm.sm.qos.peak_throughput'):
+                if 'gsm_a.gm.sm.qos.peak_throughput' in field_val:
                     #10.5.6.5, TS24.008
                     self.__esm_status[self.__cur_eps_id].qos.peak_tput=1000*pow(2,int(field_val['gsm_a.gm.sm.qos.peak_throughput'])-1)
 
-                if field_val.has_key('gsm_a.gm.sm.qos.mean_throughput'):
+                if 'gsm_a.gm.sm.qos.mean_throughput' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.mean_tput=mean_tput[int(field_val['gsm_a.gm.sm.qos.mean_throughput'])]
 
-                if field_val.has_key('gsm_a.gm.sm.qos.traffic_cls'):
+                if 'gsm_a.gm.sm.qos.traffic_cls' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.traffic_class=int(field_val['gsm_a.gm.sm.qos.traffic_cls'])
 
-                if field_val.has_key('gsm_a.gm.sm.qos.del_order'):
+                if 'gsm_a.gm.sm.qos.del_order' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.delivery_order=int(field_val['gsm_a.gm.sm.qos.del_order'])
 
-                if field_val.has_key('gsm_a.gm.sm.qos.traff_hdl_pri'):
+                if 'gsm_a.gm.sm.qos.traff_hdl_pri' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.traffic_handling_priority=int(field_val['gsm_a.gm.sm.qos.traff_hdl_pri'])
 
-                if field_val.has_key('gsm_a.gm.sm.qos.ber'):
+                if 'gsm_a.gm.sm.qos.ber' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.residual_ber=residual_ber[int(field_val['gsm_a.gm.sm.qos.ber'])]
 
-                if field_val.has_key('gsm_a.gm.sm.qos.trans_delay'):
+                if 'gsm_a.gm.sm.qos.trans_delay' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.transfer_delay=trans_delay(int(field_val['gsm_a.gm.sm.qos.trans_delay']))
 
-                if field_val.has_key('gsm_a.gm.sm.qos.max_bitrate_upl'):
+                if 'gsm_a.gm.sm.qos.max_bitrate_upl' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl']))
 
-                if field_val.has_key('gsm_a.gm.sm.qos.max_bitrate_downl'):
+                if 'gsm_a.gm.sm.qos.max_bitrate_downl' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl']))
 
-                if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_upl'):
+                if 'gsm_a.gm.sm.qos.guar_bitrate_upl' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl']))
 
-                if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_downl'):
+                if 'gsm_a.gm.sm.qos.guar_bitrate_downl' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink=max_bitrate(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl']))
 
-                if field_val.has_key('gsm_a.gm.sm.qos.max_bitrate_upl_ext'):
+                if 'gsm_a.gm.sm.qos.max_bitrate_upl_ext' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.max_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_upl_ext']))
 
-                if field_val.has_key('gsm_a.gm.sm.qos.max_bitrate_downl_ext'):
+                if 'gsm_a.gm.sm.qos.max_bitrate_downl_ext' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.max_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.max_bitrate_downl_ext']))
-                if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_upl_ext'):
+                if 'gsm_a.gm.sm.qos.guar_bitrate_upl_ext' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_upl_ext']))
-                if field_val.has_key('gsm_a.gm.sm.qos.guar_bitrate_downl_ext'):
+                if 'gsm_a.gm.sm.qos.guar_bitrate_downl_ext' in field_val:
                     self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext=max_bitrate_ext(int(field_val['gsm_a.gm.sm.qos.guar_bitrate_downl_ext']))
 
                 self.log_info("EPS_Id="+str(self.__cur_eps_id)+self.__esm_status[self.__cur_eps_id].dump())
@@ -527,7 +524,7 @@ class LteNasAnalyzer(ProtocolAnalyzer):
                     'guaranteed_bitrate_ulink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_ulink_ext),
                     'guaranteed_bitrate_dlink_ext':xstr(self.__esm_status[self.__cur_eps_id].qos.guaranteed_bitrate_dlink_ext),
                     })
-        if self.__esm_status.has_key(self.__cur_eps_id):
+        if self.__cur_eps_id in self.__esm_status:
             self.log_info(str(self.__esm_status[self.__cur_eps_id].qos.dump_rate()))
             self.log_info(str(self.__esm_status[self.__cur_eps_id].qos.dump_delivery()))
             self.broadcast_info('QOS_DELIVERY', self.__esm_status[self.__cur_eps_id].qos.dump_delivery_dict())

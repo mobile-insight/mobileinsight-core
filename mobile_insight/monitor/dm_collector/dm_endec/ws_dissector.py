@@ -120,10 +120,10 @@ class WSDissector:
         """
         assert cls._init_proc_called
         if msg_type not in cls.SUPPORTED_TYPES:
-            print "MI(Unknown) Unsupported message for ws_dissector:", msg_type
+            print(("MI(Unknown) Unsupported message for ws_dissector:", msg_type))
             return None
         if len(b) > 500:
-            print "MI(Ignore) Length of message is too large for ws_dissector:", len(b), "bytes"
+            print(("MI(Ignore) Length of message is too large for ws_dissector:", len(b), "bytes"))
             return None
 
         input_data = struct.pack(
@@ -137,7 +137,7 @@ class WSDissector:
         cls._proc.stdin.flush()
         result = []
         while True:
-            line = cls._proc.stdout.readline()
+            line = cls._proc.stdout.readline().decode("utf-8")
             if line.startswith("===___==="):
                 break
             result.append(line)
@@ -162,4 +162,4 @@ if __name__ == "__main__":
     WSDissector.init_proc(executable_path, "/usr/local/lib")
 
     for typ, b in tests:
-        print WSDissector.decode_msg(typ, binascii.a2b_hex(b))
+        print((WSDissector.decode_msg(typ, binascii.a2b_hex(b))))

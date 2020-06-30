@@ -3,6 +3,8 @@
 # It installs package under /usr/local folder
 # Author  : Zengwen Yuan
 # Date    : 2018-04-12
+# Modified: Yunqi Guo
+# Date    : 2019-11-02
 # Version : 3.1
 
 # set -e
@@ -27,8 +29,8 @@ PREFIX=/usr/local
 MOBILEINSIGHT_PATH=$(pwd)
 WIRESHARK_SRC_PATH=${MOBILEINSIGHT_PATH}/wireshark-${ws_ver}
 
-PYTHON=python2
-PIP=pip2
+PYTHON=python3
+PIP=pip3
 
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
@@ -69,11 +71,11 @@ else
     echo "All clear."
 fi
 
-echo -e "${GREEN}[INFO]${NC} Checking Python 2.7 environment..."
+echo -e "${GREEN}[INFO]${NC} Checking Python 3 environment..."
 if [[ $(brew ls --versions ${PYTHON}) ]] ; then
-    echo "Python 2.7 is installed by Homebrew and ready."
+    echo "Python 3 is installed by Homebrew and ready."
 else
-    echo -e "${YELLOW}[WARNING]${NC} It appears that you do not have a Python 2.7 version installed via Homebrew."
+    echo -e "${YELLOW}[WARNING]${NC} It appears that you do not have a Python 3 version installed via Homebrew."
     echo "Installing formulae python@2 via Homebrew."
     brew install python@2
 fi
@@ -190,12 +192,17 @@ else
     exit 4
 fi
 
-echo -e "${GREEN}[INFO]${NC} Testing MobileInsight GUI (you need to be in a graphic session)..."
-mi-gui
-if [[ $? == 0 ]] ; then
-    echo "Successfully ran MobileInsight GUI!"
-    echo "The installation of mobileinsight-core is finished!"
+if [ x$DISPLAY != x ] ; then
+    echo -e "${GREEN}[INFO]${NC} Testing MobileInsight GUI (you need to be in a graphic session)..."
+    mi-gui
+    if [[ $? == 0 ]] ; then
+        echo "Successfully ran MobileInsight GUI!"
+        echo "The installation of mobileinsight-core is finished!"
+    else
+        echo "There are issues running MobileInsight GUI, you need to fix them manually"
+    fi
 else
-    echo "There are issues running MobileInsight GUI, you need to fix them manually"
-    echo "The installation of mobileinsight-core is finished!"
+  echo "GUI Disabled"
 fi
+
+echo "The installation of mobileinsight-core is finished!"

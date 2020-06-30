@@ -12,11 +12,7 @@ import binascii
 from datetime import *
 import json
 import struct
-#import xml.etree.ElementTree as ET
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 try:
     from utils import *
@@ -28,12 +24,12 @@ except ImportError as e:
             return func
         return decorate
 
-from ws_dissector import *
+from .ws_dissector import *
 
 import itertools
 
 
-def range(stop): return iter(itertools.count().next, stop)
+def range(stop): return iter(itertools.count().__next__, stop)
 
 
 class SuperEncoder(json.JSONEncoder):
@@ -116,7 +112,7 @@ class DMLogPacket:
                             # xml = ET.fromstring(decoded)
                             xml = ET.XML(decoded)
                         except Exception as e:
-                            print "Unsupported RRC_DL_BCCH_BCH"
+                            print("Unsupported RRC_DL_BCCH_BCH")
                             xx = cls._wrap_decoded_xml(xmls)
                             lst.append(("Unsupported", xx, "msg"))
                             return lst
@@ -143,7 +139,7 @@ class DMLogPacket:
                                     xmls.append(decoded)
                                     # print sib_types[sib_id]
                                 else:
-                                    print "(MI)Unknown RRC SIB Type: %d" % sib_id
+                                    print(("(MI)Unknown RRC SIB Type: %d" % sib_id))
                         else:
                             # deal with a segmented SIB
                             sib_segment = xml.find(
@@ -169,12 +165,12 @@ class DMLogPacket:
             return lst, type_id
 
         except Exception as e:
-            print len(decoded_list)
-            print decoded_list
+            print((len(decoded_list)))
+            print(decoded_list)
             i = 0
             while i < len(decoded_list):
-                print i
-                print decoded_list[i]
+                print(i)
+                print((decoded_list[i]))
                 i += 1
             import traceback
             raise RuntimeError(str(traceback.format_exc()))
@@ -388,7 +384,7 @@ class DMLogPacket:
         xml = cls._parse_internal_list("xml/dict", self._decoded_list)
         # Zengwen: what about this name?
         xml.tag = "dm_log_packet"
-        return ET.tostring(xml)
+        return ET.tostring(xml, encoding='unicode')
 
     def decode_json(self):
         """

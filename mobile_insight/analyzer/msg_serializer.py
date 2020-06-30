@@ -10,7 +10,7 @@ __all__ = ["MsgSerializer"]
 
 import pickle
 
-from analyzer import *
+from .analyzer import *
 
 
 class MsgSerializer(Analyzer):

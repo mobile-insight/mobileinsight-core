@@ -28,8 +28,8 @@ PREFIX=/usr/local
 MOBILEINSIGHT_PATH=$(pwd)
 WIRESHARK_SRC_PATH=${MOBILEINSIGHT_PATH}/wireshark-${ws_ver}
 
-PYTHON=python2
-PIP=pip2
+PYTHON=python3
+PIP=pip3
 
 echo "Installing dependencies for compiling Wireshark libraries"
 sudo apt-get -y install pkg-config wget libglib2.0-dev bison flex libpcap-dev
@@ -147,12 +147,12 @@ else
     exit 4
 fi
 
-echo "Testing MobileInsight GUI (you need to be in a graphic session)..."
-mi-gui
-if [[ $? == 0 ]] ; then
-    echo "Successfully ran MobileInsight GUI!"
-    echo "The installation of mobileinsight-core is finished!"
-else
-    echo "There are issues running MobileInsight GUI, you need to fix them manually"
-    echo "The installation of mobileinsight-core is finished!"
-fi
+# echo "Testing MobileInsight GUI (you need to be in a graphic session)..."
+# mi-gui
+# if [[ $? == 0 ]] ; then
+#     echo "Successfully ran MobileInsight GUI!"
+#     echo "The installation of mobileinsight-core is finished!"
+# else
+#     echo "There are issues running MobileInsight GUI, you need to fix them manually"
+#     echo "The installation of mobileinsight-core is finished!"
+# fi

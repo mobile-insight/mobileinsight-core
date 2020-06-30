@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """
 Python GUI for MobileInsight
@@ -9,7 +9,7 @@ Date : Feb 26, 2016
 import sys
 import wx
 import wx.grid
-import wx.animate
+import wx.adv
 from threading import Thread
 from random import random
 from datetime import datetime, timedelta
@@ -52,15 +52,15 @@ class ProgressDialog(wx.Dialog):
     def __init__(self, parent):
         wx.Dialog.__init__(self, parent, -1, style=wx.NO_BORDER)
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-
-        gif = wx.animate.GIFAnimationCtrl(
-            self, -1, "icons/progress.gif", pos=(0, 0), size=(-1, -1))
-        gif.GetPlayer().UseBackgroundColour(True)
+        anim = wx.adv.Animation("icons/loading.gif")
+        gif = wx.adv.AnimationCtrl(self, -1, anim, size=(-1, -1))
+        # gif = wx.adv.AnimationCtrl(self, pos=(0, 0), size=(-1, -1))
         gif.Play()
 
         mainSizer.Add(gif, wx.EXPAND | wx.ALL)
         self.SetSizer(mainSizer)
         self.Fit()
+
 
 
 class TimeWindowDialog(wx.Dialog):
@@ -235,7 +235,7 @@ class WindowClass(wx.Frame):
         leftbox = wx.BoxSizer(wx.VERTICAL)
         self.status_text = wx.StaticText(
             leftPanel,
-            label="Welcome to MobileInsight!\n\nMobileInsight is a Python (2.7) package for mobile network monitoring and analysis on the end device.",
+            label="Welcome to MobileInsight 5.0!\n\nMobileInsight is a Python 3 package for mobile network monitoring and analysis on the end device.",
             style=wx.ALIGN_LEFT)
         self.details_text = wx.TextCtrl(
             leftPanel, style=wx.ALIGN_LEFT | wx.TE_MULTILINE)
@@ -286,7 +286,7 @@ class WindowClass(wx.Frame):
             wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
         if (openFileDialog.ShowModal() == wx.ID_OK):
             # print 'Selected %s' %openFileDialog.GetPath()
-            print 'Selected %s' % openFileDialog.Paths
+            print(('Selected %s' % openFileDialog.Paths))
             try:
                 self.grid.ClearGrid()
 
@@ -309,7 +309,7 @@ class WindowClass(wx.Frame):
                         openFileDialog.Directory)
 
             except e:
-                print "Error while opening file.", e
+                print(("Error while opening file.", e))
             # if (random() > 0.5):
             #    self.SetupGrid(self.data1)
             # else:

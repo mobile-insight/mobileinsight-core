@@ -7,8 +7,15 @@
 #include "log_packet_helper.h"
 #include <bitset>
 
-#define SSTRHEX( x ) static_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::hex << x ) ).str()
+// #define SSTRHEX( x ) static_cast< std::ostringstream & >( \
+//         ( std::ostringstream() << std::hex << x ) ).str()
+
+std::string SSTRHEX(int x){
+    std::ostringstream stream;
+    stream << std::hex << x;
+    std::string result( stream.str() );
+    return result;
+}
 
 const Fmt LtePhyPucchTxReport_Fmt [] = {
     {UINT, "Version", 1},
