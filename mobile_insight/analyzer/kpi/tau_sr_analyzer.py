@@ -63,7 +63,7 @@ class TauSrAnalyzer(KpiAnalyzer):
         self.register_kpi("Mobility", "TAU_SR", self.__emm_sr_callback)
         self.register_kpi("Mobility", "TAU_REQ", self.__emm_sr_callback,
                           list(self.kpi_measurements['total_number'].keys()))
-        self.register_kpi("Mobility", "TAU_SR_LATENCY", self.__emm_sr_callback,
+        self.register_kpi("Mobility", "TAU_LATENCY", self.__emm_sr_callback,
                           None)
         self.register_kpi("Retainability", "TAU_REJ", self.__emm_sr_callback,
                           list(self.kpi_measurements['reject_number'].keys()))
@@ -129,17 +129,20 @@ class TauSrAnalyzer(KpiAnalyzer):
                                 # self.log_info("TAU_SR: " + str(self.kpi_measurements))
                                 self.store_kpi("KPI_Mobility_TAU_SUC",
                                             self.kpi_measurements['success_number'], log_item_dict['timestamp'])
+
                                 upload_dict = {
                                     'total_number': self.kpi_measurements['total_number']['TOTAL'],
                                     'success_number': self.kpi_measurements['success_number']['TOTAL']}
-                                self.upload_kpi('KPI.Mobility.TAU_SR', upload_dict)
+                                # self.upload_kpi('KPI.Mobility.TAU_SR', upload_dict)
                                 self.tau_req_flag = False
 
                                 # TAU latency
                                 delta_time = (log_item_dict['timestamp']-self.tau_req_timestamp).total_seconds()
                                 if delta_time >= 0:
                                     upload_dict = {'latency': delta_time}
-                                    self.upload_kpi("KPI.Mobility.TAU_SR_LATENCY", upload_dict)
+                                    self.store_kpi("KPI_Mobility_TAU_LATENCY",
+                                                           delta_time, log_item_dict['timestamp'])
+                                    # self.upload_kpi("KPI.Mobility.TAU_SR_LATENCY", upload_dict)
 
                             # '4b' indicates Tracking area update reject
                             elif field.get('name') == 'nas_eps.nas_msg_emm_type' and field.get('value') == '4b' and self.tau_req_flag:
@@ -151,11 +154,12 @@ class TauSrAnalyzer(KpiAnalyzer):
                                             # self.log_info("TAU_SR: " + str(self.kpi_measurements))
                                             self.store_kpi("KPI_Retainability_TAU_REJ",
                                                            self.kpi_measurements['reject_number'], log_item_dict['timestamp'])
+
                                             upload_dict = {
                                                 'total_number': self.kpi_measurements['total_number']['TOTAL'],
                                                 'reject_number': self.kpi_measurements['reject_number']}
                                             # self.upload_kpi('KPI.Retainability.RRC_AB_REL', upload_dict, log_item_dict['timestamp'])
-                                            self.upload_kpi('KPI.Retainability.TAU_REJ', upload_dict)
+                                            # self.upload_kpi('KPI.Retainability.TAU_REJ', upload_dict)
                                         else:
                                             self.log_warning("Unknown EMM cause for TAU reject: " + cause_idx)
                                         self.tau_req_flag = False

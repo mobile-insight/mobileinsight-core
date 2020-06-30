@@ -473,7 +473,7 @@ class KpiAnalyzer(Analyzer):
         if not cur_location:
             cur_location = ("None", "None")
 
-        if isinstance(kpi_value, str) or isinstance(kpi_value, int):
+        if isinstance(kpi_value, str) or isinstance(kpi_value, int) or isinstance(kpi_value, float):
             sql_cmd = "insert into " + kpi_name + "(value, timestamp," \
                       "op, phone_model, gps, cell_id, tai_id, dl_freq, ul_freq, dl_bw, ul_bw," \
                       "allowed_access, band_id) values(\"" + \

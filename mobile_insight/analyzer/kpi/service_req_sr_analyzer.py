@@ -61,6 +61,7 @@ class ServiceReqSrAnalyzer(KpiAnalyzer):
                           list(self.kpi_measurements['success_number'].keys()))
         self.register_kpi("Accessibility", "SR_REQ", self.__emm_sr_callback,
                           list(self.kpi_measurements['total_number'].keys()))
+        self.register_kpi("Accessibility", "SR_LATENCY", self.__emm_sr_callback, None)
         self.register_kpi("Retainability", "SR_REJ", self.__emm_sr_callback,
                           list(self.kpi_measurements['reject_number'].keys()))
         self.register_kpi("Accessibility", "SR_SR", self.__emm_sr_callback)
@@ -121,6 +122,12 @@ class ServiceReqSrAnalyzer(KpiAnalyzer):
                 self.store_kpi("KPI_Accessibility_SR_SUC", self.kpi_measurements['success_number'], log_item_dict['timestamp'])
                                # '{:.2f}'.format(self.current_kpi['TOTAL']), msg.timestamp)
 
+                delta_time = (log_item_dict['timestamp']-self.sr_req_timestamp).total_seconds()
+                if delta_time >= 0:
+                    upload_dict = {'latency': delta_time}
+                    self.store_kpi("KPI_Accessibility_SR_LATENCY",
+                                           delta_time, log_item_dict['timestamp'])
+
         elif msg.type_id == "LTE_NAS_EMM_OTA_Incoming_Packet":
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
@@ -161,6 +168,7 @@ class ServiceReqSrAnalyzer(KpiAnalyzer):
                             if field.get('name') == 'nas_eps.security_header_type' and field.get('value') == 'C':
                                 self.kpi_measurements['total_number']['TOTAL'] += 1
                                 self.service_req_flag = True
+                                self.sr_req_timestamp = log_item_dict['timestamp']
                                 self.store_kpi("KPI_Accessibility_SR_REQ", self.kpi_measurements['total_number'], log_item_dict['timestamp'])
 
 

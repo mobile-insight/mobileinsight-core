@@ -24,28 +24,34 @@ def kpi_manager_example(path):
     kpi_manager = KPIManager()
     # print "All supported KPIs:", str(kpi_manager.list_kpis())
 
-    kpi_manager.enable_kpi("KPI.Accessibility.DEDICATED_BEARER_SR_QCI1_REQ", periodicity='10m')
-    kpi_manager.enable_kpi("KPI.Accessibility.DEDICATED_BEARER_SR_QCI1_SR", periodicity='2h')
+    # kpi_manager.enable_kpi("KPI.Accessibility.DEDICATED_BEARER_SR_QCI1_REQ", periodicity='10m')
+    # kpi_manager.enable_kpi("KPI.Accessibility.DEDICATED_BEARER_SR_QCI1_SR", periodicity='2h')
     kpi_manager.enable_kpi("KPI.Accessibility.RRC_SUC")
-    kpi_manager.enable_kpi("KPI.Accessibility.RRC_SR", cell='22205186')
-    # kpi_manager.enable_kpi("KPI.Accessibility.SR_SUC", periodicity='1h')
-    kpi_manager.enable_kpi("KPI.Accessibility.SR_SR", periodicity='1h')
+    kpi_manager.enable_kpi("KPI.Accessibility.RRC_REQ")
+    kpi_manager.enable_kpi("KPI.Accessibility.RRC_SR")
+    kpi_manager.enable_kpi("KPI.Accessibility.SR_SUC")
+    kpi_manager.enable_kpi("KPI.Accessibility.SR_SR")
+    kpi_manager.enable_kpi("KPI.Accessibility.SR_LATENCY")
     # kpi_manager.enable_kpi("KPI.Accessibility.ATTACH_SUC")
-    kpi_manager.enable_kpi("KPI.Accessibility.ATTACH_SR")
+    # kpi_manager.enable_kpi("KPI.Accessibility.ATTACH_SR")
 
     # Test Mobility KPIs
-    # kpi_manager.enable_kpi("KPI.Mobility.HO_TOTAL")
+    kpi_manager.enable_kpi("KPI.Mobility.HO_TOTAL")
+    kpi_manager.enable_kpi("KPI.Mobility.HO_FAILURE")
     kpi_manager.enable_kpi("KPI.Mobility.HO_SR")
-    # kpi_manager.enable_kpi("KPI.Mobility.HO_TOTAL", periodicity='1h')
-    # kpi_manager.enable_kpi("KPI.Mobility.HO_FAILURE", periodicity='1h')
-    kpi_manager.enable_kpi("KPI.Mobility.TAU_SR", periodicity='1h')
+    kpi_manager.enable_kpi("KPI.Mobility.HANDOVER_LATENCY") # test log: data_sample
+
+    kpi_manager.enable_kpi("KPI.Mobility.TAU_SUC")
+    kpi_manager.enable_kpi("KPI.Mobility.TAU_REQ")
+    kpi_manager.enable_kpi("KPI.Mobility.TAU_SR")
+    kpi_manager.enable_kpi("KPI.Mobility.TAU_LATENCY")
     # kpi_manager.enable_kpi("KPI.Mobility.TAU_REQ", periodicity='1h')
 
     # Test Retainability KPIs
-    kpi_manager.enable_kpi("KPI.Retainability.RRC_AB_REL") 
+    # kpi_manager.enable_kpi("KPI.Retainability.RRC_AB_REL") 
 
     # Test Integrity KPIs
-    kpi_manager.enable_kpi("KPI.Integrity.DL_TPUT") 
+    # kpi_manager.enable_kpi("KPI.Integrity.DL_TPUT") 
 
     kpi_manager.set_source(src)
 
