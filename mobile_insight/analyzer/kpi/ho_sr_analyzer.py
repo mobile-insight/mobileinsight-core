@@ -28,9 +28,13 @@ class HoSrAnalyzer(KpiAnalyzer):
 
         self.kpi_measurements = {'failure_number': 0, 'total_number': 0}
 
+        self.ho_req_flag = False
+        self.ho_req_timestamp = None
+
         self.register_kpi("Mobility","HO_FAILURE", self.__ho_sr_callback, 0)
         self.register_kpi("Mobility", "HO_TOTAL", self.__ho_sr_callback, 0)
         self.register_kpi("Mobility", "HO_SR", self.__ho_sr_callback, 0)
+        self.register_kpi("Accessibility", "HO_LATENCY", self.__ho_sr_callback, 0)
 
         # add callback function
         self.add_source_callback(self.__ho_sr_callback)
@@ -45,9 +49,19 @@ class HoSrAnalyzer(KpiAnalyzer):
         KpiAnalyzer.set_source(self,source)
         #enable LTE RRC log
         source.enable_log("LTE_RRC_OTA_Packet")
+        source.enable_log("LTE_RRC_Serv_Cell_Info")
 
     def __ho_sr_callback(self, msg):
         # deal with RRC OTA
+
+        if self.ho_req_flag and msg.type_id == "LTE_RRC_Serv_Cell_Info":
+            log_item = msg.data.decode()
+            log_item_dict = dict(log_item)
+            self.ho_req_flag = False
+            delta_time = (log_item_dict['timestamp']-self.ho_req_timestamp).total_seconds() * 1000
+            if delta_time >= 0:
+                self.store_kpi("KPI_Accessibility_HO_LATENCY",
+                                       delta_time, log_item_dict['timestamp'])
 
         if msg.type_id == "LTE_RRC_OTA_Packet":
             log_item = msg.data.decode()
@@ -68,6 +82,8 @@ class HoSrAnalyzer(KpiAnalyzer):
 
                     elif field.get('name') == "lte-rrc.mobilityControlInfo_element":
                         self.store_kpi("KPI_Mobility_HO_TOTAL", str(self.kpi_measurements['total_number']), log_item_dict['timestamp'])
+                        self.ho_req_flag = True
+                        self.ho_req_timestamp = log_item_dict['timestamp']
 
         return 0
 
