@@ -40,6 +40,7 @@ def kpi_manager_example(path):
     # Test Mobility KPIs
     kpi_manager.enable_kpi("KPI.Mobility.HO_TOTAL")
     kpi_manager.enable_kpi("KPI.Mobility.HO_FAILURE")
+    kpi_manager.enable_kpi("KPI.Mobility.HO_FAILURE_LATENCY")
     kpi_manager.enable_kpi("KPI.Mobility.HO_SR")
     kpi_manager.enable_kpi("KPI.Mobility.HANDOVER_LATENCY") # test log: data_sample
     kpi_manager.enable_kpi("KPI.Accessibility.HO_LATENCY")

@@ -83,7 +83,7 @@ class TauSrAnalyzer(KpiAnalyzer):
         """
         KpiAnalyzer.set_source(self,source)
         #enable LTE EMM logs
-        source.enable_log("LTE_NAS_ESM_State")
+        source.enable_log("LTE_NAS_EMM_State")
         source.enable_log("LTE_NAS_EMM_OTA_Incoming_Packet")
         source.enable_log("LTE_NAS_EMM_OTA_Outgoing_Packet")
 
@@ -107,10 +107,11 @@ class TauSrAnalyzer(KpiAnalyzer):
 
         # print 'log'
 
-        if msg.type_id == "LTE_NAS_ESM_State":
+        if msg.type_id == "LTE_NAS_EMM_State":
             log_item = msg.data.decode()
             log_item_dict = dict(log_item)
-            if self.tau_req_flag and int(log_item_dict["EPS bearer state"]) == 2:
+            # print(log_item_dict)
+            if self.tau_req_flag and log_item_dict["EMM State"] == 'EMM_REGISTERED': # 'EMM State': 'EMM_REGISTERED'
                 self.kpi_measurements['success_number']['TOTAL'] += 1
 
                 # self.__calculate_kpi()
