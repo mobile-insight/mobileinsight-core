@@ -6,15 +6,12 @@ A Mobility management analyzer.
 Author: Yuanjie Li
 """
 
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-from analyzer import *
-from wcdma_rrc_analyzer import WcdmaRrcAnalyzer
-from lte_rrc_analyzer import LteRrcAnalyzer
-from lte_nas_analyzer import LteNasAnalyzer
-from umts_nas_analyzer import UmtsNasAnalyzer
+import xml.etree.ElementTree as ET
+from .analyzer import *
+from .wcdma_rrc_analyzer import WcdmaRrcAnalyzer
+from .lte_rrc_analyzer import LteRrcAnalyzer
+from .lte_nas_analyzer import LteNasAnalyzer
+from .umts_nas_analyzer import UmtsNasAnalyzer
 
 import copy
 
@@ -988,18 +985,18 @@ class MobilityStateMachine:
     #             print item2.dump()
 
     def dump(self):
-        print "Handoff State Machine"
+        print("Handoff State Machine")
         for item in self.state_machine:
             for item2 in self.state_machine[item]:
                 meas_report = ""
                 for report in self.state_machine[item][item2].meas_report_queue:
                     meas_report = meas_report + \
                         "(" + str(report[0].freq) + "," + str(report[1].event_list[0].type) + ") "
-                print item.__class__.__name__ + "->" \
+                print((item.__class__.__name__ + "->" \
                     + item2.__class__.__name__ + ": " \
-                    + meas_report
-                print "From State:\n", item.dump()
-                print "To State:\n", item2.dump()
+                    + meas_report))
+                print(("From State:\n", item.dump()))
+                print(("To State:\n", item2.dump()))
 ############################################
 
 

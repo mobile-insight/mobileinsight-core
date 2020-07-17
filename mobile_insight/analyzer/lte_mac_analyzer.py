@@ -82,9 +82,9 @@ class LteMacAnalyzer(Analyzer):
 
         elif msg.type_id == "LTE_MAC_UL_Buffer_Status_Internal":
             log_item = msg.data.decode()
-            if log_item.has_key('Subpackets'):
+            if 'Subpackets' in log_item:
                 for i in range(0, len(log_item['Subpackets'])):
-                    if log_item['Subpackets'][i].has_key('Samples'):
+                    if 'Samples' in log_item['Subpackets'][i]:
                         # print log_item
                         for sample in log_item['Subpackets'][i]['Samples']:
                             sub_fn = int(sample['Sub FN'])
@@ -185,7 +185,7 @@ class LteMacAnalyzer(Analyzer):
         log_item = msg.data.decode()
         timestamp = str(log_item['timestamp'])
         # two_tb_flag = False # if a record has 'Serving Cell Index' key, two tb share the same cell idx
-        if log_item.has_key('Records'):
+        if 'Records' in log_item:
             for i in range(0, len(log_item['Records'])):
                 record = log_item['Records'][i]
                 if 'Transport Blocks' in record:

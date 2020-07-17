@@ -1,5 +1,6 @@
 /* dm_collector_c.cpp
  * Author: Jiayao Li
+ * Modified: Yunqi Guo, 2019-11-02 for python3 usage
  * This file defines dm_collector_c, a Python extension module that collects
  * and decodes diagnositic logs from Qualcomm chipsets.
  */
@@ -24,7 +25,9 @@
 #endif
 
 #ifndef _WIN32
+
 #include <sys/time.h>
+
 #endif
 
 // NOTE: the following number should be updated every time.
@@ -132,7 +135,7 @@ static PyMethodDef DmCollectorCMethods[] = {
 
 // sort, unique and bucketing
 static void
-sort_type_ids(IdVector& type_ids, std::vector<IdVector>& out_vectors) {
+sort_type_ids(IdVector &type_ids, std::vector <IdVector> &out_vectors) {
     sort(type_ids.begin(), type_ids.end());
     IdVector::iterator itr = std::unique(type_ids.begin(), type_ids.end());
     type_ids.resize(std::distance(type_ids.begin(), itr));
@@ -143,46 +146,48 @@ sort_type_ids(IdVector& type_ids, std::vector<IdVector>& out_vectors) {
     for (j = 0; j < type_ids.size(); j++) {
         if (j != 0 && last_equip_id != get_equip_id(type_ids[j])) {
             out_vectors.push_back(IdVector(type_ids.begin() + i,
-                                            type_ids.begin() + j));
+                                           type_ids.begin() + j));
             i = j;
         }
         last_equip_id = get_equip_id(type_ids[j]);
     }
     if (i != j) {
         out_vectors.push_back(IdVector(type_ids.begin() + i,
-                                        type_ids.begin() + j));
+                                       type_ids.begin() + j));
     }
     return;
 }
 
 static bool
-check_file (PyObject *o) {
+check_file(PyObject *o) {
     return PyObject_HasAttrString(o, "write");
 }
 
 // FIXME: currently it is the same with check_file(), but it should be stricter
 static bool
-check_serial_port (PyObject *o) {
+check_serial_port(PyObject *o) {
     return PyObject_HasAttrString(o, "read");
 }
 
 static bool
-send_msg (PyObject *serial_port, const char *b, int length) {
+send_msg(PyObject *serial_port, const char *b, int length) {
     std::string frame = encode_hdlc_frame(b, length);
     PyObject *o = PyObject_CallMethod(serial_port,
-                                        (char *) "write",
-                                        (char *) "s#", frame.c_str(), frame.size());
+                                      (char *) "write",
+                                      (char *) "y#", frame.c_str(), frame.size());
     Py_DECREF(o);
     return true;
 }
 
 #ifndef _WIN32
+
 static double
-get_posix_timestamp () {
+get_posix_timestamp() {
     struct timeval tv;
     (void) gettimeofday(&tv, NULL);
-    return (double)(tv.tv_sec) + (double)(tv.tv_usec) / 1.0e6;
+    return (double) (tv.tv_sec) + (double) (tv.tv_usec) / 1.0e6;
 }
+
 #else
 static double
 get_posix_timestamp () {
@@ -208,8 +213,8 @@ get_qcdm_timestamp () {
 
 // Return: successful or not
 static PyObject *
-dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
-    (void)self;
+dm_collector_c_disable_logs(PyObject *self, PyObject *args) {
+    (void) self;
     IdVector empty;
     BinaryBuffer buf;
     PyObject *serial_port = NULL;
@@ -231,31 +236,31 @@ dm_collector_c_disable_logs (PyObject *self, PyObject *args) {
     }
     (void) send_msg(serial_port, buf.first, buf.second);
     Py_DECREF(serial_port);
-    delete [] buf.first;
+    delete[] buf.first;
     Py_RETURN_TRUE;
 
     raise_exception:
-        Py_DECREF(serial_port);
-        return NULL;
+    Py_DECREF(serial_port);
+    return NULL;
 }
 
 // Converts type names to a vector of IDs.
 // Returns true if all string are successfully converted, or false if wrong name
 // is found.
 static bool
-map_typenames_to_ids (PyObject *type_names, IdVector &type_ids) {
+map_typenames_to_ids(PyObject *type_names, IdVector &type_ids) {
     Py_ssize_t n = PySequence_Length(type_names);
 
     bool name_error = false;
     for (Py_ssize_t i = 0; i < n; i++) {
         PyObject *item = PySequence_GetItem(type_names, i);
-        if (!PyString_Check(item)) {
+        if (!PyUnicode_Check(item)) {
             // ignore non-strings
         } else {
-            const char *name = PyString_AsString(item);
+            const char *name = PyUnicode_AsUTF8(item);
             int cnt = find_ids(LogPacketTypeID_To_Name,
-                                ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
-                                name, type_ids);
+                               ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
+                               name, type_ids);
             if (cnt == 0) {
                 name_error = true;
             }
@@ -274,7 +279,7 @@ map_typenames_to_ids (PyObject *type_names, IdVector &type_ids) {
 // of messages.
 // If error occurs, false is returned and PyErr_SetString() will be called.
 static bool
-generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
+generate_log_config_msgs(PyObject *file_or_serial, PyObject *type_names) {
 
     IdVector type_ids;
     bool success = map_typenames_to_ids(type_names, type_ids);
@@ -286,12 +291,12 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
     BinaryBuffer buf;
     // Yuanjie: check if Modem_debug_message exists. If so, enable it in slightly different way
     IdVector::iterator debug_ind = type_ids.begin();
-    for(; debug_ind != type_ids.end(); debug_ind++) {
-        if(*debug_ind==Modem_debug_message){
+    for (; debug_ind != type_ids.end(); debug_ind++) {
+        if (*debug_ind == Modem_debug_message) {
             break;
         }
     }
-    if(debug_ind!=type_ids.end()){
+    if (debug_ind != type_ids.end()) {
         //Modem_debug_message should be enabled
         type_ids.erase(debug_ind);
 
@@ -309,7 +314,7 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
         buf = encode_log_config(DEBUG_WCDMA_L1, type_ids);
         if (buf.first != NULL && buf.second != 0) {
             (void) send_msg(file_or_serial, buf.first, buf.second);
-            delete [] buf.first;
+            delete[] buf.first;
         } else {
             PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
             return false;
@@ -318,14 +323,14 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
     }
 
     // send log config messages
-    std::vector<IdVector> type_id_vectors;
+    std::vector <IdVector> type_id_vectors;
     sort_type_ids(type_ids, type_id_vectors);
     for (size_t i = 0; i < type_id_vectors.size(); i++) {
-        const IdVector& v = type_id_vectors[i];
+        const IdVector &v = type_id_vectors[i];
         buf = encode_log_config(SET_MASK, v);
         if (buf.first != NULL && buf.second != 0) {
             (void) send_msg(file_or_serial, buf.first, buf.second);
-            delete [] buf.first;
+            delete[] buf.first;
         } else {
             PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
             return false;
@@ -338,8 +343,8 @@ generate_log_config_msgs (PyObject *file_or_serial, PyObject *type_names) {
 // A helper function that generated binary code of config headers.
 // If error occurs, false is returned and PyErr_SetString() will be called.
 static bool
-generate_log_config_headers (PyObject *file_or_serial, PyObject *type_names) {
-    (void)type_names;
+generate_log_config_headers(PyObject *file_or_serial, PyObject *type_names) {
+    (void) type_names;
     BinaryBuffer buf;
     IdVector empty;
     for (int k = 0; k < 12; k++) {
@@ -385,7 +390,7 @@ generate_log_config_headers (PyObject *file_or_serial, PyObject *type_names) {
         }
         if (buf.first != NULL && buf.second != 0) {
             (void) send_msg(file_or_serial, buf.first, buf.second);
-            delete [] buf.first;
+            delete[] buf.first;
             buf.first = NULL;
         } else {
             PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
@@ -398,14 +403,14 @@ generate_log_config_headers (PyObject *file_or_serial, PyObject *type_names) {
 // A helper function that generated binary code of config ends.
 // If error occurs, false is returned and PyErr_SetString() will be called.
 static bool
-generate_log_config_ends (PyObject *file_or_serial, PyObject *type_names) {
-    (void)type_names;
+generate_log_config_ends(PyObject *file_or_serial, PyObject *type_names) {
+    (void) type_names;
     BinaryBuffer buf;
     IdVector empty;
     buf = encode_log_config(DIAG_END_6000, empty);
     if (buf.first != NULL && buf.second != 0) {
         (void) send_msg(file_or_serial, buf.first, buf.second);
-        delete [] buf.first;
+        delete[] buf.first;
         buf.first = NULL;
     } else {
         PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
@@ -415,11 +420,10 @@ generate_log_config_ends (PyObject *file_or_serial, PyObject *type_names) {
 }
 
 
-
 // Return: successful or not
 static PyObject *
-dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
-    (void)self;
+dm_collector_c_enable_logs(PyObject *self, PyObject *args) {
+    (void) self;
     PyObject *serial_port = NULL;
     PyObject *sequence = NULL;
     bool success = false;
@@ -449,15 +453,15 @@ dm_collector_c_enable_logs (PyObject *self, PyObject *args) {
     Py_RETURN_TRUE;
 
     raise_exception:
-        Py_DECREF(sequence);
-        Py_DECREF(serial_port);
-        return NULL;
+    Py_DECREF(sequence);
+    Py_DECREF(serial_port);
+    return NULL;
 }
 
 // Return: successful or not
 static PyObject *
-dm_collector_c_set_filtered_export (PyObject *self, PyObject *args) {
-    (void)self;
+dm_collector_c_set_filtered_export(PyObject *self, PyObject *args) {
+    (void) self;
     const char *path;
     PyObject *sequence = NULL;
     IdVector type_ids;
@@ -485,14 +489,14 @@ dm_collector_c_set_filtered_export (PyObject *self, PyObject *args) {
     Py_RETURN_TRUE;
 
     raise_exception:
-        Py_DECREF(sequence);
-        return NULL;
+    Py_DECREF(sequence);
+    return NULL;
 }
 
 // Return: successful or not
 static PyObject *
-dm_collector_c_set_filtered (PyObject *self, PyObject *args) {
-    (void)self;
+dm_collector_c_set_filtered(PyObject *self, PyObject *args) {
+    (void) self;
     PyObject *sequence = NULL;
     IdVector type_ids;
     bool success = false;
@@ -519,14 +523,14 @@ dm_collector_c_set_filtered (PyObject *self, PyObject *args) {
     Py_RETURN_TRUE;
 
     raise_exception:
-        Py_DECREF(sequence);
-        return NULL;
+    Py_DECREF(sequence);
+    return NULL;
 }
 
 // Return: successful or not
 static PyObject *
-dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
-    (void)self;
+dm_collector_c_generate_diag_cfg(PyObject *self, PyObject *args) {
+    (void) self;
     PyObject *file = NULL;
     PyObject *sequence = NULL;
     bool success = false;
@@ -566,7 +570,7 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
         }
         if (buf.first != NULL && buf.second != 0) {
             (void) send_msg(file, buf.first, buf.second);
-            delete [] buf.first;
+            delete[] buf.first;
             buf.first = NULL;
         } else {
             PyErr_SetString(PyExc_RuntimeError, "Log config msg failed to encode.");
@@ -590,19 +594,19 @@ dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args) {
     Py_RETURN_TRUE;
 
     raise_exception:
-        Py_DECREF(sequence);
-        Py_DECREF(file);
-        return NULL;
+    Py_DECREF(sequence);
+    Py_DECREF(file);
+    return NULL;
 }
 
 // Return: None
 static PyObject *
-dm_collector_c_feed_binary (PyObject *self, PyObject *args) {
-    (void)self;
+dm_collector_c_feed_binary(PyObject *self, PyObject *args) {
+    (void) self;
     const char *b;
     int length;
-    if (!PyArg_ParseTuple(args, "s#", &b, &length)){
-        // printf("dm_collector_c_feed_binary returns NULL\n");
+    if (!PyArg_ParseTuple(args, "y#", &b, &length)) {
+         printf("dm_collector_c_feed_binary returns NULL\n");
         return NULL;
     }
     feed_binary(b, length);
@@ -610,9 +614,9 @@ dm_collector_c_feed_binary (PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-dm_collector_c_reset (PyObject *self, PyObject *args) {
-    (void)self;
-    (void)args;
+dm_collector_c_reset(PyObject *self, PyObject *args) {
+    (void) self;
+    (void) args;
     reset_binary();
     Py_RETURN_NONE;
 }
@@ -620,7 +624,7 @@ dm_collector_c_reset (PyObject *self, PyObject *args) {
 
 // Return: decoded_list or None
 static PyObject *
-dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
+dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
 
     // (void)self;
 
@@ -743,7 +747,6 @@ dm_collector_c_receive_log_packet (PyObject *self, PyObject *args) {
                 continue;
                 // Py_RETURN_NONE;
             }
-
         } else {
             continue;
             // Py_RETURN_NONE;
@@ -800,15 +803,23 @@ dm_collector_c_generate_custom_packet (PyObject *self, PyObject *args) {
 
 // Init the module
 PyMODINIT_FUNC
-initdm_collector_c(void)
-{
-    PyObject *dm_collector_c = Py_InitModule3("dm_collector_c", DmCollectorCMethods,
-        "collects and decodes diagnositic logs from Qualcomm chipsets.");
+PyInit_dm_collector_c(void) {
+    /*
+    Yunqi: change the functions for python 3
+    */
+    //    PyObject *dm_collector_c = Py_InitModule3("dm_collector_c", DmCollectorCMethods,
+    //        "collects and decodes diagnositic logs from Qualcomm chipsets.");
+    static struct PyModuleDef moduledef = {
+            PyModuleDef_HEAD_INIT, "dm_collector_c",
+            "collects and decodes diagnositic logs from Qualcomm chipsets.", -1,
+            DmCollectorCMethods,
+    };
+    PyObject *dm_collector_c = PyModule_Create(&moduledef);
 
     PyObject *log_packet_types;
 
     // dm_ccllector_c.log_packet_types: stores all supported type names
-    if(EXPOSE_INTERNAL_LOGS == 1) {
+    if (EXPOSE_INTERNAL_LOGS == 1) {
         //YUANJIE: expose all logs to MobileInsight
         int n_types = ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName);
         log_packet_types = PyTuple_New(n_types);
@@ -820,28 +831,25 @@ initdm_collector_c(void)
             // Refer to consts.h
             // printf("%s\n",LogPacketTypeID_To_Name[i].name);
             PyTuple_SetItem(log_packet_types,
-                        i,
-                        Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));
+                            i,
+                            Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));
         }
 
-    }
-    else {
+    } else {
         //YUANJIE: internal logs are not exposed
         int n_types = 0;
-        for (int i = 0; i < (int)ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++)
-        {
-            if(LogPacketTypeID_To_Name[i].b_public)
+        for (int i = 0; i < (int) ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++) {
+            if (LogPacketTypeID_To_Name[i].b_public)
                 n_types++;
         }
         log_packet_types = PyTuple_New(n_types);
-        int count=0;
-        for (int i = 0; i < (int)ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++)
-        {
-            if(LogPacketTypeID_To_Name[i].b_public){
+        int count = 0;
+        for (int i = 0; i < (int) ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName); i++) {
+            if (LogPacketTypeID_To_Name[i].b_public) {
                 // printf("%s\n",LogPacketTypeID_To_Name[i].name);
                 PyTuple_SetItem(log_packet_types,
-                        count,
-                        Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));
+                                count,
+                                Py_BuildValue("s", LogPacketTypeID_To_Name[i].name));
                 count++;
             }
 
@@ -852,9 +860,10 @@ initdm_collector_c(void)
     Py_DECREF(log_packet_types);
 
     // dm_ccllector_c.version: stores the value of DM_COLLECTOR_C_VERSION
-    PyObject *pystr = PyString_FromString(DM_COLLECTOR_C_VERSION);
+    PyObject *pystr = PyUnicode_FromString(DM_COLLECTOR_C_VERSION);
     PyObject_SetAttrString(dm_collector_c, "version", pystr);
     Py_DECREF(pystr);
 
     manager_init_state(&g_emanager);
+    return dm_collector_c;
 }

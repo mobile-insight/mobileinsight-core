@@ -20,10 +20,10 @@ except Exception as e:
 
 
 if is_android:
-    from android_dev_diag_monitor import AndroidDevDiagMonitor
-    from android_mtk_monitor import AndroidMtkMonitor
-from monitor import Monitor
-from dm_collector import *  # P4A: THIS LINE WILL BE DELETED ###
-from offline_replayer import OfflineReplayer
-from online_monitor import OnlineMonitor
-from mtk_offline_replayer import MtkOfflineReplayer
+    from .android_dev_diag_monitor import AndroidDevDiagMonitor
+    from .android_mtk_monitor import AndroidMtkMonitor
+from .monitor import Monitor
+from .dm_collector import *  # P4A: THIS LINE WILL BE DELETED ###
+from .offline_replayer import OfflineReplayer
+from .online_monitor import OnlineMonitor
+from .mtk_offline_replayer import MtkOfflineReplayer

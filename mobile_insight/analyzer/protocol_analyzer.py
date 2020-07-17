@@ -6,13 +6,10 @@ A protocol analyzer abstraction.
 Author: Yuanjie Li
 """
 
-from analyzer import *
-from profile import Profile, ProfileHierarchy
-from state_machine import StateMachine
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
+from .analyzer import *
+from .profile import Profile, ProfileHierarchy
+from .state_machine import StateMachine
+import xml.etree.ElementTree as ET
 
 __all__ = ["ProtocolAnalyzer"]
 

@@ -48,3 +48,5 @@ examples/lte-rrc-example.py
 
 # Wireshark sources
 wireshark-2.*/
+
+.idea/

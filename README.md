@@ -14,10 +14,11 @@ Using MobileInsight, users can declare a monitor to track the network status and
 
 Currently MobileInsight supports installation on macOS and Ubuntu/Debian systems. To install it on Windows, please use our all-in-one virtual machine from [`mobileinsight-dev`](https://github.com/mobile-insight/mobileinsight-dev).
 
-First install latest [Python 2.7](https://www.python.org/), then download MobileInsight from the [release page](https://github.com/mobile-insight/mobileinsight-core/releases):
 
-    tar -zxvf mobileinsight-4.0.tar.gz
-    cd mobileinsight-4.0
+
+First clone or download the git repository to user local folder.
+
+
 
 Next, run installation script (but __do not__ execute with root priviledge!):
 
@@ -57,7 +58,8 @@ We love pull requests and discussing novel ideas. You can open issues here to re
 
 The following Slack group is used exclusively for discussions about developing the MobileInsight and its sister projects:
 
-+ Dev Slack Group: https://mobileinsight-dev.slack.com (join via this [link](https://goo.gl/htJGqT))
 + Email: support@mobileinsight.net
++ Dev Slack Group: https://mobileinsight-dev.slack.com (join via this [link](https://goo.gl/htJGqT))
+
 
 For other advanced topics, please refer to the wiki and the [MobileInsight website](http://mobileinsight.net).

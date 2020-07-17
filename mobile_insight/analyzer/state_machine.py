@@ -54,7 +54,7 @@ class StateMachine(object):
         if not self.cur_state:
             init_state = self.init_callback(event)
             if self.state_machine \
-                    and init_state in self.state_machine.keys():
+                    and init_state in list(self.state_machine.keys()):
                 # Always check if the new state is declared
                 self.cur_state = init_state
                 self.state_history.append((str(event.timestamp), init_state))

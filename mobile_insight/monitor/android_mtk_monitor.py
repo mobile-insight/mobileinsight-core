@@ -14,9 +14,9 @@ import sys
 import timeit
 import datetime
 
-from monitor import Monitor, Event
-from dm_collector import dm_collector_c, DMLogPacket, FormatError
-import mtk_log_parser
+from .monitor import Monitor, Event
+from .dm_collector import dm_collector_c, DMLogPacket, FormatError
+from . import mtk_log_parser
 
 is_android = False
 try:
@@ -203,13 +203,15 @@ class AndroidMtkMonitor(Monitor):
         dm_collector_c.set_filtered_export(path, self._type_names)  # ???
 
     def _run_shell_cmd(self, cmd, wait=False):
+        if isinstance(cmd, str):
+            cmd = cmd.encode()
         p = subprocess.Popen(
             "su",
             executable=ANDROID_SHELL,
             shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE)
-        res, err = p.communicate(cmd + '\n')
+        res, err = p.communicate(cmd + b'\n')
         if wait:
             p.wait()
             # return p.stdout

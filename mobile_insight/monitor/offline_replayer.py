@@ -5,17 +5,18 @@ An offline log replayer
 
 Author: Jiayao Li,
         Yuanjie Li
+Update: Yunqi Guo, 2020/06, for MI5
 """
 
 __all__ = ["OfflineReplayer"]
 
-import sys
 import os
-import timeit
+import sys
 import time
+import timeit
 
-from monitor import Monitor, Event
-from dm_collector import dm_collector_c, DMLogPacket, FormatError
+from .dm_collector import dm_collector_c, DMLogPacket, FormatError
+from .monitor import Monitor, Event
 
 
 class OfflineReplayer(Monitor):
@@ -71,7 +72,7 @@ class OfflineReplayer(Monitor):
 
     def __del__(self):
         if self.is_android and self.service_context:
-            print "detaching..."
+            print("detaching...")
             from service import mi2app_utils
             mi2app_utils.detach_thread()
 
@@ -158,7 +159,7 @@ class OfflineReplayer(Monitor):
 
         try:
 
-            self.broadcast_info('STARTED',{})
+            self.broadcast_info('STARTED', {})
             self.log_info('STARTED: ' + str(time.time()))
             log_list = []
             if os.path.isfile(self._input_path):
@@ -183,10 +184,13 @@ class OfflineReplayer(Monitor):
                 while True:
                     s = self._input_file.read(64)
 
+                    if not s:  # EOF encountered
+                        break
+
                     if s:
                         dm_collector_c.feed_binary(s)
                     decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
-                                                                True,   # include_timestamp
+                                                                True,  # include_timestamp
                                                                 )
                     if not s and not decoded:   # EOF encountered and no message can be received any more
                         break
@@ -207,11 +211,11 @@ class OfflineReplayer(Monitor):
                                 self.send(event)
                             after_sending_time = time.time()
                             sending_inter += after_sending_time - after_decode_time
-                            # pself.log_info('After sending event: ' + str(time.time()))
+                            # self.log_info('After sending event: ' + str(time.time()))
 
                         except FormatError as e:
                             # skip this packet
-                            print "FormatError: ", e
+                            print(("FormatError: ", e))
                 self.log_info('Decoding_inter: ' + str(decoding_inter))
                 self.log_info('sending_inter: ' + str(sending_inter))
                 self._input_file.close()

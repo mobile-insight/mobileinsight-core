@@ -6,7 +6,7 @@ __all__ = ["analyzer", "monitor", "element", "utils"]
 # from monitor import *
 # from element import *
 # from utils import *
-import analyzer
-import monitor
-import element
-import utils
+from . import analyzer
+from . import monitor
+from . import element
+from . import utils
