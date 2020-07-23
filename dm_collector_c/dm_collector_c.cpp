@@ -766,13 +766,13 @@ dm_collector_c_generate_custom_packet (PyObject *self, PyObject *args) {
     Py_INCREF(feeded_data);
 
     // Check arguments
-    if (!PyString_Check(feeded_data)) {
+    if (!PyUnicode_Check(feeded_data)) {
         PyErr_SetString(PyExc_TypeError, "\'feeded_data\' is not a string.");
         Py_DECREF(feeded_data);
         return NULL;
     }
 
-    const char *msg = PyString_AsString(feeded_data);
+    const char *msg = PyUnicode_AsUTF8(feeded_data);
     int length = strlen(msg);
     char *b = new char[length + 14 + 1];
     b[length + 14] = '\0';
