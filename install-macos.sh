@@ -192,12 +192,17 @@ else
     exit 4
 fi
 
-echo -e "${GREEN}[INFO]${NC} Testing MobileInsight GUI (you need to be in a graphic session)..."
-mi-gui
-if [[ $? == 0 ]] ; then
-    echo "Successfully ran MobileInsight GUI!"
-    echo "The installation of mobileinsight-core is finished!"
+if [ x$DISPLAY != x ] ; then
+    echo -e "${GREEN}[INFO]${NC} Testing MobileInsight GUI (you need to be in a graphic session)..."
+    mi-gui
+    if [[ $? == 0 ]] ; then
+        echo "Successfully ran MobileInsight GUI!"
+        echo "The installation of mobileinsight-core is finished!"
+    else
+        echo "There are issues running MobileInsight GUI, you need to fix them manually"
+    fi
 else
-    echo "There are issues running MobileInsight GUI, you need to fix them manually"
-    echo "The installation of mobileinsight-core is finished!"
+  echo "GUI Disabled"
 fi
+
+echo "The installation of mobileinsight-core is finished!"

@@ -85,7 +85,7 @@ class OfflineReplayer(Monitor):
     def __get_libs_path(self):
         if self.is_android and self.service_context:
             return os.path.join(
-                self.service_context.getFilesDir().getAbsolutePath(), "data")
+                self.service_context.getFilesDir().getAbsolutePath(), "app/data")
         else:
             return "./data"
 
