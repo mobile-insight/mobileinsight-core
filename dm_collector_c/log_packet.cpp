@@ -52,10 +52,10 @@
 #include "wcdma_search_cell_reselection_rank.h"
 
 
-#define SSTR(x) static_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::dec << x ) ).str()
+// #define SSTR(x) static_cast< std::ostringstream & >( \
+//         ( std::ostringstream() << std::dec << x ) ).str()
 
-// #define SSTR(x) std::to_string(x)
+#define SSTR(x) std::to_string(x)
 
 // #ifdef __ANDROID__
 // #include <android/log.h>
