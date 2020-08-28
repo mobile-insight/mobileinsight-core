@@ -4060,6 +4060,21 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         result_subpkt_sample,
                                         "SFN", iSFN);
                                 Py_DECREF(old_object);
+                                //***** Get MAC CE *****
+                                char hex[10] = {};
+                                int ce_len = _search_result_int(result_subpkt_sample, "HDR LEN");
+                                std::string ascii_data = "0x";
+                                for (int k = offset; k < offset + ce_len; k++) {
+                                    sprintf(hex, "%02x", b[k] & 0xFF);
+                                    ascii_data += hex;
+                                }
+                                PyObject *decoded = Py_BuildValue("s", ascii_data.c_str());
+                                PyObject *tmp = Py_BuildValue("(sOs)",
+                                        "MAC CE", decoded, "");
+                                PyList_Append(result_subpkt_sample, tmp);
+                                Py_DECREF(decoded);
+                                Py_DECREF(tmp);
+                                //***** End *****
                                 offset += _search_result_int(result_subpkt_sample, "HDR LEN");
                                 PyObject *t = Py_BuildValue("(sOs)",
                                                             "Ignored",
@@ -4096,6 +4111,21 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         result_subpkt_sample,
                                         "SFN", iSFN);
                                 Py_DECREF(old_object);
+                                //***** Get MAC CE *****
+                                char hex[10] = {};
+                                int ce_len = _search_result_int(result_subpkt_sample, "HDR LEN");
+                                std::string ascii_data = "0x";
+                                for (int k = offset; k < offset + ce_len; k++) {
+                                    sprintf(hex, "%02x", b[k] & 0xFF);
+                                    ascii_data += hex;
+                                }
+                                PyObject *decoded = Py_BuildValue("s", ascii_data.c_str());
+                                PyObject *tmp = Py_BuildValue("(sOs)",
+                                        "MAC CE", decoded, "");
+                                PyList_Append(result_subpkt_sample, tmp);
+                                Py_DECREF(decoded);
+                                Py_DECREF(tmp);
+                                //***** End *****
                                 offset += _search_result_int(result_subpkt_sample, "HDR LEN");
                                 PyObject *t = Py_BuildValue("(sOs)",
                                                             "Ignored",
