@@ -52,10 +52,10 @@
 #include "wcdma_search_cell_reselection_rank.h"
 
 
-#define SSTR(x) static_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::dec << x ) ).str()
+// #define SSTR(x) static_cast< std::ostringstream & >( \
+//         ( std::ostringstream() << std::dec << x ) ).str()
 
-// #define SSTR(x) std::to_string(x)
+#define SSTR(x) std::to_string(x)
 
 // #ifdef __ANDROID__
 // #include <android/log.h>
@@ -10173,8 +10173,14 @@ is_debug_packet(const char *b, size_t length) {
     // return length >=2 && (b[0] ==  '\x79');
 }
 
+bool
+is_custom_packet (const char *b, size_t length) {
+    return length >= 2 && b[0] == '\xee' && b[1] == '\xee';
+}
+
 void
-on_demand_decode(const char *b, size_t length, LogPacketType type_id, PyObject *result) {
+on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject* result)
+{
     int offset = 0;
     switch (type_id) {
         case CDMA_Paging_Channel_Message:
@@ -10722,6 +10728,40 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
     on_demand_decode(b + offset, length - offset, type_id, result);
 
     return result;
+}
+
+PyObject *
+decode_custom_packet (const char *b, size_t length) {
+
+    if (PyDateTimeAPI == NULL)  // import datetime module
+        PyDateTime_IMPORT;
+
+    PyObject *result = NULL;
+    int offset = 0;
+
+    // Parse Header
+    result = PyList_New(0);
+    offset = 0;
+    offset += _decode_by_fmt(CustomPacketHeaderFmt, ARRAY_SIZE(LogPacketHeaderFmt, Fmt),
+                                b, offset, length, result);
+
+    std::string strTypeId = "Custom_Packet";
+    PyObject *pystr = Py_BuildValue("s", strTypeId.c_str());
+    PyObject *old_object = _replace_result(result, "type_id", pystr);
+    Py_DECREF(old_object);
+    Py_DECREF(pystr);
+
+    decode_custom_packet_payload(b + offset, length - offset, result);
+    return result;
+}
+
+void
+decode_custom_packet_payload (const char *b, size_t length, PyObject* result)
+{
+    PyObject *pystr = Py_BuildValue("s#", b, length);
+    PyObject *old_object = _replace_result(result, "Msg", pystr);
+    Py_DECREF(old_object);
+    Py_DECREF(pystr);
 }
 
 /*-----------------------------------------------------------------------
