@@ -29,7 +29,9 @@ def kpi_manager_example(path):
     kpi_manager.enable_kpi("KPI.Accessibility.RRC_SUC")
     kpi_manager.enable_kpi("KPI.Accessibility.RRC_REQ")
     kpi_manager.enable_kpi("KPI.Accessibility.RRC_SR")
+    kpi_manager.enable_kpi("KPI.Accessibility.RRC_LATENCY")
     kpi_manager.enable_kpi("KPI.Accessibility.SR_SUC")
+    kpi_manager.enable_kpi("KPI.Accessibility.SR_REQ")
     kpi_manager.enable_kpi("KPI.Accessibility.SR_SR")
     kpi_manager.enable_kpi("KPI.Accessibility.SR_LATENCY")
     # kpi_manager.enable_kpi("KPI.Accessibility.ATTACH_SUC")
@@ -38,8 +40,10 @@ def kpi_manager_example(path):
     # Test Mobility KPIs
     kpi_manager.enable_kpi("KPI.Mobility.HO_TOTAL")
     kpi_manager.enable_kpi("KPI.Mobility.HO_FAILURE")
+    kpi_manager.enable_kpi("KPI.Mobility.HO_FAILURE_LATENCY")
     kpi_manager.enable_kpi("KPI.Mobility.HO_SR")
     kpi_manager.enable_kpi("KPI.Mobility.HANDOVER_LATENCY") # test log: data_sample
+    kpi_manager.enable_kpi("KPI.Accessibility.HO_LATENCY")
 
     kpi_manager.enable_kpi("KPI.Mobility.TAU_SUC")
     kpi_manager.enable_kpi("KPI.Mobility.TAU_REQ")

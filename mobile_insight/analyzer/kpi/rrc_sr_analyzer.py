@@ -41,9 +41,12 @@ class RrcSrAnalyzer(KpiAnalyzer):
                           list(self.kpi_measurements['release_number'].keys()))
         self.register_kpi("Accessibility", "RRC_SR", self.__rrc_sr_callback)
 
-        self.include_analyzer('UlMacLatencyAnalyzer', [self.__rrc_sr_callback])
+        self.register_kpi("Accessibility", "RRC_LATENCY", self.__rrc_sr_callback)
+
+        # self.include_analyzer('UlMacLatencyAnalyzer', [self.__rrc_sr_callback])
 
         self.cause = None # record establishement casue of current RRC connection
+        self.rrc_req_flag = False
         self.rrc_req_timestamp = None
 
         # add callback function
@@ -98,12 +101,19 @@ class RrcSrAnalyzer(KpiAnalyzer):
                 log_xml = ET.XML(log_item_dict['Msg'])
                 for field in log_xml.iter('field'):
 
-                    if field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
+                    if self.rrc_req_flag and field.get('name') == "lte-rrc.rrcConnectionSetupComplete_element":
                         # self.__clear_kpi()
+                        # print(log_item_dict['timestamp'])
                         if self.cause:
+                            # print(log_item_dict['timestamp'] + '22')
                             self.kpi_measurements['success_number'][self.cause] += 1
                             self.cause = None
+                            self.rrc_req_flag = False
                             self.store_kpi("KPI_Accessibility_RRC_SUC", self.kpi_measurements['total_number'], log_item_dict['timestamp'])
+                            delta_time = (log_item_dict['timestamp']-self.rrc_req_timestamp).total_seconds() * 1000
+                            if delta_time >= 0:
+                                self.store_kpi("KPI_Accessibility_RRC_LATENCY",
+                                                       delta_time, log_item_dict['timestamp'])
                             # upload_dict = dict((k, self.kpi_measurements[k]) for k in ('success_number', 'total_number'))
                             # self.upload_kpi('KPI.Accessibility.RRC_SR', upload_dict, log_item_dict['timestamp'])
                             # self.upload_kpi('KPI.Accessibility.RRC_SR', upload_dict)
@@ -121,6 +131,7 @@ class RrcSrAnalyzer(KpiAnalyzer):
 
                     elif field.get('name') ==  "lte-rrc.rrcConnectionRequest_element":
                     	self.rrc_req_timestamp = log_item_dict['timestamp']
+
                     elif field.get('name') == 'lte-rrc.establishmentCause':
                         # self.__clear_kpi()
                         if field.get('show') == '4':
@@ -144,11 +155,13 @@ class RrcSrAnalyzer(KpiAnalyzer):
                             #FIXME: MobileInsight crashes after reporting this warning
                             self.log_warning("Unknown lte-rrc.establishmentCause: " + str(field.get('showname')))
                         self.store_kpi("KPI_Accessibility_RRC_REQ", self.kpi_measurements['total_number'], log_item_dict['timestamp'])
+                        self.rrc_req_flag = True
 
                     elif field.get('name') == 'lte-rrc.releaseCause':
                         # TODO: check if this release is abnormal
                         # self.__clear_kpi()
-                        queue_length = self.get_analyzer('UlMacLatencyAnalyzer').queue_length
+                        # queue_length = self.get_analyzer('UlMacLatencyAnalyzer').queue_length
+                        queue_length = 1
                         if queue_length != 0:
                             # Check cause loadBalancingTAUrequired, other, cs-FallbackHighPriority-v1020, rrc-Suspend-v1320
                             if field.get('show') == '0': # Cause: Other

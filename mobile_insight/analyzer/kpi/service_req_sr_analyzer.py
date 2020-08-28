@@ -122,9 +122,8 @@ class ServiceReqSrAnalyzer(KpiAnalyzer):
                 self.store_kpi("KPI_Accessibility_SR_SUC", self.kpi_measurements['success_number'], log_item_dict['timestamp'])
                                # '{:.2f}'.format(self.current_kpi['TOTAL']), msg.timestamp)
 
-                delta_time = (log_item_dict['timestamp']-self.sr_req_timestamp).total_seconds()
+                delta_time = (log_item_dict['timestamp']-self.sr_req_timestamp).total_seconds() * 1000
                 if delta_time >= 0:
-                    upload_dict = {'latency': delta_time}
                     self.store_kpi("KPI_Accessibility_SR_LATENCY",
                                            delta_time, log_item_dict['timestamp'])
 

@@ -77,12 +77,14 @@ class TrackCellInfoAnalyzer(Analyzer):
             mnc_value = msg.data['MNC']
             if mnc_value == 260:
                 self.__status.op = 'T-Mobile'
-            if mnc_value == 120:
+            elif mnc_value == 120:
                 self.__status.op = 'Sprint'
-            if mnc_value == 410:
+            elif mnc_value == 410:
                 self.__status.op = 'ATT'
-            if mnc_value == 480:
+            elif mnc_value == 480:
                 self.__status.op = 'Verizon'
+            else:
+                self.__status.op = str(msg.data['MCC']) +'-'+ str(msg.data['MNC'])
 
 
         else:
@@ -105,12 +107,14 @@ class TrackCellInfoAnalyzer(Analyzer):
                 mnc_value = msg.data['MNC']
                 if mnc_value == 260:
                     self.__status.op = 'T-Mobile'
-                if mnc_value == 120:
+                elif mnc_value == 120:
                     self.__status.op = 'Sprint'
-                if mnc_value == 410:
+                elif mnc_value == 410:
                     self.__status.op = 'ATT'
-                if mnc_value == 480:
+                elif mnc_value == 480:
                     self.__status.op = 'Verizon'
+                else:
+                    self.__status.op = str(msg.data['MCC']) +'-'+ str(msg.data['MNC'])
 
         if status_updated:
             self.log_debug(self.__status.dump())
