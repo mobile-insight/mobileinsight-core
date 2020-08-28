@@ -108,7 +108,7 @@ class IpDlTputAnalyzer(KpiAnalyzer):
                 # self.pdcp_buffer.append([log_item['timestamp'], sys_fn, sub_fn, pdu_size, pdu_size])
             if self.cur_ts:
                 lap = (log_item['timestamp'] - self.cur_ts).total_seconds()
-                if lap > 0.1:
+                if lap > 1:
                     self.cur_ts = log_item['timestamp']
                     tput = self.cum_bytes*8/lap
                     self.cum_bytes = 0

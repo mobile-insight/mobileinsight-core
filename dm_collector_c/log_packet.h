@@ -42,6 +42,13 @@ const Fmt LogPacketHeaderFmt[] = {
         {QCDM_TIMESTAMP, "timestamp",   8}
 };
 
+const Fmt CustomPacketHeaderFmt [] = {
+    {UINT, "log_msg_len", 2},
+    {UINT, "type_id", 2},
+    {QCDM_TIMESTAMP, "timestamp", 8},
+    {PLACEHOLDER, "Msg", 0},
+};
+
 //Yuanjie: the following comments are my suggestions for field name replacement
 //No change if the comments are missing
 
@@ -4173,16 +4180,20 @@ const Fmt ModemDebug_Fmt[] = {
         {SKIP,           NULL,                   6},
 };
 
-bool is_log_packet(const char *b, size_t length);
-
-bool is_debug_packet(const char *b, size_t length);    //Yuanjie: test if it's a debugging message
+bool is_log_packet (const char *b, size_t length);
+bool is_debug_packet (const char *b, size_t length);   //Yuanjie: test if it's a debugging message
+bool is_custom_packet (const char *b, size_t length);
 
 // Given a binary string, try to decode it as a log packet.
 // Return a specially formatted Python list that stores the decoding result.
 // If skip_decoding is True, only the header would be decoded.
 PyObject *decode_log_packet(const char *b, size_t length, bool skip_decoding);
 
-void on_demand_decode(const char *b, size_t length, LogPacketType type_id, PyObject *result);
+PyObject * decode_custom_packet (const char *b, size_t length);
+void decode_custom_packet_payload (const char *b, size_t length, PyObject* result);
+
+void on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject* result);
+
 
 
 PyObject *decode_log_packet_modem(const char *b, size_t length, bool skip_decoding);

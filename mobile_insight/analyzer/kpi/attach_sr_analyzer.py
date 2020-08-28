@@ -123,7 +123,7 @@ class AttachSrAnalyzer(KpiAnalyzer):
                                         upload_dict = {
                                             'total_number': self.kpi_measurements['total_number'],
                                             'success_number': self.kpi_measurements['success_number']}
-                                        self.upload_kpi('KPI.Accessibility.ATTACH_SR', upload_dict)
+                                        # self.upload_kpi('KPI.Accessibility.ATTACH_SR', upload_dict)
                                         self.attach_req_timestamp = None
                                     # self.__calculate_kpi()
                                     # self.store_kpi("KPI_Accessibility_ATTACH_SR_" + self.type, \
