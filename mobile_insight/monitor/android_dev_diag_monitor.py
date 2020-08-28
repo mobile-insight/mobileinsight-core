@@ -83,6 +83,7 @@ class ChronicleProcessor(object):
         ret_ts = None
         ret_payload = None
         ret_filename = None
+        ret_is_payload_pending = False
 
         while len(b) > 0:
             if len(b) <= self.to_read[self.state]:
@@ -120,10 +121,12 @@ class ChronicleProcessor(object):
             elif self.state == cls.READ_PAYLOAD:
                 if len(self.bytes[self.state]
                        ) > 0:  # don't need to wait for complete field
+                    ret_is_payload_pending = True
                     ret_payload = self.bytes[self.state]
                     self.bytes[self.state] = b""
                 if self.to_read[self.state] == 0:  # current field is complete
                     self._init_state()
+                    ret_is_payload_pending = False
                     break
             else:  # READ_FILENAME
                 if self.to_read[self.state] == 0:  # current field is complete
@@ -131,7 +134,7 @@ class ChronicleProcessor(object):
                     self._init_state()
                     break
         remain = b
-        return ret_msg_type, ret_ts, ret_payload, ret_filename, remain
+        return ret_msg_type, ret_ts, ret_payload, ret_filename, remain, ret_is_payload_pending
 
 
 class DiagRevealerDaemon(threading.Thread):
@@ -202,6 +205,11 @@ class AndroidDevDiagMonitor(Monitor):
         self._type_names = []
         self._last_diag_revealer_ts = None
         self.running = False
+
+        self._mi3log_index = -1
+        self._mi3log_fd = None
+        self._pending_customPacket = []
+        self.lock_mi3log = threading.Lock()
 
         """
         Exec/lib initialization path
@@ -405,6 +413,16 @@ class AndroidDevDiagMonitor(Monitor):
             cmd2 = "kill " + " ".join([str(pid) for pid in diag_procs])
             self._run_shell_cmd(cmd2)
 
+        if self._is_mi3log_enabled():
+            self.lock_mi3log.acquire()
+            for msg in self._pending_customPacket:
+                os.write(self._mi3log_fd, dm_collector_c.generate_custom_packet(msg))
+            self._pending_customPacket = []
+            self.lock_mi3log.release()
+            os.write(self._mi3log_fd, dm_collector_c.generate_custom_packet("Bye"))
+            os.close(self._mi3log_fd)
+            self._mi3log_fd = None
+
     def _pause_collection(self):
         if self.diag_revealer_daemon:
             self.diag_revealer_daemon.stop()
@@ -418,9 +436,34 @@ class AndroidDevDiagMonitor(Monitor):
                 self._run_shell_cmd(cmd)
         self.log_info("diag_revealer is stopped")
         self.running = False
+        if self._is_mi3log_enabled():
+            self.lock_mi3log.acquire()
+            for msg in self._pending_customPacket:
+                os.write(self._mi3log_fd, dm_collector_c.generate_custom_packet(msg))
+            self._pending_customPacket = []
+            self.lock_mi3log.release()
 
     def _resume_collection(self):
         self.run()
+
+    def _enable_mi3log(self):
+        self._mi3log_index = 0
+        self._mi3log_fd = self._create_mi3log()
+
+    def _is_mi3log_enabled(self):
+        return (self._mi3log_index >= 0 and self._mi3log_fd != None)
+
+    def _create_mi3log(self):
+        path = os.path.join(get_cache_dir(), str(self._mi3log_index) + ".mi3log")
+        self.log_info("Create mi3log: " + path)
+        return os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND)
+
+    def _insert_custom_packet(self, msg):
+        if self._is_mi3log_enabled():
+            self.lock_mi3log.acquire()
+            self.log_info("Insert custom packet: " + msg)
+            self._pending_customPacket.append(msg)
+            self.lock_mi3log.release()
 
     def run(self):
         """
@@ -468,6 +511,10 @@ class AndroidDevDiagMonitor(Monitor):
             # Read log packets from diag_revealer
             chproc = ChronicleProcessor()
             self.running = True
+
+            if self._is_mi3log_enabled():
+                os.write(self._mi3log_fd, dm_collector_c.generate_custom_packet("Hello"))
+
             while self.running:
                 try:
                     # self.log_info("Before os.read(fifo, self.BLOCK_SIZE)")
@@ -482,14 +529,28 @@ class AndroidDevDiagMonitor(Monitor):
 
                 while s:  # preprocess metadata
                     # self.log_info("Before chproc.process: %s" % s)
-                    ret_msg_type, ret_ts, ret_payload, ret_filename, remain = chproc.process(
+                    ret_msg_type, ret_ts, ret_payload, ret_filename, remain, ret_is_payload_pending = chproc.process(
                         s)
+
                     # self.log_info("After chproc.process(s)")
+                    if self._is_mi3log_enabled():
+                        if ret_msg_type == ChronicleProcessor.TYPE_LOG and ret_payload is not None:
+                            os.write(self._mi3log_fd, ret_payload)
+                        if not ret_is_payload_pending:
+                            # no pending payload to be read, good to insert 
+                            # custom packet
+                            self.lock_mi3log.acquire()
+                            for msg in self._pending_customPacket:
+                                os.write(self._mi3log_fd, dm_collector_c.generate_custom_packet(msg))
+                            self._pending_customPacket = []
+                            self.lock_mi3log.release()
+
                     if ret_msg_type == ChronicleProcessor.TYPE_LOG:
                         if ret_ts:
                             self._last_diag_revealer_ts = ret_ts
                         if ret_payload:
                             dm_collector_c.feed_binary(ret_payload)
+
                     elif ret_msg_type == ChronicleProcessor.TYPE_START_LOG_FILE:
                         if ret_filename:
                             pass
@@ -498,6 +559,7 @@ class AndroidDevDiagMonitor(Monitor):
                         if ret_filename:
                             # res_dict = {'filename':ret_filename}
                             # msg = ("new_diag_log",res_dict,"dict")
+
                             msg = ('filename', ret_filename, "")
                             # print "End of %s" % ret_filename
                             event = Event(timeit.default_timer(),
@@ -506,6 +568,21 @@ class AndroidDevDiagMonitor(Monitor):
                             # ret_filename)
                             self.send(event)
                             del event
+
+                            if self._is_mi3log_enabled():
+                                os.write(self._mi3log_fd, dm_collector_c.generate_custom_packet("Bye"))
+                                os.close(self._mi3log_fd)
+
+                                msg = ('filename', str(os.path.join(get_cache_dir(), str(self._mi3log_index) + ".mi3log")), "")
+                                event = Event(timeit.default_timer(),
+                                              "new_diag_mi3log",
+                                              DMLogPacket([msg]))
+                                self.send(event)
+                                del event
+
+                                self._mi3log_index += 1
+                                self._mi3log_fd = self._create_mi3log()
+
                     elif ret_msg_type is not None:
                         # raise RuntimeError("Unknown ret msg type: %s" % str(ret_msg_type))
                         self.log_warning("Unknown ret msg type: %s" % str(ret_msg_type))

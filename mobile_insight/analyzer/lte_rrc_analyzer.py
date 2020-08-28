@@ -45,7 +45,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         self.__config = {}  # (cell_id,freq) -> LteRrcConfig()
 
     def __del__(self):
-        self.log_info("LteRrcAnalyzer __del__")
+        # self.log_info("LteRrcAnalyzer __del__")
+        pass
 
     def create_profile_hierarchy(self):
         '''

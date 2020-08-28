@@ -36,98 +36,101 @@
 // Global variable to control exportation of raw log
 static ExportManagerState g_emanager;
 
-static PyObject *dm_collector_c_disable_logs(PyObject *self, PyObject *args);
-
-static PyObject *dm_collector_c_enable_logs(PyObject *self, PyObject *args);
-
-static PyObject *dm_collector_c_set_filtered_export(PyObject *self, PyObject *args);
-
-static PyObject *dm_collector_c_set_filtered(PyObject *self, PyObject *args);
-
-static PyObject *dm_collector_c_generate_diag_cfg(PyObject *self, PyObject *args);
-
-static PyObject *dm_collector_c_feed_binary(PyObject *self, PyObject *args);
-
-static PyObject *dm_collector_c_reset(PyObject *self, PyObject *args);
-
-static PyObject *dm_collector_c_receive_log_packet(PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_disable_logs (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_enable_logs (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_set_filtered_export (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_set_filtered (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_generate_diag_cfg (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_feed_binary (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_reset (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_receive_log_packet (PyObject *self, PyObject *args);
+static PyObject *dm_collector_c_generate_custom_packet (PyObject *self, PyObject *args);
 
 static PyMethodDef DmCollectorCMethods[] = {
-        {"disable_logs",        dm_collector_c_disable_logs,        METH_VARARGS,
-                                                                       "Disable logs for a serial port.\n"
-                                                                       "\n"
-                                                                       "Args:\n"
-                                                                       "    port: a diagnositic serial port.\n"
-                                                                       "\n"
-                                                                       "Returns:\n"
-                                                                       "    Successful or not.\n"
-        },
-        {"enable_logs",         dm_collector_c_enable_logs,         METH_VARARGS,
-                                                                       "Enable logs for a serial port.\n"
-                                                                       "\n"
-                                                                       "Args:\n"
-                                                                       "    port: a diagnositic serial port.\n"
-                                                                       "    type_names: a sequence of type names.\n"
-                                                                       "\n"
-                                                                       "Returns:\n"
-                                                                       "    Successful or not.\n"
-                                                                       "\n"
-                                                                       "Raises\n"
-                                                                       "    ValueError: when an unrecognized type name is passed in.\n"
-        },
-        {"set_filtered_export", dm_collector_c_set_filtered_export, METH_VARARGS,
-                                                                       "Configure this moduel to output a filtered log file.\n"
-                                                                       "\n"
-                                                                       "Args:\n"
-                                                                       "    type_names: a sequence of type names.\n"
-                                                                       "\n"
-                                                                       "Returns:\n"
-                                                                       "    Successful or not.\n"
-                                                                       "\n"
-                                                                       "Raises\n"
-                                                                       "    ValueError: when an unrecognized type name is passed in.\n"
-        },
-        {"set_filtered",        dm_collector_c_set_filtered,        METH_VARARGS,
-                                                                       "Configure this moduel to only decode filtered logs.\n"
-                                                                       "\n"
-                                                                       "Args:\n"
-                                                                       "    type_names: a sequence of type names.\n"
-                                                                       "\n"
-                                                                       "Returns:\n"
-                                                                       "    Successful or not.\n"
-                                                                       "\n"
-                                                                       "Raises\n"
-                                                                       "    ValueError: when an unrecognized type name is passed in.\n"
-        },
-        {"feed_binary",         dm_collector_c_feed_binary,         METH_VARARGS,
-                                                                       "Feed raw packets."},
-        {"reset",               dm_collector_c_reset,               METH_VARARGS,
-                                                                       "Reset dm_collector."},
-        {"generate_diag_cfg",   dm_collector_c_generate_diag_cfg,   METH_VARARGS,
-                                                                       "Generate a Diag.cfg file.\n"
-                                                                       "\n"
-                                                                       "This file can be loaded by diag_mdlog program on Android phones. It\n"
-                                                                       "disables all previous log messages, then enables logs specified in\n"
-                                                                       "type_names.\n"
-                                                                       "\n"
-                                                                       "Args:\n"
-                                                                       "    file: output Python file object\n"
-                                                                       "    type_names: the type of logs you wish to enable.\n"
-        },
-        {"receive_log_packet",  dm_collector_c_receive_log_packet,  METH_VARARGS,
-                                                                       "Extract a log packet from feeded data.\n"
-                                                                       "\n"
-                                                                       "Args:\n"
-                                                                       "    skip_decoding: If set to True, only the header would be decoded.\n"
-                                                                       "        Default to False.\n"
-                                                                       "    include_timestamp: Return the time when the message is received.\n"
-                                                                       "        Default to False.\n"
-                                                                       "\n"
-                                                                       "Returns:\n"
-                                                                       "    If include_timestamp is True, return (decoded, posix_timestamp);\n"
-                                                                       "    otherwise only return decoded message.\n"
-        },
-        {NULL,                  NULL,                               0, NULL}        /* Sentinel */
+    {"disable_logs", dm_collector_c_disable_logs, METH_VARARGS,
+        "Disable logs for a serial port.\n"
+        "\n"
+        "Args:\n"
+        "    port: a diagnositic serial port.\n"
+        "\n"
+        "Returns:\n"
+        "    Successful or not.\n"
+    },
+    {"enable_logs", dm_collector_c_enable_logs, METH_VARARGS,
+        "Enable logs for a serial port.\n"
+        "\n"
+        "Args:\n"
+        "    port: a diagnositic serial port.\n"
+        "    type_names: a sequence of type names.\n"
+        "\n"
+        "Returns:\n"
+        "    Successful or not.\n"
+        "\n"
+        "Raises\n"
+        "    ValueError: when an unrecognized type name is passed in.\n"
+    },
+    {"set_filtered_export", dm_collector_c_set_filtered_export, METH_VARARGS,
+        "Configure this moduel to output a filtered log file.\n"
+        "\n"
+        "Args:\n"
+        "    type_names: a sequence of type names.\n"
+        "\n"
+        "Returns:\n"
+        "    Successful or not.\n"
+        "\n"
+        "Raises\n"
+        "    ValueError: when an unrecognized type name is passed in.\n"
+    },
+    {"set_filtered", dm_collector_c_set_filtered, METH_VARARGS,
+        "Configure this moduel to only decode filtered logs.\n"
+        "\n"
+        "Args:\n"
+        "    type_names: a sequence of type names.\n"
+        "\n"
+        "Returns:\n"
+        "    Successful or not.\n"
+        "\n"
+        "Raises\n"
+        "    ValueError: when an unrecognized type name is passed in.\n"
+    },
+    {"feed_binary", dm_collector_c_feed_binary, METH_VARARGS,
+        "Feed raw packets."},
+    {"reset", dm_collector_c_reset, METH_VARARGS,
+        "Reset dm_collector."},
+    {"generate_diag_cfg", dm_collector_c_generate_diag_cfg, METH_VARARGS,
+        "Generate a Diag.cfg file.\n"
+        "\n"
+        "This file can be loaded by diag_mdlog program on Android phones. It\n"
+        "disables all previous log messages, then enables logs specified in\n"
+        "type_names.\n"
+        "\n"
+        "Args:\n"
+        "    file: output Python file object\n"
+        "    type_names: the type of logs you wish to enable.\n"
+    },
+    {"receive_log_packet", dm_collector_c_receive_log_packet, METH_VARARGS,
+        "Extract a log packet from feeded data.\n"
+        "\n"
+        "Args:\n"
+        "    skip_decoding: If set to True, only the header would be decoded.\n"
+        "        Default to False.\n"
+        "    include_timestamp: Return the time when the message is received.\n"
+        "        Default to False.\n"
+        "\n"
+        "Returns:\n"
+        "    If include_timestamp is True, return (decoded, posix_timestamp);\n"
+        "    otherwise only return decoded message.\n"
+    },
+    {"generate_custom_packet", dm_collector_c_generate_custom_packet, METH_VARARGS,
+        "Generate a custom packet based on feeded data.\n"
+        "\n"
+        "Args:\n"
+        "    feeded_data: Message to be encoded within hdlc frame.\n"
+        "\n"
+        "Returns:\n"
+        "    Encoded binary stream.\n"
+    },
+    {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
 // sort, unique and bucketing
@@ -188,6 +191,22 @@ get_posix_timestamp() {
 #else
 static double
 get_posix_timestamp () {
+    return 0;
+}
+#endif
+
+#ifndef _WIN32
+static unsigned long long
+get_qcdm_timestamp () {
+    struct timeval tv;
+    (void) gettimeofday(&tv, NULL);
+    const double PER_SECOND = 52428800.0;
+    const double PER_USECOND = 52428800.0 / 1.0e6;
+    return (tv.tv_sec - 3657 * 24 * 60 * 60) * PER_SECOND + tv.tv_usec * PER_USECOND;
+}
+#else
+static unsigned long long
+get_qcdm_timestamp () {
     return 0;
 }
 #endif
@@ -612,96 +631,174 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
     std::string frame;
     bool crc_correct = false;
     bool skip_decoding = false, include_timestamp = false;  // default values
-    double posix_timestamp = (include_timestamp ? get_posix_timestamp() : -1.0);
+    double posix_timestamp = (include_timestamp? get_posix_timestamp(): -1.0);
+    bool success = true;
+    PyObject *arg_skip_decoding = NULL;
+    PyObject *arg_include_timestamp = NULL;
 
-    bool success = get_next_frame(frame, crc_correct);
-    // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
-    // if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
-    if (success && crc_correct) {
-        PyObject *arg_skip_decoding = NULL;
-        PyObject *arg_include_timestamp = NULL;
-        if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
-                              &arg_skip_decoding, &arg_include_timestamp))
-            Py_RETURN_NONE;
-        if (arg_skip_decoding != NULL) {
-            Py_INCREF(arg_skip_decoding);
-            skip_decoding = (PyObject_IsTrue(arg_skip_decoding) == 1);
-            Py_DECREF(arg_skip_decoding);
-        }
-        if (arg_include_timestamp != NULL) {
-            Py_INCREF(arg_include_timestamp);
-            include_timestamp = (PyObject_IsTrue(arg_include_timestamp) == 1);
-            Py_DECREF(arg_include_timestamp);
-        }
 
-        check_frame_format(frame);
+    if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
+                                &arg_skip_decoding, &arg_include_timestamp))
+        return NULL;
+    if (arg_skip_decoding != NULL) {
+        Py_INCREF(arg_skip_decoding);
+        skip_decoding = (PyObject_IsTrue(arg_skip_decoding) == 1);
+        Py_DECREF(arg_skip_decoding);
+    }
+    if (arg_include_timestamp != NULL) {
+        Py_INCREF(arg_include_timestamp);
+        include_timestamp = (PyObject_IsTrue(arg_include_timestamp) == 1);
+        Py_DECREF(arg_include_timestamp);
+    }
 
-        if (!manager_export_binary(&g_emanager, frame.c_str(), frame.size()))
-            Py_RETURN_NONE;
-        if (is_log_packet(frame.c_str(), frame.size())) {
-            const char *s = frame.c_str();
-            PyObject *decoded = decode_log_packet(s + 2,  // skip first two bytes
-                                                  frame.size() - 2,
-                                                  skip_decoding);
-            if (include_timestamp) {
-                PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
-                Py_XDECREF(decoded);
-                return ret;
-            } else {
-                return decoded;
+    while (success) {
+        // keep reading the buffer if no message has been sent out and there
+        // are any frames remain.
+
+        success = get_next_frame(frame, crc_correct);
+        // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
+        // if (success && crc_correct && is_log_packet(frame.c_str(), frame.size())) {
+        //
+
+        if (success && crc_correct) {
+
+            check_frame_format(frame);
+
+            // Check if it is custom packet
+            if(is_custom_packet(frame.c_str(), frame.size())) {
+                if (skip_decoding) {
+                    Py_RETURN_NONE;
+                }
+                const char *s = frame.c_str();
+                PyObject *decoded = decode_custom_packet(s + 2,  // skip first two bytes
+                                                      frame.size() - 2);
+                if (include_timestamp) {
+                    PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+                    Py_DECREF(decoded);
+                    return ret;
+                } else {
+                    return decoded;
+                }
             }
-        } else if (is_debug_packet(frame.c_str(), frame.size())) {
-            //Yuanjie: the original debug msg does not have header...
 
-            unsigned short n_size = frame.size() + sizeof(char) * 14;
+            if (!manager_export_binary(&g_emanager, frame.c_str(), frame.size()))
+                continue;
+                // Py_RETURN_NONE;
+            if (is_log_packet(frame.c_str(), frame.size())) {
+                const char *s = frame.c_str();
+                PyObject *decoded = decode_log_packet(s + 2,  // skip first two bytes
+                                                      frame.size() - 2,
+                                                      skip_decoding);
+                if (include_timestamp) {
+                    PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+                    Py_DECREF(decoded);
+                    return ret;
+                } else {
+                    return decoded;
+                }
+            }
+            else if (is_debug_packet(frame.c_str(), frame.size())) {
+                //Yuanjie: the original debug msg does not have header...
 
-            unsigned char tmp[14] = {
+                unsigned short n_size = frame.size()+sizeof(char)*14;
+
+                unsigned char tmp[14]={
                     0xFF, 0xFF,
                     0x00, 0x00, 0xeb, 0x1f,
                     0x00, 0x00, 0x73, 0xB7,
                     0xB8, 0x65, 0xDD, 0x00
-            };
-            // tmp[2]=(char)(n_size);
-            *(tmp + 2) = n_size;
-            *(tmp) = n_size;
-            char *s = new char[n_size];
-            memmove(s, tmp, sizeof(char) * 14);
-            memmove(s + sizeof(char) * 14, frame.c_str(), frame.size());
-            PyObject *decoded = decode_log_packet_modem(s, n_size, skip_decoding);
+                };
+                // tmp[2]=(char)(n_size);
+                *(tmp+2)=n_size;
+                *(tmp)=n_size;
+                char *s = new char[n_size];
+                memmove(s,tmp,sizeof(char)*14);
+                memmove(s+sizeof(char)*14,frame.c_str(),frame.size());
+                PyObject *decoded = decode_log_packet_modem(s, n_size, skip_decoding);
 
-            // char *s = new char[n_size];
-            // memset(s,0,sizeof(char)*n_size);
-            // *s = n_size;
-            // *(s+2) = n_size;
-            // *(s+4) = 0xeb;
-            // *(s+5) = 0x1f;
-            // memmove(s+sizeof(char)*14,frame.c_str(),frame.size());
-            // PyObject *decoded = decode_log_packet(s, n_size, skip_decoding);
+                // char *s = new char[n_size];
+                // memset(s,0,sizeof(char)*n_size);
+                // *s = n_size;
+                // *(s+2) = n_size;
+                // *(s+4) = 0xeb;
+                // *(s+5) = 0x1f;
+                // memmove(s+sizeof(char)*14,frame.c_str(),frame.size());
+                // PyObject *decoded = decode_log_packet(s, n_size, skip_decoding);
 
 
 
-            // // The following code does not crash on Android.
-            // // But if use s and frame.size(), it crashes
-            // const char *s = frame.c_str();
-            // PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
-            //                                         frame.size() - 2,
-            //                                         skip_decoding);
+                // // The following code does not crash on Android.
+                // // But if use s and frame.size(), it crashes
+                // const char *s = frame.c_str();
+                // PyObject *decoded = decode_log_packet(  s + 2,  // skip first two bytes
+                //                                         frame.size() - 2,
+                //                                         skip_decoding);
 
-            if (include_timestamp) {
-                PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
-                Py_DECREF(decoded);
-                // delete [] s; //Yuanjie: bug for it on Android, but no problem on laptop
-                return ret;
+                if (include_timestamp) {
+                    PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
+                    Py_DECREF(decoded);
+                    // delete [] s; //Yuanjie: bug for it on Android, but no problem on laptop
+                    return ret;
+                } else {
+                    // delete [] s; //Yuanjie: bug for it on Android, but no problem on laptop
+                    return decoded;
+                }
             } else {
-                // delete [] s; //Yuanjie: bug for it on Android, but no problem on laptop
-                return decoded;
+                continue;
+                // Py_RETURN_NONE;
             }
         } else {
-            Py_RETURN_NONE;
+            continue;
+            // Py_RETURN_NONE;
         }
-    } else {
-        Py_RETURN_NONE;
     }
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+dm_collector_c_generate_custom_packet (PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *feeded_data = NULL;
+
+    if (!PyArg_ParseTuple(args, "O", &feeded_data)) {
+        return NULL;
+    }
+    Py_INCREF(feeded_data);
+
+    // Check arguments
+    if (!PyUnicode_Check(feeded_data)) {
+        PyErr_SetString(PyExc_TypeError, "\'feeded_data\' is not a string.");
+        Py_DECREF(feeded_data);
+        return NULL;
+    }
+
+    const char *msg = PyUnicode_AsUTF8(feeded_data);
+    int length = strlen(msg);
+    char *b = new char[length + 14 + 1];
+    b[length + 14] = '\0';
+
+    // pre-head: 2 bytes
+    b[0] = '\xee';
+    b[1] = '\xee';
+    // log_msg_len: 2 bytes
+    *((unsigned short *)(b+2)) = (unsigned short)length;
+    // type_id: 2 bytes
+    for (int i = 4; i < 6; i++) {
+        b[i] = '\x00';
+    }
+    // timestamp: 8 bytes
+    unsigned long long qcdm_timestamp = get_qcdm_timestamp();
+    memcpy(b + 6, &qcdm_timestamp, sizeof(char) * 8);
+
+    memcpy(b + 14, msg, sizeof(char) * length);
+    std::string frame = encode_hdlc_frame(b, length + 14);
+
+    delete(b);
+
+    PyObject *rt = Py_BuildValue("s#", frame.c_str(), frame.size());
+
+    Py_DECREF(feeded_data);
+    return rt;
 }
 
 // Init the module
