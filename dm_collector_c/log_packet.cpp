@@ -3920,12 +3920,12 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                     (void) _map_result_field_to_name(
                                         mac_hdr, 
                                         "LC ID", 
-                                        LCId, 
-                                        ARRAY_SIZE(LCId, ValueName),
+                                        LteMacULTransportBlock_Mac_Hdr_LCId, 
+                                        ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_LCId, ValueName),
                                         "(MI)Unknown");
 
                                     uint iSDULen = -1;
-                                    if (iLCID < 22) // not CE
+                                    if (iLCID >= 1 && iLCID <= 10) // logical channel
                                     {
                                         PyObject *mac_hdr_L = PyList_New(0);
                                         if (iF2 == 0)
@@ -3963,15 +3963,9 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             uint utemp2 = _search_result_uint(mac_hdr_L, "L2 Field");
                                             iSDULen = utemp * 0x100 + utemp2;
                                         }
+                                        old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
+                                        Py_DECREF(old_object);
                                     }
-                                    else if (iLCID == 30)
-                                        iSDULen = 3;
-                                    else if (iLCID == 29 || iLCID == 26)
-                                        iSDULen = 1;
-                                    /* other MAC CE */
-
-                                    old_object = _replace_result_int(mac_hdr, "SDU Len", iSDULen);
-                                    Py_DECREF(old_object);
 
                                     mac_hdr_tmp_list.push_back(mac_hdr);
 
@@ -3986,9 +3980,11 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
 
                                     uint utemp = _search_result_uint(mac_hdr_ce, "Header Field");
                                     uint iLCID = utemp & 31;
+                                    uint iSDULen = -1;
 
                                     if (iLCID == 30) // L-BSR
                                     {
+                                        iSDULen = 3;
                                         tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_L_BSR,
                                                    ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_L_BSR, Fmt),
                                                    b, offset, length, mac_hdr_ce); 
@@ -4012,17 +4008,18 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3", iIndex3);
                                         Py_DECREF(old_object);
 
-                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", BufferSizeValue[iIndex0]);
+                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex0]);
                                         Py_DECREF(old_object);
-                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", BufferSizeValue[iIndex1]);
+                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex1]);
                                         Py_DECREF(old_object);
-                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", BufferSizeValue[iIndex2]);
+                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex2]);
                                         Py_DECREF(old_object);
-                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", BufferSizeValue[iIndex3]);
+                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex3]);
                                         Py_DECREF(old_object);
                                     }
                                     else if (iLCID == 29) // S-BSR
                                     {
+                                        iSDULen = 1;
                                         tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_BSR,
                                                    ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_BSR, Fmt),
                                                    b, offset, length, mac_hdr_ce);
@@ -4040,7 +4037,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                                    b, offset, length, mac_hdr_ce);
                                             old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0", iIndex);
                                             Py_DECREF(old_object);
-                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", BufferSizeValue[iIndex]);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
                                             Py_DECREF(old_object);
                                         }
                                         else if (iLCGId == 1)
@@ -4050,7 +4047,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                                    b, offset, length, mac_hdr_ce);
                                             old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1", iIndex);
                                             Py_DECREF(old_object);
-                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", BufferSizeValue[iIndex]);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
                                             Py_DECREF(old_object);
                                         }
                                         else if (iLCGId == 2)
@@ -4060,7 +4057,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                                    b, offset, length, mac_hdr_ce);
                                             old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2", iIndex);
                                             Py_DECREF(old_object);
-                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", BufferSizeValue[iIndex]);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
                                             Py_DECREF(old_object);
                                         }
                                         else if (iLCGId == 3)
@@ -4070,12 +4067,22 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                                    b, offset, length, mac_hdr_ce);
                                             old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3", iIndex);
                                             Py_DECREF(old_object);
-                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", BufferSizeValue[iIndex]);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
                                             Py_DECREF(old_object);
                                         }
                                     }
+                                    else if (iLCID == 27)
+                                    {
+                                        iSDULen = 2;
+                                        tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_C_RNTI,
+                                                   ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_C_RNTI, Fmt),
+                                                   b, offset, length, mac_hdr_ce); 
+                                        offset += tmp_count;
+                                        hdr_count += tmp_count;
+                                    }
                                     else if (iLCID == 26) // PHR
                                     {
+                                        iSDULen = 1;
                                         tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_PHR,
                                                    ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_PHR, Fmt),
                                                    b, offset, length, mac_hdr_ce); 
@@ -4089,6 +4096,9 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         Py_DECREF(old_object);
                                     }
 
+                                    old_object = _replace_result_int(mac_hdr_ce, "Len", iSDULen);
+                                    Py_DECREF(old_object);
+
                                     PyObject *t = Py_BuildValue("(sOs)", "Ignored", mac_hdr_ce, "dict");
                                     PyList_Append(mac_hdr_list, t);
                                     Py_DECREF(mac_hdr_ce);
@@ -4097,7 +4107,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
 
 
 
-                                PyObject *t1 = Py_BuildValue("(sOs)", "Mac Hdrs", mac_hdr_list, "list");
+                                PyObject *t1 = Py_BuildValue("(sOs)", "Mac Hdr + CE", mac_hdr_list, "list");
                                 PyList_Append(result_subpkt_sample, t1);
                                 Py_DECREF(mac_hdr_list);
                                 Py_DECREF(t1);
@@ -4192,12 +4202,12 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                     (void) _map_result_field_to_name(
                                         mac_hdr, 
                                         "LC ID", 
-                                        LCId, 
-                                        ARRAY_SIZE(LCId, ValueName),
+                                        LteMacULTransportBlock_Mac_Hdr_LCId, 
+                                        ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_LCId, ValueName),
                                         "(MI)Unknown");
 
                                     uint iSDULen = -1;
-                                    if (iLCID < 22) // not CE
+                                    if (iLCID >= 1 && iLCID <= 10) // logical channel
                                     {
                                         PyObject *mac_hdr_L = PyList_New(0);
                                         if (iF2 == 0)
@@ -4235,15 +4245,9 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             uint utemp2 = _search_result_uint(mac_hdr_L, "L2 Field");
                                             iSDULen = utemp * 0x100 + utemp2;
                                         }
+                                        old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
+                                        Py_DECREF(old_object);
                                     }
-                                    else if (iLCID == 30)
-                                        iSDULen = 3;
-                                    else if (iLCID == 29 || iLCID == 26)
-                                        iSDULen = 1;
-                                    /* other MAC CE */
-
-                                    old_object = _replace_result_int(mac_hdr, "SDU Len", iSDULen);
-                                    Py_DECREF(old_object);
 
                                     mac_hdr_tmp_list.push_back(mac_hdr);
 
@@ -4258,9 +4262,11 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
 
                                     uint utemp = _search_result_uint(mac_hdr_ce, "Header Field");
                                     uint iLCID = utemp & 31;
+                                    uint iSDULen = -1;
 
                                     if (iLCID == 30) // L-BSR
                                     {
+                                        iSDULen = 3;
                                         tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_L_BSR,
                                                    ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_L_BSR, Fmt),
                                                    b, offset, length, mac_hdr_ce); 
@@ -4284,17 +4290,18 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3", iIndex3);
                                         Py_DECREF(old_object);
 
-                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", BufferSizeValue[iIndex0]);
+                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex0]);
                                         Py_DECREF(old_object);
-                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", BufferSizeValue[iIndex1]);
+                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex1]);
                                         Py_DECREF(old_object);
-                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", BufferSizeValue[iIndex2]);
+                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex2]);
                                         Py_DECREF(old_object);
-                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", BufferSizeValue[iIndex3]);
+                                        old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex3]);
                                         Py_DECREF(old_object);
                                     }
                                     else if (iLCID == 29) // S-BSR
                                     {
+                                        iSDULen = 1;
                                         tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_BSR,
                                                    ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_BSR, Fmt),
                                                    b, offset, length, mac_hdr_ce);
@@ -4312,7 +4319,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                                    b, offset, length, mac_hdr_ce);
                                             old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0", iIndex);
                                             Py_DECREF(old_object);
-                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", BufferSizeValue[iIndex]);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
                                             Py_DECREF(old_object);
                                         }
                                         else if (iLCGId == 1)
@@ -4322,7 +4329,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                                    b, offset, length, mac_hdr_ce);
                                             old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1", iIndex);
                                             Py_DECREF(old_object);
-                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", BufferSizeValue[iIndex]);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
                                             Py_DECREF(old_object);
                                         }
                                         else if (iLCGId == 2)
@@ -4332,7 +4339,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                                    b, offset, length, mac_hdr_ce);
                                             old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2", iIndex);
                                             Py_DECREF(old_object);
-                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", BufferSizeValue[iIndex]);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
                                             Py_DECREF(old_object);
                                         }
                                         else if (iLCGId == 3)
@@ -4342,12 +4349,22 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                                    b, offset, length, mac_hdr_ce);
                                             old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3", iIndex);
                                             Py_DECREF(old_object);
-                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", BufferSizeValue[iIndex]);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
                                             Py_DECREF(old_object);
                                         }
                                     }
+                                    else if (iLCID == 27)
+                                    {
+                                        iSDULen = 2;
+                                        tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_C_RNTI,
+                                                   ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_C_RNTI, Fmt),
+                                                   b, offset, length, mac_hdr_ce); 
+                                        offset += tmp_count;
+                                        hdr_count += tmp_count;
+                                    }
                                     else if (iLCID == 26) // PHR
                                     {
+                                        iSDULen = 1;
                                         tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_PHR,
                                                    ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_PHR, Fmt),
                                                    b, offset, length, mac_hdr_ce); 
@@ -4360,6 +4377,9 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         old_object = _replace_result_int(mac_hdr_ce, "PHR Ind", iPHRInd);
                                         Py_DECREF(old_object);
                                     }
+                                    
+                                    old_object = _replace_result_int(mac_hdr_ce, "Len", iSDULen);
+                                    Py_DECREF(old_object);
 
                                     PyObject *t = Py_BuildValue("(sOs)", "Ignored", mac_hdr_ce, "dict");
                                     PyList_Append(mac_hdr_list, t);
@@ -4367,9 +4387,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                     Py_DECREF(t);
                                 }
 
-
-
-                                PyObject *t1 = Py_BuildValue("(sOs)", "Mac Hdrs", mac_hdr_list, "list");
+                                PyObject *t1 = Py_BuildValue("(sOs)", "Mac Hdr + CE", mac_hdr_list, "list");
                                 PyList_Append(result_subpkt_sample, t1);
                                 Py_DECREF(mac_hdr_list);
                                 Py_DECREF(t1);
