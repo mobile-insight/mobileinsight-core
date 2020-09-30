@@ -86,6 +86,7 @@ enum LogPacketType {
     LTE_PHY_Serving_Cell_Measurement_Result = 0xB193,
     LTE_PHY_Connected_Mode_Neighbor_Meas_Req_Resp = 0xB195,
     LTE_PHY_CDRX_Events_Info = 0xB198,
+    LTE_PHY_Inter_Freq_Log = 0xB19E,
     LTE_PHY_BPLMN_Cell_Request = 0xB1A1,
     LTE_PHY_BPLMN_Cell_Confirm = 0xB1A2,
 
@@ -253,6 +254,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "LTE_PHY_Connected_Mode_Neighbor_Measurement",true},
     {LTE_PHY_CDRX_Events_Info,
         "LTE_RRC_CDRX_Events_Info", false},
+    {LTE_PHY_Inter_Freq_Log,
+        "LTE_PHY_Inter_Freq_Log", true},
     {LTE_PHY_BPLMN_Cell_Request,
         "LTE_PHY_BPLMN_Cell_Request", false},
     {LTE_PHY_BPLMN_Cell_Confirm,
