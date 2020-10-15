@@ -34,8 +34,9 @@ def kpi_manager_example(path):
     kpi_manager.enable_kpi("KPI.Accessibility.SR_REQ")
     kpi_manager.enable_kpi("KPI.Accessibility.SR_SR")
     kpi_manager.enable_kpi("KPI.Accessibility.SR_LATENCY")
-    # kpi_manager.enable_kpi("KPI.Accessibility.ATTACH_SUC")
-    # kpi_manager.enable_kpi("KPI.Accessibility.ATTACH_SR")
+    kpi_manager.enable_kpi("KPI.Accessibility.ATTACH_SUC")
+    kpi_manager.enable_kpi("KPI.Accessibility.ATTACH_SR")
+    kpi_manager.enable_kpi("KPI.Accessibility.ATTACH_REQ")
 
     # Test Mobility KPIs
     kpi_manager.enable_kpi("KPI.Mobility.HO_TOTAL")
