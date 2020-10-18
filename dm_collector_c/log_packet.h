@@ -1539,7 +1539,7 @@ const Fmt LteMacULTransportBlock_SubpktV2_SampleFmt[] = {
 
 //xyf
 const ValueName LteMacULTransportBlock_Mac_Hdr_LCId[] = {
-        {0, "CCCH (unsupported)"},
+        {0, "CCCH"},
         {1, "1"},
         {2, "2"},
         {3, "3"},
@@ -1559,7 +1559,7 @@ const ValueName LteMacULTransportBlock_Mac_Hdr_LCId[] = {
         {17, "Reserved (unsupported)"},
         {18, "AUL confirmation (4 octets) (unsupported)"},
         {19, "AUL confirmation (1 octet) (unsupported)"},
-        {20, "Recommended bit rate query (unsupported)"},
+        {20, "Recommended bit rate query"},
         {21, "SPS confirmation (unsupported)"},
         {22, "Truncated Sidelink BSR (unsupported)"},
         {23, "Sidelink BSR (unsupported)"},
@@ -1567,10 +1567,15 @@ const ValueName LteMacULTransportBlock_Mac_Hdr_LCId[] = {
         {25, "Extended PHR (unsupported)"},
         {26, "PHR"},
         {27, "C-RNTI"},
-        {28, "Truncated BSR (unsupported)"},
+        {28, "T-BSR"},
         {29, "S-BSR"},
         {30, "L-BSR"},
         {31, "Padding"},
+};
+
+const ValueName LteMacULTransportBlock_Mac_CE_RBRQ_ULorDL[] = {
+        {0, "DL"},
+        {1, "UL"},
 };
 
 const int LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[] = {
@@ -1587,7 +1592,7 @@ const int LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[] = {
 const Fmt LteMacULTransportBlock_Mac_Hdr[] = {
         {UINT,        "Header Field",    1},
         {PLACEHOLDER, "LC ID",           0},
-        {PLACEHOLDER, "Len",         0},
+        {PLACEHOLDER, "Len",             0},
 };
 
 const Fmt LteMacULTransportBlock_Mac_Hdr_L1[] = {
@@ -1612,37 +1617,46 @@ const Fmt LteMacULTransportBlock_Mac_CE_L_BSR[] = {
         {PLACEHOLDER, "BSR LCG 3 (bytes)", 0},
 };
 
-const Fmt LteMacULTransportBlock_Mac_CE_S_BSR[] = {
-        {UINT,        "S-BSR Field",     1},
+const Fmt LteMacULTransportBlock_Mac_CE_S_T_BSR[] = {
+        {UINT,        "S/T-BSR Field",     1},
 };
 
-const Fmt LteMacULTransportBlock_Mac_CE_S_BSR_LCG0[] = {
+const Fmt LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG0[] = {
         {PLACEHOLDER, "BSR LCG 0",       0},
         {PLACEHOLDER, "BSR LCG 0 (bytes)", 0},
 };
 
-const Fmt LteMacULTransportBlock_Mac_CE_S_BSR_LCG1[] = {
+const Fmt LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG1[] = {
         {PLACEHOLDER, "BSR LCG 1",       0},
         {PLACEHOLDER, "BSR LCG 1 (bytes)", 0},
 };
 
-const Fmt LteMacULTransportBlock_Mac_CE_S_BSR_LCG2[] = {
+const Fmt LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG2[] = {
         {PLACEHOLDER, "BSR LCG 2",       0},
         {PLACEHOLDER, "BSR LCG 2 (bytes)", 0},
 };
 
-const Fmt LteMacULTransportBlock_Mac_CE_S_BSR_LCG3[] = {
+const Fmt LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG3[] = {
         {PLACEHOLDER, "BSR LCG 3",       0},
         {PLACEHOLDER, "BSR LCG 3 (bytes)", 0},
 };
 
 const Fmt LteMacULTransportBlock_Mac_CE_C_RNTI[] = {
-        {UINT,        "C-RNTI",    2},
+        {BYTE_STREAM, "C-RNTI",          2},
 };
 
 const Fmt LteMacULTransportBlock_Mac_CE_PHR[] = {
         {UINT,        "PHR Field",       1},
         {PLACEHOLDER, "PHR Ind",         0},
+};
+
+const Fmt LteMacULTransportBlock_Mac_CE_RBRQ[] = {
+        {UINT,        "RBRQ Field 1",     1},
+        {UINT,        "RBRQ Field 2",     1},
+        {PLACEHOLDER, "LCID (RBRQ)",      0},
+        {PLACEHOLDER, "UL/DL",            0},
+        {PLACEHOLDER, "Bit Rate",         0},
+        {PLACEHOLDER, "Bit Rate Multiplier", 0},
 };
 //xyf
 
@@ -1699,6 +1713,71 @@ const Fmt LteMacDLTransportBlock_SubpktV4_SampleFmt[] = {
         {UINT,        "HDR LEN",         1},
         // Mac Hdr + CE and UL TB Other Structure
 };
+
+//xyf
+const ValueName LteMacDLTransportBlock_Mac_Hdr_LCId[] = {
+        {0, "CCCH (unsupported)"},
+        {1, "1"},
+        {2, "2"},
+        {3, "3"},
+        {4, "4"},
+        {5, "5"},
+        {6, "6"},
+        {7, "7"},
+        {8, "8"},
+        {9, "9"},
+        {10, "10"},
+        {11, "Reserved (unsupported)"},
+        {12, "Reserved (unsupported)"},
+        {13, "Reserved (unsupported)"},
+        {14, "Reserved (unsupported)"},
+        {15, "Reserved (unsupported)"},
+        {16, "Extended LC ID field (unsupported)"},
+        {17, "DCQR Command (unsupported)"},
+        {18, "Activation/Deactivation of PDCP Duplication (unsupported)"},
+        {19, "Hibernation (1 octet) (unsupported)"},
+        {20, "Hibernation (4 octet) (unsupported)"},
+        {21, "Activation/Deactivation of CSI-RS (unsupported)"},
+        {22, "Recommended bit rate (unsupported)"},
+        {23, "SC-PTM Stop Indication (unsupported)"},
+        {24, "Activation/Deactivation (4 octet) (unsupported)"},
+        {25, "SC-MCCH, SC-MTCH (unsupported)"},
+        {26, "Long DRX Command"},
+        {27, "Activation/Deactivation (1 octet)"},
+        {28, "CRID"},
+        {29, "TA"},
+        {30, "DRX Command"},
+        {31, "Padding"},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_Hdr[] = {
+        {UINT,        "Header Field",    1},
+        {PLACEHOLDER, "LC ID",           0},
+        {PLACEHOLDER, "Len",             0},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_Hdr_L1[] = {
+        {UINT,        "L1 Field",        1},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_Hdr_L2[] = {
+        {UINT,        "L2 Field",        1},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_CE_TA[] = {
+        {UINT,        "TA Field",        1},
+        {PLACEHOLDER, "TAG Id",          0},
+        {PLACEHOLDER, "TA Command",      0},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_CE_AD1[] = {
+        {UINT,        "AD Field",        1},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_CE_CRID[] = {
+        {BYTE_STREAM, "CRID",            6},
+};
+//xyf
 
 // ----------------------------------------------------------
 // LTE Mac UL Tx Statistics
