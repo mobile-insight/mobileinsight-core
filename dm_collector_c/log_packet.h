@@ -1716,7 +1716,7 @@ const Fmt LteMacDLTransportBlock_SubpktV4_SampleFmt[] = {
 
 //xyf
 const ValueName LteMacDLTransportBlock_Mac_Hdr_LCId[] = {
-        {0, "CCCH (unsupported)"},
+        {0, "CCCH"},
         {1, "1"},
         {2, "2"},
         {3, "3"},
