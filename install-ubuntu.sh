@@ -45,7 +45,7 @@ fi
 echo "Configuring Wireshark sources for ws_dissector compilation..."
 cd ${WIRESHARK_SRC_PATH}
 ./configure --disable-wireshark > /dev/null 2>&1
-if [[ $? != 0 ]]; then
+if [ $? != 0 ]; then
     echo "Error when executing '${WIRESHARK_SRC_PATH}/configure --disable-wireshark'."
     echo "You need to manually fix it before continuation. Exiting with status 3"
     exit 3
@@ -78,15 +78,17 @@ fi
 
 if [ "$FindWiresharkLibrary" = false ] ; then
     echo "Compiling wireshark-${ws_ver} from source code, it may take a few minutes..."
-    make > /dev/null 2>&1
-    if [[ $? != 0 ]]; then
+    # make -j8 > /dev/null 2>&1
+    NPROC=$(nproc)
+    make -j$NPROC
+    if [ $? != 0 ]; then
         echo "Error when compiling wireshark-${ws_ver} from source code'."
         echo "You need to manually fix it before continuation. Exiting with status 2"
         exit 2
     fi
     echo "Installing wireshark-${ws_ver}"
     sudo make install > /dev/null 2>&1
-    if [[ $? != 0 ]]; then
+    if [ $? != 0 ]; then
         echo "Error when installing wireshark-${ws_ver} compiled from source code'."
         echo "You need to manually fix it before continuation. Exiting with status 2"
         exit 2
@@ -113,9 +115,9 @@ sudo chmod 755 ${PREFIX}/bin/ws_dissector
 
 echo "Installing dependencies for mobileinsight GUI..."
 sudo apt-get -y install python-wxgtk3.0
-which pip
-if [[ $? != 0 ]] ; then
-    sudo apt-get -y install python-pip
+which pip3
+if [ $? != 0 ]; then
+    sudo apt-get -y install python3-pip
 fi
 if ${PIP} install matplotlib pyserial > /dev/null; then
     echo "pyserial and matplotlib are successfully installed!"
@@ -139,7 +141,7 @@ sudo ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
 echo "Testing the MobileInsight offline analysis example."
 cd ${MOBILEINSIGHT_PATH}/examples
 ${PYTHON} offline-analysis-example.py
-if [[ $? == 0 ]] ; then
+if [ $? -eq 0 ]; then
     echo "Successfully ran the offline analysis example!"
 else
     echo "Failed to run offline analysis example!"

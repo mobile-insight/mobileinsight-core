@@ -183,13 +183,16 @@ class OfflineReplayer(Monitor):
                 dm_collector_c.reset()
                 while True:
                     s = self._input_file.read(64)
-                    if not s:  # EOF encountered
+
+                    if s:
+                        dm_collector_c.feed_binary(s)
+                    decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
+                                                                True,   # include_timestamp
+                                                                )
+                    if not s and not decoded:
+                        # EOF encountered and no message can be received any more
                         break
 
-                    dm_collector_c.feed_binary(s)
-                    decoded = dm_collector_c.receive_log_packet(self._skip_decoding,
-                                                                True,  # include_timestamp
-                                                                )
                     if decoded:
                         try:
                             before_decode_time = time.time()
@@ -199,7 +202,7 @@ class OfflineReplayer(Monitor):
                             after_decode_time = time.time()
                             decoding_inter += after_decode_time - before_decode_time
 
-                            if type_id in self._type_names:
+                            if type_id in self._type_names or type_id == "Custom_Packet":
                                 event = Event(timeit.default_timer(),
                                               type_id,
                                               packet)
