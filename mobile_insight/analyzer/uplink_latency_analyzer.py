@@ -169,7 +169,7 @@ class UplinkLatencyAnalyzer(Analyzer):
                                 if (t_now not in self.tmp_dict):
                                     self.tmp_dict[t_now] = {}
                                 self.tmp_dict[t_now]['Waiting Latency'] = self.__f_time_diff(packet[2], packet[3])
-                                self.tmp_dict[t_now]['Tx Latency'] = self.__f_time_diff(packet[2], self.__f_time())
+                                self.tmp_dict[t_now]['Tx Latency'] = self.__f_time_diff(packet[3], self.__f_time())
                                 
                                 # print [packet[0], self.__f_time_diff(packet[2], packet[3]), self.__f_time_diff(packet[2], self.__f_time())]
 
