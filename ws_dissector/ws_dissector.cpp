@@ -30,38 +30,39 @@
     #error Your compiler is not either MS Visual C compiler or GNU gcc.
 #endif
 
-#define WS_DISSECTOR_VERSION "2.0.1"
+#define WS_DISSECTOR_VERSION "3.2.7"
 
 const int BUFFER_SIZE = 2000;
 guchar buffer[BUFFER_SIZE] = {};
 
-void print_tree(const proto_tree* tree, int level)
-{
-    if(tree == NULL)
-        return;
-
-    for(int i=0; i<level; ++i)
-        printf("    ");
-
-    gchar field_str[ITEM_LABEL_LENGTH + 1] = {0};
-    if(tree->finfo->rep == NULL)
-        proto_item_fill_label(tree->finfo, field_str);
-    else
-        strcpy(field_str, tree->finfo->rep->representation);
-
-    if(!PROTO_ITEM_IS_HIDDEN(tree))
-        printf("%s\n", field_str);
-
-    print_tree(tree->first_child, level+1);
-    print_tree(tree->next, level);
-}
+// void print_tree(const proto_tree* tree, int level)
+// {
+//     if(tree == NULL)
+//         return;
+// 
+//     for(int i=0; i<level; ++i)
+//         printf("    ");
+// 
+//     gchar field_str[ITEM_LABEL_LENGTH + 1] = {0};
+//     if(tree->finfo->rep == NULL)
+//         proto_item_fill_label(tree->finfo, field_str);
+//     else
+//         strcpy(field_str, tree->finfo->rep->representation);
+// 
+//     if(!PROTO_ITEM_IS_HIDDEN(tree))
+//         printf("%s\n", field_str);
+// 
+//     print_tree(tree->first_child, level+1);
+//     print_tree(tree->next, level);
+// }
 
 void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
 {
-    wtap_pkthdr phdr;
+    wtap_rec phdr;
     frame_data fdata;
 
-    memset(&phdr, 0, sizeof(wtap_pkthdr));
+    memset(&phdr, 0, sizeof(wtap_rec));
+    phdr.rec_header.packet_header.pkt_encap = WTAP_ENCAP_USER1;
     frame_data_init(&fdata, 0, &phdr, 0, 0);
 
     // fdata = (frame_data*)g_new(frame_data, 1);
@@ -78,8 +79,8 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
     // fdata->file_off = 0;
     // fdata->subnum = 0;
     // fdata.lnk_t = WTAP_ENCAP_ETHERNET;
-    fdata.lnk_t = WTAP_ENCAP_USER1;
-    fdata.flags.encoding = PACKET_CHAR_ENC_CHAR_ASCII;
+    // fdata.lnk_t = WTAP_ENCAP_USER1;
+    fdata.encoding = PACKET_CHAR_ENC_CHAR_ASCII;
     // fdata->flags.visited = 0;
     // fdata->flags.marked = 0;
     // fdata->flags.ref_time = 0;
@@ -92,7 +93,7 @@ void try_dissect(epan_t *session, size_t data_len, const guchar* raw_data)
     epan_dissect_run(edt, 0, &phdr, tvb_new_real_data(raw_data, data_len, data_len), &fdata, NULL);
     // const proto_tree *payload_tree = edt->tree->first_child->next;
     // print_tree(payload_tree, 0);
-    write_pdml_proto_tree(edt, stdout);
+    write_pdml_proto_tree(NULL, NULL, PF_NONE, edt, NULL, stdout, FALSE); 
 
     epan_dissect_free(edt);
     frame_data_destroy(&fdata);
@@ -120,15 +121,22 @@ int main(int argc, char** argv)
     // to prevent "started_with_special_privs: assertion failed" error.
     init_process_policies();
 
-    epan_init(register_all_protocols, register_all_protocol_handoffs,
-                NULL, NULL);
+    wtap_init(TRUE);
+    epan_init(NULL, NULL, TRUE);
 
     proto_register_aww();
     proto_reg_handoff_aww();
 
-    epan_t *session = epan_new();
+	static const struct packet_provider_funcs funcs = {
+		NULL,
+		NULL,
+		NULL,
+		NULL
+	};
+    epan_t *session = epan_new(NULL, &funcs);
     char s[] = "uat:user_dlts:\"User 1 (DLT=148)\",\"aww\",\"0\",\"\",\"0\",\"\"";
-    switch (prefs_set_pref(s)) {
+    char *errmsg = NULL;
+    switch (prefs_set_pref(s, &errmsg)) {
     case PREFS_SET_OK:
         break;
 

@@ -1,12 +1,13 @@
 #include "config.h"
 #include <epan/epan.h>
 #include <epan/packet.h>
+#include <epan/proto_data.h>
 #include <epan/dissectors/packet-pdcp-lte.h>
 
 #include <stdio.h>
 #include "packet-aww.h"
 
-#define WS_DISSECTOR_VERSION "2.0.1"
+#define WS_DISSECTOR_VERSION "3.2.7"
 
 static const int PROTO_MAX = 1000;
 
@@ -185,8 +186,8 @@ dissect_extra_pdcp_lte_info(tvbuff_t *tvb, packet_info *pinfo, gint32 offset)
 }
 
 
-static void
-dissect_aww(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
+static int
+dissect_aww(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void *data)
 {
     col_set_str(pinfo->cinfo, COL_PROTOCOL, "Automator Wireshark Wrapper");
     /* Clear out stuff in the info column */
@@ -217,6 +218,7 @@ dissect_aww(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
             }
         }
     }
+    return tvb_reported_length(tvb);
 }
 
 
@@ -250,6 +252,7 @@ proto_register_aww(void)
     proto_table = register_dissector_table(
                     "aww.proto",
                     "AWW protocol",
+                    proto_aww,
                     FT_UINT16,
                     BASE_DEC
                     );
@@ -271,14 +274,7 @@ proto_reg_handoff_aww(void)
     dissector_handle_t handle = NULL;
     for (int i = 0; i <= PROTO_MAX; i++) {
         if (protos[i] != NULL) {
-            handle = NULL;
             handle = find_dissector(protos[i]);
-            // printf ("[MoonSky]: find_dissector[%s]: ", protos[i]);
-            // if (handle != NULL) {
-            //     printf ("Success\n");
-            // } else {
-            //     printf ("Fail\n");
-            // }
             dissector_add_uint("aww.proto", i, handle);
         }
     }
