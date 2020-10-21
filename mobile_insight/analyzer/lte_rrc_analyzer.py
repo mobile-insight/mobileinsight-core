@@ -374,7 +374,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 field_val['lte-rrc.threshServingLow'] = None  # mandatory
                 field_val['lte-rrc.s_NonIntraSearch'] = "inf"
                 field_val['lte-rrc.q_Hyst'] = 0
-                field_val['lte-rrc.q_RxLevMin'] = None  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
                 field_val['lte-rrc.p_Max'] = 23  # default value for UE category 3
                 field_val['lte-rrc.s_IntraSearch'] = "inf"
                 field_val['lte-rrc.t_ReselectionEUTRA'] = None
@@ -404,7 +404,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 self.__config[cur_pair].sib.intra_freq_config = LteRrcSibIntraFreqConfig(
                     int(field_val['lte-rrc.t_ReselectionEUTRA']),
-                    int(field_val['lte-rrc.q_RxLevMin']) * 2,
+                    int(field_val['lte-rrc.utra_q_RxLevMin']) * 2,
                     int(field_val['lte-rrc.p_Max']),
                     float(field_val['lte-rrc.s_IntraSearch']) * 2)
 
@@ -413,7 +413,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     self.profile.update("LteRrcProfile:" + str(self.__status.id) + "_" + str(
                         self.__status.freq) + ".idle.intra_freq_config",
                                         {'tReselection': field_val['lte-rrc.t_ReselectionEUTRA'],
-                                         'q_RxLevMin': str(int(field_val['lte-rrc.q_RxLevMin']) * 2),
+                                         'q_RxLevMin': str(int(field_val['lte-rrc.utra_q_RxLevMin']) * 2),
                                          'p_Max': field_val['lte-rrc.p_Max'],
                                          's_IntraSearch': str(float(field_val['lte-rrc.s_IntraSearch']) * 2)})
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
@@ -426,7 +426,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 # FIXME: set to the default value based on TS36.331
                 field_val['lte-rrc.dl_CarrierFreq'] = None  # mandatory
                 field_val['lte-rrc.t_ReselectionEUTRA'] = None  # mandatory
-                field_val['lte-rrc.q_RxLevMin'] = None  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
                 field_val['lte-rrc.p_Max'] = 23  # optional, r.f. 36.101
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
                 field_val['lte-rrc.threshX_High'] = None  # mandatory
@@ -446,7 +446,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     "LTE",
                     neighbor_freq,
                     int(field_val['lte-rrc.t_ReselectionEUTRA']),
-                    int(field_val['lte-rrc.q_RxLevMin']) * 2,
+                    int(field_val['lte-rrc.utra_q_RxLevMin']) * 2,
                     int(field_val['lte-rrc.p_Max']),
                     int(field_val['lte-rrc.cellReselectionPriority']),
                     int(field_val['lte-rrc.threshX_High']) * 2,
@@ -460,7 +460,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                         {'rat': 'LTE',
                                          'freq': str(neighbor_freq),
                                          'tReselection': field_val['lte-rrc.t_ReselectionEUTRA'],
-                                         'q_RxLevMin': str(int(field_val['lte-rrc.q_RxLevMin']) * 2),
+                                         'q_RxLevMin': str(int(field_val['lte-rrc.utra_q_RxLevMin']) * 2),
                                          'p_Max': field_val['lte-rrc.p_Max'],
                                          'priority': field_val['lte-rrc.cellReselectionPriority'],
                                          'threshx_high': str(int(field_val['lte-rrc.threshX_High']) * 2),
@@ -494,7 +494,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 # Default value setting
                 # FIXME: set to default based on TS25.331
                 field_val['lte-rrc.carrierFreq'] = None  # mandatory
-                field_val['lte-rrc.q_RxLevMin'] = None  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
                 field_val['lte-rrc.p_MaxUTRA'] = None  # mandatory
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
                 field_val['lte-rrc.threshX_High'] = None  # mandatory
@@ -513,7 +513,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     "UTRA",
                     neighbor_freq,
                     None,  # For 3G, tReselection is not in this IE
-                    int(field_val['lte-rrc.q_RxLevMin']) * 2,
+                    int(field_val['lte-rrc.utra_q_RxLevMin']) * 2,
                     int(field_val['lte-rrc.p_MaxUTRA']),
                     int(field_val['lte-rrc.cellReselectionPriority']),
                     int(field_val['lte-rrc.threshX_High']) * 2,
@@ -527,7 +527,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                         {'rat': 'UTRA',
                                          'freq': str(neighbor_freq),
                                          'tReselection': 'null',
-                                         'q_RxLevMin': str(int(field_val['lte-rrc.q_RxLevMin']) * 2),
+                                         'q_RxLevMin': str(int(field_val['lte-rrc.utra_q_RxLevMin']) * 2),
                                          'p_Max': field_val['lte-rrc.p_MaxUTRA'],
                                          'priority': field_val['lte-rrc.cellReselectionPriority'],
                                          'threshx_high': str(int(field_val['lte-rrc.threshX_High']) * 2),
@@ -555,7 +555,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 # Default value setting
                 # FIXME: set to default based on TS25.331
                 field_val['lte-rrc.startingARFCN'] = None  # mandatory
-                field_val['lte-rrc.q_RxLevMin'] = None  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
                 field_val['lte-rrc.p_MaxGERAN'] = 0  # mandatory
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
                 field_val['lte-rrc.threshX_High'] = None  # mandatory
@@ -574,7 +574,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     "GERAN",
                     neighbor_freq,
                     None,  # For 3G, tReselection is not in this IE
-                    int(field_val['lte-rrc.q_RxLevMin']) * 2,
+                    int(field_val['lte-rrc.utra_q_RxLevMin']) * 2,
                     int(field_val['lte-rrc.p_MaxGERAN']),
                     int(field_val['lte-rrc.cellReselectionPriority']),
                     int(field_val['lte-rrc.threshX_High']) * 2,
@@ -588,7 +588,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                         {'rat': 'GERAN',
                                          'freq': str(neighbor_freq),
                                          'tReselection': 'null',
-                                         'q_RxLevMin': str(int(field_val['lte-rrc.q_RxLevMin']) * 2),
+                                         'q_RxLevMin': str(int(field_val['lte-rrc.utra_q_RxLevMin']) * 2),
                                          'p_Max': field_val['lte-rrc.p_MaxGERAN'],
                                          'priority': field_val['lte-rrc.cellReselectionPriority'],
                                          'threshx_high': str(int(field_val['lte-rrc.threshX_High']) * 2),

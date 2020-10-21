@@ -578,7 +578,7 @@ class MmAnalyzer(Analyzer):
                         if attr.get("name") in (
                             "lte-rrc.threshX_High",
                             "lte-rrc.threshX_Low",
-                                "lte-rrc.q_RxLevMin"):
+                                "lte-rrc.utra_q_RxLevMin"):
                             info[attr.get("name")[8:]] = re.findall(
                                 Pattern1, s)[0]
                         elif attr.get("name") in ("lte-rrc.carrierFreq", "lte-rrc.cellReselectionPriority", "lte-rrc.p_MaxUTRA", "lte-rrc.q_QualMin"):
