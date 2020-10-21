@@ -1,20 +1,16 @@
 #!/bin/bash
 # Installation script for mobileinsight-core on macOS
 # It installs package under /usr/local folder
-# Author  : Zengwen Yuan
-# Date    : 2018-04-12
-# Modified: Yunqi Guo
-# Date    : 2019-11-02
-# Version : 3.1
+# Author  : Zengwen Yuan, Yunqi Guo, Yuanjie Li
+# Date    : 2020-10-20
+# Version : 4.0
 
-# set -e
-# set -u
 
 echo "** Installer Script for mobileinsight-core on macOS **"
 echo " "
-echo "  Author : Zengwen Yuan (zyuan [at] cs.ucla.edu)"
-echo "  Date   : 2018-04-12"
-echo "  Rev    : 3.1"
+echo "  Author : Zengwen Yuan (zyuan [at] cs.ucla.edu), Yuanjie Li (liyuanjie08 [at] gmail.com)"
+echo "  Date   : 2020-10-21"
+echo "  Rev    : 4.0"
 echo "  Usage  : ./install-macos.sh"
 echo " "
 
@@ -22,7 +18,7 @@ echo "Upgrading MobileInsight..."
 yes | ./uninstall.sh
 
 # Wireshark version to install
-ws_ver=2.0.13
+ws_ver=3.2.7
 
 # Use local library path
 PREFIX=/usr/local
@@ -106,24 +102,41 @@ else
 fi
 
 echo -e "${GREEN}[INFO]${NC} Installing dependencies for compiling Wireshark libraries"
-brew install wget gettext libffi
+brew install wget gettext libffi qt lua
 
 echo -e "${GREEN}[INFO]${NC} Checking Wireshark sources to compile ws_dissector"
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
     echo -e "${GREEN}[INFO]${NC} You do not have source codes for Wireshark version ${ws_ver}, downloading..."
-    wget https://www.wireshark.org/download/src/all-versions/wireshark-${ws_ver}.tar.bz2
-    tar xf wireshark-${ws_ver}.tar.bz2
-    rm wireshark-${ws_ver}.tar.bz2
+    wget https://www.wireshark.org/download/src/all-versions/wireshark-${ws_ver}.tar.xz
+    tar xf wireshark-${ws_ver}.tar.xz
+    rm wireshark-${ws_ver}.tar.xz
 fi
 
 echo -e "${GREEN}[INFO]${NC} Configuring Wireshark sources for ws_dissector compilation..."
 cd ${WIRESHARK_SRC_PATH}
-./configure --disable-wireshark > /dev/null 2>&1
+cmake --disable-wireshark . > /dev/null 2>&1
 if [[ $? != 0 ]]; then
-    echo -e "${YELLOW}[WARNING]${NC} Error when executing '${WIRESHARK_SRC_PATH}/configure --disable-wireshark'."
+    echo -e "${YELLOW}[WARNING]${NC} Error when executing '${WIRESHARK_SRC_PATH}/ccmake --disable-wireshark .'."
     echo "You need to manually fix it before continuation. Exiting with status 3."
     exit 3
 fi
+
+
+# echo "Compiling wireshark-${ws_ver} from source code, it may take a few minutes..."
+# make -j $(grep -c ^processor /proc/cpuinfo)
+# if [ $? != 0 ]; then
+#     echo "Error when compiling wireshark-${ws_ver} from source code'."
+#     echo "You need to manually fix it before continuation. Exiting with status 2"
+#     exit 2
+# fi
+# echo "Installing wireshark-${ws_ver}"
+# sudo make install > /dev/null 2>&1
+# if [ $? != 0 ]; then
+#     echo "Error when installing wireshark-${ws_ver} compiled from source code'."
+#     echo "You need to manually fix it before continuation. Exiting with status 2"
+#     exit 2
+# fi
+
 
 echo -e "${GREEN}[INFO]${NC} Compiling Wireshark dissector for MobileInsight..."
 cd ${MOBILEINSIGHT_PATH}/ws_dissector
