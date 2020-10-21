@@ -2,8 +2,8 @@
 # Installation script for mobileinsight-core on Ubuntu
 # It installs package under /usr/local folder
 # Author  : Zengwen Yuan, Haotian Deng
-# Date    : 2017-11-13
-# Version : 3.0
+# Date    : 2020-10-20
+# Version : 4.0
 
 # set -e
 # set -u
