@@ -178,7 +178,8 @@ fi
 
 echo -e "${GREEN}[INFO]${NC} Installing dependencies for MobileInsight GUI..."
 echo -e "${GREEN}[INFO]${NC} Installing wxPython..."
-brew install wxpython
+# brew install wxpython
+sudo pip3 install wxpython
 
 if [[ ! -f ${PREFIX}/bin/${PYTHON} ]] ; then
     echo -e "${YELLOW}[WARNING]${NC} Cannot find python installed by Homebrew under /usr/local"
