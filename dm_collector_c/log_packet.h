@@ -3989,6 +3989,9 @@ const ValueName ValueNameDCIFormat[] = {
         {12, "Format 60A"},
         {13, "Format 61A"},
         {15, "Reserved"},
+
+        //xyf
+        {14, "Format 62"},
 };
 
 const ValueName ValueNameMatchOrNot[] = {
@@ -4027,6 +4030,10 @@ const ValueName ValueNamePruneStatus[] = {
         //added for pdcch_decoding v24
         {200, "PDCCH_DEBUG_SUCCESS_DCI60A"},
         {201, "PDCCH_DEBUG_SUCCESS_DCI61A"},
+
+        //xyf
+        {202, "PDCCH_DEBUG_SUCCESS_DCI62"},
+        {216, "PDCCH_DEBUG_SUCCESS_DCI62_EARLY_TERMINATION"},
 
 };
 
