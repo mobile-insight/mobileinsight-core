@@ -640,6 +640,7 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
                                 &arg_skip_decoding, &arg_include_timestamp))
         return NULL;
+
     if (arg_skip_decoding != NULL) {
         Py_INCREF(arg_skip_decoding);
         skip_decoding = (PyObject_IsTrue(arg_skip_decoding) == 1);
@@ -652,8 +653,8 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
     }
 
     while (success) {
-        // keep reading the buffer if no message has been sent out and there
-        // are any frames remain.
+
+        // Keep reading the buffer in case there are any frames remained.
 
         success = get_next_frame(frame, crc_correct);
         // printf("success=%d crc_correct=%d is_log_packet=%d\n", success, crc_correct, is_log_packet(frame.c_str(), frame.size()));
@@ -683,7 +684,7 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
 
             if (!manager_export_binary(&g_emanager, frame.c_str(), frame.size()))
                 continue;
-                // Py_RETURN_NONE;
+
             if (is_log_packet(frame.c_str(), frame.size())) {
                 const char *s = frame.c_str();
                 PyObject *decoded = decode_log_packet(s + 2,  // skip first two bytes
@@ -696,8 +697,7 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
                 } else {
                     return decoded;
                 }
-            }
-            else if (is_debug_packet(frame.c_str(), frame.size())) {
+            } else if (is_debug_packet(frame.c_str(), frame.size())) {
                 //Yuanjie: the original debug msg does not have header...
 
                 unsigned short n_size = frame.size()+sizeof(char)*14;

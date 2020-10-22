@@ -1559,6 +1559,47 @@ _decode_lte_phy_pdsch_demapper_config(const char *b, int offset, size_t length,
 }
 
 static int
+_decode_lte_phy_interlog(const char *b, int offset, size_t length,
+                        PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+
+    switch (pkt_ver) {
+    case 2:
+        {
+            offset += _decode_by_fmt(LtePhyInterlogFmt_v2_Header,
+                                        ARRAY_SIZE(LtePhyInterlogFmt_v2_Header, Fmt),
+                                        b, offset, length, result);
+            int n_neighbor_cells = _search_result_int(result, "Number of Neighbor Cells");
+
+            PyObject *t = NULL;
+            PyObject *result_allcells = NULL;
+            // decode "Neighbor Cells"
+            result_allcells = PyList_New(0);
+            for (int i = 0; i < n_neighbor_cells; i++) {
+                PyObject *result_cell = PyList_New(0);
+                offset += _decode_by_fmt(LtePhyInterlogFmt_v2_Neighbor_Cell,
+                                            ARRAY_SIZE(LtePhyInterlogFmt_v2_Neighbor_Cell, Fmt),
+                                            b, offset, length, result_cell);
+                t = Py_BuildValue("(sOs)", "Ignored", result_cell, "dict");
+                PyList_Append(result_allcells, t);
+                Py_DECREF(t);
+                Py_DECREF(result_cell);
+            }
+            t = Py_BuildValue("(sOs)", "Neighbor Cells", result_allcells, "list");
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            Py_DECREF(result_allcells);
+
+            return offset - start;
+        }
+    default:
+        printf("(MI)Unknown LTE PHY InterLog version: 0x%x\n", pkt_ver);
+        return 0;
+    }
+}
+
+static int
 _decode_lte_phy_cmlifmr(const char *b, int offset, size_t length,
                         PyObject *result) {
     int start = offset;
@@ -10290,6 +10331,13 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                                      ARRAY_SIZE(LtePhyPdschDemapperConfigFmt, Fmt),
                                      b, offset, length, result);
             offset += _decode_lte_phy_pdsch_demapper_config(b, offset, length, result);
+            break;
+
+        case LTE_PHY_Inter_Freq_Log:
+            offset += _decode_by_fmt(LtePhyInterlogFmt,
+                                        ARRAY_SIZE(LtePhyInterlogFmt, Fmt),
+                                        b, offset, length, result);
+            offset += _decode_lte_phy_interlog(b, offset, length, result);
             break;
 
         case LTE_PHY_Connected_Mode_LTE_Intra_Freq_Meas_Results:

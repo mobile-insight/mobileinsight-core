@@ -732,6 +732,35 @@ const ValueName LtePhyPdschDemapperConfig_Joint_Demod_Skip_Reason[] = {
 };
 
 // ------------------------------------------------------------
+// LTE_PHY_Inter_Freq_Log
+const Fmt LtePhyInterlogFmt [] = {
+    {UINT, "Version", 1},
+};
+
+const Fmt LtePhyInterlogFmt_v2_Header [] = {
+    {SKIP, NULL, 3},        // Unknown
+    {UINT, "Serving Cell E-ARFCN", 4}, 
+    {UINT, "Serving Physical Cell ID", 2},  //serving cell ID
+    {UINT, "Sub-frame Number", 2},
+    {RSRP, "RSRP(dBm)", 2}, //Filtered RSRP (dBm)
+    {SKIP, NULL, 2},    // Duplicated
+    {RSRQ, "RSRQ(dB)", 2}, //Filtered RSRQ (dBm)
+    {SKIP, NULL, 2},    // Duplicated
+    {UINT, "E-ARFCN", 4}, 
+    {UINT, "Number of Neighbor Cells", 1},
+    {UINT, "Number of Detected Cells", 1},
+    {UINT, "Meas BW", 2}
+};
+
+const Fmt LtePhyInterlogFmt_v2_Neighbor_Cell [] = {
+    {UINT, "Physical Cell ID", 2},  //cell ID
+    {RSRP, "RSRP(dBm)", 2},
+    {SKIP, NULL, 2},    // Duplicated
+    {RSRQ, "RSRQ(dB)", 2},
+    {SKIP, NULL, 4}     // Duplicated & reserved
+};
+
+// ------------------------------------------------------------
 // LTE_PHY_Connected_Mode_LTE_Intra_Freq_Meas_Results
 const Fmt LtePhyCmlifmrFmt[] = {
         {UINT, "Version",            1},
@@ -4184,6 +4213,8 @@ bool is_log_packet (const char *b, size_t length);
 bool is_debug_packet (const char *b, size_t length);   //Yuanjie: test if it's a debugging message
 bool is_custom_packet (const char *b, size_t length);
 
+bool is_custom_packet (const char *b, size_t length);
+
 // Given a binary string, try to decode it as a log packet.
 // Return a specially formatted Python list that stores the decoding result.
 // If skip_decoding is True, only the header would be decoded.
@@ -4192,8 +4223,8 @@ PyObject *decode_log_packet(const char *b, size_t length, bool skip_decoding);
 PyObject * decode_custom_packet (const char *b, size_t length);
 void decode_custom_packet_payload (const char *b, size_t length, PyObject* result);
 
-void on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject* result);
 
+void on_demand_decode(const char *b, size_t length, LogPacketType type_id, PyObject *result);
 
 
 PyObject *decode_log_packet_modem(const char *b, size_t length, bool skip_decoding);
