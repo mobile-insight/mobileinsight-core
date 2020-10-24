@@ -387,7 +387,7 @@ const ValueName NrRrcOtaPduType_v7[] = {
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
 
-const ValueName NrRrcOtaPduType_v8[] = {
+const ValueName NrRrcOtaPduType_v8s[] = {
 
         // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
         // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
@@ -404,25 +404,6 @@ const ValueName NrRrcOtaPduType_v8[] = {
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
 
-
-
-const ValueName NrRrcOtaPduType_v7[] = {
-//        {0x02, "LTE-RRC_BCCH_DL_SCH"},
-//        {0x04, "LTE-RRC_PCCH"},
-//        {0x05, "LTE-RRC_DL_CCCH"},
-//        {0x06, "LTE-RRC_DL_DCCH"},
-//        {0x07, "LTE-RRC_UL_CCCH"},
-//        {0x08, "LTE-RRC_UL_DCCH"},
-};
-
-const ValueName NrRrcOtaPduType_v8[] = {
-//        {0x02, "LTE-RRC_BCCH_DL_SCH"},
-//        {0x04, "LTE-RRC_PCCH"},
-//        {0x05, "LTE-RRC_DL_CCCH"},
-//        {0x06, "LTE-RRC_DL_DCCH"},
-//        {0x07, "LTE-RRC_UL_CCCH"},
-//        {0x08, "LTE-RRC_UL_DCCH"},
-};
 
 // ------------------------------------------------------------
 // LTE NAS Plain
