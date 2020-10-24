@@ -10102,6 +10102,63 @@ static int _decode_lte_pdcch_phich_indication_report_payload(const char *b,
     }
 }
 
+
+// ----------------------------------------------------------------------------
+
+
+static int
+_decode_nr_rrc_ota(const char *b, int offset, size_t length,
+                    PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Pkt Version");
+
+    //pkt_ver==8 (Xiaomi)
+    if (pkt_ver == 8) {
+
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+
+        const char *type_name = search_name(NrRrcOtaPduType_v8,
+                                            ARRAY_SIZE(NrRrcOtaPduType_v8, ValueName),
+                                            pdu_number);
+
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown 5G NR RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t = Py_BuildValue("(sy#s)",
+                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
+
+    } else if (pkt_ver = 7) {
+        //pkt_ver==8 (Samsung)
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+        const char *type_name = search_name(NrRrcOtaPduType_v7,
+                                            ARRAY_SIZE(NrRrcOtaPduType_v7, ValueName),
+                                            pdu_number);
+
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown 5G NR RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t = Py_BuildValue("(sy#s)",
+                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
+    }
+}
+
+
 // ----------------------------------------------------------------------------
 
 //Yuanjie: decode modem's internal debugging message
@@ -10220,7 +10277,8 @@ is_custom_packet (const char *b, size_t length) {
 }
 
 void
-on_demand_decode(const char *b, size_t length, LogPacketType type_id, PyObject *result) {
+on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject* result)
+{
     int offset = 0;
     switch (type_id) {
         case CDMA_Paging_Channel_Message:
@@ -10728,6 +10786,12 @@ on_demand_decode(const char *b, size_t length, LogPacketType type_id, PyObject *
                                      ARRAY_SIZE(LtePhyCncm_Fmt, Fmt),
                                      b, offset, length, result);
             offset += _decode_lte_phy_connected_neighbor_cell_meas_payload(b, offset, length, result);
+            break;
+        case NR_RRC_OTA_Packet:
+            offset += _decode_by_fmt(NrRrcOtaPacketFmt,
+                                     ARRAY_SIZE(NrRrcOtaPacketFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_nr_rrc_ota(b, offset, length, result);
             break;
         default:
             break;

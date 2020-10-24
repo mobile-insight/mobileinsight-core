@@ -354,6 +354,41 @@ const ValueName LteRrcOtaPduType_v19[] = {
 };
 
 // ------------------------------------------------------------
+// NR_RRC_OTA_Packet
+const Fmt NrRrcOtaPacketFmt[] = {
+        {UINT, "Pkt Version",        1},    //version
+        {UINT, "Unknown", 			 3},    //Maybe Reserved
+        {UINT, "RRC Release Number", 1},    //RRC release version
+        {UINT, "RRC Version Number", 1},    //RRC version version
+        {UINT, "Radio Bearer ID",    1},    //no change
+        {UINT, "Physical Cell ID",   2},     //Cell ID
+        {UINT, "Freq",   			 4},     //Freq
+        {UINT, "SysFrameNum/SubFrameNum",   4},     //System/subsystem frame number
+        {UINT, "Physical Cell ID",   2},     //Cell ID
+        {UINT, "PDU Number",         2},     //PDU Number
+        {UINT, "SIB Mask In SI",     4},
+        {UINT, "Msg Length",         2}
+};
+
+const ValueName NrRrcOtaPduType_v7[] = {
+//        {0x02, "LTE-RRC_BCCH_DL_SCH"},
+//        {0x04, "LTE-RRC_PCCH"},
+//        {0x05, "LTE-RRC_DL_CCCH"},
+//        {0x06, "LTE-RRC_DL_DCCH"},
+//        {0x07, "LTE-RRC_UL_CCCH"},
+//        {0x08, "LTE-RRC_UL_DCCH"},
+};
+
+const ValueName NrRrcOtaPduType_v8[] = {
+//        {0x02, "LTE-RRC_BCCH_DL_SCH"},
+//        {0x04, "LTE-RRC_PCCH"},
+//        {0x05, "LTE-RRC_DL_CCCH"},
+//        {0x06, "LTE-RRC_DL_DCCH"},
+//        {0x07, "LTE-RRC_UL_CCCH"},
+//        {0x08, "LTE-RRC_UL_DCCH"},
+};
+
+// ------------------------------------------------------------
 // LTE NAS Plain
 const Fmt LteNasPlainFmt[] = {
         {UINT, "Pkt Version", 1}
@@ -739,14 +774,14 @@ const Fmt LtePhyInterlogFmt [] = {
 
 const Fmt LtePhyInterlogFmt_v2_Header [] = {
     {SKIP, NULL, 3},        // Unknown
-    {UINT, "Serving Cell E-ARFCN", 4}, 
+    {UINT, "Serving Cell E-ARFCN", 4},
     {UINT, "Serving Physical Cell ID", 2},  //serving cell ID
     {UINT, "Sub-frame Number", 2},
     {RSRP, "RSRP(dBm)", 2}, //Filtered RSRP (dBm)
     {SKIP, NULL, 2},    // Duplicated
     {RSRQ, "RSRQ(dB)", 2}, //Filtered RSRQ (dBm)
     {SKIP, NULL, 2},    // Duplicated
-    {UINT, "E-ARFCN", 4}, 
+    {UINT, "E-ARFCN", 4},
     {UINT, "Number of Neighbor Cells", 1},
     {UINT, "Number of Detected Cells", 1},
     {UINT, "Meas BW", 2}
@@ -4209,9 +4244,9 @@ const Fmt ModemDebug_Fmt[] = {
         {SKIP,           NULL,                   6},
 };
 
-bool is_log_packet(const char *b, size_t length);
-
-bool is_debug_packet(const char *b, size_t length);    //Yuanjie: test if it's a debugging message
+bool is_log_packet (const char *b, size_t length);
+bool is_debug_packet (const char *b, size_t length);   //Yuanjie: test if it's a debugging message
+bool is_custom_packet (const char *b, size_t length);
 
 bool is_custom_packet (const char *b, size_t length);
 
@@ -4222,6 +4257,7 @@ PyObject *decode_log_packet(const char *b, size_t length, bool skip_decoding);
 
 PyObject * decode_custom_packet (const char *b, size_t length);
 void decode_custom_packet_payload (const char *b, size_t length, PyObject* result);
+
 
 void on_demand_decode(const char *b, size_t length, LogPacketType type_id, PyObject *result);
 

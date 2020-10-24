@@ -110,6 +110,8 @@ enum LogPacketType {
     GSM_DSDS_RR_Cell_Information = 0x5B34,
 
     Modem_debug_message = 0x1FEB,
+
+    NR_RRC_OTA_Packet = 0xB821,
 };
 
 // Mapping type IDs to names
