@@ -62,6 +62,21 @@ class WSDissector:
         "LTE-NAS_EPS_PLAIN": 250,
         "LTE-PDCP_DL_SRB": 300,
         "LTE-PDCP_UL_SRB": 301,
+
+        # 5GNR: 400-499
+        "nr-rrc.ue_radio_paging_info": 400,
+        "nr-rrc.ue_radio_access_cap_info": 401,
+        "nr-rrc.bcch.bch": 402,
+        "nr-rrc.bcch.dl.sch": 403,
+        "nr-rrc.dl.ccch": 404,
+        "nr-rrc.dl.dcch": 405,
+        "nr-rrc.pcch": 406,
+        "nr-rrc.ul.ccch": 407,
+        "nr-rrc.ul.ccch1": 408,
+        "nr-rrc.ul.dcch": 409,
+        "nr-rrc.rrc_reconf": 410,
+        "nr-rrc.ue_mrdc_cap": 411,
+        "nr-rrc.ue_nr_cap": 412,
     }
     _proc = None
     _init_proc_called = False

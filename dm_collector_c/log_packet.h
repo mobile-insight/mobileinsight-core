@@ -371,6 +371,42 @@ const Fmt NrRrcOtaPacketFmt[] = {
 };
 
 const ValueName NrRrcOtaPduType_v7[] = {
+
+        // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
+        // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
+        {0x00, "nr-rrc.bcch.bch"},
+        {0x00, "nr-rrc.bcch.dl.sch"},
+        {0x00, "nr-rrc.dl.ccch"},
+        {0x00, "nr-rrc.dl.dcch"},
+        {0x00, "nr-rrc.pcch"},
+        {0x00, "nr-rrc.ul.ccch"},
+        {0x00, "nr-rrc.ul.ccch1"},
+        {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
+        {0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
+        // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
+        // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
+};
+
+const ValueName NrRrcOtaPduType_v8[] = {
+
+        // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
+        // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
+        {0x00, "nr-rrc.bcch.bch"},
+        {0x00, "nr-rrc.bcch.dl.sch"},
+        {0x00, "nr-rrc.dl.ccch"},
+        {0x00, "nr-rrc.dl.dcch"},
+        {0x00, "nr-rrc.pcch"},
+        {0x00, "nr-rrc.ul.ccch"},
+        {0x00, "nr-rrc.ul.ccch1"},
+        {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
+        {0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
+        // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
+        // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
+};
+
+
+
+const ValueName NrRrcOtaPduType_v7[] = {
 //        {0x02, "LTE-RRC_BCCH_DL_SCH"},
 //        {0x04, "LTE-RRC_PCCH"},
 //        {0x05, "LTE-RRC_DL_CCCH"},
