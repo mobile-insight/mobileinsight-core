@@ -374,15 +374,18 @@ const ValueName NrRrcOtaPduType_v7[] = {
 
         // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
         // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
-        {0x00, "nr-rrc.bcch.bch"},
-        {0x00, "nr-rrc.bcch.dl.sch"},
-        {0x00, "nr-rrc.dl.ccch"},
-        {0x00, "nr-rrc.dl.dcch"},
-        {0x00, "nr-rrc.pcch"},
-        {0x00, "nr-rrc.ul.ccch"},
-        {0x00, "nr-rrc.ul.ccch1"},
+        // {0x00, "nr-rrc.bcch.dl.sch"},
+        // {0x00, "nr-rrc.dl.ccch"},
+        // {0x00, "nr-rrc.dl.dcch"},
+        // {0x00, "nr-rrc.pcch"},
+        // {0x00, "nr-rrc.ul.ccch"},
+        // {0x00, "nr-rrc.ul.ccch1"},
+        {0x01, "nr-rrc.bcch.bch"},  // MIB
+        {0x0a, "nr-rrc.ul.dcch"},   // RRC Reconfiguration Complete
         {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
         {0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
+        {0x18, "nr-rrc.rrc_reconf"}, // Radio Bearer Config
+        {0x18, "nr-rrc.dl.dcch"},    // Radio Bearer Config (choice 2)
         // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
@@ -391,15 +394,18 @@ const ValueName NrRrcOtaPduType_v8[] = {
 
         // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
         // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
-        {0x00, "nr-rrc.bcch.bch"},
-        {0x00, "nr-rrc.bcch.dl.sch"},
-        {0x00, "nr-rrc.dl.ccch"},
-        {0x00, "nr-rrc.dl.dcch"},
-        {0x00, "nr-rrc.pcch"},
-        {0x00, "nr-rrc.ul.ccch"},
-        {0x00, "nr-rrc.ul.ccch1"},
+        // {0x00, "nr-rrc.bcch.dl.sch"},
+        // {0x00, "nr-rrc.dl.ccch"},
+        // {0x00, "nr-rrc.dl.dcch"},
+        // {0x00, "nr-rrc.pcch"},
+        // {0x00, "nr-rrc.ul.ccch"},
+        // {0x00, "nr-rrc.ul.ccch1"},
+        {0x01, "nr-rrc.bcch.bch"},  // MIB
+        {0x0a, "nr-rrc.ul.dcch"},   // RRC Reconfiguration Complete
         {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
         {0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
+        {0x1a, "nr-rrc.rrc_reconf"}, // Radio Bearer Config
+        {0x18, "nr-rrc.dl.dcch"},    // Radio Bearer Config (choice 2)
         // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
