@@ -387,7 +387,7 @@ const ValueName NrRrcOtaPduType_v7[] = {
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
 
-const ValueName NrRrcOtaPduType_v8s[] = {
+const ValueName NrRrcOtaPduType_v8[] = {
 
         // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
         // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
