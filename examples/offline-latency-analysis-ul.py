@@ -46,8 +46,11 @@ for latency in stats.all_packets:
 total_latency = total_wait + total_trans + total_retx
 n = len(stats.all_packets)
 
-print ("Average latency is:", float(total_latency) / n)
-print ("Average waiting latency is:", float(total_wait) / n)
-print ("Average tx latency is:", float(total_trans) / n)
-print ("Average retx latency is:", float(total_retx) / n)
+if (n > 0):
+  print ("Average latency is:", float(total_latency) / n)
+  print ("Average waiting latency is:", float(total_wait) / n)
+  print ("Average tx latency is:", float(total_trans) / n)
+  print ("Average retx latency is:", float(total_retx) / n)
+else:
+  print ("Certain message type(s) missing in the provided log.")
 
