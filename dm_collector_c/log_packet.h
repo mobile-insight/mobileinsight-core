@@ -402,13 +402,12 @@ const Fmt NrRrcOtaPacketFmt[] = {
         {UINT, "Pkt Version",        1},    //version
         {UINT, "Unknown", 			 3},    //Maybe Reserved
         {UINT, "RRC Release Number", 1},    //RRC release version
-        {UINT, "RRC Version Number", 1},    //RRC version version
+        {BYTE_STREAM, "RRC Version Number", 1},    //RRC version version
         {UINT, "Radio Bearer ID",    1},    //no change
         {UINT, "Physical Cell ID",   2},     //Cell ID
         {UINT, "Freq",   			 4},     //Freq
         {UINT, "SysFrameNum/SubFrameNum",   4},     //System/subsystem frame number
-        {UINT, "Physical Cell ID",   2},     //Cell ID
-        {UINT, "PDU Number",         2},     //PDU Number
+        {UINT, "PDU Number",         1},     //PDU Number
         {UINT, "SIB Mask In SI",     4},
         {UINT, "Msg Length",         2}
 };
