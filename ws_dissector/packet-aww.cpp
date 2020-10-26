@@ -56,6 +56,21 @@ static void init_proto_names (const char *protos []) {
 
     protos[300] = "pdcp-lte"; // signaling plane - Downlink
     protos[301] = "pdcp-lte"; // signaling plane - Uplink
+
+
+    protos[400] = "nr-rrc.ue_radio_paging_info";
+    protos[401] = "nr-rrc.ue_radio_access_cap_info";
+    protos[402] = "nr-rrc.bcch.bch";
+    protos[403] = "nr-rrc.bcch.dl.sch";
+    protos[404] = "nr-rrc.dl.ccch";
+    protos[405] = "nr-rrc.dl.dcch";
+    protos[406] = "nr-rrc.pcch";
+    protos[407] = "nr-rrc.ul.ccch";
+    protos[408] = "nr-rrc.ul.ccch1";
+    protos[409] = "nr-rrc.ul.dcch";
+    protos[410] = "nr-rrc.rrc_reconf";
+    protos[411] = "nr-rrc.ue_mrdc_cap";
+    protos[412] = "nr-rrc.ue_nr_cap";
 }
 
 

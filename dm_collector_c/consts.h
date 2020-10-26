@@ -110,6 +110,8 @@ enum LogPacketType {
     GSM_DSDS_RR_Cell_Information = 0x5B34,
 
     Modem_debug_message = 0x1FEB,
+
+    NR_RRC_OTA_Packet = 0xB821,
 };
 
 // Mapping type IDs to names
@@ -295,6 +297,9 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "GSM_DSDS_RR_Cell_Information", false},
     {GSM_DSDS_RR_Signaling_Message,
         "GSM_DSDS_RR_Signaling_Message", false},
+
+    {NR_RRC_OTA_Packet,
+        "5G_NR_RRC_OTA_Packet", true},
 
     {Modem_debug_message,
         "Modem_debug_message", false},
