@@ -298,6 +298,9 @@ const ValueName LogPacketTypeID_To_Name [] = {
     {GSM_DSDS_RR_Signaling_Message,
         "GSM_DSDS_RR_Signaling_Message", false},
 
+    {NR_RRC_OTA_Packet,
+        "5G_NR_RRC_OTA_Packet", true},
+
     {Modem_debug_message,
         "Modem_debug_message", false},
 };
