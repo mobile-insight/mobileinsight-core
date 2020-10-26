@@ -424,13 +424,13 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 field_val = {}
 
                 # FIXME: set to the default value based on TS36.331
-                field_val['lte-rrc.dl_CarrierFreq'] = None  # mandatory
-                field_val['lte-rrc.t_ReselectionEUTRA'] = None  # mandatory
-                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
+                field_val['lte-rrc.dl_CarrierFreq'] = 0  # mandatory
+                field_val['lte-rrc.t_ReselectionEUTRA'] = 0  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = 0  # mandatory
                 field_val['lte-rrc.p_Max'] = 23  # optional, r.f. 36.101
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
-                field_val['lte-rrc.threshX_High'] = None  # mandatory
-                field_val['lte-rrc.threshX_Low'] = None  # mandatory
+                field_val['lte-rrc.threshX_High'] = 0  # mandatory
+                field_val['lte-rrc.threshX_Low'] = 0  # mandatory
                 field_val['lte-rrc.q_OffsetFreq'] = 0
 
                 for val in field.iter('field'):
@@ -493,12 +493,12 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 # Default value setting
                 # FIXME: set to default based on TS25.331
-                field_val['lte-rrc.carrierFreq'] = None  # mandatory
-                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
-                field_val['lte-rrc.p_MaxUTRA'] = None  # mandatory
+                field_val['lte-rrc.carrierFreq'] = 0  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = 0  # mandatory
+                field_val['lte-rrc.p_MaxUTRA'] = 0  # mandatory
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
-                field_val['lte-rrc.threshX_High'] = None  # mandatory
-                field_val['lte-rrc.threshX_High'] = None  # mandatory
+                field_val['lte-rrc.threshX_High'] = 0  # mandatory
+                field_val['lte-rrc.threshX_High'] = 0  # mandatory
 
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
@@ -554,12 +554,12 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 # Default value setting
                 # FIXME: set to default based on TS25.331
-                field_val['lte-rrc.startingARFCN'] = None  # mandatory
-                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
+                field_val['lte-rrc.startingARFCN'] = 0  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = 0  # mandatory
                 field_val['lte-rrc.p_MaxGERAN'] = 0  # mandatory
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
-                field_val['lte-rrc.threshX_High'] = None  # mandatory
-                field_val['lte-rrc.threshX_High'] = None  # mandatory
+                field_val['lte-rrc.threshX_High'] = 0  # mandatory
+                field_val['lte-rrc.threshX_High'] = 0  # mandatory
 
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
@@ -614,8 +614,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             if field.get('name') == "lte-rrc.IntraFreqNeighCellInfo_element":
                 field_val = {}
 
-                field_val['lte-rrc.physCellId'] = None  # mandatory
-                field_val['lte-rrc.q_OffsetCell'] = None  # mandatory
+                field_val['lte-rrc.physCellId'] = 0  # mandatory
+                field_val['lte-rrc.q_OffsetCell'] = 0  # mandatory
 
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
@@ -695,7 +695,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
             if field.get('name') == "lte-rrc.measObjectUTRA_element":
                 field_val = {}
 
-                field_val['lte-rrc.carrierFreq'] = None
+                field_val['lte-rrc.carrierFreq'] = 0
                 field_val['lte-rrc.offsetFreq'] = 0
 
                 for val in field.iter('field'):
