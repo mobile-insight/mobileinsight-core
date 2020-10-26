@@ -11012,6 +11012,8 @@ _nr_rrc_reconf_complete_to_ul_dcch(const char *b, int pdu_length) {
         ul_dcch_msg[i] = (b[i - 1] << 3) | (((unsigned char) b[i]) >> 5);
     }
     ul_dcch_msg[pdu_length] = (b[pdu_length - 1] << 3);
+
+    return ul_dcch_msg;
 }
 
 static int
@@ -11052,7 +11054,7 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
             return (offset - start) + pdu_length;
         }
 
-    } else if (pkt_ver = 7) {
+    } else if (pkt_ver == 7) {
         //pkt_ver==8 (Samsung)
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
@@ -11082,6 +11084,9 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
             return (offset - start) + pdu_length;
         }
     }
+
+    printf("(MI)Unknown 5GNR RRC OTA Message version: 0x%x\n", pkt_ver);
+    return 0;
 }
 
 
