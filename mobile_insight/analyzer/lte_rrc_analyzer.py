@@ -371,13 +371,13 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 # Default value setting
                 # FIXME: set default to those in TS36.331
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
-                field_val['lte-rrc.threshServingLow'] = None  # mandatory
+                field_val['lte-rrc.threshServingLow'] = 0  # mandatory
                 field_val['lte-rrc.s_NonIntraSearch'] = "inf"
                 field_val['lte-rrc.q_Hyst'] = 0
-                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = 0  # mandatory
                 field_val['lte-rrc.p_Max'] = 23  # default value for UE category 3
                 field_val['lte-rrc.s_IntraSearch'] = "inf"
-                field_val['lte-rrc.t_ReselectionEUTRA'] = None
+                field_val['lte-rrc.t_ReselectionEUTRA'] = 0
 
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
