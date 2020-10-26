@@ -7597,6 +7597,12 @@ static int _decode_lte_mac_rach_attempt_subpkt(const char *b, int offset,
                     offset += _decode_by_fmt(LteMacRachAttempt_Subpkt_Msg1_v4,
                                              ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg1_v4, Fmt),
                                              b, offset, length, result_subpkt_msg1);
+                    (void) _map_result_field_to_name(result_subpkt,
+                                                     "CE Level",
+                                                     LteMacRachAttempt_Subpkt_CELEVEL,
+                                                     ARRAY_SIZE(LteMacRachAttempt_Subpkt_CELEVEL,
+                                                                ValueName),
+                                                     "(MI)Unknown");
                     PyObject *t1 = Py_BuildValue("(sOs)", "Msg1",
                                                  result_subpkt_msg1, "dict");
                     PyList_Append(result_subpkt, t1);

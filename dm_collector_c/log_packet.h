@@ -2650,6 +2650,10 @@ const Fmt LteMacRachAttempt_Subpkt_Msg1_v4[] = {
         {UINT,        "CE Level",              1},
 };
 
+const ValueName LteMacRachAttempt_Subpkt_CELEVEL[] = {
+        {0, "CE_LEVEL_0"},
+};
+
 const Fmt LteMacRachAttempt_Subpkt_Msg2[] = {
         {UINT, "Backoff Value (ms)", 2},
         {UINT, "Result",             1},
