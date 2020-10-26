@@ -11002,6 +11002,17 @@ static int _decode_lte_pdcch_phich_indication_report_payload(const char *b,
 
 // ----------------------------------------------------------------------------
 
+// Convert to NR RRC Reconfiguration Complete message to what is accepted on
+// UL-DCCH
+static char *
+_nr_rrc_reconf_complete_to_ul_dcch(const char *b, int pdu_length) {
+    char *ul_dcch_msg = new char[pdu_length + 1];
+    ul_dcch_msg[0] = 0x08 | (((unsigned char) b[0]) >> 5);
+    for (int i = 1; i < pdu_length; i++) {
+        ul_dcch_msg[i] = (b[i - 1] << 3) | (((unsigned char) b[i]) >> 5);
+    }
+    ul_dcch_msg[pdu_length] = (b[pdu_length - 1] << 3);
+}
 
 static int
 _decode_nr_rrc_ota(const char *b, int offset, size_t length,
@@ -11025,8 +11036,17 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
         } else {
             std::string type_str = "raw_msg/";
             type_str += type_name;
-            PyObject *t = Py_BuildValue("(sy#s)",
-                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyObject *t;
+            if (pdu_number == 0x0a) {
+                // RRC Reconfiguration Complete needs special processing
+                char *ul_dcch_msg = _nr_rrc_reconf_complete_to_ul_dcch(b + offset, pdu_length);
+                t = Py_BuildValue("(sy#s)",
+                                  "Msg", ul_dcch_msg, pdu_length + 1, type_str.c_str());
+                delete ul_dcch_msg;
+            } else {
+                t = Py_BuildValue("(sy#s)",
+                                  "Msg", b + offset, pdu_length, type_str.c_str());
+            }
             PyList_Append(result, t);
             Py_DECREF(t);
             return (offset - start) + pdu_length;
@@ -11046,8 +11066,17 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
         } else {
             std::string type_str = "raw_msg/";
             type_str += type_name;
-            PyObject *t = Py_BuildValue("(sy#s)",
-                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyObject *t;
+            if (pdu_number == 0x0a) {
+                // RRC Reconfiguration Complete needs special processing
+                char *ul_dcch_msg = _nr_rrc_reconf_complete_to_ul_dcch(b + offset, pdu_length);
+                t = Py_BuildValue("(sy#s)",
+                                  "Msg", ul_dcch_msg, pdu_length + 1, type_str.c_str());
+                delete ul_dcch_msg;
+            } else {
+                t = Py_BuildValue("(sy#s)",
+                                  "Msg", b + offset, pdu_length, type_str.c_str());
+            }
             PyList_Append(result, t);
             Py_DECREF(t);
             return (offset - start) + pdu_length;
