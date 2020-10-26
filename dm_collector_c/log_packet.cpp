@@ -273,13 +273,18 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
                                      ARRAY_SIZE(LteRrcOtaPacketFmt_v24, Fmt),
                                      b, offset, length, result);
             break;
+        case 26:
+            offset += _decode_by_fmt(LteRrcOtaPacketFmt_v26,
+                                     ARRAY_SIZE(LteRrcOtaPacketFmt_v26, Fmt),
+                                     b, offset, length, result);
+            break;
         default:
             printf("(MI)Unknown LTE RRC OTA packet version: %d\n", pkt_ver);
             return 0;
     }
 
-    //pkt_ver==19 added for
-    if (pkt_ver == 19) {
+    //pkt_ver==19 || pkt_ver == 26 added for
+    if (pkt_ver == 19 || pkt_ver == 26) {
 
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
@@ -302,8 +307,10 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
         }
 
     } else if (pkt_ver >= 15) {
+
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
+
         const char *type_name = search_name(LteRrcOtaPduType_v15,
                                             ARRAY_SIZE(LteRrcOtaPduType_v15, ValueName),
                                             pdu_number);
@@ -10220,7 +10227,8 @@ is_custom_packet (const char *b, size_t length) {
 }
 
 void
-on_demand_decode(const char *b, size_t length, LogPacketType type_id, PyObject *result) {
+on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject* result)
+{
     int offset = 0;
     switch (type_id) {
         case CDMA_Paging_Channel_Message:

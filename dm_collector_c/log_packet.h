@@ -222,107 +222,150 @@ const ValueName UmtsNasOtaFmt_MessageDirection[] = {
 // ------------------------------------------------------------
 // LTE_RRC_OTA_Packet
 const Fmt LteRrcOtaPacketFmt[] = {
-        {UINT, "Pkt Version",        1},    //version
-        {UINT, "RRC Release Number", 1},    //RRC release version
-        {UINT, "Major/minor",        1},
-        {UINT, "Radio Bearer ID",    1},    //no change
-        {UINT, "Physical Cell ID",   2}     //Cell ID
+        {UINT, "Pkt Version",                 1},    //version
+        {UINT, "RRC Release Number",          1},    //RRC release version
         // continued in LteRrcOtaPacketFmt_v2 or LteRrcOtaPacketFmt_v7
 };
 
 // Apply to version 2 packets
 const Fmt LteRrcOtaPacketFmt_v2[] = {
-        {UINT, "Freq",                    2},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "Msg Length",              1},
-        {UINT, "SIB Mask in SI",          1}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        2},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "Msg Length",                  1},
+        {UINT, "SIB Mask in SI",              1}
 };
 
 const Fmt LteRrcOtaPacketFmt_v4[] = {
-        {UINT, "Freq",                    2},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "Msg Length",              2},
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        2},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "Msg Length",                  2},
 };
 
 const Fmt LteRrcOtaPacketFmt_v7[] = {
-        {UINT, "Freq",                    2},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {SKIP, NULL,                      4},    // Unknown yet, only for Pkt Version = 7
-        {UINT, "Msg Length",              1},
-        {UINT, "SIB Mask in SI",          1}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        2},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {SKIP, NULL,                          4},    // Unknown yet, only for Pkt Version = 7
+        {UINT, "Msg Length",                  1},
+        {UINT, "SIB Mask in SI",              1}
 };
 
 const Fmt LteRrcOtaPacketFmt_v8[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v9[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v12[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v13[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v15[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v19[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          4},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              4},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v20[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v24[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          4},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID    
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              4},
+        {UINT, "Msg Length",                  2}
+};
+
+const Fmt LteRrcOtaPacketFmt_v26[] = {
+        {BYTE_STREAM, "RRC Version Number",   1}, 
+        {UINT, "NR RRC Release Number",       1},
+        {BYTE_STREAM, "NR RRC Version Number",1},
+        {UINT, "Radio Bearer ID",             1},
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        2},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     4},    //System/subsystem frame number 
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              4},
+        {UINT, "Msg Length",                  2}
 };
 
 const ValueName LteRrcOtaPduType[] = {
@@ -4209,11 +4252,10 @@ const Fmt ModemDebug_Fmt[] = {
         {SKIP,           NULL,                   6},
 };
 
-bool is_log_packet(const char *b, size_t length);
-
-bool is_debug_packet(const char *b, size_t length);    //Yuanjie: test if it's a debugging message
-
+bool is_log_packet (const char *b, size_t length);
+bool is_debug_packet (const char *b, size_t length);   //Yuanjie: test if it's a debugging message
 bool is_custom_packet (const char *b, size_t length);
+
 
 // Given a binary string, try to decode it as a log packet.
 // Return a specially formatted Python list that stores the decoding result.
@@ -4222,6 +4264,7 @@ PyObject *decode_log_packet(const char *b, size_t length, bool skip_decoding);
 
 PyObject * decode_custom_packet (const char *b, size_t length);
 void decode_custom_packet_payload (const char *b, size_t length, PyObject* result);
+
 
 void on_demand_decode(const char *b, size_t length, LogPacketType type_id, PyObject *result);
 
