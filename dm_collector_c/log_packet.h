@@ -4347,6 +4347,8 @@ const ValueName ValueNameCDRXEvent[] = {
         {13, "CDRX_OFF_2_ON"},
         {22, "WAKEUP_MISSED_CYCLE_TIMER_START"},
         {23, "WAKEUP_MISSED_CYCLE_TIMER_END"},
+        {24, "CATM1_UL_RETX_TIMER_START"},
+        {25, "CATM1_UL_RETX_TIMER_END"},
 };
 
 const ValueName ValueNameWcdmaRrcStates[] = {
