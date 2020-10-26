@@ -160,6 +160,10 @@ static int _decode_lte_phy_cdrx_events_info_payload (const char *b,
                     strInternalFieldMask += "WAKEUP_MISSED_CYCLE_TIMER|";
                     count ++;
                 }
+                if (((utemp >> (17 - 1)) & 1) == 1) {
+                    strInternalFieldMask += "CATM1_UL_RETX_TIMER|";
+                    count ++;
+                }
                 int check = 0;
                 for (int i = 0; i < 32; i++) {
                     if (((utemp >> i) & 1) == 1) {
@@ -167,7 +171,10 @@ static int _decode_lte_phy_cdrx_events_info_payload (const char *b,
                     }
                 }
                 if (check != count) {
-                    strInternalFieldMask += "(MI)Unknown|";
+                    if(check == 0){
+                        strInternalFieldMask += "NO_EVENTS|";
+                    }
+                    else strInternalFieldMask += "(MI)Unknown|";
                 }
                 PyObject *pystr = Py_BuildValue("s", strInternalFieldMask.c_str());
                 old_object = _replace_result(result_record_item, "Internal Field Mask",
