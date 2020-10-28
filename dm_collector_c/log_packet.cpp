@@ -7206,9 +7206,25 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                             ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_v5,
                                        Fmt),
                             b, offset, length, result_subpkt);
-                    PyObject *old_object = _replace_result_int(result_subpkt,
-                                                               "Preamble Format", 0);
-                    Py_DECREF(old_object);
+                    //Preamble Format is related to PRACH config(36.321)
+                    int prach_cfg = _search_result_int(result_subpkt, "PRACH config");
+                    if(prach_cfg < 16){
+                        PyObject *old_object = _replace_result_int(result_subpkt,
+                                                                "Preamble Format", 0);
+                        Py_DECREF(old_object);
+                    }
+                    else if (prach_cfg==30){
+                        std::string temp = "N/A";
+                        PyObject *pystr = Py_BuildValue("s", temp.c_str());
+                        PyObject *old_object = _replace_result(result_subpkt,
+                                                                "Preamble Format", pystr);
+                        Py_DECREF(old_object);                                        
+                    }
+                    else{
+                        PyObject *old_object = _replace_result_int(result_subpkt,
+                                                                "Preamble Format", 1);
+                        Py_DECREF(old_object);
+                    }
 
                     PyObject *result_prach_cfg_r13 = PyList_New(0);
 
@@ -7314,6 +7330,15 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                     offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part,
                                              ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part, Fmt),
                                              b, offset, length, result_temp);
+                    int temp=_search_result_int(result_temp,"Initial CE Level");
+                    if(temp == 0xffff){
+                        std::string temp = "NA";
+                        PyObject *pystr = Py_BuildValue("s", temp.c_str());
+                        PyObject *old_object = _replace_result(result_temp,
+                                                            "Initial CE Level", pystr);
+                        Py_DECREF(old_object);
+                        Py_DECREF(pystr);
+                    }
                     t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
                     PyList_Append(result_prach_cfg_r13, t);
                     Py_DECREF(t);
