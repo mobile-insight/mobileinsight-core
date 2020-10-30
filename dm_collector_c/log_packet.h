@@ -1535,11 +1535,46 @@ const Fmt LteMacConfigurationSubpkt_RACHConfig_v5[] = {
         {UINT, "PRACH config",                1},
         {UINT, "CS zone length",              1},
         {UINT, "Root seq index",              2},
-        {UINT, "PRACH Freq Offset",           2},
+        {UINT, "PRACH Freq Offset",           1},
+        {PLACEHOLDER, "Preamble Format",      0},
         {UINT, "High speed flag",             1},
         {UINT, "Max retx Msg3",               1},
         {UINT, "RA rsp win size",             1},
         {UINT, "PRACH Cfg R13 Present",       1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_size_v5[] = {
+        {UINT, "RSRP Thresh PRACH List Size", 1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_v5[] = {
+        {UINT, "RSRP Thresh PRACH List", 1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_hidden_rsrp_prach_list_v5[] = {
+        {UINT, "Hidden RSRP Thresh PRACH List", 1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_prach_param_ce_list_size_v5[] = {
+        {UINT, "PRACH Param CE List", 1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_prach_list_v5[] = {
+        {UINT,"First Preamble",                 1},
+        {UINT,"Last Preamble",                  1},
+        {UINT,"Max Preamble Tx Attempt Per CE", 1},
+        {UINT,"Contention Resol Timer",         2},
+        {UINT,"Prach Cfg Index",                1},
+        {UINT,"RA RSP Win Size",                1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_hidden_prach_list_v5[] = {
+        {BYTE_STREAM, "Hidden PRACH Param Ce", 7},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_prach_last_part[] = {
+        {UINT, "Initial CE Level",      2},
+        {UINT, "Preamble Trans Max CE", 2},
 };
 
 const Fmt LteMacConfigurationSubpkt_LCConfig[] = {

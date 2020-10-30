@@ -3733,9 +3733,151 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                                          b, offset, length, result_subpkt);
                                 success = true;
                             } else if (subpkt_ver == 5) {
+                                // RACH Config Subpacket
+                                PyObject *t = NULL;
+
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_RACHConfig_v5,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_RACHConfig_v5, Fmt),
                                                          b, offset, length, result_subpkt);
+                                
+                                //Preamble Format is related to PRACH config(36.321)
+                                int prach_cfg = _search_result_int(result_subpkt, "PRACH config");
+                                if(prach_cfg < 16){
+                                    PyObject *old_object = _replace_result_int(result_subpkt,
+                                                                            "Preamble Format", 0);
+                                    Py_DECREF(old_object);
+                                }
+                                else if (prach_cfg==30){
+                                    std::string temp = "N/A";
+                                    PyObject *pystr = Py_BuildValue("s", temp.c_str());
+                                    PyObject *old_object = _replace_result(result_subpkt,
+                                                                            "Preamble Format", pystr);
+                                    Py_DECREF(old_object);                                        
+                                }
+                                else{
+                                    PyObject *old_object = _replace_result_int(result_subpkt,
+                                                                            "Preamble Format", 1);
+                                    Py_DECREF(old_object);
+                                }
+
+                                PyObject *result_prach_cfg_r13 = PyList_New(0);
+
+                                PyObject *result_rsrp_list_size = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_size_v5,
+                                             ARRAY_SIZE(
+                                                     LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_size_v5,
+                                                     Fmt),
+                                             b, offset, length, result_rsrp_list_size);
+                                int iListSize = _search_result_int(result_rsrp_list_size, "RSRP Thresh PRACH List Size");
+
+                                t = Py_BuildValue("(sOs)", "Ignored", result_rsrp_list_size, "dict");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_rsrp_list_size);
+
+                                PyObject *result_rsrp_list = PyList_New(0);
+                                for (int i = 0; i < iListSize; i++) {
+                                    PyObject *result_temp = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_v5,
+                                                            ARRAY_SIZE(
+                                                                    LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_v5,
+                                                                    Fmt),
+                                                            b, offset, length, result_temp);
+                                    t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                                    PyList_Append(result_rsrp_list, t);
+                                    Py_DECREF(t);
+                                    Py_DECREF(result_temp);
+                                }
+                                t = Py_BuildValue("(sOs)", "RSRP Thresh PRACH List", result_rsrp_list, "list");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_rsrp_list);
+
+                                result_rsrp_list = PyList_New(0);
+                                for (int i = 0; i < 3 - iListSize; i++) {
+                                    PyObject *result_temp = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_hidden_rsrp_prach_list_v5,
+                                                            ARRAY_SIZE(
+                                                                    LteMacRachTrigger_RachConfigSubpktPayload_hidden_rsrp_prach_list_v5,
+                                                                    Fmt),
+                                                            b, offset, length, result_temp);
+                                    t = Py_BuildValue("(sOs)", "Hidden", result_temp, "dict");
+                                    PyList_Append(result_rsrp_list, t);
+                                    Py_DECREF(t);
+                                    Py_DECREF(result_temp);
+                                }
+                                t = Py_BuildValue("(sOs)", "Hidden RSRP Thresh PRACH List", result_rsrp_list, "list");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_rsrp_list);
+
+                                PyObject *param_ce_list_size = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_prach_param_ce_list_size_v5,
+                                                        ARRAY_SIZE(
+                                                                LteMacConfiguration_RachConfigSubpktPayload_prach_param_ce_list_size_v5,
+                                                                Fmt),
+                                                        b, offset, length, param_ce_list_size);
+                                int iparamListSize = _search_result_int(param_ce_list_size, "PRACH Param CE List");
+
+                                t = Py_BuildValue("(sOs)", "Ignored", param_ce_list_size, "dict");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(param_ce_list_size);
+
+                                PyObject *param_ce_list = PyList_New(0);
+                                for (int i = 0; i < iparamListSize; i++) {
+                                    PyObject *result_temp = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_prach_list_v5,
+                                                            ARRAY_SIZE(LteMacConfiguration_RachConfigSubpktPayload_prach_list_v5,
+                                                                        Fmt),
+                                                            b, offset, length, result_temp);
+                                    t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                                    PyList_Append(param_ce_list, t);
+                                    Py_DECREF(t);
+                                    Py_DECREF(result_temp);
+                                }
+                                t = Py_BuildValue("(sOs)", "PRACH Param Ce", param_ce_list, "list");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(param_ce_list);
+
+                                param_ce_list = PyList_New(0);
+                                for (int i = 0; i < 4 - iparamListSize; i++) {
+                                    PyObject *result_temp = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_hidden_prach_list_v5,
+                                                            ARRAY_SIZE(
+                                                                    LteMacConfiguration_RachConfigSubpktPayload_hidden_prach_list_v5,
+                                                                    Fmt),
+                                                            b, offset, length, result_temp);
+                                    t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                                    PyList_Append(param_ce_list, t);
+                                    Py_DECREF(t);
+                                    Py_DECREF(result_temp);
+                                }
+                                t = Py_BuildValue("(sOs)", "Hidden Prach Param Ce", param_ce_list, "list");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(param_ce_list);
+
+                                PyObject *result_temp = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_prach_last_part,
+                                                        ARRAY_SIZE(LteMacConfiguration_RachConfigSubpktPayload_prach_last_part, Fmt),
+                                                        b, offset, length, result_temp);
+                                t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_temp);
+
+                                int iPRACHCfgR13Present = _search_result_int(result_subpkt, "PRACH Cfg R13 Present");
+                                if (iPRACHCfgR13Present == 0) {
+                                    t = Py_BuildValue("(sOs)", "Hidden PRACH Cfg R13", result_prach_cfg_r13, "list");
+                                } else {
+                                    t = Py_BuildValue("(sOs)", "PRACH Cfg R13", result_prach_cfg_r13, "list");
+                                }
+                                PyList_Append(result_subpkt, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_prach_cfg_r13);
+
                                 success = true;
                             }
                             break;
