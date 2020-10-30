@@ -394,6 +394,10 @@ const ValueName LteRrcOtaPduType_v19[] = {
         {0x09, "LTE-RRC_DL_DCCH"},
         {0x0a, "LTE-RRC_UL_CCCH"},
         {0x0b, "LTE-RRC_UL_DCCH"},
+        {0x2e, "LTE-RRC_BCCH_DL_SCH_NB"},
+        {0x30, "LTE-RRC_DL_CCCH_NB"},
+        {0x31, "LTE-RRC_DL_DCCH_NB"},
+        {0x34, "LTE-RRC_UL_DCCH_NB"},
 };
 
 // ------------------------------------------------------------
@@ -2530,7 +2534,7 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v5[] = {
         {UINT,        "Preamble trans max",               1},
         {UINT,        "Contention resolution timer (ms)", 2},
         {UINT,        "Message size Group_A",             2},
-        {UINT,        "Power offset Group_B",             1},
+        {UINT,        "Power offset Group_B",             1},   //TODO: the relationship between -Infinity and 0
         {UINT,        "PMax (dBm)",                       2},
         {UINT,        "Delta preamble Msg3",              2},
         {UINT,        "PRACH config",                     1},
@@ -2561,7 +2565,12 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_param_ce_list_size_v5[
 };
 
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_list_v5[] = {
-        {BYTE_STREAM, "PRACH Param Ce", 7},
+        {UINT,"First Preamble",                 1},
+        {UINT,"Last Preamble",                  1},
+        {UINT,"Max Preamble Tx Attempt Per CE", 1},
+        {UINT,"Contention Resol Timer",         2},
+        {UINT,"Prach Cfg Index",                1},
+        {UINT,"RA RSP Win Size",                1},
 };
 
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_hidden_prach_list_v5[] = {
@@ -2575,30 +2584,30 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part[] = {
 
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload[] = {
         // Version 1
-        {UINT,        "Rach reason",      1},
-        {PLACEHOLDER, "RACH Contention",  0},
-        {BYTE_STREAM, "Maching ID",       6},
-        {SKIP,        NULL,               1},
-        {UINT,        "Preamble",         1},
-        {BYTE_STREAM, "Preamble RA mask", 1},
-        {UINT,        "Msg3 size",        1},
-        {UINT,        "Group chosen",     1},
-        {UINT,        "Radio condn (dB)", 1},
-        {BYTE_STREAM, "CRNTI",            2},
+        {UINT,        "Rach reason",            1},
+        {PLACEHOLDER, "RACH Contention",        0},
+        {BYTE_STREAM, "Maching ID",             6},
+        {SKIP,        NULL,                     1},
+        {UINT,        "Preamble",               1},
+        {BYTE_STREAM, "Preamble RA mask",       1},
+        {UINT,        "Msg3 size",              1},
+        {UINT,        "Group chosen",           1},
+        {UINT,        "Radio condn (dB)",       1},
+        {BYTE_STREAM_LITTLE_ENDIAN, "CRNTI",    2},
 };
 
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2[] = {
-        {UINT,        "Sub Id",           1},
-        {UINT,        "Cell Id",          1},
-        {UINT,        "Rach reason",      1},
-        {BYTE_STREAM, "Maching ID",       6},
-        {UINT,        "RACH Contention",  1},
-        {UINT,        "Preamble",         1},
-        {BYTE_STREAM, "Preamble RA mask", 1},
-        {UINT,        "Msg3 size",        1},
-        {UINT,        "Group chosen",     1},
-        {UINT,        "Radio condn (dB)", 1},
-        {BYTE_STREAM, "CRNTI",            2},
+        {UINT,        "Sub Id",                 1},
+        {UINT,        "Cell Id",                1},
+        {UINT,        "Rach reason",            1},
+        {BYTE_STREAM, "Maching ID",             6},
+        {UINT,        "RACH Contention",        1},
+        {UINT,        "Preamble",               1},
+        {BYTE_STREAM, "Preamble RA mask",       1},
+        {UINT,        "Msg3 size",              1},
+        {UINT,        "Group chosen",           1},
+        {UINT,        "Radio condn (dB)",       1},
+        {BYTE_STREAM_LITTLE_ENDIAN, "CRNTI",    2},
 };
 
 const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason[] = {
