@@ -1465,7 +1465,7 @@ const Fmt LteMacConfigurationSubpkt_DLConfig_Scell_Tag_Info_v2[] = {
 };
 
 const ValueName LteMacConfigurationConfigType_DLConfig_TA_Timer[] = {
-        {0xffff, "Infinity ms"},
+        {0xffff, "Infinity"},
 };
 
 const Fmt LteMacConfigurationSubpkt_ULConfig[] = {
