@@ -2586,9 +2586,8 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload[] = {
         // Version 1
         {UINT,        "Rach reason",            1},
         {PLACEHOLDER, "RACH Contention",        0},
-        {BYTE_STREAM, "Maching ID",             6},
-        {SKIP,        NULL,                     1},
-        {UINT,        "Preamble",               1},
+        {UINT, "Maching ID",                    8},
+        {PLACEHOLDER,        "Preamble",        0},
         {BYTE_STREAM, "Preamble RA mask",       1},
         {UINT,        "Msg3 size",              1},
         {UINT,        "Group chosen",           1},
@@ -2600,9 +2599,9 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2[] = {
         {UINT,        "Sub Id",                 1},
         {UINT,        "Cell Id",                1},
         {UINT,        "Rach reason",            1},
-        {BYTE_STREAM, "Maching ID",             6},
-        {UINT,        "RACH Contention",        1},
-        {UINT,        "Preamble",               1},
+        {BYTE_STREAM, "Maching ID",             8},
+        {PLACEHOLDER,        "RACH Contention", 0},
+        {PLACEHOLDER,        "Preamble",        0},
         {BYTE_STREAM, "Preamble RA mask",       1},
         {UINT,        "Msg3 size",              1},
         {UINT,        "Group chosen",           1},
@@ -2616,6 +2615,10 @@ const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason[] = {
         {2, "UL_DATA"},
         {3, "DL_DATA"},
         {4, "HO"},
+};
+
+const ValueName LteMacRachTrigger_RachReasonSubpkt_GroupChosen[] = {
+        {0, "Group A(0)"},
 };
 
 const ValueName ValueNameRachContention[] = {
