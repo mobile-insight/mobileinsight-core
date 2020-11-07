@@ -3724,7 +3724,6 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_ULConfig, Fmt),
                                                          b, offset, length, result_subpkt);
                                 int iBSRTimer = _search_result_uint(result_subpkt, "BSR timer");
-                                printf("%d\n",iBSRTimer);
                                 if (iBSRTimer == 0xffff) {
                                     (void) _map_result_field_to_name(result_subpkt,
                                                                         "BSR timer",
@@ -7854,6 +7853,19 @@ static int _decode_lte_mac_rach_attempt_subpkt(const char *b, int offset,
                     offset += _decode_by_fmt(LteMacRachAttempt_Subpkt_Msg1_v4,
                                              ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg1_v4, Fmt),
                                              b, offset, length, result_subpkt_msg1);
+                    
+                    int Preamble_index_mask = _search_result_uint(result_subpkt_msg1, "Preamble index mask");
+                    // printf("%s", Preamble_index_mask);
+                    if (Preamble_index_mask == 0xff) {
+                        (void) _map_result_field_to_name(result_subpkt_msg1,
+                                                            "Preamble index mask",
+                                                            LteMacRachAttempt_Subpkt_Preamble_index_mask,
+                                                            ARRAY_SIZE(
+                                                                    LteMacRachAttempt_Subpkt_Preamble_index_mask,
+                                                                    ValueName),
+                                                            "MI Unknown");
+                    }
+
                     (void) _map_result_field_to_name(result_subpkt_msg1,
                                                      "CE Level",
                                                      LteMacRachAttempt_Subpkt_CELEVEL,

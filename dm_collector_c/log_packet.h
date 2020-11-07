@@ -2705,9 +2705,13 @@ const Fmt LteMacRachAttempt_Subpkt_Msg1_v3[] = {
 
 const Fmt LteMacRachAttempt_Subpkt_Msg1_v4[] = {
         {UINT,        "Preamble Index",        1},
-        {BYTE_STREAM, "Preamble index mask",   1},
+        {UINT,        "Preamble index mask",   1},
         {UINT,        "Preamble power offset", 2},
         {UINT,        "CE Level",              1},
+};
+
+const ValueName LteMacRachAttempt_Subpkt_Preamble_index_mask[] = {
+        {0xff, "Invalid"},
 };
 
 const ValueName LteMacRachAttempt_Subpkt_CELEVEL[] = {
