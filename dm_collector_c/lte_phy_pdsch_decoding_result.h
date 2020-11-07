@@ -99,6 +99,21 @@ const Fmt LtePhyPdschDecodingResult_Record_v44 [] = {
     {UINT, "HARQ Log Status", 1},   // right shift 3 bit, 2 bits
     {PLACEHOLDER, "Codeword Swap", 0},  // 1 bit
     {PLACEHOLDER, "Number of Streams", 0},  // 2 bits
+    {BYTE_STREAM, "Demap Sic Status",2},
+    {SKIP, "Reserved",2},
+};
+
+const Fmt LtePhyPdschDecodingResult_Record_v105 [] = {
+    {UINT, "Subframe Offset", 2},
+    {UINT, "Subframe Number",0 },
+    {UINT, "PDSCH Channel ID", 2},
+    {UINT, "HARQ ID", 1},   // 4 bits
+    {PLACEHOLDER, "RNTI Type", 0},  // 4 bits
+    {UINT, "System Information Msg Number", 2}, // 4 bits
+    {PLACEHOLDER, "System Information Mask", 0},    // 12 bits
+    {UINT, "HARQ Log Status", 1},   // right shift 3 bit, 2 bits
+    {PLACEHOLDER, "Codeword Swap", 0},  // 1 bit
+    {PLACEHOLDER, "Number of Streams", 0},  // 2 bits
     {UINT, "Demap Sic Status",2},
     {SKIP, "Reserved",2},
 };
@@ -197,8 +212,8 @@ const Fmt LtePhyPdschDecodingResult_Stream_v44 [] = {
 const Fmt LtePhyPdschDecodingResult_Stream_v106 [] = {
     {UINT, "Transport Block CRC", 4},   // 1 bit
     {PLACEHOLDER, "NDI", 0},    // 1 bit
-    {PLACEHOLDER, "Code Block Size Plus Data", 0},
     {PLACEHOLDER, "Code Block Size Plus", 0},   // 13 bits
+    {PLACEHOLDER, "Num Code Block Plus Data", 0},
     {PLACEHOLDER, "Num Code Block Plus", 0},    // 4 bits
     {PLACEHOLDER, "Max TDEC Iter", 0},  // 4 bits
     {PLACEHOLDER, "Retransmission Number", 0},  // 3 bits
@@ -1262,8 +1277,8 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                offset += _decode_by_fmt(LtePhyPdschDecodingResult_Record_v44,
-                        ARRAY_SIZE(LtePhyPdschDecodingResult_Record_v44, Fmt),
+                offset += _decode_by_fmt(LtePhyPdschDecodingResult_Record_v105,
+                        ARRAY_SIZE(LtePhyPdschDecodingResult_Record_v105, Fmt),
                         b, offset, length, result_record_item);
                 temp = _search_result_int(result_record_item, "Subframe Offset");
                 int iSubframeNumber=(temp+iStartingSubframeNumber)%10;
