@@ -7390,6 +7390,15 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                             ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_v5,
                                        Fmt),
                             b, offset, length, result_subpkt);
+                    int power_offset_config_b=_search_result_int(result_subpkt,"Power offset Group_B");
+                    if(power_offset_config_b==0){
+                        std::string temp = "- Infinity";
+                        PyObject *pystr = Py_BuildValue("s", temp.c_str());
+                        PyObject *old_object = _replace_result(result_subpkt,
+                                                            "Power offset Group_B", pystr);
+                        Py_DECREF(old_object);
+                        Py_DECREF(pystr);
+                    }
                     //Preamble Format is related to PRACH config(36.321)
                     int prach_cfg = _search_result_int(result_subpkt, "PRACH config");
                     if(prach_cfg < 16){
@@ -7548,6 +7557,44 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                                                      ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpkt_RachReason,
                                                                 ValueName),
                                                      "(MI)Unknown");
+                    (void) _map_result_field_to_name(result_subpkt, "Group chosen",
+                                                     LteMacRachTrigger_RachReasonSubpkt_GroupChosen,
+                                                     ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpkt_GroupChosen,
+                                                                ValueName),
+                                                     "(MI)Unknown");
+                    PyObject *temp=_search_result(result_subpkt,"Maching ID");
+                    long long tempLong=PyLong_AsLongLong(temp);
+                    int iPreamble=(int)tempLong&0xff00000000000000;
+                    PyObject *old_object1 = _replace_result_int(result_subpkt,
+                                                                   "Preamble", iPreamble);
+                    Py_DECREF(old_object1);
+                    char arr[6];
+                    int wei=56;
+                    for(int i=5;i>=0;i--){
+                        long long templong2=tempLong<<wei;
+                        arr[i]=(char)(templong2>>56);
+                        wei-=8;
+                    }
+                    
+                    std::string MachingId;
+                    char hex[10]={};
+                    for(int i=5;i>0;i--){
+                        sprintf(hex,"%02x",arr[i]&0xff);
+                        MachingId+="0x";
+                        MachingId+=hex;
+                        MachingId+=",";
+                    }
+                    sprintf(hex,"%02x",arr[0]&0xff);
+                    MachingId+="0x";
+                    MachingId+=hex;
+                    
+                    PyObject *pystr1= Py_BuildValue("s", MachingId.c_str());
+                    PyObject *old_object2 = _replace_result(result_subpkt,
+                                                           "Maching ID", pystr1);
+                    Py_DECREF(old_object2);
+
+                    Py_DECREF(temp);
+
                     std::string strRachContention = "Contention Based RACH procedure";
                     PyObject *pystr = Py_BuildValue("s", strRachContention.c_str());
                     PyObject *old_object = _replace_result(result_subpkt,
