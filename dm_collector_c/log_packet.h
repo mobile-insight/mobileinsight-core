@@ -1469,7 +1469,8 @@ const ValueName LteMacConfigurationConfigType_DLConfig_TA_Timer[] = {
 };
 
 const Fmt LteMacConfigurationSubpkt_ULConfig[] = {
-        {UINT, "SR periodicity",            3},
+        {UINT, "SR resource present",       1},
+        {UINT, "SR periodicity",            2},
         {UINT, "BSR timer",                 2},
         {UINT, "SPS Number of Tx released", 2},
         {UINT, "Retx BSR timer",            2},    // 0xFF need to be read as infinity
@@ -1484,6 +1485,10 @@ const Fmt LteMacConfigurationSubpkt_ULConfig_v2[] = {
         {UINT, "SPS Number of Tx released", 2},
         {UINT, "Retx BSR timer",            2},    // 0xFF need to be read as infinity
         {SKIP, "NULL",                      2},
+};
+
+const ValueName LteMacConfigurationConfigType_ULConfig_BSR_Timer[] = {
+        {0xffff, "Infinity"},
 };
 
 const Fmt LteMacConfigurationSubpkt_RACHConfig[] = {
@@ -1547,6 +1552,10 @@ const Fmt LteMacConfigurationSubpkt_RACHConfig_v5[] = {
         {UINT, "PRACH Cfg R13 Present",       1},
 };
 
+const ValueName LteMacConfigurationSubpkt_RACHConfig_Power_offset_Group_B[] = {
+        {0x00, "-Infinity"},
+};
+
 const Fmt LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_size_v5[] = {
         {UINT, "RSRP Thresh PRACH List Size", 1},
 };
@@ -1579,6 +1588,10 @@ const Fmt LteMacConfiguration_RachConfigSubpktPayload_hidden_prach_list_v5[] = {
 const Fmt LteMacConfiguration_RachConfigSubpktPayload_prach_last_part[] = {
         {UINT, "Initial CE Level",      2},
         {UINT, "Preamble Trans Max CE", 2},
+};
+
+const ValueName LteMacConfiguration_RachConfigSubpktPayload_prach_initial_ce_level[] = {
+        {0xffff, "NA"},
 };
 
 const Fmt LteMacConfigurationSubpkt_LCConfig[] = {

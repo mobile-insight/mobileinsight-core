@@ -3662,6 +3662,17 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_DLConfig, Fmt),
                                                          b, offset, length, result_subpkt);
+                                
+                                int iTaTimer = _search_result_uint(result_subpkt, "TA Timer");
+                                if (iTaTimer == 0xffff) {
+                                    (void) _map_result_field_to_name(result_subpkt,
+                                                                        "TA Timer",
+                                                                        LteMacConfigurationConfigType_DLConfig_TA_Timer,
+                                                                        ARRAY_SIZE(
+                                                                                LteMacConfigurationConfigType_DLConfig_TA_Timer,
+                                                                                ValueName),
+                                                                        "MI Unknown");
+                                }
                                 success = true;
                             } else if (subpkt_ver == 2) {
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig_v2,
@@ -3712,6 +3723,16 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_ULConfig,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_ULConfig, Fmt),
                                                          b, offset, length, result_subpkt);
+                                // int iBSRTimer = _search_result_uint(result_subpkt, "BSR Timer");
+                                // if (iBSRTimer == 0xffff) {
+                                //     (void) _map_result_field_to_name(result_subpkt,
+                                //                                         "BSR Timer",
+                                //                                         LteMacConfigurationConfigType_ULConfig_BSR_Timer,
+                                //                                         ARRAY_SIZE(
+                                //                                                 LteMacConfigurationConfigType_ULConfig_BSR_Timer,
+                                //                                                 ValueName),
+                                //                                         "MI Unknown");
+                                }
                                 success = true;
                             } else if (subpkt_ver == 2) {
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_ULConfig_v2,
@@ -3739,6 +3760,17 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_RACHConfig_v5,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_RACHConfig_v5, Fmt),
                                                          b, offset, length, result_subpkt);
+                                
+                                // int iPowerOffsetGroupB = _search_result_uint(result_subpkt, "Power offset Group_B");
+                                // if (iPowerOffsetGroupB == 0x00) {
+                                //     (void) _map_result_field_to_name(result_subpkt,
+                                //                                         "Power offset Group_B",
+                                //                                         LteMacConfigurationSubpkt_RACHConfig_Power_offset_Group_B,
+                                //                                         ARRAY_SIZE(
+                                //                                                 LteMacConfigurationSubpkt_RACHConfig_Power_offset_Group_B,
+                                //                                                 ValueName),
+                                //                                         "MI Unknown");
+                                // }
                                 
                                 //Preamble Format is related to PRACH config(36.321)
                                 int prach_cfg = _search_result_int(result_subpkt, "PRACH config");
@@ -3863,6 +3895,16 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_prach_last_part,
                                                         ARRAY_SIZE(LteMacConfiguration_RachConfigSubpktPayload_prach_last_part, Fmt),
                                                         b, offset, length, result_temp);
+                                // int iInitialCELevel = _search_result_uint(result_temp, "Initial CE Level");
+                                // if (iInitialCELevel == 0xffff) {
+                                //     (void) _map_result_field_to_name(result_temp,
+                                //                                         "Initial CE Level",
+                                //                                         LteMacConfiguration_RachConfigSubpktPayload_prach_initial_ce_level,
+                                //                                         ARRAY_SIZE(
+                                //                                                 LteMacConfiguration_RachConfigSubpktPayload_prach_initial_ce_level,
+                                //                                                 ValueName),
+                                //                                         "MI Unknown");
+                                // }
                                 t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
                                 PyList_Append(result_prach_cfg_r13, t);
                                 Py_DECREF(t);
