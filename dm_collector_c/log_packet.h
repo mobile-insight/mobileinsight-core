@@ -1474,11 +1474,12 @@ const Fmt LteMacConfigurationSubpkt_DLConfig_Scell_Tag_Info_v2[] = {
 };
 
 const ValueName LteMacConfigurationConfigType_DLConfig_TA_Timer[] = {
-        {0xffff, "Infinity ms"},
+        {0xffff, "Infinity"},
 };
 
 const Fmt LteMacConfigurationSubpkt_ULConfig[] = {
-        {UINT, "SR periodicity",            3},
+        {UINT, "SR resource present",       1},
+        {UINT, "SR periodicity",            2},
         {UINT, "BSR timer",                 2},
         {UINT, "SPS Number of Tx released", 2},
         {UINT, "Retx BSR timer",            2},    // 0xFF need to be read as infinity
@@ -1493,6 +1494,10 @@ const Fmt LteMacConfigurationSubpkt_ULConfig_v2[] = {
         {UINT, "SPS Number of Tx released", 2},
         {UINT, "Retx BSR timer",            2},    // 0xFF need to be read as infinity
         {SKIP, "NULL",                      2},
+};
+
+const ValueName LteMacConfigurationConfigType_ULConfig_BSR_Timer[] = {
+        {0xffff, "Infinity"},
 };
 
 const Fmt LteMacConfigurationSubpkt_RACHConfig[] = {
@@ -1556,6 +1561,10 @@ const Fmt LteMacConfigurationSubpkt_RACHConfig_v5[] = {
         {UINT, "PRACH Cfg R13 Present",       1},
 };
 
+const ValueName LteMacConfigurationSubpkt_RACHConfig_Power_offset_Group_B[] = {
+        {0x00, "-Infinity"},
+};
+
 const Fmt LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_size_v5[] = {
         {UINT, "RSRP Thresh PRACH List Size", 1},
 };
@@ -1588,6 +1597,10 @@ const Fmt LteMacConfiguration_RachConfigSubpktPayload_hidden_prach_list_v5[] = {
 const Fmt LteMacConfiguration_RachConfigSubpktPayload_prach_last_part[] = {
         {UINT, "Initial CE Level",      2},
         {UINT, "Preamble Trans Max CE", 2},
+};
+
+const ValueName LteMacConfiguration_RachConfigSubpktPayload_prach_initial_ce_level[] = {
+        {0xffff, "NA"},
 };
 
 const Fmt LteMacConfigurationSubpkt_LCConfig[] = {
@@ -2595,9 +2608,8 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload[] = {
         // Version 1
         {UINT,        "Rach reason",            1},
         {PLACEHOLDER, "RACH Contention",        0},
-        {BYTE_STREAM, "Maching ID",             6},
-        {SKIP,        NULL,                     1},
-        {UINT,        "Preamble",               1},
+        {UINT, "Maching ID",                    8},
+        {PLACEHOLDER,        "Preamble",        0},
         {BYTE_STREAM, "Preamble RA mask",       1},
         {UINT,        "Msg3 size",              1},
         {UINT,        "Group chosen",           1},
@@ -2609,9 +2621,9 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2[] = {
         {UINT,        "Sub Id",                 1},
         {UINT,        "Cell Id",                1},
         {UINT,        "Rach reason",            1},
-        {BYTE_STREAM, "Maching ID",             6},
-        {UINT,        "RACH Contention",        1},
-        {UINT,        "Preamble",               1},
+        {BYTE_STREAM, "Maching ID",             8},
+        {PLACEHOLDER,        "RACH Contention", 0},
+        {PLACEHOLDER,        "Preamble",        0},
         {BYTE_STREAM, "Preamble RA mask",       1},
         {UINT,        "Msg3 size",              1},
         {UINT,        "Group chosen",           1},
@@ -2625,6 +2637,10 @@ const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason[] = {
         {2, "UL_DATA"},
         {3, "DL_DATA"},
         {4, "HO"},
+};
+
+const ValueName LteMacRachTrigger_RachReasonSubpkt_GroupChosen[] = {
+        {0, "Group A(0)"},
 };
 
 const ValueName ValueNameRachContention[] = {
@@ -2698,9 +2714,13 @@ const Fmt LteMacRachAttempt_Subpkt_Msg1_v3[] = {
 
 const Fmt LteMacRachAttempt_Subpkt_Msg1_v4[] = {
         {UINT,        "Preamble Index",        1},
-        {BYTE_STREAM, "Preamble index mask",   1},
+        {UINT,        "Preamble index mask",   1},
         {UINT,        "Preamble power offset", 2},
         {UINT,        "CE Level",              1},
+};
+
+const ValueName LteMacRachAttempt_Subpkt_Preamble_index_mask[] = {
+        {0xff, "Invalid"},
 };
 
 const ValueName LteMacRachAttempt_Subpkt_CELEVEL[] = {

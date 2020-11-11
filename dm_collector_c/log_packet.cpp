@@ -3684,6 +3684,17 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_DLConfig, Fmt),
                                                          b, offset, length, result_subpkt);
+                                
+                                int iTaTimer = _search_result_uint(result_subpkt, "TA Timer");
+                                if (iTaTimer == 0xffff) {
+                                    (void) _map_result_field_to_name(result_subpkt,
+                                                                        "TA Timer",
+                                                                        LteMacConfigurationConfigType_DLConfig_TA_Timer,
+                                                                        ARRAY_SIZE(
+                                                                                LteMacConfigurationConfigType_DLConfig_TA_Timer,
+                                                                                ValueName),
+                                                                        "MI Unknown");
+                                }
                                 success = true;
                             } else if (subpkt_ver == 2) {
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig_v2,
@@ -3734,6 +3745,16 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_ULConfig,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_ULConfig, Fmt),
                                                          b, offset, length, result_subpkt);
+                                int iBSRTimer = _search_result_uint(result_subpkt, "BSR timer");
+                                if (iBSRTimer == 0xffff) {
+                                    (void) _map_result_field_to_name(result_subpkt,
+                                                                        "BSR timer",
+                                                                        LteMacConfigurationConfigType_ULConfig_BSR_Timer,
+                                                                        ARRAY_SIZE(
+                                                                                LteMacConfigurationConfigType_ULConfig_BSR_Timer,
+                                                                                ValueName),
+                                                                        "MI Unknown");
+                                }
                                 success = true;
                             } else if (subpkt_ver == 2) {
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_ULConfig_v2,
@@ -3761,6 +3782,17 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_RACHConfig_v5,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_RACHConfig_v5, Fmt),
                                                          b, offset, length, result_subpkt);
+                                
+                                int iPowerOffsetGroupB = _search_result_uint(result_subpkt, "Power offset Group_B");
+                                if (iPowerOffsetGroupB == 0x00) {
+                                    (void) _map_result_field_to_name(result_subpkt,
+                                                                        "Power offset Group_B",
+                                                                        LteMacConfigurationSubpkt_RACHConfig_Power_offset_Group_B,
+                                                                        ARRAY_SIZE(
+                                                                                LteMacConfigurationSubpkt_RACHConfig_Power_offset_Group_B,
+                                                                                ValueName),
+                                                                        "MI Unknown");
+                                }
                                 
                                 //Preamble Format is related to PRACH config(36.321)
                                 int prach_cfg = _search_result_int(result_subpkt, "PRACH config");
@@ -3885,6 +3917,16 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_prach_last_part,
                                                         ARRAY_SIZE(LteMacConfiguration_RachConfigSubpktPayload_prach_last_part, Fmt),
                                                         b, offset, length, result_temp);
+                                int iInitialCELevel = _search_result_uint(result_temp, "Initial CE Level");
+                                if (iInitialCELevel == 0xffff) {
+                                    (void) _map_result_field_to_name(result_temp,
+                                                                        "Initial CE Level",
+                                                                        LteMacConfiguration_RachConfigSubpktPayload_prach_initial_ce_level,
+                                                                        ARRAY_SIZE(
+                                                                                LteMacConfiguration_RachConfigSubpktPayload_prach_initial_ce_level,
+                                                                                ValueName),
+                                                                        "MI Unknown");
+                                }
                                 t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
                                 PyList_Append(result_prach_cfg_r13, t);
                                 Py_DECREF(t);
@@ -7370,6 +7412,15 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                             ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_v5,
                                        Fmt),
                             b, offset, length, result_subpkt);
+                    int power_offset_config_b=_search_result_int(result_subpkt,"Power offset Group_B");
+                    if(power_offset_config_b==0){
+                        std::string temp = "- Infinity";
+                        PyObject *pystr = Py_BuildValue("s", temp.c_str());
+                        PyObject *old_object = _replace_result(result_subpkt,
+                                                            "Power offset Group_B", pystr);
+                        Py_DECREF(old_object);
+                        Py_DECREF(pystr);
+                    }
                     //Preamble Format is related to PRACH config(36.321)
                     int prach_cfg = _search_result_int(result_subpkt, "PRACH config");
                     if(prach_cfg < 16){
@@ -7528,6 +7579,44 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                                                      ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpkt_RachReason,
                                                                 ValueName),
                                                      "(MI)Unknown");
+                    (void) _map_result_field_to_name(result_subpkt, "Group chosen",
+                                                     LteMacRachTrigger_RachReasonSubpkt_GroupChosen,
+                                                     ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpkt_GroupChosen,
+                                                                ValueName),
+                                                     "(MI)Unknown");
+                    PyObject *temp=_search_result(result_subpkt,"Maching ID");
+                    long long tempLong=PyLong_AsLongLong(temp);
+                    int iPreamble=(int)tempLong&0xff00000000000000;
+                    PyObject *old_object1 = _replace_result_int(result_subpkt,
+                                                                   "Preamble", iPreamble);
+                    Py_DECREF(old_object1);
+                    char arr[6];
+                    int wei=56;
+                    for(int i=5;i>=0;i--){
+                        long long templong2=tempLong<<wei;
+                        arr[i]=(char)(templong2>>56);
+                        wei-=8;
+                    }
+                    
+                    std::string MachingId;
+                    char hex[10]={};
+                    for(int i=5;i>0;i--){
+                        sprintf(hex,"%02x",arr[i]&0xff);
+                        MachingId+="0x";
+                        MachingId+=hex;
+                        MachingId+=",";
+                    }
+                    sprintf(hex,"%02x",arr[0]&0xff);
+                    MachingId+="0x";
+                    MachingId+=hex;
+                    
+                    PyObject *pystr1= Py_BuildValue("s", MachingId.c_str());
+                    PyObject *old_object2 = _replace_result(result_subpkt,
+                                                           "Maching ID", pystr1);
+                    Py_DECREF(old_object2);
+
+                    Py_DECREF(temp);
+
                     std::string strRachContention = "Contention Based RACH procedure";
                     PyObject *pystr = Py_BuildValue("s", strRachContention.c_str());
                     PyObject *old_object = _replace_result(result_subpkt,
@@ -7786,6 +7875,19 @@ static int _decode_lte_mac_rach_attempt_subpkt(const char *b, int offset,
                     offset += _decode_by_fmt(LteMacRachAttempt_Subpkt_Msg1_v4,
                                              ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg1_v4, Fmt),
                                              b, offset, length, result_subpkt_msg1);
+                    
+                    int Preamble_index_mask = _search_result_uint(result_subpkt_msg1, "Preamble index mask");
+                    // printf("%s", Preamble_index_mask);
+                    if (Preamble_index_mask == 0xff) {
+                        (void) _map_result_field_to_name(result_subpkt_msg1,
+                                                            "Preamble index mask",
+                                                            LteMacRachAttempt_Subpkt_Preamble_index_mask,
+                                                            ARRAY_SIZE(
+                                                                    LteMacRachAttempt_Subpkt_Preamble_index_mask,
+                                                                    ValueName),
+                                                            "MI Unknown");
+                    }
+
                     (void) _map_result_field_to_name(result_subpkt_msg1,
                                                      "CE Level",
                                                      LteMacRachAttempt_Subpkt_CELEVEL,
