@@ -400,6 +400,15 @@ const ValueName LteRrcOtaPduType_v19[] = {
         {0x34, "LTE-RRC_UL_DCCH_NB"},
 };
 
+//added fields for version 26
+const ValueName LteRrcOtaPduType_v26[] = {
+        {0x02, "LTE-RRC_BCCH_DL_SCH"},
+        {0x04, "LTE-RRC_PCCH"},
+        {0x06, "LTE-RRC_DL_DCCH"},
+        {0x07, "LTE-RRC_DL_CCCH"},
+        {0x08, "LTE-RRC_UL_DCCH"},
+};
+
 // ------------------------------------------------------------
 // NR_RRC_OTA_Packet
 const Fmt NrRrcOtaPacketFmt[] = {
