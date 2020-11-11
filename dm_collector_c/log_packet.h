@@ -404,8 +404,9 @@ const ValueName LteRrcOtaPduType_v19[] = {
 const ValueName LteRrcOtaPduType_v26[] = {
         {0x02, "LTE-RRC_BCCH_DL_SCH"},
         {0x04, "LTE-RRC_PCCH"},
+        {0x05, "LTE-RRC_DL_CCCH"},
         {0x06, "LTE-RRC_DL_DCCH"},
-        {0x07, "LTE-RRC_DL_CCCH"},
+        {0x07, "LTE-RRC_UL_CCCH"},
         {0x08, "LTE-RRC_UL_DCCH"},
 };
 
