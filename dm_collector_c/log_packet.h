@@ -328,7 +328,8 @@ const Fmt LteRrcOtaPacketFmt_v19[] = {
         {UINT, "Freq",                        4},    //frequency
         {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
         {UINT, "PDU Number",                  1},    //PDU number
-        {UINT, "SIB Mask in SI",              4},
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
         {UINT, "Msg Length",                  2}
 };
 
@@ -351,7 +352,8 @@ const Fmt LteRrcOtaPacketFmt_v24[] = {
         {UINT, "Freq",                        4},    //frequency
         {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
         {UINT, "PDU Number",                  1},    //PDU number
-        {UINT, "SIB Mask in SI",              4},
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
         {UINT, "Msg Length",                  2}
 };
 
@@ -364,7 +366,8 @@ const Fmt LteRrcOtaPacketFmt_v26[] = {
         {UINT, "Freq",                        2},    //frequency
         {UINT, "SysFrameNum/SubFrameNum",     4},    //System/subsystem frame number 
         {UINT, "PDU Number",                  1},    //PDU number
-        {UINT, "SIB Mask in SI",              4},
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
         {UINT, "Msg Length",                  2}
 };
 
@@ -413,7 +416,8 @@ const Fmt NrRrcOtaPacketFmt[] = {
         {UINT, "Freq",   			 4},     //Freq
         {UINT, "SysFrameNum/SubFrameNum",   4},     //System/subsystem frame number
         {UINT, "PDU Number",         1},     //PDU Number
-        {UINT, "SIB Mask In SI",     4},
+        {UINT, "SIB Mask in SI",     1},
+        {SKIP, NULL,                 3},
         {UINT, "Msg Length",         2}
 };
 
