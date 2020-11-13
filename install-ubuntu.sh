@@ -35,7 +35,7 @@ echo "Checking Wireshark sources to compile ws_dissector"
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
     echo "You do not have source codes for Wireshark version ${ws_ver}, downloading..."
 
-    wget  http://metro.cs.ucla.edu/mobile_insight/wireshark-${ws_ver}-rbc-dissector.tar.xz -O wireshark-${ws_ver}.tar.xz
+    wget  http://www.mobileinsight.net/wireshark-${ws_ver}-rbc-dissector.tar.xz -O wireshark-${ws_ver}.tar.xz
     # wget https://www.wireshark.org/download/src/all-versions/wireshark-${ws_ver}.tar.xz
     tar -xf wireshark-${ws_ver}.tar.xz
     rm wireshark-${ws_ver}.tar.xz
