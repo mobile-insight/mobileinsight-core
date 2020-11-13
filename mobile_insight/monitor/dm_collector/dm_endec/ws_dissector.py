@@ -81,6 +81,9 @@ class WSDissector:
         "nr-rrc.rrc_reconf": 410,
         "nr-rrc.ue_mrdc_cap": 411,
         "nr-rrc.ue_nr_cap": 412,
+        "nr-rrc.sbcch.sl.bch": 413,
+        "nr-rrc.scch": 414,
+        "nr-rrc.radio_bearer_conf": 415,
     }
     _proc = None
     _init_proc_called = False
