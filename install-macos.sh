@@ -104,7 +104,7 @@ echo -e "${GREEN}[INFO]${NC} Checking Wireshark sources to compile ws_dissector"
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
     echo -e "${GREEN}[INFO]${NC} You do not have source codes for Wireshark version ${ws_ver}, downloading..."
     # wget https://www.wireshark.org/download/src/all-versions/wireshark-${ws_ver}.tar.xz
-    wget  http://metro.cs.ucla.edu/mobile_insight/wireshark-${ws_ver}-rbc-dissector.tar.xz -O wireshark-${ws_ver}.tar.xz
+    wget http://metro.cs.ucla.edu/mobile_insight/wireshark-${ws_ver}-rbc-dissector.tar.xz -O wireshark-${ws_ver}.tar.xz
     tar xf wireshark-${ws_ver}.tar.xz
     rm wireshark-${ws_ver}.tar.xz
 fi
@@ -164,14 +164,19 @@ fi
 
 echo -e "${GREEN}[INFO]${NC} Installing GUI for MobileInsight..."
 cd ${MOBILEINSIGHT_PATH}
-if [[ $(mkdir -p ${PREFIX}/share/mobileinsight/) ]] ; then
-    cp -r gui/* ${PREFIX}/share/mobileinsight/
-    ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
-else
-    sudo mkdir -p ${PREFIX}/share/mobileinsight/
-    sudo cp -r gui/* ${PREFIX}/share/mobileinsight/
-    sudo ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
-fi
+
+sudo mkdir -p ${PREFIX}/share/mobileinsight/
+sudo cp -r gui/* ${PREFIX}/share/mobileinsight/
+sudo ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
+
+# if [[ $(mkdir -p ${PREFIX}/share/mobileinsight/) ]] ; then
+#     cp -r gui/* ${PREFIX}/share/mobileinsight/
+#     ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
+# else
+#     sudo mkdir -p ${PREFIX}/share/mobileinsight/
+#     sudo cp -r gui/* ${PREFIX}/share/mobileinsight/
+#     sudo ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
+# fi
 
 echo -e "${GREEN}[INFO]${NC} Installing dependencies for MobileInsight GUI..."
 echo -e "${GREEN}[INFO]${NC} Installing wxPython..."
