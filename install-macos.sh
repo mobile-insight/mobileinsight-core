@@ -1,16 +1,12 @@
 #!/bin/bash
 # Installation script for mobileinsight-core on macOS
 # It installs package under /usr/local folder
-# Author  : Zengwen Yuan, Yunqi Guo, Yuanjie Li
-# Date    : 2020-10-20
-# Version : 4.0
-
 
 echo "** Installer Script for mobileinsight-core on macOS **"
 echo " "
-echo "  Author : Zengwen Yuan (zyuan [at] cs.ucla.edu), Yuanjie Li (liyuanjie08 [at] gmail.com)"
-echo "  Date   : 2020-10-21"
-echo "  Rev    : 4.0"
+echo "  Author : Zengwen Yuan (zyuan [at] cs.ucla.edu), Yuanjie Li (yuanjiel [at] tsinghua.edu.cn), Yunqi Guo (luckiday [at] cs.ucla.edu) "
+echo "  Date   : 2020-11-13"
+echo "  Rev    : 4.1"
 echo "  Usage  : ./install-macos.sh"
 echo " "
 
@@ -18,7 +14,7 @@ echo "Upgrading MobileInsight..."
 yes | ./uninstall.sh
 
 # Wireshark version to install
-ws_ver=3.2.7
+ws_ver=3.4.0
 
 # Use local library path
 PREFIX=/usr/local
@@ -122,20 +118,20 @@ if [[ $? != 0 ]]; then
 fi
 
 
-# echo "Compiling wireshark-${ws_ver} from source code, it may take a few minutes..."
-# make -j $(grep -c ^processor /proc/cpuinfo)
-# if [ $? != 0 ]; then
-#     echo "Error when compiling wireshark-${ws_ver} from source code'."
-#     echo "You need to manually fix it before continuation. Exiting with status 2"
-#     exit 2
-# fi
-# echo "Installing wireshark-${ws_ver}"
-# sudo make install > /dev/null 2>&1
-# if [ $? != 0 ]; then
-#     echo "Error when installing wireshark-${ws_ver} compiled from source code'."
-#     echo "You need to manually fix it before continuation. Exiting with status 2"
-#     exit 2
-# fi
+echo "Compiling wireshark-${ws_ver} from source code, it may take a few minutes..."
+make -j $(grep -c ^processor /proc/cpuinfo)
+if [ $? != 0 ]; then
+    echo "Error when compiling wireshark-${ws_ver} from source code'."
+    echo "You need to manually fix it before continuation. Exiting with status 2"
+    exit 2
+fi
+echo "Installing wireshark-${ws_ver}"
+sudo make install > /dev/null 2>&1
+if [ $? != 0 ]; then
+    echo "Error when installing wireshark-${ws_ver} compiled from source code'."
+    echo "You need to manually fix it before continuation. Exiting with status 2"
+    exit 2
+fi
 
 
 echo -e "${GREEN}[INFO]${NC} Compiling Wireshark dissector for MobileInsight..."
