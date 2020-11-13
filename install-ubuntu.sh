@@ -1,16 +1,13 @@
 #!/bin/bash
 # Installation script for mobileinsight-core on Ubuntu
 # It installs package under /usr/local folder
-# Author  : Zengwen Yuan, Haotian Deng
-# Date    : 2020-10-20
-# Version : 4.0
 
 # set -e
 # set -u
 
 echo "** Installer Script for mobileinsight-core on Ubuntu **"
 echo " "
-echo "  Author : Zengwen Yuan (zyuan [at] cs.ucla.edu), Haotian Deng (deng164 [at] purdue.edu)"
+echo "  Author : Zengwen Yuan (zyuan [at] cs.ucla.edu), Haotian Deng (deng164 [at] purdue.edu), Yuanjie Li (yuanjiel [at] tsinghua.edu.cn)"
 echo "  Date   : 2020-10-20"
 echo "  Rev    : 4.0"
 echo "  Usage  : ./install-ubuntu.sh"
@@ -20,7 +17,7 @@ echo "Upgrading MobileInsight..."
 yes | ./uninstall.sh
 
 # Wireshark version to install
-ws_ver=3.2.7
+ws_ver=3.4.0
 
 # Use local library path
 #TODO
@@ -32,7 +29,7 @@ PYTHON=python3
 PIP=pip3
 
 echo "Installing dependencies for compiling Wireshark libraries"
-sudo apt-get -y install cmake pkg-config wget libglib2.0-dev bison flex libpcap-dev libgcrypt-dev qt5-default qttools5-dev qtmultimedia5-dev libqt5svg5-dev
+sudo apt-get -y install cmake pkg-config wget libglib2.0-dev bison flex libpcap-dev libgcrypt-dev qt5-default qttools5-dev qtmultimedia5-dev libqt5svg5-dev libc-ares-dev libsdl2-mixer-2.0-0 libsdl2-image-2.0-0 libsdl2-2.0-0
 
 echo "Checking Wireshark sources to compile ws_dissector"
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
@@ -46,53 +43,52 @@ echo "Configuring Wireshark sources for ws_dissector compilation..."
 cd ${WIRESHARK_SRC_PATH}
 cmake --disable-wireshark . > /dev/null 2>&1
 if [ $? != 0 ]; then
-    echo "Error when executing '${WIRESHARK_SRC_PATH}/configure --disable-wireshark'."
+    echo "Error when executing '${WIRESHARK_SRC_PATH}/cmake --disable-wireshark .'"
     echo "You need to manually fix it before continuation. Exiting with status 3"
     exit 3
 fi
 
 echo "Check if proper version of wireshark dynamic library exists in system path..."
 
-FindWiresharkLibrary=true
+# FindWiresharkLibrary=true
 
-if readelf -d "/usr/local/lib/libwireshark.so" | grep "SONAME" | grep "libwireshark.so.13" ; then
-    echo "Found libwireshark.so.13 being used"
-else
-    echo "Didn't find libwireshark.so.13"
-    FindWiresharkLibrary=false
+# if readelf -d "/usr/local/lib/libwireshark.so" | grep "SONAME" | grep "libwireshark.so.13" ; then
+#     echo "Found libwireshark.so.13 being used"
+# else
+#     echo "Didn't find libwireshark.so.13"
+#     FindWiresharkLibrary=false
+# fi
+
+# if readelf -d "/usr/local/lib/libwiretap.so" | grep "SONAME" | grep "libwiretap.so.10" ; then
+#     echo "Found libwiretap.so.10 being used"
+# else
+#     echo "Didn't find libwiretap.so.10"
+#     FindWiresharkLibrary=false
+# fi
+
+# if readelf -d "/usr/local/lib/libwsutil.so" | grep "SONAME" | grep "libwsutil.so.11" ; then
+#     echo "Found libwsutil.so.11 being used"
+# else
+#     echo "Didn't find libwsutil.so.11"
+#     FindWiresharkLibrary=false
+# fi
+
+# if [ "$FindWiresharkLibrary" = false ] ; then
+echo "Compiling wireshark-${ws_ver} from source code, it may take a few minutes..."
+make -j $(grep -c ^processor /proc/cpuinfo)
+if [ $? != 0 ]; then
+    echo "Error when compiling wireshark-${ws_ver} from source code'."
+    echo "You need to manually fix it before continuation. Exiting with status 2"
+    exit 2
 fi
-
-if readelf -d "/usr/local/lib/libwiretap.so" | grep "SONAME" | grep "libwiretap.so.10" ; then
-    echo "Found libwiretap.so.10 being used"
-else
-    echo "Didn't find libwiretap.so.10"
-    FindWiresharkLibrary=false
+echo "Installing wireshark-${ws_ver}"
+sudo make install > /dev/null 2>&1
+if [ $? != 0 ]; then
+    echo "Error when installing wireshark-${ws_ver} compiled from source code'."
+    echo "You need to manually fix it before continuation. Exiting with status 2"
+    exit 2
 fi
-
-if readelf -d "/usr/local/lib/libwsutil.so" | grep "SONAME" | grep "libwsutil.so.11" ; then
-    echo "Found libwsutil.so.11 being used"
-else
-    echo "Didn't find libwsutil.so.11"
-    FindWiresharkLibrary=false
-fi
-
-if [ "$FindWiresharkLibrary" = false ] ; then
-    echo "Compiling wireshark-${ws_ver} from source code, it may take a few minutes..."
-    make -j $(grep -c ^processor /proc/cpuinfo)
-    if [ $? != 0 ]; then
-        echo "Error when compiling wireshark-${ws_ver} from source code'."
-        echo "You need to manually fix it before continuation. Exiting with status 2"
-        exit 2
-    fi
-    echo "Installing wireshark-${ws_ver}"
-    sudo make install > /dev/null 2>&1
-    if [ $? != 0 ]; then
-        echo "Error when installing wireshark-${ws_ver} compiled from source code'."
-        echo "You need to manually fix it before continuation. Exiting with status 2"
-        exit 2
-    fi
-
-fi
+# fi
 
 echo "Reload ldconfig cache, your password may be required..."
 sudo rm /etc/ld.so.cache
@@ -147,12 +143,12 @@ else
     exit 4
 fi
 
-# echo "Testing MobileInsight GUI (you need to be in a graphic session)..."
-# mi-gui
-# if [[ $? == 0 ]] ; then
-#     echo "Successfully ran MobileInsight GUI!"
-#     echo "The installation of mobileinsight-core is finished!"
-# else
-#     echo "There are issues running MobileInsight GUI, you need to fix them manually"
-#     echo "The installation of mobileinsight-core is finished!"
-# fi
+echo "Testing MobileInsight GUI (you need to be in a graphic session)..."
+mi-gui
+if [[ $? == 0 ]] ; then
+    echo "Successfully ran MobileInsight GUI!"
+    echo "The installation of mobileinsight-core is finished!"
+else
+    echo "There are issues running MobileInsight GUI, you need to fix them manually"
+    echo "The installation of mobileinsight-core is finished!"
+fi
