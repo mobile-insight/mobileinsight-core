@@ -65,7 +65,7 @@ try:
         res = run_shell_cmd(cmd)
         if res.startswith(b"mt"):
             return ChipsetType.MTK
-        elif res.startswith(b"msm") or res.startswith(b"mdm") or res.startswith(b"sdm"):
+        elif res.startswith(b"msm") or res.startswith(b"mdm") or res.startswith(b"sdm") or res.startswith(b"kona"):
             return ChipsetType.QUALCOMM
         else:
             print(("WARNING: Unknown type:", res))
