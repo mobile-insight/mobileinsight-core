@@ -231,6 +231,10 @@ class Element(object):
         :param msg_dict: A dictionary that lists the information to be broadcasted.
         :type msg_dict: string->string dictionary
         """
+
+        pass
+
+        """
         if not is_android:
             # Currently only support Android mobile version
             return
@@ -255,3 +259,4 @@ class Element(object):
         except Exception as e:
             import traceback
             self.log_error(str(traceback.format_exc()))
+        """
