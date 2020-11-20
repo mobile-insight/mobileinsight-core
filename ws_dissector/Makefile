@@ -1,26 +1,33 @@
 # Makefile for ws_dissector PC and Android version
-# Author  : Zengwen Yuan, Yuanjie Li, Jiayao Li
+# Author  : Zengwen Yuan, Yuanjie Li, Jiayao Li, Yunqi Guo
 # Date    : 2016-11-22
-# Version : 2.0
+# Update  : 2020-11-20(V3.0)
+# Version : 3.0
 
+
+# Note: You need to compile wireshark and glib before building ws_dissector.
+# Please change this part to your environment settings before `make`.
 LIB_PREFIX=/usr/local/lib
-WIRESHARK_SRC=$(HOME)/dev/wireshark-2.0.8
-GLIB_SRC=$(HOME)/dev/glib-2.50.22
-LIBPCAP_SRC=$(HOME)/dev/libpcap-1.8.0
+#HOME=/home/vagrant
+HOME=/YOUR/PATH
+WIRESHARK_SRC=$(HOME)/wireshark-3.4.0
+GLIB_SRC=$(HOME)/glib-2.54.3
+LIBPCAP_SRC=$(HOME)/libpcap-1.9.1
+ANDROID_LIB_PREFIX=$(HOME)/lib
+ANDROID_LIB_A=$(HOME)/androidcc/lib
+ANDROID_LIB_B=/usr/local/lib	# Change it to the path of libwireshark.so
+CXX=$(HOME)/android-ndk-toolchain/bin/arm-linux-androideabi-g++
 
-ANDROID_PREFIX=$(HOME)/dev/android
-ANDROID_LIB_PREFIX=$(HOME)/dev/android/lib
-ARCH=arm-linux-androideabi
-CROSS_PATH=${ANDROID_PREFIX}/bin/${ARCH}
-CXX=${CROSS_PATH}-g++
 STRIP=${CROSS_PATH}-strip
 ANDROID_CC_FLAGS=-I"$(WIRESHARK_SRC)" \
 				-I"$(LIBPCAP_SRC)" \
 				-I"$(GLIB_SRC)" \
 				-I"$(GLIB_SRC)/glib" \
 				-I"$(GLIB_SRC)/gmodule" \
-				-I"$(GLIB_SRC)/android" \
-				-L"$(ANDROID_LIB_PREFIX)" -lwireshark -lglib-2.0
+				-I"$(GLIB_SRC)/object" \
+				-I"$(LIBPCAP_SRC)" \
+				-L"$(ANDROID_LIB_B)" -lwireshark -lwiretap -lwsutil \
+				-L"$(ANDROID_LIB_A)" -lglib-2.0
 
 
 all: ws_dissector
