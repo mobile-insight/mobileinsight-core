@@ -24,7 +24,7 @@ class WcdmaRrcAnalyzer(ProtocolAnalyzer):
 
     def __init__(self):
 
-        self.log_info("Initialing WcdmaRrcAnalyzer..")
+        # self.log_info("Initialing WcdmaRrcAnalyzer..")
 
         ProtocolAnalyzer.__init__(self)
 
