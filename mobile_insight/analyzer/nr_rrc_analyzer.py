@@ -94,9 +94,8 @@ class NrRrcAnalyzer(ProtocolAnalyzer):
                 # self.__status.tac = msg.data['TAC']
                 self.__history[timestamp] = self.__status
 
-        if status_updated:
-            self.log_info('NR_RRC_STATUS: ' + self.__status.dump())
-            # self.broadcast_info('LTE_RRC_STATUS', self.__status.dump_dict())
+        # if status_updated:
+        #     self.log_info('NR_RRC_STATUS: ' + self.__status.dump())
 
     def __callback_sib_config(self, msg):
         """
@@ -279,10 +278,10 @@ class NrRrcAnalyzer(ProtocolAnalyzer):
                 self.__config[cur_pair].active.measid_list[meas_id] = (obj_id, config_id)
                 # print(meas_id, obj_id, config_id)
                 meas_obj, report_config = self.__config[cur_pair].get_meas_config(meas_id)
-                if meas_obj and report_config:
-                    self.log_info('NR_RRC_RECONFIG: ' + str(meas_id) + '\n' + 'meas_obj: ' + str(obj_id) + ' ' + self.__config[cur_pair].active.measobj[obj_id].dump() + '\nconfig_id: ' + str(config_id) + ' ' + self.__config[cur_pair].active.report_list[config_id].dump())
-                else:
-                    self.log_info('NR_RRC_RECONFIG: ' + str(meas_id) + '\n' + 'meas_obj: ' + str(obj_id) + '\nconfig_id: ' + str(config_id))
+                # if meas_obj and report_config:
+                #     self.log_info('NR_RRC_RECONFIG: ' + str(meas_id) + '\n' + 'meas_obj: ' + str(obj_id) + ' ' + self.__config[cur_pair].active.measobj[obj_id].dump() + '\nconfig_id: ' + str(config_id) + ' ' + self.__config[cur_pair].active.report_list[config_id].dump())
+                # else:
+                #     self.log_info('NR_RRC_RECONFIG: ' + str(meas_id) + '\n' + 'meas_obj: ' + str(obj_id) + '\nconfig_id: ' + str(config_id))
 
             if field.get("name") == "nr-rrc.measResults_element":
                 # field_val = {}
@@ -332,14 +331,15 @@ class NrRrcAnalyzer(ProtocolAnalyzer):
                 cur_pair = (self.__status.id, self.__status.freq)
                 if cur_pair in self.__config:
                     meas_obj, report_config = self.__config[cur_pair].get_meas_config(measid)
+                    if report_config and report_config.event_list[0].type == 'periodic':
+                        continue
                         
                 meas_obj_dump = "None" if meas_obj is None else meas_obj.dump()
                 report_cfg_dump = "None" if report_config is None else report_config.dump()
-                self.log_info(str(msg.timestamp) +
-                    " NR_RRC_REPORT\n" +
-                    "meas_object: " + meas_obj_dump + "\n" +
-                    "report_config: " + report_cfg_dump + '\n' +
-                    "serving_cell: " + str(serv_meas) + '\n' + 
+                self.log_info("NR_RRC_REPORT " + str(msg.timestamp) + " " + 
+                    "meas_object: " + meas_obj_dump + " " +
+                    "report_config: " + report_cfg_dump + ' ' +
+                    "serving_cell: " + str(serv_meas) + ' ' + 
                     "neighbor_cells: " + str(neighborCells))
 
             if field.get("name") == "nr-rrc.spCellConfigCommon_element":
@@ -350,9 +350,10 @@ class NrRrcAnalyzer(ProtocolAnalyzer):
                         cid = int(val.get("show"))
                     if val.get("name") == "nr-rrc.absoluteFrequencySSB":
                         freq = int(val.get("show"))
-                self.log_info(str(msg.timestamp) +
-                    " NR_RRC_HANDOVER " + "source cell=" + str(("NR",self.__status.id, self.__status.freq)) +
-                    " target cell=" + str(("NR",cid,freq)))
+                # self.log_info("UPDATE_CELL " + str(msg.timestamp) + " " +
+                #     "source cell=" + str(("NR",self.__status.id, self.__status.freq)) + " " +
+                #     "target cell=" + str(("NR",cid,freq)))
+                self.log_info("UPDATE_NR_CELL " + str(msg.timestamp) + " " + str((freq,cid)))
                 self.__update_conn(freq,cid,msg.timestamp)
 
 
