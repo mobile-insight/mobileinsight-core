@@ -377,6 +377,10 @@ const Fmt LtePdschStatIndication_Record_TB_v34 [] = {
     {PLACEHOLDER, "ACK/NACK Decision", 0},
 };
 
+const ValueName LtePdschStatIndication_Record_TB_v34_QED_Iteration [] = {
+    {0, "OFF"},
+};
+
 const Fmt LtePdschStatIndication_Record_v34_P2 [] = {
     {UINT, "PMCH ID", 1},
     {UINT, "Area ID", 1},
@@ -1682,6 +1686,13 @@ static int _decode_lte_pdsch_stat_indication_payload (const char *b,
                     old_object = _replace_result_int(result_record_item_TB_item,
                             "QED Iteration", qedIterations);
                     Py_DECREF(old_object);
+
+                    (void) _map_result_field_to_name(result_record_item_TB_item,
+                            "QED Iteration",
+                            LtePdschStatIndication_Record_TB_v34_QED_Iteration,
+                            ARRAY_SIZE(LtePdschStatIndication_Record_TB_v34_QED_Iteration,
+                                ValueName),
+                            "(MI)Unknown");
 
                     PyObject *t3 = Py_BuildValue("(sOs)", "Ignored",
                             result_record_item_TB_item, "dict");
