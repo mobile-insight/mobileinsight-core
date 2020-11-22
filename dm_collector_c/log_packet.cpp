@@ -7902,6 +7902,33 @@ static int _decode_lte_mac_rach_attempt_subpkt(const char *b, int offset,
                         offset += _decode_by_fmt(LteMacRachAttempt_Subpkt_Msg3_v4,
                                                  ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg3_v4, Fmt),
                                                  b, offset, length, result_subpkt_msg3);
+                        
+                        int iGrantRaw= _search_result_int(result_subpkt_msg3,
+                                                             "Grant Raw");
+                        char arr[4];
+                        int wei=24;
+                        for(int i=2;i>=0;i--){
+                            int templong2=iGrantRaw<<wei;
+                            arr[i]=(char)(templong2>>24);
+                            wei-=8;
+                        }
+                        std::string GrantRaw;
+                        char hex[10]={};
+                        GrantRaw+="0x";
+                        sprintf(hex,"%02x",arr[1]&0xf);
+                        GrantRaw+=hex;
+                        sprintf(hex,"%02x",arr[0]&0xff);
+                        GrantRaw+=hex;
+                        sprintf(hex,"%02x",arr[3]&0xff);
+                        GrantRaw+=hex;
+
+                        PyObject *pystr1= Py_BuildValue("s", GrantRaw.c_str());
+                        PyObject *old_object2 = _replace_result(result_subpkt_msg3,
+                                                            "Grant Raw", pystr1);
+                        Py_DECREF(old_object2);
+                        Py_DECREF(pystr1);
+
+
                         int iGrantBytes = _search_result_int(result_subpkt_msg3,
                                                              "Grant");
                         PyObject *result_MACPDUs = PyList_New(0);

@@ -248,6 +248,7 @@ const Fmt LtePhyPdschDecodingResult_TBlks_v124 [] = {
     {PLACEHOLDER, "Companding Format", 0},  // 4 bits
     {SKIP, NULL, 1},
     {UINT, "Effective Code Rate Data", 2},
+    {PLACEHOLDER,"Effective Code Rate", 0},
     {UINT, "HARQ Combine Enable",1},
 };
 
@@ -273,6 +274,7 @@ const Fmt LtePhyPdschDecodingResult_TBlks_v126 [] = {
     {SKIP, NULL, 1},
 
     {UINT,"Effective Code Rate Data",2},
+    {PLACEHOLDER,"Effective Code Rate", 0},
     {UINT, "HARQ Combine Enable",1},
 };
 
@@ -1949,6 +1951,15 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
 
                     temp = _search_result_uint(result_record_stream_item,"Effective Code Rate Data");
                     int iEffectiveCodeRateData = (temp>>5) & (0x7ff);
+                    float fEffectiveCodeRateData=iEffectiveCodeRateData*1.0/1024.0;
+                    std::string temps;
+                    char hex[10]={};
+                    sprintf(hex,"%0.3f",fEffectiveCodeRateData);
+                    temps+=hex;
+                    PyObject *pystr1= Py_BuildValue("s", temps.c_str());
+                    PyObject *old_object2 = _replace_result(result_record_stream_item,"Effective Code Rate", pystr1);
+                    Py_DECREF(old_object2);
+                    Py_DECREF(pystr1);
 
                     old_object = _replace_result_int(result_record_stream_item,
                             "Transport Block CRC", iTransportBlockCRC);
@@ -2209,6 +2220,15 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
 
                     temp = _search_result_uint(result_record_stream_item,"Effective Code Rate Data");
                     int iEffectiveCodeRateData = (temp>>5) & (0x7ff);
+                    float fEffectiveCodeRateData=iEffectiveCodeRateData*1.0/1024.0;
+                    std::string temps;
+                    char hex[10]={};
+                    sprintf(hex,"%0.3f",fEffectiveCodeRateData);
+                    temps+=hex;
+                    PyObject *pystr1= Py_BuildValue("s", temps.c_str());
+                    PyObject *old_object2 = _replace_result(result_record_stream_item,"Effective Code Rate", pystr1);
+                    Py_DECREF(old_object2);
+                    Py_DECREF(pystr1);
 
                     old_object = _replace_result_int(result_record_stream_item,
                             "Transport Block CRC", iTransportBlockCRC);
@@ -2459,6 +2479,16 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
 
                     int iEffectiveCodeRateData=(temp>>5) & 0x7ff;
 
+                    float fEffectiveCodeRateData=iEffectiveCodeRateData*1.0/1024.0;
+                    std::string temps;
+                    char hex[10]={};
+                    sprintf(hex,"%0.3f",fEffectiveCodeRateData);
+                    temps+=hex;
+                    PyObject *pystr1= Py_BuildValue("s", temps.c_str());
+                    PyObject *old_object2 = _replace_result(result_record_stream_item,"Effective Code Rate", pystr1);
+                    Py_DECREF(old_object2);
+                    Py_DECREF(pystr1);
+                    
                     temp = _search_result_uint(result_record_stream_item,
                             "HARQ Combine Enable");
                     int iHarqCombineEnable=(temp>>1) &7;

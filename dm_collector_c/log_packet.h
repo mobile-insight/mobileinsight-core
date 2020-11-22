@@ -2740,7 +2740,7 @@ const Fmt LteMacRachAttempt_Subpkt_Msg3[] = {
 };
 
 const Fmt LteMacRachAttempt_Subpkt_Msg3_v4[] = {
-        {BYTE_STREAM, "Grant Raw", 4},
+        {UINT,        "Grant Raw", 4},
         {UINT,        "Grant",     2},
         {UINT,        "Harq ID",   1},
 };
