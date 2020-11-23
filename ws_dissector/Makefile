@@ -1,15 +1,16 @@
 # Makefile for ws_dissector PC and Android version
 # Author  : Zengwen Yuan, Yuanjie Li, Jiayao Li, Yunqi Guo
 # Date    : 2016-11-22
-# Update  : 2020-11-20(V3.0)
-# Version : 3.0
+# Update  : 2020-11-20 [For wireshark 3.4.0 or later]
 
 
-# Note: You need to compile wireshark and glib before building ws_dissector.
-# Please change this part to your environment settings before `make`.
+# Note: Please compile wireshark and glib before building ws_dissector.
+# The following settings work with the cross-compiling environment provided
+# by https://github.com/luckiday/wireshark-for-android. If you are using a
+# customized environment, please update the <include path>(-I), <library path>(l).
+
 LIB_PREFIX=/usr/local/lib
-#HOME=/home/vagrant
-HOME=/YOUR/PATH
+HOME=/home/vagrant
 WIRESHARK_SRC=$(HOME)/wireshark-3.4.0
 GLIB_SRC=$(HOME)/glib-2.54.3
 LIBPCAP_SRC=$(HOME)/libpcap-1.9.1
