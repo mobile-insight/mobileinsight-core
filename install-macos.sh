@@ -86,7 +86,7 @@ if [[ $? != 0 ]]; then
     brew install glib gnutls libgcrypt dbus
     brew install geoip c-ares
     # Install Wireshark stable version 2.0.x using our own formulae
-    brew install ./wireshark.rb
+    # brew install ./wireshark.rb
 elif [[ $brew_ws_ver == *${ws_ver}* ]]; then
     echo -e "${GREEN}[INFO]${NC} You have a Wireshark version ${ws_ver} installed, continuing..."
 else

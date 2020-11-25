@@ -13,9 +13,9 @@ from mobile_insight.analyzer import MsgLogger, NrRrcAnalyzer, LteRrcAnalyzer, Wc
 
 if __name__ == "__main__":
 
-    # Initialize a 3G/4G monitor
+    # Initialize a monitor
     src = OfflineReplayer()
-    src.set_input_path("./offline_log_examples/")
+    src.set_input_path("./logs/offline_log_examples/")
     src.enable_log_all()
 
     # src.enable_log("LTE_PHY_Serv_Cell_Measurement")
