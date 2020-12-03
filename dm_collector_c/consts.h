@@ -111,6 +111,22 @@ enum LogPacketType {
 
     Modem_debug_message = 0x1FEB,
 
+    LTE_NB1_Random_Access_Request_Report = 0xB240,
+    LTE_NB1_Random_Access_Response_Report = 0xB241,
+    LTE_NB1_UE_Identification_Message_Report= 0xB242,
+    LTE_NB1_Contention_Resolution_Message_Report = 0xB243,
+    
+    LTE_NB1_ML1_GM_DCI_Info = 0xB244,
+    LTE_NB1_ML1_GM_TX_Report = 0xB245,
+    LTE_NB1_ML1_GM_PDSCH_STAT_Ind = 0xB246,
+    LTE_NB1_ML1_CDRX_Events_Info = 0xB248,
+    LTE_NB1_ML1_Sum_Sys_Info = 0xB24B,
+    LTE_NB1_ML1_Cell_Resel = 0xB24C,
+    LTE_NB1_ML1_Serv_Cell_Meas_Response = 0xB24D,
+    LTE_NB1_NBR_Cell_Meas = 0xB24E,
+    LTE_NB1_ML1_Search_PBCH_Decode = 0xB250,
+    LTE_NB1_ML1_DLM_Decode_Page = 0xB251,
+
     NR_RRC_OTA_Packet = 0xB821,
 };
 
@@ -297,6 +313,27 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "GSM_DSDS_RR_Cell_Information", false},
     {GSM_DSDS_RR_Signaling_Message,
         "GSM_DSDS_RR_Signaling_Message", false},
+
+
+
+    {LTE_NB1_ML1_GM_DCI_Info,
+        "LTE_NB1_ML1_GM_DCI_Info", true},
+    {LTE_NB1_ML1_GM_TX_Report,
+        "LTE_NB1_ML1_GM_TX_Report", true},
+    {LTE_NB1_ML1_GM_PDSCH_STAT_Ind,
+        "LTE_NB1_ML1_GM_PDSCH_STAT_Ind", true},
+    {LTE_NB1_ML1_CDRX_Events_Info,
+        "LTE_NB1_ML1_CDRX_Events_Info", true},
+    {LTE_NB1_ML1_Sum_Sys_Info,
+        "LTE_NB1_ML1_Sum_Sys_Info", true},
+    {LTE_NB1_ML1_Cell_Resel,
+        "LTE_NB1_ML1_Cell_Resel", true},
+    {LTE_NB1_NBR_Cell_Meas,
+        "LTE_NB1_NBR_Cell_Meas", true},
+    {LTE_NB1_ML1_Search_PBCH_Decode,
+        "LTE_NB1_ML1_Search_PBCH_Decode", true},
+    {LTE_NB1_ML1_DLM_Decode_Page,
+        "LTE_NB1_ML1_DLM_Decode_Page", true},
 
     {NR_RRC_OTA_Packet,
         "5G_NR_RRC_OTA_Packet", true},
