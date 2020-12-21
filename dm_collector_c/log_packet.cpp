@@ -90,6 +90,18 @@ namespace patch {
 
 // TODO: split this .cpp to multiple files.
 
+static double target_sampling_rate = 1;
+
+bool set_target_sampling_rate(int sampling_rate){
+      if (sampling_rate < 0 || sampling_rate >100)
+	      return false;
+      target_sampling_rate = (double)sampling_rate / 100.0;
+      printf("target_sampling_rate=%f\n",target_sampling_rate);
+      return true;
+
+}
+
+
 static int
 _decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
                                  PyObject *result) {
@@ -12032,11 +12044,30 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
 
 }
 
+
+time_t prev = 0;
 PyObject *
 decode_log_packet(const char *b, size_t length, bool skip_decoding) {
 
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
+
+    
+    if(skip_decoding){
+	    if(prev==0){
+	    	prev = time(0);
+	    }else {
+	    	time_t now = time(0);
+		double diff = difftime(now, prev);
+
+		if(diff >= 1){
+			prev = now;
+		}else if (diff > target_sampling_rate){
+			PyObject *result = Py_None;
+			return result;
+		}		
+	    }
+    }
 
     PyObject *result = NULL;
     int offset = 0;
@@ -12059,6 +12090,7 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
             ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
             "Unsupported");
 
+    /*
     if (skip_decoding) {    // skip further decoding
 
         PyObject *t = Py_BuildValue("(sy#s)",
@@ -12068,6 +12100,7 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
         Py_DECREF(t);
         return result;
     }
+    */
 
     on_demand_decode(b + offset, length - offset, type_id, result);
 

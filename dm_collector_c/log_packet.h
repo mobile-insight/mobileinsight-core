@@ -4584,6 +4584,8 @@ bool is_debug_packet (const char *b, size_t length);   //Yuanjie: test if it's a
 bool is_custom_packet (const char *b, size_t length);
 
 
+// Set sampling rate
+bool set_target_sampling_rate(int sampling_rate);
 
 // Given a binary string, try to decode it as a log packet.
 // Return a specially formatted Python list that stores the decoding result.

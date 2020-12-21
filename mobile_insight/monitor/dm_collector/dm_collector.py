@@ -150,6 +150,8 @@ class DMCollector(Monitor):
                 if decoded:
                     try:
                         # packet = DMLogPacket(decoded)
+                        if not decoded[0]:
+                            continue
                         packet = DMLogPacket(decoded[0])
                         type_id = packet.get_type_id()
                         # print d["type_id"], d["timestamp"]

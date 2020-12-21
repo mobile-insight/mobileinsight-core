@@ -68,10 +68,10 @@ class DMLogPacket:
         :param decoded_list: output of *dm_collector_c* library
         :type decoded_list: list
         """
+
         cls = self.__class__
-
+        
         self._decoded_list, self._type_id = cls._preparse_internal_list(decoded_list)
-
         # Optimization: Cache the decoded message. Avoid repetitive decoding
         self.decoded_cache = None
         self.decoded_xml_cache = None
@@ -92,6 +92,8 @@ class DMLogPacket:
                                     31: "RRC_SIB19",
                                     })
     def _preparse_internal_list(cls, decoded_list):
+        if not decoded_list:
+            return
         lst = []
         type_id = ""
         try:
