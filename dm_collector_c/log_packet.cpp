@@ -12045,7 +12045,7 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
 }
 
 
-time_t prev = 0;
+static clock_t prev = 0;
 PyObject *
 decode_log_packet(const char *b, size_t length, bool skip_decoding) {
 
@@ -12055,19 +12055,23 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
     
     if(skip_decoding){
 	    if(prev==0){
-	    	prev = time(0);
+		prev = clock();
 	    }else {
-	    	time_t now = time(0);
-		double diff = difftime(now, prev);
+		clock_t now = clock();
+		double diff = ((double) (now - prev)) / CLOCKS_PER_SEC;
 
 		if(diff >= 1){
 			prev = now;
-		}else if (diff > target_sampling_rate){
+		}else if (diff > target_sampling_rate + 0.0001){
 			PyObject *result = Py_None;
 			return result;
-		}		
+		}
+	        else{
+			//pass
+		}	
 	    }
     }
+
 
     PyObject *result = NULL;
     int offset = 0;
