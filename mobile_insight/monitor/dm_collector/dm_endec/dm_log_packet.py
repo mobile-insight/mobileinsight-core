@@ -70,8 +70,10 @@ class DMLogPacket:
         """
 
         cls = self.__class__
-        
-        self._decoded_list, self._type_id = cls._preparse_internal_list(decoded_list)
+        if decoded_list:
+            self._decoded_list, self._type_id = cls._preparse_internal_list(decoded_list)
+        else:
+            self._decoded_list, self._type_id = None, None
         # Optimization: Cache the decoded message. Avoid repetitive decoding
         self.decoded_cache = None
         self.decoded_xml_cache = None
@@ -93,7 +95,7 @@ class DMLogPacket:
                                     })
     def _preparse_internal_list(cls, decoded_list):
         if not decoded_list:
-            return
+            return None, None
         lst = []
         type_id = ""
         try:
