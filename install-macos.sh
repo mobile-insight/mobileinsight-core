@@ -114,9 +114,9 @@ fi
 
 echo -e "${GREEN}[INFO]${NC} Configuring Wireshark sources for ws_dissector compilation..."
 cd ${WIRESHARK_SRC_PATH}
-cmake --disable-wireshark . > /dev/null 2>&1
+cmake -DBUILD_wireshark=OFF . > /dev/null 2>&1
 if [[ $? != 0 ]]; then
-    echo -e "${YELLOW}[WARNING]${NC} Error when executing '${WIRESHARK_SRC_PATH}/ccmake --disable-wireshark .'."
+    echo -e "${YELLOW}[WARNING]${NC} Error when executing '${WIRESHARK_SRC_PATH}/cmake -DBUILD_wireshark=OFF .'."
     echo "You need to manually fix it before continuation. Exiting with status 3."
     exit 3
 fi
