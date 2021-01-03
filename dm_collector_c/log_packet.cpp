@@ -96,7 +96,7 @@ bool set_target_sampling_rate(int sampling_rate){
       if (sampling_rate < 0 || sampling_rate >100)
 	      return false;
       target_sampling_rate = (double)sampling_rate / 100.0;
-      printf("target_sampling_rate=%f\n",target_sampling_rate);
+      // printf("target_sampling_rate=%f\n",target_sampling_rate);
       return true;
 
 }
@@ -3375,7 +3375,8 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                         PyObject *t = Py_BuildValue("(sOs)",
                                                     "Ignored", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
-                        Py_DECREF(result_subpkt);
+                        Py_DECREF(t);
+			Py_DECREF(result_subpkt);
                     } else {
                         printf("(MI)Unknown LTE PHY Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
@@ -3447,7 +3448,10 @@ _decode_lte_phy_irat_cdma_subpkt(const char *b, int offset, size_t length,
                 PyObject *t2 = Py_BuildValue("(sOs)",
                                              name2, result_subpkt, "dict");
                 PyList_Append(result, t2);
-                Py_DECREF(result_subpkt);
+                
+		Py_DECREF(t);
+		Py_DECREF(t2);
+		Py_DECREF(result_subpkt);
             }
             break;
 
@@ -3533,7 +3537,8 @@ _decode_lte_phy_irat_subpkt(const char *b, int offset, size_t length,
                 PyObject *t = Py_BuildValue("(sOs)",
                                             name, result_subpkt, "dict");
                 PyList_Append(result, t);
-                Py_DECREF(result_subpkt);
+                Py_DECREF(t);
+		Py_DECREF(result_subpkt);
 
             }
 
@@ -4034,7 +4039,8 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                         PyObject *t = Py_BuildValue("(sOs)",
                                                     "Ignored", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
-                        Py_DECREF(result_subpkt);
+                        Py_DECREF(t);
+			Py_DECREF(result_subpkt);
                     } else {
                         printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id,
                                subpkt_ver);
@@ -4776,7 +4782,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                     PyObject *t = Py_BuildValue("(sOs)",
                                                 "Ignored", result_subpkt, "dict");
                     PyList_Append(result_allpkts, t);
-                    Py_DECREF(result_subpkt);
+		    Py_DECREF(result_subpkt);
                     Py_DECREF(t);
                 }
             }
@@ -12062,7 +12068,7 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
 
 		if(diff >= 1){
 			prev = now;
-		}else if (diff > target_sampling_rate + 0.0001){
+		}else if (diff > target_sampling_rate){
 			PyObject *result = Py_None;
 			return result;
 		}
