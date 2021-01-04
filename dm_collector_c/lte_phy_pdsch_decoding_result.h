@@ -2059,7 +2059,6 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                             break;
                         }
                         count_temp=count_temp+1;
-                        Py_DECREF(result_hidden_record);
                     }
 
                     offset=offset-8;
@@ -2329,7 +2328,6 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                             break;
                         }
                         count_temp=count_temp+1;
-                        Py_DECREF(result_hidden_record);
                     }
 
                     offset=offset-8;
@@ -2595,7 +2593,6 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                             break;
                         }
                         count_temp=count_temp+1;
-                        Py_DECREF(result_hidden_record);
                     }
 
                     offset=offset-8;
@@ -2846,7 +2843,6 @@ static int _decode_lte_phy_pdsch_decoding_result_payload (const char *b,
                             break;
                         }
                         count_temp=count_temp+1;
-                        Py_DECREF(result_hidden_record);
                     }
 
                     offset=offset-8;
