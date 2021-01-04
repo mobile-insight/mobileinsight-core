@@ -3801,6 +3801,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                     PyObject *pystr = Py_BuildValue("s", temp.c_str());
                                     PyObject *old_object = _replace_result(result_subpkt,
                                                                             "Preamble Format", pystr);
+                                    Py_DECREF(pystr);
                                     Py_DECREF(old_object);                                        
                                 }
                                 else{
@@ -7610,6 +7611,7 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                     PyObject *old_object2 = _replace_result(result_subpkt,
                                                            "Maching ID", pystr1);
                     Py_DECREF(old_object2);
+                    Py_DECREF(pystr1);
 
                     Py_DECREF(temp);
 
