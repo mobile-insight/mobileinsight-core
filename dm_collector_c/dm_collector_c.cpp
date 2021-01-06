@@ -712,10 +712,12 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
                                                       skip_decoding);
 		if (include_timestamp) {
                     PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
-                    return ret;
+                    Py_DECREF(decoded);
+		    return ret;
                 } else {
                     return decoded;
                 }
+
             } else if (is_debug_packet(frame.c_str(), frame.size())) {
                 //Yuanjie: the original debug msg does not have header...
 
