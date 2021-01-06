@@ -269,7 +269,8 @@ class DMLogPacket:
                     sub_tag.set("type", "list")
                 else:
                     sub_tag.set("type", type_str)
-                sub_tag.append(xx)
+                if xx:
+                    sub_tag.append(xx)
             i += 1
         return output_xml
 
