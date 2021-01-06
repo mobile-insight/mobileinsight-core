@@ -163,8 +163,13 @@ _map_result_field_to_name(PyObject *result, const char *target,
         const char *name = search_name(mapping, n, val);
         if (name == NULL)  // not found
             name = not_found;
-        PyObject *pystr = Py_BuildValue("s", name);
-        PyList_SetItem(result, i, Py_BuildValue("(sOs)", target, pystr, ""));
+        // PyObject *pystr = Py_BuildValue("s", name);
+        // PyList_SetItem(result, i, Py_BuildValue("(sOs)", target, pystr, ""));
+        PyObject *pystr = NULL, *tmp = NULL;
+        pystr = Py_BuildValue("s", name);
+        tmp = Py_BuildValue("(sOs)", target, pystr, "");
+        PyList_SetItem(result, i, tmp);
+        Py_DECREF(tmp);
         Py_DECREF(pystr);
         return val;
     } else {
