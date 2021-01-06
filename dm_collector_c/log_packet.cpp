@@ -4230,6 +4230,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             }
                                             old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
                                             Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
                                         }
 
                                         mac_hdr_tmp_list.push_back(mac_hdr);
@@ -4562,6 +4563,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             }
                                             old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
                                             Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
                                         }
 
                                         mac_hdr_tmp_list.push_back(mac_hdr);
@@ -4951,6 +4953,7 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             }
                                             old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
                                             Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
                                         }
 
                                         mac_hdr_tmp_list.push_back(mac_hdr);
@@ -5157,6 +5160,7 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             }
                                             old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
                                             Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
                                         }
 
                                         mac_hdr_tmp_list.push_back(mac_hdr);
