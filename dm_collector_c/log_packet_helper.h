@@ -166,6 +166,7 @@ _map_result_field_to_name(PyObject *result, const char *target,
         PyObject *pystr = Py_BuildValue("s", name);
         PyList_SetItem(result, i, Py_BuildValue("(sOs)", target, pystr, ""));
         Py_DECREF(pystr);
+	//PyList_SetItem(result, i, Py_BuildValue("(sss)", target, name, ""));
         return val;
     } else {
         return -1;
@@ -259,11 +260,12 @@ _decode_by_fmt(const Fmt fmt[], int n_fmt,
                         break;
                 }
                 // Convert to a Python integer object or a Python long integer object
-                if (fmt[i].len <= 4)
+                if (fmt[i].len <= 4){
                     decoded = Py_BuildValue("I", ii);
-                else
+		}else{
                     decoded = Py_BuildValue("K", iiii);
-                n_consumed += fmt[i].len;
+		}
+		n_consumed += fmt[i].len;
                 break;
             }
             case UINT_BIG_ENDIAN: {
@@ -296,11 +298,12 @@ _decode_by_fmt(const Fmt fmt[], int n_fmt,
                 }
                 // Convert to a Python integer object or a Python long integer object
                 // TODO: make it little endian
-                if (fmt[i].len <= 4)
+                if (fmt[i].len <= 4){
                     decoded = Py_BuildValue("I", ii);
-                else
+		} else {
                     decoded = Py_BuildValue("K", iiii);
-                n_consumed += fmt[i].len;
+		}
+		n_consumed += fmt[i].len;
                 break;
             }
 
@@ -446,7 +449,7 @@ _decode_by_fmt(const Fmt fmt[], int n_fmt,
         if (decoded != NULL) {
             PyObject *t = Py_BuildValue("(sOs)",
                                         fmt[i].field_name, decoded, "");
-            PyList_Append(result, t);
+	    PyList_Append(result, t);
             Py_DECREF(t);
             Py_DECREF(decoded);
         }

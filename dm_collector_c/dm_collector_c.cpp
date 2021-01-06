@@ -717,6 +717,7 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
                 } else {
                     return decoded;
                 }
+
             } else if (is_debug_packet(frame.c_str(), frame.size())) {
                 //Yuanjie: the original debug msg does not have header...
 
