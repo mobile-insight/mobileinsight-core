@@ -388,6 +388,24 @@ _decode_lte_rrc_mib(const char *b, int offset, size_t length,
                                      ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_v3, Fmt),
                                      b, offset, length, result);
             break;
+        case 17:{
+            offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt_v17,
+                                     ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_v17, Fmt),
+                                     b, offset, length, result);
+
+            (void) _map_result_field_to_name(result,
+                    "Op Mode Type",
+                    LteRrcMibMessageLogPacketFmt_OpModeType,
+                    ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_OpModeType, ValueName),
+                    "(MI)Unknown");
+
+            (void) _map_result_field_to_name(result,
+                    "Raster Offset",
+                    LteRrcMibMessageLogPacketFmt_RasterOffset,
+                    ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_RasterOffset, ValueName),
+                    "(MI)Unknown");
+            break;
+        }
         default:
             printf("(MI)Unknown LTE RRC MIB version: 0x%x\n", pkt_ver);
             return 0;

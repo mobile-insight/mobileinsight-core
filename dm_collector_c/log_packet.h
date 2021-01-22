@@ -1384,6 +1384,35 @@ const Fmt LteRrcMibMessageLogPacketFmt_v3[] = {
         {UINT,      "Sib1 BR Sch Info",  1}
 };
 
+//yueli
+const Fmt LteRrcMibMessageLogPacketFmt_v17[] = {
+        {UINT,      "Physical Cell ID",  2},    //cell ID
+        {UINT,      "Freq",              4},    //frequency
+        {UINT,      "SFN",               2},
+        {UINT,      "SFN MSB4",          1},
+        {UINT,      "HSFN LSB2",         1},
+        {UINT,      "Sib1 Sch Info",           1},
+        {UINT,      "Sys Info Value Tag",      1},
+        {UINT,      "Access Barring Enabled",  1},
+        {UINT,      "Op Mode Type",            1},
+        {UINT,      "Raster Offset",           2},
+        {UINT,      "Number of Antenna", 1}
+};
+
+const ValueName LteRrcMibMessageLogPacketFmt_OpModeType[] = {
+        {0,  "inband-DifferentPCI"},
+        {1,  "inband-SamePCI"},
+        {2,  "GUARDBAND"},
+        {3,  "STANDALONE"}
+};
+
+const ValueName LteRrcMibMessageLogPacketFmt_RasterOffset[] = {
+        {0,  "KHZ-7DOT5"},
+        {1,  "KHZ-2DOT5"},
+        {2,  "KHZ2DOT5"},
+        {3,  "KHZ7DOT5"}
+};
+
 // ----------------------------------------------------------------------------
 // Haotian
 const Fmt LtePdcpDlSrbIntegrityDataPduFmt[] = {
