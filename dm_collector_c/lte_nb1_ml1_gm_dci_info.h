@@ -33,8 +33,8 @@ const Fmt LteNb1SwGmDciInfoFmt_Record_v3[] = {
     {PLACEHOLDER, "Scheduling Delay",0},     // 3 bit
     {PLACEHOLDER, "MCS",0},                    // 5 bits
     {PLACEHOLDER,"Repetition Number",0},       // 3 bits
-    {PLACEHOLDER,"DCI Repetition Number",0}    // 2 bits
-    {PLACEHOLDER,"HARQ Resource",0}            // 4 bits
+    {PLACEHOLDER,"DCI Repetition Number",0},    // 2 bits
+    {PLACEHOLDER,"HARQ Resource",0},            // 4 bits
     {PLACEHOLDER,"Reserved2",0}                // 5 bits
 };
 
