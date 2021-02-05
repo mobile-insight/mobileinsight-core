@@ -11959,8 +11959,8 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             break;
         // msgs for LTE NB1 SW
         case LTE_NB1_ML1_GM_DCI_Info:
-            offset += _decode_by_fmt(LteNb1SwGmDciInfoFmt,
-                                     ARRAY_SIZE(LteNb1SwGmDciInfoFmt, Fmt),
+            offset += _decode_by_fmt(LteNb1Ml1GmDciInfoFmt,
+                                     ARRAY_SIZE(LteNb1Ml1GmDciInfoFmt, Fmt),
                                      b, offset, length, result);
             offset += _decode_lte_nb1_ml1_gm_dci_info_payload(b, offset, length, result);
             break;
