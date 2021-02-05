@@ -38,7 +38,7 @@ const Fmt LteNb1SwGmDciInfoFmt_Record_v3[] = {
     {PLACEHOLDER,"Reserved2",0}                // 5 bits
 };
 
-static int _decode_lte_phy_cdrx_events_info_payload (const char *b,
+static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
