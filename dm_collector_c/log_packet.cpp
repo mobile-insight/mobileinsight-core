@@ -34,6 +34,7 @@
 #include "lte_pdcp_dl_cipher_data_pdu.h"
 #include "lte_pdcp_ul_cipher_data_pdu.h"
 #include "lte_pdsch_stat_indication.h"
+#include "lte_nb1_ml1_gm_dci_info.h"
 #include "lte_phy_bplmn_cell_confirm.h"
 #include "lte_phy_bplmn_cell_request.h"
 #include "lte_phy_cdrx_events_info.h"
@@ -11956,6 +11957,14 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                                      b, offset, length, result);
             offset += _decode_lte_phy_cdrx_events_info_payload(b, offset, length, result);
             break;
+        // msgs for LTE NB1 SW
+        case LTE_NB1_ML1_GM_DCI_Info:
+            offset += _decode_by_fmt(LteNb1SwGmDciInfoFmt,
+                                     ARRAY_SIZE(LteNb1SwGmDciInfoFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_gm_dci_info_payload(b, offset, length, result);
+            break;
+
         case WCDMA_RRC_States:
             offset += _decode_wcdma_rrc_states_payload(b, offset, length, result);
             break;

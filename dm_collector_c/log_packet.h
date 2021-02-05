@@ -460,7 +460,6 @@ const ValueName NrRrcOtaPduType_v8[] = {
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
 
-
 // ------------------------------------------------------------
 // LTE NAS Plain
 const Fmt LteNasPlainFmt[] = {
