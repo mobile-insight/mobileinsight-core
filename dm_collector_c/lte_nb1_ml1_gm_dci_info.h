@@ -8,19 +8,19 @@
 
 const Fmt LteNb1Ml1GmDciInfoFmt[] = {
     {UINT, "Version", 1},
-    {SKIP, NULL, 2} //Reserved
+    {SKIP, NULL, 2}, //Reserved
 };
 
 const Fmt LteNb1Ml1GmDciInfoFmt_v3[] = {
-    {UINT, "Num of Records", 1}, 
+    {UINT, "Num of Records", 1},
 
 };
 
 const Fmt LteNb1Ml1GmDciInfoFmt_Record_v3[] = {
-    {UINT, "NPDCCH Timing HSFN",3},          // 10 bits
+    {UINT, "NPDCCH Timing HSFN", 4},          // 10 bits
     {PLACEHOLDER, "NPDCCH Timing SFN",0},    // 10 bits
     {PLACEHOLDER, "NPDCCH Timing Sub FN",0}, // 4 bits
-    {UINT, "RNTI Type Data", 1},             // 1 bit
+    {PLACEHOLDER, "RNTI Type Data", 0},             // 1 bit
     {PLACEHOLDER, "RNTI Type",0},            // 2 bits
     {PLACEHOLDER, "UL Grant Present",0},     // 1 bit
     {PLACEHOLDER, "DL Grant Present",0},     // 1 bit
@@ -35,8 +35,20 @@ const Fmt LteNb1Ml1GmDciInfoFmt_Record_v3[] = {
     {PLACEHOLDER,"Repetition Number",0},       // 3 bits
     {PLACEHOLDER,"DCI Repetition Number",0},    // 2 bits
     {PLACEHOLDER,"HARQ Resource",0},            // 4 bits
-    {PLACEHOLDER,"Reserved2",0}                // 5 bits
+    {PLACEHOLDER,"Reserved2",0},               // 5 bits
 };
+
+static void reprint(PyObject *obj) {
+    PyObject* repr = PyObject_Repr(obj);
+    PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
+    const char *bytes = PyBytes_AS_STRING(str);
+
+    printf("REPR: %s\n", bytes);
+
+    Py_XDECREF(repr);
+    Py_XDECREF(str);
+}
+
 
 static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
         int offset, size_t length, PyObject *result) {
@@ -56,14 +68,26 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
+                printf("offset:%d\n",offset);
                 offset += _decode_by_fmt(LteNb1Ml1GmDciInfoFmt_Record_v3,
                         ARRAY_SIZE(LteNb1Ml1GmDciInfoFmt_Record_v3, Fmt),
                         b, offset, length, result_record_item);
+                printf("offset:%d\n",offset);
+                reprint(result_record_item);
 
                 unsigned int iNonDecodeHSFN = _search_result_uint(result_record_item, "NPDCCH Timing HSFN");
+                // printf("iNonDecodeHSFN:0x%x\n",iNonDecodeHSFN);
                 int iHSFN = iNonDecodeHSFN & 1023;          // 10 bits
+                // printf("NPDCCH Timing HSFN:%d\n",iHSFN);
                 int iSFN = (iNonDecodeHSFN >> 10) & 1023;   // 10 bits
                 int iSubFN = (iNonDecodeHSFN >> 20) & 15;   // 4 bits
+                int iRNTI_T_D = (iNonDecodeHSFN >> 24) & 1;              // 1 bit
+                int iRNTI_T = (iNonDecodeHSFN >> 25) & 3;         // 2 bit
+                int iUL_P = (iNonDecodeHSFN >> 27) & 1;           // 1 bit
+                int iDL_P = (iNonDecodeHSFN >> 28) & 1;           // 1 bit
+                int iPDCCH_P = (iNonDecodeHSFN >> 29) & 1;        // 1 bit
+                int iNDI = (iNonDecodeHSFN >> 30) & 1;            // 1 bit
+                int iReserved = (iNonDecodeHSFN >> 31) & 1;       // 1 bit
 
                 old_object = _replace_result_int(result_record_item, "NPDCCH Timing HSFN",
                         iHSFN);
@@ -75,15 +99,6 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
                         iSubFN);
                 Py_DECREF(old_object);
 
-                unsigned int iNonDecodeRNTI_T_D = _search_result_uint(result_record_item, "RNTI Type Data");
-                int iRNTI_T_D = iNonDecodeRNTI_T_D & 1;              // 1 bit
-                int iRNTI_T = (iNonDecodeRNTI_T_D >> 1) & 3;         // 2 bit
-                int iUL_P = (iNonDecodeRNTI_T_D >> 3) & 1;           // 1 bit
-                int iDL_P = (iNonDecodeRNTI_T_D >> 4) & 1;           // 1 bit
-                int iPDCCH_P = (iNonDecodeRNTI_T_D >> 5) & 1;        // 1 bit
-                int iNDI = (iNonDecodeRNTI_T_D >> 6) & 1;            // 1 bit
-                int iReserved = (iNonDecodeRNTI_T_D >> 7) & 1;       // 1 bit
-
                 old_object = _replace_result_int(result_record_item, "RNTI Type Data",
                         iRNTI_T_D);
                 Py_DECREF(old_object);
@@ -91,8 +106,8 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
                         iRNTI_T);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item, "RNTI Type",
-                        ValueNameRNTIType,
-                        ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                        ValueNameNBIoT_RNTIType,
+                        ARRAY_SIZE(ValueNameNBIoT_RNTIType, ValueName),
                         "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item, "UL Grant Present",
                         iUL_P);
@@ -123,6 +138,7 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
                 Py_DECREF(old_object);
 
                 unsigned int iNonDecodeSC_I = _search_result_uint(result_record_item, "SC Index");
+                // printf("iNonDecodeSC_I:0x%x\n",iNonDecodeSC_I);
                 int iSC_I = iNonDecodeSC_I & 31;                   // 5 bits
                 int iRedund_v = (iNonDecodeSC_I >> 5) & 3;         // 2 bits
                 int iRes_a = (iNonDecodeSC_I >> 7) & 7;            // 3 bits

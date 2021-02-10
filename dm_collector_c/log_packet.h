@@ -4206,6 +4206,11 @@ const ValueName ValueNameRNTIType[] = {
         {7, "TPC-PUCCH-RNTI"},
         {8, "MBMS RNTI"},
 };
+const ValueName ValueNameNBIoT_RNTIType[] = {
+        // 2 bits
+        {0, "C-RNTI"},
+        {2, "TC-RNTI"},
+};
 const ValueName ValueNameDCIFormat[] = {
         // 4 bits
         // Release 8
