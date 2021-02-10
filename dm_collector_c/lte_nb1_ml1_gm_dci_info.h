@@ -38,17 +38,6 @@ const Fmt LteNb1Ml1GmDciInfoFmt_Record_v3[] = {
     {PLACEHOLDER,"Reserved2",0},               // 5 bits
 };
 
-static void reprint(PyObject *obj) {
-    PyObject* repr = PyObject_Repr(obj);
-    PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
-    const char *bytes = PyBytes_AS_STRING(str);
-
-    printf("REPR: %s\n", bytes);
-
-    Py_XDECREF(repr);
-    Py_XDECREF(str);
-}
-
 
 static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
         int offset, size_t length, PyObject *result) {
@@ -68,17 +57,13 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);
-                printf("offset:%d\n",offset);
                 offset += _decode_by_fmt(LteNb1Ml1GmDciInfoFmt_Record_v3,
                         ARRAY_SIZE(LteNb1Ml1GmDciInfoFmt_Record_v3, Fmt),
                         b, offset, length, result_record_item);
-                printf("offset:%d\n",offset);
                 reprint(result_record_item);
 
                 unsigned int iNonDecodeHSFN = _search_result_uint(result_record_item, "NPDCCH Timing HSFN");
-                // printf("iNonDecodeHSFN:0x%x\n",iNonDecodeHSFN);
                 int iHSFN = iNonDecodeHSFN & 1023;          // 10 bits
-                // printf("NPDCCH Timing HSFN:%d\n",iHSFN);
                 int iSFN = (iNonDecodeHSFN >> 10) & 1023;   // 10 bits
                 int iSubFN = (iNonDecodeHSFN >> 20) & 15;   // 4 bits
                 int iRNTI_T_D = (iNonDecodeHSFN >> 24) & 1;              // 1 bit
@@ -138,7 +123,6 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
                 Py_DECREF(old_object);
 
                 unsigned int iNonDecodeSC_I = _search_result_uint(result_record_item, "SC Index");
-                // printf("iNonDecodeSC_I:0x%x\n",iNonDecodeSC_I);
                 int iSC_I = iNonDecodeSC_I & 31;                   // 5 bits
                 int iRedund_v = (iNonDecodeSC_I >> 5) & 3;         // 2 bits
                 int iRes_a = (iNonDecodeSC_I >> 7) & 7;            // 3 bits
