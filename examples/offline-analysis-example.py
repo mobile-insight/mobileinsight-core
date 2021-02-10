@@ -15,12 +15,13 @@ if __name__ == "__main__":
 
     # Initialize a monitor
     src = OfflineReplayer()
-    src.set_input_path("./logs/offline_log_examples/")
-    src.enable_log_all()
+    src.set_input_path("/home/kevin/mobileinsight-6.0-ref/IoT/Traces/twilio_nb_open_3.qmdl")
+    # src.enable_log_all()
 
     # src.enable_log("LTE_PHY_Serv_Cell_Measurement")
-    src.enable_log("5G_NR_RRC_OTA_Packet")
-    src.enable_log("LTE_RRC_OTA_Packet")
+    # src.enable_log("5G_NR_RRC_OTA_Packet")
+    # src.enable_log("LTE_RRC_OTA_Packet")
+    src.enable_log("LTE_NB1_ML1_GM_DCI_Info")
 
     logger = MsgLogger()
     logger.set_decode_format(MsgLogger.XML)
