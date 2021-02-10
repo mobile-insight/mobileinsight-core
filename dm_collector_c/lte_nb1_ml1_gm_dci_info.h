@@ -60,7 +60,6 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
                 offset += _decode_by_fmt(LteNb1Ml1GmDciInfoFmt_Record_v3,
                         ARRAY_SIZE(LteNb1Ml1GmDciInfoFmt_Record_v3, Fmt),
                         b, offset, length, result_record_item);
-                reprint(result_record_item);
 
                 unsigned int iNonDecodeHSFN = _search_result_uint(result_record_item, "NPDCCH Timing HSFN");
                 int iHSFN = iNonDecodeHSFN & 1023;          // 10 bits
