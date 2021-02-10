@@ -7,7 +7,7 @@
 #include "log_packet_helper.h"
 
 const Fmt LteNb1Ml1GmDciInfoFmt[] = {
-    {UINT, "Pkt Version", 1},
+    {UINT, "Version", 1},
     {SKIP, NULL, 2} //Reserved
 };
 
@@ -46,12 +46,12 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
     PyObject *old_object;
 
     switch (pkt_ver) {
-    case 3:
+        case 3:
         {
             offset += _decode_by_fmt(LteNb1Ml1GmDciInfoFmt_v3,
                     ARRAY_SIZE(LteNb1Ml1GmDciInfoFmt_v3, Fmt),
                     b, offset, length, result);
-            int num_record = _search_result_int(result, "Num Records");
+            int num_record = _search_result_int(result, "Num of Records");
 
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
@@ -61,9 +61,9 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
                         b, offset, length, result_record_item);
 
                 unsigned int iNonDecodeHSFN = _search_result_uint(result_record_item, "NPDCCH Timing HSFN");
-                int iHSFN = iNonDecodeHSFN & 1023;
-                int iSFN = (iNonDecodeHSFN >> 10) & 1023;
-                int iSubFN = (iNonDecodeHSFN >> 20) & 15;
+                int iHSFN = iNonDecodeHSFN & 1023;          // 10 bits
+                int iSFN = (iNonDecodeHSFN >> 10) & 1023;   // 10 bits
+                int iSubFN = (iNonDecodeHSFN >> 20) & 15;   // 4 bits
 
                 old_object = _replace_result_int(result_record_item, "NPDCCH Timing HSFN",
                         iHSFN);
@@ -76,13 +76,13 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
                 Py_DECREF(old_object);
 
                 unsigned int iNonDecodeRNTI_T_D = _search_result_uint(result_record_item, "RNTI Type Data");
-                int iRNTI_T_D = iNonDecodeRNTI_T_D & 1;
-                int iRNTI_T = (iNonDecodeRNTI_T_D >> 1) & 3;
-                int iUL_P = (iNonDecodeRNTI_T_D >> 3) & 1;
-                int iDL_P = (iNonDecodeRNTI_T_D >> 4) & 1;
-                int iPDCCH_P = (iNonDecodeRNTI_T_D >> 5) & 1;
-                int iNDI = (iNonDecodeRNTI_T_D >> 6) & 1;
-                int iReserved = (iNonDecodeRNTI_T_D >> 7) & 1;
+                int iRNTI_T_D = iNonDecodeRNTI_T_D & 1;              // 1 bit
+                int iRNTI_T = (iNonDecodeRNTI_T_D >> 1) & 3;         // 2 bit
+                int iUL_P = (iNonDecodeRNTI_T_D >> 3) & 1;           // 1 bit
+                int iDL_P = (iNonDecodeRNTI_T_D >> 4) & 1;           // 1 bit
+                int iPDCCH_P = (iNonDecodeRNTI_T_D >> 5) & 1;        // 1 bit
+                int iNDI = (iNonDecodeRNTI_T_D >> 6) & 1;            // 1 bit
+                int iReserved = (iNonDecodeRNTI_T_D >> 7) & 1;       // 1 bit
 
                 old_object = _replace_result_int(result_record_item, "RNTI Type Data",
                         iRNTI_T_D);
@@ -123,15 +123,15 @@ static int _decode_lte_nb1_ml1_gm_dci_info_payload (const char *b,
                 Py_DECREF(old_object);
 
                 unsigned int iNonDecodeSC_I = _search_result_uint(result_record_item, "SC Index");
-                int iSC_I = iNonDecodeSC_I & 31;
-                int iRedund_v = (iNonDecodeSC_I >> 5) & 3;
-                int iRes_a = (iNonDecodeSC_I >> 7) & 7;
-                int iSched_delay = (iNonDecodeSC_I >> 10) & 7;
-                int iMCS = (iNonDecodeSC_I >> 13) & 31;
-                int iRepetition_N = (iNonDecodeSC_I >> 18) & 7;
-                int iDCI_Repetition_N = (iNonDecodeSC_I >> 21) & 3;
-                int iHARQ_R = (iNonDecodeSC_I >> 23) & 15;
-                int iReserved2 = (iNonDecodeSC_I >> 27) & 31;
+                int iSC_I = iNonDecodeSC_I & 31;                   // 5 bits
+                int iRedund_v = (iNonDecodeSC_I >> 5) & 3;         // 2 bits
+                int iRes_a = (iNonDecodeSC_I >> 7) & 7;            // 3 bits
+                int iSched_delay = (iNonDecodeSC_I >> 10) & 7;     // 3 bits
+                int iMCS = (iNonDecodeSC_I >> 13) & 31;            // 5 bits
+                int iRepetition_N = (iNonDecodeSC_I >> 18) & 7;    // 3 bits
+                int iDCI_Repetition_N = (iNonDecodeSC_I >> 21) & 3;// 2 bits
+                int iHARQ_R = (iNonDecodeSC_I >> 23) & 15;         // 4 bits
+                int iReserved2 = (iNonDecodeSC_I >> 27) & 31;      // 5 bits
 
                 old_object = _replace_result_int(result_record_item, "SC Index",
                         iSC_I);
