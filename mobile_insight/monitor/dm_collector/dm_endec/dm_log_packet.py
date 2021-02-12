@@ -68,10 +68,12 @@ class DMLogPacket:
         :param decoded_list: output of *dm_collector_c* library
         :type decoded_list: list
         """
+
         cls = self.__class__
-
-        self._decoded_list, self._type_id = cls._preparse_internal_list(decoded_list)
-
+        if decoded_list:
+            self._decoded_list, self._type_id = cls._preparse_internal_list(decoded_list)
+        else:
+            self._decoded_list, self._type_id = None, None
         # Optimization: Cache the decoded message. Avoid repetitive decoding
         self.decoded_cache = None
         self.decoded_xml_cache = None
@@ -92,6 +94,8 @@ class DMLogPacket:
                                     31: "RRC_SIB19",
                                     })
     def _preparse_internal_list(cls, decoded_list):
+        if not decoded_list:
+            return None, None
         lst = []
         type_id = ""
         try:
@@ -186,6 +190,8 @@ class DMLogPacket:
         :param decoded_list: output of dm_collector_c library
         :type decoded_list: list
         """
+        if not decoded_list:
+            return None
         if out_type == "dict":
             return cls._parse_internal_list_dict(decoded_list)
         elif out_type == "list":
@@ -196,6 +202,8 @@ class DMLogPacket:
 
     @classmethod
     def _parse_internal_list_dict(cls, decoded_list):
+        if not decoded_list:
+            return None
         output_d = dict()
         i, list_len = 0, len(decoded_list)
         while i < list_len:
@@ -213,6 +221,8 @@ class DMLogPacket:
 
     @classmethod
     def _parse_internal_list_list(cls, decoded_list):
+        if not decoded_list:
+            return None
         output_lst = []
         i, list_len = 0, len(decoded_list)
         while i < list_len:
@@ -229,6 +239,8 @@ class DMLogPacket:
 
     @classmethod
     def _parse_internal_list_xml(cls, tag_name, decoded_list):
+        if not decoded_list:
+            return None
         output_xml = ET.Element(tag_name)
         i, list_len = 0, len(decoded_list)
         while i < list_len:
@@ -257,12 +269,15 @@ class DMLogPacket:
                     sub_tag.set("type", "list")
                 else:
                     sub_tag.set("type", type_str)
-                sub_tag.append(xx)
+                if xx:
+                    sub_tag.append(xx)
             i += 1
         return output_xml
 
     @classmethod
     def _parse_internal_list_old(cls, out_type, decoded_list):
+        if not decoded_list:
+            return None
         """
         DEPRECIATED. DO NOT CALL THIS FUNCTION since it is very slow.
         """
@@ -363,8 +378,12 @@ class DMLogPacket:
         #     self.decoded_cache = cls._parse_internal_list("dict", self._decoded_list)
         # return self.decoded_cache
 
-        cls = self.__class__
-        return cls._parse_internal_list("dict", self._decoded_list)
+        if self._decoded_list:
+
+            cls = self.__class__
+            return cls._parse_internal_list("dict", self._decoded_list)
+        else:
+            return None
 
     def decode_xml(self):
         """
@@ -379,12 +398,12 @@ class DMLogPacket:
         #     xml.tag = "dm_log_packet"
         #     self.decoded_json_cache = ET.tostring(xml)
         # return self.decoded_json_cache
+        if self._decoded_list:
 
-        cls = self.__class__
-        xml = cls._parse_internal_list("xml/dict", self._decoded_list)
-        # Zengwen: what about this name?
-        xml.tag = "dm_log_packet"
-        return ET.tostring(xml, encoding='unicode')
+            cls = self.__class__
+            xml = cls._parse_internal_list("xml/dict", self._decoded_list)
+            xml.tag = "dm_log_packet"
+            return ET.tostring(xml, encoding='unicode')
 
     def decode_json(self):
         """
@@ -411,13 +430,16 @@ class DMLogPacket:
 
         d = self.decode()
 
-        try:
-            import xmltodict
-            if "Msg" in d:
-                d["Msg"] = xmltodict.parse(d["Msg"])
-        except ImportError:
-            pass
-        return json.dumps(d, cls=SuperEncoder)
+        if d:
+            try:
+                import xmltodict
+                if "Msg" in d:
+                    d["Msg"] = xmltodict.parse(d["Msg"])
+            except ImportError:
+                pass
+            return json.dumps(d, cls=SuperEncoder)
+        else:
+            return None
 
     @classmethod
     def init(cls, prefs):

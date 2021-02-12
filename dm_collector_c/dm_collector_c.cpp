@@ -52,6 +52,8 @@ static PyObject *dm_collector_c_reset(PyObject *self, PyObject *args);
 
 static PyObject *dm_collector_c_receive_log_packet(PyObject *self, PyObject *args);
 
+static PyObject *dm_collector_c_set_sampling_rate(PyObject *self, PyObject *args);
+
 static PyMethodDef DmCollectorCMethods[] = {
         {"disable_logs",        dm_collector_c_disable_logs,        METH_VARARGS,
                                                                        "Disable logs for a serial port.\n"
@@ -75,6 +77,18 @@ static PyMethodDef DmCollectorCMethods[] = {
                                                                        "Raises\n"
                                                                        "    ValueError: when an unrecognized type name is passed in.\n"
         },
+	{"set_sampling_rate",   dm_collector_c_set_sampling_rate,   METH_VARARGS,
+		                                                       "Enable target ratio for cross-layer sampling.\n"
+								       "Args:\n"
+                                                                       "    sampling_rate: the target sampling rate.\n"
+								       "    type_names: integer between 0 and 100.\n"
+                                                                       "\n"
+                                                                       "Returns:\n"
+                                                                       "    Successful or not.\n"
+                                                                       "\n"
+                                                                       "Raises\n"
+                                                                       "    ValueError: when an unrecognized sampling rate is passed in.\n"
+	},
         {"set_filtered_export", dm_collector_c_set_filtered_export, METH_VARARGS,
                                                                        "Configure this moduel to output a filtered log file.\n"
                                                                        "\n"
@@ -400,6 +414,34 @@ generate_log_config_ends(PyObject *file_or_serial, PyObject *type_names) {
     return true;
 }
 
+// Return: successful or not
+static PyObject *
+dm_collector_c_set_sampling_rate(PyObject *self, PyObject *args) {
+    (void) self;  
+    int c_sampling_rate;
+    bool success = false;
+
+    if (!PyArg_ParseTuple(args, "i", &c_sampling_rate)) {
+	    return NULL;
+    }
+
+    if(c_sampling_rate < 0 || c_sampling_rate > 100){
+        PyErr_SetString(PyExc_RuntimeError, "The sampling rate must be between 0 and 100.");
+        return NULL;
+    }
+
+    success = set_target_sampling_rate(c_sampling_rate);
+    if (!success) {
+        goto raise_exception;
+    }
+    Py_RETURN_TRUE;
+
+    raise_exception:
+    return NULL;
+
+
+}
+
 
 // Return: successful or not
 static PyObject *
@@ -617,6 +659,7 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
     PyObject *arg_skip_decoding = NULL;
     PyObject *arg_include_timestamp = NULL;
 
+
     if (!PyArg_ParseTuple(args, "|OO:receive_log_packet",
                           &arg_skip_decoding, &arg_include_timestamp))
         Py_RETURN_NONE;
@@ -667,13 +710,17 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
                 PyObject *decoded = decode_log_packet(s + 2,  // skip first two bytes
                                                       frame.size() - 2,
                                                       skip_decoding);
-                if (include_timestamp) {
+		if (include_timestamp) {
                     PyObject *ret = Py_BuildValue("(Od)", decoded, posix_timestamp);
-                    Py_DECREF(decoded);
-                    return ret;
+
+		    if(decoded != Py_None)
+                      Py_DECREF(decoded);
+
+		    return ret;
                 } else {
                     return decoded;
                 }
+
             } else if (is_debug_packet(frame.c_str(), frame.size())) {
                 //Yuanjie: the original debug msg does not have header...
 

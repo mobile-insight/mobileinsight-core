@@ -34,6 +34,7 @@
 #include "lte_pdcp_dl_cipher_data_pdu.h"
 #include "lte_pdcp_ul_cipher_data_pdu.h"
 #include "lte_pdsch_stat_indication.h"
+#include "lte_nb1_ml1_gm_dci_info.h"
 #include "lte_phy_bplmn_cell_confirm.h"
 #include "lte_phy_bplmn_cell_request.h"
 #include "lte_phy_cdrx_events_info.h"
@@ -89,6 +90,18 @@ namespace patch {
  */
 
 // TODO: split this .cpp to multiple files.
+
+static double target_sampling_rate = 1;
+
+bool set_target_sampling_rate(int sampling_rate){
+      if (sampling_rate < 0 || sampling_rate >100)
+	      return false;
+      target_sampling_rate = (double)sampling_rate / 100.0;
+      // printf("target_sampling_rate=%f\n",target_sampling_rate);
+      return true;
+
+}
+
 
 static int
 _decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
@@ -376,6 +389,24 @@ _decode_lte_rrc_mib(const char *b, int offset, size_t length,
                                      ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_v3, Fmt),
                                      b, offset, length, result);
             break;
+        case 17:{
+            offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt_v17,
+                                     ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_v17, Fmt),
+                                     b, offset, length, result);
+
+            (void) _map_result_field_to_name(result,
+                    "Op Mode Type",
+                    LteRrcMibMessageLogPacketFmt_OpModeType,
+                    ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_OpModeType, ValueName),
+                    "(MI)Unknown");
+
+            (void) _map_result_field_to_name(result,
+                    "Raster Offset",
+                    LteRrcMibMessageLogPacketFmt_RasterOffset,
+                    ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_RasterOffset, ValueName),
+                    "(MI)Unknown");
+            break;
+        }
         default:
             printf("(MI)Unknown LTE RRC MIB version: 0x%x\n", pkt_ver);
             return 0;
@@ -3363,7 +3394,8 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                         PyObject *t = Py_BuildValue("(sOs)",
                                                     "Ignored", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
-                        Py_DECREF(result_subpkt);
+                        Py_DECREF(t);
+			Py_DECREF(result_subpkt);
                     } else {
                         printf("(MI)Unknown LTE PHY Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
@@ -3435,7 +3467,10 @@ _decode_lte_phy_irat_cdma_subpkt(const char *b, int offset, size_t length,
                 PyObject *t2 = Py_BuildValue("(sOs)",
                                              name2, result_subpkt, "dict");
                 PyList_Append(result, t2);
-                Py_DECREF(result_subpkt);
+                
+		Py_DECREF(t);
+		Py_DECREF(t2);
+		Py_DECREF(result_subpkt);
             }
             break;
 
@@ -3521,7 +3556,8 @@ _decode_lte_phy_irat_subpkt(const char *b, int offset, size_t length,
                 PyObject *t = Py_BuildValue("(sOs)",
                                             name, result_subpkt, "dict");
                 PyList_Append(result, t);
-                Py_DECREF(result_subpkt);
+                Py_DECREF(t);
+		Py_DECREF(result_subpkt);
 
             }
 
@@ -3784,6 +3820,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                     PyObject *pystr = Py_BuildValue("s", temp.c_str());
                                     PyObject *old_object = _replace_result(result_subpkt,
                                                                             "Preamble Format", pystr);
+                                    Py_DECREF(pystr);
                                     Py_DECREF(old_object);                                        
                                 }
                                 else{
@@ -4022,7 +4059,8 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                         PyObject *t = Py_BuildValue("(sOs)",
                                                     "Ignored", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
-                        Py_DECREF(result_subpkt);
+                        Py_DECREF(t);
+			Py_DECREF(result_subpkt);
                     } else {
                         printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id,
                                subpkt_ver);
@@ -4211,6 +4249,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             }
                                             old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
                                             Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
                                         }
 
                                         mac_hdr_tmp_list.push_back(mac_hdr);
@@ -4543,6 +4582,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             }
                                             old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
                                             Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
                                         }
 
                                         mac_hdr_tmp_list.push_back(mac_hdr);
@@ -4764,7 +4804,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                     PyObject *t = Py_BuildValue("(sOs)",
                                                 "Ignored", result_subpkt, "dict");
                     PyList_Append(result_allpkts, t);
-                    Py_DECREF(result_subpkt);
+		    Py_DECREF(result_subpkt);
                     Py_DECREF(t);
                 }
             }
@@ -4932,6 +4972,7 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             }
                                             old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
                                             Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
                                         }
 
                                         mac_hdr_tmp_list.push_back(mac_hdr);
@@ -5138,6 +5179,7 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                             }
                                             old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
                                             Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
                                         }
 
                                         mac_hdr_tmp_list.push_back(mac_hdr);
@@ -7411,6 +7453,7 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                         PyObject *pystr = Py_BuildValue("s", temp.c_str());
                         PyObject *old_object = _replace_result(result_subpkt,
                                                                 "Preamble Format", pystr);
+                        Py_DECREF(pystr);                                    
                         Py_DECREF(old_object);                                        
                     }
                     else{
@@ -7592,6 +7635,7 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                     PyObject *old_object2 = _replace_result(result_subpkt,
                                                            "Maching ID", pystr1);
                     Py_DECREF(old_object2);
+                    Py_DECREF(pystr1);
 
                     Py_DECREF(temp);
 
@@ -11913,6 +11957,14 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                                      b, offset, length, result);
             offset += _decode_lte_phy_cdrx_events_info_payload(b, offset, length, result);
             break;
+        // msgs for LTE NB1 SW
+        case LTE_NB1_ML1_GM_DCI_Info:
+            offset += _decode_by_fmt(LteNb1Ml1GmDciInfoFmt,
+                                     ARRAY_SIZE(LteNb1Ml1GmDciInfoFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_gm_dci_info_payload(b, offset, length, result);
+            break;
+
         case WCDMA_RRC_States:
             offset += _decode_wcdma_rrc_states_payload(b, offset, length, result);
             break;
@@ -12032,11 +12084,34 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
 
 }
 
+
+static clock_t prev = 0;
 PyObject *
 decode_log_packet(const char *b, size_t length, bool skip_decoding) {
 
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
+
+    
+    if(skip_decoding){
+	    if(prev==0){
+		prev = clock();
+	    }else {
+		clock_t now = clock();
+		double diff = ((double) (now - prev)) / CLOCKS_PER_SEC;
+
+		if(diff >= 1){
+			prev = now;
+		}else if (diff > target_sampling_rate){
+			PyObject *result = Py_None;
+			return result;
+		}
+	        else{
+			//pass
+		}	
+	    }
+    }
+
 
     PyObject *result = NULL;
     int offset = 0;
@@ -12059,6 +12134,7 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
             ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
             "Unsupported");
 
+    /*
     if (skip_decoding) {    // skip further decoding
 
         PyObject *t = Py_BuildValue("(sy#s)",
@@ -12068,6 +12144,7 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
         Py_DECREF(t);
         return result;
     }
+    */
 
     on_demand_decode(b + offset, length - offset, type_id, result);
 

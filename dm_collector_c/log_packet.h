@@ -460,7 +460,6 @@ const ValueName NrRrcOtaPduType_v8[] = {
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
 
-
 // ------------------------------------------------------------
 // LTE NAS Plain
 const Fmt LteNasPlainFmt[] = {
@@ -1382,6 +1381,35 @@ const Fmt LteRrcMibMessageLogPacketFmt_v3[] = {
         {BANDWIDTH, "DL BW",             1},    //downlink bandwidth
         //added fields
         {UINT,      "Sib1 BR Sch Info",  1}
+};
+
+//yueli
+const Fmt LteRrcMibMessageLogPacketFmt_v17[] = {
+        {UINT,      "Physical Cell ID",  2},    //cell ID
+        {UINT,      "Freq",              4},    //frequency
+        {UINT,      "SFN",               2},
+        {UINT,      "SFN MSB4",          1},
+        {UINT,      "HSFN LSB2",         1},
+        {UINT,      "Sib1 Sch Info",           1},
+        {UINT,      "Sys Info Value Tag",      1},
+        {UINT,      "Access Barring Enabled",  1},
+        {UINT,      "Op Mode Type",            1},
+        {UINT,      "Raster Offset",           2},
+        {UINT,      "Number of Antenna", 1}
+};
+
+const ValueName LteRrcMibMessageLogPacketFmt_OpModeType[] = {
+        {0,  "inband-DifferentPCI"},
+        {1,  "inband-SamePCI"},
+        {2,  "GUARDBAND"},
+        {3,  "STANDALONE"}
+};
+
+const ValueName LteRrcMibMessageLogPacketFmt_RasterOffset[] = {
+        {0,  "KHZ-7DOT5"},
+        {1,  "KHZ-2DOT5"},
+        {2,  "KHZ2DOT5"},
+        {3,  "KHZ7DOT5"}
 };
 
 // ----------------------------------------------------------------------------
@@ -4178,6 +4206,11 @@ const ValueName ValueNameRNTIType[] = {
         {7, "TPC-PUCCH-RNTI"},
         {8, "MBMS RNTI"},
 };
+const ValueName ValueNameNBIoT_RNTIType[] = {
+        // 2 bits
+        {0, "C-RNTI"},
+        {2, "TC-RNTI"},
+};
 const ValueName ValueNameDCIFormat[] = {
         // 4 bits
         // Release 8
@@ -4584,6 +4617,8 @@ bool is_debug_packet (const char *b, size_t length);   //Yuanjie: test if it's a
 bool is_custom_packet (const char *b, size_t length);
 
 
+// Set sampling rate
+bool set_target_sampling_rate(int sampling_rate);
 
 // Given a binary string, try to decode it as a log packet.
 // Return a specially formatted Python list that stores the decoding result.
