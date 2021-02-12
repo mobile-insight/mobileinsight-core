@@ -54,7 +54,8 @@ def get_chipset_type():
     res = run_shell_cmd(cmd)
     if res.startswith(b"mt"):
         return ChipsetType.MTK
-    elif res.startswith(b"msm") or res.startswith(b"mdm"):
+    elif res.startswith(b"msm") or res.startswith(b"mdm") or res.startswith("lito"):
+        print("Chipset:", res)
         return ChipsetType.QUALCOMM
     else:
         return None

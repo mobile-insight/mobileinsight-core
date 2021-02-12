@@ -66,9 +66,10 @@ try:
         if res.startswith(b"mt"):
             return ChipsetType.MTK
         elif res.startswith(b"msm") or res.startswith(b"mdm") or res.startswith(b"sdm") or res.startswith(b"kona") or res.startswith(b"lito"):
+            print(("Found: type:", res))
             return ChipsetType.QUALCOMM
         else:
-            print(("WARNING: Unknown type:", res))
+            print(("test WARNING: Unknown type:", res))
             return None
 
 
