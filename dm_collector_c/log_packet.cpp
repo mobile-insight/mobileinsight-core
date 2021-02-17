@@ -7,6 +7,7 @@
 #include <datetime.h>
 #include <fstream>
 #include <map>
+#include <vector>//xyf
 #include <sstream>
 #include <string>
 #include <cstring>
@@ -33,6 +34,11 @@
 #include "lte_pdcp_dl_cipher_data_pdu.h"
 #include "lte_pdcp_ul_cipher_data_pdu.h"
 #include "lte_pdsch_stat_indication.h"
+#include "lte_nb1_ml1_gm_dci_info.h"
+#include "lte_nb1_ml1_gm_tx_report.h"
+// #include "lte_nb1_ml1_cell_resel.h"
+// #include "lte_nb1_ml1_gm_pdsch_stat_ind.h"
+// #include "lte_nb1_ml1_sum_sys_info.h"
 #include "lte_phy_bplmn_cell_confirm.h"
 #include "lte_phy_bplmn_cell_request.h"
 #include "lte_phy_cdrx_events_info.h"
@@ -88,6 +94,18 @@ namespace patch {
  */
 
 // TODO: split this .cpp to multiple files.
+
+static double target_sampling_rate = 1;
+
+bool set_target_sampling_rate(int sampling_rate){
+      if (sampling_rate < 0 || sampling_rate >100)
+	      return false;
+      target_sampling_rate = (double)sampling_rate / 100.0;
+      // printf("target_sampling_rate=%f\n",target_sampling_rate);
+      return true;
+
+}
+
 
 static int
 _decode_wcdma_signaling_messages(const char *b, int offset, size_t length,
@@ -273,13 +291,18 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
                                      ARRAY_SIZE(LteRrcOtaPacketFmt_v24, Fmt),
                                      b, offset, length, result);
             break;
+        case 26:
+            offset += _decode_by_fmt(LteRrcOtaPacketFmt_v26,
+                                     ARRAY_SIZE(LteRrcOtaPacketFmt_v26, Fmt),
+                                     b, offset, length, result);
+            break;
         default:
             printf("(MI)Unknown LTE RRC OTA packet version: %d\n", pkt_ver);
             return 0;
     }
 
-    //pkt_ver==19 added for
-    if (pkt_ver == 19) {
+    //pkt_ver == 26 added for
+    if(pkt_ver == 19 || pkt_ver == 26) {
 
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
@@ -302,8 +325,10 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
         }
 
     } else if (pkt_ver >= 15) {
+
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
+
         const char *type_name = search_name(LteRrcOtaPduType_v15,
                                             ARRAY_SIZE(LteRrcOtaPduType_v15, ValueName),
                                             pdu_number);
@@ -368,6 +393,24 @@ _decode_lte_rrc_mib(const char *b, int offset, size_t length,
                                      ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_v3, Fmt),
                                      b, offset, length, result);
             break;
+        case 17:{
+            offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt_v17,
+                                     ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_v17, Fmt),
+                                     b, offset, length, result);
+
+            (void) _map_result_field_to_name(result,
+                    "Op Mode Type",
+                    LteRrcMibMessageLogPacketFmt_OpModeType,
+                    ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_OpModeType, ValueName),
+                    "(MI)Unknown");
+
+            (void) _map_result_field_to_name(result,
+                    "Raster Offset",
+                    LteRrcMibMessageLogPacketFmt_RasterOffset,
+                    ARRAY_SIZE(LteRrcMibMessageLogPacketFmt_RasterOffset, ValueName),
+                    "(MI)Unknown");
+            break;
+        }
         default:
             printf("(MI)Unknown LTE RRC MIB version: 0x%x\n", pkt_ver);
             return 0;
@@ -3356,7 +3399,7 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                                                     "Ignored", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(t);
-                        Py_DECREF(result_subpkt);
+			Py_DECREF(result_subpkt);
                     } else {
                         printf("(MI)Unknown LTE PHY Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
@@ -3428,7 +3471,10 @@ _decode_lte_phy_irat_cdma_subpkt(const char *b, int offset, size_t length,
                 PyObject *t2 = Py_BuildValue("(sOs)",
                                              name2, result_subpkt, "dict");
                 PyList_Append(result, t2);
-                Py_DECREF(result_subpkt);
+                
+		Py_DECREF(t);
+		Py_DECREF(t2);
+		Py_DECREF(result_subpkt);
             }
             break;
 
@@ -3514,7 +3560,8 @@ _decode_lte_phy_irat_subpkt(const char *b, int offset, size_t length,
                 PyObject *t = Py_BuildValue("(sOs)",
                                             name, result_subpkt, "dict");
                 PyList_Append(result, t);
-                Py_DECREF(result_subpkt);
+                Py_DECREF(t);
+		Py_DECREF(result_subpkt);
 
             }
 
@@ -3655,6 +3702,17 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_DLConfig, Fmt),
                                                          b, offset, length, result_subpkt);
+                                
+                                int iTaTimer = _search_result_uint(result_subpkt, "TA Timer");
+                                if (iTaTimer == 0xffff) {
+                                    (void) _map_result_field_to_name(result_subpkt,
+                                                                        "TA Timer",
+                                                                        LteMacConfigurationConfigType_DLConfig_TA_Timer,
+                                                                        ARRAY_SIZE(
+                                                                                LteMacConfigurationConfigType_DLConfig_TA_Timer,
+                                                                                ValueName),
+                                                                        "MI Unknown");
+                                }
                                 success = true;
                             } else if (subpkt_ver == 2) {
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_DLConfig_v2,
@@ -3705,6 +3763,16 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_ULConfig,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_ULConfig, Fmt),
                                                          b, offset, length, result_subpkt);
+                                int iBSRTimer = _search_result_uint(result_subpkt, "BSR timer");
+                                if (iBSRTimer == 0xffff) {
+                                    (void) _map_result_field_to_name(result_subpkt,
+                                                                        "BSR timer",
+                                                                        LteMacConfigurationConfigType_ULConfig_BSR_Timer,
+                                                                        ARRAY_SIZE(
+                                                                                LteMacConfigurationConfigType_ULConfig_BSR_Timer,
+                                                                                ValueName),
+                                                                        "MI Unknown");
+                                }
                                 success = true;
                             } else if (subpkt_ver == 2) {
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_ULConfig_v2,
@@ -3726,9 +3794,173 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                                          b, offset, length, result_subpkt);
                                 success = true;
                             } else if (subpkt_ver == 5) {
+                                // RACH Config Subpacket
+                                PyObject *t = NULL;
+
                                 offset += _decode_by_fmt(LteMacConfigurationSubpkt_RACHConfig_v5,
                                                          ARRAY_SIZE(LteMacConfigurationSubpkt_RACHConfig_v5, Fmt),
                                                          b, offset, length, result_subpkt);
+                                
+                                int iPowerOffsetGroupB = _search_result_uint(result_subpkt, "Power offset Group_B");
+                                if (iPowerOffsetGroupB == 0x00) {
+                                    (void) _map_result_field_to_name(result_subpkt,
+                                                                        "Power offset Group_B",
+                                                                        LteMacConfigurationSubpkt_RACHConfig_Power_offset_Group_B,
+                                                                        ARRAY_SIZE(
+                                                                                LteMacConfigurationSubpkt_RACHConfig_Power_offset_Group_B,
+                                                                                ValueName),
+                                                                        "MI Unknown");
+                                }
+                                
+                                //Preamble Format is related to PRACH config(36.321)
+                                int prach_cfg = _search_result_int(result_subpkt, "PRACH config");
+                                if(prach_cfg < 16){
+                                    PyObject *old_object = _replace_result_int(result_subpkt,
+                                                                            "Preamble Format", 0);
+                                    Py_DECREF(old_object);
+                                }
+                                else if (prach_cfg==30){
+                                    std::string temp = "N/A";
+                                    PyObject *pystr = Py_BuildValue("s", temp.c_str());
+                                    PyObject *old_object = _replace_result(result_subpkt,
+                                                                            "Preamble Format", pystr);
+                                    Py_DECREF(pystr);
+                                    Py_DECREF(old_object);                                        
+                                }
+                                else{
+                                    PyObject *old_object = _replace_result_int(result_subpkt,
+                                                                            "Preamble Format", 1);
+                                    Py_DECREF(old_object);
+                                }
+
+                                PyObject *result_prach_cfg_r13 = PyList_New(0);
+
+                                PyObject *result_rsrp_list_size = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_size_v5,
+                                             ARRAY_SIZE(
+                                                     LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_size_v5,
+                                                     Fmt),
+                                             b, offset, length, result_rsrp_list_size);
+                                int iListSize = _search_result_int(result_rsrp_list_size, "RSRP Thresh PRACH List Size");
+
+                                t = Py_BuildValue("(sOs)", "Ignored", result_rsrp_list_size, "dict");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_rsrp_list_size);
+
+                                PyObject *result_rsrp_list = PyList_New(0);
+                                for (int i = 0; i < iListSize; i++) {
+                                    PyObject *result_temp = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_v5,
+                                                            ARRAY_SIZE(
+                                                                    LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_v5,
+                                                                    Fmt),
+                                                            b, offset, length, result_temp);
+                                    t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                                    PyList_Append(result_rsrp_list, t);
+                                    Py_DECREF(t);
+                                    Py_DECREF(result_temp);
+                                }
+                                t = Py_BuildValue("(sOs)", "RSRP Thresh PRACH List", result_rsrp_list, "list");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_rsrp_list);
+
+                                result_rsrp_list = PyList_New(0);
+                                for (int i = 0; i < 3 - iListSize; i++) {
+                                    PyObject *result_temp = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_hidden_rsrp_prach_list_v5,
+                                                            ARRAY_SIZE(
+                                                                    LteMacRachTrigger_RachConfigSubpktPayload_hidden_rsrp_prach_list_v5,
+                                                                    Fmt),
+                                                            b, offset, length, result_temp);
+                                    t = Py_BuildValue("(sOs)", "Hidden", result_temp, "dict");
+                                    PyList_Append(result_rsrp_list, t);
+                                    Py_DECREF(t);
+                                    Py_DECREF(result_temp);
+                                }
+                                t = Py_BuildValue("(sOs)", "Hidden RSRP Thresh PRACH List", result_rsrp_list, "list");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_rsrp_list);
+
+                                PyObject *param_ce_list_size = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_prach_param_ce_list_size_v5,
+                                                        ARRAY_SIZE(
+                                                                LteMacConfiguration_RachConfigSubpktPayload_prach_param_ce_list_size_v5,
+                                                                Fmt),
+                                                        b, offset, length, param_ce_list_size);
+                                int iparamListSize = _search_result_int(param_ce_list_size, "PRACH Param CE List");
+
+                                t = Py_BuildValue("(sOs)", "Ignored", param_ce_list_size, "dict");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(param_ce_list_size);
+
+                                PyObject *param_ce_list = PyList_New(0);
+                                for (int i = 0; i < iparamListSize; i++) {
+                                    PyObject *result_temp = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_prach_list_v5,
+                                                            ARRAY_SIZE(LteMacConfiguration_RachConfigSubpktPayload_prach_list_v5,
+                                                                        Fmt),
+                                                            b, offset, length, result_temp);
+                                    t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                                    PyList_Append(param_ce_list, t);
+                                    Py_DECREF(t);
+                                    Py_DECREF(result_temp);
+                                }
+                                t = Py_BuildValue("(sOs)", "PRACH Param Ce", param_ce_list, "list");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(param_ce_list);
+
+                                param_ce_list = PyList_New(0);
+                                for (int i = 0; i < 4 - iparamListSize; i++) {
+                                    PyObject *result_temp = PyList_New(0);
+                                    offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_hidden_prach_list_v5,
+                                                            ARRAY_SIZE(
+                                                                    LteMacConfiguration_RachConfigSubpktPayload_hidden_prach_list_v5,
+                                                                    Fmt),
+                                                            b, offset, length, result_temp);
+                                    t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                                    PyList_Append(param_ce_list, t);
+                                    Py_DECREF(t);
+                                    Py_DECREF(result_temp);
+                                }
+                                t = Py_BuildValue("(sOs)", "Hidden Prach Param Ce", param_ce_list, "list");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(param_ce_list);
+
+                                PyObject *result_temp = PyList_New(0);
+                                offset += _decode_by_fmt(LteMacConfiguration_RachConfigSubpktPayload_prach_last_part,
+                                                        ARRAY_SIZE(LteMacConfiguration_RachConfigSubpktPayload_prach_last_part, Fmt),
+                                                        b, offset, length, result_temp);
+                                int iInitialCELevel = _search_result_uint(result_temp, "Initial CE Level");
+                                if (iInitialCELevel == 0xffff) {
+                                    (void) _map_result_field_to_name(result_temp,
+                                                                        "Initial CE Level",
+                                                                        LteMacConfiguration_RachConfigSubpktPayload_prach_initial_ce_level,
+                                                                        ARRAY_SIZE(
+                                                                                LteMacConfiguration_RachConfigSubpktPayload_prach_initial_ce_level,
+                                                                                ValueName),
+                                                                        "MI Unknown");
+                                }
+                                t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                                PyList_Append(result_prach_cfg_r13, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_temp);
+
+                                int iPRACHCfgR13Present = _search_result_int(result_subpkt, "PRACH Cfg R13 Present");
+                                if (iPRACHCfgR13Present == 0) {
+                                    t = Py_BuildValue("(sOs)", "Hidden PRACH Cfg R13", result_prach_cfg_r13, "list");
+                                } else {
+                                    t = Py_BuildValue("(sOs)", "PRACH Cfg R13", result_prach_cfg_r13, "list");
+                                }
+                                PyList_Append(result_subpkt, t);
+                                Py_DECREF(t);
+                                Py_DECREF(result_prach_cfg_r13);
+
                                 success = true;
                             }
                             break;
@@ -3831,7 +4063,8 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                         PyObject *t = Py_BuildValue("(sOs)",
                                                     "Ignored", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
-                        Py_DECREF(result_subpkt);
+                        Py_DECREF(t);
+			Py_DECREF(result_subpkt);
                     } else {
                         printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id,
                                subpkt_ver);
@@ -3912,6 +4145,9 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         BSRTrig,
                                         ARRAY_SIZE(BSRTrig, ValueName),
                                         "(MI)Unknown");
+                                // xyf
+                                int iRNTIType = _search_result_int(result_subpkt_sample, "RNTI Type");
+                                // xyf
                                 (void) _map_result_field_to_name(
                                         result_subpkt_sample,
                                         "RNTI Type",
@@ -3931,8 +4167,280 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         result_subpkt_sample,
                                         "SFN", iSFN);
                                 Py_DECREF(old_object);
-                                offset += _search_result_int(result_subpkt_sample,
-                                                             "HDR LEN");
+                                
+
+                                //xyf
+                                if (iRNTIType != 0)
+                                    offset += _search_result_int(result_subpkt_sample, "HDR LEN");
+                                else
+                                {
+                                    int hdr_count = 0;
+                                    int tmp_count = 0;
+                                    std::vector<PyObject *> mac_hdr_tmp_list;
+                                    
+                                    PyObject *mac_hdr_list = PyList_New(0);
+
+                                    while (true)
+                                    {
+                                        PyObject *mac_hdr = PyList_New(0);
+                                        tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_Hdr,
+                                                               ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr, Fmt),
+                                                               b, offset, length, mac_hdr);
+                                        offset += tmp_count;
+                                        hdr_count += tmp_count;
+
+                                        uint utemp = _search_result_uint(mac_hdr, "Header Field");
+                                        uint iF2 = (utemp >> 6) & 1;
+                                        uint iE = (utemp >> 5) & 1;
+                                        uint iLCID = utemp & 31;
+
+                                        old_object = _replace_result_int(mac_hdr, "LC ID", iLCID);
+                                        Py_DECREF(old_object);
+
+                                        (void) _map_result_field_to_name(
+                                            mac_hdr, 
+                                            "LC ID", 
+                                            LteMacULTransportBlock_Mac_Hdr_LCId, 
+                                            ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_LCId, ValueName),
+                                            "(MI)Unknown");
+
+                                        uint iSDULen = -1;
+                                        if (iLCID >= 0 && iLCID <= 10 && iE != 0) // logical channel
+                                        {
+                                            PyObject *mac_hdr_L = PyList_New(0);
+                                            if (iF2 == 0)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_Hdr_L1,
+                                                               ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_L1, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                utemp = _search_result_uint(mac_hdr_L, "L1 Field");
+
+                                                if ((utemp >> 7) == 1) // 15-bit L
+                                                {
+                                                    tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_Hdr_L2,
+                                                               ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_L2, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                    offset += tmp_count;
+                                                    hdr_count += tmp_count; 
+
+                                                    uint utemp2 = _search_result_uint(mac_hdr_L, "L2 Field");
+                                                    iSDULen = (utemp & 0x7f) * 0x100 + utemp2;
+                                                }
+                                                else // 7-bit L
+                                                    iSDULen = utemp & 0x7f;
+                                            }
+                                            else // 16-bit L
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_Hdr_L1,
+                                                               ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_L1, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                utemp = _search_result_uint(mac_hdr_L, "L1 Field");
+
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_Hdr_L2,
+                                                               ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_L2, Fmt),
+                                                               b, offset, length, mac_hdr_L); 
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                uint utemp2 = _search_result_uint(mac_hdr_L, "L2 Field");
+                                                iSDULen = utemp * 0x100 + utemp2;
+                                            }
+                                            old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
+                                            Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
+                                        }
+
+                                        mac_hdr_tmp_list.push_back(mac_hdr);
+
+                                        if (iE == 0)
+                                            break;
+                                    }
+
+                                    // fill in CE info
+                                    for (uint hdr_index = 0; hdr_index < mac_hdr_tmp_list.size(); ++hdr_index)
+                                    {
+                                        PyObject *mac_hdr_ce = mac_hdr_tmp_list[hdr_index];
+
+                                        uint utemp = _search_result_uint(mac_hdr_ce, "Header Field");
+                                        uint iLCID = utemp & 31;
+                                        uint iSDULen = -1;
+
+                                        if (iLCID == 30) // L-BSR
+                                        {
+                                            iSDULen = 3;
+                                            tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_L_BSR,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_L_BSR, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+
+                                            uint utemp1 = _search_result_uint(mac_hdr_ce, "L-BSR Field 1");
+                                            uint utemp2 = _search_result_uint(mac_hdr_ce, "L-BSR Field 2");
+                                            uint utemp3 = _search_result_uint(mac_hdr_ce, "L-BSR Field 3");
+                                            uint iIndex0 = (utemp1 >> 2);
+                                            uint iIndex1 = (utemp1 << 4) & 0x30 + (utemp2 >> 4);
+                                            uint iIndex2 = (utemp2 << 2) & 0x3c + (utemp3 >> 6);
+                                            uint iIndex3 = utemp3 & 0x3f;
+
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0", iIndex0);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1", iIndex1);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2", iIndex2);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3", iIndex3);
+                                            Py_DECREF(old_object);
+
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex0]);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex1]);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex2]);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex3]);
+                                            Py_DECREF(old_object);
+                                        }
+                                        else if (iLCID == 29 || iLCID == 28) // S/T-BSR
+                                        {
+                                            iSDULen = 1;
+                                            tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_T_BSR,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_T_BSR, Fmt),
+                                                       b, offset, length, mac_hdr_ce);
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+
+                                            uint utemp = _search_result_uint(mac_hdr_ce, "S/T-BSR Field");
+                                            uint iLCGId = (utemp >> 6);
+                                            uint iIndex = utemp & 0x3f;
+
+                                            if (iLCGId == 0)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG0,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG0, Fmt),
+                                                       b, offset, length, mac_hdr_ce);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0", iIndex);
+                                                Py_DECREF(old_object);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
+                                                Py_DECREF(old_object);
+                                            }
+                                            else if (iLCGId == 1)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG1,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG1, Fmt),
+                                                       b, offset, length, mac_hdr_ce);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1", iIndex);
+                                                Py_DECREF(old_object);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
+                                                Py_DECREF(old_object);
+                                            }
+                                            else if (iLCGId == 2)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG2,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG2, Fmt),
+                                                       b, offset, length, mac_hdr_ce);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2", iIndex);
+                                                Py_DECREF(old_object);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
+                                                Py_DECREF(old_object);
+                                            }
+                                            else if (iLCGId == 3)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG3,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG3, Fmt),
+                                                       b, offset, length, mac_hdr_ce);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3", iIndex);
+                                                Py_DECREF(old_object);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
+                                                Py_DECREF(old_object);
+                                            }
+                                        }
+                                        else if (iLCID == 27) // C-RNTI
+                                        {
+                                            iSDULen = 2;
+                                            tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_C_RNTI,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_C_RNTI, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+                                        }
+                                        else if (iLCID == 26) // PHR
+                                        {
+                                            iSDULen = 1;
+                                            tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_PHR,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_PHR, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+
+                                            uint utemp = _search_result_uint(mac_hdr_ce, "PHR Field");
+                                            uint iPHRInd = utemp & 0x3f;
+                                            
+                                            old_object = _replace_result_int(mac_hdr_ce, "PHR Ind", iPHRInd);
+                                            Py_DECREF(old_object);
+                                        }
+                                        else if (iLCID == 20) // Recommended bit rate query
+                                        {
+                                            iSDULen = 2;
+                                            tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_RBRQ,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_RBRQ, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+
+                                            uint utemp1 = _search_result_uint(mac_hdr_ce, "RBRQ Field 1");
+                                            uint utemp2 = _search_result_uint(mac_hdr_ce, "RBRQ Field 2");
+                                            uint iRBRQLCID = (utemp1 >> 4);
+                                            uint iULorDL = (utemp1 >> 3) & 1;
+                                            uint iBitRate = ((utemp1 & 0x7) << 3) | (utemp2 >> 5);
+                                            uint iX = (utemp2 >> 4) & 1;
+                                            
+                                            old_object = _replace_result_int(mac_hdr_ce, "LCID (RBRQ)", iRBRQLCID);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "UL/DL", iULorDL);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "Bit Rate", iBitRate);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "Bit Rate Multiplier", iX);
+                                            Py_DECREF(old_object);
+
+                                            (void) _map_result_field_to_name(
+                                                mac_hdr_ce, 
+                                                "UL/DL", 
+                                                LteMacULTransportBlock_Mac_CE_RBRQ_ULorDL, 
+                                                ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_RBRQ_ULorDL, ValueName),
+                                                "(MI)Unknown");
+                                        }
+
+                                        if (iLCID > 10)
+                                        {
+                                            old_object = _replace_result_int(mac_hdr_ce, "Len", iSDULen);
+                                            Py_DECREF(old_object);
+                                        }
+
+                                        PyObject *t = Py_BuildValue("(sOs)", "Ignored", mac_hdr_ce, "dict");
+                                        PyList_Append(mac_hdr_list, t);
+                                        Py_DECREF(mac_hdr_ce);
+                                        Py_DECREF(t);
+                                    }
+
+
+
+                                    PyObject *t1 = Py_BuildValue("(sOs)", "Mac Hdr + CE", mac_hdr_list, "list");
+                                    PyList_Append(result_subpkt_sample, t1);
+                                    Py_DECREF(mac_hdr_list);
+                                    Py_DECREF(t1);
+
+                                    tmp_count = _search_result_int(result_subpkt_sample, "HDR LEN");
+                                    offset += tmp_count - hdr_count;
+                                }
+                                //xyf
+
                                 PyObject *t = Py_BuildValue("(sOs)",
                                                             "Ignored", result_subpkt_sample, "dict");
                                 PyList_Append(result_sample_list, t);
@@ -3966,6 +4474,9 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         BSRTrig,
                                         ARRAY_SIZE(BSRTrig, ValueName),
                                         "(MI)Unknown");
+                                // xyf
+                                int iRNTIType = _search_result_int(result_subpkt_sample, "RNTI Type");
+                                // xyf
                                 (void) _map_result_field_to_name(
                                         result_subpkt_sample,
                                         "RNTI Type",
@@ -3989,8 +4500,283 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         "SFN", iSFN);
                                 Py_DECREF(old_object);
 
-                                offset += _search_result_int(
-                                        result_subpkt_sample, "HDR LEN");
+
+
+
+                                //xyf
+                                if (iRNTIType != 0)
+                                    offset += _search_result_int(result_subpkt_sample, "HDR LEN");
+                                else
+                                {
+                                    int hdr_count = 0;
+                                    std::vector<PyObject *> mac_hdr_tmp_list;
+                                    
+                                    PyObject *mac_hdr_list = PyList_New(0);
+
+                                    while (true)
+                                    {
+                                        PyObject *mac_hdr = PyList_New(0);
+                                        tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_Hdr,
+                                                               ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr, Fmt),
+                                                               b, offset, length, mac_hdr);
+                                        offset += tmp_count;
+                                        hdr_count += tmp_count;
+
+                                        uint utemp = _search_result_uint(mac_hdr, "Header Field");
+                                        uint iF2 = (utemp >> 6) & 1;
+                                        uint iE = (utemp >> 5) & 1;
+                                        uint iLCID = utemp & 31;
+
+                                        old_object = _replace_result_int(mac_hdr, "LC ID", iLCID);
+                                        Py_DECREF(old_object);
+
+                                        (void) _map_result_field_to_name(
+                                            mac_hdr, 
+                                            "LC ID", 
+                                            LteMacULTransportBlock_Mac_Hdr_LCId, 
+                                            ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_LCId, ValueName),
+                                            "(MI)Unknown");
+
+                                        uint iSDULen = -1;
+                                        if (iLCID >= 0 && iLCID <= 10 && iE != 0) // logical channel
+                                        {
+                                            PyObject *mac_hdr_L = PyList_New(0);
+                                            if (iF2 == 0)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_Hdr_L1,
+                                                               ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_L1, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                utemp = _search_result_uint(mac_hdr_L, "L1 Field");
+
+                                                if ((utemp >> 7) == 1) // 15-bit L
+                                                {
+                                                    tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_Hdr_L2,
+                                                               ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_L2, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                    offset += tmp_count;
+                                                    hdr_count += tmp_count; 
+
+                                                    uint utemp2 = _search_result_uint(mac_hdr_L, "L2 Field");
+                                                    iSDULen = (utemp & 0x7f) * 0x100 + utemp2;
+                                                }
+                                                else // 7-bit L
+                                                    iSDULen = utemp & 0x7f;
+                                            }
+                                            else // 16-bit L
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_Hdr_L1,
+                                                               ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_L1, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                utemp = _search_result_uint(mac_hdr_L, "L1 Field");
+
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_Hdr_L2,
+                                                               ARRAY_SIZE(LteMacULTransportBlock_Mac_Hdr_L2, Fmt),
+                                                               b, offset, length, mac_hdr_L); 
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                uint utemp2 = _search_result_uint(mac_hdr_L, "L2 Field");
+                                                iSDULen = utemp * 0x100 + utemp2;
+                                            }
+                                            old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
+                                            Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
+                                        }
+
+                                        mac_hdr_tmp_list.push_back(mac_hdr);
+
+                                        if (iE == 0)
+                                            break;
+                                    }
+
+                                    // fill in CE info
+                                    for (uint hdr_index = 0; hdr_index < mac_hdr_tmp_list.size(); ++hdr_index)
+                                    {
+                                        PyObject *mac_hdr_ce = mac_hdr_tmp_list[hdr_index];
+
+                                        uint utemp = _search_result_uint(mac_hdr_ce, "Header Field");
+                                        uint iLCID = utemp & 31;
+                                        uint iSDULen = -1;
+
+                                        if (iLCID == 30) // L-BSR
+                                        {
+                                            iSDULen = 3;
+                                            tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_L_BSR,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_L_BSR, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+
+                                            uint utemp1 = _search_result_uint(mac_hdr_ce, "L-BSR Field 1");
+                                            uint utemp2 = _search_result_uint(mac_hdr_ce, "L-BSR Field 2");
+                                            uint utemp3 = _search_result_uint(mac_hdr_ce, "L-BSR Field 3");
+                                            uint iIndex0 = (utemp1 >> 2);
+                                            uint iIndex1 = (utemp1 << 4) & 0x30 + (utemp2 >> 4);
+                                            uint iIndex2 = (utemp2 << 2) & 0x3c + (utemp3 >> 6);
+                                            uint iIndex3 = utemp3 & 0x3f;
+
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0", iIndex0);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1", iIndex1);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2", iIndex2);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3", iIndex3);
+                                            Py_DECREF(old_object);
+
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex0]);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex1]);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex2]);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex3]);
+                                            Py_DECREF(old_object);
+                                        }
+                                        else if (iLCID == 29 || iLCID == 28) // S/T-BSR
+                                        {
+                                            iSDULen = 1;
+                                            tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_T_BSR,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_T_BSR, Fmt),
+                                                       b, offset, length, mac_hdr_ce);
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+
+                                            uint utemp = _search_result_uint(mac_hdr_ce, "S/T-BSR Field");
+                                            uint iLCGId = (utemp >> 6);
+                                            uint iIndex = utemp & 0x3f;
+
+                                            if (iLCGId == 0)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG0,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG0, Fmt),
+                                                       b, offset, length, mac_hdr_ce);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0", iIndex);
+                                                Py_DECREF(old_object);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 0 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
+                                                Py_DECREF(old_object);
+                                            }
+                                            else if (iLCGId == 1)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG1,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG1, Fmt),
+                                                       b, offset, length, mac_hdr_ce);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1", iIndex);
+                                                Py_DECREF(old_object);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 1 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
+                                                Py_DECREF(old_object);
+                                            }
+                                            else if (iLCGId == 2)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG2,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG2, Fmt),
+                                                       b, offset, length, mac_hdr_ce);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2", iIndex);
+                                                Py_DECREF(old_object);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 2 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
+                                                Py_DECREF(old_object);
+                                            }
+                                            else if (iLCGId == 3)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG3,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG3, Fmt),
+                                                       b, offset, length, mac_hdr_ce);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3", iIndex);
+                                                Py_DECREF(old_object);
+                                                old_object = _replace_result_int(mac_hdr_ce, "BSR LCG 3 (bytes)", LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[iIndex]);
+                                                Py_DECREF(old_object);
+                                            }
+                                        }
+                                        else if (iLCID == 27) // C-RNTI
+                                        {
+                                            iSDULen = 2;
+                                            tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_C_RNTI,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_C_RNTI, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+                                        }
+                                        else if (iLCID == 26) // PHR
+                                        {
+                                            iSDULen = 1;
+                                            tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_PHR,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_PHR, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+
+                                            uint utemp = _search_result_uint(mac_hdr_ce, "PHR Field");
+                                            uint iPHRInd = utemp & 0x3f;
+                                            
+                                            old_object = _replace_result_int(mac_hdr_ce, "PHR Ind", iPHRInd);
+                                            Py_DECREF(old_object);
+                                        }
+                                        else if (iLCID == 20) // Recommended bit rate query
+                                        {
+                                            iSDULen = 2;
+                                            tmp_count = _decode_by_fmt(LteMacULTransportBlock_Mac_CE_RBRQ,
+                                                       ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_RBRQ, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+
+                                            uint utemp1 = _search_result_uint(mac_hdr_ce, "RBRQ Field 1");
+                                            uint utemp2 = _search_result_uint(mac_hdr_ce, "RBRQ Field 2");
+                                            uint iRBRQLCID = (utemp1 >> 4);
+                                            uint iULorDL = (utemp1 >> 3) & 1;
+                                            uint iBitRate = ((utemp1 & 0x7) << 3) | (utemp2 >> 5);
+                                            uint iX = (utemp2 >> 4) & 1;
+                                            
+                                            old_object = _replace_result_int(mac_hdr_ce, "LCID (RBRQ)", iRBRQLCID);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "UL/DL", iULorDL);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "Bit Rate", iBitRate);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "Bit Rate Multiplier", iX);
+                                            Py_DECREF(old_object);
+
+                                            (void) _map_result_field_to_name(
+                                                mac_hdr_ce, 
+                                                "UL/DL", 
+                                                LteMacULTransportBlock_Mac_CE_RBRQ_ULorDL, 
+                                                ARRAY_SIZE(LteMacULTransportBlock_Mac_CE_RBRQ_ULorDL, ValueName),
+                                                "(MI)Unknown");
+                                        }
+                                        
+                                        if (iLCID > 10)
+                                        {
+                                            old_object = _replace_result_int(mac_hdr_ce, "Len", iSDULen);
+                                            Py_DECREF(old_object);
+                                        }
+
+                                        PyObject *t = Py_BuildValue("(sOs)", "Ignored", mac_hdr_ce, "dict");
+                                        PyList_Append(mac_hdr_list, t);
+                                        Py_DECREF(mac_hdr_ce);
+                                        Py_DECREF(t);
+                                    }
+
+                                    PyObject *t1 = Py_BuildValue("(sOs)", "Mac Hdr + CE", mac_hdr_list, "list");
+                                    PyList_Append(result_subpkt_sample, t1);
+                                    Py_DECREF(mac_hdr_list);
+                                    Py_DECREF(t1);
+
+                                    tmp_count = _search_result_int(result_subpkt_sample, "HDR LEN");
+                                    offset += tmp_count - hdr_count;
+                                    nsample_byte_count += tmp_count;
+                                }
+                                //xyf
+
+
+
+
+
                                 PyObject *t = Py_BuildValue("(sOs)",
                                                             "Ignored", result_subpkt_sample, "dict");
                                 PyList_Append(result_sample_list, t);
@@ -4022,7 +4808,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                     PyObject *t = Py_BuildValue("(sOs)",
                                                 "Ignored", result_subpkt, "dict");
                     PyList_Append(result_allpkts, t);
-                    Py_DECREF(result_subpkt);
+		    Py_DECREF(result_subpkt);
                     Py_DECREF(t);
                 }
             }
@@ -4084,6 +4870,9 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                 offset += _decode_by_fmt(LteMacDLTransportBlock_SubpktV2_SampleFmt,
                                                          ARRAY_SIZE(LteMacDLTransportBlock_SubpktV2_SampleFmt, Fmt),
                                                          b, offset, length, result_subpkt_sample);
+                                // xyf
+                                int iRNTIType = _search_result_int(result_subpkt_sample, "RNTI Type");
+                                // xyf
                                 (void) _map_result_field_to_name(
                                         result_subpkt_sample,
                                         "RNTI Type",
@@ -4102,7 +4891,174 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         result_subpkt_sample,
                                         "SFN", iSFN);
                                 Py_DECREF(old_object);
-                                offset += _search_result_int(result_subpkt_sample, "HDR LEN");
+
+                                //xyf
+                                if (iRNTIType != 0)
+                                    offset += _search_result_int(result_subpkt_sample, "HDR LEN");
+                                else
+                                {
+                                    int hdr_count = 0;
+                                    int tmp_count = 0;
+                                    std::vector<PyObject *> mac_hdr_tmp_list;
+                                    
+                                    PyObject *mac_hdr_list = PyList_New(0);
+
+                                    while (true)
+                                    {
+                                        PyObject *mac_hdr = PyList_New(0);
+                                        tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_Hdr,
+                                                               ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr, Fmt),
+                                                               b, offset, length, mac_hdr);
+                                        offset += tmp_count;
+                                        hdr_count += tmp_count;
+
+                                        uint utemp = _search_result_uint(mac_hdr, "Header Field");
+                                        uint iF2 = (utemp >> 6) & 1;
+                                        uint iE = (utemp >> 5) & 1;
+                                        uint iLCID = utemp & 31;
+
+                                        old_object = _replace_result_int(mac_hdr, "LC ID", iLCID);
+                                        Py_DECREF(old_object);
+
+                                        (void) _map_result_field_to_name(
+                                            mac_hdr, 
+                                            "LC ID", 
+                                            LteMacDLTransportBlock_Mac_Hdr_LCId, 
+                                            ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr_LCId, ValueName),
+                                            "(MI)Unknown");
+
+                                        uint iSDULen = -1;
+                                        if (iLCID >= 0 && iLCID <= 10 && iE != 0) // logical channel
+                                        {
+                                            PyObject *mac_hdr_L = PyList_New(0);
+                                            if (iF2 == 0)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_Hdr_L1,
+                                                               ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr_L1, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                utemp = _search_result_uint(mac_hdr_L, "L1 Field");
+
+                                                if ((utemp >> 7) == 1) // 15-bit L
+                                                {
+                                                    tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_Hdr_L2,
+                                                               ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr_L2, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                    offset += tmp_count;
+                                                    hdr_count += tmp_count; 
+
+                                                    uint utemp2 = _search_result_uint(mac_hdr_L, "L2 Field");
+                                                    iSDULen = (utemp & 0x7f) * 0x100 + utemp2;
+                                                }
+                                                else // 7-bit L
+                                                    iSDULen = utemp & 0x7f;
+                                            }
+                                            else // 16-bit L
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_Hdr_L1,
+                                                               ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr_L1, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                utemp = _search_result_uint(mac_hdr_L, "L1 Field");
+
+                                                tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_Hdr_L2,
+                                                               ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr_L2, Fmt),
+                                                               b, offset, length, mac_hdr_L); 
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                uint utemp2 = _search_result_uint(mac_hdr_L, "L2 Field");
+                                                iSDULen = utemp * 0x100 + utemp2;
+                                            }
+                                            old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
+                                            Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
+                                        }
+
+                                        mac_hdr_tmp_list.push_back(mac_hdr);
+
+                                        if (iE == 0)
+                                            break;
+                                    }
+
+                                    // fill in CE info
+                                    for (uint hdr_index = 0; hdr_index < mac_hdr_tmp_list.size(); ++hdr_index)
+                                    {
+                                        PyObject *mac_hdr_ce = mac_hdr_tmp_list[hdr_index];
+
+                                        uint utemp = _search_result_uint(mac_hdr_ce, "Header Field");
+                                        uint iLCID = utemp & 31;
+                                        uint iSDULen = -1;
+
+                                        if (iLCID == 30 || iLCID == 26) // DRX/Long DRX Command
+                                            iSDULen = 0;
+                                        else if (iLCID == 29) // TA Command
+                                        {
+                                            iSDULen = 1;
+                                            tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_CE_TA,
+                                                       ARRAY_SIZE(LteMacDLTransportBlock_Mac_CE_TA, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+
+                                            uint utemp = _search_result_uint(mac_hdr_ce, "TA Field");
+                                            uint iTAGId = (utemp >> 6);
+                                            uint iTACommand = utemp & 0x3f;
+
+                                            old_object = _replace_result_int(mac_hdr_ce, "TAG Id", iTAGId);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "TA Command", iTACommand);
+                                            Py_DECREF(old_object);
+                                        }
+                                        else if (iLCID == 28) // CRID
+                                        {
+                                            iSDULen = 6;
+                                            tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_CE_CRID,
+                                                       ARRAY_SIZE(LteMacDLTransportBlock_Mac_CE_CRID, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+                                        }
+                                        else if (iLCID == 27) // Activation/Deactivation (1 octet)
+                                        {
+                                            iSDULen = 1;
+                                            tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_CE_AD1,
+                                                       ARRAY_SIZE(LteMacDLTransportBlock_Mac_CE_AD1, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+                                        }
+
+                                        if (iLCID > 10)
+                                        {
+                                            old_object = _replace_result_int(mac_hdr_ce, "Len", iSDULen);
+                                            Py_DECREF(old_object);
+                                        }
+
+                                        PyObject *t = Py_BuildValue("(sOs)", "Ignored", mac_hdr_ce, "dict");
+                                        PyList_Append(mac_hdr_list, t);
+                                        Py_DECREF(mac_hdr_ce);
+                                        Py_DECREF(t);
+                                    }
+
+
+
+                                    PyObject *t1 = Py_BuildValue("(sOs)", "Mac Hdr + CE", mac_hdr_list, "list");
+                                    PyList_Append(result_subpkt_sample, t1);
+                                    Py_DECREF(mac_hdr_list);
+                                    Py_DECREF(t1);
+
+                                    tmp_count = _search_result_int(result_subpkt_sample, "HDR LEN");
+                                    offset += tmp_count - hdr_count;
+                                }
+                                //xyf
+
+
+
                                 PyObject *t = Py_BuildValue("(sOs)",
                                                             "Ignored",
                                                             result_subpkt_sample, "dict");
@@ -4120,6 +5076,9 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                 offset += _decode_by_fmt(LteMacDLTransportBlock_SubpktV4_SampleFmt,
                                                          ARRAY_SIZE(LteMacDLTransportBlock_SubpktV4_SampleFmt, Fmt),
                                                          b, offset, length, result_subpkt_sample);
+                                // xyf
+                                int iRNTIType = _search_result_int(result_subpkt_sample, "RNTI Type");
+                                // xyf
                                 (void) _map_result_field_to_name(
                                         result_subpkt_sample,
                                         "RNTI Type",
@@ -4138,7 +5097,174 @@ _decode_lte_mac_dl_transportblock_subpkt(const char *b, int offset, size_t lengt
                                         result_subpkt_sample,
                                         "SFN", iSFN);
                                 Py_DECREF(old_object);
-                                offset += _search_result_int(result_subpkt_sample, "HDR LEN");
+                                
+
+                                //xyf
+                                if (iRNTIType != 0)
+                                    offset += _search_result_int(result_subpkt_sample, "HDR LEN");
+                                else
+                                {
+                                    int hdr_count = 0;
+                                    int tmp_count = 0;
+                                    std::vector<PyObject *> mac_hdr_tmp_list;
+                                    
+                                    PyObject *mac_hdr_list = PyList_New(0);
+
+                                    while (true)
+                                    {
+                                        PyObject *mac_hdr = PyList_New(0);
+                                        tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_Hdr,
+                                                               ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr, Fmt),
+                                                               b, offset, length, mac_hdr);
+                                        offset += tmp_count;
+                                        hdr_count += tmp_count;
+
+                                        uint utemp = _search_result_uint(mac_hdr, "Header Field");
+                                        uint iF2 = (utemp >> 6) & 1;
+                                        uint iE = (utemp >> 5) & 1;
+                                        uint iLCID = utemp & 31;
+
+                                        old_object = _replace_result_int(mac_hdr, "LC ID", iLCID);
+                                        Py_DECREF(old_object);
+
+                                        (void) _map_result_field_to_name(
+                                            mac_hdr, 
+                                            "LC ID", 
+                                            LteMacDLTransportBlock_Mac_Hdr_LCId, 
+                                            ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr_LCId, ValueName),
+                                            "(MI)Unknown");
+
+                                        uint iSDULen = -1;
+                                        if (iLCID >= 0 && iLCID <= 10 && iE != 0) // logical channel
+                                        {
+                                            PyObject *mac_hdr_L = PyList_New(0);
+                                            if (iF2 == 0)
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_Hdr_L1,
+                                                               ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr_L1, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                utemp = _search_result_uint(mac_hdr_L, "L1 Field");
+
+                                                if ((utemp >> 7) == 1) // 15-bit L
+                                                {
+                                                    tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_Hdr_L2,
+                                                               ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr_L2, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                    offset += tmp_count;
+                                                    hdr_count += tmp_count; 
+
+                                                    uint utemp2 = _search_result_uint(mac_hdr_L, "L2 Field");
+                                                    iSDULen = (utemp & 0x7f) * 0x100 + utemp2;
+                                                }
+                                                else // 7-bit L
+                                                    iSDULen = utemp & 0x7f;
+                                            }
+                                            else // 16-bit L
+                                            {
+                                                tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_Hdr_L1,
+                                                               ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr_L1, Fmt),
+                                                               b, offset, length, mac_hdr_L);
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                utemp = _search_result_uint(mac_hdr_L, "L1 Field");
+
+                                                tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_Hdr_L2,
+                                                               ARRAY_SIZE(LteMacDLTransportBlock_Mac_Hdr_L2, Fmt),
+                                                               b, offset, length, mac_hdr_L); 
+                                                offset += tmp_count;
+                                                hdr_count += tmp_count; 
+
+                                                uint utemp2 = _search_result_uint(mac_hdr_L, "L2 Field");
+                                                iSDULen = utemp * 0x100 + utemp2;
+                                            }
+                                            old_object = _replace_result_int(mac_hdr, "Len", iSDULen);
+                                            Py_DECREF(old_object);
+                                            Py_DECREF(mac_hdr_L);
+                                        }
+
+                                        mac_hdr_tmp_list.push_back(mac_hdr);
+
+                                        if (iE == 0)
+                                            break;
+                                    }
+
+                                    // fill in CE info
+                                    for (uint hdr_index = 0; hdr_index < mac_hdr_tmp_list.size(); ++hdr_index)
+                                    {
+                                        PyObject *mac_hdr_ce = mac_hdr_tmp_list[hdr_index];
+
+                                        uint utemp = _search_result_uint(mac_hdr_ce, "Header Field");
+                                        uint iLCID = utemp & 31;
+                                        uint iSDULen = -1;
+
+                                        if (iLCID == 30 || iLCID == 26) // DRX/Long DRX Command
+                                            iSDULen = 0;
+                                        else if (iLCID == 29) // TA Command
+                                        {
+                                            iSDULen = 1;
+                                            tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_CE_TA,
+                                                       ARRAY_SIZE(LteMacDLTransportBlock_Mac_CE_TA, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+
+                                            uint utemp = _search_result_uint(mac_hdr_ce, "TA Field");
+                                            uint iTAGId = (utemp >> 6);
+                                            uint iTACommand = utemp & 0x3f;
+
+                                            old_object = _replace_result_int(mac_hdr_ce, "TAG Id", iTAGId);
+                                            Py_DECREF(old_object);
+                                            old_object = _replace_result_int(mac_hdr_ce, "TA Command", iTACommand);
+                                            Py_DECREF(old_object);
+                                        }
+                                        else if (iLCID == 28) // CRID
+                                        {
+                                            iSDULen = 6;
+                                            tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_CE_CRID,
+                                                       ARRAY_SIZE(LteMacDLTransportBlock_Mac_CE_CRID, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+                                        }
+                                        else if (iLCID == 27) // Activation/Deactivation (1 octet)
+                                        {
+                                            iSDULen = 1;
+                                            tmp_count = _decode_by_fmt(LteMacDLTransportBlock_Mac_CE_AD1,
+                                                       ARRAY_SIZE(LteMacDLTransportBlock_Mac_CE_AD1, Fmt),
+                                                       b, offset, length, mac_hdr_ce); 
+                                            offset += tmp_count;
+                                            hdr_count += tmp_count;
+                                        }
+
+                                        if (iLCID > 10)
+                                        {
+                                            old_object = _replace_result_int(mac_hdr_ce, "Len", iSDULen);
+                                            Py_DECREF(old_object);
+                                        }
+
+                                        PyObject *t = Py_BuildValue("(sOs)", "Ignored", mac_hdr_ce, "dict");
+                                        PyList_Append(mac_hdr_list, t);
+                                        Py_DECREF(mac_hdr_ce);
+                                        Py_DECREF(t);
+                                    }
+
+
+
+                                    PyObject *t1 = Py_BuildValue("(sOs)", "Mac Hdr + CE", mac_hdr_list, "list");
+                                    PyList_Append(result_subpkt_sample, t1);
+                                    Py_DECREF(mac_hdr_list);
+                                    Py_DECREF(t1);
+
+                                    tmp_count = _search_result_int(result_subpkt_sample, "HDR LEN");
+                                    offset += tmp_count - hdr_count;
+                                }
+                                //xyf
+                                
+
                                 PyObject *t = Py_BuildValue("(sOs)",
                                                             "Ignored",
                                                             result_subpkt_sample, "dict");
@@ -6310,9 +7436,35 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                             ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_v5,
                                        Fmt),
                             b, offset, length, result_subpkt);
-                    PyObject *old_object = _replace_result_int(result_subpkt,
-                                                               "Preamble Format", 0);
-                    Py_DECREF(old_object);
+                    int power_offset_config_b=_search_result_int(result_subpkt,"Power offset Group_B");
+                    if(power_offset_config_b==0){
+                        std::string temp = "- Infinity";
+                        PyObject *pystr = Py_BuildValue("s", temp.c_str());
+                        PyObject *old_object = _replace_result(result_subpkt,
+                                                            "Power offset Group_B", pystr);
+                        Py_DECREF(old_object);
+                        Py_DECREF(pystr);
+                    }
+                    //Preamble Format is related to PRACH config(36.321)
+                    int prach_cfg = _search_result_int(result_subpkt, "PRACH config");
+                    if(prach_cfg < 16){
+                        PyObject *old_object = _replace_result_int(result_subpkt,
+                                                                "Preamble Format", 0);
+                        Py_DECREF(old_object);
+                    }
+                    else if (prach_cfg==30){
+                        std::string temp = "N/A";
+                        PyObject *pystr = Py_BuildValue("s", temp.c_str());
+                        PyObject *old_object = _replace_result(result_subpkt,
+                                                                "Preamble Format", pystr);
+                        Py_DECREF(pystr);                                    
+                        Py_DECREF(old_object);                                        
+                    }
+                    else{
+                        PyObject *old_object = _replace_result_int(result_subpkt,
+                                                                "Preamble Format", 1);
+                        Py_DECREF(old_object);
+                    }
 
                     PyObject *result_prach_cfg_r13 = PyList_New(0);
 
@@ -6418,6 +7570,15 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                     offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part,
                                              ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part, Fmt),
                                              b, offset, length, result_temp);
+                    int temp=_search_result_int(result_temp,"Initial CE Level");
+                    if(temp == 0xffff){
+                        std::string temp = "NA";
+                        PyObject *pystr = Py_BuildValue("s", temp.c_str());
+                        PyObject *old_object = _replace_result(result_temp,
+                                                            "Initial CE Level", pystr);
+                        Py_DECREF(old_object);
+                        Py_DECREF(pystr);
+                    }
                     t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
                     PyList_Append(result_prach_cfg_r13, t);
                     Py_DECREF(t);
@@ -6443,6 +7604,45 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                                                      ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpkt_RachReason,
                                                                 ValueName),
                                                      "(MI)Unknown");
+                    (void) _map_result_field_to_name(result_subpkt, "Group chosen",
+                                                     LteMacRachTrigger_RachReasonSubpkt_GroupChosen,
+                                                     ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpkt_GroupChosen,
+                                                                ValueName),
+                                                     "(MI)Unknown");
+                    PyObject *temp=_search_result(result_subpkt,"Maching ID");
+                    long long tempLong=PyLong_AsLongLong(temp);
+                    int iPreamble=(int)tempLong&0xff00000000000000;
+                    PyObject *old_object1 = _replace_result_int(result_subpkt,
+                                                                   "Preamble", iPreamble);
+                    Py_DECREF(old_object1);
+                    char arr[6];
+                    int wei=56;
+                    for(int i=5;i>=0;i--){
+                        long long templong2=tempLong<<wei;
+                        arr[i]=(char)(templong2>>56);
+                        wei-=8;
+                    }
+                    
+                    std::string MachingId;
+                    char hex[10]={};
+                    for(int i=5;i>0;i--){
+                        sprintf(hex,"%02x",arr[i]&0xff);
+                        MachingId+="0x";
+                        MachingId+=hex;
+                        MachingId+=",";
+                    }
+                    sprintf(hex,"%02x",arr[0]&0xff);
+                    MachingId+="0x";
+                    MachingId+=hex;
+                    
+                    PyObject *pystr1= Py_BuildValue("s", MachingId.c_str());
+                    PyObject *old_object2 = _replace_result(result_subpkt,
+                                                           "Maching ID", pystr1);
+                    Py_DECREF(old_object2);
+                    Py_DECREF(pystr1);
+
+                    Py_DECREF(temp);
+
                     std::string strRachContention = "Contention Based RACH procedure";
                     PyObject *pystr = Py_BuildValue("s", strRachContention.c_str());
                     PyObject *old_object = _replace_result(result_subpkt,
@@ -6701,6 +7901,25 @@ static int _decode_lte_mac_rach_attempt_subpkt(const char *b, int offset,
                     offset += _decode_by_fmt(LteMacRachAttempt_Subpkt_Msg1_v4,
                                              ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg1_v4, Fmt),
                                              b, offset, length, result_subpkt_msg1);
+                    
+                    int Preamble_index_mask = _search_result_uint(result_subpkt_msg1, "Preamble index mask");
+                    // printf("%s", Preamble_index_mask);
+                    if (Preamble_index_mask == 0xff) {
+                        (void) _map_result_field_to_name(result_subpkt_msg1,
+                                                            "Preamble index mask",
+                                                            LteMacRachAttempt_Subpkt_Preamble_index_mask,
+                                                            ARRAY_SIZE(
+                                                                    LteMacRachAttempt_Subpkt_Preamble_index_mask,
+                                                                    ValueName),
+                                                            "MI Unknown");
+                    }
+
+                    (void) _map_result_field_to_name(result_subpkt_msg1,
+                                                     "CE Level",
+                                                     LteMacRachAttempt_Subpkt_CELEVEL,
+                                                     ARRAY_SIZE(LteMacRachAttempt_Subpkt_CELEVEL,
+                                                                ValueName),
+                                                     "(MI)Unknown");
                     PyObject *t1 = Py_BuildValue("(sOs)", "Msg1",
                                                  result_subpkt_msg1, "dict");
                     PyList_Append(result_subpkt, t1);
@@ -6731,6 +7950,33 @@ static int _decode_lte_mac_rach_attempt_subpkt(const char *b, int offset,
                         offset += _decode_by_fmt(LteMacRachAttempt_Subpkt_Msg3_v4,
                                                  ARRAY_SIZE(LteMacRachAttempt_Subpkt_Msg3_v4, Fmt),
                                                  b, offset, length, result_subpkt_msg3);
+                        
+                        int iGrantRaw= _search_result_int(result_subpkt_msg3,
+                                                             "Grant Raw");
+                        char arr[4];
+                        int wei=24;
+                        for(int i=2;i>=0;i--){
+                            int templong2=iGrantRaw<<wei;
+                            arr[i]=(char)(templong2>>24);
+                            wei-=8;
+                        }
+                        std::string GrantRaw;
+                        char hex[10]={};
+                        GrantRaw+="0x";
+                        sprintf(hex,"%02x",arr[1]&0xf);
+                        GrantRaw+=hex;
+                        sprintf(hex,"%02x",arr[0]&0xff);
+                        GrantRaw+=hex;
+                        sprintf(hex,"%02x",arr[3]&0xff);
+                        GrantRaw+=hex;
+
+                        PyObject *pystr1= Py_BuildValue("s", GrantRaw.c_str());
+                        PyObject *old_object2 = _replace_result(result_subpkt_msg3,
+                                                            "Grant Raw", pystr1);
+                        Py_DECREF(old_object2);
+                        Py_DECREF(pystr1);
+
+
                         int iGrantBytes = _search_result_int(result_subpkt_msg3,
                                                              "Grant");
                         PyObject *result_MACPDUs = PyList_New(0);
@@ -10106,6 +11352,19 @@ static int _decode_lte_pdcch_phich_indication_report_payload(const char *b,
 
 // ----------------------------------------------------------------------------
 
+// Convert to NR RRC Reconfiguration Complete message to what is accepted on
+// UL-DCCH
+static char *
+_nr_rrc_reconf_complete_to_ul_dcch(const char *b, int pdu_length) {
+    char *ul_dcch_msg = new char[pdu_length + 1];
+    ul_dcch_msg[0] = 0x08 | (((unsigned char) b[0]) >> 5);
+    for (int i = 1; i < pdu_length; i++) {
+        ul_dcch_msg[i] = (b[i - 1] << 3) | (((unsigned char) b[i]) >> 5);
+    }
+    ul_dcch_msg[pdu_length] = (b[pdu_length - 1] << 3);
+
+    return ul_dcch_msg;
+}
 
 static int
 _decode_nr_rrc_ota(const char *b, int offset, size_t length,
@@ -10129,14 +11388,23 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
         } else {
             std::string type_str = "raw_msg/";
             type_str += type_name;
-            PyObject *t = Py_BuildValue("(sy#s)",
-                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyObject *t;
+            if (pdu_number == 0x0a) {
+                // RRC Reconfiguration Complete needs special processing
+                char *ul_dcch_msg = _nr_rrc_reconf_complete_to_ul_dcch(b + offset, pdu_length);
+                t = Py_BuildValue("(sy#s)",
+                                  "Msg", ul_dcch_msg, pdu_length + 1, type_str.c_str());
+                delete ul_dcch_msg;
+            } else {
+                t = Py_BuildValue("(sy#s)",
+                                  "Msg", b + offset, pdu_length, type_str.c_str());
+            }
             PyList_Append(result, t);
             Py_DECREF(t);
             return (offset - start) + pdu_length;
         }
 
-    } else if (pkt_ver = 7) {
+    } else if (pkt_ver == 7) {
         //pkt_ver==8 (Samsung)
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
@@ -10150,13 +11418,25 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
         } else {
             std::string type_str = "raw_msg/";
             type_str += type_name;
-            PyObject *t = Py_BuildValue("(sy#s)",
-                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyObject *t;
+            if (pdu_number == 0x0a) {
+                // RRC Reconfiguration Complete needs special processing
+                char *ul_dcch_msg = _nr_rrc_reconf_complete_to_ul_dcch(b + offset, pdu_length);
+                t = Py_BuildValue("(sy#s)",
+                                  "Msg", ul_dcch_msg, pdu_length + 1, type_str.c_str());
+                delete ul_dcch_msg;
+            } else {
+                t = Py_BuildValue("(sy#s)",
+                                  "Msg", b + offset, pdu_length, type_str.c_str());
+            }
             PyList_Append(result, t);
             Py_DECREF(t);
             return (offset - start) + pdu_length;
         }
     }
+
+    printf("(MI)Unknown 5GNR RRC OTA Message version: 0x%x\n", pkt_ver);
+    return 0;
 }
 
 
@@ -10681,6 +11961,38 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                                      b, offset, length, result);
             offset += _decode_lte_phy_cdrx_events_info_payload(b, offset, length, result);
             break;
+        // msgs for LTE NB1 SW
+        case LTE_NB1_ML1_GM_DCI_Info:
+            offset += _decode_by_fmt(LteNb1Ml1GmDciInfoFmt,
+                                     ARRAY_SIZE(LteNb1Ml1GmDciInfoFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_gm_dci_info_payload(b, offset, length, result);
+            break;
+        case LTE_NB1_ML1_GM_TX_Report:
+            offset += _decode_by_fmt(LteNb1Ml1GmTxReport,
+                                     ARRAY_SIZE(LteNb1Ml1GmTxReport, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_gm_tx_report_payload(b, offset, length, result);
+            break;
+        case LTE_NB1_ML1_Cell_Resel:
+            offset += _decode_by_fmt(LteNb1Ml1CellReselFmt,
+                                     ARRAY_SIZE(LteNb1Ml1CellReselFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_cell_resel_payload(b, offset, length, result);
+            break;
+        case LTE_NB1_ML1_GM_PDSCH_STAT_Ind:
+            offset += _decode_by_fmt(LteNb1Ml1GmPdschStatIndFmt,
+                                     ARRAY_SIZE(LteNb1Ml1GmPdschStatIndFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_gm_pdsch_stat_ind_payload(b, offset, length, result);
+            break;
+        case LTE_NB1_ML1_Sum_Sys_Info:
+            offset += _decode_by_fmt(LteNb1Ml1SumSysInfoFmt,
+                                     ARRAY_SIZE(LteNb1Ml1SumSysInfoFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_sum_sys_info_payload(b, offset, length, result);
+            break;
+
         case WCDMA_RRC_States:
             offset += _decode_wcdma_rrc_states_payload(b, offset, length, result);
             break;
@@ -10800,11 +12112,34 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
 
 }
 
+
+static clock_t prev = 0;
 PyObject *
 decode_log_packet(const char *b, size_t length, bool skip_decoding) {
 
     if (PyDateTimeAPI == NULL)  // import datetime module
         PyDateTime_IMPORT;
+
+    
+    if(skip_decoding){
+	    if(prev==0){
+		prev = clock();
+	    }else {
+		clock_t now = clock();
+		double diff = ((double) (now - prev)) / CLOCKS_PER_SEC;
+
+		if(diff >= 1){
+			prev = now;
+		}else if (diff > target_sampling_rate){
+			PyObject *result = Py_None;
+			return result;
+		}
+	        else{
+			//pass
+		}	
+	    }
+    }
+
 
     PyObject *result = NULL;
     int offset = 0;
@@ -10827,6 +12162,7 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
             ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
             "Unsupported");
 
+    /*
     if (skip_decoding) {    // skip further decoding
 
         PyObject *t = Py_BuildValue("(sy#s)",
@@ -10836,6 +12172,7 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
         Py_DECREF(t);
         return result;
     }
+    */
 
     on_demand_decode(b + offset, length - offset, type_id, result);
 

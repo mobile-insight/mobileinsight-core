@@ -1,0 +1,68 @@
+/*
+ * LTE NB1 ML1 Sum Sys Info
+ */
+
+#include "consts.h"
+#include "log_packet.h"
+#include "log_packet_helper.h"
+
+const Fmt LteNb1Ml1SumSysInfoFmt[] = {
+    {UINT, "Version", 1},
+};
+
+const Fmt LteNb1Ml1SumSysInfoFmt_v1[] = {
+    {UINT, "OP Mode", 8},          // 2 bits
+    {PLACEHOLDER, "Meas BW",0},    // 4 bits
+    {PLACEHOLDER, "Cell Id", 0},          // 10 bits
+    {PLACEHOLDER, "Frequency", 0},          // 32 bits
+    {PLACEHOLDER, "Inst Meas RSRP", 0},     // 11 bits
+    {PLACEHOLDER, "Srxlev", 0},          // 21 bits
+};
+
+
+static int _decode_lte_nb1_ml1_sum_sys_info_payload (const char *b,
+        int offset, size_t length, PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Version");
+
+    PyObject *old_object;
+    PyObject *pyfloat;
+    int temp;
+
+    switch (pkt_ver) {
+        case 1:
+        {
+        	offset += _decode_by_fmt(LteNb1Ml1SumSysInfoFmt_v1,
+                    ARRAY_SIZE(LteNb1Ml1SumSysInfoFmt_v1, Fmt),
+                    b, offset, length, result);
+            int num_record = _search_result_int(result, "Num of Records");
+
+            unsigned int iNonDecodeHSFN = _search_result_uint(result_record_item, "NPDCCH Timing HSFN");
+            int iHSFN = iNonDecodeHSFN & 3;          // 2 bits
+            int iSFN = (iNonDecodeHSFN >> 2) & 15;   // 4 bits
+            int iSFN = (iNonDecodeHSFN >> 6) & 1023;   // 10 bits
+            int iSFN = (iNonDecodeHSFN >> 16) & 0xffffffff;   // 32 bits
+            int iSFN = (iNonDecodeHSFN >> 48) & 0x7ff;   // 11 bits
+            int iSFN = (iNonDecodeHSFN >> 10) & 0x1fffff;   // 21 bits
+
+            old_object = _replace_result_int(result_record_item, "SC Index",
+                    iSC_I);
+            Py_DECREF(old_object);
+
+            temp = _search_result_int(result_cell_item,
+                    "Inst Measured RSRP");
+            float RSRP = float(temp & 4095);
+            RSRP = RSRP * 0.0625 - 180.0;
+            pyfloat = Py_BuildValue("f", RSRP);
+            old_object = _replace_result(result_cell_item,
+                    "Inst Measured RSRP", pyfloat);
+            Py_DECREF(old_object);
+            Py_DECREF(pyfloat);
+
+            return offset - start;
+        }
+        default:
+            printf("(MI)Unknown LTE NB1 ML1 GM DCI Info version: 0x%x\n", pkt_ver);
+            return 0;
+    }
+}

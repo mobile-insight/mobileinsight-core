@@ -1,0 +1,25 @@
+diff --git a/epan/dissectors/asn1/nr-rrc/nr-rrc.cnf b/epan/dissectors/asn1/nr-rrc/nr-rrc.cnf
+index fd478d8969..b3b89250e0 100644
+--- a/epan/dissectors/asn1/nr-rrc/nr-rrc.cnf
++++ b/epan/dissectors/asn1/nr-rrc/nr-rrc.cnf
+@@ -145,7 +145,7 @@ PH-TypeListMCG
+ PH-TypeListSCG
+ RA-ReportList-r16
+ RACH-ConfigCommon
+-RadioBearerConfig
++RadioBearerConfig                  @radio_bearer_conf
+ ReferenceTime-r16
+ RRCReconfiguration                 @rrc_reconf
+ RRCReconfigurationComplete
+diff --git a/epan/dissectors/packet-nr-rrc.c b/epan/dissectors/packet-nr-rrc.c
+index 75977474c0..cfa8602711 100644
+--- a/epan/dissectors/packet-nr-rrc.c
++++ b/epan/dissectors/packet-nr-rrc.c
+@@ -112214,6 +112214,7 @@ proto_register_nr_rrc(void) {
+   register_dissector("nr-rrc.ue_nr_cap", dissect_nr_rrc_UE_NR_Capability_PDU, proto_nr_rrc);
+   register_dissector("nr-rrc.sbcch.sl.bch", dissect_SBCCH_SL_BCH_Message_PDU, proto_nr_rrc);
+   register_dissector("nr-rrc.scch", dissect_SCCH_Message_PDU, proto_nr_rrc);
++  register_dissector("nr-rrc.radio_bearer_conf", dissect_nr_rrc_RadioBearerConfig_PDU, proto_nr_rrc);
+ 
+ 
+ /*--- End of included file: packet-nr-rrc-dis-reg.c ---*/
