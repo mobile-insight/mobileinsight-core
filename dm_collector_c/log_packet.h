@@ -4223,6 +4223,11 @@ const ValueName ValueNameNB1_DCI_RNTIType[] = {
 //         {4, "TC-RNTI"},
 // };
 
+const ValueName ValueNameNB1_Sum_Sys_Info_MeasBWType[] = {
+        // 4 bits
+        {0, "mbw6 RBs"},
+};
+
 const ValueName ValueNameNPUSCHFormat_1_TX_Type[] = {
         // 1 bits
         {0,  ""},

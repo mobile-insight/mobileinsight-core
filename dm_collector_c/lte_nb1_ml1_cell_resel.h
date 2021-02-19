@@ -33,7 +33,7 @@ static int _decode_lte_nb1_ml1_cell_resel_payload (const char *b,
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 
-    PyObject *old_object;
+    // PyObject *old_object;
 
     switch (pkt_ver) {
         case 4:

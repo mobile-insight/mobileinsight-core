@@ -459,15 +459,15 @@ _decode_by_fmt(const Fmt fmt[], int n_fmt,
 }
 
 //printf PyObject
-static void reprint(PyObject *obj) {
-    PyObject* repr = PyObject_Repr(obj);
-    PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
-    const char *bytes = PyBytes_AS_STRING(str);
+// static void reprint(PyObject *obj) {
+//     PyObject* repr = PyObject_Repr(obj);
+//     PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
+//     const char *bytes = PyBytes_AS_STRING(str);
 
-    printf("REPR: %s\n", bytes);
+//     printf("REPR: %s\n", bytes);
 
-    Py_XDECREF(repr);
-    Py_XDECREF(str);
-}
+//     Py_XDECREF(repr);
+//     Py_XDECREF(str);
+// }
 
 #endif // __DM_COLLECTOR_C_LOG_PACKET_HELPER_H__
