@@ -54,6 +54,16 @@ static int _decode_lte_nb1_ml1_gm_tx_report_payload (const char *b,
                     b, offset, length, result);
             int num_record = _search_result_int(result, "Num of Records");
 
+            unsigned int iNonDecodeSubcarrierSpace = _search_result_uint(result, "Subcarrier Space");
+            int iSubcarrierSpace = (iNonDecodeSubcarrierSpace >> 5) & 7;
+            old_object = _replace_result_int(result, "Subcarrier Space",
+                        iSubcarrierSpace);
+                Py_DECREF(old_object);
+            (void) _map_result_field_to_name(result, "Subcarrier Space",
+                        ValueNameNB1_GM_TX_Report_Subcarrier_Space_Type,
+                        ARRAY_SIZE(ValueNameNB1_GM_TX_Report_Subcarrier_Space_Type, ValueName),
+                        "(MI)Unknown");
+
             PyObject *result_record = PyList_New(0);
             for (int i = 0; i < num_record; i++) {
                 PyObject *result_record_item = PyList_New(0);

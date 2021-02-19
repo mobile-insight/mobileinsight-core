@@ -68,8 +68,8 @@ static int _decode_lte_nb1_ml1_gm_pdsch_stat_ind_payload (const char *b,
                         iRNTI_T);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(result_record_item, "RNTI Type",
-                        ValueNameRNTIType,
-                        ARRAY_SIZE(ValueNameRNTIType, ValueName),
+                        ValueNameNB1_PDSCH_RNTIType,
+                        ARRAY_SIZE(ValueNameNB1_PDSCH_RNTIType, ValueName),
                         "(MI)Unknown");
                 old_object = _replace_result_int(result_record_item, "CRC",
                         iCRC);

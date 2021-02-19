@@ -33,7 +33,7 @@ static int _decode_lte_nb1_ml1_cell_resel_payload (const char *b,
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
 
-    // PyObject *old_object;
+    PyObject *old_object;
 
     switch (pkt_ver) {
         case 4:
@@ -56,6 +56,12 @@ static int _decode_lte_nb1_ml1_cell_resel_payload (const char *b,
                     offset += _decode_by_fmt(LteNb1Ml1CellReselFmt_CellInfo_v4,
                             ARRAY_SIZE(LteNb1Ml1CellReselFmt_CellInfo_v4, Fmt),
                             b, offset, length, result_cells_item);
+
+                    int temp = _search_result_int(result_cells_item, "RANK");
+                    int iRANK = ((temp & 0xff) << 24) >> 24;
+                    old_object = _replace_result_int(result_cells_item, "RANK",
+                        iRANK);
+                    Py_DECREF(old_object);
 
                     PyObject *t2 = Py_BuildValue("(sOs)", "Ignored",
                             result_cells_item, "dict");

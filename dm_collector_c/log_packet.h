@@ -4216,16 +4216,22 @@ const ValueName ValueNameNB1_DCI_RNTIType[] = {
         {0, "C-RNTI"},
         {2, "TC-RNTI"},
 };
-// const ValueName ValueNameNB1_PDSCH_RNTIType[] = {
-//         // 3 bits
-//         {0, "C-RNTI"},
-//         {3, "RA-RNTI"},
-//         {4, "TC-RNTI"},
-// };
+
+const ValueName ValueNameNB1_PDSCH_RNTIType[] = {
+        // 3 bits
+        {1, "C-RNTI"},       
+        {3, "RA-RNTI"},
+        {4, "TC-RNTI"},
+};
 
 const ValueName ValueNameNB1_Sum_Sys_Info_MeasBWType[] = {
         // 4 bits
         {0, "mbw6 RBs"},
+};
+
+const ValueName ValueNameNB1_GM_TX_Report_Subcarrier_Space_Type[] = {
+        // 3 bits
+        {4, "15 kHz"},
 };
 
 const ValueName ValueNameNPUSCHFormat_1_TX_Type[] = {
