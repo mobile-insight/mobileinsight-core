@@ -36,7 +36,7 @@ static int _decode_lte_nb1_ml1_cell_resel_payload (const char *b,
     PyObject *old_object;
 
     switch (pkt_ver) {
-        case 3:
+        case 4:
         {
         	offset += _decode_by_fmt(LteNb1Ml1CellReselFmt_v4,
                     ARRAY_SIZE(LteNb1Ml1CellReselFmt_v4, Fmt),
@@ -48,34 +48,27 @@ static int _decode_lte_nb1_ml1_cell_resel_payload (const char *b,
                 offset += _decode_by_fmt(LteNb1Ml1CellReselFmt_LayerInfo_v4,
                     ARRAY_SIZE(LteNb1Ml1CellReselFmt_LayerInfo_v4, Fmt),
                     b, offset, length, result);
+                int num_cells = _search_result_int(result, "Num Cells");
 
                 PyObject *result_cells = PyList_New(0);
-                for (int j = 0; j < 4; j++) {
+                for (int j = 0; j < num_cells; j++) {
                     PyObject *result_cells_item = PyList_New(0);
                     offset += _decode_by_fmt(LteNb1Ml1CellReselFmt_CellInfo_v4,
                             ARRAY_SIZE(LteNb1Ml1CellReselFmt_CellInfo_v4, Fmt),
                             b, offset, length, result_cells_item);
 
-                    unsigned int iNonDecodeHSFN = _search_result_uint(result_cells_item, "NPDCCH Timing HSFN");
-                    int iHSFN = iNonDecodeHSFN & 1023;          // 10 bits
-                    int iSFN = (iNonDecodeHSFN >> 10) & 1023;   // 10 bits
-
-                    old_object = _replace_result_int(result_cells_item, "SC Index",
-                            iSC_I);
-                    Py_DECREF(old_object);
-
-                    PyObject *t1 = Py_BuildValue("(sOs)", "Ignored",
+                    PyObject *t2 = Py_BuildValue("(sOs)", "Ignored",
                             result_cells_item, "dict");
-                    PyList_Append(result_cells, t1);
-                    Py_DECREF(t1);
+                    PyList_Append(result_cells, t2);
+                    Py_DECREF(t2);
                     Py_DECREF(result_cells_item);
 
                 }
                 PyObject *t1 = Py_BuildValue("(sOs)", "cells",
-                        result_layers, "dict");
+                        result_cells, "dict");
                 PyList_Append(result_layers, t1);
                 Py_DECREF(t1);
-                Py_DECREF(result_layers_item);
+                Py_DECREF(result_cells);
             }
             PyObject *t = Py_BuildValue("(sOs)", "layers",
                     result_layers, "list");
@@ -85,7 +78,7 @@ static int _decode_lte_nb1_ml1_cell_resel_payload (const char *b,
             return offset - start;
         }
         default:
-            printf("(MI)Unknown LTE NB1 ML1 GM DCI Info version: 0x%x\n", pkt_ver);
+            printf("(MI)Unknown LTE NB1 ML1 Cell Resel Info version: 0x%x\n", pkt_ver);
             return 0;
     }
 }

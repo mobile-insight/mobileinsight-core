@@ -7,15 +7,16 @@
 #include "log_packet_helper.h"
 
 const Fmt LteNb1Ml1SumSysInfoFmt[] = {
-    {UINT, "Version", 1},
+    
 };
 
 const Fmt LteNb1Ml1SumSysInfoFmt_v1[] = {
-    {UINT, "OP Mode", 8},          // 2 bits
+    {UINT, "Version", 1},
+    {UINT, "OP Mode", 3},          // 2 bits
     {PLACEHOLDER, "Meas BW",0},    // 4 bits
-    {PLACEHOLDER, "Cell Id", 0},          // 10 bits
-    {PLACEHOLDER, "Frequency", 0},          // 32 bits
-    {PLACEHOLDER, "Inst Meas RSRP", 0},     // 11 bits
+    {PLACEHOLDER, "Cell Id", 0},          // 18 bits
+    {UINT, "Frequency", 4},          // 32 bits
+    {UINT, "Inst Meas RSRP", 4},     // 11 bits
     {PLACEHOLDER, "Srxlev", 0},          // 21 bits
 };
 
@@ -35,15 +36,11 @@ static int _decode_lte_nb1_ml1_sum_sys_info_payload (const char *b,
         	offset += _decode_by_fmt(LteNb1Ml1SumSysInfoFmt_v1,
                     ARRAY_SIZE(LteNb1Ml1SumSysInfoFmt_v1, Fmt),
                     b, offset, length, result);
-            int num_record = _search_result_int(result, "Num of Records");
 
-            unsigned int iNonDecodeHSFN = _search_result_uint(result_record_item, "NPDCCH Timing HSFN");
-            int iHSFN = iNonDecodeHSFN & 3;          // 2 bits
-            int iSFN = (iNonDecodeHSFN >> 2) & 15;   // 4 bits
-            int iSFN = (iNonDecodeHSFN >> 6) & 1023;   // 10 bits
-            int iSFN = (iNonDecodeHSFN >> 16) & 0xffffffff;   // 32 bits
-            int iSFN = (iNonDecodeHSFN >> 48) & 0x7ff;   // 11 bits
-            int iSFN = (iNonDecodeHSFN >> 10) & 0x1fffff;   // 21 bits
+            unsigned int iNonDecodeOP = _search_result_uint(result_record_item, "OP Mode");
+            int iOPMode = iNonDecodeOP & 3;          // 2 bits
+            int iMeasBW = (iNonDecodeOP >> 2) & 15;   // 4 bits
+            int iCellId = (iNonDecodeOP >> 6) & 1023;   // 18 bits
 
             old_object = _replace_result_int(result_record_item, "SC Index",
                     iSC_I);
@@ -62,7 +59,7 @@ static int _decode_lte_nb1_ml1_sum_sys_info_payload (const char *b,
             return offset - start;
         }
         default:
-            printf("(MI)Unknown LTE NB1 ML1 GM DCI Info version: 0x%x\n", pkt_ver);
+            printf("(MI)Unknown LTE NB1 ML1 SUM Sys Info version: 0x%x\n", pkt_ver);
             return 0;
     }
 }

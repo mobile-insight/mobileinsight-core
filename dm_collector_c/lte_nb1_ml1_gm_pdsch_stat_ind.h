@@ -37,7 +37,7 @@ static int _decode_lte_nb1_ml1_gm_pdsch_stat_ind_payload (const char *b,
     PyObject *old_object;
 
     switch (pkt_ver) {
-        case 3:
+        case 2:
         {
         	offset += _decode_by_fmt(LteNb1Ml1GmPdschStatIndFmt_v2,
                     ARRAY_SIZE(LteNb1Ml1GmPdschStatIndFmt_v2, Fmt),
@@ -125,7 +125,7 @@ static int _decode_lte_nb1_ml1_gm_pdsch_stat_ind_payload (const char *b,
             return offset - start;
         }
         default:
-            printf("(MI)Unknown LTE NB1 ML1 GM DCI Info version: 0x%x\n", pkt_ver);
+            printf("(MI)Unknown LTE NB1 ML1 GM PDSCH Stat Ind version: 0x%x\n", pkt_ver);
             return 0;
     }
 }

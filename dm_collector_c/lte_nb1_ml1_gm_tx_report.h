@@ -174,7 +174,7 @@ static int _decode_lte_nb1_ml1_gm_tx_report_payload (const char *b,
             return offset - start;
         }
         default:
-            printf("(MI)Unknown LTE NB1 ML1 GM DCI Info version: 0x%x\n", pkt_ver);
+            printf("(MI)Unknown LTE NB1 ML1 GM TX Report version: 0x%x\n", pkt_ver);
             return 0;
     }
 }
