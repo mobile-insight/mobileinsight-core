@@ -9,7 +9,7 @@ Offline analysis by replaying logs
 
 # Import MobileInsight modules
 from mobile_insight.monitor import OfflineReplayer
-from mobile_insight.analyzer import MsgLogger, NrRrcAnalyzer, LteRrcAnalyzer, WcdmaRrcAnalyzer, LteNasAnalyzer, UmtsNasAnalyzer, LteMacAnalyzer, LteMeasurementAnalyzer
+from mobile_insight.analyzer import MsgLogger, LteRrcAnalyzer, WcdmaRrcAnalyzer, LteNasAnalyzer, UmtsNasAnalyzer, LteMacAnalyzer, LteMeasurementAnalyzer
 
 if __name__ == "__main__":
 
@@ -21,7 +21,11 @@ if __name__ == "__main__":
     # src.enable_log("LTE_PHY_Serv_Cell_Measurement")
     # src.enable_log("5G_NR_RRC_OTA_Packet")
     # src.enable_log("LTE_RRC_OTA_Packet")
-    src.enable_log("LTE_NB1_ML1_GM_DCI_Info")
+    # src.enable_log("LTE_NB1_ML1_GM_DCI_Info")
+    # src.enable_log("LTE_NB1_ML1_GM_TX_Report")
+    # src.enable_log("LTE_NB1_ML1_Cell_Resel")
+    # src.enable_log("LTE_NB1_ML1_GM_PDSCH_STAT_Ind")
+    src.enable_log("LTE_NB1_ML1_Sum_Sys_Info")
 
     logger = MsgLogger()
     logger.set_decode_format(MsgLogger.XML)
@@ -30,11 +34,11 @@ if __name__ == "__main__":
     logger.set_source(src)
 
     # # Analyzers
-    nr_rrc_analyzer = NrRrcAnalyzer()
-    nr_rrc_analyzer.set_source(src)  # bind with the monitor
+    # nr_rrc_analyzer = NrRrcAnalyzer()
+    # nr_rrc_analyzer.set_source(src)  # bind with the monitor
 
-    lte_rrc_analyzer = LteRrcAnalyzer()
-    lte_rrc_analyzer.set_source(src)  # bind with the monitor
+    # lte_rrc_analyzer = LteRrcAnalyzer()
+    # lte_rrc_analyzer.set_source(src)  # bind with the monitor
 
     # wcdma_rrc_analyzer = WcdmaRrcAnalyzer()
     # wcdma_rrc_analyzer.set_source(src)  # bind with the monitor
