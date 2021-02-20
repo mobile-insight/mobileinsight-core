@@ -27,8 +27,6 @@ static int _decode_lte_nb1_ml1_sum_sys_info_payload (const char *b,
     int pkt_ver = _search_result_int(result, "Version");
 
     PyObject *old_object;
-    PyObject *pyfloat;
-
 
     switch (pkt_ver) {
         case 1:
