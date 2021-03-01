@@ -39,6 +39,7 @@
 #include "lte_nb1_ml1_cell_resel.h"
 #include "lte_nb1_ml1_gm_pdsch_stat_ind.h"
 #include "lte_nb1_ml1_sum_sys_info.h"
+#include "lte_nb1_ml1_search_pbch_search_decode.h"
 #include "lte_phy_bplmn_cell_confirm.h"
 #include "lte_phy_bplmn_cell_request.h"
 #include "lte_phy_cdrx_events_info.h"
@@ -11991,6 +11992,12 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                                      ARRAY_SIZE(LteNb1Ml1SumSysInfoFmt, Fmt),
                                      b, offset, length, result);
             offset += _decode_lte_nb1_ml1_sum_sys_info_payload(b, offset, length, result);
+            break;
+        case LTE_NB1_ML1_Search_PBCH_Decode:
+            offset += _decode_by_fmt(LteNb1Ml1SearchPbchDecodeFmt,
+                                     ARRAY_SIZE(LteNb1Ml1SearchPbchDecodeFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_search_pbch_decode_payload(b, offset, length, result);
             break;
 
         case WCDMA_RRC_States:
