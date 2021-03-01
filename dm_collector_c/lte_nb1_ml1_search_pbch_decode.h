@@ -1,5 +1,5 @@
 /*
- * LTE NB1 ML1 Search PBCh Decode
+ * LTE NB1 ML1 Search PBCH Decode
  */
 
 #include "consts.h"

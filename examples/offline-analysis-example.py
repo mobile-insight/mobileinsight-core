@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     # Initialize a monitor
     src = OfflineReplayer()
-    src.set_input_path("/home/kevin/mobileinsight-6.0-ref/IoT/Traces/twilio_nb_open_3.qmdl")
+    src.set_input_path("/home/kevin/mobileinsight-6.0-ref/IoT/Traces/attemptn-2.qmdl")
     # src.enable_log_all()
 
     # src.enable_log("LTE_PHY_Serv_Cell_Measurement")
@@ -25,7 +25,8 @@ if __name__ == "__main__":
     # src.enable_log("LTE_NB1_ML1_GM_TX_Report")
     # src.enable_log("LTE_NB1_ML1_Cell_Resel")
     # src.enable_log("LTE_NB1_ML1_GM_PDSCH_STAT_Ind")
-    src.enable_log("LTE_NB1_ML1_Sum_Sys_Info")
+    # src.enable_log("LTE_NB1_ML1_Sum_Sys_Info")
+    src.enable_log("LTE_NB1_ML1_Search_PBCH_Decode")
 
     logger = MsgLogger()
     logger.set_decode_format(MsgLogger.XML)

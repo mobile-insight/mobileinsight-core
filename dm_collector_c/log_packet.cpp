@@ -39,7 +39,7 @@
 #include "lte_nb1_ml1_cell_resel.h"
 #include "lte_nb1_ml1_gm_pdsch_stat_ind.h"
 #include "lte_nb1_ml1_sum_sys_info.h"
-#include "lte_nb1_ml1_search_pbch_search_decode.h"
+#include "lte_nb1_ml1_search_pbch_decode.h"
 #include "lte_phy_bplmn_cell_confirm.h"
 #include "lte_phy_bplmn_cell_request.h"
 #include "lte_phy_cdrx_events_info.h"
