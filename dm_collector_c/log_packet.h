@@ -357,14 +357,28 @@ const Fmt LteRrcOtaPacketFmt_v24[] = {
         {UINT, "Msg Length",                  2}
 };
 
+// const Fmt LteRrcOtaPacketFmt_v26[] = {
+//         {BYTE_STREAM, "RRC Version Number",   1}, 
+//         {UINT, "NR RRC Release Number",       1},
+//         {BYTE_STREAM, "NR RRC Version Number",1},
+//         {UINT, "Radio Bearer ID",             1},
+//         {UINT, "Physical Cell ID",            2},    //Cell ID
+//         {UINT, "Freq",                        2},    //frequency
+//         {UINT, "SysFrameNum/SubFrameNum",     4},    //System/subsystem frame number 
+//         {UINT, "PDU Number",                  1},    //PDU number
+//         {UINT, "SIB Mask in SI",              1},
+//         {SKIP, NULL,                          3},
+//         {UINT, "Msg Length",                  2}
+// };
+
 const Fmt LteRrcOtaPacketFmt_v26[] = {
         {BYTE_STREAM, "RRC Version Number",   1}, 
         {UINT, "NR RRC Release Number",       1},
         {BYTE_STREAM, "NR RRC Version Number",1},
         {UINT, "Radio Bearer ID",             1},
         {UINT, "Physical Cell ID",            2},    //Cell ID
-        {UINT, "Freq",                        2},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum",     4},    //System/subsystem frame number 
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number 
         {UINT, "PDU Number",                  1},    //PDU number
         {UINT, "SIB Mask in SI",              1},
         {SKIP, NULL,                          3},
@@ -456,6 +470,25 @@ const ValueName NrRrcOtaPduType_v8[] = {
         {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
         {0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
         {0x1a, "nr-rrc.radio_bearer_conf"}, // Radio Bearer Config
+        // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
+        // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
+};
+
+const ValueName NrRrcOtaPduType_v9[] = {
+
+        // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
+        // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
+        // {0x00, "nr-rrc.bcch.dl.sch"},
+        // {0x00, "nr-rrc.dl.ccch"},
+        // {0x00, "nr-rrc.dl.dcch"},
+        // {0x00, "nr-rrc.pcch"},
+        // {0x00, "nr-rrc.ul.ccch"},
+        // {0x00, "nr-rrc.ul.ccch1"},
+        {0x01, "nr-rrc.bcch.bch"},  // MIB
+        {0x0a, "nr-rrc.ul.dcch"},   // RRC Reconfiguration Complete
+        {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
+        {0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
+        // {0x1a, "nr-rrc.radio_bearer_conf"}, // Radio Bearer Config
         // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
@@ -4470,6 +4503,7 @@ const ValueName ValueNameCellIndex[] = {
         {0, "PCell"},
         {1, "1_SCell"},
         {2, "2_SCell"},
+        {3, "3_SCell"},
 };
 
 const ValueName ValueNameBandClassGSM[] = {

@@ -11373,7 +11373,6 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
 
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
-
         const char *type_name = search_name(NrRrcOtaPduType_v8,
                                             ARRAY_SIZE(NrRrcOtaPduType_v8, ValueName),
                                             pdu_number);
@@ -11406,6 +11405,35 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
         int pdu_length = _search_result_int(result, "Msg Length");
         const char *type_name = search_name(NrRrcOtaPduType_v7,
                                             ARRAY_SIZE(NrRrcOtaPduType_v7, ValueName),
+                                            pdu_number);
+
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown 5G NR RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t;
+            if (pdu_number == 0x0a) {
+                // RRC Reconfiguration Complete needs special processing
+                char *ul_dcch_msg = _nr_rrc_reconf_complete_to_ul_dcch(b + offset, pdu_length);
+                t = Py_BuildValue("(sy#s)",
+                                  "Msg", ul_dcch_msg, pdu_length + 1, type_str.c_str());
+                delete ul_dcch_msg;
+            } else {
+                t = Py_BuildValue("(sy#s)",
+                                  "Msg", b + offset, pdu_length, type_str.c_str());
+            }
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
+    } else if (pkt_ver == 9) {
+        // pixel5
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+        const char *type_name = search_name(NrRrcOtaPduType_v9,
+                                            ARRAY_SIZE(NrRrcOtaPduType_v9, ValueName),
                                             pdu_number);
 
         if (type_name == NULL) {    // not found

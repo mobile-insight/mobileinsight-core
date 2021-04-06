@@ -145,8 +145,8 @@ class WSDissector:
         if msg_type not in cls.SUPPORTED_TYPES:
             print(("MI(Unknown) Unsupported message for ws_dissector:", msg_type))
             return None
-        if len(b) > 3000:
-            print(("MI(Ignore) Length of message is too large for ws_dissector:", len(b), "bytes"))
+        if len(b) > 2800:
+            print(("MI(Ignore) Length of message is too large for ws_dissector:", msg_type, len(b), "bytes"))
             return None
 
         input_data = struct.pack(
