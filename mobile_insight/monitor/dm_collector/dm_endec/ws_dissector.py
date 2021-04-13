@@ -146,7 +146,7 @@ class WSDissector:
             print(("MI(Unknown) Unsupported message for ws_dissector:", msg_type))
             return None
         # print("[MI debug] Length of message:", msg_type, len(b))
-        if len(b) > 2800:
+        if len(b) > 2600:
             print(("MI(Ignore) Length of message is too large for ws_dissector:", msg_type, len(b), "bytes"))
             return None
 
