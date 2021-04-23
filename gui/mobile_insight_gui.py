@@ -235,7 +235,7 @@ class WindowClass(wx.Frame):
         leftbox = wx.BoxSizer(wx.VERTICAL)
         self.status_text = wx.StaticText(
             leftPanel,
-            label="Welcome to MobileInsight 5.0!\n\nMobileInsight is a Python 3 package for mobile network monitoring and analysis on the end device.",
+            label="Welcome to MobileInsight 6.0 beta!\n\nMobileInsight is a Python 3 package for mobile network monitoring and analysis on the end device.",
             style=wx.ALIGN_LEFT)
         self.details_text = wx.TextCtrl(
             leftPanel, style=wx.ALIGN_LEFT | wx.TE_MULTILINE)
