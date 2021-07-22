@@ -20,7 +20,7 @@ echo "Upgrading MobileInsight..."
 yes | ./uninstall.sh
 
 # Wireshark version to install
-ws_ver=3.2.7
+ws_ver=3.4.7
 
 # Use local library path
 #TODO
@@ -44,7 +44,7 @@ fi
 
 echo "Configuring Wireshark sources for ws_dissector compilation..."
 cd ${WIRESHARK_SRC_PATH}
-cmake -DBUILD_wireshark=OFF . > /dev/null 2>&1
+cmake --disable-wireshark . > /dev/null 2>&1
 if [ $? != 0 ]; then
     echo "Error when executing '${WIRESHARK_SRC_PATH}/cmake -DBUILD_wireshark .'"
     echo "You need to manually fix it before continuation. Exiting with status 3"
