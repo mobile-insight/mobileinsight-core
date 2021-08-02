@@ -120,7 +120,7 @@ setup(
     name='MobileInsight',
     version='6.0.0-beta',
     description='Mobile network monitoring and analysis',
-    author='UCLA Wireless Networking Group and Purdue Peng Group',
+    author='MobileInsight team',
     author_email='support@mobileinsight.net',
     url='http://www.mobileinsight.net',
     license='Apache License 2.0',
