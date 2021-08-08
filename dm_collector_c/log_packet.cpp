@@ -53,6 +53,13 @@
 #include "wcdma_rrc_states.h"
 #include "wcdma_search_cell_reselection_rank.h"
 
+#include "nr_ml1_search_meas_database_update.h"
+#include "nr_mac_ul_tb_stats.h"
+#include "nr_ml1_serving_cell_beam_mngt.h"
+#include "nr_mac_pdsch_stats.h"
+#include "nr_mac_ul_physical_channel_schedule_report.h"
+#include "nr_l2_ul_tb.h"
+
 
 // #define SSTR(x) static_cast< std::ostringstream & >( \
 //         ( std::ostringstream() << std::dec << x ) ).str()
@@ -11558,6 +11565,61 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
 {
     int offset = 0;
     switch (type_id) {
+
+        case NR_L2_UL_TB:
+            offset += _decode_by_fmt(NrL2UlTbFmt,
+                                     ARRAY_SIZE(NrL2UlTbFmt, Fmt),
+                                     b, offset, length, result);
+
+            offset += _decode_nr_l2_ul_tb_subpkt(b, offset, length, result);
+
+            break;
+        
+        case NR_MAC_UL_Physical_Channel_Schedule_Report:
+            offset += _decode_by_fmt(NrMacVersion_Fmt,
+                                     ARRAY_SIZE(NrMacVersion_Fmt, Fmt),
+                                     b, offset, length, result);
+
+            offset += _decode_nr_mac_ul_physical_channel_schedule_report_subpkt(b, offset, length, result);
+
+            break;
+
+        case NR_MAC_PDSCH_Stats:
+            offset += _decode_by_fmt(NrMacPdschStats_Fmt,
+                                     ARRAY_SIZE(NrMacPdschStats_Fmt, Fmt),
+                                     b, offset, length, result);
+
+            offset += _decode_nr_mac_pdsch_stats_subpkt(b, offset, length, result);
+
+            break;
+
+        case NR_ML1_Serving_Cell_Beam_Management:
+            offset += _decode_by_fmt(NrMl1ServCellBeamMngt_Fmt,
+                                     ARRAY_SIZE(NrMl1ServCellBeamMngt_Fmt, Fmt),
+                                     b, offset, length, result);
+
+            offset += _decode_nr_ml1_serv_cell_beam_mngt_subpkt(b, offset, length, result);
+
+            break;
+
+
+        case NR_MAC_UL_TB_Stats:
+            offset += _decode_by_fmt(NrMacUlTbStats_Fmt,
+                                     ARRAY_SIZE(NrMacUlTbStats_Fmt, Fmt),
+                                     b, offset, length, result);
+
+            offset += _decode_nr_mac_ul_tb_stats_subpkt(b, offset, length, result);
+
+            break;
+
+        case NR_ML1_Searcher_Measurement_Database_Update_Ext:
+            offset += _decode_by_fmt(NrMl1SearchMeasDatabaseUpdate_Fmt,
+                                     ARRAY_SIZE(NrMl1SearchMeasDatabaseUpdate_Fmt, Fmt),
+                                     b, offset, length, result);
+
+            offset += _decode_nr_ml1_search_meas_subpkt(b, offset, length, result);
+
+            break;
         case CDMA_Paging_Channel_Message:
             // Not fully support.
             offset += _decode_by_fmt(CdmaPagingChannelMsg_Fmt,
