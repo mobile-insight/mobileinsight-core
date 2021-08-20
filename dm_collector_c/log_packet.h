@@ -18,6 +18,8 @@ enum FmtType {
     UINT_BIG_ENDIAN,    // Big endian uint
     BYTE_STREAM,    // A stream of bytes.
     BYTE_STREAM_LITTLE_ENDIAN,    // a stream of bytes in little endian
+    BIT_STREAM,    // A stream of bits.
+    BIT_STREAM_LITTLE_ENDIAN, // a stream of bits in little endian
     QCDM_TIMESTAMP,    // Timestamp in all messages. len = 8
     PLMN_MK1,    // in WCDMA Cell ID
     PLMN_MK2,    // in LTE NAS EMM State
