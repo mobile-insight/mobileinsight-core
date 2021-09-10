@@ -365,60 +365,62 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
             # serving cell and intra-frequency reselection info
             if field.get('name') == "lte-rrc.sib3_element":
+                
+                try:
+                    field_val = {}
 
-                field_val = {}
+                    # Default value setting
+                    # FIXME: set default to those in TS36.331
+                    field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
+                    field_val['lte-rrc.threshServingLow'] = None  # mandatory
+                    field_val['lte-rrc.s_NonIntraSearch'] = "inf"
+                    field_val['lte-rrc.q_Hyst'] = 0
+                    field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
+                    field_val['lte-rrc.p_Max'] = 23  # default value for UE category 3
+                    field_val['lte-rrc.s_IntraSearch'] = "inf"
+                    field_val['lte-rrc.t_ReselectionEUTRA'] = None
 
-                # Default value setting
-                # FIXME: set default to those in TS36.331
-                field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
-                field_val['lte-rrc.threshServingLow'] = None  # mandatory
-                field_val['lte-rrc.s_NonIntraSearch'] = "inf"
-                field_val['lte-rrc.q_Hyst'] = 0
-                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
-                field_val['lte-rrc.p_Max'] = 23  # default value for UE category 3
-                field_val['lte-rrc.s_IntraSearch'] = "inf"
-                field_val['lte-rrc.t_ReselectionEUTRA'] = None
+                    for val in field.iter('field'):
+                        field_val[val.get('name')] = val.get('show')
 
-                for val in field.iter('field'):
-                    field_val[val.get('name')] = val.get('show')
+                    cur_pair = (self.__status.id, self.__status.freq)
+                    if cur_pair not in self.__config:
+                        self.__config[cur_pair] = LteRrcConfig()
+                        self.__config[cur_pair].status = self.__status
 
-                cur_pair = (self.__status.id, self.__status.freq)
-                if cur_pair not in self.__config:
-                    self.__config[cur_pair] = LteRrcConfig()
-                    self.__config[cur_pair].status = self.__status
+                    self.__config[cur_pair].sib.serv_config = LteRrcSibServ(
+                        int(field_val['lte-rrc.cellReselectionPriority']),
+                        int(field_val['lte-rrc.threshServingLow']) * 2,
+                        float(field_val['lte-rrc.s_NonIntraSearch']) * 2,
+                        int(field_val['lte-rrc.q_Hyst']))
 
-                self.__config[cur_pair].sib.serv_config = LteRrcSibServ(
-                    int(field_val['lte-rrc.cellReselectionPriority']),
-                    int(field_val['lte-rrc.threshServingLow']) * 2,
-                    float(field_val['lte-rrc.s_NonIntraSearch']) * 2,
-                    int(field_val['lte-rrc.q_Hyst']))
+                    # Test profile
+                    if self.__status.inited():
+                        self.profile.update(
+                            "LteRrcProfile:" + str(self.__status.id) + "_" + str(self.__status.freq) + ".idle.serv_config",
+                            {'priority': field_val['lte-rrc.cellReselectionPriority'],
+                             'threshserv_low': str(int(field_val['lte-rrc.threshServingLow']) * 2),
+                             's_nonintrasearch': str(float(field_val['lte-rrc.s_NonIntraSearch']) * 2),
+                             'q_hyst': field_val['lte-rrc.q_Hyst']})
 
-                # Test profile
-                if self.__status.inited():
-                    self.profile.update(
-                        "LteRrcProfile:" + str(self.__status.id) + "_" + str(self.__status.freq) + ".idle.serv_config",
-                        {'priority': field_val['lte-rrc.cellReselectionPriority'],
-                         'threshserv_low': str(int(field_val['lte-rrc.threshServingLow']) * 2),
-                         's_nonintrasearch': str(float(field_val['lte-rrc.s_NonIntraSearch']) * 2),
-                         'q_hyst': field_val['lte-rrc.q_Hyst']})
+                    self.__config[cur_pair].sib.intra_freq_config = LteRrcSibIntraFreqConfig(
+                        int(field_val['lte-rrc.t_ReselectionEUTRA']),
+                        int(field_val['lte-rrc.utra_q_RxLevMin']) * 2,
+                        int(field_val['lte-rrc.p_Max']),
+                        float(field_val['lte-rrc.s_IntraSearch']) * 2)
 
-                self.__config[cur_pair].sib.intra_freq_config = LteRrcSibIntraFreqConfig(
-                    int(field_val['lte-rrc.t_ReselectionEUTRA']),
-                    int(field_val['lte-rrc.utra_q_RxLevMin']) * 2,
-                    int(field_val['lte-rrc.p_Max']),
-                    float(field_val['lte-rrc.s_IntraSearch']) * 2)
-
-                # Test profile
-                if self.__status.inited():
-                    self.profile.update("LteRrcProfile:" + str(self.__status.id) + "_" + str(
-                        self.__status.freq) + ".idle.intra_freq_config",
-                                        {'tReselection': field_val['lte-rrc.t_ReselectionEUTRA'],
-                                         'q_RxLevMin': str(int(field_val['lte-rrc.utra_q_RxLevMin']) * 2),
-                                         'p_Max': field_val['lte-rrc.p_Max'],
-                                         's_IntraSearch': str(float(field_val['lte-rrc.s_IntraSearch']) * 2)})
-                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
-
+                    # Test profile
+                    if self.__status.inited():
+                        self.profile.update("LteRrcProfile:" + str(self.__status.id) + "_" + str(
+                            self.__status.freq) + ".idle.intra_freq_config",
+                                            {'tReselection': field_val['lte-rrc.t_ReselectionEUTRA'],
+                                             'q_RxLevMin': str(int(field_val['lte-rrc.utra_q_RxLevMin']) * 2),
+                                             'p_Max': field_val['lte-rrc.p_Max'],
+                                             's_IntraSearch': str(float(field_val['lte-rrc.s_IntraSearch']) * 2)})
+                    self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                    # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                except:
+                    pass
             # inter-frequency (LTE)
             if field.get('name') == "lte-rrc.interFreqCarrierFreqList":
                 field_val = {}
