@@ -2684,8 +2684,8 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2[] = {
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v3[] = {
         {UINT,        "Rach reason",            1},
         {PLACEHOLDER, "RACH Contention",        0},
-        {UINT, "Maching ID",                    8},
-        {PLACEHOLDER,        "Preamble",        0},
+        {UINT, "Maching ID",                    6},
+        {UINT,        "Preamble",        0},
         {BYTE_STREAM, "Preamble RA mask",       1},
         {UINT,        "Msg3 size",              1},
         {UINT,        "CE Level",               1},
