@@ -7371,7 +7371,7 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Number of Subpackets");
-    printf("hello-2\n");
+    // printf("hello-2\n");
 
     switch (pkt_ver) {
         case 1: {
@@ -7388,7 +7388,7 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                                                     "Subpacket Version");
                 int subpkt_size = _search_result_int(result_subpkt,
                                                      "Subpacket Size");
-                printf("hello-1\n");
+                // printf("hello-1\n");
 
                 if (subpkt_id == 3 && subpkt_ver == 2) {
                     // RACH Config Subpacket
@@ -7857,7 +7857,7 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                 PyList_Append(result_allpkts, t);
                 Py_DECREF(t);
                 Py_DECREF(result_subpkt);
-                printf("hello6\n");
+                // printf("hello6\n");
                 offset += subpkt_size - (offset - start_subpkt);
             }
             PyObject *t = Py_BuildValue("(sOs)", "Subpackets", result_allpkts,
@@ -7865,7 +7865,7 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
             PyList_Append(result, t);
             Py_DECREF(t);
             Py_DECREF(result_allpkts);
-            printf("hello7\n");
+            // printf("hello7\n");
             return offset - start;
         }
         default:
