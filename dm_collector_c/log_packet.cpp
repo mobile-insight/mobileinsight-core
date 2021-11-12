@@ -59,10 +59,10 @@
 #include "wcdma_search_cell_reselection_rank.h"
 
 
-// #define SSTR(x) static_cast< std::ostringstream & >( \
-//         ( std::ostringstream() << std::dec << x ) ).str()
+#define SSTR(x) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
 
-#define SSTR(x) std::to_string(x)
+// #define SSTR(x) std::to_string(x)
 
 // #ifdef __ANDROID__
 // #include <android/log.h>
@@ -7449,6 +7449,7 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
     int n_subpkt = _search_result_int(result, "Number of Subpackets");
+    // printf("hello-2\n");
 
     switch (pkt_ver) {
         case 1: {
@@ -7465,6 +7466,8 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                                                     "Subpacket Version");
                 int subpkt_size = _search_result_int(result_subpkt,
                                                      "Subpacket Size");
+                // printf("hello-1\n");
+
                 if (subpkt_id == 3 && subpkt_ver == 2) {
                     // RACH Config Subpacket
                     offset += _decode_by_fmt(
@@ -7672,7 +7675,128 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                     PyList_Append(result_subpkt, t);
                     Py_DECREF(t);
                     Py_DECREF(result_prach_cfg_r13);
-                } else if (subpkt_id == 5 && subpkt_ver == 1) {
+                } 
+                else if (subpkt_id == 3 && subpkt_ver == 6) {
+                    // RACH Config Subpacket, not tested
+                                        PyObject *t = NULL;
+
+                    offset += _decode_by_fmt(
+                            LteMacRachTrigger_RachConfigSubpktPayload_v6,
+                            ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_v6,
+                                       Fmt),
+                            b, offset, length, result_subpkt);
+
+                    PyObject *result_prach_cfg_r13 = PyList_New(0);
+
+                    PyObject *result_rsrp_list_size = PyList_New(0);
+                    offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_rsrp_prach_list_size_v5,
+                                             ARRAY_SIZE(
+                                                     LteMacRachTrigger_RachConfigSubpktPayload_rsrp_prach_list_size_v5,
+                                                     Fmt),
+                                             b, offset, length, result_rsrp_list_size);
+                    int iListSize = _search_result_int(result_rsrp_list_size, "RSRP Thresh PRACH List Size");
+
+                    t = Py_BuildValue("(sOs)", "Ignored", result_rsrp_list_size, "dict");
+                    PyList_Append(result_prach_cfg_r13, t);
+                    Py_DECREF(t);
+                    Py_DECREF(result_rsrp_list_size);
+
+                    PyObject *result_rsrp_list = PyList_New(0);
+                    for (int i = 0; i < iListSize; i++) {
+                        PyObject *result_temp = PyList_New(0);
+                        offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_rsrp_prach_list_v5,
+                                                 ARRAY_SIZE(
+                                                         LteMacRachTrigger_RachConfigSubpktPayload_rsrp_prach_list_v5,
+                                                         Fmt),
+                                                 b, offset, length, result_temp);
+                        t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                        PyList_Append(result_rsrp_list, t);
+                        Py_DECREF(t);
+                        Py_DECREF(result_temp);
+                    }
+                    t = Py_BuildValue("(sOs)", "RSRP Thresh PRACH List", result_rsrp_list, "list");
+                    PyList_Append(result_prach_cfg_r13, t);
+                    Py_DECREF(t);
+                    Py_DECREF(result_rsrp_list);
+
+                    result_rsrp_list = PyList_New(0);
+                    for (int i = 0; i < 3 - iListSize; i++) {
+                        PyObject *result_temp = PyList_New(0);
+                        offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_hidden_rsrp_prach_list_v5,
+                                                 ARRAY_SIZE(
+                                                         LteMacRachTrigger_RachConfigSubpktPayload_hidden_rsrp_prach_list_v5,
+                                                         Fmt),
+                                                 b, offset, length, result_temp);
+                        t = Py_BuildValue("(sOs)", "Hidden", result_temp, "dict");
+                        PyList_Append(result_rsrp_list, t);
+                        Py_DECREF(t);
+                        Py_DECREF(result_temp);
+                    }
+                    t = Py_BuildValue("(sOs)", "Hidden RSRP Thresh PRACH List", result_rsrp_list, "list");
+                    PyList_Append(result_prach_cfg_r13, t);
+                    Py_DECREF(t);
+                    Py_DECREF(result_rsrp_list);
+
+
+                    PyObject *param_ce_list_size = PyList_New(0);
+                    offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_prach_param_ce_list_size_v5,
+                                             ARRAY_SIZE(
+                                                     LteMacRachTrigger_RachConfigSubpktPayload_prach_param_ce_list_size_v5,
+                                                     Fmt),
+                                             b, offset, length, param_ce_list_size);
+                    int iparamListSize = _search_result_int(param_ce_list_size, "PRACH Param CE List");
+
+                    t = Py_BuildValue("(sOs)", "Ignored", param_ce_list_size, "dict");
+                    PyList_Append(result_prach_cfg_r13, t);
+                    Py_DECREF(t);
+                    Py_DECREF(param_ce_list_size);
+
+                    PyObject *param_ce_list = PyList_New(0);
+                    for (int i = 0; i < iparamListSize; i++) {
+                        PyObject *result_temp = PyList_New(0);
+                        offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_prach_list_v6,
+                                                 ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_prach_list_v6,
+                                                            Fmt),
+                                                 b, offset, length, result_temp);
+                        t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                        PyList_Append(param_ce_list, t);
+                        Py_DECREF(t);
+                        Py_DECREF(result_temp);
+                    }
+                    t = Py_BuildValue("(sOs)", "PRACH Param Ce", param_ce_list, "list");
+                    PyList_Append(result_prach_cfg_r13, t);
+                    Py_DECREF(t);
+                    Py_DECREF(param_ce_list);
+
+                    param_ce_list = PyList_New(0);
+                    for (int i = 0; i < 4 - iparamListSize; i++) {
+                        PyObject *result_temp = PyList_New(0);
+                        offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_hidden_prach_list_v6,
+                                                 ARRAY_SIZE(
+                                                         LteMacRachTrigger_RachConfigSubpktPayload_hidden_prach_list_v6,
+                                                         Fmt),
+                                                 b, offset, length, result_temp);
+                        t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                        PyList_Append(param_ce_list, t);
+                        Py_DECREF(t);
+                        Py_DECREF(result_temp);
+                    }
+                    t = Py_BuildValue("(sOs)", "Hidden Prach Param Ce", param_ce_list, "list");
+                    PyList_Append(result_prach_cfg_r13, t);
+                    Py_DECREF(t);
+                    Py_DECREF(param_ce_list);
+
+                    PyObject *result_temp = PyList_New(0);
+                    offset += _decode_by_fmt(LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part_v6,
+                                             ARRAY_SIZE(LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part_v6, Fmt),
+                                             b, offset, length, result_temp);
+                    t = Py_BuildValue("(sOs)", "Ignored", result_temp, "dict");
+                    PyList_Append(result_prach_cfg_r13, t);
+                    Py_DECREF(t);
+                    Py_DECREF(result_temp);
+
+                } 
+                else if (subpkt_id == 5 && subpkt_ver == 1) {
                     offset += _decode_by_fmt(
                             LteMacRachTrigger_RachReasonSubpktPayload,
                             ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpktPayload,
@@ -7743,7 +7867,66 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                                                      ValueNameRachContention,
                                                      ARRAY_SIZE(ValueNameRachContention, ValueName),
                                                      "(MI)Unknown");
-                } else {
+                } 
+                // else if (subpkt_id == 5 && subpkt_ver == 3) {
+                //     printf("hello\n");
+                //     offset += _decode_by_fmt(
+                //             LteMacRachTrigger_RachReasonSubpktPayload_v3,
+                //             ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpktPayload_v3,
+                //                        Fmt),
+                //             b, offset, length, result_subpkt);
+                //     (void) _map_result_field_to_name(result_subpkt, "Rach reason",
+                //                                      LteMacRachTrigger_RachReasonSubpkt_RachReason,
+                //                                      ARRAY_SIZE(LteMacRachTrigger_RachReasonSubpkt_RachReason,
+                //                                                 ValueName),
+                //                                      "(MI)Unknown");
+                //     PyObject *temp=_search_result(result_subpkt,"Maching ID");
+                //     long long tempLong=PyLong_AsLongLong(temp);
+                //     int iPreamble=(int)tempLong&0xff00000000000000;
+                //     PyObject *old_object1 = _replace_result_int(result_subpkt,
+                //                                                    "Preamble", iPreamble);
+                //     printf("hello1\n");
+                //     Py_DECREF(old_object1);
+                //     char arr[6];
+                //     int wei=56;
+                //     for(int i=5;i>=0;i--){
+                //         long long templong2=tempLong<<wei;
+                //         arr[i]=(char)(templong2>>56);
+                //         wei-=8;
+                //     }
+                //     printf("hello2\n");
+                    
+                //     std::string MachingId;
+                //     char hex[10]={};
+                //     for(int i=5;i>0;i--){
+                //         sprintf(hex,"%02x",arr[i]&0xff);
+                //         MachingId+="0x";
+                //         MachingId+=hex;
+                //         MachingId+=",";
+                //     }
+                //     printf("hello3\n");
+                //     sprintf(hex,"%02x",arr[0]&0xff);
+                //     MachingId+="0x";
+                //     MachingId+=hex;
+                    
+                //     PyObject *pystr1= Py_BuildValue("s", MachingId.c_str());
+                //     PyObject *old_object2 = _replace_result(result_subpkt,
+                //                                            "Maching ID", pystr1);
+                //     printf("hello4\n");
+                //     Py_DECREF(old_object2);
+                //     Py_DECREF(pystr1);
+
+                //     Py_DECREF(temp);
+
+                //     std::string strRachContention = "Contention Based RACH procedure";
+                //     PyObject *pystr = Py_BuildValue("s", strRachContention.c_str());
+                //     PyObject *old_object = _replace_result(result_subpkt,
+                //                                            "RACH Contention", pystr);
+                //     printf("hello5\n");
+                //     Py_DECREF(old_object);
+                //     Py_DECREF(pystr);
+                // } 
+                else {
                     printf("(MI)Unknown LTE MAC RACH Trigger subpkt id and "
                            "version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                 }
@@ -7752,6 +7935,7 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
                 PyList_Append(result_allpkts, t);
                 Py_DECREF(t);
                 Py_DECREF(result_subpkt);
+                // printf("hello6\n");
                 offset += subpkt_size - (offset - start_subpkt);
             }
             PyObject *t = Py_BuildValue("(sOs)", "Subpackets", result_allpkts,
@@ -7759,6 +7943,7 @@ static int _decode_lte_mac_rach_trigger_subpkt(const char *b, int offset,
             PyList_Append(result, t);
             Py_DECREF(t);
             Py_DECREF(result_allpkts);
+            // printf("hello7\n");
             return offset - start;
         }
         default:

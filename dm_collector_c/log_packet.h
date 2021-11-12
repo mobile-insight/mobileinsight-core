@@ -2609,6 +2609,12 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v5[] = {
         {UINT,        "PRACH Cfg R13 Present",            1},
 };
 
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v6[] = {
+        {WCDMA_MEAS,  "Preamble initial power (dB)",      2},    // Note sure if it is correct
+        {UINT,        "Power ramping step (dB)",          1},
+        {UINT,        "Delta preamble Msg3",              2},
+};
+
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_rsrp_prach_list_size_v5[] = {
         {UINT, "RSRP Thresh PRACH List Size", 1},
 };
@@ -2625,22 +2631,43 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_param_ce_list_size_v5[
         {UINT, "PRACH Param CE List", 1},
 };
 
+// const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_param_ce_NA_v6[] = {
+//         {UINT, "PRACH Param CE NA", 24},
+// };
+
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_list_v5[] = {
-        {UINT,"First Preamble",                 1},
-        {UINT,"Last Preamble",                  1},
-        {UINT,"Max Preamble Tx Attempt Per CE", 1},
-        {UINT,"Contention Resol Timer",         2},
-        {UINT,"Prach Cfg Index",                1},
-        {UINT,"RA RSP Win Size",                1},
+        {UINT,"First Preamble",                   1},
+        {UINT,"Last Preamble",                    1},
+        {UINT,"Max Preamble Tx Attempt Per CE",   1},
+        {UINT,"Contention Resol Timer",           2},
+        {UINT,"Prach Cfg Index",                  1},
+        {UINT,"RA RSP Win Size",                  1},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_list_v6[] = {
+        {UINT,"First Subcarrier",                 1},
+        {UINT,"Multitone Subcarrer",              1},
+        {UINT,"Last Subcarrier",                  1},
+        {UINT,"Max Preamble Tx Attempt Per CE",   1},
+        {UINT,"Contention Resol Timer",           4},
 };
 
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_hidden_prach_list_v5[] = {
         {BYTE_STREAM, "Hidden PRACH Param Ce", 7},
 };
 
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_hidden_prach_list_v6[] = {
+        {BYTE_STREAM, "Hidden Prach Param Ce", 8},
+};
+
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part[] = {
         {UINT, "Initial CE Level",      2},
         {UINT, "Preamble Trans Max CE", 2},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part_v6[] = {
+        {UINT, "Preamble Trans Max CE", 2},
+        {SKIP, NULL,                   1},
 };
 
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload[] = {
@@ -2668,6 +2695,19 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2[] = {
         {UINT,        "Group chosen",           1},
         {UINT,        "Radio condn (dB)",       1},
         {BYTE_STREAM_LITTLE_ENDIAN, "CRNTI",    2},
+};
+
+const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v3[] = {
+        {UINT,        "Rach reason",            1},
+        {PLACEHOLDER, "RACH Contention",        0},
+        {UINT, "Maching ID",                    6},
+        {UINT,        "Preamble",        0},
+        {BYTE_STREAM, "Preamble RA mask",       1},
+        {UINT,        "Msg3 size",              1},
+        {UINT,        "CE Level",               1},
+        {UINT,        "Radio condn (dB)",       1},
+        {BYTE_STREAM_LITTLE_ENDIAN, "CRNTI",    2},
+        {SKIP, NULL,                            1},
 };
 
 const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason[] = {
