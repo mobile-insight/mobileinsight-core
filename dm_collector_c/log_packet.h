@@ -2084,6 +2084,22 @@ const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt_v24[] = {
         {PLACEHOLDER, "Total Bytes",            0},
 };
 
+const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt_v5[] = {
+        {UINT,        "Sub FN",                2},
+        {PLACEHOLDER, "Sys FN",                0},
+        {UINT,        "Number of active LCID", 1}
+};
+
+const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt_v5[] = {
+        {UINT,        "Ld Id",                  1},
+        {UINT,        "Priority",               1},
+        {UINT,        "New Uncompressed Bytes", 4},
+        {UINT,        "New Compressed Bytes",   4},
+        {UINT,        "Retx bytes",             4},
+        {UINT,        "Ctrl bytes",             2},
+        {PLACEHOLDER, "Total Bytes",            0},
+};
+
 // ----------------------------------------------------------------------------
 // LTE_RLC_UL_Config_Log_Packet
 
