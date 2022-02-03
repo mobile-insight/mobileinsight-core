@@ -321,7 +321,7 @@ const ValueName LogPacketTypeID_To_Name [] = {
     {LTE_PHY_Connected_Mode_Neighbor_Meas_Req_Resp, // LTE neighbor measurement request (connected mode)
         "LTE_PHY_Connected_Mode_Neighbor_Measurement",true},
     {LTE_PHY_CDRX_Events_Info,
-        "LTE_RRC_CDRX_Events_Info", false},
+        "LTE_PHY_CDRX_Events_Info", false},
     {LTE_PHY_Inter_Freq_Log,
         "LTE_PHY_Inter_Freq_Log", true},
     {LTE_PHY_BPLMN_Cell_Request,
