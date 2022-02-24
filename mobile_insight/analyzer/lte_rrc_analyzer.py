@@ -428,7 +428,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 # FIXME: set to the default value based on TS36.331
                 field_val['lte-rrc.dl_CarrierFreq'] = None  # mandatory
                 field_val['lte-rrc.t_ReselectionEUTRA'] = None  # mandatory
-                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
+                field_val['lte-rrc.q_RxLevMin'] = None  # mandatory
                 field_val['lte-rrc.p_Max'] = 23  # optional, r.f. 36.101
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
                 field_val['lte-rrc.threshX_High'] = None  # mandatory
@@ -448,7 +448,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     "LTE",
                     neighbor_freq,
                     int(field_val['lte-rrc.t_ReselectionEUTRA']),
-                    int(field_val['lte-rrc.utra_q_RxLevMin']) * 2,
+                    int(field_val['lte-rrc.q_RxLevMin']) * 2,
                     int(field_val['lte-rrc.p_Max']),
                     int(field_val['lte-rrc.cellReselectionPriority']),
                     int(field_val['lte-rrc.threshX_High']) * 2,
@@ -462,7 +462,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                         {'rat': 'LTE',
                                          'freq': str(neighbor_freq),
                                          'tReselection': field_val['lte-rrc.t_ReselectionEUTRA'],
-                                         'q_RxLevMin': str(int(field_val['lte-rrc.utra_q_RxLevMin']) * 2),
+                                         'q_RxLevMin': str(int(field_val['lte-rrc.q_RxLevMin']) * 2),
                                          'p_Max': field_val['lte-rrc.p_Max'],
                                          'priority': field_val['lte-rrc.cellReselectionPriority'],
                                          'threshx_high': str(int(field_val['lte-rrc.threshX_High']) * 2),
