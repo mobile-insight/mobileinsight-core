@@ -32,7 +32,7 @@ PYTHON=python3
 PIP=pip3
 
 echo "Installing dependencies for compiling Wireshark libraries"
-sudo apt-get -y install pkg-config wget libglib2.0-dev bison flex libpcap-dev
+sudo apt-get -y install pkg-config wget libglib2.0-dev bison flex libpcap-dev libgcrypt20-dev libgcrypt11-dev
 
 echo "Checking Wireshark sources to compile ws_dissector"
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
