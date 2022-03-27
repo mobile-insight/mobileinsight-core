@@ -21,10 +21,10 @@ from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 from matplotlib.figure import Figure
 
 import xml.dom.minidom
+import xml.etree.ElementTree as ET
 
 from mobile_insight.analyzer import LogAnalyzer
 from mobile_insight.monitor.dm_collector.dm_endec.dm_log_packet import DMLogPacket
-
 
 ID_FILE_OPEN = wx.NewId()
 ID_FILE_EXIT = wx.NewId()
@@ -60,7 +60,6 @@ class ProgressDialog(wx.Dialog):
         mainSizer.Add(gif, wx.EXPAND | wx.ALL)
         self.SetSizer(mainSizer)
         self.Fit()
-
 
 
 class TimeWindowDialog(wx.Dialog):
@@ -115,7 +114,7 @@ class TimeWindowDialog(wx.Dialog):
     def start_slider_update(self, event):
         delta_seconds = self.start_slider.GetValue() * self.unit_seconds
         self.cur_start = self.start_time + \
-            timedelta(seconds=int(delta_seconds))
+                         timedelta(seconds=int(delta_seconds))
         self.updateUI()
 
     def end_slider_udpate(self, event):
@@ -237,8 +236,8 @@ class WindowClass(wx.Frame):
             leftPanel,
             label="Welcome to MobileInsight 6.0 beta!\n\nMobileInsight is a Python 3 package for mobile network monitoring and analysis on the end device.",
             style=wx.ALIGN_LEFT)
-        self.details_text = wx.TextCtrl(
-            leftPanel, style=wx.ALIGN_LEFT | wx.TE_MULTILINE)
+        #self.details_text = wx.TextCtrl(leftPanel, style=wx.ALIGN_LEFT | wx.TE_MULTILINE)
+        self.details_text = wx.TreeCtrl(leftPanel, style=wx.TR_DEFAULT_STYLE | wx.TR_LINES_AT_ROOT)
 
         leftbox.Add(self.status_text, 1, wx.EXPAND | wx.HORIZONTAL)
         leftbox.Add(self.details_text, 3, wx.EXPAND)
@@ -362,18 +361,18 @@ class WindowClass(wx.Frame):
 
     def OnAbout(self, e):
         about_text = (
-            'MobileInsight GUI\n\n\n' +
-            'Copyright (c) 2014-2016 MobileInsight Team\n\n' +
-            'Developers:\n    Moustafa Alzantot,\n' +
-            '    Priyanka Avinash Kachare,\n' +
-            '    Michael Ivan,\n' +
-            '    Yuanjie Li')
+                'MobileInsight GUI\n\n\n' +
+                'Copyright (c) 2014-2016 MobileInsight Team\n\n' +
+                'Developers:\n    Moustafa Alzantot,\n' +
+                '    Priyanka Avinash Kachare,\n' +
+                '    Michael Ivan,\n' +
+                '    Yuanjie Li')
         search_dlg = wx.MessageDialog(
             self, about_text, "About MobileInsight GUI", wx.OK)
         search_dlg.ShowModal()
 
     def OnGridSelect(self, e):
-        #self.statusbar.SetStatusText("Selected %d" %e.GetRow())
+        # self.statusbar.SetStatusText("Selected %d" %e.GetRow())
         row = e.GetRow()
         if (row < len(self.data_view)):
             self.status_text.SetLabel(
@@ -381,12 +380,143 @@ class WindowClass(wx.Frame):
                 (str(
                     self.data_view[row]["Timestamp"]), str(
                     self.data_view[row]["TypeID"])))
-            # self.details_text.SetValue(str(self.data_view[row]["Payload"]))
-            val = xml.dom.minidom.parseString(
-                str(self.data_view[row]["Payload"]))
-            pretty_xml_as_string = val.toprettyxml(indent="  ", newl="\n")
-            self.details_text.SetValue(pretty_xml_as_string)
+            #self.details_text.SetValue(str(self.data_view[row]["Payload"]))
+            
+            #val = xml.dom.minidom.parseString(
+             #   str(self.data_view[row]["Payload"]))
+            #pretty_xml_as_string = val.toprettyxml(indent="  ", newl="\n", encoding="utf8")  # maybe will trigger bug
+            #self.details_text.SetValue(pretty_xml_as_string)
+            
+            self.content = {}
+            r = ET.fromstring(str(self.data_view[row]["Payload"]))
+            print(r.tag)
+            for child in r:
+                k = child.get("key")
+                if child.get("type")=="list" and len(child)==0:
+                    self.content[k]={}
+                elif child.get("type") == "list" and child[0].tag == "list":
+                    list_content = self.parse_list(child, k)
+                    self.content[k] = list_content
+                elif child.get("type") == "list" and child[0].tag == "msg":  # xml from wireshark
+                    list_content = self.parse_msg(child)
+                    self.content[k] = list_content
+                    # print(str(list_content))
+                elif child.get("type")=="dict":
+                    self.content[k]=self.parse_dict(child)
+                else:
+                    self.content[k] = child.text
+            self.details_text.DeleteAllItems()
+            root = self.details_text.AddRoot('payload')
+            self.creat_tree(self.content,root)
+            self.details_text.ExpandAll()
+            
         e.Skip()
+
+    def parse_list(self, listroot, attrib_key):
+        '''
+        convert list from .xml to standard dict
+        :param listroot:
+        :param attrib_key:
+        :return: dict
+        '''
+        list_content = {}
+        if(len(listroot)==0):
+            return None
+        listroot = listroot[0];  # <pair key="CA Combos" type="list">   <list>
+        i = 0
+        for xml_list in listroot:
+            if xml_list.tag == "item" and xml_list.get("type") == "dict":  # The only subclass of list is dict
+                dist_content = self.parse_dict(xml_list)
+                if(xml_list.get("key")==None):
+                    list_content[attrib_key + "[" + str(i) + "]"] = dist_content 
+                    i += 1
+                else:
+                    list_content[xml_list.get("key")]=dist_content 
+        return list_content
+
+    def parse_dict(self, dictroot):
+        '''
+        convert dict from .xml to standard dict
+        :param dictroot:
+        :return:
+        '''
+        dictroot = dictroot[0]  # <item type="dict">  <dict>
+        dict_content = {}
+        for d in dictroot:
+            k = d.get("key")
+            if (d.get("type") == "list"):  # list in dist
+                list_content = self.parse_list(d, k)
+                dict_content[k] = list_content
+            elif (d.get("type")=="dict"):
+                list_content = self.parse_dict(d)
+                dict_content[k] = list_content
+            else:
+                dict_content[k] = d.text;  # key-value
+        return dict_content
+
+    def split_key_value(self,str):
+        '''
+        e.g. "a:b"->"a","b"
+        :param str:
+        :return:
+        '''
+        start=str.find(":")
+        if(start!=-1):
+            key=str[0:start]
+            val=str[start+1:]
+            return key ,val
+        else:
+            return str,"none"
+    def parse_msg(self, msgroot):
+        '''
+        parse xml file which is conveyed by wireshark
+        :param msgroot:
+        :return:
+        '''
+        proto = msgroot.findall(".//proto")
+        dict_msg = {}
+        skip_context=["geninfo","frame","user_dlt"]#proto which is useless
+        for p in proto:
+            if (p.get("hide") != "yes" and p.get("name") not in skip_context):
+                dict_msg.update(self.parse_msg_field(p))
+            else:
+                continue
+        return dict_msg
+
+    def parse_msg_field(self, msgroot):
+        msg_dict={}
+        #skip_context=["geninfo","frame","user_dlt"]
+        for field in msgroot:
+            if (field.get("hide") == "yes"):
+                continue
+            elif len(field) != 0 and field.get("showname")!=None:
+                k=field.get("showname")
+                k,_=self.split_key_value(k)
+                val_dict = self.parse_msg_field(field)
+                if len(val_dict)==0:
+                    msg_dict[k]="skip"
+                else:
+                    msg_dict[k]=val_dict
+            elif len(field)!=0:
+                msg_dict.update(self.parse_msg_field(field))
+            else:
+                dict_msg = field.get("showname")
+                if dict_msg !=None:
+                    k, v = self.split_key_value(dict_msg)
+                    msg_dict[k] = v
+        return msg_dict
+
+    def creat_tree(self,payload_dict,root):
+        for k,v in payload_dict.items():
+            if(isinstance(v,dict)):
+                subroot=self.details_text.AppendItem(root,str(k))
+                self.creat_tree(v,subroot)
+            else:
+                if(v!="skip"):
+                    self. details_text.AppendItem(root,str(k)+":"+str(v))
+                else:
+                    self.details_text.AppendItem(root,str(k))
+                    
 
     def Quit(self, e):
         self.Destroy()
@@ -423,7 +553,7 @@ class WindowClass(wx.Frame):
             self.grid.SetCellValue(i, 1, str(self.data_view[i]["TypeID"]))
             self.grid.SetReadOnly(i, 0)
             self.grid.SetReadOnly(i, 1)
-        #self.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.onRowClick)
+        # self.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.onRowClick)
 
 
 def main():

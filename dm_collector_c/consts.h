@@ -126,7 +126,14 @@ enum LogPacketType {
     LTE_NB1_NBR_Cell_Meas = 0xB24E,
     LTE_NB1_ML1_Search_PBCH_Decode = 0xB250,
     LTE_NB1_ML1_DLM_Decode_Page = 0xB251,
-
+    
+    
+    //GNSS related
+    GNSS_GPS_Measurement_Report= 0x1477,
+    GNSS_Glonass_Measurement_Report=0x1480,
+    QMI_MCS_QCSI_PKT=0x1544,
+    GNSS_BDS_Measurement_Report=0x1756,
+    GNSS_GAL_Measurement_Report=0x1886,
 
     // 5G SM
     NR_NAS_SM5G_Plain_OTA_Incoming_Msg = 0xB800,
@@ -136,6 +143,7 @@ enum LogPacketType {
     NR_NAS_MM5G_Plain_OTA_Incoming_Msg = 0xB80A,
     NR_NAS_MM5G_Plain_OTA_Outgoing_Msg = 0xB80B,
     NR_NAS_MM5G_Service_Request = 0xB80D,
+    NR_NAS_MM5G_State= 0xB80C,
 
     // 5G RRC
     NR_RRC_OTA_Packet = 0xB821,
@@ -144,6 +152,7 @@ enum LogPacketType {
 
     // 5G PDCP
     NR_PDCP_DL_Data_PDU = 0xB840,
+    NR_PDCP_UL_Control_Pdu = 0xB861, 
 
     // 5G L2
     NR_L2_UL_TB = 0xB872,
@@ -154,6 +163,7 @@ enum LogPacketType {
     NR_RLC_UL_Stats = 0xB868,
     NR_RLC_UL_Status_PDU = 0xB869,
     NR_RLC_DL_Status_PDU = 0xB84E,
+    NR_RLC_DL_Stats = 0xB84D,
 
     // 5G MAC
     NR_MAC_UL_TB = 0xB880,
@@ -397,6 +407,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "5G_NR_NAS_MM_Plain_OTA_Outgoing_Msg", true},
     {NR_NAS_MM5G_Service_Request,
         "5G_NR_NAS_MM_Service_Request", true},
+    {NR_NAS_MM5G_State,
+        "5G_NR_NAS_MM5G_State",true},
 
 
     {NR_RRC_OTA_Packet,
@@ -409,6 +421,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
 
     {NR_PDCP_DL_Data_PDU,
         "5G_NR_PDCP_DL_Data_PDU", true},
+    {NR_PDCP_UL_Control_Pdu,
+        "5G_NR_PDCP_UL_Control_Pdu", true},
 
     {NR_L2_UL_TB,
         "5G_NR_L2_UL_TB", true},
@@ -423,6 +437,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "5G_NR_RLC_UL_Status_PDU", true},
     {NR_RLC_DL_Status_PDU,
         "5G_NR_RLC_DL_Status_PDU", true},
+    {NR_RLC_DL_Stats,
+        "5G_NR_RLC_DL_Stats", true},
 
     {NR_MAC_UL_TB,
         "5G_NR_MAC_UL_TB", true},
@@ -452,7 +468,7 @@ const ValueName LogPacketTypeID_To_Name [] = {
     {NR_LL1_FW_Serving_FTL,
         "5G_NR_LL1_FW_Serving_FTL", true},
     {NR_LL1_FW_CSF_Reports,
-        "5G_NR_LL1_FW_Serving_FTL", true},
+        "5G_NR_LL1_FW_CSF_Reports", true},
     {NR_ML1_DL_Handover,
         "5G_NR_ML1_DL_Handover", true},
     {NR_ML1_Searcher_ACQ_Config_And_Response,
@@ -468,6 +484,18 @@ const ValueName LogPacketTypeID_To_Name [] = {
 
     {Modem_debug_message,
         "Modem_debug_message", false},
+    {GNSS_GPS_Measurement_Report,
+        "GNSS_GPS_Measurement_Report", true},
+    {GNSS_Glonass_Measurement_Report,
+        "GNSS_Glonass_Measurement_Report", true},
+        
+    {QMI_MCS_QCSI_PKT,
+        "QMI_MCS_QCSI_PKT", false},
+        
+    {GNSS_BDS_Measurement_Report,
+        "GNSS_BDS_Measurement_Report", true},   
+    {GNSS_GAL_Measurement_Report,
+        "GNSS_GAL_Measurement_Report", true}, 
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__
