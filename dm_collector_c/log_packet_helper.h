@@ -106,6 +106,19 @@ _search_result_int(PyObject *result, const char *target) {
 }
 
 
+static PyObject* _replace_result_string(
+    PyObject* result,
+    const char* target,
+    std::string new_string)
+    __attribute__((unused));
+
+static PyObject*
+_replace_result_string(PyObject* result, const char* target, std::string new_string) {
+    PyObject* pystring = Py_BuildValue("s", new_string.c_str());
+    PyObject* old_object = _replace_result(result, target, pystring);
+    Py_DECREF(pystring);
+    return old_object;
+}
 
 
 
@@ -126,6 +139,23 @@ _search_result_uint(PyObject *result, const char *target) {
     return val;
 }
 
+//adding
+// This function should be called when the value is 8 bytes long.
+// Return: unsigned long int
+static unsigned long int _search_result_ulongint(
+        PyObject *result,
+        const char *target)
+__attribute__ ((unused));
+
+static unsigned long int
+_search_result_ulongint(PyObject *result, const char *target) {
+    PyObject *item = _search_result(result, target);
+    assert(PyLong_Check(item));
+    unsigned long int val = (unsigned long int) PyLong_AsUnsignedLongLongMask(item);
+    Py_DECREF(item);
+
+    return val;
+}
 static const char*
 _search_result_bytestream(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
