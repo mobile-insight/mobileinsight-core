@@ -104,22 +104,23 @@ _search_result_int(PyObject *result, const char *target) {
 
     return val;
 }
+//adding
+// This function should be called when the value is 8 bytes long.
+// Return: unsigned long int
+static unsigned long int _search_result_ulongint(
+        PyObject *result,
+        const char *target)
+__attribute__ ((unused));
 
+static unsigned long int
+_search_result_ulongint(PyObject *result, const char *target) {
+    PyObject *item = _search_result(result, target);
+    assert(PyLong_Check(item));
+    unsigned long int val = (unsigned long int) PyLong_AsUnsignedLongLongMask(item);
+    Py_DECREF(item);
 
-static PyObject* _replace_result_string(
-    PyObject* result,
-    const char* target,
-    std::string new_string)
-    __attribute__((unused));
-
-static PyObject*
-_replace_result_string(PyObject* result, const char* target, std::string new_string) {
-    PyObject* pystring = Py_BuildValue("s", new_string.c_str());
-    PyObject* old_object = _replace_result(result, target, pystring);
-    Py_DECREF(pystring);
-    return old_object;
+    return val;
 }
-
 
 
 // This function should be called when the value is 4 bytes long.
@@ -139,23 +140,6 @@ _search_result_uint(PyObject *result, const char *target) {
     return val;
 }
 
-//adding
-// This function should be called when the value is 8 bytes long.
-// Return: unsigned long int
-static unsigned long int _search_result_ulongint(
-        PyObject *result,
-        const char *target)
-__attribute__ ((unused));
-
-static unsigned long int
-_search_result_ulongint(PyObject *result, const char *target) {
-    PyObject *item = _search_result(result, target);
-    assert(PyLong_Check(item));
-    unsigned long int val = (unsigned long int) PyLong_AsUnsignedLongLongMask(item);
-    Py_DECREF(item);
-
-    return val;
-}
 static const char*
 _search_result_bytestream(PyObject *result, const char *target) {
     PyObject *item = _search_result(result, target);
@@ -186,8 +170,6 @@ _replace_result(PyObject *result, const char *target, PyObject *new_object) {
     }
 }
 
-
-
 static void
 _delete_result(PyObject *result, const char *target){
     int i = _find_result_index(result, target);
@@ -209,6 +191,19 @@ _replace_result_int(PyObject *result, const char *target, int new_int) {
     PyObject *pyint = Py_BuildValue("i", new_int);
     PyObject *old_object = _replace_result(result, target, pyint);
     Py_DECREF(pyint);
+    return old_object;
+}
+static PyObject* _replace_result_string(
+    PyObject* result,
+    const char* target,
+    std::string new_string)
+    __attribute__((unused));
+
+static PyObject*
+_replace_result_string(PyObject* result, const char* target, std::string new_string) {
+    PyObject* pystring = Py_BuildValue("s", new_string.c_str());
+    PyObject* old_object = _replace_result(result, target, pystring);
+    Py_DECREF(pystring);
     return old_object;
 }
 
@@ -438,9 +433,6 @@ _decode_by_fmt(const Fmt fmt[], int n_fmt,
                 n_consumed += fmt[i].len;
                 break;
             }
-
-
-
             case PLMN_MK1: {
                 assert(fmt[i].len == 6);
                 const char *plmn = p;
@@ -597,5 +589,15 @@ _convert_nr_rsrq(PyObject *obj, const char *rsrq_field){
     Py_DECREF(old_object);
     Py_DECREF(pyfloat);
 }
+// static void reprint(PyObject *obj) {
+//     PyObject* repr = PyObject_Repr(obj);
+//     PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
+//     const char *bytes = PyBytes_AS_STRING(str);
+
+//     printf("REPR: %s\n", bytes);
+
+//     Py_XDECREF(repr);
+//     Py_XDECREF(str);
+// }
 
 #endif // __DM_COLLECTOR_C_LOG_PACKET_HELPER_H__

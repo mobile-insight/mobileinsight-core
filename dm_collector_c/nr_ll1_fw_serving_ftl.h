@@ -109,8 +109,8 @@ static int _decode_nr_ll1_fw_serving_ftl_payload (const char *b,
     }	
     default:
         printf("(MI)Unknown NR5G LL1 FW Serving FTL version: %d\n", pkt_ver);
-        return 0;
     }
+    return 0;
 }				
 		
 		

@@ -11619,8 +11619,8 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
     switch (type_id) {
 
         case NR_L2_UL_TB:
-            offset += _decode_by_fmt(NrL2UlTbFmt,
-                                     ARRAY_SIZE(NrL2UlTbFmt, Fmt),
+            offset += _decode_by_fmt(NrL2UlTb_Fmt,
+                                     ARRAY_SIZE(NrL2UlTb_Fmt, Fmt),
                                      b, offset, length, result);
 
             offset += _decode_nr_l2_ul_tb_subpkt(b, offset, length, result);

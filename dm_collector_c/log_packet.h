@@ -461,7 +461,6 @@ const ValueName NrRrcOtaPduType_v8[] = {
         // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
-
 const ValueName NrRrcOtaPduType_v9[] = {
 
         // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
@@ -2110,6 +2109,22 @@ const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt_v24[] = {
         {PLACEHOLDER, "Total Bytes",            0},
 };
 
+const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_SampleFmt_v5[] = {
+        {UINT,        "Sub FN",                2},
+        {PLACEHOLDER, "Sys FN",                0},
+        {UINT,        "Number of active LCID", 1}
+};
+
+const Fmt LteMacULBufferStatusInternal_ULBufferStatusSubPacket_LCIDFmt_v5[] = {
+        {UINT,        "Ld Id",                  1},
+        {UINT,        "Priority",               1},
+        {UINT,        "New Uncompressed Bytes", 4},
+        {UINT,        "New Compressed Bytes",   4},
+        {UINT,        "Retx bytes",             4},
+        {UINT,        "Ctrl bytes",             2},
+        {PLACEHOLDER, "Total Bytes",            0},
+};
+
 // ----------------------------------------------------------------------------
 // LTE_RLC_UL_Config_Log_Packet
 
@@ -2619,6 +2634,12 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v5[] = {
         {UINT,        "PRACH Cfg R13 Present",            1},
 };
 
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v6[] = {
+        {WCDMA_MEAS,  "Preamble initial power (dB)",      2},    // Note sure if it is correct
+        {UINT,        "Power ramping step (dB)",          1},
+        {UINT,        "Delta preamble Msg3",              2},
+};
+
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_rsrp_prach_list_size_v5[] = {
         {UINT, "RSRP Thresh PRACH List Size", 1},
 };
@@ -2643,14 +2664,30 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_list_v5[] = {
         {UINT,"Prach Cfg Index",                1},
         {UINT,"RA RSP Win Size",                1},
 };
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_list_v6[] = {
+        {UINT,"First Subcarrier",                 1},
+        {UINT,"Multitone Subcarrer",              1},
+        {UINT,"Last Subcarrier",                  1},
+        {UINT,"Max Preamble Tx Attempt Per CE",   1},
+        {UINT,"Contention Resol Timer",           4},
+};
 
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_hidden_prach_list_v5[] = {
         {BYTE_STREAM, "Hidden PRACH Param Ce", 7},
 };
 
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_hidden_prach_list_v6[] = {
+        {BYTE_STREAM, "Hidden Prach Param Ce", 8},
+};
+
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part[] = {
         {UINT, "Initial CE Level",      2},
         {UINT, "Preamble Trans Max CE", 2},
+};
+
+const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part_v6[] = {
+        {UINT, "Preamble Trans Max CE", 2},
+        {SKIP, NULL,                   1},
 };
 
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload[] = {
@@ -2678,6 +2715,19 @@ const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2[] = {
         {UINT,        "Group chosen",           1},
         {UINT,        "Radio condn (dB)",       1},
         {BYTE_STREAM_LITTLE_ENDIAN, "CRNTI",    2},
+};
+
+const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v3[] = {
+        {UINT,        "Rach reason",            1},
+        {PLACEHOLDER, "RACH Contention",        0},
+        {UINT, "Maching ID",                    6},
+        {UINT,        "Preamble",        0},
+        {BYTE_STREAM, "Preamble RA mask",       1},
+        {UINT,        "Msg3 size",              1},
+        {UINT,        "CE Level",               1},
+        {UINT,        "Radio condn (dB)",       1},
+        {BYTE_STREAM_LITTLE_ENDIAN, "CRNTI",    2},
+        {SKIP, NULL,                            1},
 };
 
 const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason[] = {
@@ -4220,6 +4270,11 @@ const ValueName ValueNameSearchSpaceType[] = {
         {2, "User"},
 };
 
+const ValueName ValueNameSubcarrierSpaceType[] = {
+        // 3 bits
+        {4, "15 kHz"},
+};
+
 const ValueName ValueNameRNTIType[] = {
         // 4 bits
         {0, "C-RNTI"},
@@ -4236,6 +4291,34 @@ const ValueName ValueNameNBIoT_RNTIType[] = {
         // 2 bits
         {0, "C-RNTI"},
         {2, "TC-RNTI"},
+};
+
+const ValueName ValueNameNB1_PDSCH_RNTIType[] = {
+        // 3 bits
+        {1, "C-RNTI"},       
+        {3, "RA-RNTI"},
+        {4, "TC-RNTI"},
+};
+
+const ValueName ValueNameNB1_Sum_Sys_Info_MeasBWType[] = {
+        // 4 bits
+        {0, "mbw6 RBs"},
+};
+
+const ValueName ValueNameNB1_GM_TX_Report_Subcarrier_Space_Type[] = {
+        // 3 bits
+        {4, "15 kHz"},
+};
+
+const ValueName ValueNameNPUSCHFormat_1_TX_Type[] = {
+        // 1 bits
+        {0,  ""},
+        {1,  "New Transmission"},
+};
+const ValueName ValueNameNPUSCHFormat[] = {
+        // 1 bits
+        {0,  "Format 1"},
+        {1,  "Format 2"},
 };
 const ValueName ValueNameDCIFormat[] = {
         // 4 bits
@@ -4624,6 +4707,15 @@ const ValueName ValueNameGSMSignalingMessageType[] = {
 const ValueName ValueNameDirection[] = {
         {0, "Uplink"},
         {1, "Downlink"},
+};
+
+const ValueName ValueNameGNSSBDSEngineType[] = {
+        {6,"GEN9"},
+};
+const ValueName ValueNameBdsObsState[]={
+        {1,"SRCH"},
+        {4,"TRK VER"},
+	{5,"TRK"}
 };
 
 // ----------------------------------------------------------------------------
