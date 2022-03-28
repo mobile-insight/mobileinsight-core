@@ -392,6 +392,7 @@ const Fmt LtePhyPuschTxReport_Payload_v144 [] = {
     {SKIP, NULL, 2},
 };
 
+
 const Fmt LtePhyPuschTxReport_Record_v144 [] = {
     {UINT, "Current SFN SF", 2},
     {UINT, "UL Carrier Index", 2}, // 2 bits
@@ -453,6 +454,78 @@ const Fmt LtePhyPuschTxReport_Record_v144 [] = {
     {UINT, "Cyclic Shift of DMRS Symbols Slot 0 (Samples)", 4},  // 4 bits
     {PLACEHOLDER, "Cyclic Shift of DMRS Symbols Slot 1 (Samples)", 0},  // 4 bits
 };
+
+
+const Fmt LtePhyPuschTxReport_Payload_v145 [] = {
+    {UINT, "Serving Cell ID", 2},    // 9 bits
+    {PLACEHOLDER, "Number of Records", 0},  // 5 bits
+    {SKIP, NULL, 1},
+    {UINT, "Dispatch SFN SF", 2},
+    {SKIP, NULL, 2},
+};
+
+const Fmt LtePhyPuschTxReport_Record_v145 [] = {
+    {UINT, "Current SFN SF", 2},
+    {UINT, "UL Carrier Index", 2}, // 2 bits
+    {PLACEHOLDER, "ACK", 0},    // 1 bit
+    {PLACEHOLDER, "CQI", 0},    // 1 bit
+    {PLACEHOLDER, "RI", 0}, // 1 bit
+    {PLACEHOLDER, "Frequency Hopping", 0},  // 2 bits
+    {PLACEHOLDER, "Re-tx Index", 0},  // 5 bits
+    {PLACEHOLDER, "Redund Ver", 0}, // 2 bits
+    {PLACEHOLDER, "Mirror Hopping", 0}, // 2 bits
+
+    {UINT, "Resource Allocation Type", 4},  // 1 bit
+    {PLACEHOLDER, "Start RB Slot 0", 0},    // 7 bits
+    {PLACEHOLDER, "Start RB Slot 1", 0},    // 7 bits
+    {PLACEHOLDER, "Num of RB", 0},  // 7 bits
+
+    {PLACEHOLDER, "DL Carrier Index",0},//3 bits
+    {PLACEHOLDER,"Enable UL DMRS OCC",0},   // shift 25 bits,total 1 bits
+
+    {UINT, "PUSCH TB Size", 2},
+    {UINT, "Coding Rate", 2},  // x/1024.0
+
+    {UINT, "Rate Matched ACK Bits", 4}, // 14 bits
+
+    {PLACEHOLDER, "RI Payload", 0},    // shift 14 then 14 bits
+    {PLACEHOLDER, "Num RI Bits NRI", 0},   // shirt 14 then 4 bits
+
+    //{PLACEHOLDER, "UE SRS", 0}, // 1 bit
+    //{PLACEHOLDER, "SRS Occasion", 0},   // 1 bit
+
+    {UINT, "ACK Payload", 16},
+
+    {UINT,"ACK/NAK Inp Length 0",4},    // shift 0 bits,total 7 bits
+    {PLACEHOLDER,"ACK/NAK Inp Length 1",0},     // shift 7 bits,total 7 bits
+    {PLACEHOLDER,"Rate Matched RI Bits",0},     // shift 14 bits,total 11 bits
+    {PLACEHOLDER,"Reserved",0},     // shift 25 bits,total 7 bits
+
+    {UINT,"UE SRS",4},  // shift 0 bits,total 1 bits
+    {PLACEHOLDER,"SRS Occasion",0},     // shift 1 bits,total 1 bits
+    {PLACEHOLDER,"PUSCH Mod Order",0},  // shift 2 bits,total 3 bits
+    {PLACEHOLDER,"PUSCH Digital Gain",0},   // shift 5 bits,total 8 bits
+    {PLACEHOLDER,"Start RB Cluster1",0},    // shift 13 bits,total 7 bits
+    {PLACEHOLDER,"Num RB Cluster1",0},  // shift 20 bits,total 7 bits
+
+    {UINT, "PUSCH Tx Power (dBm)", 4},    // 7 bits (x - 128)
+    {PLACEHOLDER, "Num CQI Bits", 0},   // 8 bits
+    {PLACEHOLDER, "Rate Matched CQI Bits", 0},  // 16 bits
+
+    {UINT, "Num DL Carriers", 4},   // 2 bits
+    {PLACEHOLDER, "Ack Nack Index", 0}, // 12 bits
+    {PLACEHOLDER, "Ack Nack Late", 0}, // 1 bit
+    {PLACEHOLDER, "CSF Late", 0}, // 1 bit
+    {PLACEHOLDER, "Drop PUSCH", 0}, // 1 bit
+
+    {BYTE_STREAM, "CQI Payload", 44},
+
+    {UINT, "Tx Resampler", 4},
+
+    {UINT, "Cyclic Shift of DMRS Symbols Slot 0 (Samples)", 4},  // 4 bits
+    {PLACEHOLDER, "Cyclic Shift of DMRS Symbols Slot 1 (Samples)", 0},  // 4 bits
+};
+
 
 static int _decode_lte_phy_pusch_tx_report_payload (const char *b,
         int offset, size_t length, PyObject *result) {
@@ -2078,6 +2151,7 @@ static int _decode_lte_phy_pusch_tx_report_payload (const char *b,
             return offset - start;
         }
    case 144:
+   case 145:
         {
             offset += _decode_by_fmt(LtePhyPuschTxReport_Payload_v144,
                     ARRAY_SIZE(LtePhyPuschTxReport_Payload_v144, Fmt),
@@ -2317,6 +2391,7 @@ static int _decode_lte_phy_pusch_tx_report_payload (const char *b,
                 old_object = _replace_result_int(result_record_item,
                         "Drop PUSCH", iDropPusch);
                 Py_DECREF(old_object);
+
 
                 u_temp = _search_result_uint(result_record_item,
                         "Cyclic Shift of DMRS Symbols Slot 0 (Samples)");

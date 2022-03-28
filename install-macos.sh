@@ -1,16 +1,12 @@
 #!/bin/bash
 # Installation script for mobileinsight-core on macOS
 # It installs package under /usr/local folder
-# Author  : Zengwen Yuan, Yunqi Guo, Yuanjie Li
-# Date    : 2020-10-20
-# Version : 4.0
-
 
 echo "** Installer Script for mobileinsight-core on macOS **"
 echo " "
-echo "  Author : Zengwen Yuan (zyuan [at] cs.ucla.edu), Yuanjie Li (liyuanjie08 [at] gmail.com)"
-echo "  Date   : 2020-10-21"
-echo "  Rev    : 4.0"
+echo "  Author : Zengwen Yuan (zyuan [at] cs.ucla.edu), Yuanjie Li (yuanjiel [at] tsinghua.edu.cn), Yunqi Guo (luckiday [at] cs.ucla.edu) "
+echo "  Date   : 2020-11-13"
+echo "  Rev    : 4.1"
 echo "  Usage  : ./install-macos.sh"
 echo " "
 
@@ -18,7 +14,7 @@ echo "Upgrading MobileInsight..."
 yes | ./uninstall.sh
 
 # Wireshark version to install
-ws_ver=3.2.7
+ws_ver=3.4.0
 
 # Use local library path
 PREFIX=/usr/local
@@ -90,7 +86,7 @@ if [[ $? != 0 ]]; then
     brew install glib gnutls libgcrypt dbus
     brew install geoip c-ares
     # Install Wireshark stable version 2.0.x using our own formulae
-    brew install ./wireshark.rb
+    # brew install ./wireshark.rb
 elif [[ $brew_ws_ver == *${ws_ver}* ]]; then
     echo -e "${GREEN}[INFO]${NC} You have a Wireshark version ${ws_ver} installed, continuing..."
 else
@@ -107,7 +103,8 @@ brew install wget gettext libffi qt lua
 echo -e "${GREEN}[INFO]${NC} Checking Wireshark sources to compile ws_dissector"
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
     echo -e "${GREEN}[INFO]${NC} You do not have source codes for Wireshark version ${ws_ver}, downloading..."
-    wget https://www.wireshark.org/download/src/all-versions/wireshark-${ws_ver}.tar.xz
+    # wget https://www.wireshark.org/download/src/all-versions/wireshark-${ws_ver}.tar.xz
+    wget http://www.mobileinsight.net/wireshark-${ws_ver}-rbc-dissector.tar.xz -O wireshark-${ws_ver}.tar.xz
     tar xf wireshark-${ws_ver}.tar.xz
     rm wireshark-${ws_ver}.tar.xz
 fi
@@ -116,26 +113,27 @@ echo -e "${GREEN}[INFO]${NC} Configuring Wireshark sources for ws_dissector comp
 cd ${WIRESHARK_SRC_PATH}
 cmake -DBUILD_wireshark=OFF . > /dev/null 2>&1
 if [[ $? != 0 ]]; then
-    echo -e "${YELLOW}[WARNING]${NC} Error when executing '${WIRESHARK_SRC_PATH}/cmake -DBUILD_wireshark=OFF .'."
+
+    echo -e "${YELLOW}[WARNING]${NC} Error when executing '${WIRESHARK_SRC_PATH}/cmake --disable-wireshark .'."
     echo "You need to manually fix it before continuation. Exiting with status 3."
     exit 3
 fi
 
 
-# echo "Compiling wireshark-${ws_ver} from source code, it may take a few minutes..."
-# make -j $(grep -c ^processor /proc/cpuinfo)
-# if [ $? != 0 ]; then
-#     echo "Error when compiling wireshark-${ws_ver} from source code'."
-#     echo "You need to manually fix it before continuation. Exiting with status 2"
-#     exit 2
-# fi
-# echo "Installing wireshark-${ws_ver}"
-# sudo make install > /dev/null 2>&1
-# if [ $? != 0 ]; then
-#     echo "Error when installing wireshark-${ws_ver} compiled from source code'."
-#     echo "You need to manually fix it before continuation. Exiting with status 2"
-#     exit 2
-# fi
+echo "Compiling wireshark-${ws_ver} from source code, it may take a few minutes..."
+make -j $(grep -c ^processor /proc/cpuinfo)
+if [ $? != 0 ]; then
+    echo "Error when compiling wireshark-${ws_ver} from source code'."
+    echo "You need to manually fix it before continuation. Exiting with status 2"
+    exit 2
+fi
+echo "Installing wireshark-${ws_ver}"
+sudo make install > /dev/null 2>&1
+if [ $? != 0 ]; then
+    echo "Error when installing wireshark-${ws_ver} compiled from source code'."
+    echo "You need to manually fix it before continuation. Exiting with status 2"
+    exit 2
+fi
 
 
 echo -e "${GREEN}[INFO]${NC} Compiling Wireshark dissector for MobileInsight..."
@@ -167,14 +165,19 @@ fi
 
 echo -e "${GREEN}[INFO]${NC} Installing GUI for MobileInsight..."
 cd ${MOBILEINSIGHT_PATH}
-if [[ $(mkdir -p ${PREFIX}/share/mobileinsight/) ]] ; then
-    cp -r gui/* ${PREFIX}/share/mobileinsight/
-    ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
-else
-    sudo mkdir -p ${PREFIX}/share/mobileinsight/
-    sudo cp -r gui/* ${PREFIX}/share/mobileinsight/
-    sudo ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
-fi
+
+sudo mkdir -p ${PREFIX}/share/mobileinsight/
+sudo cp -r gui/* ${PREFIX}/share/mobileinsight/
+sudo ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
+
+# if [[ $(mkdir -p ${PREFIX}/share/mobileinsight/) ]] ; then
+#     cp -r gui/* ${PREFIX}/share/mobileinsight/
+#     ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
+# else
+#     sudo mkdir -p ${PREFIX}/share/mobileinsight/
+#     sudo cp -r gui/* ${PREFIX}/share/mobileinsight/
+#     sudo ln -s ${PREFIX}/share/mobileinsight/mi-gui ${PREFIX}/bin/mi-gui
+# fi
 
 echo -e "${GREEN}[INFO]${NC} Installing dependencies for MobileInsight GUI..."
 echo -e "${GREEN}[INFO]${NC} Installing wxPython..."

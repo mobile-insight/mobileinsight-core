@@ -14,6 +14,8 @@ __all__ = ["Analyzer",
            "UplinkLatencyAnalyzer",
            "KPIManager",
            "LteDlRetxAnalyzer",
+
+           "NrRrcAnalyzer",
            ]
 
 from .analyzer import Analyzer
@@ -32,6 +34,9 @@ from .track_cell_info_analyzer import TrackCellInfoAnalyzer
 from .ul_mac_latency_analyzer import UlMacLatencyAnalyzer
 from .lte_dl_retx_analyzer import LteDlRetxAnalyzer
 from .uplink_latency_analyzer import UplinkLatencyAnalyzer
+
+# 5G NR
+from .nr_rrc_analyzer import NrRrcAnalyzer
 
 # LTE
 from .lte_rrc_analyzer import LteRrcAnalyzer

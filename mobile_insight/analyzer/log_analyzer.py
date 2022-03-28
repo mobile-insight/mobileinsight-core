@@ -32,7 +32,8 @@ class LogAnalyzer(Analyzer):
         self.set_source(self.src)
         self.add_source_callback(self.__dump_message)
         self.listener_callback = listener_callback
-        self.supported_types = set(dm_collector_c.log_packet_types)
+        self.supported_types = list(dm_collector_c.log_packet_types)
+        self.supported_types.sort()
         for st in self.supported_types:
             self.src.enable_log(st)
 

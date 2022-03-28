@@ -135,7 +135,7 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
                     break;
                 }
             }
-            // Haotian: hardcode highest value
+            // TODO: Simplify the following code. *highest* indicates the highest item IDs' mask. Setting it to FFF should be able to support all messages
             switch (equip_id) {
                 case 0x00000001:    // CDMA, _1xEV, ......
                     highest = 0x00000FD3;
@@ -147,7 +147,8 @@ encode_log_config (LogConfigOp op, const std::vector<int>& type_ids) {
                     highest = 0x00000B56;
                     break;
                 case 0x0000000b:    // LTE, ......
-                    highest = 0x000001C4;
+                    // highest = 0x000001C4;
+                    highest = 0x00000FFF;
                     break;
                 default:
                     break;

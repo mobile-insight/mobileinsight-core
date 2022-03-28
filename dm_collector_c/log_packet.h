@@ -18,6 +18,8 @@ enum FmtType {
     UINT_BIG_ENDIAN,    // Big endian uint
     BYTE_STREAM,    // A stream of bytes.
     BYTE_STREAM_LITTLE_ENDIAN,    // a stream of bytes in little endian
+    BIT_STREAM,    // A stream of bits.
+    BIT_STREAM_LITTLE_ENDIAN, // a stream of bits in little endian
     QCDM_TIMESTAMP,    // Timestamp in all messages. len = 8
     PLMN_MK1,    // in WCDMA Cell ID
     PLMN_MK2,    // in LTE NAS EMM State
@@ -222,107 +224,153 @@ const ValueName UmtsNasOtaFmt_MessageDirection[] = {
 // ------------------------------------------------------------
 // LTE_RRC_OTA_Packet
 const Fmt LteRrcOtaPacketFmt[] = {
-        {UINT, "Pkt Version",        1},    //version
-        {UINT, "RRC Release Number", 1},    //RRC release version
-        {UINT, "Major/minor",        1},
-        {UINT, "Radio Bearer ID",    1},    //no change
-        {UINT, "Physical Cell ID",   2}     //Cell ID
+        {UINT, "Pkt Version",                 1},    //version
+        {UINT, "RRC Release Number",          1},    //RRC release version
         // continued in LteRrcOtaPacketFmt_v2 or LteRrcOtaPacketFmt_v7
 };
 
 // Apply to version 2 packets
 const Fmt LteRrcOtaPacketFmt_v2[] = {
-        {UINT, "Freq",                    2},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "Msg Length",              1},
-        {UINT, "SIB Mask in SI",          1}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        2},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "Msg Length",                  1},
+        {UINT, "SIB Mask in SI",              1}
 };
 
 const Fmt LteRrcOtaPacketFmt_v4[] = {
-        {UINT, "Freq",                    2},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "Msg Length",              2},
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        2},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "Msg Length",                  2},
 };
 
 const Fmt LteRrcOtaPacketFmt_v7[] = {
-        {UINT, "Freq",                    2},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {SKIP, NULL,                      4},    // Unknown yet, only for Pkt Version = 7
-        {UINT, "Msg Length",              1},
-        {UINT, "SIB Mask in SI",          1}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        2},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {SKIP, NULL,                          4},    // Unknown yet, only for Pkt Version = 7
+        {UINT, "Msg Length",                  1},
+        {UINT, "SIB Mask in SI",              1}
 };
 
 const Fmt LteRrcOtaPacketFmt_v8[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v9[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v12[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v13[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v15[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v19[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          4},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v20[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          1},
-        {SKIP, NULL,                      3},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const Fmt LteRrcOtaPacketFmt_v24[] = {
-        {UINT, "Freq",                    4},    //frequency
-        {UINT, "SysFrameNum/SubFrameNum", 2},    //System/subsystem frame number
-        {UINT, "PDU Number",              1},    //PDU number
-        {UINT, "SIB Mask in SI",          4},
-        {UINT, "Msg Length",              2}
+        {UINT, "Major/minor",                 1},
+        {UINT, "Radio Bearer ID",             1},    //no change
+        {UINT, "Physical Cell ID",            2},    //Cell ID    
+        {UINT, "Freq",                        4},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     2},    //System/subsystem frame number
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
+};
+
+const Fmt LteRrcOtaPacketFmt_v26[] = {
+        {BYTE_STREAM, "RRC Version Number",   1}, 
+        {UINT, "NR RRC Release Number",       1},
+        {BYTE_STREAM, "NR RRC Version Number",1},
+        {UINT, "Radio Bearer ID",             1},
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        2},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     4},    //System/subsystem frame number 
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
 };
 
 const ValueName LteRrcOtaPduType[] = {
@@ -351,7 +399,13 @@ const ValueName LteRrcOtaPduType_v19[] = {
         {0x09, "LTE-RRC_DL_DCCH"},
         {0x0a, "LTE-RRC_UL_CCCH"},
         {0x0b, "LTE-RRC_UL_DCCH"},
+        {0x2e, "LTE-RRC_BCCH_DL_SCH_NB"},
+        {0x30, "LTE-RRC_DL_CCCH_NB"},
+        {0x31, "LTE-RRC_DL_DCCH_NB"},
+        {0x34, "LTE-RRC_UL_DCCH_NB"},
+        {0x32, "LTE-RRC_UL_CCCH_NB"},
 };
+
 
 // ------------------------------------------------------------
 // NR_RRC_OTA_Packet
@@ -359,14 +413,14 @@ const Fmt NrRrcOtaPacketFmt[] = {
         {UINT, "Pkt Version",        1},    //version
         {UINT, "Unknown", 			 3},    //Maybe Reserved
         {UINT, "RRC Release Number", 1},    //RRC release version
-        {UINT, "RRC Version Number", 1},    //RRC version version
+        {BYTE_STREAM, "RRC Version Number", 1},    //RRC version version
         {UINT, "Radio Bearer ID",    1},    //no change
         {UINT, "Physical Cell ID",   2},     //Cell ID
         {UINT, "Freq",   			 4},     //Freq
         {UINT, "SysFrameNum/SubFrameNum",   4},     //System/subsystem frame number
-        {UINT, "Physical Cell ID",   2},     //Cell ID
-        {UINT, "PDU Number",         2},     //PDU Number
-        {UINT, "SIB Mask In SI",     4},
+        {UINT, "PDU Number",         1},     //PDU Number
+        {UINT, "SIB Mask in SI",     1},
+        {SKIP, NULL,                 3},
         {UINT, "Msg Length",         2}
 };
 
@@ -384,8 +438,7 @@ const ValueName NrRrcOtaPduType_v7[] = {
         {0x0a, "nr-rrc.ul.dcch"},   // RRC Reconfiguration Complete
         {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
         {0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
-        {0x18, "nr-rrc.rrc_reconf"}, // Radio Bearer Config
-        {0x18, "nr-rrc.dl.dcch"},    // Radio Bearer Config (choice 2)
+        {0x18, "nr-rrc.radio_bearer_conf"}, // Radio Bearer Config
         // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
@@ -404,13 +457,35 @@ const ValueName NrRrcOtaPduType_v8[] = {
         {0x0a, "nr-rrc.ul.dcch"},   // RRC Reconfiguration Complete
         {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
         {0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
-        {0x1a, "nr-rrc.rrc_reconf"}, // Radio Bearer Config
-        {0x18, "nr-rrc.dl.dcch"},    // Radio Bearer Config (choice 2)
+        {0x1a, "nr-rrc.radio_bearer_conf"}, // Radio Bearer Config
         // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
 
+const ValueName NrRrcOtaPduType_v9[] = {
 
+        // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
+        // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
+        // {0x00, "nr-rrc.bcch.dl.sch"},
+        // {0x00, "nr-rrc.dl.ccch"},
+        // {0x00, "nr-rrc.dl.dcch"},
+        // {0x00, "nr-rrc.pcch"},
+        // {0x00, "nr-rrc.ul.ccch"},
+        // {0x00, "nr-rrc.ul.ccch1"},
+        {0x01, "nr-rrc.bcch.bch"},  // MIB
+	    {0x02,"nr-rrc.bcch.dl.sch"},
+	    {0x03,"nr-rrc.dl.ccch"},
+	    {0x04,"nr-rrc.dl.dcch"},
+	    {0x05,"nr-rrc.pcch"},
+	    {0x06,"nr-rrc.ul.ccch"},
+        {0x0a, "nr-rrc.ul.dcch"},   // RRC Reconfiguration Complete
+        {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
+	
+       	{0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
+        {0x19, "nr-rrc.radio_bearer_conf"}, // Radio Bearer Config
+        // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
+        // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
+};
 // ------------------------------------------------------------
 // LTE NAS Plain
 const Fmt LteNasPlainFmt[] = {
@@ -1334,6 +1409,35 @@ const Fmt LteRrcMibMessageLogPacketFmt_v3[] = {
         {UINT,      "Sib1 BR Sch Info",  1}
 };
 
+//yueli
+const Fmt LteRrcMibMessageLogPacketFmt_v17[] = {
+        {UINT,      "Physical Cell ID",  2},    //cell ID
+        {UINT,      "Freq",              4},    //frequency
+        {UINT,      "SFN",               2},
+        {UINT,      "SFN MSB4",          1},
+        {UINT,      "HSFN LSB2",         1},
+        {UINT,      "Sib1 Sch Info",           1},
+        {UINT,      "Sys Info Value Tag",      1},
+        {UINT,      "Access Barring Enabled",  1},
+        {UINT,      "Op Mode Type",            1},
+        {UINT,      "Raster Offset",           2},
+        {UINT,      "Number of Antenna", 1}
+};
+
+const ValueName LteRrcMibMessageLogPacketFmt_OpModeType[] = {
+        {0,  "inband-DifferentPCI"},
+        {1,  "inband-SamePCI"},
+        {2,  "GUARDBAND"},
+        {3,  "STANDALONE"}
+};
+
+const ValueName LteRrcMibMessageLogPacketFmt_RasterOffset[] = {
+        {0,  "KHZ-7DOT5"},
+        {1,  "KHZ-2DOT5"},
+        {2,  "KHZ2DOT5"},
+        {3,  "KHZ7DOT5"}
+};
+
 // ----------------------------------------------------------------------------
 // Haotian
 const Fmt LtePdcpDlSrbIntegrityDataPduFmt[] = {
@@ -1419,11 +1523,12 @@ const Fmt LteMacConfigurationSubpkt_DLConfig_Scell_Tag_Info_v2[] = {
 };
 
 const ValueName LteMacConfigurationConfigType_DLConfig_TA_Timer[] = {
-        {0xffff, "Infinity ms"},
+        {0xffff, "Infinity"},
 };
 
 const Fmt LteMacConfigurationSubpkt_ULConfig[] = {
-        {UINT, "SR periodicity",            3},
+        {UINT, "SR resource present",       1},
+        {UINT, "SR periodicity",            2},
         {UINT, "BSR timer",                 2},
         {UINT, "SPS Number of Tx released", 2},
         {UINT, "Retx BSR timer",            2},    // 0xFF need to be read as infinity
@@ -1438,6 +1543,10 @@ const Fmt LteMacConfigurationSubpkt_ULConfig_v2[] = {
         {UINT, "SPS Number of Tx released", 2},
         {UINT, "Retx BSR timer",            2},    // 0xFF need to be read as infinity
         {SKIP, "NULL",                      2},
+};
+
+const ValueName LteMacConfigurationConfigType_ULConfig_BSR_Timer[] = {
+        {0xffff, "Infinity"},
 };
 
 const Fmt LteMacConfigurationSubpkt_RACHConfig[] = {
@@ -1493,11 +1602,54 @@ const Fmt LteMacConfigurationSubpkt_RACHConfig_v5[] = {
         {UINT, "PRACH config",                1},
         {UINT, "CS zone length",              1},
         {UINT, "Root seq index",              2},
-        {UINT, "PRACH Freq Offset",           2},
+        {UINT, "PRACH Freq Offset",           1},
+        {PLACEHOLDER, "Preamble Format",      0},
         {UINT, "High speed flag",             1},
         {UINT, "Max retx Msg3",               1},
         {UINT, "RA rsp win size",             1},
         {UINT, "PRACH Cfg R13 Present",       1},
+};
+
+const ValueName LteMacConfigurationSubpkt_RACHConfig_Power_offset_Group_B[] = {
+        {0x00, "-Infinity"},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_size_v5[] = {
+        {UINT, "RSRP Thresh PRACH List Size", 1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_rsrp_prach_list_v5[] = {
+        {UINT, "RSRP Thresh PRACH List", 1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_hidden_rsrp_prach_list_v5[] = {
+        {UINT, "Hidden RSRP Thresh PRACH List", 1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_prach_param_ce_list_size_v5[] = {
+        {UINT, "PRACH Param CE List", 1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_prach_list_v5[] = {
+        {UINT,"First Preamble",                 1},
+        {UINT,"Last Preamble",                  1},
+        {UINT,"Max Preamble Tx Attempt Per CE", 1},
+        {UINT,"Contention Resol Timer",         2},
+        {UINT,"Prach Cfg Index",                1},
+        {UINT,"RA RSP Win Size",                1},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_hidden_prach_list_v5[] = {
+        {BYTE_STREAM, "Hidden PRACH Param Ce", 7},
+};
+
+const Fmt LteMacConfiguration_RachConfigSubpktPayload_prach_last_part[] = {
+        {UINT, "Initial CE Level",      2},
+        {UINT, "Preamble Trans Max CE", 2},
+};
+
+const ValueName LteMacConfiguration_RachConfigSubpktPayload_prach_initial_ce_level[] = {
+        {0xffff, "NA"},
 };
 
 const Fmt LteMacConfigurationSubpkt_LCConfig[] = {
@@ -1631,6 +1783,129 @@ const Fmt LteMacULTransportBlock_SubpktV2_SampleFmt[] = {
         // Mac Hdr + CE and UL TB Other Structure
 };
 
+//xyf
+const ValueName LteMacULTransportBlock_Mac_Hdr_LCId[] = {
+        {0, "CCCH"},
+        {1, "1"},
+        {2, "2"},
+        {3, "3"},
+        {4, "4"},
+        {5, "5"},
+        {6, "6"},
+        {7, "7"},
+        {8, "8"},
+        {9, "9"},
+        {10, "10"},
+        {11, "CCCH (unsupported)"},
+        {12, "CCCH (unsupported)"},
+        {13, "CCCH and Extended PHR (unsupported)"},
+        {14, "Reserved (unsupported)"},
+        {15, "Reserved (unsupported)"},
+        {16, "Extended LC ID field (unsupported)"},
+        {17, "Reserved (unsupported)"},
+        {18, "AUL confirmation (4 octets) (unsupported)"},
+        {19, "AUL confirmation (1 octet) (unsupported)"},
+        {20, "Recommended bit rate query"},
+        {21, "SPS confirmation (unsupported)"},
+        {22, "Truncated Sidelink BSR (unsupported)"},
+        {23, "Sidelink BSR (unsupported)"},
+        {24, "Dual Connectivity PHR (unsupported)"},
+        {25, "Extended PHR (unsupported)"},
+        {26, "PHR"},
+        {27, "C-RNTI"},
+        {28, "T-BSR"},
+        {29, "S-BSR"},
+        {30, "L-BSR"},
+        {31, "Padding"},
+};
+
+const ValueName LteMacULTransportBlock_Mac_CE_RBRQ_ULorDL[] = {
+        {0, "DL"},
+        {1, "UL"},
+};
+
+const int LteMacULTransportBlock_Mac_CE_BSR_BufferSizeValue[] = {
+    0, 10, 12, 14, 17, 19, 22, 26,
+    31, 36, 42, 49, 57, 67, 78, 91,
+    107, 125, 146, 171, 200, 234, 274, 321,
+    376, 440, 515, 603, 706, 826, 967, 1132,
+    1326, 1552, 1817, 2127, 2490, 2915, 3413, 3995,
+    4677, 5476, 6411, 7505, 8787, 10287, 12403, 14099,
+    16507, 19325, 22624, 24687, 31009, 36304, 42502, 49759,
+    58255, 68201, 79846, 93479, 109439, 128125, 150000, 0x7fffffff
+};
+
+const Fmt LteMacULTransportBlock_Mac_Hdr[] = {
+        {UINT,        "Header Field",    1},
+        {PLACEHOLDER, "LC ID",           0},
+        {PLACEHOLDER, "Len",             0},
+};
+
+const Fmt LteMacULTransportBlock_Mac_Hdr_L1[] = {
+        {UINT,        "L1 Field",        1},
+};
+
+const Fmt LteMacULTransportBlock_Mac_Hdr_L2[] = {
+        {UINT,        "L2 Field",        1},
+};
+
+const Fmt LteMacULTransportBlock_Mac_CE_L_BSR[] = {
+        {UINT,        "L-BSR Field 1",   1},
+        {UINT,        "L-BSR Field 2",   1},
+        {UINT,        "L-BSR Field 3",   1},
+        {PLACEHOLDER, "BSR LCG 0",       0},
+        {PLACEHOLDER, "BSR LCG 1",       0},
+        {PLACEHOLDER, "BSR LCG 2",       0},
+        {PLACEHOLDER, "BSR LCG 3",       0},
+        {PLACEHOLDER, "BSR LCG 0 (bytes)", 0},
+        {PLACEHOLDER, "BSR LCG 1 (bytes)", 0},
+        {PLACEHOLDER, "BSR LCG 2 (bytes)", 0},
+        {PLACEHOLDER, "BSR LCG 3 (bytes)", 0},
+};
+
+const Fmt LteMacULTransportBlock_Mac_CE_S_T_BSR[] = {
+        {UINT,        "S/T-BSR Field",     1},
+};
+
+const Fmt LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG0[] = {
+        {PLACEHOLDER, "BSR LCG 0",       0},
+        {PLACEHOLDER, "BSR LCG 0 (bytes)", 0},
+};
+
+const Fmt LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG1[] = {
+        {PLACEHOLDER, "BSR LCG 1",       0},
+        {PLACEHOLDER, "BSR LCG 1 (bytes)", 0},
+};
+
+const Fmt LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG2[] = {
+        {PLACEHOLDER, "BSR LCG 2",       0},
+        {PLACEHOLDER, "BSR LCG 2 (bytes)", 0},
+};
+
+const Fmt LteMacULTransportBlock_Mac_CE_S_T_BSR_LCG3[] = {
+        {PLACEHOLDER, "BSR LCG 3",       0},
+        {PLACEHOLDER, "BSR LCG 3 (bytes)", 0},
+};
+
+const Fmt LteMacULTransportBlock_Mac_CE_C_RNTI[] = {
+        {BYTE_STREAM, "C-RNTI",          2},
+};
+
+const Fmt LteMacULTransportBlock_Mac_CE_PHR[] = {
+        {UINT,        "PHR Field",       1},
+        {PLACEHOLDER, "PHR Ind",         0},
+};
+
+const Fmt LteMacULTransportBlock_Mac_CE_RBRQ[] = {
+        {UINT,        "RBRQ Field 1",     1},
+        {UINT,        "RBRQ Field 2",     1},
+        {PLACEHOLDER, "LCID (RBRQ)",      0},
+        {PLACEHOLDER, "UL/DL",            0},
+        {PLACEHOLDER, "Bit Rate",         0},
+        {PLACEHOLDER, "Bit Rate Multiplier", 0},
+};
+//xyf
+
 // ----------------------------------------------------------
 // MAC DL Transport Block
 // Jie
@@ -1684,6 +1959,71 @@ const Fmt LteMacDLTransportBlock_SubpktV4_SampleFmt[] = {
         {UINT,        "HDR LEN",         1},
         // Mac Hdr + CE and UL TB Other Structure
 };
+
+//xyf
+const ValueName LteMacDLTransportBlock_Mac_Hdr_LCId[] = {
+        {0, "CCCH"},
+        {1, "1"},
+        {2, "2"},
+        {3, "3"},
+        {4, "4"},
+        {5, "5"},
+        {6, "6"},
+        {7, "7"},
+        {8, "8"},
+        {9, "9"},
+        {10, "10"},
+        {11, "Reserved (unsupported)"},
+        {12, "Reserved (unsupported)"},
+        {13, "Reserved (unsupported)"},
+        {14, "Reserved (unsupported)"},
+        {15, "Reserved (unsupported)"},
+        {16, "Extended LC ID field (unsupported)"},
+        {17, "DCQR Command (unsupported)"},
+        {18, "Activation/Deactivation of PDCP Duplication (unsupported)"},
+        {19, "Hibernation (1 octet) (unsupported)"},
+        {20, "Hibernation (4 octet) (unsupported)"},
+        {21, "Activation/Deactivation of CSI-RS (unsupported)"},
+        {22, "Recommended bit rate (unsupported)"},
+        {23, "SC-PTM Stop Indication (unsupported)"},
+        {24, "Activation/Deactivation (4 octet) (unsupported)"},
+        {25, "SC-MCCH, SC-MTCH (unsupported)"},
+        {26, "Long DRX Command"},
+        {27, "Activation/Deactivation (1 octet)"},
+        {28, "CRID"},
+        {29, "TA"},
+        {30, "DRX Command"},
+        {31, "Padding"},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_Hdr[] = {
+        {UINT,        "Header Field",    1},
+        {PLACEHOLDER, "LC ID",           0},
+        {PLACEHOLDER, "Len",             0},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_Hdr_L1[] = {
+        {UINT,        "L1 Field",        1},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_Hdr_L2[] = {
+        {UINT,        "L2 Field",        1},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_CE_TA[] = {
+        {UINT,        "TA Field",        1},
+        {PLACEHOLDER, "TAG Id",          0},
+        {PLACEHOLDER, "TA Command",      0},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_CE_AD1[] = {
+        {UINT,        "AD Field",        1},
+};
+
+const Fmt LteMacDLTransportBlock_Mac_CE_CRID[] = {
+        {BYTE_STREAM, "CRID",            6},
+};
+//xyf
 
 // ----------------------------------------------------------
 // LTE Mac UL Tx Statistics
@@ -2265,7 +2605,7 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_v5[] = {
         {UINT,        "Preamble trans max",               1},
         {UINT,        "Contention resolution timer (ms)", 2},
         {UINT,        "Message size Group_A",             2},
-        {UINT,        "Power offset Group_B",             1},
+        {UINT,        "Power offset Group_B",             1},   //TODO: the relationship between -Infinity and 0
         {UINT,        "PMax (dBm)",                       2},
         {UINT,        "Delta preamble Msg3",              2},
         {UINT,        "PRACH config",                     1},
@@ -2296,7 +2636,12 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_param_ce_list_size_v5[
 };
 
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_list_v5[] = {
-        {BYTE_STREAM, "PRACH Param Ce", 7},
+        {UINT,"First Preamble",                 1},
+        {UINT,"Last Preamble",                  1},
+        {UINT,"Max Preamble Tx Attempt Per CE", 1},
+        {UINT,"Contention Resol Timer",         2},
+        {UINT,"Prach Cfg Index",                1},
+        {UINT,"RA RSP Win Size",                1},
 };
 
 const Fmt LteMacRachTrigger_RachConfigSubpktPayload_hidden_prach_list_v5[] = {
@@ -2310,30 +2655,29 @@ const Fmt LteMacRachTrigger_RachConfigSubpktPayload_prach_last_part[] = {
 
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload[] = {
         // Version 1
-        {UINT,        "Rach reason",      1},
-        {PLACEHOLDER, "RACH Contention",  0},
-        {BYTE_STREAM, "Maching ID",       6},
-        {SKIP,        NULL,               1},
-        {UINT,        "Preamble",         1},
-        {BYTE_STREAM, "Preamble RA mask", 1},
-        {UINT,        "Msg3 size",        1},
-        {UINT,        "Group chosen",     1},
-        {UINT,        "Radio condn (dB)", 1},
-        {BYTE_STREAM, "CRNTI",            2},
+        {UINT,        "Rach reason",            1},
+        {PLACEHOLDER, "RACH Contention",        0},
+        {UINT, "Maching ID",                    8},
+        {PLACEHOLDER,        "Preamble",        0},
+        {BYTE_STREAM, "Preamble RA mask",       1},
+        {UINT,        "Msg3 size",              1},
+        {UINT,        "Group chosen",           1},
+        {UINT,        "Radio condn (dB)",       1},
+        {BYTE_STREAM_LITTLE_ENDIAN, "CRNTI",    2},
 };
 
 const Fmt LteMacRachTrigger_RachReasonSubpktPayload_v2[] = {
-        {UINT,        "Sub Id",           1},
-        {UINT,        "Cell Id",          1},
-        {UINT,        "Rach reason",      1},
-        {BYTE_STREAM, "Maching ID",       6},
-        {UINT,        "RACH Contention",  1},
-        {UINT,        "Preamble",         1},
-        {BYTE_STREAM, "Preamble RA mask", 1},
-        {UINT,        "Msg3 size",        1},
-        {UINT,        "Group chosen",     1},
-        {UINT,        "Radio condn (dB)", 1},
-        {BYTE_STREAM, "CRNTI",            2},
+        {UINT,        "Sub Id",                 1},
+        {UINT,        "Cell Id",                1},
+        {UINT,        "Rach reason",            1},
+        {BYTE_STREAM, "Maching ID",             8},
+        {PLACEHOLDER,        "RACH Contention", 0},
+        {PLACEHOLDER,        "Preamble",        0},
+        {BYTE_STREAM, "Preamble RA mask",       1},
+        {UINT,        "Msg3 size",              1},
+        {UINT,        "Group chosen",           1},
+        {UINT,        "Radio condn (dB)",       1},
+        {BYTE_STREAM_LITTLE_ENDIAN, "CRNTI",    2},
 };
 
 const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason[] = {
@@ -2342,6 +2686,10 @@ const ValueName LteMacRachTrigger_RachReasonSubpkt_RachReason[] = {
         {2, "UL_DATA"},
         {3, "DL_DATA"},
         {4, "HO"},
+};
+
+const ValueName LteMacRachTrigger_RachReasonSubpkt_GroupChosen[] = {
+        {0, "Group A(0)"},
 };
 
 const ValueName ValueNameRachContention[] = {
@@ -2415,9 +2763,17 @@ const Fmt LteMacRachAttempt_Subpkt_Msg1_v3[] = {
 
 const Fmt LteMacRachAttempt_Subpkt_Msg1_v4[] = {
         {UINT,        "Preamble Index",        1},
-        {BYTE_STREAM, "Preamble index mask",   1},
+        {UINT,        "Preamble index mask",   1},
         {UINT,        "Preamble power offset", 2},
         {UINT,        "CE Level",              1},
+};
+
+const ValueName LteMacRachAttempt_Subpkt_Preamble_index_mask[] = {
+        {0xff, "Invalid"},
+};
+
+const ValueName LteMacRachAttempt_Subpkt_CELEVEL[] = {
+        {0, "CE_LEVEL_0"},
 };
 
 const Fmt LteMacRachAttempt_Subpkt_Msg2[] = {
@@ -2439,7 +2795,7 @@ const Fmt LteMacRachAttempt_Subpkt_Msg3[] = {
 };
 
 const Fmt LteMacRachAttempt_Subpkt_Msg3_v4[] = {
-        {BYTE_STREAM, "Grant Raw", 4},
+        {UINT,        "Grant Raw", 4},
         {UINT,        "Grant",     2},
         {UINT,        "Harq ID",   1},
 };
@@ -3876,6 +4232,11 @@ const ValueName ValueNameRNTIType[] = {
         {7, "TPC-PUCCH-RNTI"},
         {8, "MBMS RNTI"},
 };
+const ValueName ValueNameNBIoT_RNTIType[] = {
+        // 2 bits
+        {0, "C-RNTI"},
+        {2, "TC-RNTI"},
+};
 const ValueName ValueNameDCIFormat[] = {
         // 4 bits
         // Release 8
@@ -3895,6 +4256,9 @@ const ValueName ValueNameDCIFormat[] = {
         {12, "Format 60A"},
         {13, "Format 61A"},
         {15, "Reserved"},
+
+        //xyf
+        {14, "Format 62"},
 };
 
 const ValueName ValueNameMatchOrNot[] = {
@@ -3933,6 +4297,10 @@ const ValueName ValueNamePruneStatus[] = {
         //added for pdcch_decoding v24
         {200, "PDCCH_DEBUG_SUCCESS_DCI60A"},
         {201, "PDCCH_DEBUG_SUCCESS_DCI61A"},
+
+        //xyf
+        {202, "PDCCH_DEBUG_SUCCESS_DCI62"},
+        {216, "PDCCH_DEBUG_SUCCESS_DCI62_EARLY_TERMINATION"},
 
 };
 
@@ -4110,6 +4478,8 @@ const ValueName ValueNameCDRXEvent[] = {
         {13, "CDRX_OFF_2_ON"},
         {22, "WAKEUP_MISSED_CYCLE_TIMER_START"},
         {23, "WAKEUP_MISSED_CYCLE_TIMER_END"},
+        {24, "CATM1_UL_RETX_TIMER_START"},
+        {25, "CATM1_UL_RETX_TIMER_END"},
 };
 
 const ValueName ValueNameWcdmaRrcStates[] = {
@@ -4269,9 +4639,12 @@ const Fmt ModemDebug_Fmt[] = {
 
 bool is_log_packet (const char *b, size_t length);
 bool is_debug_packet (const char *b, size_t length);   //Yuanjie: test if it's a debugging message
-bool is_custom_packet (const char *b, size_t length);
 
 bool is_custom_packet (const char *b, size_t length);
+
+
+// Set sampling rate
+bool set_target_sampling_rate(int sampling_rate);
 
 // Given a binary string, try to decode it as a log packet.
 // Return a specially formatted Python list that stores the decoding result.

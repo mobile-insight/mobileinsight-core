@@ -96,7 +96,7 @@ class MsgLogger(Analyzer):
         """
         if not msg.data:
             return
-        self.__msg_log.append(msg)
+        # self.__msg_log.append(msg)
         date = datetime.datetime.fromtimestamp(
             msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')
         # self.log_info(date+':'+msg.type_id)

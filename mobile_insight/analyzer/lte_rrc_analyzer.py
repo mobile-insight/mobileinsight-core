@@ -277,7 +277,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 raw_msg = Event(' '.join(map(str, [log_item_dict['timestamp'], item['SFN'], item['Sub-FN']])),
                                 msg.type_id, item)
                 if self.state_machine.update_state(raw_msg):
-                    self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
+                    # self.log_info("rrc state: " + str(self.state_machine.get_current_state()))
                     event = Event(msg.timestamp, 'rrc state', str(self.state_machine.get_current_state()))
                     self.send_to_coordinator(event)
                     # self.log_info("rrc state history: " + str(self.state_machine.state_history))
@@ -354,85 +354,82 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                         meas_report['rssi'] = meas_report['rsrp'] - 141  # map rsrp to rssi
                     elif val.get('name') == 'lte-rrc.rsrqResult':
                         meas_report['rsrq'] = int(val.get('show'))
-                self.broadcast_info('MEAR_PCELL', meas_report)
-                # self.log_info('MEAR_PCELL: ' + str(meas_report))
+                self.broadcast_info('MEAS_PCELL', meas_report)
+                self.log_info('MEAS_PCELL: ' + str(meas_report))
                 self.send_to_coordinator(Event(msg.timestamp, 'rsrp', meas_report['rsrp']))
                 self.send_to_coordinator(Event(msg.timestamp, 'rsrq', meas_report['rsrq']))
 
             # TODO: use MIB, not lte-rrc.trackingAreaCode
-            if field.get('name') == "lte-rrc.trackingAreaCode":  # tracking area code
-                self.__status.tac = field.get('show')
+            # if field.get('name') == "lte-rrc.trackingAreaCode":  # tracking area code
+            #     self.__status.tac = int(field.get('show'))
 
             # serving cell and intra-frequency reselection info
             if field.get('name') == "lte-rrc.sib3_element":
-                
-                try:
-                    field_val = {}
 
-                    # Default value setting
-                    # FIXME: set default to those in TS36.331
-                    field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
-                    field_val['lte-rrc.threshServingLow'] = None  # mandatory
-                    field_val['lte-rrc.s_NonIntraSearch'] = "inf"
-                    field_val['lte-rrc.q_Hyst'] = 0
-                    field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
-                    field_val['lte-rrc.p_Max'] = 23  # default value for UE category 3
-                    field_val['lte-rrc.s_IntraSearch'] = "inf"
-                    field_val['lte-rrc.t_ReselectionEUTRA'] = None
+                field_val = {}
 
-                    for val in field.iter('field'):
-                        field_val[val.get('name')] = val.get('show')
+                # Default value setting
+                # FIXME: set default to those in TS36.331
+                field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
+                field_val['lte-rrc.threshServingLow'] = 0  # mandatory
+                field_val['lte-rrc.s_NonIntraSearch'] = "inf"
+                field_val['lte-rrc.q_Hyst'] = 0
+                field_val['lte-rrc.utra_q_RxLevMin'] = 0  # mandatory
+                field_val['lte-rrc.p_Max'] = 23  # default value for UE category 3
+                field_val['lte-rrc.s_IntraSearch'] = "inf"
+                field_val['lte-rrc.t_ReselectionEUTRA'] = 0
 
-                    cur_pair = (self.__status.id, self.__status.freq)
-                    if cur_pair not in self.__config:
-                        self.__config[cur_pair] = LteRrcConfig()
-                        self.__config[cur_pair].status = self.__status
+                for val in field.iter('field'):
+                    field_val[val.get('name')] = val.get('show')
 
-                    self.__config[cur_pair].sib.serv_config = LteRrcSibServ(
-                        int(field_val['lte-rrc.cellReselectionPriority']),
-                        int(field_val['lte-rrc.threshServingLow']) * 2,
-                        float(field_val['lte-rrc.s_NonIntraSearch']) * 2,
-                        int(field_val['lte-rrc.q_Hyst']))
+                cur_pair = (self.__status.id, self.__status.freq)
+                if cur_pair not in self.__config:
+                    self.__config[cur_pair] = LteRrcConfig()
+                    self.__config[cur_pair].status = self.__status
 
-                    # Test profile
-                    if self.__status.inited():
-                        self.profile.update(
-                            "LteRrcProfile:" + str(self.__status.id) + "_" + str(self.__status.freq) + ".idle.serv_config",
-                            {'priority': field_val['lte-rrc.cellReselectionPriority'],
-                             'threshserv_low': str(int(field_val['lte-rrc.threshServingLow']) * 2),
-                             's_nonintrasearch': str(float(field_val['lte-rrc.s_NonIntraSearch']) * 2),
-                             'q_hyst': field_val['lte-rrc.q_Hyst']})
+                self.__config[cur_pair].sib.serv_config = LteRrcSibServ(
+                    int(field_val['lte-rrc.cellReselectionPriority']),
+                    int(field_val['lte-rrc.threshServingLow']) * 2,
+                    float(field_val['lte-rrc.s_NonIntraSearch']) * 2,
+                    int(field_val['lte-rrc.q_Hyst']))
 
-                    self.__config[cur_pair].sib.intra_freq_config = LteRrcSibIntraFreqConfig(
-                        int(field_val['lte-rrc.t_ReselectionEUTRA']),
-                        int(field_val['lte-rrc.utra_q_RxLevMin']) * 2,
-                        int(field_val['lte-rrc.p_Max']),
-                        float(field_val['lte-rrc.s_IntraSearch']) * 2)
+                # Test profile
+                if self.__status.inited():
+                    self.profile.update(
+                        "LteRrcProfile:" + str(self.__status.id) + "_" + str(self.__status.freq) + ".idle.serv_config",
+                        {'priority': field_val['lte-rrc.cellReselectionPriority'],
+                         'threshserv_low': str(int(field_val['lte-rrc.threshServingLow']) * 2),
+                         's_nonintrasearch': str(float(field_val['lte-rrc.s_NonIntraSearch']) * 2),
+                         'q_hyst': field_val['lte-rrc.q_Hyst']})
 
-                    # Test profile
-                    if self.__status.inited():
-                        self.profile.update("LteRrcProfile:" + str(self.__status.id) + "_" + str(
-                            self.__status.freq) + ".idle.intra_freq_config",
-                                            {'tReselection': field_val['lte-rrc.t_ReselectionEUTRA'],
-                                             'q_RxLevMin': str(int(field_val['lte-rrc.utra_q_RxLevMin']) * 2),
-                                             'p_Max': field_val['lte-rrc.p_Max'],
-                                             's_IntraSearch': str(float(field_val['lte-rrc.s_IntraSearch']) * 2)})
-                    self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                    # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
-                except:
-                    pass
+                self.__config[cur_pair].sib.intra_freq_config = LteRrcSibIntraFreqConfig(
+                    int(field_val['lte-rrc.t_ReselectionEUTRA']),
+                    int(field_val['lte-rrc.utra_q_RxLevMin']) * 2,
+                    int(field_val['lte-rrc.p_Max']),
+                    float(field_val['lte-rrc.s_IntraSearch']) * 2)
+
+                # Test profile
+                if self.__status.inited():
+                    self.profile.update("LteRrcProfile:" + str(self.__status.id) + "_" + str(
+                        self.__status.freq) + ".idle.intra_freq_config",
+                                        {'tReselection': field_val['lte-rrc.t_ReselectionEUTRA'],
+                                         'q_RxLevMin': str(int(field_val['lte-rrc.utra_q_RxLevMin']) * 2),
+                                         'p_Max': field_val['lte-rrc.p_Max'],
+                                         's_IntraSearch': str(float(field_val['lte-rrc.s_IntraSearch']) * 2)})
+                self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
             # inter-frequency (LTE)
             if field.get('name') == "lte-rrc.interFreqCarrierFreqList":
                 field_val = {}
 
                 # FIXME: set to the default value based on TS36.331
-                field_val['lte-rrc.dl_CarrierFreq'] = None  # mandatory
-                field_val['lte-rrc.t_ReselectionEUTRA'] = None  # mandatory
-                field_val['lte-rrc.q_RxLevMin'] = None  # mandatory
+                field_val['lte-rrc.dl_CarrierFreq'] = 0  # mandatory
+                field_val['lte-rrc.t_ReselectionEUTRA'] = 0  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = 0  # mandatory
                 field_val['lte-rrc.p_Max'] = 23  # optional, r.f. 36.101
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
-                field_val['lte-rrc.threshX_High'] = None  # mandatory
-                field_val['lte-rrc.threshX_Low'] = None  # mandatory
+                field_val['lte-rrc.threshX_High'] = 0  # mandatory
+                field_val['lte-rrc.threshX_Low'] = 0  # mandatory
                 field_val['lte-rrc.q_OffsetFreq'] = 0
 
                 for val in field.iter('field'):
@@ -487,7 +484,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                         self.__config[cur_pair].sib.inter_freq_cell_config[offset_pair] = q_offset_range[int(offset)]
 
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             # inter-RAT (UTRA)
             if field.get('name') == "lte-rrc.CarrierFreqUTRA_FDD_element":
@@ -495,12 +492,12 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 # Default value setting
                 # FIXME: set to default based on TS25.331
-                field_val['lte-rrc.carrierFreq'] = None  # mandatory
-                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
-                field_val['lte-rrc.p_MaxUTRA'] = None  # mandatory
+                field_val['lte-rrc.carrierFreq'] = 0  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = 0  # mandatory
+                field_val['lte-rrc.p_MaxUTRA'] = 0  # mandatory
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
-                field_val['lte-rrc.threshX_High'] = None  # mandatory
-                field_val['lte-rrc.threshX_High'] = None  # mandatory
+                field_val['lte-rrc.threshX_High'] = 0  # mandatory
+                field_val['lte-rrc.threshX_High'] = 0  # mandatory
 
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
@@ -538,7 +535,8 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          })
 
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             if field.get('name') == "lte-rrc.t_ReselectionUTRA":
                 cur_pair = (self.__status.id, self.__status.freq)
@@ -556,12 +554,12 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
 
                 # Default value setting
                 # FIXME: set to default based on TS25.331
-                field_val['lte-rrc.startingARFCN'] = None  # mandatory
-                field_val['lte-rrc.utra_q_RxLevMin'] = None  # mandatory
+                field_val['lte-rrc.startingARFCN'] = 0  # mandatory
+                field_val['lte-rrc.utra_q_RxLevMin'] = 0  # mandatory
                 field_val['lte-rrc.p_MaxGERAN'] = 0  # mandatory
                 field_val['lte-rrc.cellReselectionPriority'] = 0  # mandatory
-                field_val['lte-rrc.threshX_High'] = None  # mandatory
-                field_val['lte-rrc.threshX_High'] = None  # mandatory
+                field_val['lte-rrc.threshX_High'] = 0  # mandatory
+                field_val['lte-rrc.threshX_High'] = 0  # mandatory
 
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
@@ -598,7 +596,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          'q_offset_freq': '0'
                                          })
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             # FIXME: t_ReselectionGERAN appears BEFORE config, so this code does not work!
             if field.get('name') == "lte-rrc.t_ReselectionGERAN":
@@ -610,14 +608,14 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     if config.rat == "GERAN":
                         config.tReselection = float(field.get('show'))
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
             # intra-frequency cell offset
             if field.get('name') == "lte-rrc.IntraFreqNeighCellInfo_element":
                 field_val = {}
 
-                field_val['lte-rrc.physCellId'] = None  # mandatory
-                field_val['lte-rrc.q_OffsetCell'] = None  # mandatory
+                field_val['lte-rrc.physCellId'] = 0  # mandatory
+                field_val['lte-rrc.q_OffsetCell'] = 0  # mandatory
 
                 for val in field.iter('field'):
                     field_val[val.get('name')] = val.get('show')
@@ -631,7 +629,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 offset = int(field_val['lte-rrc.q_OffsetCell'])
                 self.__config[cur_pair].sib.intra_freq_cell_config[cell_id] = q_offset_range[int(offset)]
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
-                # self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
+                self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
 
                 # TODO: RRC connection status update
 
@@ -651,10 +649,10 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
         for field in msg.data.iter('field'):
 
             if field.get('name') == "lte-rrc.measObjectId":
-                measobj_id = field.get('show')
+                measobj_id = int(field.get('show'))
 
             if field.get('name') == "lte-rrc.reportConfigId":
-                report_id = field.get('show')
+                report_id = int(field.get('show'))
 
             # Add a LTE measurement object
             if field.get('name') == "lte-rrc.measObjectEUTRA_element":
@@ -691,13 +689,27 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                             self.__config[cur_pair].active.measobj[freq].add_cell(cell_id, cell_offset)
 
                 self.broadcast_info('RRC_RECONFIG', self.__config[cur_pair].dump_dict())
-                # self.log_info('RRC_RECONFIG: ' + str(self.__config[cur_pair].dump()))
+                self.log_info('RRC_RECONFIG: ' + str(self.__config[cur_pair].dump()))
+
+            # Add a NR (5G) measurement object (5G-NSA: in order to add NR cell as secondaryGroup for EN-DC)
+            if field.get('name') == "lte-rrc.measObjectNR_r15_element":
+                freq = None
+                for val in field.iter('field'):
+                    if val.get('name') == "lte-rrc.carrierFreq_r15":
+                        freq = int(val.get('show'))
+                        break
+                if freq is not None:
+                    cur_pair = (self.__status.id, self.__status.freq)
+                    if cur_pair not in self.__config:
+                        self.__config[cur_pair] = LteRrcConfig()
+                        self.__config[cur_pair].status = self.__status
+                    self.__config[cur_pair].active.measobj[freq] = LteMeasObjectNr(measobj_id, freq, None)
 
             # Add a UTRA (3G) measurement object:
             if field.get('name') == "lte-rrc.measObjectUTRA_element":
                 field_val = {}
 
-                field_val['lte-rrc.carrierFreq'] = None
+                field_val['lte-rrc.carrierFreq'] = 0
                 field_val['lte-rrc.offsetFreq'] = 0
 
                 for val in field.iter('field'):
@@ -867,6 +879,26 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                         break
                         report_config.add_event('b2', threshold1, threshold2)
 
+                    if val.get('name') == "lte-rrc.eventB1_NR_r15_element":
+                        threshold = None
+                        quantity = None
+                        for item in val.iter('field'):
+                            if item.get('name') == "lte-rrc.b1_ThresholdNR_r15":
+                                for item2 in item.iter('field'):
+                                    if item2.get('name') == "lte-rrc.nr_RSRP_r15":
+                                        threshold = int(item2.get('show')) - 156
+                                        quantity = 'RSRP'
+                                        break
+                                    if item2.get('name') == "lte-rrc.nr_RSRQ_r15":
+                                        threshold = int(item2.get('show')) / 2.0 - 43
+                                        quantity = 'RSRQ'
+                                        break
+                                    if item2.get('name') == "lte-rrc.nr_SINR_r15":
+                                        threshold = int(item2.get('show')) / 2.0 - 23
+                                        quantity = 'SINR'
+                                        break
+                        report_config.add_event('b1', threshold, None)
+
                 self.__config[cur_pair].active.report_list[report_id] = report_config
 
             # Add a LTE measurement report config
@@ -884,6 +916,47 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 obj_id = int(field_val['lte-rrc.measObjectId'])
                 config_id = int(field_val['lte-rrc.reportConfigId'])
                 self.__config[cur_pair].active.measid_list[meas_id] = (obj_id, config_id)
+
+            # Measurement for NR objects
+            if field.get('name') == "lte-rrc.measResults_element":
+                meas_id = None
+                NR_cells = []
+                for val in field.iter('field'):
+                    if val.get('name') == "lte-rrc.measId":
+                        meas_id = int(val.get('show'))
+                    if val.get('name') == "lte-rrc.MeasResultCellNR_r15_element":
+                        pci = None
+                        rsrp = None
+                        for item in val.iter('field'):
+                            if item.get('name') == "lte-rrc.pci_r15":
+                                pci = int(item.get('show'))
+                            if item.get('name') == "lte-rrc.measResultCell_r15_element":
+                                for sub in item.iter('field'):
+                                    if sub.get('name') == "lte-rrc.rsrpResult_r15":
+                                        rsrp = int(sub.get('show')) - 156
+                                    break
+                                break
+                        if pci:
+                            NR_cells.append({"lte-rrc.pci_r15":pci, "lte-rrc.rsrpResult_r15":rsrp})
+                
+                if NR_cells:   
+                    cur_pair = (self.__status.id, self.__status.freq)
+                    config_str = 'None'
+                    obj_str = 'None'
+                    if cur_pair in self.__config and meas_id in self.__config[cur_pair].active.measid_list:
+                        obj_id,config_id = self.__config[cur_pair].active.measid_list[meas_id]
+                    
+                        if config_id in self.__config[cur_pair].active.report_list:
+                            config_str = self.__config[cur_pair].active.report_list[config_id].dump()
+                    
+                        for key,obj in self.__config[cur_pair].active.measobj.items():
+                            if obj.obj_id == obj_id:
+                                obj_str = obj.dump()
+                                break
+                    self.log_info("NR_RRC_REPORT " + str(msg.timestamp) + " " +
+                        "meas_object: " + obj_str + " " +
+                        "config: " + config_str + " " +
+                        "NR cells: " + str(NR_cells))               
 
     def __callback_rrc_conn(self, msg):
         """
@@ -913,6 +986,58 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                 drx_state['DRX state'] = "IDLE"
                 drx_state['Timestamp'] = str(msg.timestamp)
                 self.broadcast_info('DRX', drx_state)
+
+            if field.get('name') == "lte-rrc.nr_Config_r15":
+                setup = None
+                for var in field.iter('field'):
+                    if setup is None and var.get('name') == "lte-rrc.setup_element":
+                        setup = True
+                    if setup is None and var.get('name') == "lte-rrc.release_element":
+                        setup = False
+                        self.log_info("RELEASE_NR_CELL " + str(msg.timestamp))
+                    if var.get('name') == "nr-rrc.spCellConfigCommon_element":
+                        pci = None
+                        freq = None
+                        for item in var.iter('field'):
+                            if item.get('name') == "nr-rrc.physCellId":
+                                pci = int(item.get('show'))
+                            if item.get('name') == "nr-rrc.absoluteFrequencySSB":
+                                freq = int(item.get('show'))
+                                break
+                        if pci and freq:
+                            self.log_info('UPDATA_NR_CELL ' + str(msg.timestamp) + ' ' + str((freq,pci)))
+
+            if field.get('name') == "lte-rrc.mobilityControlInfo_element":
+                pci = None
+                freq = None
+                for val in field.iter('field'):
+                    if val.get('name') == "lte-rrc.targetPhysCellId":
+                        pci = int(val.get('show'))
+                    if val.get('name') == "lte-rrc.dl_CarrierFreq":
+                        freq = int(val.get('show'))
+                        break
+                if pci and freq:
+                    self.log_info('HANDOVER ' + str(msg.timestamp) + ' from ' + str((self.__status.freq, self.__status.id)) + ' to ' + str((freq,pci)))
+                    self.__update_conn(msg.timestamp,freq,pci)
+
+    def __update_conn(self, timestamp, freq, pci):
+        status_updated = False
+        if not self.__status.inited():
+            status_updated = True
+            self.__status.freq = freq
+            self.__status.id = pci
+        elif self.__status.freq != freq or self.__status.id != pci:
+            status_updated = True
+            curr_conn = self.__status.conn
+            self.__status = LteRrcStatus()
+            self.__status.conn = curr_conn
+            self.__status.freq = freq
+            self.__status.id = pci
+            # self.__status.tac = None
+
+        if status_updated:
+            self.log_info(self.__status.dump())
+            self.broadcast_info('LTE_RRC_STATUS', self.__status.dump_dict())
 
     def set_source(self, source):
         """
@@ -1466,10 +1591,44 @@ class LteMeasObjectEutra:
         res = (self.__class__.__name__
                + ' ' + str(self.obj_id)
                + ' ' + str(self.freq)
-               + ' ' + str(self.offset_freq)
-               + '\n')
+               + ' ' + str(self.offset_freq) + ' ')
         for item in self.cell_list:
-            res += str(item) + ' ' + str(self.cell_list[item]) + '\n'
+            res += str(item) + ' ' + str(self.cell_list[item]) + ' '
+        return res
+
+
+class LteMeasObjectNr:
+    """
+    NR Measurement object configuration
+    """
+
+    def __init__(self, measobj_id, freq, offset_freq):
+        self.obj_id = measobj_id
+        self.freq = freq  # carrier frequency
+        self.offset_freq = offset_freq  # frequency-specific measurement offset
+        self.cell_list = {}  # cellID->cellIndividualOffset
+
+    def add_cell(self, cell_id, cell_offset):
+        """
+        Add a cell individual offset
+
+        :param cell_id: the cell identifier
+        :type cell_id: int
+        :param cell_offset: the cell individual offset
+        :type cell_offset: int
+        """
+        self.cell_list[cell_id] = cell_offset
+
+    def dump(self):
+        """
+        Report the cell's NR measurement configurations
+
+        :returns: a string that encodes the cell's NR measurement configurations
+        :rtype: string
+        """
+        res = (self.__class__.__name__
+               + ' ' + str(self.obj_id)
+               + ' ' + str(self.freq))
         return res
 
 
@@ -1531,11 +1690,11 @@ class LteReportConfig:
         """
         res = (self.__class__.__name__
                + ' ' + str(self.report_id)
-               + ' ' + str(self.hyst) + '\n')
+               + ' ' + str(self.hyst))
         for item in self.event_list:
-            res += (str(item.type)
+            res += (' ' + str(item.type)
                     + ' ' + str(item.threshold1)
-                    + ' ' + str(item.threshold2) + '\n')
+                    + ' ' + str(item.threshold2))
         return res
 
 

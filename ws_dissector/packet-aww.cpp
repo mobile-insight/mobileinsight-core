@@ -51,6 +51,11 @@ static void init_proto_names (const char *protos []) {
     protos[203] = "lte-rrc.bcch.dl.sch";
     protos[204] = "lte-rrc.dl.ccch";
     protos[205] = "lte-rrc.ul.ccch";
+    protos[206] = "lte-rrc.dl.dcch.nb";
+    protos[207] = "lte-rrc.ul.dcch.nb";
+    protos[208] = "lte-rrc.bcch.dl.sch.nb";
+    protos[209] = "lte-rrc.dl.ccch.nb";
+    protos[210] = "lte-rrc.ul.ccch.nb";
 
     protos[250] = "nas-eps_plain";
 
@@ -71,6 +76,10 @@ static void init_proto_names (const char *protos []) {
     protos[410] = "nr-rrc.rrc_reconf";
     protos[411] = "nr-rrc.ue_mrdc_cap";
     protos[412] = "nr-rrc.ue_nr_cap";
+    protos[413] = "nr-rrc.sbcch.sl.bch";
+    protos[414] = "nr-rrc.scch";
+    protos[415] = "nr-rrc.radio_bearer_conf";
+    protos[416] = "nas-5gs";
 }
 
 

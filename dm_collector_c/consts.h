@@ -111,7 +111,83 @@ enum LogPacketType {
 
     Modem_debug_message = 0x1FEB,
 
+    LTE_NB1_Random_Access_Request_Report = 0xB240,
+    LTE_NB1_Random_Access_Response_Report = 0xB241,
+    LTE_NB1_UE_Identification_Message_Report= 0xB242,
+    LTE_NB1_Contention_Resolution_Message_Report = 0xB243,
+    
+    LTE_NB1_ML1_GM_DCI_Info = 0xB244,
+    LTE_NB1_ML1_GM_TX_Report = 0xB245,
+    LTE_NB1_ML1_GM_PDSCH_STAT_Ind = 0xB246,
+    LTE_NB1_ML1_CDRX_Events_Info = 0xB248,
+    LTE_NB1_ML1_Sum_Sys_Info = 0xB24B,
+    LTE_NB1_ML1_Cell_Resel = 0xB24C,
+    LTE_NB1_ML1_Serv_Cell_Meas_Response = 0xB24D,
+    LTE_NB1_NBR_Cell_Meas = 0xB24E,
+    LTE_NB1_ML1_Search_PBCH_Decode = 0xB250,
+    LTE_NB1_ML1_DLM_Decode_Page = 0xB251,
+    
+    
+    //GNSS related
+    GNSS_GPS_Measurement_Report= 0x1477,
+    GNSS_Glonass_Measurement_Report=0x1480,
+    QMI_MCS_QCSI_PKT=0x1544,
+    GNSS_BDS_Measurement_Report=0x1756,
+    GNSS_GAL_Measurement_Report=0x1886,
+
+    // 5G SM
+    NR_NAS_SM5G_Plain_OTA_Incoming_Msg = 0xB800,
+    NR_NAS_SM5G_Plain_OTA_Outgoing_Msg = 0xB801,
+
+    // 5G MM
+    NR_NAS_MM5G_Plain_OTA_Incoming_Msg = 0xB80A,
+    NR_NAS_MM5G_Plain_OTA_Outgoing_Msg = 0xB80B,
+    NR_NAS_MM5G_Service_Request = 0xB80D,
+    NR_NAS_MM5G_State= 0xB80C,
+
+    // 5G RRC
     NR_RRC_OTA_Packet = 0xB821,
+    NR_RRC_Serving_Cell_Info = 0xB823,
+    NR_RRC_Configuration_Info = 0xB825,
+
+    // 5G PDCP
+    NR_PDCP_DL_Data_PDU = 0xB840,
+    NR_PDCP_UL_Control_Pdu = 0xB861, 
+
+    // 5G L2
+    NR_L2_UL_TB = 0xB872,
+    NR_L2_UL_BSR = 0xB873,
+    NR_L2_UL_Data_PDU = 0xB870,
+
+    // 5G RLC
+    NR_RLC_UL_Stats = 0xB868,
+    NR_RLC_UL_Status_PDU = 0xB869,
+    NR_RLC_DL_Status_PDU = 0xB84E,
+    NR_RLC_DL_Stats = 0xB84D,
+
+    // 5G MAC
+    NR_MAC_UL_TB = 0xB880,
+    NR_MAC_UL_TB_Stats = 0xB881,
+    NR_MAC_UL_Physical_Channel_Schedule_Report = 0xB883,
+    NR_MAC_DCI_Info = 0xB885,
+    NR_MAC_DL_TB_Report = 0xB886,
+    NR_MAC_PDSCH_Status = 0xB887,
+    NR_MAC_PDSCH_Stats = 0xB888,
+    NR_MAC_RACH_Attempt = 0xB88A,
+    NR_MAC_CSF_Report = 0xB8A7,
+    NR_MAC_CDRX_Events_Info = 0xB890,
+    NR_MAC_UCI_Payload_Information = 0xB896,
+    
+    // 5G LL1/ML1
+    NR_LL1_FW_TX_IU_RF = 0xB8D1,
+    NR_LL1_FW_Serving_FTL = 0xB8DD,
+    NR_LL1_FW_CSF_Reports = 0xB8E2,
+    NR_ML1_DL_Handover = 0xB952,
+    NR_ML1_Searcher_ACQ_Config_And_Response = 0xB96D,
+    NR_ML1_Searcher_Conn_Eval = 0xB96F,
+    NR_ML1_Serving_Cell_Beam_Management = 0xB975,
+    NR_ML1_Searcher_Measurement_Database_Update_Ext = 0xB97F,
+
 };
 
 // Mapping type IDs to names
@@ -132,7 +208,7 @@ const ValueName LogPacketTypeID_To_Name [] = {
     {_1xEV_Rx_Partial_MultiRLP_Packet,
         "1xEV_Rx_Partial_MultiRLP_Packet", true},
     {_1xEVDO_Multi_Carrier_Pilot_Sets,
-        "_1xEVDO_Multi_Carrier_Pilot_Sets", false},
+        "1xEVDO_Multi_Carrier_Pilot_Sets", false},
     {HDR_Pilot_Sets,
         "HDR_Pilot_Sets", false},
 
@@ -298,8 +374,128 @@ const ValueName LogPacketTypeID_To_Name [] = {
     {GSM_DSDS_RR_Signaling_Message,
         "GSM_DSDS_RR_Signaling_Message", false},
 
+
+
+    {LTE_NB1_ML1_GM_DCI_Info,
+        "LTE_NB1_ML1_GM_DCI_Info", true},
+    {LTE_NB1_ML1_GM_TX_Report,
+        "LTE_NB1_ML1_GM_TX_Report", true},
+    {LTE_NB1_ML1_GM_PDSCH_STAT_Ind,
+        "LTE_NB1_ML1_GM_PDSCH_STAT_Ind", true},
+    {LTE_NB1_ML1_CDRX_Events_Info,
+        "LTE_NB1_ML1_CDRX_Events_Info", true},
+    {LTE_NB1_ML1_Sum_Sys_Info,
+        "LTE_NB1_ML1_Sum_Sys_Info", true},
+    {LTE_NB1_ML1_Cell_Resel,
+        "LTE_NB1_ML1_Cell_Resel", true},
+    {LTE_NB1_NBR_Cell_Meas,
+        "LTE_NB1_NBR_Cell_Meas", true},
+    {LTE_NB1_ML1_Search_PBCH_Decode,
+        "LTE_NB1_ML1_Search_PBCH_Decode", true},
+    {LTE_NB1_ML1_DLM_Decode_Page,
+        "LTE_NB1_ML1_DLM_Decode_Page", true},
+
+    {NR_NAS_SM5G_Plain_OTA_Incoming_Msg,
+        "5G_NR_NAS_SM_Plain_OTA_Incoming_Msg", true},
+    {NR_NAS_SM5G_Plain_OTA_Outgoing_Msg,
+        "5G_NR_NAS_SM_Plain_OTA_Outgoing_Msg", true},
+
+
+    {NR_NAS_MM5G_Plain_OTA_Incoming_Msg,
+        "5G_NR_NAS_MM_Plain_OTA_Incoming_Msg", true},
+    {NR_NAS_MM5G_Plain_OTA_Outgoing_Msg,
+        "5G_NR_NAS_MM_Plain_OTA_Outgoing_Msg", true},
+    {NR_NAS_MM5G_Service_Request,
+        "5G_NR_NAS_MM_Service_Request", true},
+    {NR_NAS_MM5G_State,
+        "5G_NR_NAS_MM5G_State",true},
+
+
+    {NR_RRC_OTA_Packet,
+        "5G_NR_RRC_OTA_Packet", true},
+    {NR_RRC_Serving_Cell_Info,
+        "5G_NR_RRC_Serving_Cell_Info", true},
+    {NR_RRC_Configuration_Info,
+        "5G_NR_RRC_Configuration_Info", true},
+
+
+    {NR_PDCP_DL_Data_PDU,
+        "5G_NR_PDCP_DL_Data_PDU", true},
+    {NR_PDCP_UL_Control_Pdu,
+        "5G_NR_PDCP_UL_Control_Pdu", true},
+
+    {NR_L2_UL_TB,
+        "5G_NR_L2_UL_TB", true},
+    {NR_L2_UL_BSR,
+        "5G_NR_L2_UL_BSR", true},
+    {NR_L2_UL_Data_PDU,
+        "5G_NR_L2_UL_Data_PDU", true},
+
+    {NR_RLC_UL_Stats,
+        "5G_NR_RLC_UL_Stats", true},
+    {NR_RLC_UL_Status_PDU,
+        "5G_NR_RLC_UL_Status_PDU", true},
+    {NR_RLC_DL_Status_PDU,
+        "5G_NR_RLC_DL_Status_PDU", true},
+    {NR_RLC_DL_Stats,
+        "5G_NR_RLC_DL_Stats", true},
+
+    {NR_MAC_UL_TB,
+        "5G_NR_MAC_UL_TB", true},
+    {NR_MAC_UL_TB_Stats,
+        "5G_NR_MAC_UL_TB_Stats", true},
+    {NR_MAC_UL_Physical_Channel_Schedule_Report,
+        "5G_NR_MAC_UL_Physical_Channel_Schedule_Report", true},
+    {NR_MAC_DCI_Info,
+        "5G_NR_MAC_DCI_Info", true},
+    {NR_MAC_DL_TB_Report,
+        "5G_NR_MAC_DL_TB_Report", true},
+    {NR_MAC_PDSCH_Status,
+        "5G_NR_MAC_PDSCH_Status", true},
+    {NR_MAC_PDSCH_Stats,
+        "5G_NR_MAC_PDSCH_Stats", true},
+    {NR_MAC_RACH_Attempt,
+        "5G_NR_MAC_RACH_Attempt", true},
+    {NR_MAC_CSF_Report,
+        "5G_NR_MAC_CSF_Report", true},
+    {NR_MAC_CDRX_Events_Info,
+        "5G_NR_MAC_CDRX_Events_Info", true},
+    {NR_MAC_UCI_Payload_Information,
+        "5G_NR_MAC_UCI_Payload_Information", true},
+
+    {NR_LL1_FW_TX_IU_RF,
+        "5G_NR_LL1_FW_TX_IU_RF", true},
+    {NR_LL1_FW_Serving_FTL,
+        "5G_NR_LL1_FW_Serving_FTL", true},
+    {NR_LL1_FW_CSF_Reports,
+        "5G_NR_LL1_FW_CSF_Reports", true},
+    {NR_ML1_DL_Handover,
+        "5G_NR_ML1_DL_Handover", true},
+    {NR_ML1_Searcher_ACQ_Config_And_Response,
+        "5G_NR_ML1_Searcher_ACQ_Config_And_Response", true},
+    {NR_ML1_Searcher_Conn_Eval,
+        "5G_NR_ML1_Searcher_Conn_Eval", true},
+    {NR_ML1_Serving_Cell_Beam_Management,
+        "5G_NR_ML1_Serving_Cell_Beam_Management", true},
+    {NR_ML1_Searcher_Measurement_Database_Update_Ext,
+        "5G_NR_ML1_Searcher_Measurement_Database_Update_Ext", true},
+
+
+
     {Modem_debug_message,
         "Modem_debug_message", false},
+    {GNSS_GPS_Measurement_Report,
+        "GNSS_GPS_Measurement_Report", true},
+    {GNSS_Glonass_Measurement_Report,
+        "GNSS_Glonass_Measurement_Report", true},
+        
+    {QMI_MCS_QCSI_PKT,
+        "QMI_MCS_QCSI_PKT", false},
+        
+    {GNSS_BDS_Measurement_Report,
+        "GNSS_BDS_Measurement_Report", true},   
+    {GNSS_GAL_Measurement_Report,
+        "GNSS_GAL_Measurement_Report", true}, 
 };
 
 #endif	// __DM_COLLECTOR_C_CONSTS_H__

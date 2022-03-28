@@ -86,6 +86,15 @@ class Monitor(Element):
         """
         pass
 
+    def set_sampling_rate(self, sampling_rate):
+        """
+        Set a target sampling rate for cross-layer sampling
+
+        :param sampling_rate: the target sampling rate
+        :type sampling_rate: an integer between 0 and 100
+        """
+        pass
+
     def run(self):
         """
         Start monitoring the mobile network. This is usually the entrance of monitoring and analysis.

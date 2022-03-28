@@ -263,6 +263,9 @@ class AndroidDevDiagMonitor(Monitor):
         if siz > 0.0:
             self._log_cut_size = siz
 
+    def set_sampling_rate(self, sampling_rate):
+        dm_collector_c.set_sampling_rate(sampling_rate)
+
     def enable_log(self, type_name):
         """
         Enable the messages to be monitored. Refer to cls.SUPPORTED_TYPES for supported types.
