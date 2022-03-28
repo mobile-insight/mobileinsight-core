@@ -35,6 +35,11 @@
 #include "lte_pdcp_ul_cipher_data_pdu.h"
 #include "lte_pdsch_stat_indication.h"
 #include "lte_nb1_ml1_gm_dci_info.h"
+#include "lte_nb1_ml1_gm_tx_report.h"
+#include "lte_nb1_ml1_cell_resel.h"
+#include "lte_nb1_ml1_gm_pdsch_stat_ind.h"
+#include "lte_nb1_ml1_sum_sys_info.h"
+#include "lte_nb1_ml1_search_pbch_decode.h"
 #include "lte_phy_bplmn_cell_confirm.h"
 #include "lte_phy_bplmn_cell_request.h"
 #include "lte_phy_cdrx_events_info.h"
@@ -59,7 +64,17 @@
 #include "nr_mac_pdsch_stats.h"
 #include "nr_mac_ul_physical_channel_schedule_report.h"
 #include "nr_l2_ul_tb.h"
-
+#include "nr_l2_ul_bsr.h"
+#include "nr_ll1_fw_serving_ftl.h"
+#include "nr_mac_rach_trigger.h"
+#include "nr_nas_sm5g_plain_ota_incoming_msg.h"
+#include "nr_rlc_dl_stats.h"                                                                                                                     
+#include "nr_nas_mm5g_state.h"
+#include "nr_pdcp_ul_control_pdu.h"
+#include "gnss_bds_measurement_report.h"
+#include "gnss_gps_measurement_report.h"
+#include "gnss_glonass_measurement_report.h"
+#include "gnss_gal_measurement_report.h"
 
 // #define SSTR(x) static_cast< std::ostringstream & >( \
 //         ( std::ostringstream() << std::dec << x ) ).str()
@@ -3402,7 +3417,7 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                                                     "Ignored", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(t);
-			Py_DECREF(result_subpkt);
+                        Py_DECREF(result_subpkt);
                     } else {
                         printf("(MI)Unknown LTE PHY Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
@@ -11437,6 +11452,43 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
             return (offset - start) + pdu_length;
         }
     }
+    
+    else if (pkt_ver == 9) {
+        //pkt_ver==9 (America)
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+        const char* type_name = search_name(NrRrcOtaPduType_v9,
+            ARRAY_SIZE(NrRrcOtaPduType_v9, ValueName),
+            pdu_number);
+        (void)_map_result_field_to_name(result,
+		"PDU Number", NrRrcOtaPduType_v9,
+		ARRAY_SIZE(NrRrcOtaPduType_v9, ValueName),
+		"(MI)Unknown");
+
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown 5G NR RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        }
+        else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject* t;
+            if (pdu_number == 0x0a) {
+                // RRC Reconfiguration Complete needs special processing
+                char* ul_dcch_msg = _nr_rrc_reconf_complete_to_ul_dcch(b + offset, pdu_length);
+                t = Py_BuildValue("(sy#s)",
+                    "Msg", ul_dcch_msg, pdu_length + 1, type_str.c_str());
+                delete ul_dcch_msg;
+            }
+            else {
+                t = Py_BuildValue("(sy#s)",
+                    "Msg", b + offset, pdu_length, type_str.c_str());
+            }
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
+    }
 
     printf("(MI)Unknown 5GNR RRC OTA Message version: 0x%x\n", pkt_ver);
     return 0;
@@ -12027,6 +12079,36 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             offset += _decode_lte_nb1_ml1_gm_dci_info_payload(b, offset, length, result);
             break;
 
+        case LTE_NB1_ML1_GM_TX_Report:
+            offset += _decode_by_fmt(LteNb1Ml1GmTxReport,
+                                     ARRAY_SIZE(LteNb1Ml1GmTxReport, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_gm_tx_report_payload(b, offset, length, result);
+            break;
+        case LTE_NB1_ML1_Cell_Resel:
+            offset += _decode_by_fmt(LteNb1Ml1CellReselFmt,
+                                     ARRAY_SIZE(LteNb1Ml1CellReselFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_cell_resel_payload(b, offset, length, result);
+            break;
+        case LTE_NB1_ML1_GM_PDSCH_STAT_Ind:
+            offset += _decode_by_fmt(LteNb1Ml1GmPdschStatIndFmt,
+                                     ARRAY_SIZE(LteNb1Ml1GmPdschStatIndFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_gm_pdsch_stat_ind_payload(b, offset, length, result);
+            break;
+        case LTE_NB1_ML1_Sum_Sys_Info:
+            offset += _decode_by_fmt(LteNb1Ml1SumSysInfoFmt,
+                                     ARRAY_SIZE(LteNb1Ml1SumSysInfoFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_sum_sys_info_payload(b, offset, length, result);
+            break;
+        case LTE_NB1_ML1_Search_PBCH_Decode:
+            offset += _decode_by_fmt(LteNb1Ml1SearchPbchDecodeFmt,
+                                     ARRAY_SIZE(LteNb1Ml1SearchPbchDecodeFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_lte_nb1_ml1_search_pbch_decode_payload(b, offset, length, result);
+            break;
         case WCDMA_RRC_States:
             offset += _decode_wcdma_rrc_states_payload(b, offset, length, result);
             break;
@@ -12140,6 +12222,73 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                                      b, offset, length, result);
             offset += _decode_nr_rrc_ota(b, offset, length, result);
             break;
+        case NR_NAS_SM5G_Plain_OTA_Incoming_Msg:
+        case NR_NAS_SM5G_Plain_OTA_Outgoing_Msg:
+            offset += _decode_by_fmt(NrNasSm5gPlainOtaMsgFmt,
+                                     ARRAY_SIZE(NrNasSm5gPlainOtaMsgFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_nr_nas_sm5g_plain_ota_msg(b, offset, length, result);
+            break;
+        case NR_L2_UL_BSR:
+            offset += _decode_by_fmt(NRL2ULBSR_Fmt,
+                                     ARRAY_SIZE(NRL2ULBSR_Fmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_nr_l2_ul_bsr_payload(b, offset, length, result);
+            break;
+        case NR_LL1_FW_Serving_FTL:
+            offset += _decode_by_fmt(NrLl1FwServingFtl_Fmt,
+                                     ARRAY_SIZE(NrLl1FwServingFtl_Fmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_nr_ll1_fw_serving_ftl_payload(b, offset, length, result);
+            break;
+        case NR_MAC_RACH_Trigger:
+            offset += _decode_by_fmt(NrMacRachTriggerFmt,
+                                     ARRAY_SIZE(NrMacRachTriggerFmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_nr_mac_rach_trigger(b, offset, length, result);
+            break;
+        case NR_RLC_DL_Stats:
+            offset += _decode_by_fmt(NrRlcDlStats_Fmt,
+                                     ARRAY_SIZE(NrRlcDlStats_Fmt,Fmt),
+                                     b, offset, length, result);
+            offset += _decode_nr_rlc_dl_status_payload(b, offset, length,result);
+            break;
+        case NR_PDCP_UL_Control_Pdu:
+            offset += _decode_by_fmt(NrPdcpUlControlPdu_Fmt,
+                                     ARRAY_SIZE(NrPdcpUlControlPdu_Fmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_nr_pdcp_ul_control_pdu_payload(b, offset, length, result);                                    
+            break;
+        case NR_NAS_MM5G_State:
+            offset += _decode_by_fmt(NrNasMm5gState_Fmt,
+                                      ARRAY_SIZE(NrNasMm5gState_Fmt, Fmt),
+                                      b, offset, length, result);
+            offset += _decode_nr_nas_mm5g_state(b, offset, length, result);
+            break;
+        case GNSS_BDS_Measurement_Report:
+            offset += _decode_by_fmt(GnssBds_Fmt,
+                                    ARRAY_SIZE(GnssBds_Fmt, Fmt),
+                                    b, offset, length, result);
+            offset += _decode_gnss_bds_payload(b, offset, length, result);
+            break;
+        case GNSS_GPS_Measurement_Report:
+            offset += _decode_by_fmt(GnssGps_Fmt,
+                                     ARRAY_SIZE(GnssGps_Fmt, Fmt),	
+                                     b, offset, length, result);
+            offset += _decode_gnss_gps_payload(b, offset, length, result);
+            break;
+        case GNSS_Glonass_Measurement_Report:
+            offset += _decode_by_fmt(GnssGlonass_Fmt,
+                                     ARRAY_SIZE(GnssGlonass_Fmt, Fmt),
+                                     b, offset, length, result);
+            offset += _decode_gnss_glonass_payload(b, offset, length, result);
+            break;
+        case GNSS_GAL_Measurement_Report:
+            offset += _decode_by_fmt(GnssGal_Fmt,
+                                ARRAY_SIZE(GnssGal_Fmt, Fmt),
+                                b, offset, length, result);
+            offset += _decode_gnss_gal_payload(b, offset, length, result);
+            break;         
         default:
             break;
     };

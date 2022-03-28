@@ -31,6 +31,7 @@ PIP=pip3
 echo "Installing dependencies for compiling Wireshark libraries"
 sudo apt-get -y install cmake pkg-config wget libglib2.0-dev bison flex libpcap-dev libgcrypt-dev qt5-default qttools5-dev qtmultimedia5-dev libqt5svg5-dev libc-ares-dev libsdl2-mixer-2.0-0 libsdl2-image-2.0-0 libsdl2-2.0-0
 
+
 echo "Checking Wireshark sources to compile ws_dissector"
 if [ ! -d "${WIRESHARK_SRC_PATH}" ]; then
     echo "You do not have source codes for Wireshark version ${ws_ver}, downloading..."

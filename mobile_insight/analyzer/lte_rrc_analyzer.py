@@ -418,7 +418,6 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                          's_IntraSearch': str(float(field_val['lte-rrc.s_IntraSearch']) * 2)})
                 self.broadcast_info('SIB_CONFIG', self.__config[cur_pair].dump_dict())
                 self.log_info('SIB_CONFIG: ' + str(self.__config[cur_pair].dump()))
-
             # inter-frequency (LTE)
             if field.get('name') == "lte-rrc.interFreqCarrierFreqList":
                 field_val = {}
@@ -446,7 +445,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                     "LTE",
                     neighbor_freq,
                     int(field_val['lte-rrc.t_ReselectionEUTRA']),
-                    int(field_val['lte-rrc.utra_q_RxLevMin']) * 2,
+                    int(field_val['lte-rrc.q_RxLevMin']) * 2,
                     int(field_val['lte-rrc.p_Max']),
                     int(field_val['lte-rrc.cellReselectionPriority']),
                     int(field_val['lte-rrc.threshX_High']) * 2,
@@ -460,7 +459,7 @@ class LteRrcAnalyzer(ProtocolAnalyzer):
                                         {'rat': 'LTE',
                                          'freq': str(neighbor_freq),
                                          'tReselection': field_val['lte-rrc.t_ReselectionEUTRA'],
-                                         'q_RxLevMin': str(int(field_val['lte-rrc.utra_q_RxLevMin']) * 2),
+                                         'q_RxLevMin': str(int(field_val['lte-rrc.q_RxLevMin']) * 2),
                                          'p_Max': field_val['lte-rrc.p_Max'],
                                          'priority': field_val['lte-rrc.cellReselectionPriority'],
                                          'threshx_high': str(int(field_val['lte-rrc.threshX_High']) * 2),

@@ -85,6 +85,7 @@ class WSDissector:
         "nr-rrc.sbcch.sl.bch": 413,
         "nr-rrc.scch": 414,
         "nr-rrc.radio_bearer_conf": 415,
+        "nas-5gs":416,
     }
     _proc = None
     _init_proc_called = False
