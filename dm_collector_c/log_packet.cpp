@@ -3417,7 +3417,7 @@ _decode_lte_phy_subpkt(const char *b, int offset, size_t length,
                                                     "Ignored", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(t);
-			Py_DECREF(result_subpkt);
+                        Py_DECREF(result_subpkt);
                     } else {
                         printf("(MI)Unknown LTE PHY Subpacket version: 0x%x - %d\n", subpkt_id, subpkt_ver);
                     }
