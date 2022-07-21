@@ -314,6 +314,12 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
                                      ARRAY_SIZE(LteRrcOtaPacketFmt_v26, Fmt),
                                      b, offset, length, result);
             break;
+        case 27:
+            offset += _decode_by_fmt(LteRrcOtaPacketFmt_v27,
+                                     ARRAY_SIZE(LteRrcOtaPacketFmt_v27, Fmt),
+                                     b, offset, length, result);
+            break;
+
         default:
             printf("(MI)Unknown LTE RRC OTA packet version: %d\n", pkt_ver);
             return 0;
@@ -342,6 +348,26 @@ _decode_lte_rrc_ota(const char *b, int offset, size_t length,
             return (offset - start) + pdu_length;
         }
 
+    } else if (pkt_ver == 27) {
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+
+        const char *type_name = search_name(LteRrcOtaPduType_v27,
+                                            ARRAY_SIZE(LteRrcOtaPduType_v27, ValueName),
+                                            pdu_number);
+
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown LTE RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t = Py_BuildValue("(sy#s)",
+                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
     } else if (pkt_ver >= 15) {
 
         int pdu_number = _search_result_int(result, "PDU Number");
@@ -394,7 +420,6 @@ _decode_lte_rrc_mib(const char *b, int offset, size_t length,
                     PyObject *result) {
     int start = offset;
     int pkt_ver = _search_result_int(result, "Version");
-
     switch (pkt_ver) {
         case 1:
             offset += _decode_by_fmt(LteRrcMibMessageLogPacketFmt_v1,
@@ -11392,6 +11417,9 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
 
     //pkt_ver==8 (Xiaomi)
     if (pkt_ver == 8) {
+        offset += _decode_by_fmt(NrRrcOtaPacketFmt_v1,
+                                     ARRAY_SIZE(NrRrcOtaPacketFmt_v1, Fmt),
+                                     b, offset, length, result);
 
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
@@ -11423,6 +11451,9 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
         }
 
     } else if (pkt_ver == 7) {
+        offset += _decode_by_fmt(NrRrcOtaPacketFmt_v1,
+                                     ARRAY_SIZE(NrRrcOtaPacketFmt_v1, Fmt),
+                                     b, offset, length, result);
         //pkt_ver==8 (Samsung)
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
@@ -11454,6 +11485,9 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
     }
     
     else if (pkt_ver == 9) {
+        offset += _decode_by_fmt(NrRrcOtaPacketFmt_v1,
+                                     ARRAY_SIZE(NrRrcOtaPacketFmt_v1, Fmt),
+                                     b, offset, length, result);
         //pkt_ver==9 (America)
         int pdu_number = _search_result_int(result, "PDU Number");
         int pdu_length = _search_result_int(result, "Msg Length");
@@ -11484,6 +11518,60 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
                 t = Py_BuildValue("(sy#s)",
                     "Msg", b + offset, pdu_length, type_str.c_str());
             }
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
+    }
+    else if (pkt_ver == 12) {
+        //Sierra Wireless EM9191
+
+        offset += _decode_by_fmt(NrRrcOtaPacketFmt_v12,
+                                     ARRAY_SIZE(NrRrcOtaPacketFmt_v12, Fmt),
+                                     b, offset, length, result);
+        
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+
+        const char *type_name = search_name(NrRrcOtaPduType_v12,
+                                            ARRAY_SIZE(NrRrcOtaPduType_v12, ValueName),
+                                            pdu_number);
+
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown NR RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t = Py_BuildValue("(sy#s)",
+                                        "Msg", b + offset, pdu_length, type_str.c_str());
+            PyList_Append(result, t);
+            Py_DECREF(t);
+            return (offset - start) + pdu_length;
+        }
+    }
+    else if (pkt_ver == 14) {
+        //SIMCOM 8262A-M2
+
+        offset += _decode_by_fmt(NrRrcOtaPacketFmt_v14,
+                                     ARRAY_SIZE(NrRrcOtaPacketFmt_v14, Fmt),
+                                     b, offset, length, result);
+        
+        int pdu_number = _search_result_int(result, "PDU Number");
+        int pdu_length = _search_result_int(result, "Msg Length");
+
+        const char *type_name = search_name(NrRrcOtaPduType_v14,
+                                            ARRAY_SIZE(NrRrcOtaPduType_v14, ValueName),
+                                            pdu_number);
+
+        if (type_name == NULL) {    // not found
+            printf("(MI)Unknown NR RRC PDU Type: 0x%x\n", pdu_number);
+            return 0;
+        } else {
+            std::string type_str = "raw_msg/";
+            type_str += type_name;
+            PyObject *t = Py_BuildValue("(sy#s)",
+                                        "Msg", b + offset, pdu_length, type_str.c_str());
             PyList_Append(result, t);
             Py_DECREF(t);
             return (offset - start) + pdu_length;
@@ -11733,7 +11821,7 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             offset += _decode_by_fmt(LteRrcOtaPacketFmt,
                                      ARRAY_SIZE(LteRrcOtaPacketFmt, Fmt),
                                      b, offset, length, result);
-            offset += _decode_lte_rrc_ota(b, offset, length, result);
+	        offset += _decode_lte_rrc_ota(b, offset, length, result);
             break;
 
         case LTE_RRC_MIB_Message_Log_Packet:
@@ -12290,6 +12378,7 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             offset += _decode_gnss_gal_payload(b, offset, length, result);
             break;         
         default:
+	        printf("Not a valid case statement in log_packet.cpp\n");
             break;
     };
 
@@ -12344,6 +12433,7 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
             LogPacketTypeID_To_Name,
             ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName),
             "Unsupported");
+
 
     /*
     if (skip_decoding) {    // skip further decoding
