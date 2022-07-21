@@ -372,6 +372,19 @@ const Fmt LteRrcOtaPacketFmt_v26[] = {
         {SKIP, NULL,                          3},
         {UINT, "Msg Length",                  2}
 };
+const Fmt LteRrcOtaPacketFmt_v27[] = {
+        {BYTE_STREAM, "RRC Version Number",   1}, 
+        {UINT, "NR RRC Release Number",       1},
+        {BYTE_STREAM, "NR RRC Version Number",1},
+        {UINT, "Radio Bearer ID",             1},
+        {UINT, "Physical Cell ID",            2},    //Cell ID
+        {UINT, "Freq",                        2},    //frequency
+        {UINT, "SysFrameNum/SubFrameNum",     4},    //System/subsystem frame number 
+        {UINT, "PDU Number",                  1},    //PDU number
+        {UINT, "SIB Mask in SI",              1},
+        {SKIP, NULL,                          3},
+        {UINT, "Msg Length",                  2}
+};
 
 const ValueName LteRrcOtaPduType[] = {
         {0x02, "LTE-RRC_BCCH_DL_SCH"},
@@ -383,6 +396,7 @@ const ValueName LteRrcOtaPduType[] = {
 };
 
 const ValueName LteRrcOtaPduType_v15[] = {
+        {0x03, "LTE-RRC_BCCH_DL_SCH"},
         {0x02, "LTE-RRC_BCCH_DL_SCH"},
         {0x05, "LTE-RRC_PCCH"},
         {0x06, "LTE-RRC_DL_CCCH"},
@@ -406,18 +420,62 @@ const ValueName LteRrcOtaPduType_v19[] = {
         {0x32, "LTE-RRC_UL_CCCH_NB"},
 };
 
+//added fields for version 27
+const ValueName LteRrcOtaPduType_v27[] = {
+        {0x03, "LTE-RRC_BCCH_DL_SCH"},
+        {0x07, "LTE-RRC_PCCH"},
+        {0x08, "LTE-RRC_DL_CCCH"},
+        {0x09, "LTE-RRC_DL_DCCH"},
+        {0x0a, "LTE-RRC_UL_CCCH"},
+        {0x0b, "LTE-RRC_UL_DCCH"},
+        {0x2e, "LTE-RRC_BCCH_DL_SCH_NB"},
+        {0x30, "LTE-RRC_DL_CCCH_NB"},
+        {0x31, "LTE-RRC_DL_DCCH_NB"},
+        {0x34, "LTE-RRC_UL_DCCH_NB"},
+        {0x32, "LTE-RRC_UL_CCCH_NB"},
+};
+
 
 // ------------------------------------------------------------
 // NR_RRC_OTA_Packet
 const Fmt NrRrcOtaPacketFmt[] = {
         {UINT, "Pkt Version",        1},    //version
         {UINT, "Unknown", 			 3},    //Maybe Reserved
+};
+
+const Fmt NrRrcOtaPacketFmt_v1[] = {
         {UINT, "RRC Release Number", 1},    //RRC release version
         {BYTE_STREAM, "RRC Version Number", 1},    //RRC version version
         {UINT, "Radio Bearer ID",    1},    //no change
         {UINT, "Physical Cell ID",   2},     //Cell ID
         {UINT, "Freq",   			 4},     //Freq
-        {UINT, "SysFrameNum/SubFrameNum",   4},     //System/subsystem frame number
+        {UINT, "SysFrameNum/SubFrameNum",   4},  //System/subsystem frame number
+        {UINT, "PDU Number",         1},     //PDU Number
+        {UINT, "SIB Mask in SI",     1},
+        {SKIP, NULL,                 3},
+        {UINT, "Msg Length",         2}
+};
+
+const Fmt NrRrcOtaPacketFmt_v12[] = {
+        {UINT, "RRC Release Number", 1},    //RRC release version
+        {BYTE_STREAM, "RRC Version Number", 1},    //RRC version version
+        {UINT, "Radio Bearer ID",    1},    //no change
+        {UINT, "Physical Cell ID",   2},     //Cell ID
+        {UINT, "Freq",   			 4},     //Freq
+        {UINT, "SysFrameNum/SubFrameNum",   3},     //System/subsystem frame number
+        {UINT, "PDU Number",         1},     //PDU Number
+        {UINT, "SIB Mask in SI",     1},
+        {SKIP, NULL,                 3},
+        {UINT, "Msg Length",         2}
+};
+
+const Fmt NrRrcOtaPacketFmt_v14[] = {
+        {UINT, "RRC Release Number", 1},    //RRC release version
+        {BYTE_STREAM, "RRC Version Number", 1},    //RRC version version
+        {UINT, "Radio Bearer ID",    1},    //no change
+        {UINT, "Physical Cell ID",   2},     //Cell ID
+        {UINT, "Freq",   			 4},     //Freq
+        {UINT, "SysFrameNum/SubFrameNum",   3},     //System/subsystem frame number
         {UINT, "PDU Number",         1},     //PDU Number
         {UINT, "SIB Mask in SI",     1},
         {SKIP, NULL,                 3},
@@ -485,6 +543,55 @@ const ValueName NrRrcOtaPduType_v9[] = {
         // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
         // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
 };
+const ValueName NrRrcOtaPduType_v12[] = {
+
+        // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
+        // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
+        // {0x00, "nr-rrc.bcch.dl.sch"},
+        // {0x00, "nr-rrc.dl.ccch"},
+        // {0x00, "nr-rrc.dl.dcch"},
+        // {0x00, "nr-rrc.pcch"},
+        // {0x00, "nr-rrc.ul.ccch"},
+        // {0x00, "nr-rrc.ul.ccch1"},
+        {0x01, "nr-rrc.bcch.bch"},  // MIB
+	    {0x02,"nr-rrc.bcch.dl.sch"},
+	    {0x03,"nr-rrc.dl.ccch"},
+	    {0x04,"nr-rrc.dl.dcch"},
+	    {0x05,"nr-rrc.pcch"},
+	    {0x06,"nr-rrc.ul.ccch"},
+        {0x0a, "nr-rrc.ul.dcch"},   // RRC Reconfiguration Complete
+        {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
+	
+       	{0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
+        {0x19, "nr-rrc.radio_bearer_conf"}, // Radio Bearer Config
+        // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
+        // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
+};
+const ValueName NrRrcOtaPduType_v14[] = {
+
+        // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
+        // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
+        // {0x00, "nr-rrc.bcch.dl.sch"},
+        // {0x00, "nr-rrc.dl.ccch"},
+        // {0x00, "nr-rrc.dl.dcch"},
+        // {0x00, "nr-rrc.pcch"},
+        // {0x00, "nr-rrc.ul.ccch"},
+        // {0x00, "nr-rrc.ul.ccch1"},
+        {0x01, "nr-rrc.bcch.bch"},  // MIB
+	    {0x02,"nr-rrc.bcch.dl.sch"},
+	    {0x03,"nr-rrc.dl.ccch"},
+	    {0x04,"nr-rrc.dl.dcch"},
+	    {0x05,"nr-rrc.pcch"},
+	    {0x06,"nr-rrc.ul.ccch"},
+        {0x0a, "nr-rrc.ul.dcch"},   // RRC Reconfiguration Complete
+        {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
+	
+       	{0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
+        {0x19, "nr-rrc.radio_bearer_conf"}, // Radio Bearer Config
+        // {0x00, "nr-rrc.ue_mrdc_cap"}, // unknown so far
+        // {0x00, "nr-rrc.ue_nr_cap"}, // unknown so far
+};
+
 // ------------------------------------------------------------
 // LTE NAS Plain
 const Fmt LteNasPlainFmt[] = {
