@@ -164,6 +164,8 @@ enum LogPacketType {
     NR_ML1_Searcher_Measurement_Database_Update_Ext = 0xB97F,                                       
     NR_ML1_Serving_Cell_Beam_Management = 0xB975,
 
+    // 5G DCI
+    NR_DCI_Message = 0xB885,
 };
 
 // Mapping type IDs to names
@@ -412,6 +414,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
     { NR_ML1_Serving_Cell_Beam_Management,
         "5G_NR_ML1_Serving_Cell_Beam_Management", true },
 
+    { NR_DCI_Message,
+        "NR_DCI_Message", true },
 
     {Modem_debug_message,
         "Modem_debug_message", false},
