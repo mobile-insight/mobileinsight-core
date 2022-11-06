@@ -1,0 +1,11 @@
+
+build/
+examples/
+MobileInsight.egg-info/
+dist/MobileInsight-6.0.0-py3.9-macosx-10.9-x86_64.egg
+ws-3.4.0-radio-bearer-config.patch
+ws_dissector/ws_dissector
+
+examples/test.txt
+*.db
+.DS_Store
