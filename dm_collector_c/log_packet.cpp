@@ -12288,7 +12288,14 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                                 ARRAY_SIZE(GnssGal_Fmt, Fmt),
                                 b, offset, length, result);
             offset += _decode_gnss_gal_payload(b, offset, length, result);
-            break;         
+            break;   
+
+        case NR_DCI_Message:
+            // offset += _decode_by_fmt(xxxPacketFmt,
+            //                          ARRAY_SIZE(xxxPacketFmt, Fmt),
+            //                          b, offset, length, result);
+            //offset += _decode_nr_rrc_ota(b, offset, length, result);
+            break;      
         default:
             break;
     };

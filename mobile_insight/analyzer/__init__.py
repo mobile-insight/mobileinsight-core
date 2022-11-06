@@ -16,6 +16,7 @@ __all__ = ["Analyzer",
            "LteDlRetxAnalyzer",
 
            "NrRrcAnalyzer",
+           "NrDciAnalyzer",
            ]
 
 from .analyzer import Analyzer
@@ -37,6 +38,7 @@ from .uplink_latency_analyzer import UplinkLatencyAnalyzer
 
 # 5G NR
 from .nr_rrc_analyzer import NrRrcAnalyzer
+from .nr_dci_analyzer import NrDciAnalyzer
 
 # LTE
 from .lte_rrc_analyzer import LteRrcAnalyzer
