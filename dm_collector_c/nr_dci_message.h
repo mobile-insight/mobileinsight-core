@@ -41,7 +41,7 @@ const Fmt NrDciMessage_Record_Fmt[] = {
 }
 
 const ValueName ValueNameNrDciMessage_Num[] = {
-        {0,  "15kHz"},
+        {0,  "15kHz"}
 };
 
 // 4 bytes
@@ -86,7 +86,7 @@ const Fmt NrDciMessage_RawDci_Fmt[] = {
 }
 
 // 16 bytes
-const Fmt NrDciMessage_UL_0_1_Fmt[] = {
+const Fmt NrDciMessage_UL_Fmt[] = {
         {UINT_BIG_ENDIAN, "UL DCI Format", 4}, // 2?? bits, 4 bytes = 32 bits cover DCI Format, Carrier ID, NDI, MCS, Freq Hopping Flag, RV, HARQ ID, PUSCH TPC, UL SUL Ind, PTRS DMRS Association, Beta Offset Ind. Do bit masking on the 2 bytes to get DCI Format
         {PLACEHOLDER, "Carrier ID", 0}, // 4?? bits, do bit masking on the 4 bytes to get Carrier ID
         {PLACEHOLDER, "NDI", 0}, // 2?? bits, do bit masking on the 4 bytes to get NDI
@@ -117,25 +117,44 @@ const Fmt NrDciMessage_UL_0_1_Fmt[] = {
         {UINT_BIG_ENDIAN, "Pruned Mask", 4} // 32 bits
 }
 
-// todo - don't know how many bytes each field is (no video)
 /*
-const Fmt NrDciMessage_DL_Fmt[] = {
-        {PLACEHOLDER, "Bandwidth Part Indicator", 0},
-        {PLACEHOLDER, "Time Resource Assignment", 0},
-        {PLACEHOLDER, "TB 1 MCS", 0},
-        {PLACEHOLDER, "TB 1 New Data Indicator", 0},
-        {PLACEHOLDER, "DL Assignment Index", 0},
-        {PLACEHOLDER, "TPC Command For Sched PUCCH", 0},
-        {PLACEHOLDER, "PUCCH Resource Indicator", 0},
-        {PLACEHOLDER, "PDSCH Harq Feedback Timing", 0},
-        {PLACEHOLDER, "CBG Transmission Info", 0},
-        {PLACEHOLDER, "CBG Flushing Out Info", 0},
-        {PLACEHOLDER, "Transmission Config Ind", 0},
-        {PLACEHOLDER, "SRS Request", 0},
-        {PLACEHOLDER, "Carrier ID", 0},
-        {PLACEHOLDER, "HARQ ID", 0}
-}
+CBG Transmission Info, CBG Flushing Out Info, Transmission Config Ind, SRS Request, Carrier ID are always 0 for every log I found
+
+Bandwidth Part Indicator - bits 0-1
+Time Resource Assignment - bits 2-5
+TB 1 MCS = bits 6-10
+TB 1 New Data Indicator - bit 11
+DL Assignment Index - bits 12-15
+TPC Command For Sched PUCCH - bits 16-17
+PUCCH Resource Indicator - bits 18-20
+PDSCH Harq Feedback Timing - bits 21-23
+CBG Transmission Info - bits 24-31
+CBG Flushing Out Info  - bit 32
+Transmission Config Ind - 33-35
+SRS Request - 36-37
+Carrier ID - 38-40
+bit 41 - don't know, but HARQ ID has to be bits 42-45 
+
+HARQ ID - bits 42-45
 */
+// 8 bytes
+const Fmt NrDciMessage_DL_Fmt[] = {
+        {UINT_BIG_ENDIAN, "Bandwidth Part Indicator", 2}, // 2 bits, 2 bytes cover Bandwidth Part Indicator, Time Resource Assignment, TB 1 MCS, TB 1 New Data Indicator, DL Assignment Index. Do bit masking
+        {PLACEHOLDER, "Time Resource Assignment", 0}, // 4 bits according to Internet
+        {PLACEHOLDER, "TB 1 MCS", 0}, // 5 bits
+        {PLACEHOLDER, "TB 1 New Data Indicator", 0}, // 1 bit
+        {PLACEHOLDER, "DL Assignment Index", 0}, // 2 bits
+        {UINT_BIG_ENDIAN, "TPC Command For Sched PUCCH", 1}, // 2 bits, 1 byte covers TPC Command For Sched PUCCH, PUCCH Resource Indicator, PDSCH Harq Feedback Timing. Do bit masking
+        {PLACEHOLDER, "PUCCH Resource Indicator", 0}, // 3 bits
+        {PLACEHOLDER, "PDSCH Harq Feedback Timing", 0}, // 3 bits
+        {UINT_BIG_ENDIAN, "CBG Transmission Info", 1}, // 0, 2, 4, 6, 8 bits, assume 8 bits
+        {UINT_BIG_ENDIAN, "CBG Flushing Out Info", 2}, // 0, 1 bit, assume 1 bit, 2 bytes cover CBG Transmission Info, CBG Flushing Out, Transmission Config Ind, SRS Request, Carrier ID, HARQ ID. Do bit masking
+        {PLACEHOLDER, "Transmission Config Ind", 0}, // 0, 3 bits, assume 3 bits
+        {PLACEHOLDER, "SRS Request", 0}, // 2 bits
+        {PLACEHOLDER, "Carrier ID", 0}, // 3 bits
+        {PLACEHOLDER, "HARQ ID", 0}, // 4 bits
+        {SKIP, NULL, 2} // last 2 bytes don't seem to be relevant to any field
+}
 
 // assuming before we call this function, we have already decoded NrDciMessage_MacVersion_Fmt, which will be passed to this function in the result variable
 static int _decode_nr_DCI (const char *b,
@@ -296,10 +315,9 @@ static int _decode_nr_DCI (const char *b,
             }
 
             // depending on the specific DCI Format, do specific decoding for that DCI Format
-            // todo decode more formats other than UL_0_1
             if (0 == strcmp("UL_0_1", _search_result_bytestream(dci, "DCI Format"))) {
-                offset += _decode_by_fmt(NrDciMessage_UL_0_1_Fmt,
-                        ARRAY_SIZE(NrDciMessage_UL_0_1_Fmt, Fmt),
+                offset += _decode_by_fmt(NrDciMessage_UL_Fmt,
+                        ARRAY_SIZE(NrDciMessage_UL_Fmt, Fmt),
                         b, offset, length, dci);
 
                 /*
@@ -447,6 +465,95 @@ static int _decode_nr_DCI (const char *b,
                 old_object = _replace_result_string(dci, "Pruned Mask", prunedMastStream.str());
                 Py_DECREF(old_object);
             }
+            else if ((0 == strcmp("DL_1_0", _search_result_bytestream(dci, "DCI Format"))) || (0 == strcmp("DL_1_1", _search_result_bytestream(dci, "DCI Format")))) {
+                offset += _decode_by_fmt(NrDciMessage_DL_Fmt,
+                        ARRAY_SIZE(NrDciMessage_DL_Fmt, Fmt),
+                        b, offset, length, dci);
+
+                utemp = _search_result_uint(dci, "Bandwidth Part Indicator");
+                unsigned int bandwidthPartIndicator = utemp & 0x3;
+                old_object = _replace_result_int(dci, "Bandwidth Part Indicator", bandwidthPartIndicator);
+                Py_DECREF(old_object);
+                unsigned int timeResourceAssignment = (utemp & 0x3C) >> 2;
+                old_object = _replace_result_int(dci, "Time Resource Assignment", timeResourceAssignment);
+                Py_DECREF(old_object);
+                unsigned int tb1Mcs = (utemp & 0x7C0) >> 6;
+                old_object = _replace_result_int(dci, "TB 1 MCS", tb1Mcs);
+                Py_DECREF(old_object);
+                unsigned int tb1NewDataIndicator = (utemp & 0x800) >> 11;
+                old_object = _replace_result_int(dci, "TB 1 New Data Indicator", tb1NewDataIndicator);
+                Py_DECREF(old_object);
+                unsigned int dlAssignmentIndex = (utemp & 0xF000) >> 12;
+                old_object = _replace_result_int(dci, "DL Assignment Index", dlAssignmentIndex);
+                Py_DECREF(old_object);
+
+                utemp = _search_result_uint(dci, "TPC Command For Sched PUCCH");
+                unsigned int tpcCommandForSchedPucch = utemp & 0x3;
+                old_object = _replace_result_int(dci, "TPC Command For Sched PUCCH", tpcCommandForSchedPucch);
+                Py_DECREF(old_object);
+                unsigned int pucchResourceIndicator = (utemp & 0x1C) >> 2;
+                old_object = _replace_result_int(dci, "PUCCH Resource Indicator", pucchResourceIndicator);
+                Py_DECREF(old_object);
+                unsigned int pdschHarqFeedbackTiming = (utemp & 0xE0) >> 5;
+                old_object = _replace_result_int(dci, "PDSCH Harq Feedback Timing", pdschHarqFeedbackTiming);
+                Py_DECREF(old_object);
+
+                utemp = _search_result_uint(dci, "CBG Flushing Out Info");
+                unsigned int cbgFlushingOutInfo = utemp & 0x1;
+                old_object = _replace_result_int(dci, "CBG Flushing Out Info", cbgFlushingOutInfo);
+                Py_DECREF(old_object);
+                unsigned int transmissionConfigInd = (utemp & 0xE) >> 1;
+                old_object = _replace_result_int(dci, "Transmission Config Ind", transmissionConfigInd);
+                Py_DECREF(old_object);
+                unsigned int srsRequest2 = (utemp & 0x30) >> 4;
+                old_object = _replace_result_int(dci, "SRS Request", srsRequest2);
+                Py_DECREF(old_object);
+                unsigned int carrierId3 = (utemp & 0x1C0) >> 6;
+                old_object = _replace_result_int(dci, "Carrier ID", carrierId3);
+                Py_DECREF(old_object);
+                unsigned int harqId2 = (utemp & 0x3C00) >> 10;
+                old_object = _replace_result_int(dci, "HARQ ID", harqId2);
+                Py_DECREF(old_object);
+            }
+
+            // make "DCI Info[index]" string
+            char index_dci_string[32];
+            sprintf(index_dci_string, "[%d]", dciIndex);
+            char dciInfoString[64] = "DCI Info";
+            strcat(dciInfoString, index_dci_string);
+
+            // build DCI Info[index] object - made up of the dci object
+            PyObject *dciInfo = Py_BuildValue("(sOs)", dciInfoString, dci, ""); // might need "list" or "dict" instead of ""?
+
+            // append DCI Info[index] object to list of DCIs
+            PyList_Append(dciList, dciInfo);
+            Py_DCREF(dciInfo);
+            Py_DECREF(dci);
         }
+
+        // make "Records[index]" string
+        char index_record_string[32];
+        sprintf(index_record_string, "[%d]", recordIndex);
+        char recordsString[64] = "Records";
+        strcat(recordsString, index_record_string);
+
+        // build Records[index] object - made up of the record object
+        PyObject *recordIndexObj = Py_BuildValue("(sOs)", recordsString, record, ""); // might need "list" or "dict" instead of ""?
+
+        // append Records[index] object to list of records
+        PyList_Append(recordList, recordIndexObj);
+        Py_DECREF(recordIndexObj);
+        Py_DECREF(record);
     }
+
+    // build Records object - made up of the recordList object
+    PyObject *records = Py_BuildValue("(sOs)", "Records", recordList, ""); // might need "list" or "dict" instead of ""?
+
+    // append Records object to result
+    PyList_Append(result, records);
+    Py_DECREF(records);
+    Py_DECREF(recordList);
+
+    // return offset - start to return however many bytes we have left remaining
+    return offset - start;
 }
