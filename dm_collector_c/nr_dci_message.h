@@ -40,7 +40,7 @@ const Fmt NrDciMessage_Version_Fmt[] = {
 const Fmt NrDciMessage_SystemTime_Fmt[] = {
         {UINT, "Slot", 1}, // 8 bits
         {UINT, "Num", 1}, // 8 bits, 1 byte = 8 bits cover Num and Reserved0 (which we don't need), do bit masking on the 8 bits to get Num
-        {UINT, "Frame", 2} // 8 bits (1 byte) + last 2?? bits of the 2nd byte. 2 bytes cover Frame and Reserved (which we don't need). Do bit masking on the 2 bytes to get the Frame.
+        {UINT, "Frame", 2} // 10 bits. 2 bytes cover Frame and Reserved (which we don't need). Do bit masking on the 2 bytes to get the Frame.
 };
 
 // 4 bytes
@@ -55,11 +55,11 @@ const ValueName ValueNameNrDciMessage_Num[] = {
 
 // 4 bytes
 const Fmt NrDciMessage_DciInfo_Fmt[] = {
-        {UINT, "Carrier ID", 4}, // 2?? bits, 4 bytes = 32 bits cover Carrier ID, RNTI Type, DCI Format, Aggregation Level, Raw DCI Included, and Reserve (not needed). do bit masking to get Carrier ID
-        {PLACEHOLDER, "RNTI Type", 0}, // 6?? bits, do bit masking on the 4 bytes to get RNTI Type
-        {PLACEHOLDER, "DCI Format", 0}, // 8?? bits, do bit masking on the 4 bytes to get DCI Format
-        {PLACEHOLDER, "Aggregation Level", 0}, // 8 bits, do bit masking on the 4 bytes to get Aggregation Level
-        {PLACEHOLDER, "Raw DCI Included", 0} // 4?? bits, do bit masking on the 4 bytes to get Raw DCI Included
+        {UINT, "Carrier ID", 4}, // 3 bits, 4 bytes = 32 bits cover Carrier ID, RNTI Type, DCI Format, Aggregation Level, Raw DCI Included, and Reserve (not needed). do bit masking to get Carrier ID
+        {PLACEHOLDER, "RNTI Type", 0}, // 4 bits, do bit masking on the 4 bytes to get RNTI Type
+        {PLACEHOLDER, "DCI Format", 0}, // 3 bits, do bit masking on the 4 bytes to get DCI Format
+        {PLACEHOLDER, "Aggregation Level", 0}, // 3 bits, do bit masking on the 4 bytes to get Aggregation Level
+        {PLACEHOLDER, "Raw DCI Included", 0} // 1 bit, do bit masking on the 4 bytes to get Raw DCI Included
 };
 
 const ValueName ValueNameNrDciMessage_RntiType[] = {
@@ -93,40 +93,40 @@ const Fmt NrDciMessage_RawDciPayload_Fmt[] = {
 
 // 0 bytes
 const Fmt NrDciMessage_RawDci_Fmt[] = {
-        {PLACEHOLDER, "Raw DCI[2]", 0},
-        {PLACEHOLDER, "Raw DCI[1]", 0},
-        {PLACEHOLDER, "Raw DCI[0]", 0}
+        {PLACEHOLDER, "Raw DCI[2]", 0}, // 0 bits
+        {PLACEHOLDER, "Raw DCI[1]", 0}, // 0 bits
+        {PLACEHOLDER, "Raw DCI[0]", 0} // 0 bits
 };
 
 // 16 bytes
 const Fmt NrDciMessage_UL_Fmt[] = {
-        {UINT, "DCI Format", 4}, // 2?? bits, 4 bytes = 32 bits cover DCI Format, Carrier ID, NDI, MCS, Freq Hopping Flag, RV, HARQ ID, PUSCH TPC, UL SUL Ind, PTRS DMRS Association, Beta Offset Ind. Do bit masking on the 2 bytes to get DCI Format
-        {PLACEHOLDER, "Carrier ID", 0}, // 4?? bits, do bit masking on the 4 bytes to get Carrier ID
-        {PLACEHOLDER, "NDI", 0}, // 2?? bits, do bit masking on the 4 bytes to get NDI
-        {PLACEHOLDER, "MCS", 0}, // ?? bits, do bit masking on the 4 bytes to get MCS
-        {PLACEHOLDER, "Freq Hopping Flag", 0}, // ?? bits, do bit masking on the 4 bytes to get Freq Hopping Flag (probably 1 bit)
-        {PLACEHOLDER, "RV", 0}, // ?? bits, do bit masking on the 4 bytes to get RV
-        {PLACEHOLDER, "HARQ ID", 0}, // ?? bits, do bit masking on the 4 bytes to get HARQ ID
-        {PLACEHOLDER, "PUSCH TPC", 0}, // ?? bits, do bit masking on the 4 bytes to get PUSCH TPC
-        {PLACEHOLDER, "UL SUL Ind", 0}, // ?? bits, do bit masking on the 4 bytes to get UL SUL Ind
-        {PLACEHOLDER, "Symbol Alloc Index", 0}, // ?? bits, do bit masking on the 4 bytes to get Symbol Alloc Index
-        {PLACEHOLDER, "BWP Ind", 0}, // ?? bits, do bit masking on the 4 bytes to get BWP Ind
-        {PLACEHOLDER, "PTRS DMRS Association", 0}, // ?? bits, do bit masking on the 4 bytes to get PTRS DMRS Association
-        {PLACEHOLDER, "Beta Offset Ind", 0}, // ?? bits, do bit masking on the 4 bytes to get Beta Offset Ind
-        {UINT, "RB Assignment", 4}, // ?? bits, 4 bytes = 32 bits cover RB Assignment, UL SCH Ind, DAI 1, DAI 2, SRS Resource Indication, Precoding Layer Info. Do bit masking on the 4 bytes to get RB Assignment
-        {PLACEHOLDER, "UL SCH Ind", 0}, // ?? bits, do bit masking on the 4 bytes to get UL SCH Ind
-        {PLACEHOLDER, "DAI 1", 0}, // ?? bits, do bit masking on the 4 bytes to get DAI 1
-        {PLACEHOLDER, "DAI 2", 0}, // ?? bits, do bit masking on the 4 bytes to get DAI 2
-        {PLACEHOLDER, "SRS Resource Indication", 0}, // ?? bits, do bit masking on the 4 bytes to get SRS Resource Indication
-        {PLACEHOLDER, "Precoding Layer Info", 0}, // ?? bits, do bit masking on the 4 bytes to get Precoding Layer Info
-        {UINT, "Antenna Ports", 1}, // ? bits, 1 byte = 8 bits cover Antenna Ports, DMRS Seq Init Flag, SRS Request. Do bit masking on the 1 byte to get Antenna Ports
-        {PLACEHOLDER, "DMRS Seq Init Flag", 0}, // ? bits, do bit masking on the 1 byte to get DMRS Seq Init Flag
-        {PLACEHOLDER, "SRS Request", 0}, // ? bits, do bit masking on the 1 byte to get SRS Request
-        {UINT, "CSI Request", 2}, // ? bits, 2 bytes = 16 bits cover CSI Request, CBGTI, Reserved MCE Enable, RA Type. do bit masking on the 2 bytes to get CSI Request
-        {PLACEHOLDER, "CBGTI", 0}, // ? bits, do bit masking on the 2 bytes to get CBGTI
-        {PLACEHOLDER, "Reserved MCE Enable", 0}, // ? bits, do bit masking on the 2 bytes to get Reserved MCE Enable
-        {PLACEHOLDER, "RA Type", 0}, // ? bits, do bit masking on the 2 bytes to get RA Type
-        {UINT, "Prune Reason", 1}, // ? bits, 1 byte = 8 bits covers Prune Reason MSB and Reserved (not needed). Do bit masking on the 1 byte to get Prune Reason
+        {UINT, "DCI Format", 4}, // 3 bits, 4 bytes = 32 bits cover DCI Format, Carrier ID, NDI, MCS, Freq Hopping Flag, RV, HARQ ID, PUSCH TPC, UL SUL Ind, PTRS DMRS Association, Beta Offset Ind. Do bit masking on the 2 bytes to get DCI Format
+        {PLACEHOLDER, "Carrier ID", 0}, // 3 bits, do bit masking on the 4 bytes to get Carrier ID
+        {PLACEHOLDER, "NDI", 0}, // 1 bits do bit masking on the 4 bytes to get NDI
+        {PLACEHOLDER, "MCS", 0}, // 5 bits, do bit masking on the 4 bytes to get MCS
+        {PLACEHOLDER, "Freq Hopping Flag", 0}, // 1 bits, do bit masking on the 4 bytes to get Freq Hopping Flag (probably 1 bit)
+        {PLACEHOLDER, "RV", 0}, // 2 bits, do bit masking on the 4 bytes to get RV
+        {PLACEHOLDER, "HARQ ID", 0}, // 4 bits, do bit masking on the 4 bytes to get HARQ ID
+        {PLACEHOLDER, "PUSCH TPC", 0}, // 2 bits, do bit masking on the 4 bytes to get PUSCH TPC
+        {PLACEHOLDER, "UL SUL Ind", 0}, // 1 bit, do bit masking on the 4 bytes to get UL SUL Ind
+        {PLACEHOLDER, "Symbol Alloc Index", 0}, // 5 bits, do bit masking on the 4 bytes to get Symbol Alloc Index
+        {PLACEHOLDER, "BWP Ind", 0}, // ?2bits, do bit masking on the 4 bytes to get BWP Ind
+        {PLACEHOLDER, "PTRS DMRS Association", 0}, // 2 bits, do bit masking on the 4 bytes to get PTRS DMRS Association
+        {PLACEHOLDER, "Beta Offset Ind", 0}, // 1 bit, do bit masking on the 4 bytes to get Beta Offset Ind
+        {UINT, "RB Assignment", 4}, // 18 bits, 4 bytes = 32 bits cover RB Assignment, UL SCH Ind, DAI 1, DAI 2, SRS Resource Indication, Precoding Layer Info. Do bit masking on the 4 bytes to get RB Assignment
+        {PLACEHOLDER, "UL SCH Ind", 0}, // 1 bits, do bit masking on the 4 bytes to get UL SCH Ind
+        {PLACEHOLDER, "DAI 1", 0}, // 2 bits, do bit masking on the 4 bytes to get DAI 1
+        {PLACEHOLDER, "DAI 2", 0}, // 2 bits, do bit masking on the 4 bytes to get DAI 2
+        {PLACEHOLDER, "SRS Resource Indication", 0}, // 3 bits, do bit masking on the 4 bytes to get SRS Resource Indication
+        {PLACEHOLDER, "Precoding Layer Info", 0}, // 6 bits, do bit masking on the 4 bytes to get Precoding Layer Info
+        {UINT, "Antenna Ports", 1}, // 5 bits, 1 byte = 8 bits cover Antenna Ports, DMRS Seq Init Flag, SRS Request. Do bit masking on the 1 byte to get Antenna Ports
+        {PLACEHOLDER, "DMRS Seq Init Flag", 0}, // 1 bits, do bit masking on the 1 byte to get DMRS Seq Init Flag
+        {PLACEHOLDER, "SRS Request", 0}, // 2 bits, do bit masking on the 1 byte to get SRS Request
+        {UINT, "CSI Request", 2}, // 6 bits, 2 bytes = 16 bits cover CSI Request, CBGTI, Reserved MCE Enable, RA Type. do bit masking on the 2 bytes to get CSI Request
+        {PLACEHOLDER, "CBGTI", 0}, // 8 bits, do bit masking on the 2 bytes to get CBGTI
+        {PLACEHOLDER, "Reserved MCE Enable", 0}, // 1 bits, do bit masking on the 2 bytes to get Reserved MCE Enable
+        {PLACEHOLDER, "RA Type", 0}, // 1 bits, do bit masking on the 2 bytes to get RA Type
+        {UINT, "Prune Reason", 1}, // 6 bits, 1 byte = 8 bits covers Prune Reason MSB and Reserved (not needed). Do bit masking on the 1 byte to get Prune Reason
         {UINT, "Pruned Mask", 4} // 32 bits
 };
 
@@ -156,7 +156,7 @@ const Fmt NrDciMessage_DL_Fmt[] = {
         {PLACEHOLDER, "Time Resource Assignment", 0}, // 4 bits according to Internet
         {PLACEHOLDER, "TB 1 MCS", 0}, // 5 bits
         {PLACEHOLDER, "TB 1 New Data Indicator", 0}, // 1 bit
-        {PLACEHOLDER, "DL Assignment Index", 0}, // 2 bits
+        {PLACEHOLDER, "DL Assignment Index", 0}, // 4 bits
         {UINT, "TPC Command For Sched PUCCH", 1}, // 2 bits, 1 byte covers TPC Command For Sched PUCCH, PUCCH Resource Indicator, PDSCH Harq Feedback Timing. Do bit masking
         {PLACEHOLDER, "PUCCH Resource Indicator", 0}, // 3 bits
         {PLACEHOLDER, "PDSCH Harq Feedback Timing", 0}, // 3 bits
@@ -507,7 +507,7 @@ static int _decode_nr_DCI (const char *b,
                 // std::cout << "UL SCH Ind: " << ulSchInd << std::endl;
                 old_object = _replace_result_int(ulList, "UL SCH Ind", ulSchInd);
                 Py_DECREF(old_object);
-                unsigned int dai1 = (utemp & 0x1F0000) >> 19;
+                unsigned int dai1 = (utemp & 0x180000) >> 19;
                 // std::cout << "DAI 1: " << dai1 << std::endl;
                 old_object = _replace_result_int(ulList, "DAI 1", dai1);
                 Py_DECREF(old_object);
@@ -683,9 +683,6 @@ static int _decode_nr_DCI (const char *b,
             PyList_Append(dciList, dciInfoIndex);
             Py_DECREF(dciInfoIndex);
             Py_DECREF(dci);
-
-                // PyList_Append(dciList, dci);
-                // Py_DECREF(dci);
         }
 
         // build DCI Info object - made up of the DCI Info[index] objects
@@ -708,9 +705,6 @@ static int _decode_nr_DCI (const char *b,
         PyList_Append(recordList, recordIndexObj);
         Py_DECREF(recordIndexObj);
         Py_DECREF(record);
-
-        // PyList_Append(recordList, record);
-        // Py_DECREF(record);
     }
 
     // build Records object - made up of the recordList object
@@ -720,9 +714,6 @@ static int _decode_nr_DCI (const char *b,
     PyList_Append(result, records);
     Py_DECREF(records);
     Py_DECREF(recordList);
-
-//     PyList_Append(result, recordList);
-//     Py_DECREF(recordList);
 
     // return offset - start to return however many bytes we have left remaining
     return offset - start;
