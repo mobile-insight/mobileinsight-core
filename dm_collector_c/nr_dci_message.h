@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <string>
 
 #include "consts.h"
 #include "log_packet.h"
@@ -217,24 +218,25 @@ static int _decode_nr_DCI (const char *b,
 
     PyObject *logFieldsChange = Py_BuildValue("(sOs)", "Log Fields Change", logFieldsChangeList, "dict");
 
-    PyObject *version131077List = PyList_New(0);
-    PyList_Append(version131077List, logFieldsChange);
+    PyObject *versionNumberList = PyList_New(0);
+    PyList_Append(versionNumberList, logFieldsChange);
     Py_DECREF(logFieldsChange);
     Py_DECREF(logFieldsChangeList);
-
     // decode NrDciMessage_Version_Fmt
     offset += _decode_by_fmt(NrDciMessage_Version_Fmt,
                 ARRAY_SIZE(NrDciMessage_Version_Fmt, Fmt),
-                b, offset, length, version131077List);
-
-    PyObject *version131077 = Py_BuildValue("(sOs)", "Version 131077", version131077List, "dict");
-    PyList_Append(result, version131077);
-    Py_DECREF(version131077);
-    Py_DECREF(version131077List);
+                b, offset, length, versionNumberList);
+    unsigned int versionNumber = (majVersion & 0xFF) << 16 | (minVersion & 0xFF);
+    std::string versionString = "Version ";
+    std::string versionNumberString = std::to_string(versionNumber);
+    PyObject *version = Py_BuildValue("(sOs)", (versionString + versionNumberString).c_str(), versionNumberList, "dict");
+    PyList_Append(result, version);
+    Py_DECREF(version);
+    Py_DECREF(versionNumberList);
 
     // build a list of records (there may be > 1 records, so we need to loop through each individual record to build the list)
     PyObject *recordList = PyList_New(0);
-    unsigned int numRecords = _search_result_uint(version131077List, "Num Records");
+    unsigned int numRecords = _search_result_uint(versionNumberList, "Num Records");
 //     std::cout << "Num Records: " << numRecords << std::endl;
     for (unsigned int recordIndex = 0; recordIndex < numRecords; recordIndex++) {
         PyObject *record = PyList_New(0);
