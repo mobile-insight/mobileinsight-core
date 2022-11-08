@@ -17,8 +17,8 @@ const Fmt NrDciMessage_MacVersion_Fmt[] = {
         {PLACEHOLDER, "{id: 2026230 }", 0} // 0 bits
 };
 
-// 12 bytes
-const Fmt NrDciMessage_Version_Fmt[] = {
+// 8 bytes
+const Fmt NrDciMessage_LogFieldsChange_Fmt[] = {
         {UINT, "Sleep", 1}, // 8 bits
         {UINT, "Beam Change", 1}, // 8 bits
         {UINT, "Signal Change", 1}, // 8 bits
@@ -26,7 +26,11 @@ const Fmt NrDciMessage_Version_Fmt[] = {
         {UINT, "DL Config", 1}, // 8 bits
         {UINT, "UL Config", 1}, // 4 bits, 1 byte = 8 bits cover UL Config and ML1 State Change, do bit masking on the 1 byte to get UL Config
         {PLACEHOLDER, "ML1 State Change", 0}, // 4 bits, do bit masking on the 1 byte to get ML1 State Change
-        {SKIP, NULL, 2}, // 16 bits for Reserved
+        {SKIP, NULL, 2} // 16 bits for Reserved
+};
+
+// 4 bytes
+const Fmt NrDciMessage_Version_Fmt[] = {
         {UINT, "Log Fields Change BMask",  2}, // 16 bits
         {SKIP, NULL, 1}, // 8 bits for Reserved
         {UINT, "Num Records", 1} // 8 bits
@@ -157,15 +161,10 @@ const Fmt NrDciMessage_DL_Fmt[] = {
         {SKIP, NULL, 2} // last 2 bytes don't seem to be relevant to any field
 };
 
-// assuming before we call this function, we have already decoded NrDciMessage_MacVersion_Fmt, which will be passed to this function in the result variable
 static int _decode_nr_DCI (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
 
-    // build MacVersion object
-//     PyObject *macVersion = Py_BuildValue("(sOs)", "MacVersion", result, "dict");
-//     PyList_Append(result, macVersion);
-//     Py_DECREF(macVersion);
     PyObject *macVersionList = PyList_New(0);
 
     offset += _decode_by_fmt(NrDciMessage_MacVersion_Fmt,
@@ -188,26 +187,46 @@ static int _decode_nr_DCI (const char *b,
     Py_DECREF(macVersion);
     Py_DECREF(macVersionList);
 
-    // decode NrDciMessage_Version_Fmt
-    offset += _decode_by_fmt(NrDciMessage_Version_Fmt,
-                ARRAY_SIZE(NrDciMessage_Version_Fmt, Fmt),
-                b, offset, length, result);
+    PyObject *logFieldsChangeList = PyList_New(0);
+
+    // decode NrDciMessage_LogFieldsChange_Fmt
+    offset += _decode_by_fmt(NrDciMessage_LogFieldsChange_Fmt,
+                ARRAY_SIZE(NrDciMessage_LogFieldsChange_Fmt, Fmt),
+                b, offset, length, logFieldsChangeList);
 //     std::cout << "offset after decoding version: " << offset << std::endl;
     
     // populate UL Config and ML1 State Change fields with their values by bit masking
-    unsigned int utemp = _search_result_uint(result, "UL Config");
+    unsigned int utemp = _search_result_uint(logFieldsChangeList, "UL Config");
+
     unsigned int ulConfig = utemp & 0xF; // last 4 bits is ulConfig
 //     std::cout << "UL Config: " << ulConfig << std::endl;
     unsigned int ml1StateChange = (utemp >> 4) & 0xF; // shift 4 bits to the right to get rid of ulConfig bits, last 4 bits of that result is ml1StateChange
 //     std::cout << "ML1 State Change: " << ml1StateChange << std::endl;
-    old_object = _replace_result_int(result, "UL Config", ulConfig);
+    old_object = _replace_result_int(logFieldsChangeList, "UL Config", ulConfig);
     Py_DECREF(old_object);
-    old_object = _replace_result_int(result, "ML1 State Change", ml1StateChange);
+    old_object = _replace_result_int(logFieldsChangeList, "ML1 State Change", ml1StateChange);
     Py_DECREF(old_object);
+
+    PyObject *logFieldsChange = Py_BuildValue("(sOs)", "Log Fields Change", logFieldsChangeList, "dict");
+
+    PyObject *version131077List = PyList_New(0);
+    PyList_Append(version131077List, logFieldsChange);
+    Py_DECREF(logFieldsChange);
+    Py_DECREF(logFieldsChangeList);
+
+    // decode NrDciMessage_Version_Fmt
+    offset += _decode_by_fmt(NrDciMessage_Version_Fmt,
+                ARRAY_SIZE(NrDciMessage_Version_Fmt, Fmt),
+                b, offset, length, version131077List);
+
+    PyObject *version131077 = Py_BuildValue("(sOs)", "Version 131077", version131077List, "dict");
+    PyList_Append(result, version131077);
+    Py_DECREF(version131077);
+    Py_DECREF(version131077List);
 
     // build a list of records (there may be > 1 records, so we need to loop through each individual record to build the list)
     PyObject *recordList = PyList_New(0);
-    unsigned int numRecords = _search_result_uint(result, "Num Records");
+    unsigned int numRecords = _search_result_uint(version131077List, "Num Records");
 //     std::cout << "Num Records: " << numRecords << std::endl;
     for (unsigned int recordIndex = 0; recordIndex < numRecords; recordIndex++) {
         PyObject *record = PyList_New(0);
