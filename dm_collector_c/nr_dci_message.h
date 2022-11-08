@@ -406,6 +406,7 @@ static int _decode_nr_DCI (const char *b,
                 Py_DECREF(old_object);
             }
 
+            PyObject *dciParamsList = PyList_New(0);
             PyObject *dciParams;
 
             // depending on the specific DCI Format, do specific decoding for that DCI Format
@@ -590,12 +591,12 @@ static int _decode_nr_DCI (const char *b,
                 Py_DECREF(old_object);
 
                 PyObject *ul = Py_BuildValue("(sOs)", "UL", ulList, "dict");
-                PyList_Append(dci, ul);
-                Py_DECREF(ul);
 
-                //dciParams = Py_BuildValue("(sOs)", "DCI Params", ul, "dict");   
-                // PyList_Append(dci, dciParams);
-                // Py_DECREF(dciParams);
+                PyList_Append(dciParamsList, ul);
+                Py_DECREF(ul);
+                dciParams = Py_BuildValue("(sOs)", "DCI Params", dciParamsList, "dict");   
+                PyList_Append(dci, dciParams);
+                Py_DECREF(dciParams);
             }
             else if ((0 == strcmp("DL_1_0", _search_result_bytestream(dci, "DCI Format"))) || (0 == strcmp("DL_1_1", _search_result_bytestream(dci, "DCI Format")))) {
                 PyObject *dlList = PyList_New(0);
@@ -662,12 +663,12 @@ static int _decode_nr_DCI (const char *b,
                 Py_DECREF(old_object);
 
                 PyObject *dl = Py_BuildValue("(sOs)", "DL", dlList, "dict");
-                PyList_Append(dci, dl);
-                Py_DECREF(dl);
 
-                // dciParams = Py_BuildValue("(sOs)", "DCI Params", dl, "dict");
-                // PyList_Append(dci, dciParams);
-                // Py_DECREF(dciParams);
+                PyList_Append(dciParamsList, dl);
+                Py_DECREF(dl);
+                dciParams = Py_BuildValue("(sOs)", "DCI Params", dciParamsList, "dict");
+                PyList_Append(dci, dciParams);
+                Py_DECREF(dciParams);
             }
             
             // make "DCI Info[index]" string
@@ -677,7 +678,7 @@ static int _decode_nr_DCI (const char *b,
             strcat(dciInfoString, index_dci_string);
 
             // build DCI Info[index] object
-            PyObject *dciInfoIndex = Py_BuildValue("(sOs)", dciInfoString, dci, "dict"); // might need "list" or "dict" instead of ""?
+            PyObject *dciInfoIndex = Py_BuildValue("(sOs)", dciInfoString, dci, "dict");
 
             // append DCI Info[index] object to list of DCIs
             PyList_Append(dciList, dciInfoIndex);
@@ -699,7 +700,7 @@ static int _decode_nr_DCI (const char *b,
         strcat(recordsString, index_record_string);
 
         // build Records[index] object - made up of the record object
-        PyObject *recordIndexObj = Py_BuildValue("(sOs)", recordsString, record, "dict"); // might need "list" or "dict" instead of ""?
+        PyObject *recordIndexObj = Py_BuildValue("(sOs)", recordsString, record, "dict");
 
         // append Records[index] object to list of records
         PyList_Append(recordList, recordIndexObj);
@@ -708,7 +709,7 @@ static int _decode_nr_DCI (const char *b,
     }
 
     // build Records object - made up of the recordList object
-    PyObject *records = Py_BuildValue("(sOs)", "Records", recordList, "list"); // might need "list" or "dict" instead of ""?
+    PyObject *records = Py_BuildValue("(sOs)", "Records", recordList, "list");
 
     // append Records object to result
     PyList_Append(result, records);
