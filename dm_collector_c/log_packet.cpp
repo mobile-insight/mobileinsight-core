@@ -12291,10 +12291,6 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             offset += _decode_gnss_gal_payload(b, offset, length, result);
             break;   
         case NR_DCI_Message:
-            offset += _decode_by_fmt(NrDciMessage_MacVersion_Fmt,
-                                     ARRAY_SIZE(NrDciMessage_MacVersion_Fmt, Fmt),
-                                     b, offset, length, result);
-            // std::cout << "offset after decoding mac version: " << offset << std::endl;
             offset += _decode_nr_DCI(b, offset, length, result);
             break;      
         default:

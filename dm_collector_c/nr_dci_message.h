@@ -162,15 +162,31 @@ static int _decode_nr_DCI (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
 
+    // build MacVersion object
+//     PyObject *macVersion = Py_BuildValue("(sOs)", "MacVersion", result, "dict");
+//     PyList_Append(result, macVersion);
+//     Py_DECREF(macVersion);
+    PyObject *macVersionList = PyList_New(0);
+
+    offset += _decode_by_fmt(NrDciMessage_MacVersion_Fmt,
+                            ARRAY_SIZE(NrDciMessage_MacVersion_Fmt, Fmt),
+                            b, offset, length, macVersionList);
+    // std::cout << "offset after decoding mac version: " << offset << std::endl;
+
     // get values of minor and major versions, populate Major.Minor Version and {id: 2026230 } fields with those values
-    unsigned int minVersion = _search_result_uint(result, "Minor Version");
-    unsigned int majVersion = _search_result_uint(result, "Major Version");
+    unsigned int minVersion = _search_result_uint(macVersionList, "Minor Version");
+    unsigned int majVersion = _search_result_uint(macVersionList, "Major Version");
 //     std::cout << "Minor Version: " << minVersion << std::endl;
 //     std::cout << "Major Version: " << majVersion << std::endl;
-    PyObject *old_object = _replace_result_int(result, "Major.Minor Version", majVersion);
+    PyObject *old_object = _replace_result_int(macVersionList, "Major.Minor Version", majVersion);
     Py_DECREF(old_object);
-    old_object = _replace_result_int(result, "{id: 2026230 }", minVersion);
+    old_object = _replace_result_int(macVersionList, "{id: 2026230 }", minVersion);
     Py_DECREF(old_object);
+
+    PyObject *macVersion = Py_BuildValue("(sOs)", "MacVersion", macVersionList, "dict");
+    PyList_Append(result, macVersion);
+    Py_DECREF(macVersion);
+    Py_DECREF(macVersionList);
 
     // decode NrDciMessage_Version_Fmt
     offset += _decode_by_fmt(NrDciMessage_Version_Fmt,
