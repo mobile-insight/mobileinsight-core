@@ -2,6 +2,7 @@
  * NR_DCI_Message
  */
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 
 #include "consts.h"
@@ -14,7 +15,7 @@ const Fmt NrDciMessage_MacVersion_Fmt[] = {
         {UINT, "Major Version", 2}, // 16 bits
         {PLACEHOLDER, "Major.Minor Version", 0}, // 0 bits
         {PLACEHOLDER, "{id: 2026230 }", 0} // 0 bits
-}
+};
 
 // 12 bytes
 const Fmt NrDciMessage_Version_Fmt[] = {
@@ -26,19 +27,19 @@ const Fmt NrDciMessage_Version_Fmt[] = {
         {UINT, "UL Config", 1}, // 4 bits, 1 byte = 8 bits cover UL Config and ML1 State Change, do bit masking on the 1 byte to get UL Config
         {PLACEHOLDER, "ML1 State Change", 0}, // 4 bits, do bit masking on the 1 byte to get ML1 State Change
         {SKIP, NULL, 2}, // 16 bits for Reserved
-        {UINT, "Log Fields Change BMask",  2} // 16 bits
+        {UINT, "Log Fields Change BMask",  2}, // 16 bits
         {SKIP, NULL, 1}, // 8 bits for Reserved
         {UINT, "Num Records", 1} // 8 bits
-}
+};
 
 // 8 bytes
 const Fmt NrDciMessage_Record_Fmt[] = {
         {UINT, "Slot", 1}, // 8 bits
         {UINT, "Num", 1}, // 8 bits, 1 byte = 8 bits cover Num and Reserved0 (which we don't need), do bit masking on the 8 bits to get Num
-        {UINT, "Frame" 2}, // 8 bits (1 byte) + last 2?? bits of the 2nd byte. 2 bytes cover Frame and Reserved (which we don't need). Do bit masking on the 2 bytes to get the Frame.
+        {UINT, "Frame", 2}, // 8 bits (1 byte) + last 2?? bits of the 2nd byte. 2 bytes cover Frame and Reserved (which we don't need). Do bit masking on the 2 bytes to get the Frame.
         {UINT, "Num DCI", 1}, // 8 bits
         {SKIP, NULL, 3} // 24 bits for reserved[0], reserved[1], reserved[2], which we don't need
-}
+};
 
 const ValueName ValueNameNrDciMessage_Num[] = {
         {0,  "15kHz"}
@@ -51,7 +52,7 @@ const Fmt NrDciMessage_DciInfo_Fmt[] = {
         {PLACEHOLDER, "DCI Format", 0}, // 8?? bits, do bit masking on the 4 bytes to get DCI Format
         {PLACEHOLDER, "Aggregation Level", 0}, // 8 bits, do bit masking on the 4 bytes to get Aggregation Level
         {PLACEHOLDER, "Raw DCI Included", 0} // 4?? bits, do bit masking on the 4 bytes to get Raw DCI Included
-}
+};
 
 const ValueName ValueNameNrDciMessage_RntiType[] = {
         {0, "C_RNTI"},
@@ -59,21 +60,21 @@ const ValueName ValueNameNrDciMessage_RntiType[] = {
 };
 
 const ValueName ValueNameNrDciMessage_DciFormat[] = {
-        {0, "DL_1_1"},
         {1, "UL_0_1"},
-        {2, "DL_1_0"}
+        {2, "DL_1_0"},
+        {3, "DL_1_1"}
 };
 
 const ValueName ValueNameNrDciMessage_AggregationLevel[] = {
         {0, "LEVEL_1"},
         {1, "LEVEL_2"},
         {3, "LEVEL_8"}
-}
+};
 
 const ValueName ValueNameNrDciMessage_PruneReasonMsb[] = {
         {0, "NONE"},
         {11, "INVALID_RES_MCS"}
-}
+};
 
 // 12 bytes
 const Fmt NrDciMessage_RawDci_Fmt[] = {
@@ -83,7 +84,7 @@ const Fmt NrDciMessage_RawDci_Fmt[] = {
         {PLACEHOLDER, "Raw DCI[2]", 0},
         {PLACEHOLDER, "Raw DCI[1]", 0},
         {PLACEHOLDER, "Raw DCI[0]", 0}
-}
+};
 
 // 16 bytes
 const Fmt NrDciMessage_UL_Fmt[] = {
@@ -109,13 +110,13 @@ const Fmt NrDciMessage_UL_Fmt[] = {
         {UINT, "Antenna Ports", 1}, // ? bits, 1 byte = 8 bits cover Antenna Ports, DMRS Seq Init Flag, SRS Request. Do bit masking on the 1 byte to get Antenna Ports
         {PLACEHOLDER, "DMRS Seq Init Flag", 0}, // ? bits, do bit masking on the 1 byte to get DMRS Seq Init Flag
         {PLACEHOLDER, "SRS Request", 0}, // ? bits, do bit masking on the 1 byte to get SRS Request
-        {PLACEHOLDER, "CSI Request", 2}, // ? bits, 2 bytes = 16 bits cover CSI Request, CBGTI, Reserved MCE Enable, RA Type. do bit masking on the 2 bytes to get CSI Request
+        {UINT, "CSI Request", 2}, // ? bits, 2 bytes = 16 bits cover CSI Request, CBGTI, Reserved MCE Enable, RA Type. do bit masking on the 2 bytes to get CSI Request
         {PLACEHOLDER, "CBGTI", 0}, // ? bits, do bit masking on the 2 bytes to get CBGTI
         {PLACEHOLDER, "Reserved MCE Enable", 0}, // ? bits, do bit masking on the 2 bytes to get Reserved MCE Enable
         {PLACEHOLDER, "RA Type", 0}, // ? bits, do bit masking on the 2 bytes to get RA Type
         {UINT, "Prune Reason", 1}, // ? bits, 1 byte = 8 bits covers Prune Reason MSB and Reserved (not needed). Do bit masking on the 1 byte to get Prune Reason
         {UINT, "Pruned Mask", 4} // 32 bits
-}
+};
 
 /*
 CBG Transmission Info, CBG Flushing Out Info, Transmission Config Ind, SRS Request, Carrier ID are always 0 for every log I found
@@ -154,17 +155,19 @@ const Fmt NrDciMessage_DL_Fmt[] = {
         {PLACEHOLDER, "Carrier ID", 0}, // 3 bits
         {PLACEHOLDER, "HARQ ID", 0}, // 4 bits
         {SKIP, NULL, 2} // last 2 bytes don't seem to be relevant to any field
-}
+};
 
 // assuming before we call this function, we have already decoded NrDciMessage_MacVersion_Fmt, which will be passed to this function in the result variable
 static int _decode_nr_DCI (const char *b,
-        int offset, size_t length, PyObject *result) {            
+        int offset, size_t length, PyObject *result) {
     int start = offset;
 
     // get values of minor and major versions, populate Major.Minor Version and {id: 2026230 } fields with those values
     unsigned int minVersion = _search_result_uint(result, "Minor Version");
     unsigned int majVersion = _search_result_uint(result, "Major Version");
-    old_object = _replace_result_int(result, "Major.Minor Version", majVersion);
+//     std::cout << "Minor Version: " << minVersion << std::endl;
+//     std::cout << "Major Version: " << majVersion << std::endl;
+    PyObject *old_object = _replace_result_int(result, "Major.Minor Version", majVersion);
     Py_DECREF(old_object);
     old_object = _replace_result_int(result, "{id: 2026230 }", minVersion);
     Py_DECREF(old_object);
@@ -173,11 +176,14 @@ static int _decode_nr_DCI (const char *b,
     offset += _decode_by_fmt(NrDciMessage_Version_Fmt,
                 ARRAY_SIZE(NrDciMessage_Version_Fmt, Fmt),
                 b, offset, length, result);
+//     std::cout << "offset after decoding version: " << offset << std::endl;
     
     // populate UL Config and ML1 State Change fields with their values by bit masking
     unsigned int utemp = _search_result_uint(result, "UL Config");
     unsigned int ulConfig = utemp & 0xF; // last 4 bits is ulConfig
+//     std::cout << "UL Config: " << ulConfig << std::endl;
     unsigned int ml1StateChange = (utemp >> 4) & 0xF; // shift 4 bits to the right to get rid of ulConfig bits, last 4 bits of that result is ml1StateChange
+//     std::cout << "ML1 State Change: " << ml1StateChange << std::endl;
     old_object = _replace_result_int(result, "UL Config", ulConfig);
     Py_DECREF(old_object);
     old_object = _replace_result_int(result, "ML1 State Change", ml1StateChange);
@@ -186,6 +192,7 @@ static int _decode_nr_DCI (const char *b,
     // build a list of records (there may be > 1 records, so we need to loop through each individual record to build the list)
     PyObject *recordList = PyList_New(0);
     unsigned int numRecords = _search_result_uint(result, "Num Records");
+//     std::cout << "Num Records: " << numRecords << std::endl;
     for (unsigned int recordIndex = 0; recordIndex < numRecords; recordIndex++) {
         PyObject *record = PyList_New(0);
 
@@ -193,16 +200,29 @@ static int _decode_nr_DCI (const char *b,
         offset += _decode_by_fmt(NrDciMessage_Record_Fmt,
                 ARRAY_SIZE(NrDciMessage_Record_Fmt, Fmt),
                 b, offset, length, record);
+        // std::cout << "offset after decoding record: " << offset << std::endl;
         
-        // puplate Num field by bit masking
+        // populate Num field by bit masking
         utemp = _search_result_uint(record, "Num");
         unsigned int num = utemp & 0xF; // last 4 bits is num
+        // std::cout << "Num: " << num << std::endl;
         old_object = _replace_result_int(record, "Num", num);
+        Py_DECREF(old_object);
+        (void) _map_result_field_to_name(record, "Num",
+                                             ValueNameNrDciMessage_Num,
+                                             ARRAY_SIZE(ValueNameNrDciMessage_Num, ValueName),
+                                             "Num Unknown");
+        
+        utemp = _search_result_uint(record, "Frame");
+        unsigned int frame = utemp & 0x3FF;
+        // std::cout << "Frame: " << frame << std::endl;
+        old_object = _replace_result_int(record, "Frame", frame);
         Py_DECREF(old_object);
 
         // for each record, build a list of DCIs (there may be > 1 DCIs in one record, so we need to loop through each individual DCI to build the list)
         PyObject *dciList = PyList_New(0);
         unsigned int numDcis = _search_result_uint(record, "Num DCI");
+        // std::cout << "Num DCI: " << numDcis << std::endl;
         for (unsigned int dciIndex = 0; dciIndex < numDcis; dciIndex++) {
             PyObject *dci = PyList_New(0);
 
@@ -210,6 +230,7 @@ static int _decode_nr_DCI (const char *b,
             offset += _decode_by_fmt(NrDciMessage_DciInfo_Fmt,
                 ARRAY_SIZE(NrDciMessage_DciInfo_Fmt, Fmt),
                 b, offset, length, dci);
+        //     std::cout << "offset after decoding dci info: " << offset << std::endl;
         
             /*
             --
@@ -262,9 +283,11 @@ static int _decode_nr_DCI (const char *b,
             */
             utemp = _search_result_uint(dci, "Carrier ID");
             unsigned int carrierId = utemp & 0x7;
+        //     std::cout << "Carrier ID: " << carrierId << std::endl;
             old_object = _replace_result_int(dci, "Carrier ID", carrierId);
             Py_DECREF(old_object);
             unsigned int rntiType = (utemp & 0x78) >> 3;
+        //     std::cout << "RNTI Type: " << rntiType << std::endl;
             old_object = _replace_result_int(dci, "RNTI Type", rntiType);
             Py_DECREF(old_object);
             (void) _map_result_field_to_name(dci, "RNTI Type",
@@ -272,6 +295,7 @@ static int _decode_nr_DCI (const char *b,
                                              ARRAY_SIZE(ValueNameNrDciMessage_RntiType, ValueName),
                                              "RNTI Type Unknown");
             unsigned int dciFormat = (utemp & 0x380) >> 7;
+        //     std::cout << "DCI Format: " << dciFormat << std::endl;
             old_object = _replace_result_int(dci, "DCI Format", dciFormat);
             Py_DECREF(old_object);
             (void) _map_result_field_to_name(dci, "DCI Format",
@@ -279,6 +303,7 @@ static int _decode_nr_DCI (const char *b,
                                              ARRAY_SIZE(ValueNameNrDciMessage_DciFormat, ValueName),
                                              "DCI Format Unknown");
             unsigned int aggregationLevel = (utemp & 0x1C00) >> 10;
+        //     std::cout << "Aggregation Level: " << aggregationLevel << std::endl;
             old_object = _replace_result_int(dci, "Aggregation Level", aggregationLevel);
             Py_DECREF(old_object);
             (void) _map_result_field_to_name(dci, "Aggregation Level",
@@ -286,6 +311,7 @@ static int _decode_nr_DCI (const char *b,
                                              ARRAY_SIZE(ValueNameNrDciMessage_AggregationLevel, ValueName),
                                              "Aggregation Level Unknown");
             unsigned int rawDciIncluded = (utemp & 0x2000) >> 13;
+        //     std::cout << "Raw DCI Included: " << rawDciIncluded << std::endl;
             old_object = _replace_result_int(dci, "Raw DCI Included", rawDciIncluded);
             Py_DECREF(old_object);
 
@@ -295,21 +321,25 @@ static int _decode_nr_DCI (const char *b,
                 offset += _decode_by_fmt(NrDciMessage_RawDci_Fmt,
                         ARRAY_SIZE(NrDciMessage_RawDci_Fmt, Fmt),
                         b, offset, length, dci);
+                // std::cout << "offset after decoding raw dci: " << offset << std::endl;
                 unsigned int rawDci0 = _search_result_uint(dci, "Raw DCI Payload[0]");
+                // std::cout << "Raw DCI Payload[0]: " << rawDci0 << std::endl;
                 unsigned int rawDci1 = _search_result_uint(dci, "Raw DCI Payload[1]");
+                // std::cout << "Raw DCI Payload[1]: " << rawDci1 << std::endl;
                 unsigned int rawDci2 = _search_result_uint(dci, "Raw DCI Payload[2]");
+                // std::cout << "Raw DCI Payload[2]: " << rawDci2 << std::endl;
 
                 // populate Raw DCI[2], Raw DCI[1], Raw DCI[0] fields as strings that show the hexadecimal values of the fields
                 std::stringstream stream2;
-                stream2 << "0x" << std::setfill('0') << std::setw(8) << std::hex << rawDci2;
+                stream2 << "0x" << std::setfill('0') << std::uppercase << std::setw(8) << std::hex << rawDci2;
                 old_object = _replace_result_string(dci, "Raw DCI[2]", stream2.str());
                 Py_DECREF(old_object);
                 std::stringstream stream1;
-                stream1 << "0x" << std::setfill('0') << std::setw(8) << std::hex << rawDci1;
+                stream1 << "0x" << std::setfill('0') << std::uppercase << std::setw(8) << std::hex << rawDci1;
                 old_object = _replace_result_string(dci, "Raw DCI[1]", stream1.str());
                 Py_DECREF(old_object);
                 std::stringstream stream0;
-                stream0 << "0x" << std::setfill('0') << std::setw(8) << std::hex << rawDci0;
+                stream0 << "0x" << std::setfill('0') << std::uppercase << std::setw(8) << std::hex << rawDci0;
                 old_object = _replace_result_string(dci, "Raw DCI[0]", stream0.str());
                 Py_DECREF(old_object);
             }
@@ -319,6 +349,7 @@ static int _decode_nr_DCI (const char *b,
                 offset += _decode_by_fmt(NrDciMessage_UL_Fmt,
                         ARRAY_SIZE(NrDciMessage_UL_Fmt, Fmt),
                         b, offset, length, dci);
+                // std::cout << "offset after decoding UL_0_1: " << offset << std::endl;
 
                 /*
                 Let us have our prior assumptions that DCI Format and Carrier ID are each 3 bits long.
@@ -338,6 +369,7 @@ static int _decode_nr_DCI (const char *b,
                 */
                 utemp = _search_result_uint(dci, "UL DCI Format");
                 unsigned int dciFormat2 = utemp & 0x7;
+                // std::cout << "UL DCI Format: " << dciFormat2 << std::endl;
                 old_object = _replace_result_int(dci, "UL DCI Format", dciFormat);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(dci, "UL DCI Format",
@@ -345,39 +377,51 @@ static int _decode_nr_DCI (const char *b,
                                                 ARRAY_SIZE(ValueNameNrDciMessage_DciFormat, ValueName),
                                                 "UL DCI Format Unknown");
                 unsigned int carrierId2 = (utemp & 0x38) >> 3;
+                // std::cout << "Carrier ID: " << carrierId2 << std::endl;
                 old_object = _replace_result_int(dci, "Carrier ID", carrierId2);
                 Py_DECREF(old_object);
                 unsigned int ndi = (utemp & 0x40) >> 6;
+                // std::cout << "NDI: " << ndi << std::endl;
                 old_object = _replace_result_int(dci, "NDI", ndi);
                 Py_DECREF(old_object);
                 unsigned int mcs = (utemp & 0xF80) >> 7;
+                // std::cout << "mcs: " << mcs << std::endl;
                 old_object = _replace_result_int(dci, "MCS", mcs);
                 Py_DECREF(old_object);
                 unsigned int freqHoppingFlag = (utemp & 0x1000) >> 12;
+                // std::cout << "Freq Hopping Flag: " << freqHoppingFlag << std::endl;
                 old_object = _replace_result_int(dci, "Freq Hopping Flag", freqHoppingFlag);
                 Py_DECREF(old_object);
                 unsigned int rv = (utemp & 0x6000) >> 13;
+                // std::cout << "RV: " << rv << std::endl;
                 old_object = _replace_result_int(dci, "RV", rv);
                 Py_DECREF(old_object);
                 unsigned int harqId = (utemp & 0x78000) >> 15;
+                // std::cout << "HARQ ID: " << harqId << std::endl;
                 old_object = _replace_result_int(dci, "HARQ ID", harqId);
                 Py_DECREF(old_object);
                 unsigned int puschTpc = (utemp & 0x180000) >> 19;
+                // std::cout << "PUSCH TPC: " << puschTpc << std::endl;
                 old_object = _replace_result_int(dci, "PUSCH TPC", puschTpc);
                 Py_DECREF(old_object);
                 unsigned int ulSulInd = (utemp & 0x200000) >> 21;
+                // std::cout << "UL SUL Ind: " << ulSulInd << std::endl;
                 old_object = _replace_result_int(dci, "UL SUL Ind", ulSulInd);
                 Py_DECREF(old_object);
                 unsigned int symbolAllocIndex = (utemp & 0x7C00000) >> 22;
+                // std::cout << "Symbol Alloc Index: " << symbolAllocIndex << std::endl;
                 old_object = _replace_result_int(dci, "Symbol Alloc Index", symbolAllocIndex);
                 Py_DECREF(old_object);
                 unsigned int bwpInd = (utemp & 0x18000000) >> 27;
+                // std::cout << "BWP Ind: " << bwpInd << std::endl;
                 old_object = _replace_result_int(dci, "BWP Ind", bwpInd);
                 Py_DECREF(old_object);
                 unsigned int ptrsDmrsAssociation = (utemp & 0x60000000) >> 29;
+                // std::cout << "PTRS DMRS Association: " << ptrsDmrsAssociation << std::endl;
                 old_object = _replace_result_int(dci, "PTRS DMRS Association", ptrsDmrsAssociation);
                 Py_DECREF(old_object);
                 unsigned int betaOffsetInd = (utemp & 0x80000000) >> 31;
+                // std::cout << "Beta Offset Ind: " << betaOffsetInd << std::endl;
                 old_object = _replace_result_int(dci, "Beta Offset Ind", betaOffsetInd);
                 Py_DECREF(old_object);
 
@@ -391,21 +435,27 @@ static int _decode_nr_DCI (const char *b,
                 */
                 utemp = _search_result_uint(dci, "RB Assignment");
                 unsigned int rbAssignment = utemp & 0x3FFFF;
+                // std::cout << "RB Assignment: " << rbAssignment << std::endl;
                 old_object = _replace_result_int(dci, "RB Assignment", rbAssignment);
                 Py_DECREF(old_object);
                 unsigned int ulSchInd = (utemp & 0x40000) >> 18;
+                // std::cout << "UL SCH Ind: " << ulSchInd << std::endl;
                 old_object = _replace_result_int(dci, "UL SCH Ind", ulSchInd);
                 Py_DECREF(old_object);
                 unsigned int dai1 = (utemp & 0x1F0000) >> 19;
+                // std::cout << "DAI 1: " << dai1 << std::endl;
                 old_object = _replace_result_int(dci, "DAI 1", dai1);
                 Py_DECREF(old_object);
                 unsigned int dai2 = (utemp & 0x600000) >> 21;
+                // std::cout << "DAI 2: " << dai2 << std::endl;
                 old_object = _replace_result_int(dci, "DAI 2", dai2);
                 Py_DECREF(old_object);
                 unsigned int srsResourceIndication = (utemp & 0x3800000) >> 23;
+                // std::cout << "SRS Resource Indication: " << srsResourceIndication << std::endl;
                 old_object = _replace_result_int(dci, "SRS Resource Indication", srsResourceIndication);
                 Py_DECREF(old_object);
                 unsigned int precodingLayerInfo = (utemp & 0xFC000000) >> 26;
+                // std::cout << "Precoding Layer Info: " << precodingLayerInfo << std::endl;
                 old_object = _replace_result_int(dci, "Precoding Layer Info", precodingLayerInfo);
                 Py_DECREF(old_object);
 
@@ -416,12 +466,15 @@ static int _decode_nr_DCI (const char *b,
                 */
                 utemp = _search_result_uint(dci, "Antenna Ports");
                 unsigned int antennaPorts = utemp & 0x1F;
+                // std::cout << "Antenna Ports: " << antennaPorts << std::endl;
                 old_object = _replace_result_int(dci, "Antenna Ports", antennaPorts);
                 Py_DECREF(old_object);
                 unsigned int dmrsSeqInitFlag = (utemp & 0x20) >> 5;
+                // std::cout << "DMRS Seq Init Flag: " << dmrsSeqInitFlag << std::endl;
                 old_object = _replace_result_int(dci, "DMRS Seq Init Flag", dmrsSeqInitFlag);
                 Py_DECREF(old_object);
                 unsigned int srsRequest = (utemp & 0xC0) >> 6;
+                // std::cout << "SRS Request: " << srsRequest << std::endl;
                 old_object = _replace_result_int(dci, "SRS Request", srsRequest);
                 Py_DECREF(old_object);
 
@@ -433,15 +486,19 @@ static int _decode_nr_DCI (const char *b,
                 */
                 utemp = _search_result_uint(dci, "CSI Request");
                 unsigned int csiRequest = utemp & 0x3F;
+                // std::cout << "CSI Request: " << csiRequest << std::endl;
                 old_object = _replace_result_int(dci, "CSI Request", csiRequest);
                 Py_DECREF(old_object);
                 unsigned int cbgti = (utemp & 0x3FC0) >> 6;
+                // std::cout << "CBGTI: " << cbgti << std::endl;
                 old_object = _replace_result_int(dci, "CBGTI", cbgti);
                 Py_DECREF(old_object);
                 unsigned int reservedMceEnable = (utemp & 0x4000) >> 14;
+                // std::cout << "Reserved MCE Enable: " << reservedMceEnable << std::endl;
                 old_object = _replace_result_int(dci, "Reserved MCE Enable", reservedMceEnable);
                 Py_DECREF(old_object);
                 unsigned int raType = (utemp & 0x8000) >> 15;
+                // std::cout << "RA Type: " << raType << std::endl;
                 old_object = _replace_result_int(dci, "RA Type", raType);
                 Py_DECREF(old_object);
 
@@ -451,6 +508,7 @@ static int _decode_nr_DCI (const char *b,
                 */
                 utemp = _search_result_uint(dci, "Prune Reason");
                 unsigned int pruneReason = (utemp & 0x3F);
+                // std::cout << "Prune Reason: " << pruneReason << std::endl;
                 old_object = _replace_result_int(dci, "Prune Reason", pruneReason);
                 Py_DECREF(old_object);
                 (void) _map_result_field_to_name(dci, "Prune Reason",
@@ -460,6 +518,7 @@ static int _decode_nr_DCI (const char *b,
 
                 // populate Pruned Mask field as a string that shows the hexadecimal value of the field
                 utemp = _search_result_uint(dci, "Pruned Mask");
+                // std::cout << "Pruned Mask: " << utemp << std::endl;
                 std::stringstream prunedMastStream;
                 prunedMastStream << "0x" << std::setfill('0') << std::setw(8) << std::hex << utemp;
                 old_object = _replace_result_string(dci, "Pruned Mask", prunedMastStream.str());
@@ -472,64 +531,87 @@ static int _decode_nr_DCI (const char *b,
 
                 utemp = _search_result_uint(dci, "Bandwidth Part Indicator");
                 unsigned int bandwidthPartIndicator = utemp & 0x3;
+                // std::cout << "Bandwidth Part Indicator: " << bandwidthPartIndicator << std::endl;
                 old_object = _replace_result_int(dci, "Bandwidth Part Indicator", bandwidthPartIndicator);
                 Py_DECREF(old_object);
                 unsigned int timeResourceAssignment = (utemp & 0x3C) >> 2;
+                // std::cout << "Time Resource Assignment: " << timeResourceAssignment << std::endl;
                 old_object = _replace_result_int(dci, "Time Resource Assignment", timeResourceAssignment);
                 Py_DECREF(old_object);
                 unsigned int tb1Mcs = (utemp & 0x7C0) >> 6;
+                // std::cout << "TB 1 MCS: " << tb1Mcs << std::endl;
                 old_object = _replace_result_int(dci, "TB 1 MCS", tb1Mcs);
                 Py_DECREF(old_object);
                 unsigned int tb1NewDataIndicator = (utemp & 0x800) >> 11;
+                // std::cout << "TB 1 New Data Indicator: " << tb1NewDataIndicator << std::endl;
                 old_object = _replace_result_int(dci, "TB 1 New Data Indicator", tb1NewDataIndicator);
                 Py_DECREF(old_object);
                 unsigned int dlAssignmentIndex = (utemp & 0xF000) >> 12;
+                // std::cout << "DL Assignment Index: " << dlAssignmentIndex << std::endl;
                 old_object = _replace_result_int(dci, "DL Assignment Index", dlAssignmentIndex);
                 Py_DECREF(old_object);
 
                 utemp = _search_result_uint(dci, "TPC Command For Sched PUCCH");
                 unsigned int tpcCommandForSchedPucch = utemp & 0x3;
+                // std::cout << "TPC Command for Sched PUCCH: " << tpcCommandForSchedPucch << std::endl;
                 old_object = _replace_result_int(dci, "TPC Command For Sched PUCCH", tpcCommandForSchedPucch);
                 Py_DECREF(old_object);
                 unsigned int pucchResourceIndicator = (utemp & 0x1C) >> 2;
+                // std::cout << "PUCCH Resource Indicator: " << pucchResourceIndicator << std::endl;
                 old_object = _replace_result_int(dci, "PUCCH Resource Indicator", pucchResourceIndicator);
                 Py_DECREF(old_object);
                 unsigned int pdschHarqFeedbackTiming = (utemp & 0xE0) >> 5;
+                // std::cout << "PDSCH Harq Feedback Timing: " << pdschHarqFeedbackTiming << std::endl;
                 old_object = _replace_result_int(dci, "PDSCH Harq Feedback Timing", pdschHarqFeedbackTiming);
                 Py_DECREF(old_object);
 
                 utemp = _search_result_uint(dci, "CBG Flushing Out Info");
                 unsigned int cbgFlushingOutInfo = utemp & 0x1;
+                // std::cout << "CBG Flushing Out Info: " << cbgFlushingOutInfo << std::endl;
                 old_object = _replace_result_int(dci, "CBG Flushing Out Info", cbgFlushingOutInfo);
                 Py_DECREF(old_object);
                 unsigned int transmissionConfigInd = (utemp & 0xE) >> 1;
+                // std::cout << "Transmission Config Ind: " << transmissionConfigInd << std::endl;
                 old_object = _replace_result_int(dci, "Transmission Config Ind", transmissionConfigInd);
                 Py_DECREF(old_object);
                 unsigned int srsRequest2 = (utemp & 0x30) >> 4;
+                // std::cout << "SRS Request: " << srsRequest2 << std::endl;
                 old_object = _replace_result_int(dci, "SRS Request", srsRequest2);
                 Py_DECREF(old_object);
                 unsigned int carrierId3 = (utemp & 0x1C0) >> 6;
+                // std::cout << "Carrier ID: " << carrierId3 << std::endl;
                 old_object = _replace_result_int(dci, "Carrier ID", carrierId3);
                 Py_DECREF(old_object);
                 unsigned int harqId2 = (utemp & 0x3C00) >> 10;
+                // std::cout << "HARQ ID: " << harqId2 << std::endl;
                 old_object = _replace_result_int(dci, "HARQ ID", harqId2);
                 Py_DECREF(old_object);
             }
-
+            
             // make "DCI Info[index]" string
             char index_dci_string[32];
             sprintf(index_dci_string, "[%d]", dciIndex);
             char dciInfoString[64] = "DCI Info";
             strcat(dciInfoString, index_dci_string);
 
-            // build DCI Info[index] object - made up of the dci object
-            PyObject *dciInfo = Py_BuildValue("(sOs)", dciInfoString, dci, ""); // might need "list" or "dict" instead of ""?
+            // build DCI Info[index] object
+            PyObject *dciInfoIndex = Py_BuildValue("(sOs)", dciInfoString, dci, "dict"); // might need "list" or "dict" instead of ""?
 
             // append DCI Info[index] object to list of DCIs
-            PyList_Append(dciList, dciInfo);
-            Py_DCREF(dciInfo);
+            PyList_Append(dciList, dciInfoIndex);
+            Py_DECREF(dciInfoIndex);
             Py_DECREF(dci);
+
+                // PyList_Append(dciList, dci);
+                // Py_DECREF(dci);
         }
+
+        // build DCI Info object - made up of the DCI Info[index] objects
+        PyObject *dciInfo = Py_BuildValue("(sOs)", "DCI Info", dciList, "list");
+
+        // append DCI list to each record
+        PyList_Append(record, dciInfo);
+        Py_DECREF(dciInfo);
 
         // make "Records[index]" string
         char index_record_string[32];
@@ -538,21 +620,27 @@ static int _decode_nr_DCI (const char *b,
         strcat(recordsString, index_record_string);
 
         // build Records[index] object - made up of the record object
-        PyObject *recordIndexObj = Py_BuildValue("(sOs)", recordsString, record, ""); // might need "list" or "dict" instead of ""?
+        PyObject *recordIndexObj = Py_BuildValue("(sOs)", recordsString, record, "dict"); // might need "list" or "dict" instead of ""?
 
         // append Records[index] object to list of records
         PyList_Append(recordList, recordIndexObj);
         Py_DECREF(recordIndexObj);
         Py_DECREF(record);
+
+        // PyList_Append(recordList, record);
+        // Py_DECREF(record);
     }
 
     // build Records object - made up of the recordList object
-    PyObject *records = Py_BuildValue("(sOs)", "Records", recordList, ""); // might need "list" or "dict" instead of ""?
+    PyObject *records = Py_BuildValue("(sOs)", "Records", recordList, "list"); // might need "list" or "dict" instead of ""?
 
     // append Records object to result
     PyList_Append(result, records);
     Py_DECREF(records);
     Py_DECREF(recordList);
+
+//     PyList_Append(result, recordList);
+//     Py_DECREF(recordList);
 
     // return offset - start to return however many bytes we have left remaining
     return offset - start;
