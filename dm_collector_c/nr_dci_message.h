@@ -36,11 +36,15 @@ const Fmt NrDciMessage_Version_Fmt[] = {
         {UINT, "Num Records", 1} // 8 bits
 };
 
-// 8 bytes
-const Fmt NrDciMessage_Record_Fmt[] = {
+// 4 bytes
+const Fmt NrDciMessage_SystemTime_Fmt[] = {
         {UINT, "Slot", 1}, // 8 bits
         {UINT, "Num", 1}, // 8 bits, 1 byte = 8 bits cover Num and Reserved0 (which we don't need), do bit masking on the 8 bits to get Num
-        {UINT, "Frame", 2}, // 8 bits (1 byte) + last 2?? bits of the 2nd byte. 2 bytes cover Frame and Reserved (which we don't need). Do bit masking on the 2 bytes to get the Frame.
+        {UINT, "Frame", 2} // 8 bits (1 byte) + last 2?? bits of the 2nd byte. 2 bytes cover Frame and Reserved (which we don't need). Do bit masking on the 2 bytes to get the Frame.
+};
+
+// 4 bytes
+const Fmt NrDciMessage_Record_Fmt[] = {
         {UINT, "Num DCI", 1}, // 8 bits
         {SKIP, NULL, 3} // 24 bits for reserved[0], reserved[1], reserved[2], which we don't need
 };
@@ -231,28 +235,39 @@ static int _decode_nr_DCI (const char *b,
     for (unsigned int recordIndex = 0; recordIndex < numRecords; recordIndex++) {
         PyObject *record = PyList_New(0);
 
+        // decode System Time
+        PyObject *systemTimeList = PyList_New(0);
+        offset += _decode_by_fmt(NrDciMessage_SystemTime_Fmt,
+                ARRAY_SIZE(NrDciMessage_SystemTime_Fmt, Fmt),
+                b, offset, length, systemTimeList);
+
+        // populate Num field by bit masking
+        utemp = _search_result_uint(systemTimeList, "Num");
+        unsigned int num = utemp & 0xF; // last 4 bits is num
+        // std::cout << "Num: " << num << std::endl;
+        old_object = _replace_result_int(systemTimeList, "Num", num);
+        Py_DECREF(old_object);
+        (void) _map_result_field_to_name(systemTimeList, "Num",
+                                             ValueNameNrDciMessage_Num,
+                                             ARRAY_SIZE(ValueNameNrDciMessage_Num, ValueName),
+                                             "Num Unknown");
+        
+        utemp = _search_result_uint(systemTimeList, "Frame");
+        unsigned int frame = utemp & 0x3FF;
+        // std::cout << "Frame: " << frame << std::endl;
+        old_object = _replace_result_int(systemTimeList, "Frame", frame);
+        Py_DECREF(old_object);
+
+        PyObject *systemTime = Py_BuildValue("(sOs)", "System Time", systemTimeList, "dict");
+        PyList_Append(record, systemTime);
+        Py_DECREF(systemTime);
+        Py_DECREF(systemTimeList);
+
         // decode individual record
         offset += _decode_by_fmt(NrDciMessage_Record_Fmt,
                 ARRAY_SIZE(NrDciMessage_Record_Fmt, Fmt),
                 b, offset, length, record);
         // std::cout << "offset after decoding record: " << offset << std::endl;
-        
-        // populate Num field by bit masking
-        utemp = _search_result_uint(record, "Num");
-        unsigned int num = utemp & 0xF; // last 4 bits is num
-        // std::cout << "Num: " << num << std::endl;
-        old_object = _replace_result_int(record, "Num", num);
-        Py_DECREF(old_object);
-        (void) _map_result_field_to_name(record, "Num",
-                                             ValueNameNrDciMessage_Num,
-                                             ARRAY_SIZE(ValueNameNrDciMessage_Num, ValueName),
-                                             "Num Unknown");
-        
-        utemp = _search_result_uint(record, "Frame");
-        unsigned int frame = utemp & 0x3FF;
-        // std::cout << "Frame: " << frame << std::endl;
-        old_object = _replace_result_int(record, "Frame", frame);
-        Py_DECREF(old_object);
 
         // for each record, build a list of DCIs (there may be > 1 DCIs in one record, so we need to loop through each individual DCI to build the list)
         PyObject *dciList = PyList_New(0);
