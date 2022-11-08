@@ -10,33 +10,33 @@
 
 // 4 bytes
 const Fmt NrDciMessage_MacVersion_Fmt[] = {
-        {UINT_BIG_ENDIAN, "Minor Version", 2}, // 16 bits
-        {UINT_BIG_ENDIAN, "Major Version", 2}, // 16 bits
+        {UINT, "Minor Version", 2}, // 16 bits
+        {UINT, "Major Version", 2}, // 16 bits
         {PLACEHOLDER, "Major.Minor Version", 0}, // 0 bits
         {PLACEHOLDER, "{id: 2026230 }", 0} // 0 bits
 }
 
 // 12 bytes
 const Fmt NrDciMessage_Version_Fmt[] = {
-        {UINT_BIG_ENDIAN, "Sleep", 1}, // 8 bits
-        {UINT_BIG_ENDIAN, "Beam Change", 1}, // 8 bits
-        {UINT_BIG_ENDIAN, "Signal Change", 1}, // 8 bits
-        {UINT_BIG_ENDIAN, "DL Dynamic Cfg Change", 1}, // 8 bits
-        {UINT_BIG_ENDIAN, "DL Config", 1}, // 8 bits
-        {UINT_BIG_ENDIAN, "UL Config", 1}, // 4 bits, 1 byte = 8 bits cover UL Config and ML1 State Change, do bit masking on the 1 byte to get UL Config
+        {UINT, "Sleep", 1}, // 8 bits
+        {UINT, "Beam Change", 1}, // 8 bits
+        {UINT, "Signal Change", 1}, // 8 bits
+        {UINT, "DL Dynamic Cfg Change", 1}, // 8 bits
+        {UINT, "DL Config", 1}, // 8 bits
+        {UINT, "UL Config", 1}, // 4 bits, 1 byte = 8 bits cover UL Config and ML1 State Change, do bit masking on the 1 byte to get UL Config
         {PLACEHOLDER, "ML1 State Change", 0}, // 4 bits, do bit masking on the 1 byte to get ML1 State Change
         {SKIP, NULL, 2}, // 16 bits for Reserved
-        {UINT_BIG_ENDIAN, "Log Fields Change BMask",  2} // 16 bits
+        {UINT, "Log Fields Change BMask",  2} // 16 bits
         {SKIP, NULL, 1}, // 8 bits for Reserved
-        {UINT_BIG_ENDIAN, "Num Records", 1} // 8 bits
+        {UINT, "Num Records", 1} // 8 bits
 }
 
 // 8 bytes
 const Fmt NrDciMessage_Record_Fmt[] = {
-        {UINT_BIG_ENDIAN, "Slot", 1}, // 8 bits
-        {UINT_BIG_ENDIAN, "Num", 1}, // 8 bits, 1 byte = 8 bits cover Num and Reserved0 (which we don't need), do bit masking on the 8 bits to get Num
-        {UINT_BIG_ENDIAN, "Frame" 2}, // 8 bits (1 byte) + last 2?? bits of the 2nd byte. 2 bytes cover Frame and Reserved (which we don't need). Do bit masking on the 2 bytes to get the Frame.
-        {UINT_BIG_ENDIAN, "Num DCI", 1}, // 8 bits
+        {UINT, "Slot", 1}, // 8 bits
+        {UINT, "Num", 1}, // 8 bits, 1 byte = 8 bits cover Num and Reserved0 (which we don't need), do bit masking on the 8 bits to get Num
+        {UINT, "Frame" 2}, // 8 bits (1 byte) + last 2?? bits of the 2nd byte. 2 bytes cover Frame and Reserved (which we don't need). Do bit masking on the 2 bytes to get the Frame.
+        {UINT, "Num DCI", 1}, // 8 bits
         {SKIP, NULL, 3} // 24 bits for reserved[0], reserved[1], reserved[2], which we don't need
 }
 
@@ -46,7 +46,7 @@ const ValueName ValueNameNrDciMessage_Num[] = {
 
 // 4 bytes
 const Fmt NrDciMessage_DciInfo_Fmt[] = {
-        {UINT_BIG_ENDIAN, "Carrier ID", 4}, // 2?? bits, 4 bytes = 32 bits cover Carrier ID, RNTI Type, DCI Format, Aggregation Level, Raw DCI Included, and Reserve (not needed). do bit masking to get Carrier ID
+        {UINT, "Carrier ID", 4}, // 2?? bits, 4 bytes = 32 bits cover Carrier ID, RNTI Type, DCI Format, Aggregation Level, Raw DCI Included, and Reserve (not needed). do bit masking to get Carrier ID
         {PLACEHOLDER, "RNTI Type", 0}, // 6?? bits, do bit masking on the 4 bytes to get RNTI Type
         {PLACEHOLDER, "DCI Format", 0}, // 8?? bits, do bit masking on the 4 bytes to get DCI Format
         {PLACEHOLDER, "Aggregation Level", 0}, // 8 bits, do bit masking on the 4 bytes to get Aggregation Level
@@ -77,9 +77,9 @@ const ValueName ValueNameNrDciMessage_PruneReasonMsb[] = {
 
 // 12 bytes
 const Fmt NrDciMessage_RawDci_Fmt[] = {
-        {UINT_BIG_ENDIAN, "Raw DCI Payload[0]", 4}, // 32 bits
-        {UINT_BIG_ENDIAN, "Raw DCI Payload[1]", 4}, // 32 bits
-        {UINT_BIG_ENDIAN, "Raw DCI Payload[2]", 4}, // 32 bits
+        {UINT, "Raw DCI Payload[0]", 4}, // 32 bits
+        {UINT, "Raw DCI Payload[1]", 4}, // 32 bits
+        {UINT, "Raw DCI Payload[2]", 4}, // 32 bits
         {PLACEHOLDER, "Raw DCI[2]", 0},
         {PLACEHOLDER, "Raw DCI[1]", 0},
         {PLACEHOLDER, "Raw DCI[0]", 0}
@@ -87,7 +87,7 @@ const Fmt NrDciMessage_RawDci_Fmt[] = {
 
 // 16 bytes
 const Fmt NrDciMessage_UL_Fmt[] = {
-        {UINT_BIG_ENDIAN, "UL DCI Format", 4}, // 2?? bits, 4 bytes = 32 bits cover DCI Format, Carrier ID, NDI, MCS, Freq Hopping Flag, RV, HARQ ID, PUSCH TPC, UL SUL Ind, PTRS DMRS Association, Beta Offset Ind. Do bit masking on the 2 bytes to get DCI Format
+        {UINT, "UL DCI Format", 4}, // 2?? bits, 4 bytes = 32 bits cover DCI Format, Carrier ID, NDI, MCS, Freq Hopping Flag, RV, HARQ ID, PUSCH TPC, UL SUL Ind, PTRS DMRS Association, Beta Offset Ind. Do bit masking on the 2 bytes to get DCI Format
         {PLACEHOLDER, "Carrier ID", 0}, // 4?? bits, do bit masking on the 4 bytes to get Carrier ID
         {PLACEHOLDER, "NDI", 0}, // 2?? bits, do bit masking on the 4 bytes to get NDI
         {PLACEHOLDER, "MCS", 0}, // ?? bits, do bit masking on the 4 bytes to get MCS
@@ -100,21 +100,21 @@ const Fmt NrDciMessage_UL_Fmt[] = {
         {PLACEHOLDER, "BWP Ind", 0}, // ?? bits, do bit masking on the 4 bytes to get BWP Ind
         {PLACEHOLDER, "PTRS DMRS Association", 0}, // ?? bits, do bit masking on the 4 bytes to get PTRS DMRS Association
         {PLACEHOLDER, "Beta Offset Ind", 0}, // ?? bits, do bit masking on the 4 bytes to get Beta Offset Ind
-        {UINT_BIG_ENDIAN, "RB Assignment", 4}, // ?? bits, 4 bytes = 32 bits cover RB Assignment, UL SCH Ind, DAI 1, DAI 2, SRS Resource Indication, Precoding Layer Info. Do bit masking on the 4 bytes to get RB Assignment
+        {UINT, "RB Assignment", 4}, // ?? bits, 4 bytes = 32 bits cover RB Assignment, UL SCH Ind, DAI 1, DAI 2, SRS Resource Indication, Precoding Layer Info. Do bit masking on the 4 bytes to get RB Assignment
         {PLACEHOLDER, "UL SCH Ind", 0}, // ?? bits, do bit masking on the 4 bytes to get UL SCH Ind
         {PLACEHOLDER, "DAI 1", 0}, // ?? bits, do bit masking on the 4 bytes to get DAI 1
         {PLACEHOLDER, "DAI 2", 0}, // ?? bits, do bit masking on the 4 bytes to get DAI 2
         {PLACEHOLDER, "SRS Resource Indication", 0}, // ?? bits, do bit masking on the 4 bytes to get SRS Resource Indication
         {PLACEHOLDER, "Precoding Layer Info", 0}, // ?? bits, do bit masking on the 4 bytes to get Precoding Layer Info
-        {UINT_BIG_ENDIAN, "Antenna Ports", 1}, // ? bits, 1 byte = 8 bits cover Antenna Ports, DMRS Seq Init Flag, SRS Request. Do bit masking on the 1 byte to get Antenna Ports
+        {UINT, "Antenna Ports", 1}, // ? bits, 1 byte = 8 bits cover Antenna Ports, DMRS Seq Init Flag, SRS Request. Do bit masking on the 1 byte to get Antenna Ports
         {PLACEHOLDER, "DMRS Seq Init Flag", 0}, // ? bits, do bit masking on the 1 byte to get DMRS Seq Init Flag
         {PLACEHOLDER, "SRS Request", 0}, // ? bits, do bit masking on the 1 byte to get SRS Request
         {PLACEHOLDER, "CSI Request", 2}, // ? bits, 2 bytes = 16 bits cover CSI Request, CBGTI, Reserved MCE Enable, RA Type. do bit masking on the 2 bytes to get CSI Request
         {PLACEHOLDER, "CBGTI", 0}, // ? bits, do bit masking on the 2 bytes to get CBGTI
         {PLACEHOLDER, "Reserved MCE Enable", 0}, // ? bits, do bit masking on the 2 bytes to get Reserved MCE Enable
         {PLACEHOLDER, "RA Type", 0}, // ? bits, do bit masking on the 2 bytes to get RA Type
-        {UINT_BIG_ENDIAN, "Prune Reason", 1}, // ? bits, 1 byte = 8 bits covers Prune Reason MSB and Reserved (not needed). Do bit masking on the 1 byte to get Prune Reason
-        {UINT_BIG_ENDIAN, "Pruned Mask", 4} // 32 bits
+        {UINT, "Prune Reason", 1}, // ? bits, 1 byte = 8 bits covers Prune Reason MSB and Reserved (not needed). Do bit masking on the 1 byte to get Prune Reason
+        {UINT, "Pruned Mask", 4} // 32 bits
 }
 
 /*
@@ -139,16 +139,16 @@ HARQ ID - bits 42-45
 */
 // 8 bytes
 const Fmt NrDciMessage_DL_Fmt[] = {
-        {UINT_BIG_ENDIAN, "Bandwidth Part Indicator", 2}, // 2 bits, 2 bytes cover Bandwidth Part Indicator, Time Resource Assignment, TB 1 MCS, TB 1 New Data Indicator, DL Assignment Index. Do bit masking
+        {UINT, "Bandwidth Part Indicator", 2}, // 2 bits, 2 bytes cover Bandwidth Part Indicator, Time Resource Assignment, TB 1 MCS, TB 1 New Data Indicator, DL Assignment Index. Do bit masking
         {PLACEHOLDER, "Time Resource Assignment", 0}, // 4 bits according to Internet
         {PLACEHOLDER, "TB 1 MCS", 0}, // 5 bits
         {PLACEHOLDER, "TB 1 New Data Indicator", 0}, // 1 bit
         {PLACEHOLDER, "DL Assignment Index", 0}, // 2 bits
-        {UINT_BIG_ENDIAN, "TPC Command For Sched PUCCH", 1}, // 2 bits, 1 byte covers TPC Command For Sched PUCCH, PUCCH Resource Indicator, PDSCH Harq Feedback Timing. Do bit masking
+        {UINT, "TPC Command For Sched PUCCH", 1}, // 2 bits, 1 byte covers TPC Command For Sched PUCCH, PUCCH Resource Indicator, PDSCH Harq Feedback Timing. Do bit masking
         {PLACEHOLDER, "PUCCH Resource Indicator", 0}, // 3 bits
         {PLACEHOLDER, "PDSCH Harq Feedback Timing", 0}, // 3 bits
-        {UINT_BIG_ENDIAN, "CBG Transmission Info", 1}, // 0, 2, 4, 6, 8 bits, assume 8 bits
-        {UINT_BIG_ENDIAN, "CBG Flushing Out Info", 2}, // 0, 1 bit, assume 1 bit, 2 bytes cover CBG Transmission Info, CBG Flushing Out, Transmission Config Ind, SRS Request, Carrier ID, HARQ ID. Do bit masking
+        {UINT, "CBG Transmission Info", 1}, // 0, 2, 4, 6, 8 bits, assume 8 bits
+        {UINT, "CBG Flushing Out Info", 2}, // 0, 1 bit, assume 1 bit, 2 bytes cover CBG Transmission Info, CBG Flushing Out, Transmission Config Ind, SRS Request, Carrier ID, HARQ ID. Do bit masking
         {PLACEHOLDER, "Transmission Config Ind", 0}, // 0, 3 bits, assume 3 bits
         {PLACEHOLDER, "SRS Request", 0}, // 2 bits
         {PLACEHOLDER, "Carrier ID", 0}, // 3 bits
