@@ -23,11 +23,15 @@ if __name__ == "__main__":
     logger = MsgLogger()
     logger.set_decode_format(MsgLogger.DICT)
     logger.set_dump_type(MsgLogger.FILE_ONLY)
-    logger.save_decoded_msg_as("./test.txt")
+    logger.save_decoded_msg_as("./decoded_dci.txt")
     logger.set_source(src)
 
     # # Analyzers
     nr_dci_analyzer = NrDciAnalyzer()
     nr_dci_analyzer.set_source(src) # bind with the monitor 
-
+    
     src.run()
+
+    nr_dci_analyzer.draw_assignment_pattern()
+    nr_dci_analyzer.draw_throughput(outlier_filter_m=3)
+    nr_dci_analyzer.reset()
