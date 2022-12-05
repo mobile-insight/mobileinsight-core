@@ -20,10 +20,14 @@ class NrDciAnalyzer(Analyzer):
         self._records = []
         self._ULs = []
         self._DLs = []
-        self._MCSs = []
+        self._MCSs_UL = []
+        self._MCSs_DL = []
         self._RBs = []
         self._both_DL_and_UL =[]
         self._throughput_UL = []
+        self._TRA_DL = []
+        self._throughput_DL = []
+        
         self.__cycles = 0
         self.__prev_frame_num = -1
 
@@ -33,10 +37,14 @@ class NrDciAnalyzer(Analyzer):
         self._records = []
         self._ULs = []
         self._DLs = []
-        self._MCSs = []
+        self._MCSs_UL = []
+        self._MCSs_DL = []
         self._RBs = []
         self._both_DL_and_UL =[]
         self._throughput_UL = []
+        self._TRA_DL = []
+        self._throughput_DL = []
+        
         self.__cycles = 0
         self.__prev_frame_num = -1
 
@@ -70,6 +78,7 @@ class NrDciAnalyzer(Analyzer):
         mcs_to_Qm = [2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,6,6,6,6,6,6,6,6,6,6,6,6,2,4,6]
         mcs_to_r = [120,157,193,251,308,379,449,526,602,679,340,378,434,490,553,
                     616,658,438,466,517,567,616,666,719,772,822,873,910,948,0,0,0] # last 3 ???
+        TRA_to_l = [12,10,9,7,5,4,4,7,2,2,2,13,4,7,4]
 
         for record in records:
             slot_num = record['System Time']['Slot']
@@ -85,12 +94,16 @@ class NrDciAnalyzer(Analyzer):
             for dci in record['DCI Info']:
                 if dci['DCI Format'][:2] == 'UL':
                     self._ULs.append(time)
-                    self._MCSs.append(dci['DCI Params']['UL']['MCS'])
+                    self._MCSs_UL.append(dci['DCI Params']['UL']['MCS'])
                     self._RBs.append(dci['DCI Params']['UL']['RB Assignment'])
                     self._throughput_UL.append(int(dci['DCI Params']['UL']['RB Assignment'])*mcs_to_Qm[int(dci['DCI Params']['UL']['MCS'])]*mcs_to_r[int(dci['DCI Params']['UL']['MCS'])])
                     
                 if dci['DCI Format'][:2] == 'DL':
                     self._DLs.append(time)
+                    self._MCSs_DL.append(dci['DCI Params']['DL']['TB 1 MCS'])
+                    self._TRA_DL.append(dci['DCI Params']['DL']['Time Resource Assignment'])
+                    self._throughput_DL.append(TRA_to_l[int(dci['DCI Params']['DL']['Time Resource Assignment'])]*mcs_to_Qm[int(dci['DCI Params']['DL']['TB 1 MCS'])]*mcs_to_r[dci['DCI Params']['DL']['TB 1 MCS']])
+
 
     def __reject_outliers(self,throughput_x, throughput_y, m=2):
         """
@@ -106,7 +119,7 @@ class NrDciAnalyzer(Analyzer):
                 res_x.append(throughput_x[idx])
         return res_x, res_y
 
-    def draw_throughput(self, figure_size=(100,4), outlier_filter_m = 3):
+    def draw_throughput_ul(self, figure_size=(100,4), outlier_filter_m = 3):
 
         plt.figure(figsize=figure_size)
         
@@ -119,7 +132,23 @@ class NrDciAnalyzer(Analyzer):
 
         plt.scatter(throughput_x, throughput_y, label='Throughput UL')
         plt.legend()
-        plt.savefig('throughput.png', dpi=200)
+        plt.savefig('throughput_ul.png', dpi=200)
+        #plt.show()
+
+    def draw_throughput_dl(self, figure_size=(100,4), outlier_filter_m = 3):
+
+        plt.figure(figsize=figure_size)
+        
+        plt.xlabel('Time in ms')
+        plt.ylabel('Throughput')
+        throughput_x = np.array(self._DLs)
+        throughput_y = np.array(self._throughput_DL)
+        # normalized_y = (throughput_y-np.min(throughput_y))/(np.max(throughput_y)-np.min(throughput_y))
+        throughput_x, throughput_y = self.__reject_outliers(throughput_x, throughput_y, outlier_filter_m)
+
+        plt.scatter(throughput_x, throughput_y, label='Throughput DL')
+        plt.legend()
+        plt.savefig('throughput_dl.png', dpi=200)
         #plt.show()
 
     def draw_assignment_pattern(self,figure_size=(100,4)):

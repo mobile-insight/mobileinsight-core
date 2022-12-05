@@ -19,7 +19,6 @@ if __name__ == "__main__":
 
     src.enable_log("NR_DCI_Message")
 
-
     logger = MsgLogger()
     logger.set_decode_format(MsgLogger.DICT)
     logger.set_dump_type(MsgLogger.FILE_ONLY)
@@ -32,6 +31,7 @@ if __name__ == "__main__":
     
     src.run()
 
-    nr_dci_analyzer.draw_assignment_pattern()
-    nr_dci_analyzer.draw_throughput(outlier_filter_m=3)
+    nr_dci_analyzer.draw_assignment_pattern(figure_size=(35,4))
+    nr_dci_analyzer.draw_throughput_ul(figure_size=(35,4), outlier_filter_m=3)
+    nr_dci_analyzer.draw_throughput_dl(figure_size=(35,4), outlier_filter_m=3)
     nr_dci_analyzer.reset()
