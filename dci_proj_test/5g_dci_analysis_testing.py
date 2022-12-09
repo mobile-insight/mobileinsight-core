@@ -35,6 +35,7 @@ if __name__ == "__main__":
     start_time = 0
     end_time = math.inf
     nr_dci_analyzer.draw_assignment_pattern(figure_size=(35,4), start_time=start_time, end_time=end_time)
-    nr_dci_analyzer.draw_throughput_ul(figure_size=(50,4), outlier_filter_m=3, start_time=start_time, end_time=end_time)
-    nr_dci_analyzer.draw_throughput_dl(figure_size=(50,4), outlier_filter_m=3, start_time=start_time, end_time=end_time)
+    nr_dci_analyzer.draw_throughput_ul(figure_size=(30,7), outlier_filter_m=3, start_time=start_time, end_time=end_time, fillzero=True)
+    nr_dci_analyzer.draw_throughput_dl(figure_size=(30,7), outlier_filter_m=3, start_time=start_time, end_time=end_time, fillzero=True)
+    nr_dci_analyzer.draw_aggregated_frame()
     nr_dci_analyzer.reset()

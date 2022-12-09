@@ -122,38 +122,50 @@ class NrDciAnalyzer(Analyzer):
                 res_x.append(throughput_x[idx])
         return res_x, res_y
 
-    def draw_throughput_ul(self, figure_size=(100,4), outlier_filter_m = 3, start_time = 0, end_time = math.inf):
+    def draw_throughput_ul(self, figure_size=(100,4), outlier_filter_m = 3, start_time = 0, end_time = math.inf, fillzero = False):
         plt.figure(figsize=figure_size)
         plt.xlabel('Time in ms')
-        plt.ylabel("Throughput")
+        plt.ylabel("Approximate Throughput")
         plt.title("throughput UL: {} ms - {} ms".format(start_time, end_time if end_time!= math.inf else "inf"))
 
         throughput_x, throughput_y = self.__reject_outliers(self._time_ULs, self._throughput_UL, outlier_filter_m)
 
-        s_idx, e_idx = np.searchsorted(throughput_x, [start_time,end_time])
-        throughput_x, throughput_y = np.array(throughput_x[s_idx : e_idx]), np.array(throughput_y[s_idx : e_idx])
-
-        plt.scatter(throughput_x, throughput_y, label='Throughput UL')
-        #plt.plot(throughput_x, throughput_y, '-o')
-        plt.legend()
-        plt.savefig("throughput_UL_{}_ms_{}_ms.png".format(start_time, end_time if end_time!= math.inf else "inf"), dpi=200)
+        if end_time == math.inf:
+            end_time = int(throughput_x[-1])
+        if fillzero:
+            x = range(start_time, end_time)
+            y = [throughput_y[throughput_x.index(t)] if t in throughput_x else 0 for t in x]
+            plt.plot(x, y)
+        else:
+            s_idx, e_idx = np.searchsorted(throughput_x, [start_time,end_time])
+            throughput_x, throughput_y = np.array(throughput_x[s_idx : e_idx]), np.array(throughput_y[s_idx : e_idx])
+            plt.scatter(throughput_x, throughput_y, label='Throughput UL')
+            #plt.plot(throughput_x, throughput_y, '-o')
+            plt.legend()
+        plt.savefig("throughput_UL_{}_ms_{}_ms.png".format(start_time, end_time), dpi=200)
         #plt.show()
 
-    def draw_throughput_dl(self, figure_size=(100,4), outlier_filter_m = 3, start_time = 0, end_time = math.inf):
+    def draw_throughput_dl(self, figure_size=(100,4), outlier_filter_m = 3, start_time = 0, end_time = math.inf, fillzero = False):
         plt.figure(figsize=figure_size)
         plt.xlabel('Time in ms')
-        plt.ylabel("Throughput")
+        plt.ylabel("Approximate Throughput")
         plt.title("throughput DL: {} ms - {} ms".format(start_time, end_time if end_time!= math.inf else "inf"))
 
         throughput_x, throughput_y = self.__reject_outliers(self._time_DLs, self._throughput_DL, outlier_filter_m)
 
-        s_idx, e_idx = np.searchsorted(throughput_x, [start_time,end_time])
-        throughput_x, throughput_y = np.array(throughput_x[s_idx : e_idx]), np.array(throughput_y[s_idx : e_idx])
-
-        plt.scatter(throughput_x, throughput_y, label='Throughput DL')
-        #plt.plot(throughput_x, throughput_y, '-o')
-        plt.legend()
-        plt.savefig("throughput_DL_{}_ms_{}_ms.png".format(start_time, end_time if end_time!= math.inf else "inf"), dpi=200)
+        if end_time == math.inf:
+            end_time = int(throughput_x[-1])
+        if fillzero:
+            x = range(start_time, end_time)
+            y = [throughput_y[throughput_x.index(t)] if t in throughput_x else 0 for t in x]
+            plt.plot(x, y)
+        else: 
+            s_idx, e_idx = np.searchsorted(throughput_x, [start_time,end_time])
+            throughput_x, throughput_y = np.array(throughput_x[s_idx : e_idx]), np.array(throughput_y[s_idx : e_idx])
+            plt.scatter(throughput_x, throughput_y, label='Throughput DL')
+            #plt.plot(throughput_x, throughput_y, '-o')
+            plt.legend()
+        plt.savefig("throughput_DL_{}_ms_{}_ms.png".format(start_time, end_time), dpi=200)
         #plt.show()
 
     def draw_assignment_pattern(self,figure_size=(100,4), start_time = 0, end_time = math.inf):
@@ -183,3 +195,29 @@ class NrDciAnalyzer(Analyzer):
         plt.legend()
         plt.savefig("Assignment Pattern_{}_ms_{}_ms.png".format(start_time, end_time if end_time!= math.inf else "inf"), dpi=200)
         #plt.show()
+
+    
+    def draw_aggregated_frame(self):
+        plt.figure()
+        plt.xlabel('slot')
+        plt.ylabel("Throughput")
+        plt.title("resource assignment within frame - UL")
+
+        x = range(10)
+        y_ul = [0]*10
+        for i in range(len(self._throughput_UL)):
+            y_ul[int(self._time_ULs[i] % 10)] += self._throughput_UL[i]
+        plt.plot(x, y_ul)
+        plt.savefig("Frame_Pattern_UL.png", dpi=200)
+
+        plt.figure()
+        plt.xlabel('slot')
+        plt.ylabel("Throughput")
+        plt.title("resource assignment within frame - DL")
+
+        x = range(10)
+        y_dl = [0]*10
+        for i in range(len(self._throughput_DL)):
+            y_dl[int(self._time_DLs[i] % 10)] += self._throughput_DL[i]
+        plt.plot(x, y_dl)
+        plt.savefig("Frame_Pattern_DL.png", dpi=200)
