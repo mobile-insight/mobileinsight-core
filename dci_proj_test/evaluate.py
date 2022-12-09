@@ -16,22 +16,23 @@ def read_dci(fields):
     dci['DCI Format'] = fields[2]
     dci['Aggregation Level'] = fields[3]
     dci['Raw DCI Included'] = int(fields[4])
+    dci['DCI Params'] = {}
     if dci['DCI Format'] == 'DL_1_0':
-        dci['DL'] = {}
-        dci['DL']['Bandwidth Part Indicator'] = int(fields[5])
-        dci['DL']['Time Resource Assignment'] = int(fields[6])
-        dci['DL']['TB 1 MCS'] = int(fields[7])
-        dci['DL']['TB 1 New Data Indicator'] = int(fields[8])
-        dci['DL']['DL Assignment Index'] = int(fields[9])
-        dci['DL']['TPC Command For Sched PUCCH'] = int(fields[10])
-        dci['DL']['PUCCH Resource Indicator'] = int(fields[11])
-        dci['DL']['PDSCH Harq Feedback Timing'] = int(fields[12])
-        dci['DL']['CBG Transmission Info'] = int(fields[13])
-        dci['DL']['CBG Flushing Out Info'] = int(fields[14])
-        dci['DL']['Transmission Config Ind'] = int(fields[15])
-        dci['DL']['SRS Request'] = int(fields[16])
-        dci['DL']['Carrier ID'] = int(fields[17])
-        dci['DL']['HARQ ID'] = int(fields[18])
+        dci['DCI Params']['DL'] = {}
+        dci['DCI Params']['DL']['Bandwidth Part Indicator'] = int(fields[5])
+        dci['DCI Params']['DL']['Time Resource Assignment'] = int(fields[6])
+        dci['DCI Params']['DL']['TB 1 MCS'] = int(fields[7])
+        dci['DCI Params']['DL']['TB 1 New Data Indicator'] = int(fields[8])
+        dci['DCI Params']['DL']['DL Assignment Index'] = int(fields[9])
+        dci['DCI Params']['DL']['TPC Command For Sched PUCCH'] = int(fields[10])
+        dci['DCI Params']['DL']['PUCCH Resource Indicator'] = int(fields[11])
+        dci['DCI Params']['DL']['PDSCH Harq Feedback Timing'] = int(fields[12])
+        dci['DCI Params']['DL']['CBG Transmission Info'] = int(fields[13])
+        dci['DCI Params']['DL']['CBG Flushing Out Info'] = int(fields[14])
+        dci['DCI Params']['DL']['Transmission Config Ind'] = int(fields[15])
+        dci['DCI Params']['DL']['SRS Request'] = int(fields[16])
+        dci['DCI Params']['DL']['Carrier ID'] = int(fields[17])
+        dci['DCI Params']['DL']['HARQ ID'] = int(fields[18])
     elif dci['DCI Format'] == 'UL_0_1':
         dci['Raw DCI[2]'] = fields[5]
         dci['Raw DCI[1]'] = fields[6]
@@ -40,54 +41,51 @@ def read_dci(fields):
         dci['Raw DCI Payload']['Raw DCI Payload[2]'] = int(dci['Raw DCI[2]'], base=16)
         dci['Raw DCI Payload']['Raw DCI Payload[1]'] = int(dci['Raw DCI[1]'], base=16)
         dci['Raw DCI Payload']['Raw DCI Payload[0]'] = int(dci['Raw DCI[0]'], base=16)
-        dci['UL'] = {}
-        dci['UL']['DCI Format'] = dci['DCI Format']
-        dci['UL']['Carrier ID'] = int(fields[8])
-        dci['UL']['NDI'] = int(fields[9])
-        dci['UL']['MCS'] = int(fields[10])
-        dci['UL']['Freq Hopping Flag'] = int(fields[11])
-        dci['UL']['RV'] = int(fields[12])
-        dci['UL']['HARQ ID'] = int(fields[13])
-        dci['UL']['PUSCH TPC'] = int(fields[14])
-        dci['UL']['UL SUL Ind'] = int(fields[15])
-        dci['UL']['Symbol Alloc Index'] = int(fields[16])
-        dci['UL']['BWP Ind'] = int(fields[17])
-        dci['UL']['PTRS DMRS Association'] = int(fields[18])
-        dci['UL']['Beta Offset Ind'] = int(fields[19])
-        dci['UL']['RB Assignment'] = int(fields[20])
-        dci['UL']['UL SCH Ind'] = int(fields[21])
-        dci['UL']['DAI 1'] = int(fields[22])
-        dci['UL']['DAI 2'] = int(fields[23])
-        dci['UL']['SRS Resource Indication'] = int(fields[24])
-        dci['UL']['Precoding Layer Info'] = int(fields[25])
-        dci['UL']['Antenna Ports'] = int(fields[26])
-        dci['UL']['DMRS Seq Init Flag'] = int(fields[27])
-        dci['UL']['SRS Request'] = int(fields[28])
-        dci['UL']['CSI Request'] = int(fields[29])
-        dci['UL']['CBGTI'] = int(fields[30])
-        dci['UL']['Reserved MCE Enable'] = int(fields[31])
-        dci['UL']['RA Type'] = int(fields[32])
-        dci['UL']['Prune Reason'] = fields[33]
-        dci['UL']['Pruned Mask'] = fields[34]
+        dci['DCI Params']['UL'] = {}
+        dci['DCI Params']['UL']['DCI Format'] = dci['DCI Format']
+        dci['DCI Params']['UL']['Carrier ID'] = int(fields[8])
+        dci['DCI Params']['UL']['NDI'] = int(fields[9])
+        dci['DCI Params']['UL']['MCS'] = int(fields[10])
+        dci['DCI Params']['UL']['Freq Hopping Flag'] = int(fields[11])
+        dci['DCI Params']['UL']['RV'] = int(fields[12])
+        dci['DCI Params']['UL']['HARQ ID'] = int(fields[13])
+        dci['DCI Params']['UL']['PUSCH TPC'] = int(fields[14])
+        dci['DCI Params']['UL']['UL SUL Ind'] = int(fields[15])
+        dci['DCI Params']['UL']['Symbol Alloc Index'] = int(fields[16])
+        dci['DCI Params']['UL']['BWP Ind'] = int(fields[17])
+        dci['DCI Params']['UL']['PTRS DMRS Association'] = int(fields[18])
+        dci['DCI Params']['UL']['Beta Offset Ind'] = int(fields[19])
+        dci['DCI Params']['UL']['RB Assignment'] = int(fields[20])
+        dci['DCI Params']['UL']['UL SCH Ind'] = int(fields[21])
+        dci['DCI Params']['UL']['DAI 1'] = int(fields[22])
+        dci['DCI Params']['UL']['DAI 2'] = int(fields[23])
+        dci['DCI Params']['UL']['SRS Resource Indication'] = int(fields[24])
+        dci['DCI Params']['UL']['Precoding Layer Info'] = int(fields[25])
+        dci['DCI Params']['UL']['Antenna Ports'] = int(fields[26])
+        dci['DCI Params']['UL']['DMRS Seq Init Flag'] = int(fields[27])
+        dci['DCI Params']['UL']['SRS Request'] = int(fields[28])
+        dci['DCI Params']['UL']['CSI Request'] = int(fields[29])
+        dci['DCI Params']['UL']['CBGTI'] = int(fields[30])
+        dci['DCI Params']['UL']['Reserved MCE Enable'] = int(fields[31])
+        dci['DCI Params']['UL']['RA Type'] = int(fields[32])
+        dci['DCI Params']['UL']['Prune Reason'] = fields[33]
+        dci['DCI Params']['UL']['Pruned Mask'] = fields[34]
     elif dci['DCI Format'] == 'DL_1_1':
-        dci['DL'] = {}
-        dci['DL']['Bandwidth Part Indicator'] = int(fields[5])
-        dci['DL']['Time Resource Assignment'] = int(fields[6])
-        dci['DL']['TB 1 MCS'] = int(fields[7])
-        dci['DL']['TB 1 New Data Indicator'] = int(fields[8])
-        dci['DL']['DL Assignment Index'] = int(fields[9])
-        dci['DL']['TPC Command For Sched PUCCH'] = int(fields[10])
-        dci['DL']['PUCCH Resource Indicator'] = int(fields[11])
-        dci['DL']['PDSCH Harq Feedback Timing'] = int(fields[12])
-        dci['DL']['CBG Transmission Info'] = int(fields[13])
-        dci['DL']['CBG Flushing Out Info'] = int(fields[14])
-        dci['DL']['Transmission Config Ind'] = int(fields[15])
-        dci['DL']['SRS Request'] = int(fields[16])
-        dci['DL']['Carrier ID'] = int(fields[17])
-        dci['DL']['HARQ ID'] = int(fields[18])
-
-
-
+        dci['DCI Params']['DL'] = {}
+        dci['DCI Params']['DL']['Bandwidth Part Indicator'] = int(fields[5])
+        dci['DCI Params']['DL']['Time Resource Assignment'] = int(fields[6])
+        dci['DCI Params']['DL']['TB 1 MCS'] = int(fields[7])
+        dci['DCI Params']['DL']['TB 1 New Data Indicator'] = int(fields[8])
+        dci['DCI Params']['DL']['DL Assignment Index'] = int(fields[9])
+        dci['DCI Params']['DL']['TPC Command For Sched PUCCH'] = int(fields[10])
+        dci['DCI Params']['DL']['PUCCH Resource Indicator'] = int(fields[11])
+        dci['DCI Params']['DL']['PDSCH Harq Feedback Timing'] = int(fields[12])
+        dci['DCI Params']['DL']['CBG Transmission Info'] = int(fields[13])
+        dci['DCI Params']['DL']['CBG Flushing Out Info'] = int(fields[14])
+        dci['DCI Params']['DL']['Transmission Config Ind'] = int(fields[15])
+        dci['DCI Params']['DL']['SRS Request'] = int(fields[16])
+        dci['DCI Params']['DL']['Carrier ID'] = int(fields[17])
+        dci['DCI Params']['DL']['HARQ ID'] = int(fields[18])
     return dci
 
 # get the groud truth from the example logs
@@ -135,7 +133,7 @@ def get_msg_gt():
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
 
-f = open("test.txt", "r")
+f = open("decoded_dci.txt", "r")
 
 # ground truth
 msg_gt = get_msg_gt()
