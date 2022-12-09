@@ -134,6 +134,7 @@ class NrDciAnalyzer(Analyzer):
         throughput_x, throughput_y = np.array(throughput_x[s_idx : e_idx]), np.array(throughput_y[s_idx : e_idx])
 
         plt.scatter(throughput_x, throughput_y, label='Throughput UL')
+        #plt.plot(throughput_x, throughput_y, '-o')
         plt.legend()
         plt.savefig("throughput_UL_{}_ms_{}_ms.png".format(start_time, end_time if end_time!= math.inf else "inf"), dpi=200)
         #plt.show()
@@ -147,9 +148,10 @@ class NrDciAnalyzer(Analyzer):
         throughput_x, throughput_y = self.__reject_outliers(self._time_DLs, self._throughput_DL, outlier_filter_m)
 
         s_idx, e_idx = np.searchsorted(throughput_x, [start_time,end_time])
-        throughput_x, throughput_y = np.array(throughput_x[s_idx : e_idx]), np.array(throughput_x[s_idx : e_idx])
+        throughput_x, throughput_y = np.array(throughput_x[s_idx : e_idx]), np.array(throughput_y[s_idx : e_idx])
 
         plt.scatter(throughput_x, throughput_y, label='Throughput DL')
+        #plt.plot(throughput_x, throughput_y, '-o')
         plt.legend()
         plt.savefig("throughput_DL_{}_ms_{}_ms.png".format(start_time, end_time if end_time!= math.inf else "inf"), dpi=200)
         #plt.show()

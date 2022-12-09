@@ -2,6 +2,7 @@
 # Filename: 5g_dci_analysis_testing.py
 import os
 import sys
+import math
 
 """
 Offline analysis by replaying logs
@@ -31,8 +32,8 @@ if __name__ == "__main__":
     
     src.run()
 
-    start_time = 90000
-    end_time = 110000
+    start_time = 0
+    end_time = math.inf
     nr_dci_analyzer.draw_assignment_pattern(figure_size=(35,4), start_time=start_time, end_time=end_time)
     nr_dci_analyzer.draw_throughput_ul(figure_size=(50,4), outlier_filter_m=3, start_time=start_time, end_time=end_time)
     nr_dci_analyzer.draw_throughput_dl(figure_size=(50,4), outlier_filter_m=3, start_time=start_time, end_time=end_time)
