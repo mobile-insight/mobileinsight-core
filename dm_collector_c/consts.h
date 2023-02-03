@@ -146,6 +146,7 @@ enum LogPacketType {
 
     // 5G PDCP
     NR_PDCP_UL_Control_Pdu = 0xB861, 
+    NR_PDCP_DL_Data_Pdu = 0xB840,
 
     // 5G L2
     NR_L2_UL_TB = 0xB872,
@@ -389,6 +390,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
 
     {NR_PDCP_UL_Control_Pdu,
         "5G_NR_PDCP_UL_Control_Pdu", true},
+    {NR_PDCP_DL_Data_Pdu,
+        "NR_PDCP_DL_Data_Pdu", true},
 
     {NR_L2_UL_TB,
         "5G_NR_L2_UL_TB", true},
