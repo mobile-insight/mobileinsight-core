@@ -13,8 +13,9 @@
 
 // 4 bytes
 const Fmt NrPdcpDlDataPdu_MajorMinorVersion_Fmt[] = {
-        {UINT, "Minor Version", 2},
-        {UINT, "Major Version", 2},
+        {UINT, "Version", 4},
+        {PLACEHOLDER, "Minor Version", 0},
+        {PLACEHOLDER, "Major Version", 0},
         {PLACEHOLDER, "Major.Minor Version", 0}
         {PLACEHOLDER, "{id: 2003420 }", 0}
 };
@@ -79,12 +80,12 @@ const Fmt NrPdcpDlDataPdu_IpPacketHeaders_Fmt[] = {
 
 // 4 bytes
 const Fmt NrPdcpDlDataPdu_StartCount_Fmt[] = {
-        {UINT, "Route Status", 4},
+        {UINT, "Start Count", 4},
 };
 
 // 4 bytes
 const Fmt NrPdcpDlDataPdu_EndCount_Fmt[] = {
-        {UINT, "Route Status", 4},
+        {UINT, "End Count", 4},
 };
 
 // 4 bytes
@@ -101,6 +102,192 @@ const Fmt NrPdcpDlDataPdu_IpPacketNums_Fmt[] = {
 static int _decode_nr_pdcp_dl_data_pdu (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
+
+    // ---------- decode MajorMinorVersion structure -------------
+    PyObject *majorMinorVersionList = PyList_New(0);
+
+    offset += _decode_by_fmt(NrPdcpDlDataPdu_MajorMinorVersion_Fmt,
+                            ARRAY_SIZE(NrPdcpDlDataPdu_MajorMinorVersion_Fmt, Fmt),
+                            b, offset, length, majorMinorVersionList);
+
+    // get values of minor and major versions, populate Major.Minor Version and {id: 2003420 } fields with those values
+    unsigned int versionNumber = _search_result_uint(majorMinorVersionList, "Version");
+    unsigned int minVersion = versionNumber & 0x00FF;
+    unsigned int majVersion = (versionNumber & 0xFF00) >> 8;
+
+    PyObject *old_object = _replace_result_int(majorMinorVersionList, "Minor Version", minVersion);
+    Py_DECREF(old_object);
+    PyObject *old_object = _replace_result_int(majorMinorVersionList, "Major Version", majVersion);
+    Py_DECREF(old_object);
+    PyObject *old_object = _replace_result_int(majorMinorVersionList, "Major.Minor Version", majVersion);
+    Py_DECREF(old_object);
+    old_object = _replace_result_int(majorMinorVersionList, "{id: 2003420 }", minVersion);
+    Py_DECREF(old_object);
+
+    PyObject *majorMinorVersion = Py_BuildValue("(sOs)", "MajorMinorVersion", majorMinorVersionList, "dict");
+    PyList_Append(result, majorMinorVersion);
+    Py_DECREF(majorMinorVersion);
+    Py_DECREF(majorMinorVersionList);
+    // ---------- end decode MajorMinorVersion structure -------------
+
+    // ---------- decode Versions structure -------------
+    // ---------- decode Version 5 structure -------------
+    PyObject *versionList = PyList_New(0);
+
+    offset += _decode_by_fmt(NrPdcpDlDataPdu_MetaRbNumAndReserved_Fmt,
+                            ARRAY_SIZE(NrPdcpDlDataPdu_MetaRbNumAndReserved_Fmt, Fmt),
+                            b, offset, length, versionList);
+
+    unsigned int numMeta = _search_result_uint(versionList, "Number of Meta");
+    unsigned int numRb = _search_result_uint(versionList, "Number of RB");
+
+    // ---------- decode PDCP State structure -------------
+    // ---------- decode PDCP State[] structure -------------
+    PyObject *pdcpStateList = PyList_New(0);
+
+    for (unsigned int i = 0; i < numRb; i++)
+    {
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_PdcpState_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_PdcpState_Fmt, Fmt),
+                        b, offset, length, pdcpStateList);
+
+        std::string pdcpStateString = "PDCP State[" + std::to_string(i) + "]";
+        PyObject *pdcpState = Py_BuildValue("(sOs)", pdcpStateString.c_str(), pdcpStateList, "dict");
+        PyList_Append(pdcpStateList, pdcpState);
+        Py_DECREF(pdcpState);
+    }
+    // ---------- end decode PDCP State[] structure -------------
+
+    PyObject *pdcpStatesList = Py_BuildValue("(sOs)", "PDCP State", pdcpStateList, "list");
+    PyList_Append(pdcpStatesList, pdcpStateList);
+    Py_DECREF(pdcpStateList);
+    // ---------- end decode PDCP State structure -------------
+
+    PyList_Append(versionList, pdcpStatesList);
+    Py_DECREF(pdcpStatesList);
+
+    // ---------- decode Meta Log Buffer structure -------------
+    PyObject *metaLogBufferList = PyList_New(0);
+    for (unsigned int i = 0; i < numMeta; i++)
+    {
+        // ---------- decode Meta Log Buffer[] structure -------------
+        PyObject *metaLogBufferElementList = PyList_New(0);
+
+        // ---------- decode SystemTime structure -------------
+        PyObject *systemTimeList = PyList_New(0);
+
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_SystemTime_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_SystemTime_Fmt, Fmt),
+                        b, offset, length, systemTimeList);
+        PyObject *systemTime = Py_BuildValue("(sOs)", "System Time", systemTimeList, "dict");
+        PyList_Append(metaLogBufferElementList, systemTime);
+        Py_DECREF(systemTime);
+        // ---------- end decode SystemTime structure -------------
+
+        // ---------- decode Rx Timetick structure -------------
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_RxTimetick_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_RxTimetick_Fmt, Fmt),
+                        b, offset, length, metaLogBufferElementList);
+        
+        // todo - calculate Rx Timetick (float) - need to build a Python float object, currently it is PLACEHOLDER (a Python integer object), but I need to create a new case for a float in log_packet_helper.h...
+        // ---------- end decode Rx Timetick structure -------------
+
+        // ---------- decode Key Index structure -------------
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_KeyIndex_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_KeyIndex_Fmt, Fmt),
+                        b, offset, length, metaLogBufferElementList);
+        // ---------- end decode Key Index structure -------------
+
+        // ---------- decode RLC Path structure -------------
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_RlcPath_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_RlcPath_Fmt, Fmt),
+                        b, offset, length, metaLogBufferElementList);
+        (void) _map_result_field_to_name(metaLogBufferElementList, "RLC Path",
+                                                ValueNameNrPdcpDlDataPdu_RlcPath,
+                                                ARRAY_SIZE(ValueNameNrPdcpDlDataPdu_RlcPath, ValueName),
+                                                "RLC Path Unknown");
+        // ---------- end decode RLC Path structure -------------
+
+        // ---------- decode Route Status structure -------------
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_RouteStatus_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_RouteStatus_Fmt, Fmt),
+                        b, offset, length, metaLogBufferElementList);
+        (void) _map_result_field_to_name(metaLogBufferElementList, "Route Status",
+                                                ValueNameNrPdcpDlDataPdu_RouteStatus,
+                                                ARRAY_SIZE(ValueNameNrPdcpDlDataPdu_RouteStatus, ValueName),
+                                                "Route Status Unknown");
+        // ---------- end decode Route Status structure -------------
+
+        // ---------- decode IP Packet Header[] structure -------------
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_IpPacketHeaders_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_IpPacketHeaders_Fmt, Fmt),
+                        b, offset, length, metaLogBufferElementList);
+        
+        unsigned int ipPacketHeader0 = _search_result_uint(metaLogBufferElementList, "IP Packet Header[0]");
+        unsigned int ipPacketHeader1 = _search_result_uint(metaLogBufferElementList, "IP Packet Header[1]");
+        
+        // populate IP Packet Header[0], IP Packet Header[1] fields as strings that show the hexadecimal values of the fields
+        std::stringstream stream1;
+        stream1 << "0x" << std::setfill('0') << std::uppercase << std::setw(8) << std::hex << ipPacketHeader0;
+        old_object = _replace_result_string(metaLogBufferElementList, "IP Packet Header[0]", stream1.str());
+        Py_DECREF(old_object);
+
+        std::stringstream stream2;
+        stream2 << "0x" << std::setfill('0') << std::uppercase << std::setw(8) << std::hex << ipPacketHeader1;
+        old_object = _replace_result_string(metaLogBufferElementList, "IP Packet Header[1]", stream2.str());
+        Py_DECREF(old_object);
+        // ---------- end decode IP Packet Header[] structure -------------
+
+        // ---------- decode Start Count structure -------------
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_StartCount_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_StartCount_Fmt, Fmt),
+                        b, offset, length, metaLogBufferElementList);
+        // ---------- end decode Start Count structure -------------
+
+        // ---------- decode End Count structure -------------
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_EndCount_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_EndCount_Fmt, Fmt),
+                        b, offset, length, metaLogBufferElementList);
+        // ---------- end decode Start Count structure -------------
+
+        // ---------- decode RLC end SN structure -------------
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_RlcEndSn_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_RlcEndSn_Fmt, Fmt),
+                        b, offset, length, metaLogBufferElementList);
+        // ---------- end decode RLC end SN structure -------------
+
+        // ---------- decode IP Packet Numbers structure -------------
+        offset += _decode_by_fmt(NrPdcpDlDataPdu_IpPacketNums_Fmt,
+                        ARRAY_SIZE(NrPdcpDlDataPdu_IpPacketNums_Fmt, Fmt),
+                        b, offset, length, metaLogBufferElementList);
+        // ---------- end decode IP Packet Numbers structure -------------
+
+        // ---------- end decode Meta Log Buffer[] structure ------------- 
+        std::string metaLogBufferStr = "Meta Log Buffer[" + std::to_string(i) + "]";
+        PyObject *metaLogBuffers = Py_BuildValue("(sOs)", metaLogBufferStr.c_str(), metaLogBufferElementList, "dict");
+        PyList_Append(metaLogBufferList, metaLogBuffers);
+        Py_DECREF(metaLogBuffers);
+    }
+
+    PyObject *metaLogBuffer = Py_BuildValue("(sOs)", "Meta Log Buffer", metaLogBufferList, "list");
+    PyList_Append(metaLogBuffer, metaLogBufferList);
+    Py_DECREF(metaLogBufferList);
+    // ---------- end decode Meta Log Buffer structure -------------
+
+    PyList_Append(versionList, metaLogBuffer);
+    Py_DECREF(metaLogBuffer);
+
+    std::string versionStr = "Version " + std::to_string(minVersion);
+    PyObject *version = Py_BuildValue("(sOs)", versionStr.c_str(), versionList, "dict");
+    PyList_Append(version, versionList);
+    Py_DECREF(versionList);
+
+    PyObject *versions = Py_BuildValue("(sOs)", "Versions", version, "dict");
+    PyList_Append(versions, version);
+    Py_DECREF(version);
+
+    PyList_Append(result, versions);
+    Py_DECREF(versions);
 
     // return offset - start to return however many bytes we have left remaining
     return offset - start;
