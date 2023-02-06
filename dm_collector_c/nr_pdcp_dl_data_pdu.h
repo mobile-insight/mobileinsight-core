@@ -12,11 +12,15 @@
 #include "log_packet_helper.h"
 
 // 4 bytes
+const Fmt NrPdcpDlDataPdu_Version_Fmt[] = {
+        {UINT, "Version", 4}
+};
+
+// 0 bytes
 const Fmt NrPdcpDlDataPdu_MajorMinorVersion_Fmt[] = {
-        {UINT, "Version", 4},
         {PLACEHOLDER, "Minor Version", 0},
         {PLACEHOLDER, "Major Version", 0},
-        {PLACEHOLDER, "Major.Minor Version", 0}
+        {PLACEHOLDER, "Major.Minor Version", 0},
         {PLACEHOLDER, "{id: 2003420 }", 0}
 };
 
@@ -104,6 +108,11 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
     int start = offset;
 
     // ---------- decode MajorMinorVersion structure -------------
+    offset += _decode_by_fmt(NrPdcpDlDataPdu_Version_Fmt,
+                            ARRAY_SIZE(NrPdcpDlDataPdu_Version_Fmt, Fmt),
+                            b, offset, length, result);
+    unsigned int versionNumber = _search_result_uint(result, "Version");
+
     PyObject *majorMinorVersionList = PyList_New(0);
 
     offset += _decode_by_fmt(NrPdcpDlDataPdu_MajorMinorVersion_Fmt,
@@ -111,15 +120,14 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
                             b, offset, length, majorMinorVersionList);
 
     // get values of minor and major versions, populate Major.Minor Version and {id: 2003420 } fields with those values
-    unsigned int versionNumber = _search_result_uint(majorMinorVersionList, "Version");
     unsigned int minVersion = versionNumber & 0x00FF;
     unsigned int majVersion = (versionNumber & 0xFF00) >> 8;
 
     PyObject *old_object = _replace_result_int(majorMinorVersionList, "Minor Version", minVersion);
     Py_DECREF(old_object);
-    PyObject *old_object = _replace_result_int(majorMinorVersionList, "Major Version", majVersion);
+    old_object = _replace_result_int(majorMinorVersionList, "Major Version", majVersion);
     Py_DECREF(old_object);
-    PyObject *old_object = _replace_result_int(majorMinorVersionList, "Major.Minor Version", majVersion);
+    old_object = _replace_result_int(majorMinorVersionList, "Major.Minor Version", majVersion);
     Py_DECREF(old_object);
     old_object = _replace_result_int(majorMinorVersionList, "{id: 2003420 }", minVersion);
     Py_DECREF(old_object);
@@ -141,6 +149,7 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
     unsigned int numMeta = _search_result_uint(versionList, "Number of Meta");
     unsigned int numRb = _search_result_uint(versionList, "Number of RB");
 
+/*
     // ---------- decode PDCP State structure -------------
     // ---------- decode PDCP State[] structure -------------
     PyObject *pdcpStateList = PyList_New(0);
@@ -276,18 +285,23 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
 
     PyList_Append(versionList, metaLogBuffer);
     Py_DECREF(metaLogBuffer);
+*/
 
     std::string versionStr = "Version " + std::to_string(minVersion);
     PyObject *version = Py_BuildValue("(sOs)", versionStr.c_str(), versionList, "dict");
-    PyList_Append(version, versionList);
+//     PyList_Append(version, versionList);
     Py_DECREF(versionList);
 
-    PyObject *versions = Py_BuildValue("(sOs)", "Versions", version, "dict");
-    PyList_Append(versions, version);
-    Py_DECREF(version);
+// //     PyObject *versions = Py_BuildValue("(sOs)", "Versions", version, "dict");
+//     PyObject *versions = Py_BuildValue("(sOs)", "Versions", version, "list");
+//     PyList_Append(versions, version);
+//     Py_DECREF(version);
 
-    PyList_Append(result, versions);
-    Py_DECREF(versions);
+//     PyList_Append(result, versions);
+//     Py_DECREF(versions);
+
+    PyList_Append(result, version);
+    Py_DECREF(version);
 
     // return offset - start to return however many bytes we have left remaining
     return offset - start;

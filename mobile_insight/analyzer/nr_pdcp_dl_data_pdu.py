@@ -33,7 +33,6 @@ class NrPdcpDlDataPduAnalyzer(Analyzer):
         log_item = msg.data.decode()
         log_item_dict = dict(log_item)
 
-
         #if the type is not JSON serializable (like datatime), convert it to str
         json_log = json.dumps(log_item_dict, indent=4, default=str) 
         print(json_log)
