@@ -22,7 +22,7 @@ if __name__ == "__main__":
     logger = MsgLogger()
     logger.set_decode_format(MsgLogger.DICT)
     logger.set_dump_type(MsgLogger.FILE_ONLY)
-    logger.save_decoded_msg_as("./decoded_dci.txt")
+    logger.save_decoded_msg_as("./decoded_nr_pdcp_dl_data_pdu.txt")
     logger.set_source(src)
 
     # # Analyzers

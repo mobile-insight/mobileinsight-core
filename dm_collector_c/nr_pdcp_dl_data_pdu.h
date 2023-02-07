@@ -308,7 +308,6 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
 
     std::string versionStr = "Version " + std::to_string(minVersion);
     PyObject *version = Py_BuildValue("(sOs)", versionStr.c_str(), versionList, "dict");
-//     PyList_Append(version, versionList);
     Py_DECREF(versionList);
     // ---------- end decode Version 5 structure -------------
 
@@ -321,17 +320,6 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
 
     PyList_Append(result, versions);
     Py_DECREF(versions);
-
-// //     PyObject *versions = Py_BuildValue("(sOs)", "Versions", version, "dict");
-//     PyObject *versions = Py_BuildValue("(sOs)", "Versions", version, "list");
-//     PyList_Append(versions, version);
-//     Py_DECREF(version);
-
-//     PyList_Append(result, versions);
-//     Py_DECREF(versions);
-
-//     PyList_Append(result, version);
-//     Py_DECREF(version);
 
     // return offset - start to return however many bytes we have left remaining
     return offset - start;
