@@ -140,6 +140,7 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
     // ---------- end decode MajorMinorVersion structure -------------
 
     // ---------- decode Versions structure -------------
+    PyObject *versionsList = PyList_New(0);
     // ---------- decode Version 5 structure -------------
     PyObject *versionList = PyList_New(0);
 
@@ -309,6 +310,17 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
     PyObject *version = Py_BuildValue("(sOs)", versionStr.c_str(), versionList, "dict");
 //     PyList_Append(version, versionList);
     Py_DECREF(versionList);
+    // ---------- end decode Version 5 structure -------------
+
+    PyList_Append(versionsList, version);
+    Py_DECREF(version);
+
+    PyObject *versions = Py_BuildValue("(sOs)", "Versions", versionsList, "dict");
+    Py_DECREF(versionsList);
+    // ---------- end decode Versions structure -------------
+
+    PyList_Append(result, versions);
+    Py_DECREF(versions);
 
 // //     PyObject *versions = Py_BuildValue("(sOs)", "Versions", version, "dict");
 //     PyObject *versions = Py_BuildValue("(sOs)", "Versions", version, "list");
@@ -318,8 +330,8 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
 //     PyList_Append(result, versions);
 //     Py_DECREF(versions);
 
-    PyList_Append(result, version);
-    Py_DECREF(version);
+//     PyList_Append(result, version);
+//     Py_DECREF(version);
 
     // return offset - start to return however many bytes we have left remaining
     return offset - start;
