@@ -18,8 +18,8 @@ const Fmt NrPdcpDlDataPdu_Version_Fmt[] = {
 
 // 0 bytes
 const Fmt NrPdcpDlDataPdu_MajorMinorVersion_Fmt[] = {
-        {PLACEHOLDER, "Minor Version", 0},
-        {PLACEHOLDER, "Major Version", 0},
+        {PLACEHOLDER, "Minor", 0},
+        {PLACEHOLDER, "Major", 0},
         {PLACEHOLDER, "Major.Minor Version", 0},
         {PLACEHOLDER, "{id: 2003420 }", 0}
 };
@@ -110,10 +110,10 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
     // ---------- decode MajorMinorVersion structure -------------
     offset += _decode_by_fmt(NrPdcpDlDataPdu_Version_Fmt,
                             ARRAY_SIZE(NrPdcpDlDataPdu_Version_Fmt, Fmt),
-                            b, offset, length, result);
+                            b, offset, length, result); // this function doesn't increase result's reference count
     unsigned int versionNumber = _search_result_uint(result, "Version");
 
-    PyObject *majorMinorVersionList = PyList_New(0);
+    PyObject *majorMinorVersionList = PyList_New(0); // reference count of majorMinorVersionList = 1
 
     offset += _decode_by_fmt(NrPdcpDlDataPdu_MajorMinorVersion_Fmt,
                             ARRAY_SIZE(NrPdcpDlDataPdu_MajorMinorVersion_Fmt, Fmt),
@@ -123,19 +123,20 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
     unsigned int minVersion = versionNumber & 0x00FF;
     unsigned int majVersion = (versionNumber & 0xFF00) >> 8;
 
-    PyObject *old_object = _replace_result_int(majorMinorVersionList, "Minor Version", minVersion);
+    PyObject *old_object = _replace_result_int(majorMinorVersionList, "Minor", minVersion); // this function doesn't increase majorMinorVersionList's reference count
     Py_DECREF(old_object);
-    old_object = _replace_result_int(majorMinorVersionList, "Major Version", majVersion);
+    old_object = _replace_result_int(majorMinorVersionList, "Major", majVersion);
     Py_DECREF(old_object);
     old_object = _replace_result_int(majorMinorVersionList, "Major.Minor Version", majVersion);
     Py_DECREF(old_object);
     old_object = _replace_result_int(majorMinorVersionList, "{id: 2003420 }", minVersion);
     Py_DECREF(old_object);
 
-    PyObject *majorMinorVersion = Py_BuildValue("(sOs)", "MajorMinorVersion", majorMinorVersionList, "dict");
-    PyList_Append(result, majorMinorVersion);
-    Py_DECREF(majorMinorVersion);
+    PyObject *majorMinorVersion = Py_BuildValue("(sOs)", "MajorMinorVersion", majorMinorVersionList, "dict"); // THIS FUNCTION INCREASES majorMinorVersionList's REFERENCE COUNT! Also, majorMinorVersions's reference count = 1
     Py_DECREF(majorMinorVersionList);
+
+    PyList_Append(result, majorMinorVersion); // increases majorMinorVersion's reference count by 1
+    Py_DECREF(majorMinorVersion);
     // ---------- end decode MajorMinorVersion structure -------------
 
     // ---------- decode Versions structure -------------
@@ -146,35 +147,38 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
                             ARRAY_SIZE(NrPdcpDlDataPdu_MetaRbNumAndReserved_Fmt, Fmt),
                             b, offset, length, versionList);
 
-    unsigned int numMeta = _search_result_uint(versionList, "Number of Meta");
+    unsigned int numMeta = _search_result_uint(versionList, "Number of Meta"); // doesn't increase reference count of versionList
     unsigned int numRb = _search_result_uint(versionList, "Number of RB");
 
-/*
     // ---------- decode PDCP State structure -------------
-    // ---------- decode PDCP State[] structure -------------
-    PyObject *pdcpStateList = PyList_New(0);
+    PyObject *pdcpStatesList = PyList_New(0);
 
     for (unsigned int i = 0; i < numRb; i++)
     {
+        // ---------- decode PDCP State[] structure -------------
+        PyObject *pdcpStateList = PyList_New(0);
         offset += _decode_by_fmt(NrPdcpDlDataPdu_PdcpState_Fmt,
                         ARRAY_SIZE(NrPdcpDlDataPdu_PdcpState_Fmt, Fmt),
                         b, offset, length, pdcpStateList);
 
         std::string pdcpStateString = "PDCP State[" + std::to_string(i) + "]";
         PyObject *pdcpState = Py_BuildValue("(sOs)", pdcpStateString.c_str(), pdcpStateList, "dict");
-        PyList_Append(pdcpStateList, pdcpState);
+        Py_DECREF(pdcpStateList);
+
+        PyList_Append(pdcpStatesList, pdcpState);
         Py_DECREF(pdcpState);
+        // ---------- end decode PDCP State[] structure -------------
     }
-    // ---------- end decode PDCP State[] structure -------------
-
-    PyObject *pdcpStatesList = Py_BuildValue("(sOs)", "PDCP State", pdcpStateList, "list");
-    PyList_Append(pdcpStatesList, pdcpStateList);
-    Py_DECREF(pdcpStateList);
-    // ---------- end decode PDCP State structure -------------
-
-    PyList_Append(versionList, pdcpStatesList);
+    PyObject *pdcpStates = Py_BuildValue("(sOs)", "PDCP State", pdcpStatesList, "list");
     Py_DECREF(pdcpStatesList);
+    // ---------- end decode PDCP State structure -------------
+//     PyObject_Print(pdcpStates, stdout, 0); // testing
+//     std::cout << "ref cnt: " << versionList->ob_refcnt << std::endl; // testing
 
+    PyList_Append(versionList, pdcpStates);
+    Py_DECREF(pdcpStates);
+
+/*
     // ---------- decode Meta Log Buffer structure -------------
     PyObject *metaLogBufferList = PyList_New(0);
     for (unsigned int i = 0; i < numMeta; i++)
