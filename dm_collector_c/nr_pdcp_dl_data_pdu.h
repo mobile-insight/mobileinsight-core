@@ -73,7 +73,7 @@ const Fmt NrPdcpDlDataPdu_RouteStatus_Fmt[] = {
 };
 
 const ValueName ValueNameNrPdcpDlDataPdu_RouteStatus[] = {
-        {2, "DELIV_DIRECT"}
+        {1, "DELIV_DIRECT"}
 };
 
 // 2 bytes
@@ -178,7 +178,6 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
     PyList_Append(versionList, pdcpStates);
     Py_DECREF(pdcpStates);
 
-/*
     // ---------- decode Meta Log Buffer structure -------------
     PyObject *metaLogBufferList = PyList_New(0);
     for (unsigned int i = 0; i < numMeta; i++)
@@ -192,7 +191,15 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
         offset += _decode_by_fmt(NrPdcpDlDataPdu_SystemTime_Fmt,
                         ARRAY_SIZE(NrPdcpDlDataPdu_SystemTime_Fmt, Fmt),
                         b, offset, length, systemTimeList);
+
+        unsigned int frame = _search_result_uint(systemTimeList, "Frame");
+        frame = frame & 0x0FFF; // lower 12 bits of the 16 are bits for the Frame field
+        old_object = _replace_result_int(systemTimeList, "Frame", frame);
+        Py_DECREF(old_object);
+
         PyObject *systemTime = Py_BuildValue("(sOs)", "System Time", systemTimeList, "dict");
+        Py_DECREF(systemTimeList);
+
         PyList_Append(metaLogBufferElementList, systemTime);
         Py_DECREF(systemTime);
         // ---------- end decode SystemTime structure -------------
@@ -201,6 +208,13 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
         offset += _decode_by_fmt(NrPdcpDlDataPdu_RxTimetick_Fmt,
                         ARRAY_SIZE(NrPdcpDlDataPdu_RxTimetick_Fmt, Fmt),
                         b, offset, length, metaLogBufferElementList);
+
+        unsigned long rxTimetickRaw = _search_result_ulongint(metaLogBufferElementList, "RX Timetick Raw"); // don't think this function increases reference count
+        // populate RX Timetick Raw fields as string that show the hexadecimal values of the field
+        std::stringstream stream1;
+        stream1 << "0x" << std::setfill('0') << std::uppercase << std::setw(16) << std::hex << rxTimetickRaw;
+        old_object = _replace_result_string(metaLogBufferElementList, "RX Timetick Raw", stream1.str()); // this function might increase reference count of metaLogBufferElementList
+        Py_DECREF(old_object);
         
         // todo - calculate Rx Timetick (float) - need to build a Python float object, currently it is PLACEHOLDER (a Python integer object), but I need to create a new case for a float in log_packet_helper.h...
         // ---------- end decode Rx Timetick structure -------------
@@ -218,7 +232,7 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
         (void) _map_result_field_to_name(metaLogBufferElementList, "RLC Path",
                                                 ValueNameNrPdcpDlDataPdu_RlcPath,
                                                 ARRAY_SIZE(ValueNameNrPdcpDlDataPdu_RlcPath, ValueName),
-                                                "RLC Path Unknown");
+                                                "RLC Path Unknown"); // don't think this function increases reference count of metaLogBufferElementList
         // ---------- end decode RLC Path structure -------------
 
         // ---------- decode Route Status structure -------------
@@ -240,14 +254,14 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
         unsigned int ipPacketHeader1 = _search_result_uint(metaLogBufferElementList, "IP Packet Header[1]");
         
         // populate IP Packet Header[0], IP Packet Header[1] fields as strings that show the hexadecimal values of the fields
-        std::stringstream stream1;
-        stream1 << "0x" << std::setfill('0') << std::uppercase << std::setw(8) << std::hex << ipPacketHeader0;
-        old_object = _replace_result_string(metaLogBufferElementList, "IP Packet Header[0]", stream1.str());
+        std::stringstream stream2;
+        stream2 << "0x" << std::setfill('0') << std::uppercase << std::setw(2) << std::hex << ipPacketHeader0;
+        old_object = _replace_result_string(metaLogBufferElementList, "IP Packet Header[0]", stream2.str()); // this function might increase reference count of metaLogBufferElementList
         Py_DECREF(old_object);
 
-        std::stringstream stream2;
-        stream2 << "0x" << std::setfill('0') << std::uppercase << std::setw(8) << std::hex << ipPacketHeader1;
-        old_object = _replace_result_string(metaLogBufferElementList, "IP Packet Header[1]", stream2.str());
+        std::stringstream stream3;
+        stream3 << "0x" << std::setfill('0') << std::uppercase << std::setw(2) << std::hex << ipPacketHeader1;
+        old_object = _replace_result_string(metaLogBufferElementList, "IP Packet Header[1]", stream3.str());
         Py_DECREF(old_object);
         // ---------- end decode IP Packet Header[] structure -------------
 
@@ -278,18 +292,18 @@ static int _decode_nr_pdcp_dl_data_pdu (const char *b,
         // ---------- end decode Meta Log Buffer[] structure ------------- 
         std::string metaLogBufferStr = "Meta Log Buffer[" + std::to_string(i) + "]";
         PyObject *metaLogBuffers = Py_BuildValue("(sOs)", metaLogBufferStr.c_str(), metaLogBufferElementList, "dict");
+        Py_DECREF(metaLogBufferElementList);
+
         PyList_Append(metaLogBufferList, metaLogBuffers);
         Py_DECREF(metaLogBuffers);
     }
 
     PyObject *metaLogBuffer = Py_BuildValue("(sOs)", "Meta Log Buffer", metaLogBufferList, "list");
-    PyList_Append(metaLogBuffer, metaLogBufferList);
     Py_DECREF(metaLogBufferList);
     // ---------- end decode Meta Log Buffer structure -------------
 
     PyList_Append(versionList, metaLogBuffer);
     Py_DECREF(metaLogBuffer);
-*/
 
     std::string versionStr = "Version " + std::to_string(minVersion);
     PyObject *version = Py_BuildValue("(sOs)", versionStr.c_str(), versionList, "dict");
