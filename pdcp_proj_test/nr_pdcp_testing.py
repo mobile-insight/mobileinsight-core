@@ -34,21 +34,17 @@ if __name__ == "__main__":
     start_time = 0
     end_time = math.inf
 
-    #nr_pdcp_dl_data_analyzer.draw_assignment_pattern(figure_size=(35,4), start_time=start_time, end_time=end_time)
-    #nr_pdcp_dl_data_analyzer.draw_throughput_ul(figure_size=(30,7), outlier_filter_m=3, start_time=start_time, end_time=end_time, fillzero=True)
-    #nr_pdcp_dl_data_analyzer.draw_throughput_dl(figure_size=(30,7), outlier_filter_m=3, start_time=start_time, end_time=end_time, fillzero=True)
-    #nr_pdcp_dl_data_analyzer.draw_aggregated_frame()
-
     nr_pdcp_dl_data_analyzer.draw_num_IP_packets(figure_size=(10,4), start_time=start_time, end_time=end_time)
 
-    nr_pdcp_dl_data_analyzer.draw_num_IP_packets_assignment(figure_size=(10,4), start_time=start_time, end_time=end_time) # not useful right now as scatter
-    nr_pdcp_dl_data_analyzer.draw_num_IP_bytes_assignment(figure_size=(10,4), start_time=start_time, end_time=end_time) # not useful right now as scatter
+    nr_pdcp_dl_data_analyzer.draw_num_IP_packets_assignment(figure_size=(10,4), start_time=start_time, end_time=end_time)
+    nr_pdcp_dl_data_analyzer.draw_num_IP_bytes_assignment(figure_size=(10,4), start_time=start_time, end_time=end_time)
 
-    #nr_pdcp_dl_data_analyzer.draw_path_and_status_scatter(figure_size=(35,4), start_time=start_time, end_time=end_time)
     nr_pdcp_dl_data_analyzer.draw_rlc_path(figure_size=(10,4), start_time=start_time, end_time=end_time)
     nr_pdcp_dl_data_analyzer.draw_route_status(figure_size=(10,4), start_time=start_time, end_time=end_time)
 
+    #nr_pdcp_dl_data_analyzer.draw_start_count_assignment(figure_size=(10,4), start_time=start_time, end_time=end_time)
     nr_pdcp_dl_data_analyzer.draw_end_count_assignment(figure_size=(10,4), start_time=start_time, end_time=end_time)
     nr_pdcp_dl_data_analyzer.draw_rlc_end_sn_assignment(figure_size=(10,4), start_time=start_time, end_time=end_time)
+    nr_pdcp_dl_data_analyzer.draw_num_pdcp_sn(figure_size=(10,4), start_time=start_time, end_time=end_time)
 
     nr_pdcp_dl_data_analyzer.reset()

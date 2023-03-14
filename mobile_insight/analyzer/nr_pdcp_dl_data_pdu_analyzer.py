@@ -182,11 +182,28 @@ class NrPdcpDlDataPduAnalyzer(Analyzer):
         numIpPacketsX = np.array(self.__numIpPacketTimes[s_idx : e_idx])
         numIpPacketsY = np.array(self.__numIpPackets[s_idx : e_idx])
 
-        #plt.scatter(numIpPacketsX, numIpPacketsY)
         plt.hist(numIpPacketsY)
-        #plt.plot(throughput_x, throughput_y, '-o')
+
         plt.savefig("numberIpPackets_{}_ms_{}_ms.png".format(start_time, end_time), dpi=200)
-        #plt.show()
+    
+    def draw_num_pdcp_sn(self, figure_size=(100,4), start_time = 0, end_time = math.inf):
+        if end_time == math.inf:
+            end_time = int(self.__times[-1])
+
+        plt.figure(figsize=figure_size)
+        plt.xlabel("Time in ms")
+        plt.ylabel("Number of PDCP SNs")
+        plt.title("Number of PDCP SNs Assignment: {} ms - {} ms".format(start_time, end_time if end_time!= math.inf else "inf"))
+
+        s_idx, e_idx = np.searchsorted(self.__times, [start_time, end_time])
+        xAxis = np.array(self.__numIpPacketTimes[s_idx : e_idx])
+        startCounts = np.array(self.__startCounts[s_idx : e_idx])
+        endCounts = np.array(self.__endCounts[s_idx : e_idx])
+        numSequenceNumbers = np.subtract(endCounts, startCounts)
+        numSequenceNumbers += 1
+
+        plt.scatter(xAxis, numSequenceNumbers, s=2)
+        plt.savefig("numberPdcpSNs_{}_ms_{}_ms.png".format(start_time, end_time), dpi=200)
     
     def draw_num_IP_packets_assignment(self,figure_size=(100,4), start_time = 0, end_time = math.inf):
         if end_time == math.inf:
@@ -201,17 +218,10 @@ class NrPdcpDlDataPduAnalyzer(Analyzer):
         startIndexNumIpPacket, endIndexNumIpPacket = np.searchsorted(self.__times, [start_time,end_time])
         numIpPacketX = np.array(self.__numIpPacketTimes[startIndexNumIpPacket : endIndexNumIpPacket])
         numIpPacketY = np.array(self.__numIpPackets[startIndexNumIpPacket : endIndexNumIpPacket])
-
-        #print(numIpPacketX)
-        #print(numIpPacketY)
         
         plt.scatter(numIpPacketX, numIpPacketY, s=2)
-        #plt.plot(numIpPacketX, numIpPacketY)
-
-        #plt.legend()
 
         plt.savefig("IP_packets_assignment_{}_ms_{}_ms.png".format(start_time, end_time if end_time!= math.inf else "inf"), dpi=200)
-        #plt.show()
     
     def draw_num_IP_bytes_assignment(self,figure_size=(100,4), start_time = 0, end_time = math.inf):
         if end_time == math.inf:
@@ -230,12 +240,8 @@ class NrPdcpDlDataPduAnalyzer(Analyzer):
         numIpPacketY = np.array(self.__numIpBytes[startIndexNumIpBytes : endIndexNumIpBytes])
 
         plt.scatter(numIpBytesX, numIpPacketY, s=2)
-        #plt.plot(numIpBytesX, numIpPacketY)
-
-        #plt.legend()
 
         plt.savefig("IP_bytes_assignment_{}_ms_{}_ms.png".format(start_time, end_time if end_time!= math.inf else "inf"), dpi=200)
-        #plt.show()
 
     def draw_rlc_path(self, figure_size=(100,4), start_time = 0, end_time = math.inf):
         if end_time == math.inf:
@@ -301,22 +307,23 @@ class NrPdcpDlDataPduAnalyzer(Analyzer):
         routeStatusTable.scale(1, 1.5)
         plt.savefig("routeStatuses_{}_ms_{}_ms.png".format(start_time, end_time), dpi=200)
 
-        '''
+    def draw_start_count_assignment(self,figure_size=(100,4), start_time = 0, end_time = math.inf):
         if end_time == math.inf:
             end_time = int(self.__times[-1])
-
+        
         plt.figure(figsize=figure_size)
-        plt.xlabel("Route Status Value")
-        plt.ylabel("Frequency")
-        plt.title("Route Statuses: {} ms - {} ms".format(start_time, end_time if end_time!= math.inf else "inf"))
+        plt.xlabel('Time in ms')
+        plt.ylabel("Start Count Sequence Number")
 
-        s_idx, e_idx = np.searchsorted(self.__times, [start_time, end_time])
-        routeStatusX = np.array(self.__routeStatusTimes[s_idx : e_idx])
-        routeStatusY = np.array(self.__routeStatuses[s_idx : e_idx])
+        plt.title("Start Count Sequence Number Assignment: {} ms - {} ms".format(start_time, end_time if end_time!= math.inf else "inf"))
 
-        plt.hist(routeStatusY)
-        plt.savefig("routeStatuses_{}_ms_{}_ms.png".format(start_time, end_time), dpi=200)
-        '''
+        startIndexEndCount, endIndexEndCount = np.searchsorted(self.__times, [start_time,end_time])
+        startCountX = np.array(self.__startCountTimes[startIndexEndCount : endIndexEndCount])
+        startCountY = np.array(self.__startCounts[startIndexEndCount : endIndexEndCount])
+
+        plt.scatter(startCountX, startCountY, s=5)
+        
+        plt.savefig("start_count_assignment_{}_ms_{}_ms.png".format(start_time, end_time if end_time!= math.inf else "inf"), dpi=200)
 
     def draw_end_count_assignment(self,figure_size=(100,4), start_time = 0, end_time = math.inf):
         if end_time == math.inf:
@@ -334,12 +341,7 @@ class NrPdcpDlDataPduAnalyzer(Analyzer):
 
         plt.scatter(endCountX, endCountY, s=5)
         
-        #plt.plot(endCountX, endCountY)
-
-        #plt.legend()
-
         plt.savefig("end_count_assignment_{}_ms_{}_ms.png".format(start_time, end_time if end_time!= math.inf else "inf"), dpi=200)
-        #plt.show()
 
     def draw_rlc_end_sn_assignment(self,figure_size=(100,4), start_time = 0, end_time = math.inf):
         if end_time == math.inf:
@@ -357,9 +359,4 @@ class NrPdcpDlDataPduAnalyzer(Analyzer):
 
         plt.scatter(rlcEndSnX, rlcEndSnY, s=5)
         
-        #plt.plot(rlcEndSnX, rlcEndSnY)
-
-        #plt.legend()
-
         plt.savefig("rlc_ed_sn_assignment_{}_ms_{}_ms.png".format(start_time, end_time if end_time!= math.inf else "inf"), dpi=200)
-        #plt.show()
