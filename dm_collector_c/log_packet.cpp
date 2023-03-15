@@ -71,6 +71,8 @@
 #include "nr_rlc_dl_stats.h"                                                                                                                     
 #include "nr_nas_mm5g_state.h"
 #include "nr_pdcp_ul_control_pdu.h"
+#include "nr_pdcp_dl_data_pdu.h"
+#include "nr_dci_message.h"
 #include "gnss_bds_measurement_report.h"
 #include "gnss_gps_measurement_report.h"
 #include "gnss_glonass_measurement_report.h"
@@ -12259,6 +12261,9 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                                      b, offset, length, result);
             offset += _decode_nr_pdcp_ul_control_pdu_payload(b, offset, length, result);                                    
             break;
+        case NR_PDCP_DL_Data_Pdu:
+            offset += _decode_nr_pdcp_dl_data_pdu(b, offset, length, result);
+            break;
         case NR_NAS_MM5G_State:
             offset += _decode_by_fmt(NrNasMm5gState_Fmt,
                                       ARRAY_SIZE(NrNasMm5gState_Fmt, Fmt),
@@ -12288,7 +12293,10 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
                                 ARRAY_SIZE(GnssGal_Fmt, Fmt),
                                 b, offset, length, result);
             offset += _decode_gnss_gal_payload(b, offset, length, result);
-            break;         
+            break;   
+        case NR_DCI_Message:
+            offset += _decode_nr_DCI(b, offset, length, result);
+            break;      
         default:
             break;
     };

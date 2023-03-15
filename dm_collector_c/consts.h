@@ -146,6 +146,7 @@ enum LogPacketType {
 
     // 5G PDCP
     NR_PDCP_UL_Control_Pdu = 0xB861, 
+    NR_PDCP_DL_Data_Pdu = 0xB840,
 
     // 5G L2
     NR_L2_UL_TB = 0xB872,
@@ -164,6 +165,8 @@ enum LogPacketType {
     NR_ML1_Searcher_Measurement_Database_Update_Ext = 0xB97F,                                       
     NR_ML1_Serving_Cell_Beam_Management = 0xB975,
 
+    // 5G DCI
+    NR_DCI_Message = 0xB885,
 };
 
 // Mapping type IDs to names
@@ -387,6 +390,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
 
     {NR_PDCP_UL_Control_Pdu,
         "5G_NR_PDCP_UL_Control_Pdu", true},
+    {NR_PDCP_DL_Data_Pdu,
+        "NR_PDCP_DL_Data_Pdu", true},
 
     {NR_L2_UL_TB,
         "5G_NR_L2_UL_TB", true},
@@ -412,6 +417,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
     { NR_ML1_Serving_Cell_Beam_Management,
         "5G_NR_ML1_Serving_Cell_Beam_Management", true },
 
+    { NR_DCI_Message,
+        "NR_DCI_Message", true },
 
     {Modem_debug_message,
         "Modem_debug_message", false},
