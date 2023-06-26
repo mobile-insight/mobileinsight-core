@@ -225,9 +225,6 @@ class Analyzer(Element):
         # A lambda function: input as a callback, output as passing event to
         # this callback
 
-        if not event.data:
-            return
-
         if module == self.source:
             # Apply the event to all source callbacks
             for i in range(len(self.source_callback)):
