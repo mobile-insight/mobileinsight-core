@@ -305,14 +305,14 @@ class LteBandwidthPredictor(KpiAnalyzer):
                     msgtimestamp = str(log_item['timestamp'])
 
                     self.array_nRB_pcell.sort()
-                    nRB_allocated = self.array_nRB_pcell[len(self.array_nRB_pcell) / 2]
+                    nRB_allocated = self.array_nRB_pcell[len(self.array_nRB_pcell) // 2]
                     self.array_MCS_pcell.sort()
-                    MCS_result = self.array_MCS_pcell[len(self.array_MCS_pcell) / 2]
+                    MCS_result = self.array_MCS_pcell[len(self.array_MCS_pcell) // 2]
 
                     self.array_cqi_pcell.sort()
-                    cqi = self.array_cqi_pcell[len(self.array_cqi_pcell) / 2]
+                    cqi = self.array_cqi_pcell[len(self.array_cqi_pcell) // 2]
                     self.array_ri_pcell.sort()
-                    ri = self.array_ri_pcell[len(self.array_ri_pcell) / 2]
+                    ri = self.array_ri_pcell[len(self.array_ri_pcell) // 2]
 
                     if len(self.array_data_frame_pcell) > 0:
                         for sys_fn, sub_fn in self.array_data_frame_pcell:
@@ -330,9 +330,9 @@ class LteBandwidthPredictor(KpiAnalyzer):
                         readyForEstimate = False
                     if readyForEstimate:
                         self.array_rsrq_pcell.sort()
-                        rsrq = self.array_rsrq_pcell[len(self.array_rsrq_pcell) / 2]
+                        rsrq = self.array_rsrq_pcell[len(self.array_rsrq_pcell) // 2]
                         self.array_snr_pcell.sort()
-                        snr = self.array_snr_pcell[len(self.array_snr_pcell) / 2]
+                        snr = self.array_snr_pcell[len(self.array_snr_pcell) // 2]
 
                         estimated_bandwidth, nRB_new, MCS_new, cell_load = self.predict_bandwidth(\
                                 rsrq, \
