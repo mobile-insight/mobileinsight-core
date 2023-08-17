@@ -6,6 +6,12 @@
 const Fmt NrL2UlTb_Fmt[] = {
 	{UINT,"Version",4},
 };
+
+const Fmt NrL2UlTb_samsung_Fmt[] = {
+         {UINT, "Minor Version",                 2},
+         {UINT, "Major Version",                 2},
+
+};
 const Fmt NrMeta_Fmt_v4[]={
 	{UINT,"Num TTI",1},
 	{PLACEHOLDER,"Is Type2 Scell",0},
@@ -355,18 +361,42 @@ _decode_TTI_Info_v4(const char* b, int offset, size_t length,
 }
 static int
 _decode_nr_l2_ul_tb_subpkt(const char* b, int offset, size_t length,
-	PyObject* result) {
+	PyObject* result) 
+{
 	int start = offset;
-	int pkt_ver = _search_result_int(result, "Version");
+	int major = 0;
+	int minor = 0;
+        int pkt_ver = 0;
 	int tmp;
 	int value;
 	int tti_num = 0;
 	bool success = 0;
 	PyObject* tmp_py = PyList_New(0);
 	PyObject* t = NULL;
-	switch (pkt_ver)
+        int version = 0;
+
+/*#if QC_MODEM == _QC_SD_778G //Nothing Mobile
+	int pkt_ver = _search_result_int(result, "Version");*/
+
+	if ((QC_MODEM == 1) || (QC_MODEM == 2))  //Samsung s23 or Nothing1
+        {
+		 major = _search_result_int(result, "Major Version");
+		 minor = _search_result_int(result, "Minor Version");
+        }
+       else 
+	 pkt_ver = _search_result_int(result, "Version");
+
+/*#if QC_MODEM == _QC_SD_778G //Nothing Mobile
+	switch (pkt_ver)*/
+	if ((QC_MODEM == 1) || (QC_MODEM == 2)) //Samsung s2 or Nothing1
+	  version = major;
+	else
+          version = pkt_ver; 
+	switch (version)
 	{
-	case 4:
+ 	 case 2:
+	 case 3:
+	 case 4:
 		offset += _decode_by_fmt(NrMeta_Fmt_v4,
 			ARRAY_SIZE(NrMeta_Fmt_v4, Fmt),
 			b, offset, length, result);
@@ -398,7 +428,11 @@ _decode_nr_l2_ul_tb_subpkt(const char* b, int offset, size_t length,
 		break;
 	}
 	if (!success) {
-		
+/*#if QC_MODEM == _QC_SD_778G //Nothing Mobile
+		printf("(MI)Unknown 5G NR L2 UL TB: %d\n", pkt_ver);*/
+             if ((QC_MODEM == 1) || (QC_MODEM == 2)) //Samsung s2 or Nothing1
+		printf("(MI)Unknown 5G NR L2 UL TB: %d\n", major);
+             else
 		printf("(MI)Unknown 5G NR L2 UL TB: %d\n", pkt_ver);
 	}
 

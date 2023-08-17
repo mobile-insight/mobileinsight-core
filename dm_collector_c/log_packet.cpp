@@ -97,25 +97,6 @@ namespace patch {
     }
 }
 
-// To Print String in Hexformat
-void hexdump(const char *buf, int buflen) {
-  //unsigned char *buf = (unsigned char*)ptr;
-  int i, j;
-  for (i=0; i<buflen; i+=16) {
-    printf("%06x: ", i);
-    for (j=0; j<16; j++)
-      if (i+j < buflen)
-        printf("%02x ", buf[i+j]);
-      else
-        printf("   ");
-    printf(" ");
-    for (j=0; j<16; j++)
-      if (i+j < buflen)
-        printf("%c", isprint(buf[i+j]) ? buf[i+j] : '.');
-    printf("\n");
-  }
-}
-
 /*
  * The decoding result is represented using a Python list object (called result
  * list in the source code).
@@ -135,9 +116,27 @@ void hexdump(const char *buf, int buflen) {
 
 static double target_sampling_rate = 1;
 
+void hexdump(const char *buf, int buflen) { 
+  //unsigned char *buf = (unsigned char*)ptr; 
+  int i, j; 
+  for (i=0; i<buflen; i+=16) { 
+    printf("%06x: ", i); 
+    for (j=0; j<16; j++) 
+      if (i+j < buflen) 
+        printf("%02x ", buf[i+j]); 
+      else 
+        printf("   "); 
+    printf(" "); 
+    for (j=0; j<16; j++) 
+      if (i+j < buflen) 
+        printf("%c", isprint(buf[i+j]) ? buf[i+j] : '.'); 
+    printf("\n"); 
+  } 
+} 
+
 bool set_target_sampling_rate(int sampling_rate){
       if (sampling_rate < 0 || sampling_rate >100)
-          return false;
+	      return false;
       target_sampling_rate = (double)sampling_rate / 100.0;
       // printf("target_sampling_rate=%f\n",target_sampling_rate);
       return true;
@@ -3510,9 +3509,9 @@ _decode_lte_phy_irat_cdma_subpkt(const char *b, int offset, size_t length,
                                              name2, result_subpkt, "dict");
                 PyList_Append(result, t2);
                 
-        Py_DECREF(t);
-        Py_DECREF(t2);
-        Py_DECREF(result_subpkt);
+		Py_DECREF(t);
+		Py_DECREF(t2);
+		Py_DECREF(result_subpkt);
             }
             break;
 
@@ -3599,7 +3598,7 @@ _decode_lte_phy_irat_subpkt(const char *b, int offset, size_t length,
                                             name, result_subpkt, "dict");
                 PyList_Append(result, t);
                 Py_DECREF(t);
-        Py_DECREF(result_subpkt);
+		Py_DECREF(result_subpkt);
 
             }
 
@@ -4102,7 +4101,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                                     "Ignored", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(t);
-            Py_DECREF(result_subpkt);
+			Py_DECREF(result_subpkt);
                     } else {
                         printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id,
                                subpkt_ver);
@@ -4846,7 +4845,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                     PyObject *t = Py_BuildValue("(sOs)",
                                                 "Ignored", result_subpkt, "dict");
                     PyList_Append(result_allpkts, t);
-            Py_DECREF(result_subpkt);
+		    Py_DECREF(result_subpkt);
                     Py_DECREF(t);
                 }
             }
@@ -11646,30 +11645,67 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
     hexdump(b, length);
     printf("------------------------------------------------\n");
     switch (type_id) {
+        case NR_MAC_RACH_Attempt:
+             printf("NR_MAC_RACH_Attempt Recvd");
+             break;
+        case NR_MAC_DCI_Info:
+             printf("NR_MAC_DCI_Info Recvd");
+             break;
 
         case NR_L2_UL_TB:
-            offset += _decode_by_fmt(NrL2UlTb_Fmt,
+          {
+            if((QC_MODEM == 1) || (QC_MODEM == 2))  //Samsung s23 or Nothing1
+            {
+            	offset += _decode_by_fmt(NrL2UlTb_samsung_Fmt,ARRAY_SIZE(NrL2UlTb_samsung_Fmt, Fmt),
+                                    b, offset, length, result);
+            }
+            else
+            {
+            	offset += _decode_by_fmt(NrL2UlTb_Fmt,
                                      ARRAY_SIZE(NrL2UlTb_Fmt, Fmt),
                                      b, offset, length, result);
-
+            }
             offset += _decode_nr_l2_ul_tb_subpkt(b, offset, length, result);
 
             break;
-        
+           }
         case NR_MAC_UL_Physical_Channel_Schedule_Report:
-            offset += _decode_by_fmt(NrMacVersion_Fmt,
+           {
+             if(QC_MODEM == 2)
+             { 
+              offset += _decode_by_fmt(NrMacVersion_Fmt,
                                      ARRAY_SIZE(NrMacVersion_Fmt, Fmt),
                                      b, offset, length, result);
-
-            offset += _decode_nr_mac_ul_physical_channel_schedule_report_subpkt(b, offset, length, result);
+             } 
+             else if(QC_MODEM == 1)
+             {
+              offset += _decode_by_fmt(NrMacVersion_Fmt_samsung,
+                                     ARRAY_SIZE(NrMacVersion_Fmt_samsung, Fmt),
+                                     b, offset, length, result);
+             }             
+             offset += _decode_nr_mac_ul_physical_channel_schedule_report_subpkt(b, offset, length, result);
 
             break;
-
+           }
         case NR_MAC_PDSCH_Stats:
-            offset += _decode_by_fmt(NrMacPdschStats_Fmt,
+            if(QC_MODEM == 2)//Nothing 1
+            {
+            	offset += _decode_by_fmt(NrMacPdschStats_Fmt,
                                      ARRAY_SIZE(NrMacPdschStats_Fmt, Fmt),
                                      b, offset, length, result);
-
+            }
+            else if(QC_MODEM == 1)//Samsung s23
+            {
+                offset += _decode_by_fmt(NrMacPdschStats_samsung_Fmt,
+                                     ARRAY_SIZE(NrMacPdschStats_samsung_Fmt, Fmt),
+                                     b, offset, length, result);
+            }
+	    else
+            {
+            	offset += _decode_by_fmt(NrMacPdschStats_Fmt,
+                                     ARRAY_SIZE(NrMacPdschStats_Fmt, Fmt),
+                                     b, offset, length, result);
+            }
             offset += _decode_nr_mac_pdsch_stats_subpkt(b, offset, length, result);
 
             break;
@@ -11685,11 +11721,25 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
 
 
         case NR_MAC_UL_TB_Stats:
-            offset += _decode_by_fmt(NrMacUlTbStats_Fmt,
+	     if(QC_MODEM == 2)//Nothing 1 mobile
+	      {
+            	 offset += _decode_by_fmt(NrMacUlTbStats_Fmt,
                                      ARRAY_SIZE(NrMacUlTbStats_Fmt, Fmt),
-                                     b, offset, length, result);
-
-            offset += _decode_nr_mac_ul_tb_stats_subpkt(b, offset, length, result);
+                                   b, offset, length, result);
+              }
+	     else if (QC_MODEM == 1)//Samsung s23
+              {
+            	offset += _decode_by_fmt(NrMacUlTbStats_Samsung_Fmt,
+                                     ARRAY_SIZE(NrMacUlTbStats_Samsung_Fmt, Fmt),
+                                   b, offset, length, result);
+              }
+	     else
+              {
+            	offset += _decode_by_fmt(NrMacUlTbStats_Fmt,
+                                     ARRAY_SIZE(NrMacUlTbStats_Fmt, Fmt),
+                                   b, offset, length, result);
+              }
+             offset += _decode_nr_mac_ul_tb_stats_subpkt(b, offset, length, result);
 
             break;
 
@@ -12263,9 +12313,24 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             offset += _decode_nr_nas_sm5g_plain_ota_msg(b, offset, length, result);
             break;
         case NR_L2_UL_BSR:
-            offset += _decode_by_fmt(NRL2ULBSR_Fmt,
+	    /*if (QC_MODEM == 2)//Nothing 1 mobile
+            {
+            	offset += _decode_by_fmt(NRL2ULBSR_Fmt,
                                      ARRAY_SIZE(NRL2ULBSR_Fmt, Fmt),
                                      b, offset, length, result);
+            }*/
+            if ((QC_MODEM == 1) || (QC_MODEM == 2))//Samsung s23
+            {
+            	offset += _decode_by_fmt(NRL2ULBSR_samsung_Fmt,
+                                     ARRAY_SIZE(NRL2ULBSR_samsung_Fmt, Fmt),
+                                     b, offset, length, result);
+            }
+	    else
+            {
+            	offset += _decode_by_fmt(NRL2ULBSR_Fmt,
+                                     ARRAY_SIZE(NRL2ULBSR_Fmt, Fmt),
+                                     b, offset, length, result);
+            }
             offset += _decode_nr_l2_ul_bsr_payload(b, offset, length, result);
             break;
         case NR_LL1_FW_Serving_FTL:
@@ -12281,9 +12346,24 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             offset += _decode_nr_mac_rach_trigger(b, offset, length, result);
             break;
         case NR_RLC_DL_Stats:
-            offset += _decode_by_fmt(NrRlcDlStats_Fmt,
+            	if(QC_MODEM == 2)//Nothing 1 mobile
+                 {
+              		offset += _decode_by_fmt(NrRlcDlStats_Fmt,
                                      ARRAY_SIZE(NrRlcDlStats_Fmt,Fmt),
                                      b, offset, length, result);
+                 }
+		else if (QC_MODEM == 1)//Samsung s23
+                 {
+            		offset += _decode_by_fmt(NrRlcDlStats_samsung_Fmt,
+                                     ARRAY_SIZE(NrRlcDlStats_samsung_Fmt,Fmt),
+                                     b, offset, length, result);
+                 }
+		else
+                 {
+            		offset += _decode_by_fmt(NrRlcDlStats_Fmt,
+                                     ARRAY_SIZE(NrRlcDlStats_Fmt,Fmt),
+                                     b, offset, length, result);
+		 }
             offset += _decode_nr_rlc_dl_status_payload(b, offset, length,result);
             break;
         case NR_PDCP_UL_Control_Pdu:
@@ -12306,7 +12386,7 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             break;
         case GNSS_GPS_Measurement_Report:
             offset += _decode_by_fmt(GnssGps_Fmt,
-                                     ARRAY_SIZE(GnssGps_Fmt, Fmt),  
+                                     ARRAY_SIZE(GnssGps_Fmt, Fmt),	
                                      b, offset, length, result);
             offset += _decode_gnss_gps_payload(b, offset, length, result);
             break;
@@ -12338,22 +12418,22 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
 
     
     if(skip_decoding){
-        if(prev==0){
-        prev = clock();
-        }else {
-        clock_t now = clock();
-        double diff = ((double) (now - prev)) / CLOCKS_PER_SEC;
+	    if(prev==0){
+		prev = clock();
+	    }else {
+		clock_t now = clock();
+		double diff = ((double) (now - prev)) / CLOCKS_PER_SEC;
 
-        if(diff >= 1){
-            prev = now;
-        }else if (diff > target_sampling_rate){
-            PyObject *result = Py_None;
-            return result;
-        }
-            else{
-            //pass
-        }   
-        }
+		if(diff >= 1){
+			prev = now;
+		}else if (diff > target_sampling_rate){
+			PyObject *result = Py_None;
+			return result;
+		}
+	        else{
+			//pass
+		}	
+	    }
     }
 
 

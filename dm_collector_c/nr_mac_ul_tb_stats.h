@@ -22,6 +22,23 @@ const Fmt NrMacUlTbStats_Fmt[] = {
     {UINT, "Num Records", 1},
     {SKIP, NULL, 4},
 };
+//Deepak: Hack need to be removed
+const Fmt NrMacUlTbStats_Samsung_Fmt[] = {
+    {UINT, "Minor Version", 2},
+    {UINT, "Major Version", 2},
+    //{UINT, "Sleep",1},
+    //{UINT, "Beam Change", 1},
+    //{UINT, "Signal Change",1},
+    //{UINT, "DL Dynamic Cfg Change", 1},
+    //{UINT, "DL Config", 1},
+    //{UINT, "UL Config", 1},//4 bit
+    //{PLACEHOLDER, "ML1_State_Change", 0},//4bit
+    //{SKIP, NULL, 2},
+    {UINT, "Log Fields Change BMask", 2},
+    {SKIP, NULL, 1},
+    {UINT, "Num Records", 1},
+    {SKIP, NULL, 4},
+};
 
 const Fmt Records_v2_0 [] = {
     {BYTE_STREAM_LITTLE_ENDIAN, "TB New Tx Bytes", 8},
@@ -76,13 +93,16 @@ static int _decode_nr_mac_ul_tb_stats_subpkt(const char* b,
     int minor_ver = _search_result_int(result, "Minor Version");
     int n_record = _search_result_int(result, "Num Records");
     switch (major_ver) {
+    case 3:
     case 2:
     {
         switch (minor_ver) {
+        case 2:
         case 1:
         {
             PyObject* result_allrecords = PyList_New(0);
             PyObject* t = NULL;
+#if 0// QC_MODEM == _QC_SD_778G //Deepak: HACK to be removed
             int temp = _search_result_uint(result, "UL Config");
             int iUL = temp & 15; // 4 bits
             int iML = (temp >> 4) & 15;    // 4 bits	
@@ -92,13 +112,14 @@ static int _decode_nr_mac_ul_tb_stats_subpkt(const char* b,
             old_object = _replace_result_int(result,
                 "ML1_State_Change", iML);
             Py_DECREF(old_object);
+#endif
+           if(QC_MODEM == 2)//Nothing mobile
+           {
             for (int i = 0; i < n_record; i++) {
                 PyObject* result_record = PyList_New(0);
                 offset += _decode_by_fmt(NrMacUlTbStatsRecord_v2_1,
                     ARRAY_SIZE(NrMacUlTbStatsRecord_v2_1, Fmt),
                     b, offset, length, result_record);
-
-
                 char name[64];
                 sprintf(name, "Record[%d]", i);
                 t = Py_BuildValue("(sOs)", name, result_record, "dict");
@@ -108,6 +129,41 @@ static int _decode_nr_mac_ul_tb_stats_subpkt(const char* b,
                 Py_DECREF(result_record);
                 Py_DECREF(t);
             }
+           }
+	  else if (QC_MODEM == 1)//Samsung s23
+          {
+            for (int i = 0; i < n_record; i++) {
+                PyObject* result_record = PyList_New(0);
+                offset += _decode_by_fmt(NrMacUlTbStatsRecord_v2_1,
+                    ARRAY_SIZE(NrMacUlTbStatsRecord_v2_1, Fmt),
+                    b, offset, length, result_record);
+                char name[64];
+                sprintf(name, "Record[%d]", i);
+                t = Py_BuildValue("(sOs)", name, result_record, "dict");
+
+                PyList_Append(result_allrecords, t);
+
+                Py_DECREF(result_record);
+                Py_DECREF(t);
+                }
+            }
+           else
+            {
+             for (int i = 0; i < n_record; i++) {
+                PyObject* result_record = PyList_New(0);
+                offset += _decode_by_fmt(NrMacUlTbStatsRecord_v2_1,
+                    ARRAY_SIZE(NrMacUlTbStatsRecord_v2_1, Fmt),
+                    b, offset, length, result_record);
+                char name[64];
+                sprintf(name, "Record[%d]", i);
+                t = Py_BuildValue("(sOs)", name, result_record, "dict");
+
+                PyList_Append(result_allrecords, t);
+
+                Py_DECREF(result_record);
+                Py_DECREF(t);
+             }
+            } 
 
             t = Py_BuildValue("(sOs)", "Records List", result_allrecords, "list");
             PyList_Append(result, t);
@@ -121,6 +177,7 @@ static int _decode_nr_mac_ul_tb_stats_subpkt(const char* b,
         {
             PyObject* result_allrecords = PyList_New(0);
             PyObject* t = NULL;
+#if 0 //QC_MODEM == _QC_SD_778G //Nothing mobile
             int temp = _search_result_uint(result, "UL Config");
             int iUL = temp & 15; // 4 bits
             int iML = (temp >> 4) & 15;    // 4 bits	
@@ -130,6 +187,7 @@ static int _decode_nr_mac_ul_tb_stats_subpkt(const char* b,
             old_object = _replace_result_int(result,
                 "ML1_State_Change", iML);
             Py_DECREF(old_object);
+#endif
 
             for (int i = 0; i < n_record; i++) {
                 //Records

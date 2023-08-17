@@ -146,6 +146,7 @@ enum LogPacketType {
 
     // 5G PDCP
     NR_PDCP_UL_Control_Pdu = 0xB861, 
+    NR_PDCP_UL_Stats = 0xB860, 
 
     // 5G L2
     NR_L2_UL_TB = 0xB872,
@@ -158,11 +159,13 @@ enum LogPacketType {
     NR_MAC_UL_Physical_Channel_Schedule_Report = 0xB883,
     NR_MAC_PDSCH_Stats = 0xB888,
     NR_MAC_RACH_Trigger= 0xB889,
+    NR_MAC_RACH_Attempt= 0xB88a,
     NR_MAC_UL_TB_Stats=0xB881, 
     // 5G LL1/ML1
     NR_LL1_FW_Serving_FTL = 0xB8DD,
     NR_ML1_Searcher_Measurement_Database_Update_Ext = 0xB97F,                                       
     NR_ML1_Serving_Cell_Beam_Management = 0xB975,
+    NR_MAC_DCI_Info= 0xB885,
 
 };
 
@@ -387,6 +390,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
 
     {NR_PDCP_UL_Control_Pdu,
         "5G_NR_PDCP_UL_Control_Pdu", true},
+    {NR_PDCP_UL_Stats,
+        "5G_NR_PDCP_UL_Stats", true},
 
     {NR_L2_UL_TB,
         "5G_NR_L2_UL_TB", true},
@@ -404,6 +409,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "5G_NR_MAC_PDSCH_Stats", true},
     {NR_MAC_RACH_Trigger,
         "5G_NR_MAC_RACH_Trigger",true},
+    {NR_MAC_RACH_Attempt,
+        "5G_NR_MAC_RACH_Attempt",true},
 
     {NR_LL1_FW_Serving_FTL,
         "5G_NR_LL1_FW_Serving_FTL", true},
@@ -411,6 +418,8 @@ const ValueName LogPacketTypeID_To_Name [] = {
         "5G_NR_ML1_Searcher_Measurement_Database_Update_Ext", true },
     { NR_ML1_Serving_Cell_Beam_Management,
         "5G_NR_ML1_Serving_Cell_Beam_Management", true },
+    { NR_MAC_DCI_Info,
+        "5G_NR_MAC_DCI_Info", true },
 
 
     {Modem_debug_message,

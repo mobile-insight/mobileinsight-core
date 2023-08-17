@@ -23,6 +23,21 @@ const Fmt NrMacVersion_Fmt [] = {
     {UINT, "Num Records", 1},
 };
 
+const Fmt NrMacVersion_Fmt_samsung [] = {
+    {UINT, "Minor Version",                 2},
+    {UINT, "Major Version",                 2},
+    //{UINT, "Sleep",        1},
+    //{UINT, "Beam Change",        1},
+    //{UINT, "Signal Change",        1},
+    //{UINT, "DL Dynamic Cfg Change",        1},
+    //{UINT, "DL Config", 1},
+    //{UINT, "UL Config", 1},
+    //{SKIP, NULL,                   2},
+    {UINT, "Log Fields Change BMask", 2},
+    {SKIP, NULL,                   1},
+    {UINT, "Num Records", 1},
+};
+
 const Fmt NrMacUlSchedRecord_v2_8 [] = {
     {UINT, "Slot", 1},
     {UINT, "Numerology (kHz)", 1},
@@ -796,7 +811,9 @@ _decode_nr_mac_ul_physical_channel_schedule_report_subpkt(const char *b, int off
         case 2:{
 
             switch (minor_ver){
-                case 8:{
+                case 8:
+                case 17:
+		    {
                     PyObject *result_allrecords = PyList_New(0);
                     PyObject *t = NULL;
 
@@ -1018,16 +1035,16 @@ _decode_nr_mac_ul_physical_channel_schedule_report_subpkt(const char *b, int off
                 }
                 
                 case 11: {
-					tmp = _search_result_int(result, "Num Records");
-					for (int i = 0; i < tmp; i++) {
-						std::string name = "Records[" + std::to_string(i) + "]";
-						offset += _decode_nr_mac_ul_pcsr_records_v2_11(b, offset, length, tmp_py, name);
-					}
-					t = Py_BuildValue("(sOs)", "Records", tmp_py, "list");
-					PyList_Append(result, t);
-					Py_DECREF(tmp_py);
-					Py_DECREF(t);
-					success = 1;
+				tmp = _search_result_int(result, "Num Records");
+				for (int i = 0; i < tmp; i++) {
+					std::string name = "Records[" + std::to_string(i) + "]";
+					offset += _decode_nr_mac_ul_pcsr_records_v2_11(b, offset, length, tmp_py, name);
+				}
+				t = Py_BuildValue("(sOs)", "Records", tmp_py, "list");
+				PyList_Append(result, t);
+				Py_DECREF(tmp_py);
+				Py_DECREF(t);
+				success = 1;
                     break;
 				}
                 default:

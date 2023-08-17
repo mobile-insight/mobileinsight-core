@@ -10,6 +10,10 @@ const Fmt NRL2ULBSR_Fmt [] = {
     {UINT, "Version", 4},
 };
 
+const Fmt NRL2ULBSR_samsung_Fmt [] = {
+     {UINT, "Minor Version", 2},
+     {UINT, "Major Version", 2},
+};
 
 //Version2
 const Fmt Meta_v2 [] = {
@@ -17,6 +21,7 @@ const Fmt Meta_v2 [] = {
     {PLACEHOLDER, "LCID Prio Bitmask", 0},//16bit
     {PLACEHOLDER, "Reserved1", 0}, //12bit
 };
+
 const Fmt TTIInfo_v2 [] = {
     {UINT, "Hard ID", 1},		//4bit  //insert systime
     {PLACEHOLDER, "Carrier", 0},	//4bit
@@ -58,19 +63,23 @@ const ValueName BSRType[] = {
 static int _decode_nr_l2_ul_bsr_payload (const char *b,
         int offset, size_t length, PyObject *result) {
     int start = offset;
-    int pkt_ver = _search_result_int(result, "Version");   
+    //int pkt_ver = _search_result_int(result, "Version");   
+    int minor = _search_result_int(result, "Minor Version");   
+    int major = _search_result_int(result, "Major Version");   
     PyObject *old_object;
 
-    switch (pkt_ver) {
+    //switch (pkt_ver) {
+    switch (major) {
+    case 3:
     case 2:
         {
 
 		//Meta
-		PyObject *result_Meta = PyList_New(0);			    
-		offset += _decode_by_fmt(Meta_v2,
-		    ARRAY_SIZE(Meta_v2, Fmt),
-		    b, offset, length, result_Meta);
-			//划分bit
+	PyObject *result_Meta = PyList_New(0);			    
+	offset += _decode_by_fmt(Meta_v2,
+	    ARRAY_SIZE(Meta_v2, Fmt),
+	    b, offset, length, result_Meta);
+		//划分bit
         unsigned int temp4 = _search_result_uint(result_Meta, "Num TTI");
         int iNumTTI = temp4 & 15; // 4 bits
         int iLCIDPrioBitmask = (temp4 >> 4) & 65535;    // 16 bits	
@@ -239,7 +248,8 @@ static int _decode_nr_l2_ul_bsr_payload (const char *b,
 		return offset - start;	
 		}	    
     default:
-        printf("(MI)Unknown NR L2 UL BSR Version: 0x%x\n", pkt_ver);
+        //printf("(MI)Unknown NR L2 UL BSR Version: 0x%x\n", pkt_ver);
+        printf("(MI)Unknown NR L2 UL BSR Version: 0x%x\n", major);
         return 0;
     }
 }	    

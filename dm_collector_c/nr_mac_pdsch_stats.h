@@ -22,6 +22,22 @@ const Fmt NrMacPdschStats_Fmt [] = {
     {SKIP, NULL,                   12}, // TODO: Some less important fields are skipped
 };
 
+const Fmt NrMacPdschStats_samsung_Fmt [] = {
+    {UINT, "Minor Version",                 2},
+    {UINT, "Major Version",                 2},
+    //{UINT, "Sleep",        1},
+    //{UINT, "Beam Change",        1},
+    //{UINT, "Signal Change",        1},
+    //{UINT, "DL Dynamic Cfg Change",        1},
+    //{UINT, "DL Config", 1},
+    //{UINT, "UL Config", 1},
+    //{SKIP, NULL,                   2},
+    {UINT, "Log Fields Change BMask", 2},
+    {SKIP, NULL,                   1},
+    {UINT, "Num Records", 1},
+    {SKIP, NULL,                   12}, // TODO: Some less important fields are skipped
+};
+
 const Fmt NrMacPdschStatsRecord_v2_2 [] = {
     {UINT, "Carrier ID", 4},
     {UINT, "Num Slots Elapsed", 4},
@@ -51,10 +67,14 @@ _decode_nr_mac_pdsch_stats_subpkt(const char *b, int offset, size_t length,
     bool success = false;
 
     switch (major_ver) {
-        case 2:{
+        case 3:
+        case 2:
+        {
 
             switch (minor_ver){
-                case 2:{
+                case 0:
+                case 2:
+                   {
                     PyObject *result_allrecords = PyList_New(0);
                     PyObject *t = NULL;
 

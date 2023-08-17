@@ -10,6 +10,10 @@ const Fmt NrRlcDlStats_Fmt [] = {
     {UINT, "Version", 4},
 };
 
+const Fmt NrRlcDlStats_samsung_Fmt [] = {
+     {UINT, "Minor Version", 2},
+     {UINT, "Major Version", 2},
+};
 const Fmt NrRlcDlStats_v4 [] = {
     {UINT, "Num RB",               1},
     {UINT, "Reason",               1},
@@ -76,12 +80,33 @@ const Fmt NrRlcDlStats_RBStats_v4 [] = {
 static int _decode_nr_rlc_dl_status_payload(const char *b,
 		int offset, size_t length, PyObject *result){	
     int start = offset;
-    int pkt_ver = _search_result_int(result, "Version");
+    int minor=0;
+    int major=0;
+    int pkt_ver=0;
+    int version=0;
 
+   if(QC_MODEM == 2) //Deepak
+    {
+      pkt_ver = _search_result_int(result, "Version");
+      version=pkt_ver;
+    }
+   else if(QC_MODEM == 1)
+    {
+      minor = _search_result_int(result, "Minor Version");
+      major = _search_result_int(result, "Major Version");
+      version=major;
+    }
+   else
+    {
+      pkt_ver = _search_result_int(result, "Version");
+      version=major;
+    }
+    
     PyObject *old_object;
     PyObject *pyfloat;
-
-   switch(pkt_ver){
+   switch(version){
+   case 3:
+   case 5:
    case 4:
    {
        offset += _decode_by_fmt(NrRlcDlStats_v4,
@@ -125,7 +150,7 @@ static int _decode_nr_rlc_dl_status_payload(const char *b,
 
     }
     default:
-          printf("(MI)Unknown NR5G RLC DL Stats version:%d\n", pkt_ver);
+          printf("(MI)Unknown NR5G RLC DL Stats version:%d\n", version);
     	  return 0;
    }
    return offset-start;
