@@ -408,9 +408,14 @@ const ValueName LteRrcOtaPduType_v19[] = {
 
 
 // ------------------------------------------------------------
+// NrRrcOtaPacketVersion
+const Fmt NrRrcOtaPacketVersion[] = {
+        {UINT, "Pkt Version", 1}
+};
+
 // NR_RRC_OTA_Packet
 const Fmt NrRrcOtaPacketFmt[] = {
-        {UINT, "Pkt Version",        1},    //version
+        //{UINT, "Pkt Version",        1},    //version
         {UINT, "Unknown", 			 3},    //Maybe Reserved
         {UINT, "RRC Release Number", 1},    //RRC release version
         {BYTE_STREAM, "RRC Version Number", 1},    //RRC version version
@@ -424,18 +429,48 @@ const Fmt NrRrcOtaPacketFmt[] = {
         {UINT, "Msg Length",         2}
 };
 
+// NR_RRC_OTA_Packet
+const Fmt NrRrcOtaPacketFmt17[] = {
+        {UINT, "Unknown",	     3},    //Maybe Reserved
+        {UINT, "RRC Release Number", 1},    //RRC release version
+        {BYTE_STREAM, "RRC Version Number", 1},    //RRC version version
+        {UINT, "Radio Bearer ID",    1},    //no change
+        {UINT, "Physical Cell ID",   2},     //Cell ID
+        {UINT, "Freq",   			 4},     //Freq
+        {UINT, "SysFrameNum/SubFrameNum",   4},     //System/subsystem frame number
+        {UINT, "TEST",         1},     //PDU Number
+        {UINT, "SIB Mask in SI",     1},
+        {SKIP, NULL,                 5},
+        {UINT, "PDU Number",         1},     //PDU Number
+        {SKIP, NULL,                 4},
+        {UINT, "Msg Length",         2}
+};
+
+// NR_RRC_OTA_Packet
+const Fmt NrRrcOtaPacketFmt12[] = {
+        {UINT, "Unknown",            3},    //Maybe Reserved
+        {UINT, "RRC Release Number", 1},    //RRC release version
+        {BYTE_STREAM, "RRC Version Number", 1},    //RRC version version
+        {UINT, "Radio Bearer ID",    1},    //no change
+        {UINT, "Physical Cell ID",   2},     //Cell ID
+        {UINT, "Freq",               4},     //Freq
+        {UINT, "SysFrameNum/SubFrameNum",   3},     //System/subsystem frame number
+        {UINT, "PDU Number",         1},     //PDU Number
+        {SKIP, NULL,                 4},
+        {UINT, "Msg Length",         2}
+};
+
 const ValueName NrRrcOtaPduType_v7[] = {
 
         // {0x00, "nr-rrc.ue_radio_paging_info"}, // unknown so far
         // {0x00, "nr-rrc.ue_radio_access_cap_info"}, // unknown so far
-        // {0x00, "nr-rrc.bcch.dl.sch"},
-        // {0x00, "nr-rrc.dl.ccch"},
-        // {0x00, "nr-rrc.dl.dcch"},
-        // {0x00, "nr-rrc.pcch"},
-        // {0x00, "nr-rrc.ul.ccch"},
-        // {0x00, "nr-rrc.ul.ccch1"},
         {0x01, "nr-rrc.bcch.bch"},  // MIB
-        {0x0a, "nr-rrc.ul.dcch"},   // RRC Reconfiguration Complete
+        {0x02, "nr-rrc.bcch.dl.sch"},
+        {0x03, "nr-rrc.dl.ccch"},
+        {0x04, "nr-rrc.dl.dcch"},
+        {0x05, "nr-rrc.pcch"},
+        {0x06, "nr-rrc.ul.ccch"},
+        {0x07, "nr-rrc.ul.ccch1"},
         {0x08, "nr-rrc.ul.dcch"},   // Derived from measurement report (uplink, dedicated link)
         {0x09, "nr-rrc.rrc_reconf"}, // Reconfiguration message
         {0x18, "nr-rrc.radio_bearer_conf"}, // Radio Bearer Config

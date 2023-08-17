@@ -97,6 +97,25 @@ namespace patch {
     }
 }
 
+// To Print String in Hexformat
+void hexdump(const char *buf, int buflen) {
+  //unsigned char *buf = (unsigned char*)ptr;
+  int i, j;
+  for (i=0; i<buflen; i+=16) {
+    printf("%06x: ", i);
+    for (j=0; j<16; j++)
+      if (i+j < buflen)
+        printf("%02x ", buf[i+j]);
+      else
+        printf("   ");
+    printf(" ");
+    for (j=0; j<16; j++)
+      if (i+j < buflen)
+        printf("%c", isprint(buf[i+j]) ? buf[i+j] : '.');
+    printf("\n");
+  }
+}
+
 /*
  * The decoding result is represented using a Python list object (called result
  * list in the source code).
@@ -118,7 +137,7 @@ static double target_sampling_rate = 1;
 
 bool set_target_sampling_rate(int sampling_rate){
       if (sampling_rate < 0 || sampling_rate >100)
-	      return false;
+          return false;
       target_sampling_rate = (double)sampling_rate / 100.0;
       // printf("target_sampling_rate=%f\n",target_sampling_rate);
       return true;
@@ -3491,9 +3510,9 @@ _decode_lte_phy_irat_cdma_subpkt(const char *b, int offset, size_t length,
                                              name2, result_subpkt, "dict");
                 PyList_Append(result, t2);
                 
-		Py_DECREF(t);
-		Py_DECREF(t2);
-		Py_DECREF(result_subpkt);
+        Py_DECREF(t);
+        Py_DECREF(t2);
+        Py_DECREF(result_subpkt);
             }
             break;
 
@@ -3580,7 +3599,7 @@ _decode_lte_phy_irat_subpkt(const char *b, int offset, size_t length,
                                             name, result_subpkt, "dict");
                 PyList_Append(result, t);
                 Py_DECREF(t);
-		Py_DECREF(result_subpkt);
+        Py_DECREF(result_subpkt);
 
             }
 
@@ -4083,7 +4102,7 @@ _decode_lte_mac_configuration_subpkt(const char *b, int offset, size_t length,
                                                     "Ignored", result_subpkt, "dict");
                         PyList_Append(result_allpkts, t);
                         Py_DECREF(t);
-			Py_DECREF(result_subpkt);
+            Py_DECREF(result_subpkt);
                     } else {
                         printf("(MI)Unknown LTE MAC Configuration Subpacket version: 0x%x - %d\n", subpkt_id,
                                subpkt_ver);
@@ -4827,7 +4846,7 @@ _decode_lte_mac_ul_transportblock_subpkt(const char *b, int offset, size_t lengt
                     PyObject *t = Py_BuildValue("(sOs)",
                                                 "Ignored", result_subpkt, "dict");
                     PyList_Append(result_allpkts, t);
-		    Py_DECREF(result_subpkt);
+            Py_DECREF(result_subpkt);
                     Py_DECREF(t);
                 }
             }
@@ -11391,111 +11410,115 @@ _decode_nr_rrc_ota(const char *b, int offset, size_t length,
     int start = offset;
     int pkt_ver = _search_result_int(result, "Pkt Version");
 
-    //pkt_ver==8 (Xiaomi)
-    if (pkt_ver == 8) {
+    int pdu_number = _search_result_int(result, "PDU Number");
+    int pdu_length = _search_result_int(result, "Msg Length");
+    printf("PDU Number: %d Msg Length: %d\n", pdu_number, pdu_length);
 
-        int pdu_number = _search_result_int(result, "PDU Number");
-        int pdu_length = _search_result_int(result, "Msg Length");
+    const char *type_name;
 
-        const char *type_name = search_name(NrRrcOtaPduType_v8,
-                                            ARRAY_SIZE(NrRrcOtaPduType_v8, ValueName),
-                                            pdu_number);
+    switch(pkt_ver)
+    {
+         case 7: 
+         case 12: 
+         case 17: 
+            type_name = search_name(NrRrcOtaPduType_v7,
+                                    ARRAY_SIZE(NrRrcOtaPduType_v7, ValueName),
+                                    pdu_number);
 
-        if (type_name == NULL) {    // not found
-            printf("(MI)Unknown 5G NR RRC PDU Type: 0x%x\n", pdu_number);
-            return 0;
-        } else {
-            std::string type_str = "raw_msg/";
-            type_str += type_name;
-            PyObject *t;
-            if (pdu_number == 0x0a) {
-                // RRC Reconfiguration Complete needs special processing
-                char *ul_dcch_msg = _nr_rrc_reconf_complete_to_ul_dcch(b + offset, pdu_length);
-                t = Py_BuildValue("(sy#s)",
-                                  "Msg", ul_dcch_msg, pdu_length + 1, type_str.c_str());
-                delete ul_dcch_msg;
-            } else {
-                t = Py_BuildValue("(sy#s)",
-                                  "Msg", b + offset, pdu_length, type_str.c_str());
-            }
-            PyList_Append(result, t);
-            Py_DECREF(t);
-            return (offset - start) + pdu_length;
-        }
+            break;
 
-    } else if (pkt_ver == 7) {
-        //pkt_ver==8 (Samsung)
-        int pdu_number = _search_result_int(result, "PDU Number");
-        int pdu_length = _search_result_int(result, "Msg Length");
-        const char *type_name = search_name(NrRrcOtaPduType_v7,
-                                            ARRAY_SIZE(NrRrcOtaPduType_v7, ValueName),
-                                            pdu_number);
+         case 8: 
+            type_name = search_name(NrRrcOtaPduType_v8,
+                                    ARRAY_SIZE(NrRrcOtaPduType_v8, ValueName),
+                                    pdu_number);
 
-        if (type_name == NULL) {    // not found
-            printf("(MI)Unknown 5G NR RRC PDU Type: 0x%x\n", pdu_number);
-            return 0;
-        } else {
-            std::string type_str = "raw_msg/";
-            type_str += type_name;
-            PyObject *t;
-            if (pdu_number == 0x0a) {
-                // RRC Reconfiguration Complete needs special processing
-                char *ul_dcch_msg = _nr_rrc_reconf_complete_to_ul_dcch(b + offset, pdu_length);
-                t = Py_BuildValue("(sy#s)",
-                                  "Msg", ul_dcch_msg, pdu_length + 1, type_str.c_str());
-                delete ul_dcch_msg;
-            } else {
-                t = Py_BuildValue("(sy#s)",
-                                  "Msg", b + offset, pdu_length, type_str.c_str());
-            }
-            PyList_Append(result, t);
-            Py_DECREF(t);
-            return (offset - start) + pdu_length;
-        }
-    }
-    
-    else if (pkt_ver == 9) {
-        //pkt_ver==9 (America)
-        int pdu_number = _search_result_int(result, "PDU Number");
-        int pdu_length = _search_result_int(result, "Msg Length");
-        const char* type_name = search_name(NrRrcOtaPduType_v9,
-            ARRAY_SIZE(NrRrcOtaPduType_v9, ValueName),
-            pdu_number);
-        (void)_map_result_field_to_name(result,
-		"PDU Number", NrRrcOtaPduType_v9,
-		ARRAY_SIZE(NrRrcOtaPduType_v9, ValueName),
-		"(MI)Unknown");
+            break;
+         
+         case 9: 
+            type_name = search_name(NrRrcOtaPduType_v9,
+                                    ARRAY_SIZE(NrRrcOtaPduType_v9, ValueName),
+                                    pdu_number);
 
-        if (type_name == NULL) {    // not found
-            printf("(MI)Unknown 5G NR RRC PDU Type: 0x%x\n", pdu_number);
-            return 0;
-        }
-        else {
-            std::string type_str = "raw_msg/";
-            type_str += type_name;
-            PyObject* t;
-            if (pdu_number == 0x0a) {
-                // RRC Reconfiguration Complete needs special processing
-                char* ul_dcch_msg = _nr_rrc_reconf_complete_to_ul_dcch(b + offset, pdu_length);
-                t = Py_BuildValue("(sy#s)",
-                    "Msg", ul_dcch_msg, pdu_length + 1, type_str.c_str());
-                delete ul_dcch_msg;
-            }
-            else {
-                t = Py_BuildValue("(sy#s)",
-                    "Msg", b + offset, pdu_length, type_str.c_str());
-            }
-            PyList_Append(result, t);
-            Py_DECREF(t);
-            return (offset - start) + pdu_length;
-        }
+            break;
+
+         default: 
+            printf("Unknown Packet Version %d\b", pkt_ver);
+            
+
     }
 
-    printf("(MI)Unknown 5GNR RRC OTA Message version: 0x%x\n", pkt_ver);
+    if (type_name == NULL) {    // not found
+        printf("(MI)Unknown 5G NR RRC PDU Type: 0x%x\n", pdu_number);
+        return 0;
+    } else {
+        std::string type_str = "raw_msg/";
+        type_str += type_name;
+        PyObject *t;
+        if (pdu_number == 0x0a) {
+            // RRC Reconfiguration Complete needs special processing
+            char *ul_dcch_msg = _nr_rrc_reconf_complete_to_ul_dcch(b + offset, pdu_length);
+            t = Py_BuildValue("(sy#s)",
+                              "Msg", ul_dcch_msg, pdu_length + 1, type_str.c_str());
+            delete ul_dcch_msg;
+        } else {
+            t = Py_BuildValue("(sy#s)",
+                              "Msg", b + offset, pdu_length, type_str.c_str());
+        }
+        PyList_Append(result, t);
+        Py_DECREF(t);
+        return (offset - start) + pdu_length;
+     }
+
     return 0;
 }
 
 
+static size_t
+_decode_nr_rrc_ota_pkt_version(const char *b, int offset, size_t length,
+                      PyObject *result) {
+    int start = offset;
+    int pkt_ver = _search_result_int(result, "Pkt Version");
+    printf("Pkt Version: %d\n", pkt_ver);
+
+    switch (pkt_ver) {
+        case 7:
+        case 8:
+        case 9:
+            offset += _decode_by_fmt(NrRrcOtaPacketFmt,
+                                     ARRAY_SIZE(NrRrcOtaPacketFmt, Fmt),
+                                     b, offset, length, result);
+
+            break;
+
+        case 12:
+            offset += _decode_by_fmt(NrRrcOtaPacketFmt12,
+                                     ARRAY_SIZE(NrRrcOtaPacketFmt12, Fmt),
+                                     b, offset, length, result);
+
+            break;
+
+        case 17:
+            offset += _decode_by_fmt(NrRrcOtaPacketFmt17,
+                                     ARRAY_SIZE(NrRrcOtaPacketFmt17, Fmt),
+                                     b, offset, length, result);
+
+            break;
+
+        default:
+            printf("+(MI)Unknown 5GNR RRC OTA Message version: 0x%x\n", pkt_ver);
+
+            return 0;
+    }
+        offset += _decode_nr_rrc_ota(b, offset, length, result);
+
+    //size_t pdu_length = length - offset;
+    //PyObject *t = Py_BuildValue("(sy#s)",
+    //                            "Msg", b + offset, pdu_length,
+    //                            "raw_msg/LTE-NAS_EPS_PLAIN");
+    //PyList_Append(result, t);
+    //Py_DECREF(t);
+    return length - start;
+}
 // ----------------------------------------------------------------------------
 
 //Yuanjie: decode modem's internal debugging message
@@ -11617,6 +11640,11 @@ void
 on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject* result)
 {
     int offset = 0;
+    printf("------------------------------------------------\n");
+    const char *type_name = search_name(LogPacketTypeID_To_Name, ARRAY_SIZE(LogPacketTypeID_To_Name, ValueName), type_id);
+    printf("Type Id/Name: 0x%02x (%s) \n", type_id,type_name);
+    hexdump(b, length);
+    printf("------------------------------------------------\n");
     switch (type_id) {
 
         case NR_L2_UL_TB:
@@ -12218,10 +12246,14 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             offset += _decode_lte_phy_connected_neighbor_cell_meas_payload(b, offset, length, result);
             break;
         case NR_RRC_OTA_Packet:
-            offset += _decode_by_fmt(NrRrcOtaPacketFmt,
-                                     ARRAY_SIZE(NrRrcOtaPacketFmt, Fmt),
+            //offset += _decode_by_fmt(NrRrcOtaPacketFmt2,
+            //                         ARRAY_SIZE(NrRrcOtaPacketFmt2, Fmt),
+            //                         b, offset, length, result);
+            offset += _decode_by_fmt(NrRrcOtaPacketVersion,
+                                     ARRAY_SIZE(NrRrcOtaPacketVersion, Fmt),
                                      b, offset, length, result);
-            offset += _decode_nr_rrc_ota(b, offset, length, result);
+            //offset += _decode_nr_rrc_ota(b, offset, length, result);
+            offset += _decode_nr_rrc_ota_pkt_version(b, offset, length, result);
             break;
         case NR_NAS_SM5G_Plain_OTA_Incoming_Msg:
         case NR_NAS_SM5G_Plain_OTA_Outgoing_Msg:
@@ -12274,7 +12306,7 @@ on_demand_decode (const char *b, size_t length, LogPacketType type_id, PyObject*
             break;
         case GNSS_GPS_Measurement_Report:
             offset += _decode_by_fmt(GnssGps_Fmt,
-                                     ARRAY_SIZE(GnssGps_Fmt, Fmt),	
+                                     ARRAY_SIZE(GnssGps_Fmt, Fmt),  
                                      b, offset, length, result);
             offset += _decode_gnss_gps_payload(b, offset, length, result);
             break;
@@ -12306,22 +12338,22 @@ decode_log_packet(const char *b, size_t length, bool skip_decoding) {
 
     
     if(skip_decoding){
-	    if(prev==0){
-		prev = clock();
-	    }else {
-		clock_t now = clock();
-		double diff = ((double) (now - prev)) / CLOCKS_PER_SEC;
+        if(prev==0){
+        prev = clock();
+        }else {
+        clock_t now = clock();
+        double diff = ((double) (now - prev)) / CLOCKS_PER_SEC;
 
-		if(diff >= 1){
-			prev = now;
-		}else if (diff > target_sampling_rate){
-			PyObject *result = Py_None;
-			return result;
-		}
-	        else{
-			//pass
-		}	
-	    }
+        if(diff >= 1){
+            prev = now;
+        }else if (diff > target_sampling_rate){
+            PyObject *result = Py_None;
+            return result;
+        }
+            else{
+            //pass
+        }   
+        }
     }
 
 

@@ -655,7 +655,6 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
     std::string frame;
     bool crc_correct = false;
     bool skip_decoding = false, include_timestamp = false;  // default values
-    double posix_timestamp = (include_timestamp ? get_posix_timestamp() : -1.0);
     bool success = true;
     PyObject *arg_skip_decoding = NULL;
     PyObject *arg_include_timestamp = NULL;
@@ -674,6 +673,8 @@ dm_collector_c_receive_log_packet(PyObject *self, PyObject *args) {
         include_timestamp = (PyObject_IsTrue(arg_include_timestamp) == 1);
         Py_DECREF(arg_include_timestamp);
     }
+
+    double posix_timestamp = (include_timestamp ? get_posix_timestamp() : -1.0);
 
     while (success) {
         // Keep reading the buffer in case there are any frames remained.
